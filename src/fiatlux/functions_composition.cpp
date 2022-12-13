@@ -1,8 +1,8 @@
-#include "immapp/visual_prog/functions_composition.h"
+#include "fiatlux/functions_composition.h"
 #include "imgui-node-editor/imgui_node_editor.h"
-#include "hello_imgui/hello_imgui.h"
+#include "hello_imgui/icons_font_awesome.h"
 
-#include <fplus/fplus.hpp>
+#include "fplus/fplus.hpp"
 #include <string>
 
 

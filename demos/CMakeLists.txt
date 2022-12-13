@@ -1,5 +1,7 @@
-add_demo_cpp(demo_compose_add demo_compose_add.main.cpp)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 
-if (IMGUI_BUNDLE_WITH_IMMVISION)
-    add_demo_cpp(demo_compose_image demo_compose_image.main.cpp)
-endif()
+imgui_bundle_add_app(fiat_add fiat_add.main.cpp)
+target_link_libraries(fiat_add PUBLIC fiatlux)
+
+imgui_bundle_add_app(fiat_image fiat_image.main.cpp)
+target_link_libraries(fiat_image PUBLIC fiatlux)

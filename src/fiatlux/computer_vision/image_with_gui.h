@@ -1,5 +1,5 @@
 #pragma once
-#include "immapp/visual_prog/functions_composition.h"
+#include "fiatlux/functions_composition.h"
 #include "immvision/immvision.h"
 
 #include <opencv2/core.hpp>
