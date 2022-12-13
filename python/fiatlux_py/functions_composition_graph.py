@@ -1,6 +1,6 @@
 from __future__ import annotations
 from imgui_bundle import imgui, imgui_node_editor as ed, icons_fontawesome, ImVec2
-from typing import List, Optional, Any
+from typing import List, Optional, Any, Sequence
 from abc import ABC, abstractmethod
 
 
@@ -61,7 +61,7 @@ class FunctionWithGui(ABC):
 class FunctionsCompositionGraph:
     function_nodes: List[_FunctionNode]
 
-    def __init__(self, functions: List[FunctionWithGui]) -> None:
+    def __init__(self, functions: Sequence[FunctionWithGui]) -> None:
         assert len(functions) > 0
         f0 = functions[0]
 
@@ -106,7 +106,7 @@ class _InputWithGui(FunctionWithGui):
     def gui_params(self) -> bool:
         return False
 
-    def name(self):
+    def name(self) -> str:
         return "Input"
 
 
@@ -168,7 +168,7 @@ class _FunctionNode:
             if new_value is not None:
                 self.set_input(new_value)
 
-        def draw_output():
+        def draw_output() -> None:
             if self.output_data_with_gui.get() is None:
                 imgui.text("None")
             else:
@@ -198,14 +198,3 @@ class _FunctionNode:
             self.output_data_with_gui.set(r)
             if self.next_function_node is not None:
                 self.next_function_node.set_input(r)
-
-
-# transform a list into a list of adjacent pairs
-# For example : [a, b, c] -> [ [a, b], [b, c]]
-def overlapping_pairs(iterable):
-    it = iter(iterable)
-    a = next(it, None)
-
-    for b in it:
-        yield (a, b)
-        a = b

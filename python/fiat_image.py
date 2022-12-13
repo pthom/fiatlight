@@ -1,7 +1,14 @@
 from __future__ import annotations
+from typing import Any
+import cv2  # type: ignore
 
 import os.path
+import sys
 
+sys.path.append(".")
+
+import numpy as np
+from imgui_bundle import imgui, imgui_node_editor
 from imgui_bundle.demos.api_demos import *
 from fiatlux_py.functions_composition_graph import *
 from fiatlux_py.image_with_gui import *
@@ -12,17 +19,17 @@ class GaussianBlurWithGui(FunctionWithGui):
     sigma_x: float = 3.0
     sigma_y: float = 3.0
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.input_gui = ImageWithGui()
         self.output_gui = ImageWithGui()
 
-    def f(self, x: Any) -> Image:
-        assert type(x) == Image
+    def f(self, x: Any) -> ImageUInt8:
+        assert type(x) == ImageUInt8
         ksize = (0, 0)
-        blur = cv2.GaussianBlur(x, ksize=ksize, sigmaX=self.sigma_x, sigmaY=self.sigma_y)
+        blur: ImageUInt8 = cv2.GaussianBlur(x, ksize=ksize, sigmaX=self.sigma_x, sigmaY=self.sigma_y)
         return blur
 
-    def name(self):
+    def name(self) -> str:
         return "GaussianBlur"
 
     def gui_params(self) -> bool:
@@ -38,16 +45,16 @@ class CannyWithGui(FunctionWithGui):
     t_upper = 200  # Upper threshold
     aperture_size = 5  # Aperture size (3, 5, or 7)
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.input_gui = ImageWithGui()
         self.output_gui = ImageWithGui()
 
-    def f(self, x: Any) -> Image:
-        assert type(x) == Image
-        edge = cv2.Canny(x, self.t_lower, self.t_upper, apertureSize=self.aperture_size)
+    def f(self, x: Any) -> ImageUInt8:
+        assert type(x) == ImageUInt8
+        edge: ImageUInt8 = cv2.Canny(x, self.t_lower, self.t_upper, apertureSize=self.aperture_size)
         return edge
 
-    def name(self):
+    def name(self) -> str:
         return "Canny"
 
     def gui_params(self) -> bool:
@@ -75,19 +82,19 @@ class OilPaintingWithGui(FunctionWithGui):
     size = 3  # size	neighbouring size is 2-size+1
     color_conversion: CvColorConversionCode  # color space conversion code
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.input_gui = ImageWithGui()
         self.output_gui = ImageWithGui()
         self.color_conversion = cv2.COLOR_BGR2HSV
 
-    def f(self, x: Any) -> Image:
-        assert type(x) == Image
+    def f(self, x: Any) -> ImageUInt8:
+        assert type(x) == ImageUInt8
         r = np.zeros_like(x)
         # pip install opencv-contrib-python
         r = cv2.xphoto.oilPainting(x, self.size, self.dynRatio, self.color_conversion)
         return r
 
-    def name(self):
+    def name(self) -> str:
         return "Oil Painting"
 
     def gui_params(self) -> bool:
@@ -98,7 +105,7 @@ class OilPaintingWithGui(FunctionWithGui):
         return changed1 or changed2
 
 
-def main():
+def main() -> None:
     this_dir = os.path.dirname(__file__)
     image = cv2.imread(demos_assets_folder() + "/images/house.jpg")
     image = cv2.resize(image, (int(image.shape[1] * 0.5), int(image.shape[0] * 0.5)))
@@ -111,7 +118,7 @@ def main():
     composition_graph = FunctionsCompositionGraph(functions)
     composition_graph.set_input(image)
 
-    def gui():
+    def gui() -> None:
         from imgui_bundle import hello_imgui
 
         hello_imgui.get_runner_params().fps_idle = 0
@@ -120,7 +127,7 @@ def main():
 
     config_node = imgui_node_editor.Config()
     config_node.settings_file = "demo_compose_image.json"
-    immapp.run(gui, with_node_editor_config=config_node, window_size=(1600, 1000), fps_idle=0)
+    immapp.run(gui, with_node_editor_config=config_node, window_size=(1600, 1000), fps_idle=0)  # type: ignore
 
     # functions = [GaussianBlurWithGui(), CannyWithGui()]
     # functions = [GaussianBlurWithGui(), CannyWithGui()]

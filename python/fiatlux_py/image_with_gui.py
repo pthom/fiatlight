@@ -2,31 +2,33 @@ from __future__ import annotations
 from typing import Any, Dict, Callable
 
 from imgui_bundle import immapp
-from .functions_composition_graph import AnyDataWithGui, FunctionWithGui
-from .cv_color_type import *
+from fiatlux_py.functions_composition_graph import AnyDataWithGui, FunctionWithGui
+from fiatlux_py.cv_color_type import *
 from imgui_bundle import immvision, imgui, ImVec2
 from imgui_bundle import imgui_node_editor
 
 import numpy as np
+from numpy.typing import NDArray
 import math
 from typing import List, Tuple, Optional, cast
-import cv2
+import cv2  # type: ignore
 
 
-Image = np.ndarray
+ImageUInt8 = NDArray[np.uint8]
+ImageFloat = NDArray[np.floating[Any]]
 
 
-def split_channels(image: Image) -> Image:
+def split_channels(image: ImageUInt8) -> ImageUInt8:
     assert len(image.shape) == 3
     depth_first = np.squeeze(np.dsplit(image, image.shape[-1]))
     return depth_first
 
 
 class ImageWithGui(AnyDataWithGui):
-    array: Optional[Image]
+    array: Optional[ImageUInt8]
     image_params: immvision.ImageParams
 
-    def __init__(self, image: Optional[Image] = None, zoom_key="z", image_display_width=200):
+    def __init__(self, image: Optional[ImageUInt8] = None, zoom_key:str = "z", image_display_width:int = 200) -> None:
         self.array = image
         self.first_frame = True
         self.image_params = immvision.ImageParams()
@@ -37,7 +39,7 @@ class ImageWithGui(AnyDataWithGui):
         return self.array
 
     def set(self, v: Any) -> None:
-        assert type(v) == Image
+        assert type(v) == ImageUInt8
         self.array = v
         self.first_frame = True
 
@@ -76,16 +78,16 @@ class ImageWithGui(AnyDataWithGui):
 
 
 class ImageChannelsWithGui(AnyDataWithGui):
-    array: Optional[Image]  # We are displaying the different channels of this image
+    array: Optional[ImageUInt8]  # We are displaying the different channels of this image
     images_params: immvision.ImageParams
     color_type: ColorType = ColorType.BGR
 
     def __init__(
         self,
-        images: Optional[Image] = None,  # images is a numpy of several image along the first axis
-        zoom_key="z",
-        image_display_width=200,
-    ):
+        images: Optional[ImageUInt8] = None,  # images is a numpy of several image along the first axis
+        zoom_key: str ="z",
+        image_display_width: int =200,
+    ) -> None:
         self.array = images
         self.first_frame = True
 
@@ -94,7 +96,7 @@ class ImageChannelsWithGui(AnyDataWithGui):
         self.image_params.zoom_key = zoom_key
 
     def set(self, v: Any) -> None:
-        assert type(v) == Image
+        assert type(v) == ImageUInt8
         self.array = v
         self.first_frame = True
 
@@ -120,7 +122,7 @@ class SplitChannelsWithGui(FunctionWithGui):
     color_conversion: Optional[ColorConversion] = None
     gui_params_optional_fn: Callable[[], bool]
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.input_gui = ImageWithGui()
         self.output_gui = ImageChannelsWithGui()
 
@@ -128,7 +130,7 @@ class SplitChannelsWithGui(FunctionWithGui):
         return cast(ImageChannelsWithGui, self.output_gui)
 
     def f(self, x: Any) -> Any:
-        assert type(x) == Image
+        assert type(x) == ImageUInt8
         if self.color_conversion is not None:
             x_converted = cv2.cvtColor(x, self.color_conversion.conversion_code)
         else:
@@ -153,12 +155,12 @@ class SplitChannelsWithGui(FunctionWithGui):
 class MergeChannelsWithGui(FunctionWithGui):
     color_conversion: Optional[ColorConversion] = None
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.input_gui = ImageChannelsWithGui()
         self.output_gui = ImageWithGui()
 
     def f(self, x: Any) -> Any:
-        assert type(x) == Image
+        assert type(x) == ImageUInt8
         channels = [c for c in x]
         image_float = np.dstack(channels)
         image_uint8 = (image_float * 255.0).astype("uint8")
@@ -261,18 +263,18 @@ class LutImage:
     max_in: float = 1.0
     max_out: float = 1.0
 
-    _lut_table: np.ndarray
-    _lut_graph: np.ndarray
+    _lut_table: NDArray[np.float_]
+    _lut_graph: ImageUInt8
     _lut_graph_needs_refresh: bool = True
 
-    def apply(self, image: Image) -> Image:
+    def apply(self, image: ImageFloat) -> ImageFloat:
         if not hasattr(self, "_lut_table"):
             self._prepare_lut()
         lut_uint8 = (self._lut_table * 255.0).astype(np.uint8)
-        image_uint8 = (image * 255.0).astype(np.uint8)
+        image_uint8: ImageUInt8 = (image * 255.0).astype(np.uint8)
         image_with_lut_uint8 = np.zeros_like(image_uint8)
         cv2.LUT(image_uint8, lut_uint8, image_with_lut_uint8)
-        image_adjusted = image_with_lut_uint8 / 255.0
+        image_adjusted: ImageFloat = image_with_lut_uint8.astype(float) / 255.0
         return image_adjusted
 
     @staticmethod
@@ -287,15 +289,15 @@ class LutImage:
             channel_name, self._lut_graph, refresh_image=self._lut_graph_needs_refresh
         )
         self._lut_graph_needs_refresh = False
-        return mouse_position
+        return mouse_position  # type: ignore
 
-    def _prepare_lut_graph(self):
+    def _prepare_lut_graph(self) -> None:
         graph_size = self._lut_graph_size()
         x = np.arange(0.0, 1.0, 1.0 / 256.0)
         self._lut_graph = immvision._draw_lut_graph(list(x), list(self._lut_table), (graph_size, graph_size))  # type: ignore
         self._lut_graph_needs_refresh = True
 
-    def _prepare_lut(self):
+    def _prepare_lut(self) -> None:
         x = np.arange(0.0, 1.0, 1.0 / 256.0)
         y = (x - self.min_in) / (self.max_in - self.min_in)
         y = np.clip(y, 0.0, 1.0)
@@ -373,7 +375,7 @@ class LutImage:
             flags = imgui.SliderFlags_.logarithmic.value if logarithmic else 0
             edited_this_slider, v = imgui.slider_float(
                 f"{label}##slider{idx_slider}", v, min, max, flags=flags
-            )  # type: ignore
+            )
             if edited_this_slider:
                 changed = True
             return v
@@ -381,7 +383,7 @@ class LutImage:
         def show_01_slider(label: str, v: float) -> float:
             return show_slider(label, v, 0, 1, False)
 
-        def show_two_01_sliders(label: str, v_min: float, v_max) -> Tuple[float, float]:
+        def show_two_01_sliders(label: str, v_min: float, v_max: float) -> Tuple[float, float]:
             v_min = show_01_slider(f"##{label}v_min", v_min)
             imgui.same_line()
             v_max = show_01_slider(f"{label}##v_max", v_max)
@@ -403,13 +405,13 @@ class LutImage:
 class LutImageWithGui(FunctionWithGui):
     lut_image: LutImage
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.lut_image = LutImage()
         self.input_gui = ImageWithGui()
         self.output_gui = ImageWithGui()
 
     def f(self, x: Any) -> Any:
-        assert type(x) == Image
+        assert type(x) == ImageFloat
         image_adjusted = self.lut_image.apply(x)
         return image_adjusted
 
@@ -424,21 +426,21 @@ class LutChannelsWithGui(FunctionWithGui):
     color_type: ColorType = ColorType.BGR
     channel_adjust_params: List[LutImage]
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.input_gui = ImageChannelsWithGui()
         self.output_gui = ImageChannelsWithGui()
 
     def output_gui_channels(self) -> ImageChannelsWithGui:
         return cast(ImageChannelsWithGui, self.output_gui)
 
-    def add_params_on_demand(self, nb_channels: int):
+    def add_params_on_demand(self, nb_channels: int) -> None:
         if not hasattr(self, "channel_adjust_params"):
             self.channel_adjust_params = []
         while len(self.channel_adjust_params) < nb_channels:
             self.channel_adjust_params.append(LutImage())
 
     def f(self, x: Any) -> Any:
-        assert type(x) == Image
+        assert type(x) == ImageUInt8
 
         original_channels = x
         self.add_params_on_demand(len(original_channels))

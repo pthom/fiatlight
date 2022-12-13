@@ -2,7 +2,7 @@ from __future__ import annotations
 from typing import Any
 from typing import Optional
 
-from .functions_composition_graph import AnyDataWithGui
+from fiatlux_py.functions_composition_graph import AnyDataWithGui
 from imgui_bundle import imgui
 
 
@@ -23,6 +23,6 @@ class IntWithGui(AnyDataWithGui):
     def get(self) -> Optional[Any]:
         return self.value
 
-    def set(self, v: Any):
+    def set(self, v: Any) -> None:
         assert type(v) == int
         self.value = v
