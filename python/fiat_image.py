@@ -9,7 +9,7 @@ sys.path.append(".")
 
 import numpy as np
 from imgui_bundle import imgui, imgui_node_editor
-from imgui_bundle.demos.api_demos import *
+from imgui_bundle.demos.demo_utils import *
 from fiatlux_py.functions_composition_graph import *
 from fiatlux_py.image_with_gui import *
 from imgui_bundle import immapp
@@ -24,7 +24,7 @@ class GaussianBlurWithGui(FunctionWithGui):
         self.output_gui = ImageWithGui()
 
     def f(self, x: Any) -> ImageUInt8:
-        assert type(x) == ImageUInt8
+        assert type(x) == np.ndarray
         ksize = (0, 0)
         blur: ImageUInt8 = cv2.GaussianBlur(x, ksize=ksize, sigmaX=self.sigma_x, sigmaY=self.sigma_y)
         return blur
@@ -50,7 +50,7 @@ class CannyWithGui(FunctionWithGui):
         self.output_gui = ImageWithGui()
 
     def f(self, x: Any) -> ImageUInt8:
-        assert type(x) == ImageUInt8
+        assert type(x) == np.ndarray
         edge: ImageUInt8 = cv2.Canny(x, self.t_lower, self.t_upper, apertureSize=self.aperture_size)
         return edge
 
@@ -88,7 +88,7 @@ class OilPaintingWithGui(FunctionWithGui):
         self.color_conversion = cv2.COLOR_BGR2HSV
 
     def f(self, x: Any) -> ImageUInt8:
-        assert type(x) == ImageUInt8
+        assert type(x) == np.ndarray
         r = np.zeros_like(x)
         # pip install opencv-contrib-python
         r = cv2.xphoto.oilPainting(x, self.size, self.dynRatio, self.color_conversion)
@@ -106,14 +106,13 @@ class OilPaintingWithGui(FunctionWithGui):
 
 
 def main() -> None:
-    this_dir = os.path.dirname(__file__)
     image = cv2.imread(demos_assets_folder() + "/images/house.jpg")
     image = cv2.resize(image, (int(image.shape[1] * 0.5), int(image.shape[0] * 0.5)))
 
     split_lut_merge_gui = Split_Lut_Merge_WithGui(ColorType.BGR)
 
-    functions = [split_lut_merge_gui.split, split_lut_merge_gui.lut, split_lut_merge_gui.merge, OilPaintingWithGui()]
-    # functions = [GaussianBlurWithGui(), CannyWithGui()]
+    # functions = [split_lut_merge_gui.split, split_lut_merge_gui.lut, split_lut_merge_gui.merge, OilPaintingWithGui()]
+    functions = [GaussianBlurWithGui(), CannyWithGui()]
 
     composition_graph = FunctionsCompositionGraph(functions)
     composition_graph.set_input(image)

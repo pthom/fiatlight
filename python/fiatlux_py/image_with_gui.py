@@ -39,7 +39,7 @@ class ImageWithGui(AnyDataWithGui):
         return self.array
 
     def set(self, v: Any) -> None:
-        assert type(v) == ImageUInt8
+        assert type(v) == np.ndarray
         self.array = v
         self.first_frame = True
 
@@ -96,7 +96,7 @@ class ImageChannelsWithGui(AnyDataWithGui):
         self.image_params.zoom_key = zoom_key
 
     def set(self, v: Any) -> None:
-        assert type(v) == ImageUInt8
+        assert type(v) == np.ndarray
         self.array = v
         self.first_frame = True
 
@@ -130,7 +130,7 @@ class SplitChannelsWithGui(FunctionWithGui):
         return cast(ImageChannelsWithGui, self.output_gui)
 
     def f(self, x: Any) -> Any:
-        assert type(x) == ImageUInt8
+        assert type(x) == np.ndarray
         if self.color_conversion is not None:
             x_converted = cv2.cvtColor(x, self.color_conversion.conversion_code)
         else:
@@ -160,7 +160,7 @@ class MergeChannelsWithGui(FunctionWithGui):
         self.output_gui = ImageWithGui()
 
     def f(self, x: Any) -> Any:
-        assert type(x) == ImageUInt8
+        assert type(x) == np.ndarray
         channels = [c for c in x]
         image_float = np.dstack(channels)
         image_uint8 = (image_float * 255.0).astype("uint8")
@@ -440,7 +440,7 @@ class LutChannelsWithGui(FunctionWithGui):
             self.channel_adjust_params.append(LutImage())
 
     def f(self, x: Any) -> Any:
-        assert type(x) == ImageUInt8
+        assert type(x) == np.ndarray
 
         original_channels = x
         self.add_params_on_demand(len(original_channels))
