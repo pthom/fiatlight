@@ -1,61 +1,8 @@
 from __future__ import annotations
+from fiatlux_py.any_data_with_gui import AnyDataWithGui
+from fiatlux_py.function_with_gui import FunctionWithGui
 from imgui_bundle import imgui, imgui_node_editor as ed, icons_fontawesome, ImVec2
 from typing import List, Optional, Any, Sequence
-from abc import ABC, abstractmethod
-
-
-class AnyDataWithGui(ABC):
-    """
-    Override this class with your types, and implement a draw function that presents it content
-    """
-
-    @abstractmethod
-    def gui_data(self, function_name: str) -> None:
-        """Override this by implementing a draw function that presents the data content"""
-        pass
-
-    def gui_set_input(self) -> Optional[Any]:
-        """Override this if you want to provide a visual way to set the input of
-        a function composition graph"""
-        return None
-
-    @abstractmethod
-    def set(self, v: Any) -> None:
-        """Override this"""
-        pass
-
-    @abstractmethod
-    def get(self) -> Optional[Any]:
-        """Override this"""
-        pass
-
-
-class FunctionWithGui(ABC):
-    """Override this class with your functions which you want to vizualize in a graph
-    // FunctionWithGui: any function that can be presented visually, with
-    // - a displayed name
-    // - a gui in order to modify the internal params
-    // - a pure function f: AnyDataWithGui -> AnyDataWithGui
-    """
-
-    # input_gui and output_gui should be filled during construction
-    input_gui: AnyDataWithGui
-    output_gui: AnyDataWithGui
-
-    @abstractmethod
-    def f(self, x: Any) -> Any:
-        pass
-
-    @abstractmethod
-    def name(self) -> str:
-        pass
-
-    def gui_params(self) -> bool:
-        """override this if you want to provide a gui for the function inner params
-        (i.e. neither input nor output params, but the function internal state)
-        It should return True if the inner params were changed.
-        """
-        return False
 
 
 class FunctionsCompositionGraph:
