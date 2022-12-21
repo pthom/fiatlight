@@ -1,17 +1,14 @@
 from __future__ import annotations
-from typing import Any
 import cv2  # type: ignore
 
-import os.path
 import sys
 
 sys.path.append(".")
 
-import numpy as np
-from imgui_bundle import imgui, imgui_node_editor
-from imgui_bundle.demos.demo_utils import *
+from imgui_bundle.demos_python.demo_utils import *
 from fiatlux_py.functions_composition_graph import *
-from fiatlux_py.image_with_gui import *
+from fiatlux_py.computer_vision.image_with_gui import *
+from fiatlux_py.computer_vision.lut import Split_Lut_Merge_WithGui
 from imgui_bundle import immapp
 
 
@@ -111,8 +108,8 @@ def main() -> None:
 
     split_lut_merge_gui = Split_Lut_Merge_WithGui(ColorType.BGR)
 
-    # functions = [split_lut_merge_gui.split, split_lut_merge_gui.lut, split_lut_merge_gui.merge, OilPaintingWithGui()]
-    functions = [GaussianBlurWithGui(), CannyWithGui()]
+    functions = [split_lut_merge_gui.split, split_lut_merge_gui.lut, split_lut_merge_gui.merge, OilPaintingWithGui()]
+    # functions = [GaussianBlurWithGui(), CannyWithGui()]
 
     composition_graph = FunctionsCompositionGraph(functions)
     composition_graph.set_input(image)
@@ -127,11 +124,6 @@ def main() -> None:
     config_node = imgui_node_editor.Config()
     config_node.settings_file = "demo_compose_image.json"
     immapp.run(gui, with_node_editor_config=config_node, window_size=(1600, 1000), fps_idle=0)  # type: ignore
-
-    # functions = [GaussianBlurWithGui(), CannyWithGui()]
-    # functions = [GaussianBlurWithGui(), CannyWithGui()]
-    # functions = [SplitChannelsWithGui(), LutChannelsWithGui(), MergeChannelsWithGui()]
-    # functions = [SplitChannelsWithGui(), LutChannelsWithGui(), MergeChannelsWithGui()]
 
 
 if __name__ == "__main__":
