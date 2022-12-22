@@ -2,7 +2,7 @@ from __future__ import annotations
 from fiatlux_py.any_data_with_gui import AnyDataWithGui
 from fiatlux_py.function_with_gui import FunctionWithGui
 from imgui_bundle import imgui, imgui_node_editor as ed, icons_fontawesome, ImVec2
-from typing import List, Optional, Any, Sequence
+from typing import List, Optional, Any, Sequence, Callable
 
 
 class FunctionsCompositionGraph:
