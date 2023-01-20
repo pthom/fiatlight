@@ -3,7 +3,7 @@ from fiatlux_py import FunctionWithGui
 from fiatlux_py.computer_vision import ImageWithGui, ImageChannelsWithGui, ImageUInt8, ImageFloat
 from fiatlux_py.computer_vision.cv_color_type import ColorConversion
 
-import cv2
+import cv2  # type: ignore
 import numpy as np
 
 
@@ -69,5 +69,3 @@ class MergeChannelsWithGui(FunctionWithGui):
         if self.color_conversion is not None:
             r += " - " + self.color_conversion.name
         return r
-
-

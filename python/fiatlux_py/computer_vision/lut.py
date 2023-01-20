@@ -1,6 +1,6 @@
 from typing import Tuple, Optional, cast, Any, List
 from numpy.typing import NDArray
-import cv2
+import cv2  # type: ignore
 import numpy as np
 import math
 from fiatlux_py import FunctionWithGui

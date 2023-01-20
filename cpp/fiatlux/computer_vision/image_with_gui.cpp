@@ -1,10 +1,12 @@
 #include "image_with_gui.h"
 #include "immvision/immvision.h"
-#include "immapp/utils.h"
+#include "imgui_node_editor_immapp/node_editor_default_context.h"
 #include "ImFileDialog/ImFileDialog.h"
 
 #include <opencv2/imgproc.hpp>
 #include <opencv2/imgcodecs.hpp>
+
+#include <any>
 
 namespace VisualProg
 {
@@ -88,7 +90,7 @@ namespace VisualProg
             );
         }
 
-        ImmApp::SuspendNodeEditorCanvas();
+        SuspendNodeEditorCanvas_Immapp();
         if (ifd::FileDialog::Instance().IsDone("ImageOpenDialog"))
         {
             if (ifd::FileDialog::Instance().HasResult())
@@ -100,7 +102,7 @@ namespace VisualProg
             }
             ifd::FileDialog::Instance().Close();
         }
-        ImmApp::ResumeNodeEditorCanvas();
+        ResumeNodeEditorCanvas_Immapp();
 
         return result;
     }

@@ -1,5 +1,5 @@
 from typing import Any, Optional, Callable, Sequence
-from imgui_bundle import imgui, immapp
+from imgui_bundle import imgui, immapp, imgui_node_editor as node_ed
 from fiatlux_py import AnyDataWithGui, FunctionWithGui, FunctionsCompositionGraph
 
 
@@ -18,13 +18,13 @@ def versatile_gui_data(value: Any) -> None:
             if imgui.button("..."):
                 imgui.open_popup("popup_value_text")
 
-            immapp.suspend_node_editor_canvas()
+            node_ed.suspend_node_editor_canvas_immapp()
             if imgui.begin_popup("popup_value_text"):
                 imgui.input_text_multiline("##value_text", value)
                 imgui.end_popup()
-            immapp.resume_node_editor_canvas()
+            node_ed.resume_node_editor_canvas_immapp()
         else:
-            imgui.text('"' +  value + '"')
+            imgui.text('"' + value + '"')
     elif isinstance(value, list):
         imgui.text(f"List len={len(value)}")
         for i, v in enumerate(value):
@@ -32,12 +32,12 @@ def versatile_gui_data(value: Any) -> None:
                 if imgui.button("..."):
                     imgui.open_popup("popup_value_list")
 
-                immapp.suspend_node_editor_canvas()
+                node_ed.suspend_node_editor_canvas_immapp()
                 if imgui.begin_popup("popup_value_list"):
                     for i, v in enumerate(value):
                         versatile_gui_data(v)
                     imgui.end_popup()
-                immapp.resume_node_editor_canvas()
+                node_ed.resume_node_editor_canvas_immapp()
 
                 break
             else:
@@ -61,10 +61,10 @@ def versatile_gui_set_input(value: Any) -> Optional[Any]:
         changed, new_value = imgui.slider_int("", value, 0, 100)
     elif isinstance(value, float):
         imgui.set_next_item_width(100)
-        changed, new_value = imgui.slider_float("", value, 0, 100)
+        changed, new_value = imgui.slider_float("", value, 0.0, 100.0)  # type: ignore
     elif isinstance(value, str):
         imgui.set_next_item_width(100)
-        changed, new_value = imgui.input_text("", value)
+        changed, new_value = imgui.input_text("", value)  # type: ignore
     else:
         raise Exception(f"VersatileDataWithGui Unsupported type: {type(value)}")
 
@@ -78,7 +78,9 @@ class VersatileDataWithGui(AnyDataWithGui):
     value: Any = None
 
     def gui_data(self, function_name: str) -> None:
+        imgui.push_id(str(id(self)))
         versatile_gui_data(self.value)
+        imgui.pop_id()
 
     def gui_set_input(self) -> Optional[Any]:
         return versatile_gui_set_input(self.value)
@@ -118,4 +120,3 @@ class VersatileFunctionsCompositionGraph(FunctionsCompositionGraph):
         functions_with_gui = [VersatileFunctionWithGui(f) for f in functions]
         FunctionsCompositionGraph.__init__(self, functions_with_gui)
         # super.__init__(self, functions_with_gui)
-

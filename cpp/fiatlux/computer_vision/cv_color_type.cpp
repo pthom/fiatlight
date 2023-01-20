@@ -3,7 +3,7 @@
 #include <opencv2/core.hpp>
 #include <opencv2/imgproc.hpp>
 #include <map>
-#include "fplus/fplus.hpp"
+#include <fplus/fplus.hpp>
 
 namespace VisualProg
 {

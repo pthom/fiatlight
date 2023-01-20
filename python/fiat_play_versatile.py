@@ -72,7 +72,7 @@ def remove_empty_words(words: List[str]) -> List[str]:
     return r
 
 
-def run_length_encode(input_list) -> List[WordWithCount]:
+def run_length_encode(input_list: List[str]) -> List[WordWithCount]:
     r: List[WordWithCount] = []
 
     for i in range(len(input_list)):
@@ -87,24 +87,28 @@ def run_length_encode(input_list) -> List[WordWithCount]:
 
 
 def sort_word_with_counts(words: List[WordWithCount]) -> List[WordWithCount]:
-    r = sorted(words, key= lambda w: w[1], reverse=True)
+    r = sorted(words, key=lambda w: w[1], reverse=True)
     return r
 
 
 def display_word_with_counts(words: List[WordWithCount]) -> str:
-    strs = [ w[0] + ": " + str(w[1]) for w in words ]
+    strs = [w[0] + ": " + str(w[1]) for w in words]
     r = "\n".join(strs)
     return r
 
 
 def main() -> None:
-    functions = [remove_non_letters, str_lower,
-                 split_words, remove_empty_words,
-                 sorted,
-                 run_length_encode, sort_word_with_counts,
-                 display_word_with_counts
-                 ]
-    functions_graph = VersatileFunctionsCompositionGraph(functions)
+    functions = [
+        remove_non_letters,
+        str_lower,
+        split_words,
+        remove_empty_words,
+        sorted,
+        run_length_encode,
+        sort_word_with_counts,
+        display_word_with_counts,
+    ]
+    functions_graph = VersatileFunctionsCompositionGraph(functions)  # type: ignore
 
     functions_graph.set_input(poem)
 

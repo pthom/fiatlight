@@ -108,8 +108,8 @@ def main() -> None:
 
     split_lut_merge_gui = Split_Lut_Merge_WithGui(ColorType.BGR)
 
-    functions = [split_lut_merge_gui.split, split_lut_merge_gui.lut, split_lut_merge_gui.merge, OilPaintingWithGui()]
-    # functions = [GaussianBlurWithGui(), CannyWithGui()]
+    # functions = [split_lut_merge_gui.split, split_lut_merge_gui.lut, split_lut_merge_gui.merge, OilPaintingWithGui()]
+    functions = [GaussianBlurWithGui(), CannyWithGui()]
 
     composition_graph = FunctionsCompositionGraph(functions)
     composition_graph.set_input(image)
@@ -117,7 +117,7 @@ def main() -> None:
     def gui() -> None:
         from imgui_bundle import hello_imgui
 
-        hello_imgui.get_runner_params().fps_idle = 0
+        hello_imgui.get_runner_params().fps_idling.enable_idling = False
         imgui.text(f"FPS: {imgui.get_io().framerate}")
         composition_graph.draw()
 

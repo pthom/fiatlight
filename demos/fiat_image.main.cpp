@@ -5,6 +5,94 @@
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/imgproc.hpp>
 
+namespace VisualProg
+{
+    struct GaussianBlurWithGui : public VisualProg::FunctionWithGui
+    {
+        float sigmaX = 3.f;
+        float sigmaY = 3.f;
+
+        GaussianBlurWithGui()
+        {
+            auto &self = *this;
+            self.InputGui = std::make_shared<ImageWithGui>();
+            self.OutputGui = std::make_shared<ImageWithGui>();
+        }
+
+        std::any f(const std::any &x) override
+        {
+            auto &self = *this;
+            const Image &asImage = std::any_cast<const Image &>(x);
+            cv::Size ksize(0, 0);
+            cv::Mat blur;
+            cv::GaussianBlur(asImage, blur, ksize, self.sigmaX, self.sigmaY);
+            return blur;
+        }
+
+        std::string Name() override { return "GaussianBlur"; }
+
+        bool GuiParams() override
+        {
+            auto &self = *this;
+            bool changed = false;
+            ImGui::SetNextItemWidth(100.f);
+            changed |= ImGui::SliderFloat("sigmaX", &self.sigmaX, 0.1, 15.0);
+            ImGui::SetNextItemWidth(100.f);
+            changed |= ImGui::SliderFloat("sigmaY", &self.sigmaY, 0.1, 15.0);
+            return changed;
+        }
+    };
+
+    struct CannyWithGui : public FunctionWithGui
+    {
+        int tLower = 100; // Lower threshold
+        int tUpper = 200; // Upper threshold
+        int apertureSize = 5; // Aperture size (3, 5, or 7)
+
+        CannyWithGui()
+        {
+            auto &self = *this;
+            self.InputGui = std::make_shared<ImageWithGui>();
+            self.OutputGui = std::make_shared<ImageWithGui>();
+        }
+
+        std::any f(const std::any &x) override
+        {
+            auto &self = *this;
+            const Image &asImage = std::any_cast<const Image &>(x);
+            cv::Size ksize(0, 0);
+            cv::Mat edge;
+            cv::Canny(asImage, edge, self.tLower, self.tUpper, self.apertureSize);
+            return edge;
+        }
+
+        std::string Name() override
+        { return "Canny"; }
+
+        bool GuiParams() override
+        {
+            auto &self = *this;
+            bool changed = false;
+            ImGui::SetNextItemWidth(100.f);
+            changed |= ImGui::SliderInt("tLower", &self.tLower, 0, 255);
+            ImGui::SetNextItemWidth(100.f);
+            changed |= ImGui::SliderInt("tUpper", &self.tUpper, 0, 255);
+
+            ImGui::Text("Aperture");
+            ImGui::SameLine();
+
+            std::vector<int> apertures{3, 5, 7};
+            for (int aperture_value: apertures)
+            {
+                changed |= ImGui::RadioButton(std::to_string(aperture_value).c_str(), &self.apertureSize,
+                                              aperture_value);
+                ImGui::SameLine();
+            }
+            ImGui::NewLine();
+            return changed;
+        }
+    };
+}
 
 int main(int, char**)
 {
@@ -13,16 +101,11 @@ int main(int, char**)
     cv::Mat image = cv::imread("assets/images/house.jpg");
     cv::resize(image, image, cv::Size(), 0.5, 0.5);
 
-    auto split_lut_merge_gui = Split_Lut_Merge_WithGui(ColorType::BGR);
-
+//    auto split_lut_merge_gui = Split_Lut_Merge_WithGui(ColorType::BGR);
 //    std::vector<FunctionWithGuiPtr> functions {
-//        std::make_shared<SplitChannelsWithGui>(),
-//        std::make_shared<LutChannelsWithGui>(),
-//        std::make_shared<MergeChannelsWithGui>(),
-//    };
+//        split_lut_merge_gui._split, split_lut_merge_gui._lut, split_lut_merge_gui._merge};
 
-    std::vector<FunctionWithGuiPtr> functions {
-        split_lut_merge_gui._split, split_lut_merge_gui._lut, split_lut_merge_gui._merge};
+    std::vector<FunctionWithGuiPtr> functions { std::make_shared<GaussianBlurWithGui>(), std::make_shared<CannyWithGui>() };
 
     FunctionsCompositionGraph compositionGraph(functions);
     compositionGraph.SetInput(image);

@@ -107,7 +107,6 @@ class ImageChannelsWithGui(AnyDataWithGui):
                     immvision.inspector_add_image(image, label)
 
 
-
 CvSize = Tuple[int, int]
 
 
