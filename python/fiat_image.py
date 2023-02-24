@@ -108,8 +108,8 @@ def main() -> None:
 
     split_lut_merge_gui = Split_Lut_Merge_WithGui(ColorType.BGR)
 
-    # functions = [split_lut_merge_gui.split, split_lut_merge_gui.lut, split_lut_merge_gui.merge, OilPaintingWithGui()]
-    functions = [GaussianBlurWithGui(), CannyWithGui()]
+    functions = [split_lut_merge_gui.split, split_lut_merge_gui.lut, split_lut_merge_gui.merge, OilPaintingWithGui()]
+    # functions = [GaussianBlurWithGui(), CannyWithGui()]
 
     composition_graph = FunctionsCompositionGraph(functions)
     composition_graph.set_input(image)

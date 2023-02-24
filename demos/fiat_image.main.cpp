@@ -101,11 +101,11 @@ int main(int, char**)
     cv::Mat image = cv::imread("assets/images/house.jpg");
     cv::resize(image, image, cv::Size(), 0.5, 0.5);
 
-//    auto split_lut_merge_gui = Split_Lut_Merge_WithGui(ColorType::BGR);
-//    std::vector<FunctionWithGuiPtr> functions {
-//        split_lut_merge_gui._split, split_lut_merge_gui._lut, split_lut_merge_gui._merge};
+    auto split_lut_merge_gui = Split_Lut_Merge_WithGui(ColorType::BGR);
 
-    std::vector<FunctionWithGuiPtr> functions { std::make_shared<GaussianBlurWithGui>(), std::make_shared<CannyWithGui>() };
+    std::vector<FunctionWithGuiPtr> functions;
+    functions = { split_lut_merge_gui._split, split_lut_merge_gui._lut, split_lut_merge_gui._merge};
+    // functions = { std::make_shared<GaussianBlurWithGui>(), std::make_shared<CannyWithGui>() };
 
     FunctionsCompositionGraph compositionGraph(functions);
     compositionGraph.SetInput(image);
