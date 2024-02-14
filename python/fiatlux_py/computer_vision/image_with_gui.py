@@ -16,33 +16,30 @@ import cv2  # type: ignore
 
 
 class ImageWithGui(AnyDataWithGui):
-    array: Optional[ImageUInt8]
+    # value: Optional[ImageUInt8]
     image_params: immvision.ImageParams
     open_file_dialog: Optional[pfd.open_file] = None
 
     def __init__(self, image: Optional[ImageUInt8] = None, zoom_key: str = "z", image_display_width: int = 200) -> None:
-        self.array = image
+        self.value = image
         self.first_frame = True
         self.image_params = immvision.ImageParams()
         self.image_params.image_display_size = (image_display_width, 0)
         self.image_params.zoom_key = zoom_key
 
-    def get(self) -> Optional[Any]:
-        return self.array
-
     def set(self, v: Any) -> None:
         assert type(v) == np.ndarray
-        self.array = v
+        self.value = v
         self.first_frame = True
 
     def gui_data(self, function_name: str) -> None:
         self.image_params.refresh_image = self.first_frame
         _, self.image_params.image_display_size = gui_edit_size(self.image_params.image_display_size)
-        if self.array is not None:
-            immvision.image(function_name, self.array, self.image_params)
+        if self.value is not None:
+            immvision.image(function_name, self.value, self.image_params)
             self.first_frame = False
         if imgui.small_button("Inspect"):
-            immvision.inspector_add_image(self.array, function_name)
+            immvision.inspector_add_image(self.value, function_name)
 
     def gui_set_input(self) -> Optional[Any]:
         result = None
@@ -59,7 +56,7 @@ class ImageWithGui(AnyDataWithGui):
 
 
 class ImageChannelsWithGui(AnyDataWithGui):
-    array: Optional[ImageUInt8]  # We are displaying the different channels of this image
+    # value: Optional[ImageUInt8]  # We are displaying the different channels of this image
     images_params: immvision.ImageParams
     color_type: ColorType = ColorType.BGR
 
@@ -69,7 +66,7 @@ class ImageChannelsWithGui(AnyDataWithGui):
         zoom_key: str = "z",
         image_display_width: int = 200,
     ) -> None:
-        self.array = images
+        self.value = images
         self.first_frame = True
 
         self.image_params = immvision.ImageParams()
@@ -78,19 +75,16 @@ class ImageChannelsWithGui(AnyDataWithGui):
 
     def set(self, v: Any) -> None:
         assert type(v) == np.ndarray
-        self.array = v
+        self.value = v
         self.first_frame = True
-
-    def get(self) -> Optional[Any]:
-        return self.array
 
     def gui_data(self, function_name: str) -> None:
         refresh_image = self.first_frame
         self.first_frame = False
 
         changed, self.image_params.image_display_size = gui_edit_size(self.image_params.image_display_size)
-        if self.array is not None:
-            for i, image in enumerate(self.array):
+        if self.value is not None:
+            for i, image in enumerate(self.value):
                 channel_name = self.color_type.channel_name(i)
                 self.image_params.refresh_image = refresh_image
                 label = f"{channel_name}"

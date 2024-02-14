@@ -6,6 +6,7 @@ class AnyDataWithGui(ABC):
     """
     Override this class with your types, and implement a draw function that presents it content
     """
+    value: Any
 
     @abstractmethod
     def gui_data(self, function_name: str) -> None:
@@ -17,12 +18,9 @@ class AnyDataWithGui(ABC):
         a function composition graph"""
         return None
 
-    @abstractmethod
     def set(self, v: Any) -> None:
-        """Override this"""
-        pass
+        """Override this if you want to add more behavior when setting the value"""
+        self.value = v
 
-    @abstractmethod
     def get(self) -> Optional[Any]:
-        """Override this"""
-        pass
+        return self.value

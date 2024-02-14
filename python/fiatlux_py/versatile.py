@@ -75,8 +75,6 @@ def versatile_gui_set_input(value: Any) -> Optional[Any]:
 
 
 class VersatileDataWithGui(AnyDataWithGui):
-    value: Any = None
-
     def gui_data(self, function_name: str) -> None:
         imgui.push_id(str(id(self)))
         versatile_gui_data(self.value)
@@ -84,12 +82,6 @@ class VersatileDataWithGui(AnyDataWithGui):
 
     def gui_set_input(self) -> Optional[Any]:
         return versatile_gui_set_input(self.value)
-
-    def get(self) -> Optional[Any]:
-        return self.value
-
-    def set(self, v: Any) -> None:
-        self.value = v
 
 
 class VersatileFunctionWithGui(FunctionWithGui):
