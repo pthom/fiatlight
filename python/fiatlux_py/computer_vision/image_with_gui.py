@@ -6,6 +6,8 @@ from fiatlux_py.functions_composition_graph import AnyDataWithGui, FunctionWithG
 from fiatlux_py.computer_vision.cv_color_type import *
 from imgui_bundle import immvision, imgui
 from imgui_bundle import imgui_node_editor
+from imgui_bundle import portable_file_dialogs as pfd
+
 
 import numpy as np
 from numpy.typing import NDArray
@@ -16,6 +18,7 @@ import cv2  # type: ignore
 class ImageWithGui(AnyDataWithGui):
     array: Optional[ImageUInt8]
     image_params: immvision.ImageParams
+    open_file_dialog: Optional[pfd.open_file] = None
 
     def __init__(self, image: Optional[ImageUInt8] = None, zoom_key: str = "z", image_display_width: int = 200) -> None:
         self.array = image
@@ -42,27 +45,16 @@ class ImageWithGui(AnyDataWithGui):
             immvision.inspector_add_image(self.array, function_name)
 
     def gui_set_input(self) -> Optional[Any]:
-        from imgui_bundle import im_file_dialog as ifd
-
-        if imgui.button("Select image file"):
-            ifd.FileDialog.instance().open(
-                "ImageOpenDialog",
-                "Choose an image",
-                "Image file (*.png*.jpg*.jpeg*.bmp*.tga).png,.jpg,.jpeg,.bmp,.tga,.*",
-                False,
-            )
-
         result = None
-        imgui_node_editor.suspend_editor_canvas()
-        if ifd.FileDialog.instance().is_done("ImageOpenDialog"):
-            if ifd.FileDialog.instance().has_result():
-                ifd_result = ifd.FileDialog.instance().get_result().path()
-                image = cv2.imread(ifd_result)
+        if imgui.button("Select image file"):
+            self.open_file_dialog = pfd.open_file("Select image file", filters=["*.png", "*.jpg", "*.jpeg", "*.bmp", "*.tga"])
+        if self.open_file_dialog is not None and self.open_file_dialog.ready():
+            if len(self.open_file_dialog.result()) == 1:
+                image_file = self.open_file_dialog.result()[0]
+                image = cv2.imread(image_file)
                 if image is not None:
                     result = image
-            ifd.FileDialog.instance().close()
-        imgui_node_editor.resume_editor_canvas()
-
+            self.open_file_dialog = None
         return result
 
 
