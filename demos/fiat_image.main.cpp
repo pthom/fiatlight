@@ -98,7 +98,8 @@ int main(int, char**)
 {
     using namespace VisualProg;
 
-    cv::Mat image = cv::imread("assets/images/house.jpg");
+    auto file = HelloImGui::AssetFileFullPath("images/house.jpg");
+    cv::Mat image = cv::imread(file);
     cv::resize(image, image, cv::Size(), 0.5, 0.5);
 
     auto split_lut_merge_gui = Split_Lut_Merge_WithGui(ColorType::BGR);
