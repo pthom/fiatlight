@@ -18,11 +18,11 @@ def versatile_gui_data(value: Any) -> None:
             if imgui.button("..."):
                 imgui.open_popup("popup_value_text")
 
-            # node_ed.suspend_node_editor_canvas_immapp()
+            node_ed.suspend_node_editor_canvas_immapp()
             if imgui.begin_popup("popup_value_text"):
                 imgui.input_text_multiline("##value_text", value)
                 imgui.end_popup()
-            # node_ed.resume_node_editor_canvas_immapp()
+            node_ed.resume_node_editor_canvas_immapp()
         else:
             imgui.text('"' + value + '"')
     elif isinstance(value, list):
