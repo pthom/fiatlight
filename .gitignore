@@ -1,5 +1,7 @@
 __pycache__
 /cmake-build*/
-/venv*/
+/venv*
 /build*/
 .mypy_cache
+external/
+/.idea/
