@@ -1,9 +1,9 @@
 from __future__ import annotations
 from typing import Any
 
-from fiatlux_py.computer_vision import ImageUInt8
-from fiatlux_py.functions_composition_graph import AnyDataWithGui, FunctionWithGui
-from fiatlux_py.computer_vision.cv_color_type import *
+from fiatlux.computer_vision import ImageUInt8
+from fiatlux.functions_composition_graph import AnyDataWithGui, FunctionWithGui
+from fiatlux.computer_vision.cv_color_type import *
 from imgui_bundle import immvision, imgui
 from imgui_bundle import imgui_node_editor
 from imgui_bundle import portable_file_dialogs as pfd
@@ -28,7 +28,7 @@ class ImageWithGui(AnyDataWithGui):
         self.image_params.zoom_key = zoom_key
 
     def set(self, v: Any) -> None:
-        assert type(v) == np.ndarray
+        assert v is None or type(v) == np.ndarray
         self.value = v
         self.first_frame = True
 

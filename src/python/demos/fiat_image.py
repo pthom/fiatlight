@@ -2,14 +2,20 @@ from __future__ import annotations
 import cv2  # type: ignore
 
 import sys
+import os
 
 sys.path.append(".")
 
-from imgui_bundle.demos_python.demo_utils import *
-from fiatlux_py.functions_composition_graph import *
-from fiatlux_py.computer_vision.image_with_gui import *
-from fiatlux_py.computer_vision.lut import Split_Lut_Merge_WithGui
+from fiatlux.functions_composition_graph import *
+from fiatlux.computer_vision.image_with_gui import *
+from fiatlux.computer_vision.lut import Split_Lut_Merge_WithGui
 from imgui_bundle import immapp
+
+
+def demos_assets_folder() -> str:
+    this_dir = os.path.dirname(os.path.abspath(__file__))
+    assets_dir = os.path.abspath(f"{this_dir}/../../demos_assets")
+    return assets_dir
 
 
 class GaussianBlurWithGui(FunctionWithGui):
@@ -23,7 +29,7 @@ class GaussianBlurWithGui(FunctionWithGui):
     def f(self, x: Any) -> ImageUInt8:
         assert type(x) == np.ndarray
         ksize = (0, 0)
-        blur: ImageUInt8 = cv2.GaussianBlur(x, ksize=ksize, sigmaX=self.sigma_x, sigmaY=self.sigma_y)
+        blur: ImageUInt8 = cv2.GaussianBlur(x, ksize=ksize, sigmaX=self.sigma_x, sigmaY=self.sigma_y)  # type: ignore
         return blur
 
     def name(self) -> str:
@@ -48,7 +54,7 @@ class CannyWithGui(FunctionWithGui):
 
     def f(self, x: Any) -> ImageUInt8:
         assert type(x) == np.ndarray
-        edge: ImageUInt8 = cv2.Canny(x, self.t_lower, self.t_upper, apertureSize=self.aperture_size)
+        edge: ImageUInt8 = cv2.Canny(x, self.t_lower, self.t_upper, apertureSize=self.aperture_size)  # type: ignore
         return edge
 
     def name(self) -> str:

@@ -1,7 +1,7 @@
 from typing import Any, Optional, Callable, cast
-from fiatlux_py import FunctionWithGui
-from fiatlux_py.computer_vision import ImageWithGui, ImageChannelsWithGui, ImageUInt8, ImageFloat
-from fiatlux_py.computer_vision.cv_color_type import ColorConversion
+from fiatlux import FunctionWithGui
+from fiatlux.computer_vision import ImageWithGui, ImageChannelsWithGui, ImageUInt8, ImageFloat
+from fiatlux.computer_vision.cv_color_type import ColorConversion
 
 import cv2  # type: ignore
 import numpy as np
@@ -30,7 +30,7 @@ class SplitChannelsWithGui(FunctionWithGui):
             x_converted = cv2.cvtColor(x, self.color_conversion.conversion_code)
         else:
             x_converted = x
-        channels = split_channels(x_converted)
+        channels = split_channels(x_converted)  # type: ignore
         channels_normalized = channels / 255.0
         return channels_normalized
 

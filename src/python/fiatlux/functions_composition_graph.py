@@ -1,6 +1,6 @@
 from __future__ import annotations
-from fiatlux_py.any_data_with_gui import AnyDataWithGui
-from fiatlux_py.function_with_gui import FunctionWithGui
+from fiatlux.any_data_with_gui import AnyDataWithGui
+from fiatlux.function_with_gui import FunctionWithGui
 from imgui_bundle import imgui, imgui_node_editor as ed, icons_fontawesome, ImVec2, ImVec4, immapp
 from typing import List, Optional, Any, Sequence, Callable
 import traceback
@@ -85,24 +85,24 @@ class _FunctionNode:
         self.link_id = ed.LinkId.create()
 
     def _draw_exception_message(self) -> None:
+        # return
         if self.last_exception_message is None:
             return
         imgui.text_colored(ImVec4(1, 0, 0, 1), self.last_exception_message)
-        imgui.same_line()
+        # imgui.same_line()
 
-        popup_id = "popup_exception_details_" + self.function.name()
-        if imgui.button("..."):
-            imgui.open_popup(popup_id)
+        # popup_id = "popup_exception_details_" + self.function.name()
+        # if imgui.button("..."):
+        #     imgui.open_popup(popup_id)
 
-        ed.suspend_node_editor_canvas_immapp()
-        if imgui.begin_popup(popup_id):
-            #imgui.set_next_item_width(immapp.em_size(60))
-            imgui.input_text_multiline(
-                "##value_text",
-                       self.last_exception_traceback,
-                        size=immapp.em_to_vec2(60, 20))
-            imgui.end_popup()
-        ed.resume_node_editor_canvas_immapp()
+        # if imgui.begin_popup(popup_id):
+        #     #imgui.set_next_item_width(immapp.em_size(60))
+        #     imgui.input_text_multiline(
+        #         "##value_text",
+        #                self.last_exception_traceback,
+        #                 size=immapp.em_to_vec2(60, 20))
+        #     imgui.end_popup()
+        # # ed.resume_node_editor_canvas_immapp()
 
     def draw_node(self, idx: int) -> None:
         assert self.function is not None

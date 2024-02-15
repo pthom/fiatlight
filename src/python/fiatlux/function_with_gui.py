@@ -1,6 +1,6 @@
 from typing import Any
 from abc import ABC, abstractmethod
-from fiatlux_py.any_data_with_gui import AnyDataWithGui
+from fiatlux.any_data_with_gui import AnyDataWithGui
 
 
 class FunctionWithGui(ABC):

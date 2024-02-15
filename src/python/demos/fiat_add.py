@@ -1,6 +1,6 @@
 from typing import Any
 from imgui_bundle import imgui, imgui_node_editor, immapp
-from fiatlux_py import IntWithGui, FunctionWithGui, FunctionsCompositionGraph
+from fiatlux import IntWithGui, FunctionWithGui, FunctionsCompositionGraph
 
 
 class AddWithGui(FunctionWithGui):
@@ -33,9 +33,7 @@ def main() -> None:
     def gui() -> None:
         functions_graph.draw()
 
-    config_node = imgui_node_editor.Config()
-    config_node.settings_file = "demo_fn_compose_add.json"
-    immapp.run(gui, with_node_editor_config=config_node, window_size=(800, 600), window_title="Additions")  # type: ignore
+    immapp.run(gui, window_size=(800, 600), window_title="fiat_add", with_node_editor=True)  # type: ignore
 
 
 if __name__ == "__main__":

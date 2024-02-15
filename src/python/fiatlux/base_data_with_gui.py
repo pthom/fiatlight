@@ -2,7 +2,7 @@ from __future__ import annotations
 from typing import Any
 from typing import Optional
 
-from fiatlux_py.functions_composition_graph import AnyDataWithGui
+from fiatlux.functions_composition_graph import AnyDataWithGui
 from imgui_bundle import imgui
 
 
