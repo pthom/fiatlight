@@ -1,6 +1,6 @@
 from typing import Any, Optional, Callable, Sequence
 from imgui_bundle import imgui, immapp, imgui_node_editor as node_ed
-from fiatlux import AnyDataWithGui, FunctionWithGui, FunctionsCompositionGraph
+from fiatlux import PureFunction, AnyDataWithGui, FunctionWithGui, FunctionsCompositionGraph
 
 
 def versatile_gui_data(value: Any) -> None:
@@ -87,10 +87,10 @@ class VersatileDataWithGui(AnyDataWithGui):
 
 
 class VersatileFunctionWithGui(FunctionWithGui):
-    inner_function: Callable[[Any], Any]
+    inner_function: PureFunction
     inner_function_name: str
 
-    def __init__(self, function: Callable[[Any], Any], function_name: Optional[str] = None):
+    def __init__(self, function: PureFunction, function_name: Optional[str] = None):
         self.inner_function = function
         if function_name is not None:
             self.inner_function_name = function_name
