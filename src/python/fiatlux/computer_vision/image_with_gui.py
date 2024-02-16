@@ -1,7 +1,7 @@
 from __future__ import annotations
 from typing import Any
 
-from fiatlux.computer_vision import ImageUInt8
+from fiatlux.computer_vision.image_types import ImageUInt8
 from fiatlux.any_data_with_gui import AnyDataWithGui
 from fiatlux.computer_vision.cv_color_type import ColorType
 from imgui_bundle import immvision, imgui
