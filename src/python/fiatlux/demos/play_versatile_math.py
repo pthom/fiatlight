@@ -1,4 +1,3 @@
-from typing import List, Tuple
 from imgui_bundle import immapp
 from fiatlux.versatile import VersatileFunctionsCompositionGraph
 
@@ -6,12 +5,7 @@ import math
 
 
 def main() -> None:
-    functions = [
-        math.exp,
-        math.sin,
-        math.log,
-        math.cos
-    ]
+    functions = [math.exp, math.sin, math.log, math.cos]
     functions_graph = VersatileFunctionsCompositionGraph(functions)
 
     functions_graph.set_input(2)
