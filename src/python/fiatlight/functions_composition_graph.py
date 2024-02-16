@@ -8,7 +8,7 @@ import sys
 
 
 class FunctionsCompositionGraph:
-    function_nodes: List[_FunctionNode]
+    function_nodes: List[FunctionNode]
 
     def __init__(self, functions: Sequence[FunctionWithGui]) -> None:
         assert len(functions) > 0
@@ -18,12 +18,12 @@ class FunctionsCompositionGraph:
         input_fake_function.input_gui = f0.input_gui
         input_fake_function.output_gui = f0.input_gui
 
-        input_node = _FunctionNode(input_fake_function)
+        input_node = FunctionNode(input_fake_function)
         self.function_nodes = []
         self.function_nodes.append(input_node)
 
         for f in functions:
-            self.function_nodes.append(_FunctionNode(f))
+            self.function_nodes.append(FunctionNode(f))
 
         for i in range(len(self.function_nodes) - 1):
             fn0 = self.function_nodes[i]
@@ -59,9 +59,9 @@ class _InputWithGui(FunctionWithGui):
         return "Input"
 
 
-class _FunctionNode:
+class FunctionNode:
     function: FunctionWithGui
-    next_function_node: Optional[_FunctionNode]
+    next_function_node: Optional[FunctionNode]
     input_data_with_gui: AnyDataWithGui
     output_data_with_gui: AnyDataWithGui
 
