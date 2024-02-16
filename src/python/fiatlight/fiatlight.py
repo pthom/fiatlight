@@ -9,15 +9,12 @@ from imgui_bundle import hello_imgui, ImVec4, ImVec2
 from typing import List
 
 
-def obj_id(obj: Any) -> str:
-    return str(id(obj))
-
-
 class FiatlightGui:
     _functions_composition_graph: FunctionsCompositionGraph
     _main_dock_space_id: str
     _info_dock_space_id: str = "info_dock"
     _runner_params: hello_imgui.RunnerParams
+    _first_frame: bool = True
 
     def __init__(self, functions_graph: MixedFunctionsGraph) -> None:
         functions_with_gui = [versatile.to_function_with_gui(f) for f in functions_graph]
@@ -42,6 +39,10 @@ class FiatlightGui:
                             imgui.input_text_multiline("##error", function_node.last_exception_traceback, text_size)
 
     def _draw_functions_graph(self) -> None:
+        if self._first_frame:
+            # the window size is not available on the first frame
+            self._first_frame = False
+            return
         self._functions_composition_graph.draw()
 
     def _dockable_windows(self) -> List[hello_imgui.DockableWindow]:

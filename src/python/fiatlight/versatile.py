@@ -1,5 +1,5 @@
 from typing import Any, Optional, Sequence
-from imgui_bundle import imgui, imgui_node_editor as node_ed
+from imgui_bundle import imgui
 from fiatlight.any_data_with_gui import AnyDataWithGui
 from fiatlight.function_with_gui import FunctionWithGui
 from fiatlight.functions_composition_graph import FunctionsCompositionGraph
@@ -17,18 +17,18 @@ def versatile_gui_data(value: Any) -> None:
         if imgui.is_item_hovered():
             osd_widgets.set_tooltip(f"{value}")
     elif isinstance(value, str):
-        max_len = 50
+        max_len = 30
         if len(value) > max_len:
             imgui.text(f"Str len={len(value)}")
             imgui.text('"' + value[:max_len])
             if imgui.button("..."):
                 imgui.open_popup("popup_value_text")
 
-            node_ed.suspend_node_editor_canvas_immapp()
-            if imgui.begin_popup("popup_value_text"):
-                imgui.input_text_multiline("##value_text", value)
-                imgui.end_popup()
-            node_ed.resume_node_editor_canvas_immapp()
+            # node_ed.suspend_node_editor_canvas_immapp()
+            # if imgui.begin_popup("popup_value_text"):
+            #     imgui.input_text_multiline("##value_text", value)
+            #     imgui.end_popup()
+            # node_ed.resume_node_editor_canvas_immapp()
         else:
             imgui.text('"' + value + '"')
     elif isinstance(value, list):

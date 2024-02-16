@@ -1,7 +1,7 @@
 from __future__ import annotations
 from fiatlight.any_data_with_gui import AnyDataWithGui
 from fiatlight.function_with_gui import FunctionWithGui
-from imgui_bundle import imgui, imgui_node_editor as ed, icons_fontawesome, ImVec2, ImVec4
+from imgui_bundle import imgui, imgui_node_editor as ed, icons_fontawesome, ImVec2, ImVec4, immapp
 from typing import List, Optional, Any, Sequence
 import traceback
 import sys
@@ -98,8 +98,12 @@ class _FunctionNode:
         ed.begin_node(self.node_id)
         position = ed.get_node_position(self.node_id)
         if position.x == 0 and position.y == 0:
-            width_between_nodes = 200
-            position = ImVec2(idx * width_between_nodes + 1, 0)
+            nb_nodes_per_row = 5
+            width_between_nodes = immapp.em_size(15)
+            height_between_nodes = immapp.em_size(20)
+            position = ImVec2(
+                (idx % nb_nodes_per_row) * width_between_nodes, (idx // nb_nodes_per_row) * height_between_nodes
+            )
             ed.set_node_position(self.node_id, position)
 
         id_fn = str(id(self.function))
