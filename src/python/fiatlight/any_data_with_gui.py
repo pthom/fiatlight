@@ -7,7 +7,7 @@ class AnyDataWithGui(ABC):
     Override this class with your types, and implement a draw function that presents it content
     """
 
-    value: Any
+    value: Any = None
 
     @abstractmethod
     def gui_data(self, function_name: str) -> None:
