@@ -1,5 +1,5 @@
-#include "fiatlux/computer_vision/image_with_gui.h"
-#include "fiatlux/computer_vision/lut.h"
+#include "fiatlight/computer_vision/image_with_gui.h"
+#include "fiatlight/computer_vision/lut.h"
 #include "immapp/immapp.h"
 
 #include <opencv2/imgcodecs.hpp>

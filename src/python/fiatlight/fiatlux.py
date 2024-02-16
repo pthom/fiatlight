@@ -1,4 +1,4 @@
-# # from fiatlux import FunctionsCompositionGraph
+# # from fiatlight import FunctionsCompositionGraph
 # from imgui_bundle import immapp, imgui, ImVec2, ImVec4
 # from typing import Any
 #

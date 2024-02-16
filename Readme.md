@@ -1,1 +1,1 @@
-# fiatlux: shine light inside your algorithm pipelines
+# fiatlight: shine light inside your algorithm pipelines

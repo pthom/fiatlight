@@ -1,6 +1,6 @@
 from typing import List, Tuple
 from imgui_bundle import immapp
-from fiatlux.versatile import VersatileFunctionsCompositionGraph
+from fiatlight.versatile import VersatileFunctionsCompositionGraph
 
 
 poem = """

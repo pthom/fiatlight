@@ -1,4 +1,4 @@
-#include "fiatlux/functions_composition.h"
+#include "fiatlight/functions_composition.h"
 #include "imgui-node-editor/imgui_node_editor.h"
 #include "hello_imgui/icons_font_awesome.h"
 

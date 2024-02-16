@@ -1,6 +1,6 @@
 from imgui_bundle import immapp
-from fiatlux import PureFunction
-from fiatlux.versatile import VersatileFunctionsCompositionGraph
+from fiatlight import PureFunction
+from fiatlight.versatile import VersatileFunctionsCompositionGraph
 
 import math
 

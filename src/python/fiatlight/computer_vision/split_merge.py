@@ -1,8 +1,8 @@
 from typing import Any, Optional, Callable, cast
-from fiatlux import FunctionWithGui
-from fiatlux.computer_vision import ImageUInt8
-from fiatlux.computer_vision.image_with_gui import ImageWithGui, ImageChannelsWithGui
-from fiatlux.computer_vision.cv_color_type import ColorConversion
+from fiatlight import FunctionWithGui
+from fiatlight.computer_vision import ImageUInt8
+from fiatlight.computer_vision.image_with_gui import ImageWithGui, ImageChannelsWithGui
+from fiatlight.computer_vision.cv_color_type import ColorConversion
 
 import cv2
 import numpy as np

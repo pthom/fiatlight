@@ -1,6 +1,6 @@
 from typing import Any
 from imgui_bundle import imgui, immapp
-from fiatlux import IntWithGui, FunctionWithGui, FunctionsCompositionGraph
+from fiatlight import IntWithGui, FunctionWithGui, FunctionsCompositionGraph
 
 
 class AddWithGui(FunctionWithGui):

@@ -3,10 +3,10 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "fiatlux"
+name = "fiatlight"
 version = "0.1.0"
 authors = [{ name = "Pascal Thomet", email = "pthomet@gmail.com" }]
-description = "fiatlux: shine light inside your algorithm pipelines"
+description = "fiatlight: shine light inside your algorithm pipelines"
 readme = "Readme.md"
 requires-python = ">=3.10"
 classifiers = [
@@ -26,12 +26,12 @@ dependencies = [
 ]
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/python/fiatlux"]
+packages = ["src/python/fiatlight"]
 
 [project.urls]
-# homepage = "https://pthom.github.io/fiatlux/"
-repository = "https://github.com/pthom/fiatlux/"
-#documentation = "https://pthom.github.io/fiatlux/"
+# homepage = "https://pthom.github.io/fiatlight/"
+repository = "https://github.com/pthom/fiatlight/"
+#documentation = "https://pthom.github.io/fiatlight/"
 
 [tool.ruff]
 line-length = 120
