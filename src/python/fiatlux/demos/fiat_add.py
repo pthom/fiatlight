@@ -1,5 +1,5 @@
 from typing import Any
-from imgui_bundle import imgui, imgui_node_editor, immapp
+from imgui_bundle import imgui, immapp
 from fiatlux import IntWithGui, FunctionWithGui, FunctionsCompositionGraph
 
 
