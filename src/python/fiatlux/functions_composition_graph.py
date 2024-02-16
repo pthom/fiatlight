@@ -1,8 +1,8 @@
 from __future__ import annotations
 from fiatlux.any_data_with_gui import AnyDataWithGui
 from fiatlux.function_with_gui import FunctionWithGui
-from imgui_bundle import imgui, imgui_node_editor as ed, icons_fontawesome, ImVec2, ImVec4, immapp
-from typing import List, Optional, Any, Sequence, Callable
+from imgui_bundle import imgui, imgui_node_editor as ed, icons_fontawesome, ImVec2, ImVec4
+from typing import List, Optional, Any, Sequence
 import traceback
 import sys
 

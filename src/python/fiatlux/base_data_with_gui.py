@@ -24,5 +24,5 @@ class IntWithGui(AnyDataWithGui):
         return self.value
 
     def set(self, v: Any) -> None:
-        assert type(v) == int
+        assert isinstance(v, int)
         self.value = v

@@ -3,15 +3,13 @@ from typing import Any
 
 from fiatlux.computer_vision import ImageUInt8
 from fiatlux.any_data_with_gui import AnyDataWithGui
-from fiatlux.computer_vision.cv_color_type import *
+from fiatlux.computer_vision.cv_color_type import ColorType
 from imgui_bundle import immvision, imgui
-from imgui_bundle import imgui_node_editor
 from imgui_bundle import portable_file_dialogs as pfd
 
 
 import numpy as np
-from numpy.typing import NDArray
-from typing import Tuple, Optional, cast
+from typing import Tuple, Optional
 import cv2
 
 
