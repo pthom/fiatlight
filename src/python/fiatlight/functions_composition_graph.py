@@ -84,25 +84,13 @@ class _FunctionNode:
         self.pin_output = ed.PinId.create()
         self.link_id = ed.LinkId.create()
 
+        # self.observer = observer
+
     def _draw_exception_message(self) -> None:
         # return
         if self.last_exception_message is None:
             return
         imgui.text_colored(ImVec4(1, 0, 0, 1), self.last_exception_message)
-        # imgui.same_line()
-
-        # popup_id = "popup_exception_details_" + self.function.name()
-        # if imgui.button("..."):
-        #     imgui.open_popup(popup_id)
-
-        # if imgui.begin_popup(popup_id):
-        #     #imgui.set_next_item_width(immapp.em_size(60))
-        #     imgui.input_text_multiline(
-        #         "##value_text",
-        #                self.last_exception_traceback,
-        #                 size=immapp.em_to_vec2(60, 20))
-        #     imgui.end_popup()
-        # # ed.resume_node_editor_canvas_immapp()
 
     def draw_node(self, idx: int) -> None:
         assert self.function is not None
