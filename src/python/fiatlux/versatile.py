@@ -9,7 +9,9 @@ def versatile_gui_data(value: Any) -> None:
     elif isinstance(value, int):
         imgui.text(f"Int Value={value}")
     elif isinstance(value, float):
-        imgui.text(f"Float Value={value}")
+        imgui.text(f"Float Value={value:.4f}")
+        if imgui.is_item_hovered():
+            imgui.set_tooltip(f"{value}")
     elif isinstance(value, str):
         max_len = 50
         if len(value) > max_len:
