@@ -114,7 +114,6 @@ class _FunctionNode:
             position = ImVec2(idx * width_between_nodes + 1, 0)
             ed.set_node_position(self.node_id, position)
 
-
         id_fn = str(id(self.function))
         imgui.push_id(id_fn)
 
@@ -177,7 +176,7 @@ class _FunctionNode:
                 self.last_exception_message = str(e)
                 exc_type, exc_value, exc_traceback = sys.exc_info()
                 traceback_details = traceback.format_exception(exc_type, exc_value, exc_traceback)
-                self.last_exception_traceback = ''.join(traceback_details)
+                self.last_exception_traceback = "".join(traceback_details)
                 r = None
 
             self.output_data_with_gui.set(r)

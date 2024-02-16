@@ -6,6 +6,7 @@ class AnyDataWithGui(ABC):
     """
     Override this class with your types, and implement a draw function that presents it content
     """
+
     value: Any
 
     @abstractmethod
