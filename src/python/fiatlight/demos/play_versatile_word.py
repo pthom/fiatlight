@@ -1,6 +1,5 @@
 from typing import List, Tuple
-from imgui_bundle import immapp
-from fiatlight.versatile import VersatileFunctionsCompositionGraph
+from fiatlight.fiatlight import FiatlightGui
 
 
 poem = """
@@ -108,14 +107,8 @@ def main() -> None:
         sort_word_with_counts,
         display_word_with_counts,
     ]
-    functions_graph = VersatileFunctionsCompositionGraph(functions)  # type: ignore
-
-    functions_graph.set_input(poem)
-
-    def gui() -> None:
-        functions_graph.draw()
-
-    immapp.run(gui, with_node_editor=True, window_size=(1400, 600), window_title="Compose")
+    fiatlight_gui = FiatlightGui(functions)
+    fiatlight_gui.run("play_versatile_word", initial_value=poem)
 
 
 if __name__ == "__main__":
