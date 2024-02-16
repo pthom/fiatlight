@@ -1,6 +1,9 @@
 from typing import Any, Optional, Sequence
 from imgui_bundle import imgui, imgui_node_editor as node_ed
-from fiatlight import PureFunction, AnyDataWithGui, FunctionWithGui, FunctionsCompositionGraph
+from fiatlight.any_data_with_gui import AnyDataWithGui
+from fiatlight.function_with_gui import FunctionWithGui
+from fiatlight.functions_composition_graph import FunctionsCompositionGraph
+from fiatlight.fiatlight_types import PureFunction, PureFunctionOrFunctionWithGui
 
 
 def versatile_gui_data(value: Any) -> None:
@@ -110,8 +113,15 @@ class VersatileFunctionWithGui(FunctionWithGui):
         return False
 
 
+def to_function_with_gui(f: PureFunctionOrFunctionWithGui) -> FunctionWithGui:
+    if isinstance(f, FunctionWithGui):
+        return f
+    else:
+        return VersatileFunctionWithGui(f)
+
+
 class VersatileFunctionsCompositionGraph(FunctionsCompositionGraph):
     def __init__(self, functions: Sequence[PureFunction]) -> None:
-        functions_with_gui = [VersatileFunctionWithGui(f) for f in functions]
+        functions_with_gui = [to_function_with_gui(f) for f in functions]
         FunctionsCompositionGraph.__init__(self, functions_with_gui)
         # super.__init__(self, functions_with_gui)
