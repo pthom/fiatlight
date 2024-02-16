@@ -115,7 +115,7 @@ def main() -> None:
     def gui() -> None:
         functions_graph.draw()
 
-    immapp.run(gui, with_node_editor=True, window_size=(1400, 600), window_title="Compose")  # type: ignore
+    immapp.run(gui, with_node_editor=True, window_size=(1400, 600), window_title="Compose")
 
 
 if __name__ == "__main__":

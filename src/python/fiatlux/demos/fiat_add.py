@@ -12,7 +12,7 @@ class AddWithGui(FunctionWithGui):
         self.output_gui = IntWithGui()
 
     def f(self, x: Any) -> int:
-        assert type(x) == int
+        assert isinstance(x, int)
         return x + self.what_to_add
 
     def name(self) -> str:
@@ -33,7 +33,7 @@ def main() -> None:
     def gui() -> None:
         functions_graph.draw()
 
-    immapp.run(gui, window_size=(800, 600), window_title="fiat_add", with_node_editor=True)  # type: ignore
+    immapp.run(gui, window_size=(800, 600), window_title="fiat_add", with_node_editor=True)
 
 
 if __name__ == "__main__":

@@ -1,4 +1,4 @@
-from typing import Any, Optional, Callable, Sequence
+from typing import Any, Optional, Sequence
 from imgui_bundle import imgui, imgui_node_editor as node_ed
 from fiatlux import PureFunction, AnyDataWithGui, FunctionWithGui, FunctionsCompositionGraph
 
@@ -56,6 +56,7 @@ def versatile_gui_data(value: Any) -> None:
 
 def versatile_gui_set_input(value: Any) -> Optional[Any]:
     changed = False
+    new_value: Any = None
     if value is None:
         imgui.text("gui_set_input: unknown type (None)")
     elif isinstance(value, int):
@@ -63,10 +64,10 @@ def versatile_gui_set_input(value: Any) -> Optional[Any]:
         changed, new_value = imgui.slider_int("", value, 0, 100)
     elif isinstance(value, float):
         imgui.set_next_item_width(100)
-        changed, new_value = imgui.slider_float("", value, 0.0, 100.0)  # type: ignore
+        changed, new_value = imgui.slider_float("", value, 0.0, 100.0)
     elif isinstance(value, str):
         imgui.set_next_item_width(100)
-        changed, new_value = imgui.input_text("", value)  # type: ignore
+        changed, new_value = imgui.input_text("", value)
     else:
         raise Exception(f"VersatileDataWithGui Unsupported type: {type(value)}")
 
@@ -110,7 +111,7 @@ class VersatileFunctionWithGui(FunctionWithGui):
 
 
 class VersatileFunctionsCompositionGraph(FunctionsCompositionGraph):
-    def __init__(self, functions: Sequence[Callable[[Any], Any]]) -> None:
+    def __init__(self, functions: Sequence[PureFunction]) -> None:
         functions_with_gui = [VersatileFunctionWithGui(f) for f in functions]
         FunctionsCompositionGraph.__init__(self, functions_with_gui)
         # super.__init__(self, functions_with_gui)

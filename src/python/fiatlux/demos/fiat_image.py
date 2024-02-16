@@ -1,20 +1,21 @@
 from __future__ import annotations
-import cv2  # type: ignore
-
-import sys
-import os
-
-sys.path.append(".")
-
-from fiatlux.functions_composition_graph import *
-from fiatlux.computer_vision.image_with_gui import *
+from fiatlux.functions_composition_graph import FunctionsCompositionGraph
+from fiatlux.function_with_gui import FunctionWithGui
+from fiatlux.computer_vision import ImageUInt8
+from fiatlux.computer_vision.image_with_gui import ImageWithGui
 from fiatlux.computer_vision.lut import Split_Lut_Merge_WithGui
-from imgui_bundle import immapp
+from fiatlux.computer_vision.cv_color_type import CvColorConversionCode, ColorType
+from imgui_bundle import immapp, imgui
+from typing import Any
+
+import cv2
+import numpy as np
+import os
 
 
 def demos_assets_folder() -> str:
     this_dir = os.path.dirname(os.path.abspath(__file__))
-    assets_dir = os.path.abspath(f"{this_dir}/../../demos_assets")
+    assets_dir = os.path.abspath(f"{this_dir}/../../../demos_assets")
     return assets_dir
 
 
@@ -72,7 +73,7 @@ class CannyWithGui(FunctionWithGui):
         changed3 = False
         for aperture_value in [3, 5, 7]:
             clicked: bool
-            clicked, self.aperture_size = imgui.radio_button(str(aperture_value), self.aperture_size, aperture_value)  # type: ignore
+            clicked, self.aperture_size = imgui.radio_button(str(aperture_value), self.aperture_size, aperture_value)
             if clicked:
                 changed3 = True
             imgui.same_line()
@@ -82,7 +83,7 @@ class CannyWithGui(FunctionWithGui):
 
 class OilPaintingWithGui(FunctionWithGui):
     dynRatio = 1  # image is divided by dynRatio before histogram processing
-    size = 3  # size	neighbouring size is 2-size+1
+    size = 3  # size neighbouring size is 2-size+1
     color_conversion: CvColorConversionCode  # color space conversion code
 
     def __init__(self) -> None:
@@ -94,7 +95,7 @@ class OilPaintingWithGui(FunctionWithGui):
         assert type(x) == np.ndarray
         r = np.zeros_like(x)
         # pip install opencv-contrib-python
-        r = cv2.xphoto.oilPainting(x, self.size, self.dynRatio, self.color_conversion)
+        r = cv2.xphoto.oilPainting(x, self.size, self.dynRatio, self.color_conversion)  # type: ignore
         return r
 
     def name(self) -> str:
@@ -127,9 +128,7 @@ def main() -> None:
         imgui.text(f"FPS: {imgui.get_io().framerate}")
         composition_graph.draw()
 
-    config_node = imgui_node_editor.Config()
-    config_node.settings_file = "demo_compose_image.json"
-    immapp.run(gui, with_node_editor_config=config_node, window_size=(1600, 1000), fps_idle=0)  # type: ignore
+    immapp.run(gui, with_node_editor=True, window_size=(1600, 1000), fps_idle=0, window_title="fiat_image")
 
 
 if __name__ == "__main__":

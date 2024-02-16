@@ -1,11 +1,12 @@
 from imgui_bundle import immapp
+from fiatlux import PureFunction
 from fiatlux.versatile import VersatileFunctionsCompositionGraph
 
 import math
 
 
 def main() -> None:
-    functions = [math.exp, math.sin, math.log, math.cos]
+    functions: list[PureFunction] = [math.exp, math.sin, math.log, math.cos]
     functions_graph = VersatileFunctionsCompositionGraph(functions)
 
     functions_graph.set_input(2)
