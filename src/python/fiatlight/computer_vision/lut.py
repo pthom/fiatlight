@@ -51,7 +51,7 @@ class LutImage:
     def _prepare_lut_graph(self) -> None:
         graph_size = self._lut_graph_size()
         x = np.arange(0.0, 1.0, 1.0 / 256.0)
-        self._lut_graph = immvision._draw_lut_graph(list(x), list(self._lut_table), (graph_size, graph_size))  # type: ignore
+        self._lut_graph = _draw_lut_graph(list(x), list(self._lut_table), (graph_size, graph_size))  # type: ignore
         self._lut_graph_needs_refresh = True
 
     def _prepare_lut(self) -> None:
@@ -264,3 +264,22 @@ class Split_Lut_Merge_WithGui:
                 self.split.output_gui_channels().color_type = self.current_conversion_pair.conversion.dst_color
                 print("a")
         return changed
+
+
+def _draw_lut_graph(x: List[float], y: List[float], size: Tuple[int, int]) -> ImageUInt8:
+    from imgui_bundle import immvision
+
+    image = np.zeros((size[1], size[0], 4), dtype=np.uint8)
+    assert len(x) == len(y)
+    len_x = len(x)
+
+    def to_point(x: float, y: float) -> Point2d:
+        return 1.0 + x * (size[0] - 3), 1.0 + (1.0 - y) * (size[1] - 3)
+
+    image[:, :, :] = (200, 200, 200, 0)
+    color = (0, 255, 255, 255)
+    for i in range(len_x - 1):
+        x0, y0 = x[i], y[i]
+        x1, y1 = x[i + 1], y[i + 1]
+        immvision.cv_drawing_utils.line(image, to_point(x0, y0), to_point(x1, y1), color)
+    return image
