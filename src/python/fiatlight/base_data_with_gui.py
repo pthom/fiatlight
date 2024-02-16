@@ -2,7 +2,7 @@ from __future__ import annotations
 from typing import Any
 from typing import Optional
 
-from fiatlux.any_data_with_gui import AnyDataWithGui
+from fiatlight.any_data_with_gui import AnyDataWithGui
 from imgui_bundle import imgui
 
 

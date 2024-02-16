@@ -1,6 +1,6 @@
 #pragma once
-#include "fiatlux/computer_vision/image_with_gui.h"
-#include "fiatlux/computer_vision/split_merge.h"
+#include "fiatlight/computer_vision/image_with_gui.h"
+#include "fiatlight/computer_vision/split_merge.h"
 
 
 namespace VisualProg

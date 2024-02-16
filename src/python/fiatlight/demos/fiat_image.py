@@ -1,10 +1,10 @@
 from __future__ import annotations
-from fiatlux.functions_composition_graph import FunctionsCompositionGraph
-from fiatlux.function_with_gui import FunctionWithGui
-from fiatlux.computer_vision import ImageUInt8
-from fiatlux.computer_vision.image_with_gui import ImageWithGui
-from fiatlux.computer_vision.lut import Split_Lut_Merge_WithGui
-from fiatlux.computer_vision.cv_color_type import CvColorConversionCode, ColorType
+from fiatlight.functions_composition_graph import FunctionsCompositionGraph
+from fiatlight.function_with_gui import FunctionWithGui
+from fiatlight.computer_vision import ImageUInt8
+from fiatlight.computer_vision.image_with_gui import ImageWithGui
+from fiatlight.computer_vision.lut import Split_Lut_Merge_WithGui
+from fiatlight.computer_vision.cv_color_type import CvColorConversionCode, ColorType
 from imgui_bundle import immapp, imgui
 from typing import Any
 

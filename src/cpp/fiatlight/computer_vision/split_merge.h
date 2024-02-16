@@ -1,5 +1,5 @@
 #pragma once
-#include "fiatlux/computer_vision/image_with_gui.h"
+#include "fiatlight/computer_vision/image_with_gui.h"
 
 
 namespace VisualProg

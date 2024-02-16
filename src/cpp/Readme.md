@@ -1,1 +1,1 @@
-The c++ version of fiatlux is out of date and not maintained.
+The c++ version of fiatlight is out of date and not maintained.

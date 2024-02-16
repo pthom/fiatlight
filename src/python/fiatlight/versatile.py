@@ -1,6 +1,6 @@
 from typing import Any, Optional, Sequence
 from imgui_bundle import imgui, imgui_node_editor as node_ed
-from fiatlux import PureFunction, AnyDataWithGui, FunctionWithGui, FunctionsCompositionGraph
+from fiatlight import PureFunction, AnyDataWithGui, FunctionWithGui, FunctionsCompositionGraph
 
 
 def versatile_gui_data(value: Any) -> None:

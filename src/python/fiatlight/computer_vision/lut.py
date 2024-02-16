@@ -3,10 +3,10 @@ from numpy.typing import NDArray
 import cv2
 import numpy as np
 import math
-from fiatlux import FunctionWithGui
-from fiatlux.computer_vision import ImageUInt8, ImageFloat, ImageWithGui, ImageChannelsWithGui
-from fiatlux.computer_vision.cv_color_type import ColorType, ColorConversionPair, compute_possible_conversion_pairs
-from fiatlux.computer_vision.split_merge import SplitChannelsWithGui, MergeChannelsWithGui
+from fiatlight import FunctionWithGui
+from fiatlight.computer_vision import ImageUInt8, ImageFloat, ImageWithGui, ImageChannelsWithGui
+from fiatlight.computer_vision.cv_color_type import ColorType, ColorConversionPair, compute_possible_conversion_pairs
+from fiatlight.computer_vision.split_merge import SplitChannelsWithGui, MergeChannelsWithGui
 from imgui_bundle import immapp, imgui, immvision
 
 
