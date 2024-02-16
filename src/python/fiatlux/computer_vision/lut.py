@@ -1,6 +1,6 @@
 from typing import Tuple, Optional, cast, Any, List
 from numpy.typing import NDArray
-import cv2  # type: ignore
+import cv2
 import numpy as np
 import math
 from fiatlux import FunctionWithGui
@@ -46,7 +46,7 @@ class LutImage:
             channel_name, self._lut_graph, refresh_image=self._lut_graph_needs_refresh
         )
         self._lut_graph_needs_refresh = False
-        return mouse_position  # type: ignore
+        return mouse_position
 
     def _prepare_lut_graph(self) -> None:
         graph_size = self._lut_graph_size()

@@ -12,7 +12,7 @@ def main() -> None:
         math.log,
         math.cos
     ]
-    functions_graph = VersatileFunctionsCompositionGraph(functions)  # type: ignore
+    functions_graph = VersatileFunctionsCompositionGraph(functions)
 
     functions_graph.set_input(2)
 

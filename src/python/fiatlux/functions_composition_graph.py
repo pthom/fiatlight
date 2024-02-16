@@ -111,7 +111,7 @@ class _FunctionNode:
         position = ed.get_node_position(self.node_id)
         if position.x == 0 and position.y == 0:
             width_between_nodes = 200
-            position = ImVec2(idx * width_between_nodes + 1, 0)  # type: ignore
+            position = ImVec2(idx * width_between_nodes + 1, 0)
             ed.set_node_position(self.node_id, position)
 
 

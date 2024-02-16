@@ -1,9 +1,10 @@
 from typing import Any, Optional, Callable, cast
 from fiatlux import FunctionWithGui
-from fiatlux.computer_vision import ImageWithGui, ImageChannelsWithGui, ImageUInt8, ImageFloat
+from fiatlux.computer_vision import ImageUInt8
+from fiatlux.computer_vision.image_with_gui import ImageWithGui, ImageChannelsWithGui
 from fiatlux.computer_vision.cv_color_type import ColorConversion
 
-import cv2  # type: ignore
+import cv2
 import numpy as np
 
 
