@@ -44,7 +44,8 @@ class FiatlightGui:
         with imgui_ctx.push_obj_id(self):
             if imgui.begin_tab_bar("InfoPanelTabBar"):
                 if imgui.begin_tab_item_simple("Info"):
-                    imgui.text("This is the info panel")
+                    if osd_widgets.get_detail_gui() is not None:
+                        osd_widgets.get_detail_gui()()
                     imgui.end_tab_item()
                 if imgui.begin_tab_item_simple("Exceptions"):
                     self._draw_exceptions()

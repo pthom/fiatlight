@@ -1,10 +1,21 @@
 from typing import Any, Optional, Sequence
-from imgui_bundle import imgui
+from imgui_bundle import imgui, imgui_ctx
 from fiatlight.any_data_with_gui import AnyDataWithGui
 from fiatlight.function_with_gui import FunctionWithGui
 from fiatlight.functions_composition_graph import FunctionsCompositionGraph
 from fiatlight.fiatlight_types import PureFunction, PureFunctionOrFunctionWithGui
 from fiatlight.internal import osd_widgets
+from typing import Callable
+
+
+def _add_details_button(obj: Any, detail_gui: Callable[[], None]) -> None:
+    with imgui_ctx.push_obj_id(obj):
+        if imgui.button("show details"):
+            osd_widgets.set_detail_gui(detail_gui)
+        if imgui.is_item_hovered():
+            osd_widgets.set_tooltip(
+                "Click to show details, then open the Info tab at the bottom to see the full string"
+            )
 
 
 def versatile_gui_data(value: Any) -> None:
@@ -21,30 +32,27 @@ def versatile_gui_data(value: Any) -> None:
         if len(value) > max_len:
             imgui.text(f"Str len={len(value)}")
             imgui.text('"' + value[:max_len])
-            if imgui.button("..."):
-                imgui.open_popup("popup_value_text")
 
-            # node_ed.suspend_node_editor_canvas_immapp()
-            # if imgui.begin_popup("popup_value_text"):
-            #     imgui.input_text_multiline("##value_text", value)
-            #     imgui.end_popup()
-            # node_ed.resume_node_editor_canvas_immapp()
+            def detail_gui():
+                imgui.input_text_multiline("##value_text", value)
+
+            _add_details_button(value, detail_gui)
+            if imgui.is_item_hovered():
+                osd_widgets.set_tooltip(
+                    "Click to show details, then open the Info tab at the bottom to see the full string"
+                )
         else:
             imgui.text('"' + value + '"')
     elif isinstance(value, list):
         imgui.text(f"List len={len(value)}")
         for i, v in enumerate(value):
             if i >= 5:
-                if imgui.button("..."):
-                    imgui.open_popup("popup_value_list")
 
-                # node_ed.suspend_node_editor_canvas_immapp()
-                if imgui.begin_popup("popup_value_list"):
+                def detail_gui():
                     for i, v in enumerate(value):
                         versatile_gui_data(v)
-                    imgui.end_popup()
-                # node_ed.resume_node_editor_canvas_immapp()
 
+                _add_details_button(value, detail_gui)
                 break
             else:
                 versatile_gui_data(v)
