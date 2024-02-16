@@ -44,7 +44,9 @@ class ImageWithGui(AnyDataWithGui):
     def gui_set_input(self) -> Optional[Any]:
         result = None
         if imgui.button("Select image file"):
-            self.open_file_dialog = pfd.open_file("Select image file", filters=["*.png", "*.jpg", "*.jpeg", "*.bmp", "*.tga"])
+            self.open_file_dialog = pfd.open_file(
+                "Select image file", filters=["*.png", "*.jpg", "*.jpeg", "*.bmp", "*.tga"]
+            )
         if self.open_file_dialog is not None and self.open_file_dialog.ready():
             if len(self.open_file_dialog.result()) == 1:
                 image_file = self.open_file_dialog.result()[0]

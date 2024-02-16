@@ -2,6 +2,7 @@ from fiatlux import FunctionsCompositionGraph
 from imgui_bundle import immapp, imgui, ImVec2, ImVec4
 from typing import Any
 
+
 class FiatLux:
     def __init__(self) -> None:
         self._functions_composition_graph = None
