@@ -4,6 +4,7 @@ from fiatlight.any_data_with_gui import AnyDataWithGui
 from fiatlight.function_with_gui import FunctionWithGui
 from fiatlight.functions_composition_graph import FunctionsCompositionGraph
 from fiatlight.fiatlight_types import PureFunction, PureFunctionOrFunctionWithGui
+from fiatlight.internal import osd_widgets
 
 
 def versatile_gui_data(value: Any) -> None:
@@ -14,7 +15,7 @@ def versatile_gui_data(value: Any) -> None:
     elif isinstance(value, float):
         imgui.text(f"Float Value={value:.4f}")
         if imgui.is_item_hovered():
-            imgui.set_tooltip(f"{value}")
+            osd_widgets.set_tooltip(f"{value}")
     elif isinstance(value, str):
         max_len = 50
         if len(value) > max_len:
