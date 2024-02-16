@@ -1,6 +1,6 @@
 from fiatlight.fiatlight_types import MixedFunctionsGraph
 from fiatlight import versatile
-from fiatlight.functions_composition_graph import FunctionsCompositionGraph
+from fiatlight.functions_composition_graph import FunctionsCompositionGraph, FunctionNode
 from fiatlight.internal import osd_widgets
 from imgui_bundle import immapp, imgui, imgui_ctx
 from typing import Any
@@ -20,23 +20,36 @@ class FiatlightGui:
         functions_with_gui = [versatile.to_function_with_gui(f) for f in functions_graph]
         self._functions_composition_graph = FunctionsCompositionGraph(functions_with_gui)
 
-    def set_functions_composition_graph(self, functions_composition_graph: Any) -> None:
-        self._functions_composition_graph = functions_composition_graph
+    def _function_nodes(self) -> List[FunctionNode]:
+        return self._functions_composition_graph.function_nodes
+
+    def _has_one_exception(self) -> bool:
+        return any(fn.last_exception_message is not None for fn in self._function_nodes())
+
+    def _draw_exceptions(self) -> None:
+        for function_node in self._function_nodes():
+            if function_node.last_exception_message is not None:
+                function_name = function_node.function.name()
+                imgui.text_colored(
+                    ImVec4(1, 0, 0, 1), f"Exception in {function_name}: {function_node.last_exception_message}"
+                )
+                if function_node.last_exception_traceback is not None:
+                    msg = function_node.last_exception_traceback
+                    nb_lines = msg.count("\n") + 1
+                    text_size = ImVec2(imgui.get_window_width(), immapp.em_size(nb_lines))
+                    imgui.input_text_multiline("##error", msg, text_size)
 
     def _draw_info_panel(self) -> None:
         osd_widgets.render()
         with imgui_ctx.push_obj_id(self):
-            imgui.text("Info Panel")
-            for function_node in self._functions_composition_graph.function_nodes:
-                with imgui_ctx.push_obj_id(function_node):
-                    if function_node.last_exception_message is not None:
-                        function_name = function_node.function.name()
-                        imgui.text_colored(
-                            ImVec4(1, 0, 0, 1), f"Exception in {function_name}: {function_node.last_exception_message}"
-                        )
-                        if function_node.last_exception_traceback is not None:
-                            text_size = ImVec2(imgui.get_window_width(), immapp.em_size(4))
-                            imgui.input_text_multiline("##error", function_node.last_exception_traceback, text_size)
+            if imgui.begin_tab_bar("InfoPanelTabBar"):
+                if imgui.begin_tab_item_simple("Info"):
+                    imgui.text("This is the info panel")
+                    imgui.end_tab_item()
+                if imgui.begin_tab_item_simple("Exceptions"):
+                    self._draw_exceptions()
+                    imgui.end_tab_item()
+                imgui.end_tab_bar()
 
     def _draw_functions_graph(self) -> None:
         if self._first_frame:
