@@ -1,11 +1,11 @@
 from __future__ import annotations
-from fiatlight.functions_composition_graph import FunctionsCompositionGraph
 from fiatlight.function_with_gui import FunctionWithGui
 from fiatlight.computer_vision import ImageUInt8
 from fiatlight.computer_vision.image_with_gui import ImageWithGui
 from fiatlight.computer_vision.lut import Split_Lut_Merge_WithGui
 from fiatlight.computer_vision.cv_color_type import CvColorConversionCode, ColorType
-from imgui_bundle import immapp, imgui
+from fiatlight.fiatlight import FiatlightGui
+from imgui_bundle import imgui
 from typing import Any
 
 import cv2
@@ -118,17 +118,8 @@ def main() -> None:
     functions = [split_lut_merge_gui.split, split_lut_merge_gui.lut, split_lut_merge_gui.merge, OilPaintingWithGui()]
     # functions = [GaussianBlurWithGui(), CannyWithGui()]
 
-    composition_graph = FunctionsCompositionGraph(functions)
-    composition_graph.set_input(image)
-
-    def gui() -> None:
-        from imgui_bundle import hello_imgui
-
-        hello_imgui.get_runner_params().fps_idling.enable_idling = False
-        imgui.text(f"FPS: {imgui.get_io().framerate}")
-        composition_graph.draw()
-
-    immapp.run(gui, with_node_editor=True, window_size=(1600, 1000), fps_idle=0, window_title="fiat_image")
+    fiatlight_gui = FiatlightGui(functions)
+    fiatlight_gui.run("play_versatile_word", initial_value=image)
 
 
 if __name__ == "__main__":
