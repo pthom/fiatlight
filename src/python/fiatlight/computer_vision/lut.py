@@ -1,3 +1,5 @@
+# type: ignore
+
 from typing import Tuple, Optional, cast, Any, List
 from numpy.typing import NDArray
 import cv2
@@ -5,8 +7,7 @@ import numpy as np
 import math
 from fiatlight import FunctionWithGui
 from fiatlight.computer_vision import ImageUInt8, ImageFloat, ImageWithGui, ImageChannelsWithGui
-from fiatlight.computer_vision.cv_color_type import ColorType, ColorConversionPair, compute_possible_conversion_pairs
-from fiatlight.computer_vision.split_merge import SplitChannelsWithGui, MergeChannelsWithGui
+from fiatlight.computer_vision.cv_color_type import ColorType
 from imgui_bundle import immapp, imgui, immvision
 
 
@@ -220,17 +221,17 @@ class LutChannelsWithGui(FunctionWithGui):
 
 
 class Split_Lut_Merge_WithGui:
-    possible_conversion_pairs: List[ColorConversionPair]
-    current_conversion_pair: Optional[ColorConversionPair]
+    possible_conversion_pairs: List[OldColorConversionPair]
+    current_conversion_pair: Optional[OldColorConversionPair]
     show_possible_color_conversions: bool = False
-    split: SplitChannelsWithGui
+    split: Old_SplitChannelsWithGui
     lut: LutChannelsWithGui
     merge: MergeChannelsWithGui
 
     def __init__(self, color_type: ColorType):
         self.possible_conversion_pairs = compute_possible_conversion_pairs(color_type)
         self.current_conversion_pair = None
-        self.split = SplitChannelsWithGui()
+        self.split = Old_SplitChannelsWithGui()
         self.split.gui_params_optional_fn = lambda: self.gui_select_conversion()
         self.merge = MergeChannelsWithGui()
         self.lut = LutChannelsWithGui()
