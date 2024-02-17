@@ -33,7 +33,7 @@ def versatile_gui_data(value: Any) -> None:
             imgui.text(f"Str len={len(value)}")
             imgui.text('"' + value[:max_len])
 
-            def detail_gui():
+            def detail_gui() -> None:
                 imgui.input_text_multiline("##value_text", value)
 
             _add_details_button(value, detail_gui)
@@ -48,7 +48,7 @@ def versatile_gui_data(value: Any) -> None:
         for i, v in enumerate(value):
             if i >= 5:
 
-                def detail_gui():
+                def detail_gui() -> None:
                     for i, v in enumerate(value):
                         versatile_gui_data(v)
 

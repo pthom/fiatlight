@@ -4,17 +4,59 @@ from fiatlight.functions_composition_graph import FunctionsCompositionGraph, Fun
 from fiatlight.internal import osd_widgets
 from imgui_bundle import immapp, imgui, imgui_ctx
 from typing import Any
-from imgui_bundle import hello_imgui, ImVec4, ImVec2
+from imgui_bundle import hello_imgui, ImVec4, ImVec2, immvision
 
-from typing import List
-from dataclasses import dataclass
+from typing import List, Tuple
 
 
-@dataclass
 class FiatlightGuiParams:
-    app_title: str = "Fiatlight"
-    initial_value: Any = None
-    functions_graph: MixedFunctionsGraph | None = None
+    initial_value: Any
+    functions_graph: MixedFunctionsGraph | None
+    show_image_inspector: bool
+    runner_params: hello_imgui.RunnerParams
+    addons: immapp.AddOnsParams
+
+    def __init__(
+        self,
+        functions_graph: MixedFunctionsGraph | None = None,
+        app_title: str = "fiatlight",
+        window_size: Tuple[int, int] | None = None,
+        initial_value: Any = None,
+        show_image_inspector: bool = False,
+        runner_params: hello_imgui.RunnerParams | None = None,
+        addons: immapp.AddOnsParams | None = None,
+    ) -> None:
+        self.functions_graph = functions_graph
+        self.initial_value = initial_value
+        self.show_image_inspector = show_image_inspector
+
+        if addons is None:
+            addons = immapp.AddOnsParams()
+        self.addons = addons
+        addons.with_node_editor = True
+
+        if runner_params is None:
+            runner_params = hello_imgui.RunnerParams()
+        self.runner_params = runner_params
+        assert runner_params is not None
+
+        if len(runner_params.app_window_params.window_title) == 0:
+            runner_params.app_window_params.window_title = app_title
+
+        runner_params.app_window_params.window_geometry.size = window_size or (1600, 1000)
+
+        runner_params.imgui_window_params.default_imgui_window_type = (
+            hello_imgui.DefaultImGuiWindowType.provide_full_screen_dock_space
+        )
+
+        if runner_params is None:
+            runner_params.app_window_params.restore_previous_geometry = True
+            runner_params.imgui_window_params.show_status_bar = True
+            runner_params.imgui_window_params.enable_viewports = True
+            runner_params.imgui_window_params.show_menu_bar = True
+            runner_params.imgui_window_params.show_menu_view = True
+
+        self._runner_params = runner_params
 
 
 class FiatlightGui:
@@ -22,8 +64,7 @@ class FiatlightGui:
     _functions_composition_graph: FunctionsCompositionGraph
     _main_dock_space_id: str
     _info_dock_space_id: str = "info_dock"
-    _runner_params: hello_imgui.RunnerParams
-    _first_frame: bool = True
+    _idx_frame: int = 0
 
     def __init__(self, params: FiatlightGuiParams) -> None:
         self.params = params
@@ -57,8 +98,9 @@ class FiatlightGui:
         with imgui_ctx.push_obj_id(self):
             if imgui.begin_tab_bar("InfoPanelTabBar"):
                 if imgui.begin_tab_item_simple("Info"):
-                    if osd_widgets.get_detail_gui() is not None:
-                        osd_widgets.get_detail_gui()()
+                    details_gui = osd_widgets.get_detail_gui()
+                    if details_gui is not None:
+                        details_gui()
                     imgui.end_tab_item()
                 if imgui.begin_tab_item_simple("Exceptions"):
                     self._draw_exceptions()
@@ -66,11 +108,14 @@ class FiatlightGui:
                 imgui.end_tab_bar()
 
     def _draw_functions_graph(self) -> None:
-        if self._first_frame:
-            # the window size is not available on the first frame
-            self._first_frame = False
-            return
-        self._functions_composition_graph.draw()
+        self._idx_frame += 1
+        if self._idx_frame == 1:
+            hello_imgui.get_runner_params().docking_params.focus_dockable_window("Functions Graph")
+        if self._idx_frame >= 3:
+            # the window size is not available on the first frames,
+            # and the node editor uses it to compute the initial position of the nodes
+            # window_size = imgui.get_window_size()
+            self._functions_composition_graph.draw()
 
     def _dockable_windows(self) -> List[hello_imgui.DockableWindow]:
         main_window = hello_imgui.DockableWindow(
@@ -83,7 +128,15 @@ class FiatlightGui:
             dock_space_name_=self._info_dock_space_id,
             gui_function_=lambda: self._draw_info_panel(),
         )
-        return [main_window, info_window]
+        r = [main_window, info_window]
+        if self.params.show_image_inspector:
+            image_inspector = hello_imgui.DockableWindow(
+                label_="Image Inspector",
+                dock_space_name_=self._main_dock_space_id,
+                gui_function_=lambda: immvision.inspector_show(),
+            )
+            r.append(image_inspector)
+        return r
 
     def _docking_splits(self, initial_dock: str = "MainDockSpace") -> List[hello_imgui.DockingSplit]:
         self._main_dock_space_id = initial_dock
@@ -98,31 +151,9 @@ class FiatlightGui:
     def run(self) -> None:
         self._functions_composition_graph.set_input(self.params.initial_value)
 
-        addons = immapp.AddOnsParams()
-        addons.with_markdown = True
-        addons.with_node_editor = True
-
-        runner_params = hello_imgui.RunnerParams()
-
-        runner_params.docking_params.docking_splits = self._docking_splits()
-        runner_params.docking_params.dockable_windows = self._dockable_windows()
-
-        runner_params.app_window_params.window_title = self.params.app_title
-        runner_params.app_window_params.window_geometry.size = (1200, 900)
-        runner_params.app_window_params.restore_previous_geometry = True
-
-        runner_params.imgui_window_params.default_imgui_window_type = (
-            hello_imgui.DefaultImGuiWindowType.provide_full_screen_dock_space
-        )
-
-        runner_params.imgui_window_params.show_status_bar = True
-        runner_params.imgui_window_params.enable_viewports = True
-
-        runner_params.imgui_window_params.show_menu_bar = True
-        runner_params.imgui_window_params.show_menu_view = True
-
-        self._runner_params = runner_params
-        immapp.run(self._runner_params, addons)
+        self.params.runner_params.docking_params.docking_splits += self._docking_splits()
+        self.params.runner_params.docking_params.dockable_windows += self._dockable_windows()
+        immapp.run(self.params.runner_params, self.params.addons)
 
 
 def fiatlight_run(params: FiatlightGuiParams) -> None:
