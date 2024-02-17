@@ -2,8 +2,7 @@ from __future__ import annotations
 from fiatlight.function_with_gui import FunctionWithGui
 from fiatlight.computer_vision import ImageUInt8
 from fiatlight.computer_vision.image_with_gui import ImageWithGui
-from fiatlight.computer_vision.lut import Split_Lut_Merge_WithGui
-from fiatlight.computer_vision.cv_color_type import CvColorConversionCode, ColorType
+from fiatlight.computer_vision.cv_color_type import CvColorConversionCode
 from fiatlight.fiatlight_gui import FiatlightGuiParams, fiatlight_run
 from imgui_bundle import imgui
 from typing import Any
@@ -113,10 +112,14 @@ def main() -> None:
     image = cv2.imread(demos_assets_folder() + "/images/house.jpg")
     image = cv2.resize(image, (int(image.shape[1] * 0.5), int(image.shape[0] * 0.5)))
 
-    split_lut_merge_gui = Split_Lut_Merge_WithGui(ColorType.BGR)
+    # split_lut_merge_gui = Split_Lut_Merge_WithGui(ColorType.BGR)
+    # functions = [split_lut_merge_gui.split, split_lut_merge_gui.lut, split_lut_merge_gui.merge, OilPaintingWithGui()]
 
-    functions = [split_lut_merge_gui.split, split_lut_merge_gui.lut, split_lut_merge_gui.merge, OilPaintingWithGui()]
     # functions = [GaussianBlurWithGui(), CannyWithGui()]
+
+    from fiatlight.computer_vision import img_proc
+
+    functions = [img_proc.SplitChannelsWithGui(), img_proc.MergeChannelsWithGui(), img_proc.ConvertColorWithGui()]
 
     fiatlight_run(
         FiatlightGuiParams(
