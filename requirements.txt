@@ -1,3 +1,4 @@
 imgui-bundle
 opencv-contrib-python
 opencv-python
+numpy
