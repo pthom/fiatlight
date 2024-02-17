@@ -99,7 +99,7 @@ class FunctionNode:
         position = ed.get_node_position(self.node_id)
         if position.x == 0 and position.y == 0:
             nb_nodes_per_row = 5
-            width_between_nodes = immapp.em_size(15)
+            width_between_nodes = immapp.em_size(20)
             height_between_nodes = immapp.em_size(20)
             position = ImVec2(
                 (idx % nb_nodes_per_row) * width_between_nodes, (idx // nb_nodes_per_row) * height_between_nodes
