@@ -118,7 +118,11 @@ def main() -> None:
     functions = [split_lut_merge_gui.split, split_lut_merge_gui.lut, split_lut_merge_gui.merge, OilPaintingWithGui()]
     # functions = [GaussianBlurWithGui(), CannyWithGui()]
 
-    fiatlight_run(FiatlightGuiParams(functions_graph=functions, app_title="fiat_image", initial_value=image))
+    fiatlight_run(
+        FiatlightGuiParams(
+            functions_graph=functions, app_title="fiat_image", initial_value=image, show_image_inspector=True
+        )
+    )
 
 
 if __name__ == "__main__":
