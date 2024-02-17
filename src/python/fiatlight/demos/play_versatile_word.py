@@ -1,5 +1,5 @@
 from typing import List, Tuple
-from fiatlight.fiatlight import FiatlightGui
+from fiatlight.fiatlight_gui import FiatlightGuiParams, fiatlight_run
 
 
 poem = """
@@ -107,8 +107,7 @@ def main() -> None:
         sort_word_with_counts,
         display_word_with_counts,
     ]
-    fiatlight_gui = FiatlightGui(functions)
-    fiatlight_gui.run("play_versatile_word", initial_value=poem)
+    fiatlight_run(FiatlightGuiParams(functions_graph=functions, app_title="play_versatile_word", initial_value=poem))
 
 
 if __name__ == "__main__":

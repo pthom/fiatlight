@@ -7,17 +7,30 @@ from typing import Any
 from imgui_bundle import hello_imgui, ImVec4, ImVec2
 
 from typing import List
+from dataclasses import dataclass
+
+
+@dataclass
+class FiatlightGuiParams:
+    app_title: str = "Fiatlight"
+    initial_value: Any = None
+    functions_graph: MixedFunctionsGraph | None = None
 
 
 class FiatlightGui:
+    params: FiatlightGuiParams
     _functions_composition_graph: FunctionsCompositionGraph
     _main_dock_space_id: str
     _info_dock_space_id: str = "info_dock"
     _runner_params: hello_imgui.RunnerParams
     _first_frame: bool = True
 
-    def __init__(self, functions_graph: MixedFunctionsGraph) -> None:
-        functions_with_gui = [versatile.to_function_with_gui(f) for f in functions_graph]
+    def __init__(self, params: FiatlightGuiParams) -> None:
+        self.params = params
+        if self.params.functions_graph is not None:
+            functions_with_gui = [versatile.to_function_with_gui(f) for f in self.params.functions_graph]
+        else:
+            functions_with_gui = []
         self._functions_composition_graph = FunctionsCompositionGraph(functions_with_gui)
 
     def _function_nodes(self) -> List[FunctionNode]:
@@ -82,8 +95,8 @@ class FiatlightGui:
         )
         return [split_main_info]
 
-    def run(self, app_window_title: str, initial_value: Any) -> None:
-        self._functions_composition_graph.set_input(initial_value)
+    def run(self) -> None:
+        self._functions_composition_graph.set_input(self.params.initial_value)
 
         addons = immapp.AddOnsParams()
         addons.with_markdown = True
@@ -94,7 +107,7 @@ class FiatlightGui:
         runner_params.docking_params.docking_splits = self._docking_splits()
         runner_params.docking_params.dockable_windows = self._dockable_windows()
 
-        runner_params.app_window_params.window_title = app_window_title
+        runner_params.app_window_params.window_title = self.params.app_title
         runner_params.app_window_params.window_geometry.size = (1200, 900)
         runner_params.app_window_params.restore_previous_geometry = True
 
@@ -110,3 +123,8 @@ class FiatlightGui:
 
         self._runner_params = runner_params
         immapp.run(self._runner_params, addons)
+
+
+def fiatlight_run(params: FiatlightGuiParams) -> None:
+    fiatlight_gui = FiatlightGui(params)
+    fiatlight_gui.run()

@@ -4,7 +4,7 @@ from fiatlight.computer_vision import ImageUInt8
 from fiatlight.computer_vision.image_with_gui import ImageWithGui
 from fiatlight.computer_vision.lut import Split_Lut_Merge_WithGui
 from fiatlight.computer_vision.cv_color_type import CvColorConversionCode, ColorType
-from fiatlight.fiatlight import FiatlightGui
+from fiatlight.fiatlight_gui import FiatlightGuiParams, fiatlight_run
 from imgui_bundle import imgui
 from typing import Any
 
@@ -118,8 +118,7 @@ def main() -> None:
     functions = [split_lut_merge_gui.split, split_lut_merge_gui.lut, split_lut_merge_gui.merge, OilPaintingWithGui()]
     # functions = [GaussianBlurWithGui(), CannyWithGui()]
 
-    fiatlight_gui = FiatlightGui(functions)
-    fiatlight_gui.run("play_versatile_word", initial_value=image)
+    fiatlight_run(FiatlightGuiParams(functions_graph=functions, app_title="fiat_image", initial_value=image))
 
 
 if __name__ == "__main__":

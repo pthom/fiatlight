@@ -1,13 +1,12 @@
-from fiatlight import PureFunction
-from fiatlight.fiatlight import FiatlightGui
+from fiatlight.fiatlight_gui import fiatlight_run, FiatlightGuiParams
 
 import math
 
 
 def main() -> None:
-    functions: list[PureFunction] = [math.exp, math.sin, math.log, math.cos]
-    fiatlight_gui = FiatlightGui(functions)
-    fiatlight_gui.run("play_versatile_math", initial_value=2.5)
+    functions = [math.exp, math.sin, math.log, math.cos]
+
+    fiatlight_run(FiatlightGuiParams(functions_graph=functions, app_title="play_versatile_math", initial_value=0))
 
 
 if __name__ == "__main__":
