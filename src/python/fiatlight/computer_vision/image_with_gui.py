@@ -3,7 +3,6 @@ from typing import Any
 
 from fiatlight.computer_vision.image_types import ImageUInt8
 from fiatlight.any_data_with_gui import AnyDataWithGui
-from fiatlight.computer_vision.cv_color_type import ColorType
 from imgui_bundle import immvision, imgui
 from imgui_bundle import portable_file_dialogs as pfd
 
@@ -56,9 +55,7 @@ class ImageWithGui(AnyDataWithGui):
 
 
 class ImageChannelsWithGui(AnyDataWithGui):
-    # value: Optional[ImageUInt8]  # We are displaying the different channels of this image
     images_params: immvision.ImageParams
-    color_type: ColorType = ColorType.BGR
 
     def __init__(
         self,
@@ -74,7 +71,6 @@ class ImageChannelsWithGui(AnyDataWithGui):
         self.image_params.zoom_key = zoom_key
 
     def set(self, v: Any) -> None:
-        assert type(v) == np.ndarray
         self.value = v
         self.first_frame = True
 
@@ -85,9 +81,8 @@ class ImageChannelsWithGui(AnyDataWithGui):
         changed, self.image_params.image_display_size = gui_edit_size(self.image_params.image_display_size)
         if self.value is not None:
             for i, image in enumerate(self.value):
-                channel_name = self.color_type.channel_name(i)
                 self.image_params.refresh_image = refresh_image
-                label = f"{channel_name}"
+                label = f"channel {i}"
                 immvision.image(label, image, self.image_params)
                 if imgui.small_button("Inspect"):
                     immvision.inspector_add_image(image, label)
