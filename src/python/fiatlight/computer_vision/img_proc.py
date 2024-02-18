@@ -4,7 +4,6 @@ from fiatlight.computer_vision import ImageUInt8
 from fiatlight.computer_vision.image_with_gui import ImageWithGui, ImageChannelsWithGui
 from fiatlight.computer_vision import cv_color_type, cv_color_type_gui
 
-import cv2
 import numpy as np
 
 
@@ -46,6 +45,8 @@ class MergeChannelsWithGui(FunctionWithGui):
 
 class ConvertColorWithGui(FunctionWithGui):
     color_conversion: cv_color_type.ColorConversion | None = None
+    input_gui: ImageWithGui
+    output_gui: ImageWithGui
 
     def __init__(self) -> None:
         self.input_gui = ImageWithGui()
@@ -54,10 +55,10 @@ class ConvertColorWithGui(FunctionWithGui):
     def f(self, x: Any) -> Any:
         if x is None or self.color_conversion is None:
             return None
-        conversion_code = self.color_conversion.conversion_code()
-        if conversion_code is None:
-            return None
-        return cv2.cvtColor(x, conversion_code)
+        r = self.color_conversion.convert_image(x)
+        self.output_gui.color_type = self.color_conversion.dst_color
+        self.output_gui.refresh_image()
+        return r
 
     def name(self) -> str:
         return f"Convert Color - {self.color_conversion}"

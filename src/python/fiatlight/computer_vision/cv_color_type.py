@@ -32,6 +32,13 @@ class ColorType(enum.Enum):
     def all_color_types() -> List["ColorType"]:
         return list(ColorType)
 
+    def color_conversion_to_bgr(self) -> Optional["ColorConversion"]:
+        conversion_code = _optional_cv_color_conversion_code_between(self, ColorType.BGR)
+        if conversion_code is None:
+            return None
+        else:
+            return ColorConversion(self, ColorType.BGR)
+
     @staticmethod
     def available_color_types_for_image(image: NDArray[Any]) -> List["ColorType"]:
         nb_channels = image.shape[-1] if len(image.shape) == 3 else 1
@@ -75,6 +82,11 @@ class ColorConversion:
     def conversion_code(self) -> Optional[CvColorConversionCode]:
         return self.src_color.conversion_code(self.dst_color)
 
+    def convert_image(self, image: NDArray[Any]) -> Optional[NDArray[Any]]:
+        conversion_code = self.conversion_code()
+        assert conversion_code is not None
+        return cv2.cvtColor(image, conversion_code)
+
     def __str__(self) -> str:
         return f"{self.src_color.name}=>{self.dst_color.name}"
 
@@ -98,7 +110,7 @@ def _optional_cv_color_conversion_code_between(type1: ColorType, type2: ColorTyp
     conversions: Dict[ColorType, CvColorConversionCode]
     if type1 == ColorType.BGR:
         conversions = {
-            ColorType.BGRA: cv2.COLOR_BGR2RGBA,
+            ColorType.BGRA: cv2.COLOR_BGR2BGRA,
             ColorType.RGB: cv2.COLOR_BGR2RGB,
             ColorType.RGBA: cv2.COLOR_BGRA2RGBA,
             ColorType.HSV: cv2.COLOR_BGR2HSV_FULL,

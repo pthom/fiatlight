@@ -36,6 +36,7 @@ class FiatlightGuiParams:
         self.addons = addons
         addons.with_node_editor = True
 
+        created_runner_params = runner_params is None
         if runner_params is None:
             runner_params = hello_imgui.RunnerParams()
         self.runner_params = runner_params
@@ -50,7 +51,7 @@ class FiatlightGuiParams:
             hello_imgui.DefaultImGuiWindowType.provide_full_screen_dock_space
         )
 
-        if runner_params is None:
+        if created_runner_params:
             runner_params.app_window_params.restore_previous_geometry = True
             runner_params.imgui_window_params.show_status_bar = True
             runner_params.imgui_window_params.enable_viewports = True

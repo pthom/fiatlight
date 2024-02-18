@@ -5,6 +5,7 @@ from fiatlight.computer_vision.image_types import ImageUInt8
 from fiatlight.any_data_with_gui import AnyDataWithGui
 from imgui_bundle import immvision, imgui
 from imgui_bundle import portable_file_dialogs as pfd
+from fiatlight.computer_vision import cv_color_type
 
 
 import numpy as np
@@ -17,6 +18,12 @@ class ImageWithGui(AnyDataWithGui):
     image_params: immvision.ImageParams
     open_file_dialog: Optional[pfd.open_file] = None
 
+    color_type: Optional[cv_color_type.ColorType] = None
+    view_with_bgr_conversion: bool = True
+    image_converted: Optional[ImageUInt8] = None
+
+    _needs_refresh: bool = False
+
     def __init__(self, image: Optional[ImageUInt8] = None, zoom_key: str = "z", image_display_width: int = 200) -> None:
         self.value = image
         self.first_frame = True
@@ -28,15 +35,41 @@ class ImageWithGui(AnyDataWithGui):
         assert v is None or type(v) == np.ndarray
         self.value = v
         self.first_frame = True
+        color_conversion_to_bgr = self._color_conversion_to_bgr()
+        if self.value is not None and color_conversion_to_bgr is not None:
+            self.image_converted = color_conversion_to_bgr.convert_image(self.value)
+
+    def refresh_image(self) -> None:
+        self._needs_refresh = True
+
+    def _color_conversion_to_bgr(self) -> Optional[cv_color_type.ColorConversion]:
+        if self.color_type is not None:
+            return self.color_type.color_conversion_to_bgr()
+        return None
+
+    def _gui_display_size(self) -> None:
+        _, self.image_params.image_display_size = gui_edit_size(self.image_params.image_display_size)
+
+    def _gui_image(self, image_id: str) -> None:
+        can_convert_to_bgr = self._color_conversion_to_bgr() is not None
+        if can_convert_to_bgr:
+            _, self.view_with_bgr_conversion = imgui.checkbox("View as BGR", self.view_with_bgr_conversion)
+        if can_convert_to_bgr and self.view_with_bgr_conversion:
+            assert self.image_converted is not None
+            immvision.image("output", self.image_converted, self.image_params)
+        else:
+            immvision.image("output - BGR", self.value, self.image_params)
+        if imgui.small_button("Inspect"):
+            immvision.inspector_add_image(self.value, image_id)
 
     def gui_data(self, function_name: str) -> None:
-        self.image_params.refresh_image = self.first_frame
-        _, self.image_params.image_display_size = gui_edit_size(self.image_params.image_display_size)
-        if self.value is not None:
-            immvision.image(function_name, self.value, self.image_params)
-            self.first_frame = False
-        if imgui.small_button("Inspect"):
-            immvision.inspector_add_image(self.value, function_name)
+        if self.value is None:
+            return
+        self.first_frame = False
+        self._gui_display_size()
+        self.image_params.refresh_image = self.first_frame or self._needs_refresh
+        self._gui_image(function_name)
+        self._needs_refresh = False
 
     def gui_set_input(self) -> Optional[Any]:
         result = None
@@ -98,7 +131,7 @@ def gui_edit_size(size: CvSize) -> Tuple[bool, CvSize]:
         return w, h
 
     changed = False
-    ratio = 1.05
+    ratio = 1.2
     imgui.push_button_repeat(True)
     imgui.text("Thumbnail size")
     imgui.same_line()
