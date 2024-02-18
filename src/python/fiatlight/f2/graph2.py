@@ -62,7 +62,7 @@ class FunctionNode2(Generic[Input, Output]):
         imgui.text(self._function.name())
         self._draw_exception_message()
 
-        params_changed, new_params = self.params_gui(self._function.get_params().get_value())
+        params_changed, new_params = self.params_gui(self._function.get_params().value)
         if params_changed:
             self._function.set_params_value(new_params)
 
@@ -78,7 +78,7 @@ class FunctionNode2(Generic[Input, Output]):
                     imgui.text("None")
                 else:
                     imgui.begin_group()
-                    self.output_gui(self._function.get_output().get_value())
+                    self.output_gui(self._function.get_output().value)
                     imgui.end_group()
                 imgui.same_line()
                 ed.begin_pin(self.pin_output, ed.PinKind.output)
@@ -116,7 +116,7 @@ def sandbox() -> None:
         changed, new_value = imgui.slider_int("Value", x, -10, 10)
         return changed, new_value
 
-    def present_data_gui(x: int) -> None:
+    def present_data_gui(x: int | None) -> None:
         imgui.text(str(x))
 
     function_node = FunctionNode2(observable_f, edit_data_gui, present_data_gui)

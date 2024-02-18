@@ -16,7 +16,7 @@ Output = TypeVar("Output")
 EditDataGuiFunction: TypeAlias = Callable[[T | None], Tuple[bool, T]]
 
 # Any function that can present a non-editable GUI for a given data
-PresentDataGuiFunction: TypeAlias = Callable[[T], None]
+PresentDataGuiFunction: TypeAlias = Callable[[T | None], None]
 
 # Any function that can create a default value for a given data type
 DefaultValueProvider: TypeAlias = Callable[[], T]
@@ -29,11 +29,9 @@ class ObservableData(Generic[T]):
           As it is used to store input and output of functions, it will be a tuple
           in the case of a function with multiple parameters,
           or a function that returns multiple values
-
-        *Never set directly the _value attribute, always use the set_value method!*
     """
 
-    _value: T
+    _value: T | None
 
     def __init__(self, secret_key: str) -> None:
         if secret_key != "fiatlight":
@@ -43,20 +41,21 @@ class ObservableData(Generic[T]):
     @staticmethod
     def create_none() -> "ObservableData[T]":
         d = ObservableData[T]("fiatlight")
-        d.set_value(None)
+        d.value = None
         return d
 
     @staticmethod
     def create_with_value(value: Any) -> "ObservableData[T]":
         d = ObservableData[T]("fiatlight")
-        d.set_value(value)
+        d.value = value
         return d
 
-    def get_value(self) -> Any:
+    @property
+    def value(self) -> T | None:
         return self._value
 
-    def set_value(self, v: Any) -> None:
-        """All the methods that set the value of this object should call this method."""
+    @value.setter
+    def value(self, v: T | None) -> None:
         self._value = v
 
     def is_none(self) -> bool:
@@ -84,7 +83,7 @@ class ObservableData(Generic[T]):
         assert self.is_tuple()
         assert isinstance(self._value, tuple)
         new_value = self._value[:index] + (value,) + self._value[index + 1 :]
-        self.set_value(new_value)
+        self.value = new_value  # type: ignore
 
     def __str__(self) -> str:
         return f"AnyData({self._value})"
@@ -117,14 +116,14 @@ class ObservableFunction(Generic[Input, Output]):
         return self._function.__name__
 
     def _compute_output(self) -> None:
-        input_value = self._params.get_value()
+        input_value = self._params.value
         try:
             r: Any
             if isinstance(input_value, tuple):
                 r = self._function(*input_value)
             else:
                 r = self._function(input_value)
-            self._output.set_value(r)
+            self._output.value = r
             self.last_exception_message = None
             self.last_exception_traceback = None
         except Exception as e:
@@ -132,11 +131,11 @@ class ObservableFunction(Generic[Input, Output]):
             exc_type, exc_value, exc_traceback = sys.exc_info()
             traceback_details = traceback.format_exception(exc_type, exc_value, exc_traceback)
             self.last_exception_traceback = "".join(traceback_details)
-            self._output.set_value(None)
+            self._output.value = None
         r = None
 
     def set_params_value(self, value: Any) -> None:
-        self._params.set_value(value)
+        self._params.value = value
         self._compute_output()
 
     def get_params(self) -> ObservableData[Input]:
