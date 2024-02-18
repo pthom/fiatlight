@@ -2,6 +2,7 @@ from __future__ import annotations
 from fiatlight.any_data_with_gui import AnyDataWithGui
 from fiatlight.function_with_gui import FunctionWithGui
 from fiatlight.config import config
+from fiatlight.internal import fl_widgets
 from imgui_bundle import imgui, imgui_node_editor as ed, icons_fontawesome, ImVec2, immapp
 from typing import List, Optional, Any, Sequence
 import traceback
@@ -91,7 +92,7 @@ class FunctionNode:
         # return
         if self.last_exception_message is None:
             return
-        imgui.text_colored(config.colors.error, self.last_exception_message)
+        fl_widgets.text("Exception:\n" + self.last_exception_message, max_line_width=30, color=config.colors.error)
 
     def draw_node(self, idx: int) -> None:
         assert self.function is not None
