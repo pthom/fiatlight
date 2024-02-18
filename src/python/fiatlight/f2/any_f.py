@@ -165,10 +165,5 @@ def sandbox1() -> None:
     # print(obs_f.nb_params())
 
 
-def sandbox2() -> None:
-    def f(a: int, b: int) -> int:
-        return a + b
-
-
 if __name__ == "__main__":
     sandbox1()

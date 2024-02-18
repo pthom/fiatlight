@@ -21,6 +21,8 @@ class FunctionNode2(Generic[Input, Output]):
     pin_output: ed.PinId
     link_id: ed.LinkId
 
+    node_size: ImVec2 = None
+
     def __init__(
         self,
         function: ObservableFunction[Input, Output],
@@ -69,7 +71,7 @@ class FunctionNode2(Generic[Input, Output]):
         draw_input_pin = True  # idx != 0
         if draw_input_pin:
             ed.begin_pin(self.pin_input, ed.PinKind.input)
-            imgui.text(icons_fontawesome.ICON_FA_CIRCLE)
+            imgui.text(icons_fontawesome.ICON_FA_ARROW_CIRCLE_LEFT)
             ed.end_pin()
 
         def draw_output() -> None:
@@ -80,14 +82,16 @@ class FunctionNode2(Generic[Input, Output]):
                     imgui.begin_group()
                     self.output_gui(self._function.get_output().value)
                     imgui.end_group()
-                imgui.same_line()
-                ed.begin_pin(self.pin_output, ed.PinKind.output)
-                imgui.text(icons_fontawesome.ICON_FA_CIRCLE)
-                ed.end_pin()
+
+                if self.node_size is not None:
+                    imgui.same_line(self.node_size.x - immapp.em_size(2))
+                    ed.begin_pin(self.pin_output, ed.PinKind.output)
+                    imgui.text(icons_fontawesome.ICON_FA_ARROW_CIRCLE_RIGHT)
+                    ed.end_pin()
 
         draw_output()
-
         ed.end_node()
+        self.node_size = imgui.get_item_rect_size()
 
     def draw_link(self) -> None:
         if self._next_function_node is None:
@@ -165,6 +169,11 @@ def sandbox2() -> None:
         ed.end()
 
     immapp.run(gui, with_node_editor=True)
+
+
+def sandbox3() -> None:
+    def f(param: int, x: int) -> int:
+        return param + x
 
 
 if __name__ == "__main__":
