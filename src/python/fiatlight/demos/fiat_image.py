@@ -115,12 +115,10 @@ def main() -> None:
     # split_lut_merge_gui = Split_Lut_Merge_WithGui(ColorType.BGR)
     # functions = [split_lut_merge_gui.split, split_lut_merge_gui.lut, split_lut_merge_gui.merge, OilPaintingWithGui()]
 
-    # functions = [GaussianBlurWithGui(), CannyWithGui()]
-
-    from fiatlight.computer_vision import img_proc
+    functions = [GaussianBlurWithGui(), CannyWithGui()]
 
     # functions = [img_proc.SplitChannelsWithGui(), img_proc.MergeChannelsWithGui(), img_proc.ConvertColorWithGui()]
-    functions = [img_proc.ConvertColorWithGui(), img_proc.ConvertColorWithGui()]
+    # functions = [img_proc.ConvertColorWithGui(), img_proc.ConvertColorWithGui()]
 
     fiatlight_run(
         FiatlightGuiParams(
