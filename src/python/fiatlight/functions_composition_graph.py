@@ -41,7 +41,9 @@ class FunctionsCompositionGraph:
         ed.begin("FunctionsCompositionGraph")
         # draw function nodes
         for i, fn in enumerate(self.function_nodes):
+            imgui.push_id(str(id(fn)))
             fn.draw_node(idx=i)
+            imgui.pop_id()
         # Note: those loops shall not be merged
         for fn in self.function_nodes:
             fn.draw_link()
@@ -108,16 +110,12 @@ class FunctionNode:
             )
             ed.set_node_position(self.node_id, position)
 
-        id_fn = str(id(self.function))
-        imgui.push_id(id_fn)
-
         imgui.text(self.function.name())
         self._draw_exception_message()
 
         params_changed = self.function.gui_params()
         if params_changed:
             self._invoke_function()
-        imgui.pop_id()
 
         draw_input_pin = idx != 0
         if draw_input_pin:

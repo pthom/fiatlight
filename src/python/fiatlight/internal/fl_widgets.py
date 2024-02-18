@@ -6,14 +6,15 @@ def text(msg: str, max_line_width: int | None = None, color: ImVec4 | None = Non
     msg_orig = msg
     is_truncated = False
 
-    def truncate_line(line: str) -> str:
-        if len(line) > max_line_width:
-            nonlocal is_truncated
-            is_truncated = True
-            return line[:max_line_width] + "..."
-        return line
-
     if max_line_width is not None:
+
+        def truncate_line(line: str) -> str:
+            if len(line) > max_line_width:
+                nonlocal is_truncated
+                is_truncated = True
+                return line[:max_line_width] + "..."
+            return line
+
         lines = msg.split("\n")
         msg = "\n".join(truncate_line(line) for line in lines)
 

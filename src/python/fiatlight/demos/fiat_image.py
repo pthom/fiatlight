@@ -119,7 +119,8 @@ def main() -> None:
 
     from fiatlight.computer_vision import img_proc
 
-    functions = [img_proc.SplitChannelsWithGui(), img_proc.MergeChannelsWithGui(), img_proc.ConvertColorWithGui()]
+    # functions = [img_proc.SplitChannelsWithGui(), img_proc.MergeChannelsWithGui(), img_proc.ConvertColorWithGui()]
+    functions = [img_proc.ConvertColorWithGui(), img_proc.ConvertColorWithGui()]
 
     fiatlight_run(
         FiatlightGuiParams(
