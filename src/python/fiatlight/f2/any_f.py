@@ -25,32 +25,20 @@ DefaultValueProvider: TypeAlias = Callable[[], T]
 class ObservableData(Generic[T]):
     """A class that can store a value, and can be observed by other classes.
     It is used to store the input and output of functions.
-    Notes:
-        * _value can be unset:
-          it means that no value was yet stored in this object.
-          (hasattr(self, '_value') will return False at the beginning)
-        * _value can be None:
-          it means that a value was stored in this object, and it is None.
-          (if set_value(None) was called)
-        * _value can be anything else:
-          it means that a value was stored in this object, and it is not None.
-        * _value can be a tuple:
-           As it is used to store input and output of functions, it will be a tuple
-           in the case of a function with multiple parameters, or a function that returns multiple values
+    Note: _value can be a tuple
+          As it is used to store input and output of functions, it will be a tuple
+          in the case of a function with multiple parameters,
+          or a function that returns multiple values
 
         *Never set directly the _value attribute, always use the set_value method!*
     """
 
-    _value: T  # intentionally unset:  is_unset() will return True at the beginning
+    _value: T
 
     def __init__(self, secret_key: str) -> None:
         if secret_key != "fiatlight":
             raise ValueError("This class should not be instantiated directly. Use the factory methods instead.")
         pass
-
-    @staticmethod
-    def create_unset() -> "ObservableData[T]":
-        return ObservableData("fiatlight")
 
     @staticmethod
     def create_none() -> "ObservableData[T]":
@@ -71,35 +59,16 @@ class ObservableData(Generic[T]):
         """All the methods that set the value of this object should call this method."""
         self._value = v
 
-    def set_unset(self) -> None:
-        """Sets this object to the unset state."""
-        if hasattr(self, "_value"):
-            delattr(self, "_value")
-
-    def is_unset(self) -> bool:
-        """Returns True if no value was yet stored in this object.
-        Note: a value can of None can be stored in this object, and this method will still return False.
-        """
-        return not hasattr(self, "_value")
-
-    def is_set(self) -> bool:
-        """Returns True if a value was stored in this object. The value might be None!"""
-        return not self.is_unset()
-
     def is_none(self) -> bool:
         """Returns True if a value was stored in this object, and it is None."""
-        return self.is_set() and self._value is None
-
-    def has_value(self) -> bool:
-        """Returns True if a value was stored in this object, and it is not None."""
-        return self.is_set() and self._value is not None
+        return self._value is None
 
     def is_tuple(self) -> bool:
-        """Returns True if a value was stored in this object, and it is a tuple."""
-        return self.is_set() and isinstance(self._value, tuple)
+        """Returns True if the value is a tuple."""
+        return isinstance(self._value, tuple)
 
     def nb_values(self) -> int:
-        """Returns the number of values stored in this object. The value might be a tuple!"""
+        """Returns the number of values stored in this object, if it is a tuple."""
         if self.is_tuple():
             assert isinstance(self._value, tuple)
             return len(self._value)
@@ -118,8 +87,6 @@ class ObservableData(Generic[T]):
         self.set_value(new_value)
 
     def __str__(self) -> str:
-        if self.is_unset():
-            return "AnyData(unset)"
         return f"AnyData({self._value})"
 
 
@@ -150,7 +117,6 @@ class ObservableFunction(Generic[Input, Output]):
         return self._function.__name__
 
     def _compute_output(self) -> None:
-        assert self._params.is_set()
         input_value = self._params.get_value()
         try:
             r: Any
@@ -166,7 +132,7 @@ class ObservableFunction(Generic[Input, Output]):
             exc_type, exc_value, exc_traceback = sys.exc_info()
             traceback_details = traceback.format_exception(exc_type, exc_value, exc_traceback)
             self.last_exception_traceback = "".join(traceback_details)
-            self._output.set_unset()
+            self._output.set_value(None)
         r = None
 
     def set_params_value(self, value: Any) -> None:

@@ -74,8 +74,6 @@ class FunctionNode2(Generic[Input, Output]):
 
         def draw_output() -> None:
             with imgui_ctx.push_id("output"):
-                if self._function.get_output().is_unset():
-                    imgui.text("Unset!")
                 if self._function.get_output().is_none():
                     imgui.text("None")
                 else:
@@ -113,6 +111,8 @@ def sandbox() -> None:
     def edit_data_gui(x: int | None) -> Tuple[bool, int]:
         if x is None:
             x = 0
+            changed = True
+            return changed, x
         changed, new_value = imgui.slider_int("Value", x, -10, 10)
         return changed, new_value
 
