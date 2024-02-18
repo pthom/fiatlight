@@ -1,10 +1,11 @@
 from fiatlight.fiatlight_types import MixedFunctionsGraph
 from fiatlight import versatile
+from fiatlight.config import config
 from fiatlight.functions_composition_graph import FunctionsCompositionGraph, FunctionNode
 from fiatlight.internal import osd_widgets
 from imgui_bundle import immapp, imgui, imgui_ctx
 from typing import Any
-from imgui_bundle import hello_imgui, ImVec4, ImVec2, immvision
+from imgui_bundle import hello_imgui, ImVec2, immvision
 
 from typing import List, Tuple
 
@@ -85,7 +86,7 @@ class FiatlightGui:
             if function_node.last_exception_message is not None:
                 function_name = function_node.function.name()
                 imgui.text_colored(
-                    ImVec4(1, 0, 0, 1), f"Exception in {function_name}: {function_node.last_exception_message}"
+                    config.colors.error, f"Exception in {function_name}: {function_node.last_exception_message}"
                 )
                 if function_node.last_exception_traceback is not None:
                     msg = function_node.last_exception_traceback

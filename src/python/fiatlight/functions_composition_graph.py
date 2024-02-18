@@ -1,7 +1,8 @@
 from __future__ import annotations
 from fiatlight.any_data_with_gui import AnyDataWithGui
 from fiatlight.function_with_gui import FunctionWithGui
-from imgui_bundle import imgui, imgui_node_editor as ed, icons_fontawesome, ImVec2, ImVec4, immapp
+from fiatlight.config import config
+from imgui_bundle import imgui, imgui_node_editor as ed, icons_fontawesome, ImVec2, immapp
 from typing import List, Optional, Any, Sequence
 import traceback
 import sys
@@ -90,7 +91,7 @@ class FunctionNode:
         # return
         if self.last_exception_message is None:
             return
-        imgui.text_colored(ImVec4(1, 0, 0, 1), self.last_exception_message)
+        imgui.text_colored(config.colors.error, self.last_exception_message)
 
     def draw_node(self, idx: int) -> None:
         assert self.function is not None
@@ -114,11 +115,7 @@ class FunctionNode:
 
         params_changed = self.function.gui_params()
         if params_changed:
-            if self.input_data_with_gui.get() is not None and self.function is not None:
-                r = self.function.f(self.input_data_with_gui.get())
-                self.output_data_with_gui.set(r)
-                if self.next_function_node is not None:
-                    self.next_function_node.set_input(r)
+            self._invoke_function()
         imgui.pop_id()
 
         draw_input_pin = idx != 0
@@ -156,9 +153,8 @@ class FunctionNode:
             return
         ed.link(self.link_id, self.pin_output, self.next_function_node.pin_input)
 
-    def set_input(self, input_data: Any) -> None:
-        self.input_data_with_gui.set(input_data)
-
+    def _invoke_function(self) -> Any:
+        input_data = self.input_data_with_gui.get()
         if self.function is not None:
             try:
                 r = self.function.f(input_data)
@@ -174,3 +170,7 @@ class FunctionNode:
             self.output_data_with_gui.set(r)
             if self.next_function_node is not None:
                 self.next_function_node.set_input(r)
+
+    def set_input(self, input_data: Any) -> None:
+        self.input_data_with_gui.set(input_data)
+        self._invoke_function()
