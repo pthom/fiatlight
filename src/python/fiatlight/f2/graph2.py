@@ -62,9 +62,9 @@ class FunctionNode2(Generic[Input, Output]):
         imgui.text(self._function.name())
         self._draw_exception_message()
 
-        params_changed, new_params = self.params_gui(self._function.get_params().value)
+        params_changed, new_params = self.params_gui(self._function.get_input().value)
         if params_changed:
-            self._function.set_params_value(new_params)
+            self._function.set_input_value(new_params)
 
         draw_input_pin = True  # idx != 0
         if draw_input_pin:
@@ -126,10 +126,47 @@ def sandbox() -> None:
         function_node.draw_node()
         ed.end()
 
-    # addons = immapp.AddOnsParams()
-    # addons.with_node_editor = True
+    immapp.run(gui, with_node_editor=True)
+
+
+def sandbox2() -> None:
+    from typing import Tuple
+    from imgui_bundle import immapp
+
+    Int2 = Tuple[int, int]
+
+    def f(xs: Int2) -> int:
+        return xs[0] + xs[1]
+
+    observable_f = ObservableFunction(f)
+
+    def edit_data_gui(xs: Int2 | None) -> Tuple[bool, Int2]:
+        if xs is None:
+            xs = 0, 0
+            changed = True
+            return changed, xs
+
+        changed = False
+        result = list(xs)
+        for i in range(2):
+            changed_this, result[i] = imgui.slider_int(f"Value {i}", xs[i], -10, 10)
+            if changed_this:
+                changed = True
+        return changed, (result[0], result[1])
+
+    def present_data_gui(xs: int | None) -> None:
+        imgui.text(str(xs))
+
+    function_node = FunctionNode2(observable_f, edit_data_gui, present_data_gui)
+
+    def gui() -> None:
+        ed.begin("Function Graph")
+        function_node.draw_node()
+        ed.end()
+
     immapp.run(gui, with_node_editor=True)
 
 
 if __name__ == "__main__":
-    sandbox()
+    # sandbox()
+    sandbox2()
