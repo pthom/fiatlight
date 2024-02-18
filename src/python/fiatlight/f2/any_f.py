@@ -25,30 +25,12 @@ DefaultValueProvider: TypeAlias = Callable[[], T]
 class ObservableData(Generic[T]):
     """A class that can store a value, and can be observed by other classes.
     It is used to store the input and output of functions.
-    Note: _value can be a tuple
-          As it is used to store input and output of functions, it will be a tuple
-          in the case of a function with multiple parameters,
-          or a function that returns multiple values
     """
 
     _value: T | None
 
-    def __init__(self, secret_key: str) -> None:
-        if secret_key != "fiatlight":
-            raise ValueError("This class should not be instantiated directly. Use the factory methods instead.")
-        pass
-
-    @staticmethod
-    def create_none() -> "ObservableData[T]":
-        d = ObservableData[T]("fiatlight")
-        d.value = None
-        return d
-
-    @staticmethod
-    def create_with_value(value: Any) -> "ObservableData[T]":
-        d = ObservableData[T]("fiatlight")
-        d.value = value
-        return d
+    def __init__(self, value: T | None = None) -> None:
+        self._value = value
 
     @property
     def value(self) -> T | None:
@@ -57,33 +39,6 @@ class ObservableData(Generic[T]):
     @value.setter
     def value(self, v: T | None) -> None:
         self._value = v
-
-    def is_none(self) -> bool:
-        """Returns True if a value was stored in this object, and it is None."""
-        return self._value is None
-
-    def is_tuple(self) -> bool:
-        """Returns True if the value is a tuple."""
-        return isinstance(self._value, tuple)
-
-    def nb_values(self) -> int:
-        """Returns the number of values stored in this object, if it is a tuple."""
-        if self.is_tuple():
-            assert isinstance(self._value, tuple)
-            return len(self._value)
-        else:
-            return 1
-
-    def get_value_at(self, index: int) -> Any:
-        assert isinstance(self._value, tuple)
-        assert 0 <= index < len(self._value)
-        return self._value[index]
-
-    def set_value_at(self, index: int, value: Any) -> None:
-        assert self.is_tuple()
-        assert isinstance(self._value, tuple)
-        new_value = self._value[:index] + (value,) + self._value[index + 1 :]
-        self.value = new_value  # type: ignore
 
     def __str__(self) -> str:
         return f"AnyData({self._value})"
@@ -108,8 +63,8 @@ class ObservableFunction(Generic[Input, Output]):
 
     def __init__(self, f: Callable[[Input], Output]) -> None:
         self._function = f
-        self._input = ObservableData.create_none()
-        self._output = ObservableData.create_none()
+        self._input = ObservableData()
+        self._output = ObservableData()
         try:
             self._signature = inspect.signature(f)
         except ValueError:

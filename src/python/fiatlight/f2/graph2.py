@@ -13,7 +13,7 @@ class FunctionNode2(Generic[Input, Output]):
     _function: ObservableFunction[Input, Output]
     _next_function_node: Optional["FunctionNode2[Output, Any]"]
 
-    params_gui: EditDataGuiFunction[Input]
+    input_gui: EditDataGuiFunction[Input]
     output_gui: PresentDataGuiFunction[Output]
 
     node_id: ed.NodeId
@@ -21,18 +21,18 @@ class FunctionNode2(Generic[Input, Output]):
     pin_output: ed.PinId
     link_id: ed.LinkId
 
-    node_size: ImVec2 = None
+    node_size: ImVec2  # will be set after the node is drawn once
 
     def __init__(
         self,
         function: ObservableFunction[Input, Output],
-        params_gui: EditDataGuiFunction[Input],
+        input_gui: EditDataGuiFunction[Input],
         output_gui: PresentDataGuiFunction[Output],
     ) -> None:
         self._function = function
         self._next_function_node = None
 
-        self.params_gui = params_gui
+        self.input_gui = input_gui
         self.output_gui = output_gui
 
         self.node_id = ed.NodeId.create()
@@ -64,7 +64,7 @@ class FunctionNode2(Generic[Input, Output]):
         imgui.text(self._function.name())
         self._draw_exception_message()
 
-        params_changed, new_params = self.params_gui(self._function.get_input().value)
+        params_changed, new_params = self.input_gui(self._function.get_input().value)
         if params_changed:
             self._function.set_input_value(new_params)
 
@@ -76,14 +76,14 @@ class FunctionNode2(Generic[Input, Output]):
 
         def draw_output() -> None:
             with imgui_ctx.push_id("output"):
-                if self._function.get_output().is_none():
+                if self._function.get_output().value is None:
                     imgui.text("None")
                 else:
                     imgui.begin_group()
                     self.output_gui(self._function.get_output().value)
                     imgui.end_group()
 
-                if self.node_size is not None:
+                if hasattr(self, "node_size"):
                     imgui.same_line(self.node_size.x - immapp.em_size(2))
                     ed.begin_pin(self.pin_output, ed.PinKind.output)
                     imgui.text(icons_fontawesome.ICON_FA_ARROW_CIRCLE_RIGHT)
