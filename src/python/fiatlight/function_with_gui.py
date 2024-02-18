@@ -4,7 +4,7 @@ from fiatlight.any_data_with_gui import AnyDataWithGui
 
 
 class FunctionWithGui(ABC):
-    """Override this class with your functions which you want to vizualize in a graph
+    """Override this class with your functions which you want to visualize in a graph
     // FunctionWithGui: any function that can be presented visually, with
     // - a displayed name
     // - a gui in order to modify the internal params
