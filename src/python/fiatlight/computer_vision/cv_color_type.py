@@ -34,7 +34,7 @@ class ColorType(enum.Enum):
 
     @staticmethod
     def available_color_types_for_image(image: NDArray[Any]) -> List["ColorType"]:
-        nb_channels = image.shape[-1]
+        nb_channels = image.shape[-1] if len(image.shape) == 3 else 1
         if nb_channels == 1:
             return [ColorType.Gray]
         elif nb_channels == 3:
