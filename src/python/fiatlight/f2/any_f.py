@@ -90,14 +90,17 @@ class ObservableData(Generic[T]):
 
 
 class ObservableFunction(Generic[Input, Output]):
-    """A class that represents a function that can be observed by other classes.
-    It stores the input and output of the function, and recomputes the output when the input is set.
+    """A class that represents a pure function that can be observed by other classes.
+    It stores the input and output of the function, as well as optional parameters
+    It recomputes the output when the input is modified, or when the parameters are modified.
+
     It also stores the last exception message and traceback, if the function raised an exception.
     """
 
     _function: PureFunction
-    _params: ObservableData[Input]
+    _input: ObservableData[Input]
     _output: ObservableData[Output]
+
     _signature: inspect.Signature | None
 
     last_exception_message: Optional[str] = None
@@ -105,7 +108,7 @@ class ObservableFunction(Generic[Input, Output]):
 
     def __init__(self, f: Callable[[Input], Output]) -> None:
         self._function = f
-        self._params = ObservableData.create_none()
+        self._input = ObservableData.create_none()
         self._output = ObservableData.create_none()
         try:
             self._signature = inspect.signature(f)
@@ -116,13 +119,9 @@ class ObservableFunction(Generic[Input, Output]):
         return self._function.__name__
 
     def _compute_output(self) -> None:
-        input_value = self._params.value
+        input_value = self._input.value
         try:
-            r: Any
-            if isinstance(input_value, tuple):
-                r = self._function(*input_value)
-            else:
-                r = self._function(input_value)
+            r = self._function(input_value)
             self._output.value = r
             self.last_exception_message = None
             self.last_exception_traceback = None
@@ -134,12 +133,12 @@ class ObservableFunction(Generic[Input, Output]):
             self._output.value = None
         r = None
 
-    def set_params_value(self, value: Any) -> None:
-        self._params.value = value
+    def set_input_value(self, value: Any) -> None:
+        self._input.value = value
         self._compute_output()
 
-    def get_params(self) -> ObservableData[Input]:
-        return self._params
+    def get_input(self) -> ObservableData[Input]:
+        return self._input
 
     def get_output(self) -> ObservableData[Output]:
         return self._output
@@ -153,22 +152,23 @@ class ObservableFunction(Generic[Input, Output]):
         return len(self._signature.parameters)
 
 
-def sandbox() -> None:
-    # def f(a: int, b: int) -> int:
-    #     return a + b
-
+def sandbox1() -> None:
     def f(a: int) -> int:
         return a + 3
 
-    import math
-
-    obs_f = ObservableFunction(math.log)
-    obs_f.set_params_value(3)
-    print(obs_f.get_params())
+    # obs_f = ObservableFunction(math.log)
+    obs_f = ObservableFunction(f)
+    obs_f.set_input_value(3)
+    print(obs_f.get_input())
     print(obs_f.get_output())
     # print(obs_f.signature())
     # print(obs_f.nb_params())
 
 
+def sandbox2() -> None:
+    def f(a: int, b: int) -> int:
+        return a + b
+
+
 if __name__ == "__main__":
-    sandbox()
+    sandbox1()
