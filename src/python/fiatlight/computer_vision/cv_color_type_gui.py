@@ -7,12 +7,15 @@ from typing import Any, Tuple
 def gui_color_conversion(
     color_conversion: OptionalColorConversion, input_image: NDArray[Any]
 ) -> Tuple[bool, OptionalColorConversion]:
+    changed = False
+
     if color_conversion is None:
         color_conversion = ColorConversion.make_default_color_conversion(input_image)
+        if color_conversion is not None:
+            changed = True  # we just created a new color conversion
     if color_conversion is None:
         return False, None
 
-    changed = False
     available_src_colors = ColorType.available_color_types_for_image(input_image)
     with imgui_ctx.begin_group():
         with imgui_ctx.push_id("source_color"):
