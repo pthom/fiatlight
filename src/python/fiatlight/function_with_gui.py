@@ -1,8 +1,18 @@
 from fiatlight.any_data_with_gui import AnyDataWithGui
-from fiatlight.parameter_with_gui import ParameterWithGui
 
 from typing import Any, List
 from abc import ABC, abstractmethod
+from dataclasses import dataclass
+
+
+@dataclass
+class FunctionParameterWithGui:
+    name: str
+    parameter_with_gui: AnyDataWithGui
+
+
+class DummySource:
+    pass
 
 
 class FunctionWithGui(ABC):
@@ -18,7 +28,7 @@ class FunctionWithGui(ABC):
     output_gui: AnyDataWithGui | None = None
 
     # parameters_with_gui should be filled during construction
-    parameters_with_gui: List[ParameterWithGui[Any]] | None = None
+    parameters_with_gui: List[FunctionParameterWithGui] | None = None
 
     @abstractmethod
     def f(self, x: Any) -> Any:
@@ -38,25 +48,22 @@ class FunctionWithGui(ABC):
         return False
 
 
-# class SourceWithGui(FunctionWithGui):
-#     """A source function that does not take any input and returns a user editable value"""
-#     source_name: str = "Source"
-#
-#     def __init__(self, initial_value: Any) -> None:
-#         self.output_gui = AnyDataWithGui()
-#         self.parameters_with_gui = [
-#             ParameterWithGui(
-#                 name=self.source_name,
-#                 value=self.output_gui.value,
-#                 present_gui=self.output_gui.gui_data)
-#         ]
-#
-#     def f(self, x: Any) -> Any:
-#         assert self.output_gui is not None
-#         return self.output_gui.value
-#
-#     def name(self) -> str:
-#         return self.source_name
+class SourceWithGui(FunctionWithGui):
+    """A source function that does not take any input and returns a user editable value"""
+
+    source_name: str = "Source"
+
+    def __init__(self, initial_value_with_gui: AnyDataWithGui, source_name: str = "Source") -> None:
+        self.output_gui = initial_value_with_gui
+        self.parameters_with_gui = [FunctionParameterWithGui("source", initial_value_with_gui)]
+        self.source_name = source_name
+
+    def f(self, _: DummySource) -> Any:
+        assert self.output_gui is not None
+        return self.output_gui.value
+
+    def name(self) -> str:
+        return self.source_name
 
 
-__all__ = ["FunctionWithGui", "ParameterWithGui", "AnyDataWithGui"]
+__all__ = ["FunctionWithGui", "AnyDataWithGui"]
