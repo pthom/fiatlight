@@ -1,77 +1,20 @@
 from imgui_bundle import imgui, imgui_node_editor as ed, icons_fontawesome, immapp, ImVec2, imgui_ctx
-from fiatlight.f2.any_f import ObservableFunction, EditDataGuiFunction, PresentDataGuiFunction
+from fiatlight.f2.any_f import ObservableFunction, PresentOutputGui, ParameterWithGui
 from fiatlight.internal import fl_widgets
 from fiatlight.config import config
-from typing import Optional, Any, TypeVar, Generic, TypeAlias, List, Callable
+from typing import Optional, Any, TypeVar, Generic, Callable
 
 
-SettableParameters = TypeVar("SettableParameters")
 Input = TypeVar("Input")
 Output = TypeVar("Output")
 T = TypeVar("T")
 
 
-class ParameterWithGui(Generic[T]):
-    value: T | None
-    edit_gui: EditDataGuiFunction[T] | None
-    present_gui: PresentDataGuiFunction[T] | None
-
-    def __init__(
-        self,
-        value: T | None = None,
-        edit_gui: EditDataGuiFunction[T] | None = None,
-        present_gui: PresentDataGuiFunction[T] | None = None,
-    ) -> None:
-        self.value = value
-        self.edit_gui = edit_gui
-        self.present_gui = present_gui
-
-
-FunctionParametersWithGui: TypeAlias = List[ParameterWithGui[Any]]
-
-
-class FunctionWithWrappedParams(Generic[SettableParameters, Input, Output]):
-    function_parameters_gui: FunctionParametersWithGui
-    wrapped_function: Callable[[SettableParameters, Input], Output]
-
-    def __init__(
-        self,
-        wrapped_function: Callable[[SettableParameters, Input], Output],
-        function_parameters_gui: FunctionParametersWithGui | None,
-    ) -> None:
-        self.wrapped_function = wrapped_function
-        self.function_parameters_gui = function_parameters_gui or []
-        self.__name__ = wrapped_function.__name__
-
-    def __call__(self, x: Input) -> Output:
-        settable_parameters_list = [param.value for param in self.function_parameters_gui]
-        return self.wrapped_function(*settable_parameters_list, x)  # type: ignore
-
-    def draw_params(self) -> bool:
-        params_changed = False
-        for i, param in enumerate(self.function_parameters_gui):
-            with imgui_ctx.push_id(f"param_{i}"):
-                if param.edit_gui is not None:
-                    changed_this, new_value = param.edit_gui(param.value)
-                    if changed_this:
-                        param.value = new_value
-                        params_changed = True
-        return params_changed
-
-    def parameters(self) -> List[Any]:
-        r = [param.value for param in self.function_parameters_gui]
-        return r
-
-
-class FunctionNode2(Generic[SettableParameters, Input, Output]):
-    output_gui: PresentDataGuiFunction[Output]
-    _function_with_wrapped_params: FunctionWithWrappedParams[SettableParameters, Input, Output]
+class FunctionNode2(Generic[Input, Output]):
     _function: ObservableFunction[Input, Output]
+    output_gui: PresentOutputGui[Output]
 
-    # _function: ObservableFunction[Input, Output]
-    # function_parameters_gui: FunctionParametersWithGui
-
-    _next_function_node: Optional["FunctionNode2[Output, Any, Any]"]
+    _next_function_node: Optional["FunctionNode2[Output, Any]"]
 
     node_id: ed.NodeId
     pin_input: ed.PinId
@@ -80,16 +23,8 @@ class FunctionNode2(Generic[SettableParameters, Input, Output]):
 
     node_size: ImVec2  # will be set after the node is drawn once
 
-    def __init__(
-        self,
-        function: Callable[[SettableParameters, Input], Output],
-        output_gui: PresentDataGuiFunction[Output],
-        function_parameters_gui: FunctionParametersWithGui | None = None,
-    ) -> None:
-        # self._function = ObservableFunction(function)
-        # self.function_parameters_gui = function_parameters_gui or []
-        self._function_with_wrapped_params = FunctionWithWrappedParams(function, function_parameters_gui or [])
-        self._function = ObservableFunction(self._function_with_wrapped_params)
+    def __init__(self, function: Callable[[Input], Output], output_gui: PresentOutputGui[Output]) -> None:
+        self._function = ObservableFunction(function)
         self._function.set_input(1)
 
         self.output_gui = output_gui
@@ -112,8 +47,6 @@ class FunctionNode2(Generic[SettableParameters, Input, Output]):
             ed.set_node_position(self.node_id, position)
 
     def draw_node(self) -> None:
-        ed.begin_node(self.node_id)
-
         def draw_title() -> None:
             imgui.text(self._function.name())
 
@@ -130,10 +63,11 @@ class FunctionNode2(Generic[SettableParameters, Input, Output]):
 
         def draw_function_output() -> None:
             with imgui_ctx.push_id("output"):
-                if self._function.get_output() is None:
+                output = self._function.get_output()
+                if output is None:
                     imgui.text("None")
                 else:
-                    self.output_gui(self._function.get_output())
+                    self.output_gui(output)
 
         def draw_output_pin() -> None:
             if hasattr(self, "node_size"):
@@ -142,15 +76,25 @@ class FunctionNode2(Generic[SettableParameters, Input, Output]):
                 imgui.text(icons_fontawesome.ICON_FA_ARROW_CIRCLE_RIGHT)
                 ed.end_pin()
 
+        def edit_params() -> bool:
+            from imgui_bundle import imgui_ctx
+
+            changed = False
+            for i, param in enumerate(self._function.parameters_with_gui()):
+                with imgui_ctx.push_id(f"param_{i}"):
+                    if param.edit_gui is not None:
+                        imgui.text(param.name + ":")
+                        changed = param.edit_gui() or changed
+            return changed
+
+        ed.begin_node(self.node_id)
         draw_title()
         draw_input_pin()
         draw_exception_message()
-        params_changed = self._function_with_wrapped_params.draw_params()
-        if params_changed:
+        if edit_params():
             self._call_function()
         draw_function_output()
         draw_output_pin()
-
         ed.end_node()
         self.node_size = imgui.get_item_rect_size()
 
@@ -165,40 +109,50 @@ class FunctionNode2(Generic[SettableParameters, Input, Output]):
 
 
 def sandbox() -> None:
-    from typing import Tuple
     from imgui_bundle import immapp
 
-    def f(param1: int, param2: int, x: int) -> int:
-        return param1 + param2 + x
+    from fiatlight.f2.boxed import BoxedInt
 
-    def g(x: int) -> int:
-        return x + 3
+    def f(param1: int, x: int) -> int:
+        return param1 + x
 
-    def edit_int(x: int | None) -> Tuple[bool, int]:
-        if x is None:
-            x = 0
-            changed = True
-            return changed, x
-        changed, new_value = imgui.slider_int("Value", x, -10, 10)
-        return changed, new_value
+    def edit_int(x: BoxedInt) -> bool:
+        if x.value is None:
+            x.value = 0
+        changed, x.value = imgui.slider_int("Value", x.value, -10, 10)
+        return changed
 
-    def present_int(x: int | None) -> None:
+    def present_int(x: int) -> None:
         imgui.text(str(x))
-        imgui.new_line()
 
-    # function_node = FunctionNode2(
-    #     f,
-    #     output_gui=present_int,
-    #     function_parameters_gui=[
-    #         ParameterWithGui(0, edit_int, present_int),
-    #         ParameterWithGui(0, edit_int, present_int),
-    #     ],
-    # )
+    import functools
+    from fiatlight.f2.any_f import FunctionWithSettableParams
+
+    class FWrapped(FunctionWithSettableParams):  # type: ignore
+        param1: BoxedInt
+
+        def __init__(self) -> None:
+            super().__init__()
+            self.param1 = BoxedInt(0)
+            self.parameters_with_gui = [
+                ParameterWithGui[BoxedInt](
+                    "param1",
+                    edit_gui=functools.partial(edit_int, self.param1),
+                    present_gui=functools.partial(present_int, self.param1),
+                )
+            ]
+
+        def f(self, x: int) -> int:
+            return f(self.param1.value, x)
+
+        def name(self) -> str:
+            return "FWrapped"
+
+    f_wrapped = FWrapped()
 
     function_node = FunctionNode2(
-        g,
+        f_wrapped,
         output_gui=present_int,
-        function_parameters_gui=[],
     )
 
     def gui() -> None:
