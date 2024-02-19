@@ -63,7 +63,7 @@ class ConvertColorWithGui(FunctionWithGui):
     def name(self) -> str:
         return f"Convert Color - {self.color_conversion}"
 
-    def gui_params(self) -> bool:
+    def old_gui_params(self) -> bool:
         input_image = self.input_gui.value
         if input_image is None:
             return False

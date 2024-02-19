@@ -61,7 +61,7 @@ class FunctionNode:
         imgui.text(self.function.name())
         self._draw_exception_message()
 
-        params_changed = self.function.gui_params()
+        params_changed = self.function.old_gui_params()
         if params_changed:
             self._invoke_function()
 

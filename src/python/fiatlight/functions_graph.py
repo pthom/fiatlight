@@ -52,7 +52,7 @@ class _InputWithGui(FunctionWithGui):
     def f(self, x: Any) -> Any:
         return x
 
-    def gui_params(self) -> bool:
+    def old_gui_params(self) -> bool:
         return False
 
     def name(self) -> str:
