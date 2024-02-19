@@ -90,7 +90,7 @@ def versatile_gui_set_input(value: Any) -> Optional[Any]:
 
 
 class VersatileDataWithGui(AnyDataWithGui):
-    def gui_data(self, function_name: str) -> None:
+    def gui_present(self) -> None:
         imgui.push_id(str(id(self)))
         versatile_gui_data(self.value)
         imgui.pop_id()

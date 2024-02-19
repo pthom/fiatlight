@@ -1,6 +1,7 @@
 from imgui_bundle import imgui
 from fiatlight.boxed import BoxedInt, BoxedFloat, BoxedStr, BoxedBool
 from fiatlight.parameter_with_gui import EditParameterGui, PresentParameterGui
+# from fiatlight.function_with_gui import SourceWithGui
 
 from dataclasses import dataclass
 from enum import Enum
@@ -28,19 +29,36 @@ def edit_int(params: IntEditParams, x: BoxedInt) -> bool:
     return changed
 
 
-def make_int_editor(
-    x: BoxedInt,
-    label: str = "##int",
-    v_min: int = 0,
-    v_max: int = 10,
-    edit_type: IntEditType = IntEditType.slider,
-) -> EditParameterGui:
-    params = IntEditParams(label, v_min, v_max, edit_type)
+def make_int_editor(x: BoxedInt, params: IntEditParams | None = None) -> EditParameterGui:
+    if params is None:
+        params = IntEditParams()
 
     def edit() -> bool:
         return edit_int(params, x)
 
     return edit
+
+
+# def make_int_with_gui(x: int, params: IntEditParams) -> AnyDataWithGui:
+#
+#     class _IntWithGui(AnyDataWithGui):
+#         def __init__(self):
+#             self.value = x
+#         def gui_data(self, label: str) -> None:
+#             imgui.text(f"{label}: {self.value}")
+#
+
+
+# def make_int_source(label: str, initial_value: int, params: IntEditParams) -> SourceWithGui:
+#     x = BoxedInt(initial_value)
+#
+#     def edit() -> bool:
+#         return edit_int(params, x)
+#
+#     def present() -> None:
+#         imgui.text(f"{label}: {x.value}")
+#
+#     return SourceWithGui(edit, present)
 
 
 def present_int(x: int) -> None:
