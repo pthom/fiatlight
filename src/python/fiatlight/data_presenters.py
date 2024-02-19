@@ -1,8 +1,7 @@
 from imgui_bundle import imgui
-from fiatlight.boxed import BoxedInt, BoxedFloat, BoxedStr, BoxedBool
-from fiatlight.parameter_with_gui import EditParameterGui, PresentParameterGui
-# from fiatlight.function_with_gui import SourceWithGui
+from fiatlight.any_data_with_gui import AnyDataWithGui
 
+from typing import Any
 from dataclasses import dataclass
 from enum import Enum
 
@@ -20,23 +19,45 @@ class IntEditParams:
     edit_type: IntEditType = IntEditType.slider
 
 
-def edit_int(params: IntEditParams, x: BoxedInt) -> bool:
-    changed = False
-    if params.edit_type == IntEditType.slider:
-        changed, x.value = imgui.slider_int(params.label, x.value, params.v_min, params.v_max)
-    elif params.edit_type == IntEditType.input:
-        changed, x.value = imgui.input_int(params.label, x.value)
-    return changed
+def _present_str(x: Any) -> None:
+    imgui.text(str(x))
 
 
-def make_int_editor(x: BoxedInt, params: IntEditParams | None = None) -> EditParameterGui:
-    if params is None:
-        params = IntEditParams()
+def make_int_with_gui(initial_value: int, params: IntEditParams) -> AnyDataWithGui:
+    r = AnyDataWithGui()
+    r.value = initial_value
+    r.gui_present_impl = lambda: _present_str(r.value)
 
     def edit() -> bool:
-        return edit_int(params, x)
+        changed = False
+        if params.edit_type == IntEditType.slider:
+            changed, r.value = imgui.slider_int(params.label, r.value, params.v_min, params.v_max)
+        elif params.edit_type == IntEditType.input:
+            changed, r.value = imgui.input_int(params.label, r.value)
+        return changed
 
-    return edit
+    r.gui_edit_impl = edit
+
+    return r
+
+
+# def make_int_source(label: str, initial_value: int, params: IntEditParams) -> SourceWithGui:
+#     x = make_int_with_gui(initial_value, params)
+#
+#     def present() -> None:
+#         imgui.text(f"{label}: {x.value}")
+#
+#     return SourceWithGui(x, present)
+
+
+# def make_int_editor(x: BoxedInt, params: IntEditParams | None = None) -> EditParameterGui:
+#     if params is None:
+#         params = IntEditParams()
+#
+#     def edit() -> bool:
+#         return edit_int(params, x)
+#
+#     return edit
 
 
 # def make_int_with_gui(x: int, params: IntEditParams) -> AnyDataWithGui:
@@ -60,27 +81,9 @@ def make_int_editor(x: BoxedInt, params: IntEditParams | None = None) -> EditPar
 #     return SourceWithGui(edit, present)
 
 
-def present_int(x: int) -> None:
-    imgui.text(str(x))
-
-
-def make_int_presenter(x: BoxedInt) -> PresentParameterGui:
-    def present() -> None:
-        present_int(x.value)
-
-    return present
-
-
 __all__ = [
-    # Boxed types are reexported for convenience
-    "BoxedInt",
-    "BoxedFloat",
-    "BoxedStr",
-    "BoxedBool",
     # Ints
     "IntEditParams",
-    "edit_int",
-    "present_int",
-    "make_int_editor",
-    "make_int_presenter",
+    "IntEditType",
+    "make_int_with_gui",
 ]
