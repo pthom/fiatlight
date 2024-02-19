@@ -1,6 +1,6 @@
 from fiatlight.f2.parameter_with_gui import ParameterWithGui
 
-from typing import Any, List, TypeVar, Generic, Union, TypeAlias, Callable
+from typing import Any, List, TypeVar, Generic
 from abc import ABC, abstractmethod
 
 
@@ -20,15 +20,16 @@ class FunctionWithSettableParams(ABC, Generic[Input, Output]):
 
     @abstractmethod
     def name(self) -> str:
+        """override this with the actual function name"""
+        pass
+
+    @abstractmethod
+    def present_output(self, value: Output) -> None:
+        """override this with the actual function output presentation"""
         pass
 
     def __call__(self, x: Input) -> Output:
         return self.f(x)
 
 
-PureFunctionOrFunctionWithWrappedParams: TypeAlias = Union[
-    Callable[[Input], Output], FunctionWithSettableParams[Input, Output]
-]
-
-
-__all__ = ["FunctionWithSettableParams", "PureFunctionOrFunctionWithWrappedParams", "ParameterWithGui"]
+__all__ = ["FunctionWithSettableParams", "ParameterWithGui"]

@@ -199,7 +199,7 @@ namespace VisualProg
             auto& self = *this;
             ImGui::PushID(&self);
 
-            ed::Begin("FunctionsCompositionGraphOld");
+            ed::Begin("FunctionsGraph");
             // draw function nodes
             for(size_t i = 0; i < self._functionNodes.size(); ++i)
                 self._functionNodes[i].DrawNode(i);
@@ -214,7 +214,7 @@ namespace VisualProg
 
 
     ///////////////////////////////////////////////////////////////////////////
-    //          FunctionsCompositionGraphOld
+    //          FunctionsGraph
     ///////////////////////////////////////////////////////////////////////////
 
     FunctionsCompositionGraph::~FunctionsCompositionGraph() = default;

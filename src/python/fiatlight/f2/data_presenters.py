@@ -1,14 +1,14 @@
 from imgui_bundle import imgui
-from fiatlight.f2.boxed import BoxedInt, BoxedFloat, BoxedStr, BoxedBool
-from fiatlight.f2.parameter_with_gui import EditParameterGui, PresentParameterGui
+from fiatlight.boxed import BoxedInt, BoxedFloat, BoxedStr, BoxedBool
+from fiatlight.parameter_with_gui import EditParameterGui, PresentParameterGui
 
 from dataclasses import dataclass
 from enum import Enum
 
 
 class IntEditType(Enum):
-    SLIDER = 1
-    INPUT = 2
+    slider = 1
+    input = 2
 
 
 @dataclass
@@ -16,14 +16,14 @@ class IntEditParams:
     label: str = "##int"
     v_min: int = 0
     v_max: int = 10
-    edit_type: IntEditType = IntEditType.SLIDER
+    edit_type: IntEditType = IntEditType.slider
 
 
 def edit_int(params: IntEditParams, x: BoxedInt) -> bool:
     changed = False
-    if params.edit_type == IntEditType.SLIDER:
+    if params.edit_type == IntEditType.slider:
         changed, x.value = imgui.slider_int(params.label, x.value, params.v_min, params.v_max)
-    elif params.edit_type == IntEditType.INPUT:
+    elif params.edit_type == IntEditType.input:
         changed, x.value = imgui.input_int(params.label, x.value)
     return changed
 
@@ -33,7 +33,7 @@ def make_int_editor(
     label: str = "##int",
     v_min: int = 0,
     v_max: int = 10,
-    edit_type: IntEditType = IntEditType.SLIDER,
+    edit_type: IntEditType = IntEditType.slider,
 ) -> EditParameterGui:
     params = IntEditParams(label, v_min, v_max, edit_type)
 

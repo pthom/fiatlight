@@ -1,6 +1,8 @@
-from typing import Any
-from abc import ABC, abstractmethod
 from fiatlight.any_data_with_gui import AnyDataWithGui
+from fiatlight.parameter_with_gui import ParameterWithGui
+
+from typing import Any, List
+from abc import ABC, abstractmethod
 
 
 class FunctionWithGui(ABC):
@@ -15,12 +17,17 @@ class FunctionWithGui(ABC):
     input_gui: AnyDataWithGui
     output_gui: AnyDataWithGui
 
+    # parameters_with_gui should be filled during construction
+    parameters_with_gui: List[ParameterWithGui[Any]] | None = None
+
     @abstractmethod
     def f(self, x: Any) -> Any:
+        """override this with the actual function implementation"""
         pass
 
     @abstractmethod
     def name(self) -> str:
+        """override this with the actual function name"""
         pass
 
     def gui_params(self) -> bool:
@@ -29,3 +36,6 @@ class FunctionWithGui(ABC):
         It should return True if the inner params were changed.
         """
         return False
+
+
+__all__ = ["FunctionWithGui", "ParameterWithGui", "AnyDataWithGui"]
