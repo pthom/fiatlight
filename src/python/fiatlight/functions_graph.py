@@ -42,7 +42,7 @@ class FunctionsGraph:
             self.shall_layout_graph = False
             width_between_nodes = hello_imgui.em_size(4)
             height_between_nodes = hello_imgui.em_size(4)
-            current_row_height = 0
+            current_row_height = 0.0
             w = imgui.get_window_width()
             current_position = ImVec2(0, 0)
 

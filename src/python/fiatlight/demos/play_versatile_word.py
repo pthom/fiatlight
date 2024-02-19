@@ -97,7 +97,16 @@ def display_word_with_counts(words: List[WordWithCount]) -> str:
 
 
 def main() -> None:
+    from fiatlight import data_presenters as dp
+
     functions = [
+        dp.make_str_source(
+            poem,
+            dp.StrEditParams(
+                edit_type=dp.StrEditType.multiline,
+                height_em=3,
+            ),
+        ),
         remove_non_letters,
         str_lower,
         split_words,
