@@ -27,11 +27,13 @@ class GaussianBlurWithGui(FunctionWithGui):
         self.output_gui = ImageWithGui()
         self.name = "Gaussian Blur"
 
-    def f(self, x: Any) -> ImageUInt8:
-        assert type(x) == np.ndarray
-        ksize = (0, 0)
-        blur: ImageUInt8 = cv2.GaussianBlur(x, ksize=ksize, sigmaX=self.sigma_x, sigmaY=self.sigma_y)  # type: ignore
-        return blur
+        def f(x: Any) -> ImageUInt8:
+            assert type(x) == np.ndarray
+            ksize = (0, 0)
+            blur: ImageUInt8 = cv2.GaussianBlur(x, ksize=ksize, sigmaX=self.sigma_x, sigmaY=self.sigma_y)  # type: ignore
+            return blur
+
+        self.f_impl = f
 
     def old_gui_params(self) -> bool:
         imgui.set_next_item_width(100)
@@ -51,10 +53,12 @@ class CannyWithGui(FunctionWithGui):
         self.output_gui = ImageWithGui()
         self.name = "Canny"
 
-    def f(self, x: Any) -> ImageUInt8:
-        assert type(x) == np.ndarray
-        edge: ImageUInt8 = cv2.Canny(x, self.t_lower, self.t_upper, apertureSize=self.aperture_size)  # type: ignore
-        return edge
+        def f(x: Any) -> ImageUInt8:
+            assert type(x) == np.ndarray
+            edge: ImageUInt8 = cv2.Canny(x, self.t_lower, self.t_upper, apertureSize=self.aperture_size)  # type: ignore
+            return edge
+
+        self.f_impl = f
 
     def old_gui_params(self) -> bool:
         imgui.set_next_item_width(100)
@@ -87,12 +91,14 @@ class OilPaintingWithGui(FunctionWithGui):
         self.color_conversion = cv2.COLOR_BGR2HSV
         self.name = "Oil Painting"
 
-    def f(self, x: Any) -> ImageUInt8:
-        assert type(x) == np.ndarray
-        r = np.zeros_like(x)
-        # pip install opencv-contrib-python
-        r = cv2.xphoto.oilPainting(x, self.size, self.dynRatio, self.color_conversion)  # type: ignore
-        return r
+        def f(x: Any) -> ImageUInt8:
+            assert type(x) == np.ndarray
+            r = np.zeros_like(x)
+            # pip install opencv-contrib-python
+            r = cv2.xphoto.oilPainting(x, self.size, self.dynRatio, self.color_conversion)  # type: ignore
+            return r
+
+        self.f_impl = f
 
     def old_gui_params(self) -> bool:
         imgui.set_next_item_width(100)

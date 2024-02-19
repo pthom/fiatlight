@@ -19,10 +19,12 @@ class SplitChannelsWithGui(FunctionWithGui):
         self.output_gui = ImageChannelsWithGui()
         self.name = "Split Channels"
 
-    def f(self, x: Any) -> Any:
-        assert type(x) == np.ndarray
-        channels = split_channels(x)
-        return channels
+        def f(x: Any) -> Any:
+            assert type(x) == np.ndarray
+            channels = split_channels(x)
+            return channels
+
+        self.f_impl = f
 
 
 class MergeChannelsWithGui(FunctionWithGui):
@@ -31,12 +33,14 @@ class MergeChannelsWithGui(FunctionWithGui):
         self.output_gui = ImageWithGui()
         self.name = "Merge Channels"
 
-    def f(self, x: Any) -> Any:
-        assert type(x) == np.ndarray
-        channels = [c for c in x]
-        image_stacked = np.dstack(channels)
-        # image_uint8 = (image_stacked * 255.0).astype("uint8")
-        return image_stacked
+        def f(x: Any) -> Any:
+            assert type(x) == np.ndarray
+            channels = [c for c in x]
+            image_stacked = np.dstack(channels)
+            # image_uint8 = (image_stacked * 255.0).astype("uint8")
+            return image_stacked
+
+        self.f_impl = f
 
 
 class ConvertColorWithGui(FunctionWithGui):
@@ -49,13 +53,15 @@ class ConvertColorWithGui(FunctionWithGui):
         self.output_gui = ImageWithGui()
         self.name = "Convert Color"
 
-    def f(self, x: Any) -> Any:
-        if x is None or self.color_conversion is None:
-            return None
-        r = self.color_conversion.convert_image(x)
-        self.output_gui.color_type = self.color_conversion.dst_color
-        self.output_gui.refresh_image()
-        return r
+        def f(x: Any) -> Any:
+            if x is None or self.color_conversion is None:
+                return None
+            r = self.color_conversion.convert_image(x)
+            self.output_gui.color_type = self.color_conversion.dst_color
+            self.output_gui.refresh_image()
+            return r
+
+        self.f_impl = f
 
     def old_gui_params(self) -> bool:
         input_image = self.input_gui.value
