@@ -12,8 +12,8 @@ import sys
 class FunctionNode:
     function: FunctionWithGui
     next_function_node: Optional[FunctionNode]
-    input_data_with_gui: AnyDataWithGui
-    output_data_with_gui: AnyDataWithGui
+    input_data_with_gui: AnyDataWithGui | None
+    output_data_with_gui: AnyDataWithGui | None
 
     last_exception_message: Optional[str] = None
     last_exception_traceback: Optional[str] = None
@@ -72,12 +72,14 @@ class FunctionNode:
             ed.end_pin()
 
         def draw_output() -> None:
+            if self.output_data_with_gui is None:
+                return
             if self.output_data_with_gui.get() is None:
                 imgui.text("None")
             else:
                 imgui.push_id(str(id(self.output_data_with_gui)))
                 imgui.begin_group()
-                self.output_data_with_gui.gui_data(function_name=self.function.name())
+                self.output_data_with_gui.gui_present()
                 imgui.pop_id()
                 imgui.end_group()
             imgui.same_line()
@@ -100,20 +102,24 @@ class FunctionNode:
             fl_widgets.text("Exception:\n" + last_exception_message, max_line_width=30, color=config.colors.error)
 
         def draw_input_pin() -> None:
+            if self.input_data_with_gui is None:
+                return
             ed.begin_pin(self.pin_input, ed.PinKind.input)
             imgui.text(icons_fontawesome.ICON_FA_ARROW_CIRCLE_LEFT)
-            if self.function.input_gui.value is None:
+            if self.input_data_with_gui.value is None:
                 imgui.same_line()
                 imgui.text("No input")
             ed.end_pin()
 
         def draw_function_output() -> None:
+            if self.output_data_with_gui is None:
+                return
             with imgui_ctx.push_id("output"):
-                output = self.function.output_gui.value
+                output = self.output_data_with_gui.value
                 if output is None:
                     imgui.text("None")
                 else:
-                    self.function.output_gui.gui_data(function_name=self.function.name())
+                    self.output_data_with_gui.gui_present()
 
         def draw_output_pin() -> None:
             if hasattr(self, "node_size"):
@@ -151,6 +157,8 @@ class FunctionNode:
         ed.link(self.link_id, self.pin_output, self.next_function_node.pin_input)
 
     def _invoke_function(self) -> Any:
+        if self.input_data_with_gui is None or self.output_data_with_gui is None:
+            return
         input_data = self.input_data_with_gui.get()
         if self.function is not None:
             try:
@@ -169,5 +177,7 @@ class FunctionNode:
                 self.next_function_node.set_input(r)
 
     def set_input(self, input_data: Any) -> None:
+        if self.input_data_with_gui is None:
+            return
         self.input_data_with_gui.set(input_data)
         self._invoke_function()

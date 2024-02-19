@@ -1,18 +1,17 @@
 from typing import Optional, Any
-from abc import ABC, abstractmethod
+from imgui_bundle import imgui
 
 
-class AnyDataWithGui(ABC):
+class AnyDataWithGui:
     """
     Override this class with your types, and implement a draw function that presents it content
     """
 
     value: Any = None
 
-    @abstractmethod
-    def gui_data(self, function_name: str) -> None:
-        """Override this by implementing a draw function that presents the data content"""
-        pass
+    def gui_present(self) -> None:
+        """Override this if needed by implementing a draw function that presents the data content"""
+        imgui.text(f"{self.value}")
 
     def set(self, v: Any) -> None:
         """Override this if you want to add more behavior when setting the value"""

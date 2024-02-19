@@ -14,8 +14,8 @@ class FunctionWithGui(ABC):
     """
 
     # input_gui and output_gui should be filled during construction
-    input_gui: AnyDataWithGui
-    output_gui: AnyDataWithGui
+    input_gui: AnyDataWithGui | None = None
+    output_gui: AnyDataWithGui | None = None
 
     # parameters_with_gui should be filled during construction
     parameters_with_gui: List[ParameterWithGui[Any]] | None = None
@@ -36,6 +36,27 @@ class FunctionWithGui(ABC):
         It should return True if the inner params were changed.
         """
         return False
+
+
+# class SourceWithGui(FunctionWithGui):
+#     """A source function that does not take any input and returns a user editable value"""
+#     source_name: str = "Source"
+#
+#     def __init__(self, initial_value: Any) -> None:
+#         self.output_gui = AnyDataWithGui()
+#         self.parameters_with_gui = [
+#             ParameterWithGui(
+#                 name=self.source_name,
+#                 value=self.output_gui.value,
+#                 present_gui=self.output_gui.gui_data)
+#         ]
+#
+#     def f(self, x: Any) -> Any:
+#         assert self.output_gui is not None
+#         return self.output_gui.value
+#
+#     def name(self) -> str:
+#         return self.source_name
 
 
 __all__ = ["FunctionWithGui", "ParameterWithGui", "AnyDataWithGui"]

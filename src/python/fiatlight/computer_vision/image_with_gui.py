@@ -13,6 +13,9 @@ from typing import Tuple, Optional
 import cv2
 
 
+_INSPECT_ID: int = 0
+
+
 class ImageWithGui(AnyDataWithGui):
     # value: Optional[ImageUInt8]
     image_params: immvision.ImageParams
@@ -50,7 +53,7 @@ class ImageWithGui(AnyDataWithGui):
     def _gui_display_size(self) -> None:
         _, self.image_params.image_display_size = gui_edit_size(self.image_params.image_display_size)
 
-    def _gui_image(self, image_id: str) -> None:
+    def _gui_image(self) -> None:
         can_convert_to_bgr = self._color_conversion_to_bgr() is not None
         if can_convert_to_bgr:
             _, self.view_with_bgr_conversion = imgui.checkbox("View as BGR", self.view_with_bgr_conversion)
@@ -60,15 +63,17 @@ class ImageWithGui(AnyDataWithGui):
         else:
             immvision.image("output - BGR", self.value, self.image_params)
         if imgui.small_button("Inspect"):
-            immvision.inspector_add_image(self.value, image_id)
+            global _INSPECT_ID
+            immvision.inspector_add_image(self.value, f"inspect {_INSPECT_ID}")
+            _INSPECT_ID += 1
 
-    def gui_data(self, function_name: str) -> None:
+    def gui_present(self) -> None:
         if self.value is None:
             return
         self.first_frame = False
         self._gui_display_size()
         self.image_params.refresh_image = self.first_frame or self._needs_refresh
-        self._gui_image(function_name)
+        self._gui_image()
         self._needs_refresh = False
 
     def gui_set_input(self) -> Optional[Any]:
@@ -107,7 +112,7 @@ class ImageChannelsWithGui(AnyDataWithGui):
         self.value = v
         self.first_frame = True
 
-    def gui_data(self, function_name: str) -> None:
+    def gui_present(self) -> None:
         refresh_image = self.first_frame
         self.first_frame = False
 
