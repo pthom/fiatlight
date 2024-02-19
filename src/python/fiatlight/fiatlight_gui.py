@@ -1,7 +1,7 @@
 from fiatlight.fiatlight_types import MixedFunctionsGraph
 from fiatlight import versatile
 from fiatlight.config import config
-from fiatlight.functions_composition_graph import FunctionsCompositionGraph, FunctionNodeOld
+from fiatlight.functions_composition_graph import FunctionsCompositionGraphOld, FunctionNodeOld
 from fiatlight.internal import osd_widgets
 from imgui_bundle import immapp, imgui, imgui_ctx
 from typing import Any
@@ -63,7 +63,7 @@ class FiatlightGuiParams:
 
 class FiatlightGui:
     params: FiatlightGuiParams
-    _functions_composition_graph: FunctionsCompositionGraph
+    _functions_composition_graph: FunctionsCompositionGraphOld
     _main_dock_space_id: str
     _info_dock_space_id: str = "info_dock"
     _idx_frame: int = 0
@@ -74,7 +74,7 @@ class FiatlightGui:
             functions_with_gui = [versatile.to_function_with_gui(f) for f in self.params.functions_graph]
         else:
             functions_with_gui = []
-        self._functions_composition_graph = FunctionsCompositionGraph(functions_with_gui)
+        self._functions_composition_graph = FunctionsCompositionGraphOld(functions_with_gui)
 
     def _function_nodes(self) -> List[FunctionNodeOld]:
         return self._functions_composition_graph.function_nodes

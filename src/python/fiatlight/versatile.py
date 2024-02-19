@@ -2,7 +2,7 @@ from typing import Any, Optional, Sequence
 from imgui_bundle import imgui, imgui_ctx
 from fiatlight.any_data_with_gui import AnyDataWithGui
 from fiatlight.function_with_gui import FunctionWithGui
-from fiatlight.functions_composition_graph import FunctionsCompositionGraph
+from fiatlight.functions_composition_graph import FunctionsCompositionGraphOld
 from fiatlight.fiatlight_types import PureFunction, PureFunctionOrFunctionWithGui
 from fiatlight.internal import osd_widgets
 from typing import Callable
@@ -129,8 +129,8 @@ def to_function_with_gui(f: PureFunctionOrFunctionWithGui) -> FunctionWithGui:
         return VersatileFunctionWithGui(f)
 
 
-class VersatileFunctionsCompositionGraph(FunctionsCompositionGraph):
+class VersatileFunctionsCompositionGraphOld(FunctionsCompositionGraphOld):
     def __init__(self, functions: Sequence[PureFunction]) -> None:
         functions_with_gui = [to_function_with_gui(f) for f in functions]
-        FunctionsCompositionGraph.__init__(self, functions_with_gui)
+        FunctionsCompositionGraphOld.__init__(self, functions_with_gui)
         # super.__init__(self, functions_with_gui)
