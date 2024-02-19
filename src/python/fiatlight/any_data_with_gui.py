@@ -1,8 +1,8 @@
-from imgui_bundle import imgui
-from typing import Optional, Any, Callable
+from typing import Optional, Any, Callable, final
 
 
-PresentFunction = Callable[[Any], None]
+VoidFunction = Callable[[], None]
+BoolFunction = Callable[[], bool]
 
 
 class AnyDataWithGui:
@@ -12,22 +12,29 @@ class AnyDataWithGui:
 
     value: Any = None
 
-    # gui_present: PresentFunction
+    # Set if needed by implementing a draw function that presents the data content
+    gui_present_impl: VoidFunction | None = None
 
-    def __init__(self, value: Any = None) -> None:
+    # Set if needed by implementing a draw function that presents an edit interface for the data
+    # and returns True if the data was changed
+    gui_edit_impl: BoolFunction | None = None
+
+    def __init__(
+        self, value: Any = None, gui_present: Optional[VoidFunction] = None, gui_edit: Optional[BoolFunction] = None
+    ) -> None:
         self.value = value
-        # if gui_present is None:
-        #     self.gui_present = lambda: _default_gui_present(self.value)
-        # else:
-        #     self.gui_present = gui_present
+        self.gui_present_impl = gui_present
+        self.gui_edit_impl = gui_edit
 
-    def gui_present(self) -> None:
-        """Override this if needed by implementing a draw function that presents the data content"""
-        imgui.text(f"{self.value}")
+    @final
+    def call_gui_present(self) -> None:
+        if self.gui_present_impl is not None:
+            self.gui_present_impl()
 
-    def gui_edit(self) -> bool:
-        """Override this if needed by implementing a gui function that edits the data content
-        and returns True if the value was changed"""
+    @final
+    def call_gui_edit(self) -> bool:
+        if self.gui_edit_impl is not None:
+            return self.gui_edit_impl()
         return False
 
     def set(self, v: Any) -> None:

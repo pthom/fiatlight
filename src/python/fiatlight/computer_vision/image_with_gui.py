@@ -33,6 +33,7 @@ class ImageWithGui(AnyDataWithGui):
         self.image_params = immvision.ImageParams()
         self.image_params.image_display_size = (image_display_width, 0)
         self.image_params.zoom_key = zoom_key
+        self.gui_present_impl = lambda: self._gui_present_impl()
 
     def set(self, v: Any) -> None:
         assert v is None or type(v) == np.ndarray
@@ -67,7 +68,7 @@ class ImageWithGui(AnyDataWithGui):
             immvision.inspector_add_image(self.value, f"inspect {_INSPECT_ID}")
             _INSPECT_ID += 1
 
-    def gui_present(self) -> None:
+    def _gui_present_impl(self) -> None:
         if self.value is None:
             return
         self.first_frame = False
@@ -108,11 +109,13 @@ class ImageChannelsWithGui(AnyDataWithGui):
         self.image_params.image_display_size = (image_display_width, 0)
         self.image_params.zoom_key = zoom_key
 
+        self.gui_present_impl = lambda: self._gui_present_impl()
+
     def set(self, v: Any) -> None:
         self.value = v
         self.first_frame = True
 
-    def gui_present(self) -> None:
+    def _gui_present_impl(self) -> None:
         refresh_image = self.first_frame
         self.first_frame = False
 
