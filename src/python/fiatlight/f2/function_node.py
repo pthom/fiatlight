@@ -123,18 +123,8 @@ def sandbox() -> None:
     def f(param1: int, x: int) -> int:
         return param1 + x
 
-    import functools
     from fiatlight.f2.function_with_settable_params import FunctionWithSettableParams, ParameterWithGui
-    from fiatlight.f2.boxed import BoxedInt
-
-    def edit_int(x: BoxedInt) -> bool:
-        if x.value is None:
-            x.value = 0
-        changed, x.value = imgui.slider_int("Value", x.value, -10, 10)
-        return changed
-
-    def present_int(x: int) -> None:
-        imgui.text(str(x))
+    from fiatlight.f2.data_presenters import BoxedInt, make_int_editor, make_int_presenter, IntEditType, present_int
 
     class FWrapped(FunctionWithSettableParams):  # type: ignore
         param1: BoxedInt
@@ -145,8 +135,8 @@ def sandbox() -> None:
             self.parameters_with_gui = [
                 ParameterWithGui[BoxedInt](
                     "param1",
-                    edit_gui=functools.partial(edit_int, self.param1),
-                    present_gui=functools.partial(present_int, self.param1),
+                    edit_gui=make_int_editor(self.param1, edit_type=IntEditType.SLIDER),
+                    present_gui=make_int_presenter(self.param1),
                 )
             ]
 
