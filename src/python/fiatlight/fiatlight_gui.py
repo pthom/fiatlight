@@ -1,7 +1,7 @@
 from fiatlight.fiatlight_types import MixedFunctionsGraph
 from fiatlight import versatile
 from fiatlight.config import config
-from fiatlight.functions_composition_graph import FunctionsCompositionGraph, FunctionNode
+from fiatlight.functions_composition_graph import FunctionsCompositionGraph, FunctionNodeOld
 from fiatlight.internal import osd_widgets
 from imgui_bundle import immapp, imgui, imgui_ctx
 from typing import Any
@@ -76,7 +76,7 @@ class FiatlightGui:
             functions_with_gui = []
         self._functions_composition_graph = FunctionsCompositionGraph(functions_with_gui)
 
-    def _function_nodes(self) -> List[FunctionNode]:
+    def _function_nodes(self) -> List[FunctionNodeOld]:
         return self._functions_composition_graph.function_nodes
 
     def _has_one_exception(self) -> bool:

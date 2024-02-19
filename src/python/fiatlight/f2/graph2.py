@@ -1,13 +1,17 @@
 from imgui_bundle import imgui, imgui_node_editor as ed, icons_fontawesome, immapp, ImVec2, imgui_ctx
-from fiatlight.f2.any_f import ObservableFunction, PresentOutputGui, ParameterWithGui
+from fiatlight.f2.observable_function import ObservableFunction
 from fiatlight.internal import fl_widgets
 from fiatlight.config import config
-from typing import Optional, Any, TypeVar, Generic, Callable
+from typing import Optional, Any, TypeVar, Generic, Callable, TypeAlias
 
 
 Input = TypeVar("Input")
 Output = TypeVar("Output")
 T = TypeVar("T")
+
+
+# Any function that can present a GUI for a given output
+PresentOutputGui: TypeAlias = Callable[[Output], None]
 
 
 class FunctionNode2(Generic[Input, Output]):
@@ -111,10 +115,12 @@ class FunctionNode2(Generic[Input, Output]):
 def sandbox() -> None:
     from imgui_bundle import immapp
 
-    from fiatlight.f2.boxed import BoxedInt
-
     def f(param1: int, x: int) -> int:
         return param1 + x
+
+    import functools
+    from fiatlight.f2.function_with_settable_params import FunctionWithSettableParams, ParameterWithGui
+    from fiatlight.f2.boxed import BoxedInt
 
     def edit_int(x: BoxedInt) -> bool:
         if x.value is None:
@@ -124,9 +130,6 @@ def sandbox() -> None:
 
     def present_int(x: int) -> None:
         imgui.text(str(x))
-
-    import functools
-    from fiatlight.f2.any_f import FunctionWithSettableParams
 
     class FWrapped(FunctionWithSettableParams):  # type: ignore
         param1: BoxedInt

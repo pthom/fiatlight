@@ -1,75 +1,17 @@
-from typing import Any, Tuple, Callable, TypeAlias, TypeVar, Optional, Generic, List, Union
+from fiatlight.f2.parameter_with_gui import ParameterWithGui
+from fiatlight.f2.function_with_settable_params import (
+    FunctionWithSettableParams,
+    PureFunctionOrFunctionWithWrappedParams,
+)
+
+from typing import Any, Callable, TypeVar, Optional, Generic, List
 import inspect
 import sys
 import traceback
-from abc import ABC, abstractmethod
 
 
-T = TypeVar("T")
 Input = TypeVar("Input")
 Output = TypeVar("Output")
-
-
-# Any function that can present an editable GUI for a given data, and return (changed, new_value)
-EditDataGuiFunction_old: TypeAlias = Callable[[T | None], Tuple[bool, T]]
-
-# Any function that can present a non-editable GUI for a given data
-PresentDataGuiFunction_old: TypeAlias = Callable[[T | None], None]
-
-# Any function that can create a default value for a given data type
-DefaultValueProvider: TypeAlias = Callable[[], T]
-
-# Any function that can present an editable GUI for a given parameter
-EditParameterGui: TypeAlias = Callable[[], bool]
-# Any function that can present a short visual GUI for a given parameter
-PresentParameterGui: TypeAlias = Callable[[], None]
-
-# Any function that can present a GUI for a given output
-PresentOutputGui: TypeAlias = Callable[[Output], None]
-
-
-class ParameterWithGui(Generic[T]):
-    """A class that represents a parameter of a function,
-    with an optional GUI to edit it, and an optional GUI to present it"""
-
-    name: str
-    value: T | None
-    edit_gui: EditParameterGui | None
-    present_gui: PresentParameterGui | None
-
-    def __init__(
-        self,
-        name: str,
-        value: T | None = None,
-        edit_gui: EditParameterGui | None = None,
-        present_gui: PresentParameterGui | None = None,
-    ) -> None:
-        self.name = name
-        self.value = value
-        self.edit_gui = edit_gui
-        self.present_gui = present_gui
-
-
-class FunctionWithSettableParams(ABC, Generic[Input, Output]):
-    """An abstract class that represents a function with settable parameters."""
-
-    parameters_with_gui: List[ParameterWithGui[Any]]  # filled this at construction!
-
-    @abstractmethod
-    def f(self, value: Input) -> Output:
-        pass
-
-    @abstractmethod
-    def name(self) -> str:
-        pass
-
-    def __call__(self, x: Input) -> Output:
-        return self.f(x)
-
-
-PureFunctionOrFunctionWithWrappedParams: TypeAlias = Union[
-    Callable[[Input], Output], FunctionWithSettableParams[Input, Output]
-]
 
 
 class ObservableFunction(Generic[Input, Output]):
