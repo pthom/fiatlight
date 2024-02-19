@@ -28,9 +28,7 @@ class FunctionContainer(Generic[Input, Output]):
         self._function = f
         self._input = None
         self._output = None
-
-    def name(self) -> str:
-        return self._function.name()
+        self.name = f.name()
 
     def _compute_output(self) -> None:
         if self._input is None:

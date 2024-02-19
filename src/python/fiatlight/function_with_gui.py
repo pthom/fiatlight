@@ -30,14 +30,11 @@ class FunctionWithGui(ABC):
     # parameters_with_gui should be filled during construction
     parameters_with_gui: List[FunctionParameterWithGui] | None = None
 
+    name: str
+
     @abstractmethod
     def f(self, x: Any) -> Any:
         """override this with the actual function implementation"""
-        pass
-
-    @abstractmethod
-    def name(self) -> str:
-        """override this with the actual function name"""
         pass
 
     def old_gui_params(self) -> bool:
@@ -51,19 +48,14 @@ class FunctionWithGui(ABC):
 class SourceWithGui(FunctionWithGui):
     """A source function that does not take any input and returns a user editable value"""
 
-    source_name: str = "Source"
-
     def __init__(self, initial_value_with_gui: AnyDataWithGui, source_name: str = "Source") -> None:
         self.output_gui = initial_value_with_gui
         self.parameters_with_gui = [FunctionParameterWithGui("source", initial_value_with_gui)]
-        self.source_name = source_name
+        self.name = source_name
 
     def f(self, _: DummySource) -> Any:
         assert self.output_gui is not None
         return self.output_gui.value
-
-    def name(self) -> str:
-        return self.source_name
 
 
 __all__ = ["FunctionWithGui", "AnyDataWithGui"]

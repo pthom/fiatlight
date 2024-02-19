@@ -10,16 +10,7 @@ class FunctionsGraph:
 
     def __init__(self, functions: Sequence[FunctionWithGui]) -> None:
         assert len(functions) > 0
-        f0 = functions[0]
-
-        input_fake_function = _InputWithGui()
-        input_fake_function.input_gui = f0.input_gui
-        input_fake_function.output_gui = f0.input_gui
-
-        input_node = FunctionNode(input_fake_function)
         self.function_nodes = []
-        self.function_nodes.append(input_node)
-
         for f in functions:
             self.function_nodes.append(FunctionNode(f))
 
@@ -46,14 +37,3 @@ class FunctionsGraph:
         ed.end()
 
         imgui.pop_id()
-
-
-class _InputWithGui(FunctionWithGui):
-    def f(self, x: Any) -> Any:
-        return x
-
-    def old_gui_params(self) -> bool:
-        return False
-
-    def name(self) -> str:
-        return "Input"

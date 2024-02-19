@@ -86,7 +86,7 @@ class FiatlightGui:
     def _draw_exceptions(self) -> None:
         for function_node in self._function_nodes():
             if function_node.last_exception_message is not None:
-                function_name = function_node.function.name()
+                function_name = function_node.function.name
                 imgui.text_colored(
                     config.colors.error, f"Exception in {function_name}: {function_node.last_exception_message}"
                 )

@@ -25,15 +25,13 @@ class GaussianBlurWithGui(FunctionWithGui):
     def __init__(self) -> None:
         self.input_gui = ImageWithGui()
         self.output_gui = ImageWithGui()
+        self.name = "Gaussian Blur"
 
     def f(self, x: Any) -> ImageUInt8:
         assert type(x) == np.ndarray
         ksize = (0, 0)
         blur: ImageUInt8 = cv2.GaussianBlur(x, ksize=ksize, sigmaX=self.sigma_x, sigmaY=self.sigma_y)  # type: ignore
         return blur
-
-    def name(self) -> str:
-        return "GaussianBlur"
 
     def old_gui_params(self) -> bool:
         imgui.set_next_item_width(100)
@@ -51,14 +49,12 @@ class CannyWithGui(FunctionWithGui):
     def __init__(self) -> None:
         self.input_gui = ImageWithGui()
         self.output_gui = ImageWithGui()
+        self.name = "Canny"
 
     def f(self, x: Any) -> ImageUInt8:
         assert type(x) == np.ndarray
         edge: ImageUInt8 = cv2.Canny(x, self.t_lower, self.t_upper, apertureSize=self.aperture_size)  # type: ignore
         return edge
-
-    def name(self) -> str:
-        return "Canny"
 
     def old_gui_params(self) -> bool:
         imgui.set_next_item_width(100)
@@ -89,6 +85,7 @@ class OilPaintingWithGui(FunctionWithGui):
         self.input_gui = ImageWithGui()
         self.output_gui = ImageWithGui()
         self.color_conversion = cv2.COLOR_BGR2HSV
+        self.name = "Oil Painting"
 
     def f(self, x: Any) -> ImageUInt8:
         assert type(x) == np.ndarray
@@ -96,9 +93,6 @@ class OilPaintingWithGui(FunctionWithGui):
         # pip install opencv-contrib-python
         r = cv2.xphoto.oilPainting(x, self.size, self.dynRatio, self.color_conversion)  # type: ignore
         return r
-
-    def name(self) -> str:
-        return "Oil Painting"
 
     def old_gui_params(self) -> bool:
         imgui.set_next_item_width(100)

@@ -133,12 +133,10 @@ def sandbox() -> None:
                     present_gui=make_int_presenter(self.param1),
                 )
             ]
+            self.name = "f_wrapped"
 
         def f(self, x: int) -> int:
             return f(self.param1.value, x)
-
-        def name(self) -> str:
-            return "FWrapped"
 
     f_wrapped = FWrapped()
 
