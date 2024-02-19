@@ -156,9 +156,12 @@ class FunctionNode:
         ed.link(self.link_id, self.pin_output, self.next_function_node.pin_input)
 
     def _invoke_function(self) -> Any:
-        if self.input_data_with_gui is None or self.output_data_with_gui is None:
+        if self.output_data_with_gui is None:
             return
-        input_data = self.input_data_with_gui.get()
+        if self.input_data_with_gui is None:
+            input_data = None
+        else:
+            input_data = self.input_data_with_gui.get()
         if self.function is not None:
             try:
                 r = self.function.f(input_data)
