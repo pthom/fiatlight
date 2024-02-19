@@ -14,11 +14,11 @@ T = TypeVar("T")
 PresentOutputGui: TypeAlias = Callable[[Output], None]
 
 
-class FunctionNode2(Generic[Input, Output]):
+class FunctionNode(Generic[Input, Output]):
     _function: ObservableFunction[Input, Output]
     output_gui: PresentOutputGui[Output]
 
-    _next_function_node: Optional["FunctionNode2[Output, Any]"]
+    _next_function_node: Optional["FunctionNode[Output, Any]"]
 
     node_id: ed.NodeId
     pin_input: ed.PinId
@@ -29,7 +29,6 @@ class FunctionNode2(Generic[Input, Output]):
 
     def __init__(self, function: Callable[[Input], Output], output_gui: PresentOutputGui[Output]) -> None:
         self._function = ObservableFunction(function)
-        self._function.set_input(1)
 
         self.output_gui = output_gui
         self._next_function_node = None
@@ -63,6 +62,9 @@ class FunctionNode2(Generic[Input, Output]):
         def draw_input_pin() -> None:
             ed.begin_pin(self.pin_input, ed.PinKind.input)
             imgui.text(icons_fontawesome.ICON_FA_ARROW_CIRCLE_LEFT)
+            if self._function.get_input() is None:
+                imgui.same_line()
+                imgui.text("No input")
             ed.end_pin()
 
         def draw_function_output() -> None:
@@ -111,6 +113,9 @@ class FunctionNode2(Generic[Input, Output]):
             return
         ed.link(self.link_id, self.pin_output, self._next_function_node.pin_input)
 
+    def set_input(self, value: Input) -> None:
+        self._function.set_input(value)
+
 
 def sandbox() -> None:
     from imgui_bundle import immapp
@@ -153,10 +158,11 @@ def sandbox() -> None:
 
     f_wrapped = FWrapped()
 
-    function_node = FunctionNode2(
+    function_node = FunctionNode(
         f_wrapped,
         output_gui=present_int,
     )
+    function_node.set_input(3)
 
     def gui() -> None:
         ed.begin("Function Graph")
