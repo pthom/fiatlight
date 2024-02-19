@@ -31,8 +31,10 @@ def make_int_with_gui(initial_value: int, params: IntEditParams | None = None) -
     r = AnyDataWithGui()
     r.value = initial_value
     r.gui_present_impl = lambda: _present_str(r.value)
+    first_frame = True
 
     def edit() -> bool:
+        nonlocal first_frame
         changed = False
         if params.edit_type == IntEditType.slider:
             imgui.set_next_item_width(hello_imgui.em_size(params.width_em))
@@ -40,6 +42,11 @@ def make_int_with_gui(initial_value: int, params: IntEditParams | None = None) -
         elif params.edit_type == IntEditType.input:
             imgui.set_next_item_width(hello_imgui.em_size(params.width_em))
             changed, r.value = imgui.input_int(params.label, r.value)
+
+        if first_frame:
+            changed = True
+            first_frame = False
+
         return changed
 
     r.gui_edit_impl = edit

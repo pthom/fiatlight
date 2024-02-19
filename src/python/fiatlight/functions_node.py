@@ -3,7 +3,7 @@ from fiatlight.any_data_with_gui import AnyDataWithGui
 from fiatlight.function_with_gui import FunctionWithGui
 from fiatlight.config import config
 from fiatlight.internal import fl_widgets
-from imgui_bundle import imgui, imgui_node_editor as ed, icons_fontawesome, ImVec2, immapp, imgui_ctx
+from imgui_bundle import imgui, imgui_node_editor as ed, icons_fontawesome, ImVec2, immapp, imgui_ctx, hello_imgui
 from typing import Optional, Any
 import traceback
 import sys
@@ -38,59 +38,6 @@ class FunctionNode:
 
         # self.observer = observer
 
-    def _draw_exception_message(self) -> None:
-        # return
-        if self.last_exception_message is None:
-            return
-        fl_widgets.text("Exception:\n" + self.last_exception_message, max_line_width=30, color=config.colors.error)
-
-    def old_draw_node(self, idx: int) -> None:
-        assert self.function is not None
-
-        ed.begin_node(self.node_id)
-        position = ed.get_node_position(self.node_id)
-        if position.x == 0 and position.y == 0:
-            nb_nodes_per_row = 5
-            width_between_nodes = immapp.em_size(20)
-            height_between_nodes = immapp.em_size(20)
-            position = ImVec2(
-                (idx % nb_nodes_per_row) * width_between_nodes, (idx // nb_nodes_per_row) * height_between_nodes
-            )
-            ed.set_node_position(self.node_id, position)
-
-        imgui.text(self.function.name)
-        self._draw_exception_message()
-
-        params_changed = self.function.old_gui_params()
-        if params_changed:
-            self._invoke_function()
-
-        draw_input_pin = idx != 0
-        if draw_input_pin:
-            ed.begin_pin(self.pin_input, ed.PinKind.input)
-            imgui.text(icons_fontawesome.ICON_FA_CIRCLE)
-            ed.end_pin()
-
-        def draw_output() -> None:
-            if self.output_data_with_gui is None:
-                return
-            if self.output_data_with_gui.get() is None:
-                imgui.text("None")
-            else:
-                imgui.push_id(str(id(self.output_data_with_gui)))
-                imgui.begin_group()
-                self.output_data_with_gui.call_gui_present()
-                imgui.pop_id()
-                imgui.end_group()
-            imgui.same_line()
-            ed.begin_pin(self.pin_output, ed.PinKind.output)
-            imgui.text(icons_fontawesome.ICON_FA_CIRCLE)
-            ed.end_pin()
-
-        draw_output()
-
-        ed.end_node()
-
     def draw_node(self) -> None:
         def draw_title() -> None:
             imgui.text(self.function.name)
@@ -99,7 +46,16 @@ class FunctionNode:
             last_exception_message = self.last_exception_message
             if last_exception_message is None:
                 return
-            fl_widgets.text("Exception:\n" + last_exception_message, max_line_width=30, color=config.colors.error)
+
+            min_exception_width = hello_imgui.em_size(12)
+            exception_width = min_exception_width
+            if hasattr(self, "node_size"):
+                exception_width = self.node_size.x - hello_imgui.em_size(2)
+                if exception_width < min_exception_width:
+                    exception_width = min_exception_width
+            fl_widgets.text_custom(
+                "Exception:\n" + last_exception_message, max_width_pixels=exception_width, color=config.colors.error
+            )
 
         def draw_input_pin() -> None:
             if self.input_data_with_gui is None:
