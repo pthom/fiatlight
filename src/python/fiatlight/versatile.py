@@ -90,7 +90,11 @@ def versatile_gui_set_input(value: Any) -> Optional[Any]:
 
 
 class VersatileDataWithGui(AnyDataWithGui):
-    def gui_present(self) -> None:
+    def __init__(self) -> None:
+        super().__init__()
+        self.gui_present_impl = lambda: self._gui_present_impl()
+
+    def _gui_present_impl(self) -> None:
         imgui.push_id(str(id(self)))
         versatile_gui_data(self.value)
         imgui.pop_id()

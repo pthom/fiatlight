@@ -79,7 +79,7 @@ class FunctionNode:
             else:
                 imgui.push_id(str(id(self.output_data_with_gui)))
                 imgui.begin_group()
-                self.output_data_with_gui.gui_present()
+                self.output_data_with_gui.call_gui_present()
                 imgui.pop_id()
                 imgui.end_group()
             imgui.same_line()
@@ -119,7 +119,7 @@ class FunctionNode:
                 if output is None:
                     imgui.text("None")
                 else:
-                    self.output_data_with_gui.gui_present()
+                    self.output_data_with_gui.call_gui_present()
 
         def draw_output_pin() -> None:
             if hasattr(self, "node_size"):
@@ -136,7 +136,7 @@ class FunctionNode:
                 for param in self.function.parameters_with_gui:
                     with imgui_ctx.push_obj_id(param):
                         imgui.text(param.name + ":")
-                        changed = param.parameter_with_gui.gui_edit() or changed
+                        changed = param.parameter_with_gui.call_gui_edit() or changed
             return changed
 
         ed.begin_node(self.node_id)
