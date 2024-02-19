@@ -118,7 +118,7 @@ class VersatileFunctionWithGui(FunctionWithGui):
     def name(self) -> str:
         return self.inner_function_name
 
-    def gui_params(self) -> bool:
+    def old_gui_params(self) -> bool:
         return False
 
 

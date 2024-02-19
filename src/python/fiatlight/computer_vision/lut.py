@@ -174,7 +174,7 @@ class LutImageWithGui(FunctionWithGui):
     def name(self) -> str:
         return "LUT"
 
-    def gui_params(self) -> bool:
+    def old_gui_params(self) -> bool:
         return self.lut_image.gui_params("LUT")
 
 
@@ -210,12 +210,12 @@ class LutChannelsWithGui(FunctionWithGui):
     def name(self) -> str:
         return "LUT channels"
 
-    def gui_params(self) -> bool:
+    def old_gui_params(self) -> bool:
         changed = False
         for i, channel_adjust_param in enumerate(self.channel_adjust_params):
             channel_name = self.color_type.channels_names()[i]
             imgui.push_id(str(i))
-            changed |= channel_adjust_param.gui_params(channel_name)
+            changed |= channel_adjust_param.old_gui_params(channel_name)
             imgui.pop_id()
         return changed
 

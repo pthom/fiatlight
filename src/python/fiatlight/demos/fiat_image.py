@@ -35,7 +35,7 @@ class GaussianBlurWithGui(FunctionWithGui):
     def name(self) -> str:
         return "GaussianBlur"
 
-    def gui_params(self) -> bool:
+    def old_gui_params(self) -> bool:
         imgui.set_next_item_width(100)
         changed1, self.sigma_x = imgui.slider_float("sigma_x", self.sigma_x, 0.1, 15.0)
         imgui.set_next_item_width(100)
@@ -60,7 +60,7 @@ class CannyWithGui(FunctionWithGui):
     def name(self) -> str:
         return "Canny"
 
-    def gui_params(self) -> bool:
+    def old_gui_params(self) -> bool:
         imgui.set_next_item_width(100)
         changed1, self.t_lower = imgui.slider_int("t_lower", self.t_lower, 0, 255)
         imgui.set_next_item_width(100)
@@ -100,7 +100,7 @@ class OilPaintingWithGui(FunctionWithGui):
     def name(self) -> str:
         return "Oil Painting"
 
-    def gui_params(self) -> bool:
+    def old_gui_params(self) -> bool:
         imgui.set_next_item_width(100)
         changed1, self.dynRatio = imgui.slider_int("dynRatio", self.dynRatio, 1, 10)
         imgui.set_next_item_width(100)
