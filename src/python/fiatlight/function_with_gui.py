@@ -1,7 +1,6 @@
 from fiatlight.any_data_with_gui import AnyDataWithGui
 
-from typing import Any, List
-from abc import ABC, abstractmethod
+from typing import Any, List, final, Callable
 from dataclasses import dataclass
 
 
@@ -15,7 +14,7 @@ class DummySource:
     pass
 
 
-class FunctionWithGui(ABC):
+class FunctionWithGui:
     """Override this class with your functions which you want to visualize in a graph
     // FunctionWithGui: any function that can be presented visually, with
     // - a displayed name
@@ -30,12 +29,16 @@ class FunctionWithGui(ABC):
     # parameters_with_gui should be filled during construction
     parameters_with_gui: List[FunctionParameterWithGui] | None = None
 
+    # the name of the function
     name: str
 
-    @abstractmethod
+    # set this with the actual function implementation at construction time
+    f_impl: Callable[[Any], Any] | None = None
+
+    @final
     def f(self, x: Any) -> Any:
-        """override this with the actual function implementation"""
-        pass
+        assert self.f_impl is not None
+        return self.f_impl(x)
 
     def old_gui_params(self) -> bool:
         """override this if you want to provide a gui for the function inner params
@@ -53,9 +56,11 @@ class SourceWithGui(FunctionWithGui):
         self.parameters_with_gui = [FunctionParameterWithGui("source", initial_value_with_gui)]
         self.name = source_name
 
-    def f(self, _: DummySource) -> Any:
-        assert self.output_gui is not None
-        return self.output_gui.value
+        def f(_: Any) -> Any:
+            assert self.output_gui is not None
+            return self.output_gui.value
+
+        self.f_impl = f
 
 
 __all__ = ["FunctionWithGui", "AnyDataWithGui"]

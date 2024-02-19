@@ -117,8 +117,10 @@ class VersatileFunctionWithGui(FunctionWithGui):
         self.output_gui = VersatileDataWithGui()
         self.name = self.inner_function_name
 
-    def f(self, x: Any) -> Any:
-        return self.inner_function(x)
+        def f(x: Any) -> Any:
+            return self.inner_function(x)
+
+        self.f_impl = f
 
     def old_gui_params(self) -> bool:
         return False
