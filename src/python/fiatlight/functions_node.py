@@ -135,9 +135,8 @@ class FunctionNode:
             if self.function.parameters_with_gui is not None:
                 for param in self.function.parameters_with_gui:
                     with imgui_ctx.push_obj_id(param):
-                        if param.edit_gui is not None:
-                            imgui.text(param.name + ":")
-                            changed = param.edit_gui() or changed
+                        imgui.text(param.name + ":")
+                        changed = param.parameter_with_gui.gui_edit() or changed
             return changed
 
         ed.begin_node(self.node_id)
