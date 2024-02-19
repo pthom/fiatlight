@@ -51,7 +51,9 @@ class FunctionNode(Generic[Input, Output]):
             last_exception_message = self._function.last_exception_message
             if last_exception_message is None:
                 return
-            fl_widgets.text("Exception:\n" + last_exception_message, max_line_width=30, color=config.colors.error)
+            fl_widgets.text_custom(
+                "Exception:\n" + last_exception_message, max_line_width=30, color=config.colors.error
+            )
 
         def draw_input_pin() -> None:
             ed.begin_pin(self.pin_input, ed.PinKind.input)
