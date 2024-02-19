@@ -165,14 +165,12 @@ class LutImageWithGui(FunctionWithGui):
         self.lut_image = LutImage()
         self.input_gui = ImageWithGui()
         self.output_gui = ImageWithGui()
+        self.name = "LUT"
 
     def f(self, x: Any) -> Any:
         assert type(x) == ImageFloat
         image_adjusted = self.lut_image.apply(x)
         return image_adjusted
-
-    def name(self) -> str:
-        return "LUT"
 
     def old_gui_params(self) -> bool:
         return self.lut_image.gui_params("LUT")
@@ -185,6 +183,7 @@ class LutChannelsWithGui(FunctionWithGui):
     def __init__(self) -> None:
         self.input_gui = ImageChannelsWithGui()
         self.output_gui = ImageChannelsWithGui()
+        self.name = "LUT channels"
 
     def output_gui_channels(self) -> ImageChannelsWithGui:
         return cast(ImageChannelsWithGui, self.output_gui)
@@ -206,9 +205,6 @@ class LutChannelsWithGui(FunctionWithGui):
             adjusted_channels[i] = self.channel_adjust_params[i].apply(original_channels[i])
 
         return adjusted_channels
-
-    def name(self) -> str:
-        return "LUT channels"
 
     def old_gui_params(self) -> bool:
         changed = False

@@ -17,20 +17,19 @@ class SplitChannelsWithGui(FunctionWithGui):
     def __init__(self) -> None:
         self.input_gui = ImageWithGui()
         self.output_gui = ImageChannelsWithGui()
+        self.name = "Split Channels"
 
     def f(self, x: Any) -> Any:
         assert type(x) == np.ndarray
         channels = split_channels(x)
         return channels
 
-    def name(self) -> str:
-        return "Split Channels"
-
 
 class MergeChannelsWithGui(FunctionWithGui):
     def __init__(self) -> None:
         self.input_gui = ImageChannelsWithGui()
         self.output_gui = ImageWithGui()
+        self.name = "Merge Channels"
 
     def f(self, x: Any) -> Any:
         assert type(x) == np.ndarray
@@ -38,9 +37,6 @@ class MergeChannelsWithGui(FunctionWithGui):
         image_stacked = np.dstack(channels)
         # image_uint8 = (image_stacked * 255.0).astype("uint8")
         return image_stacked
-
-    def name(self) -> str:
-        return "Merge Channels"
 
 
 class ConvertColorWithGui(FunctionWithGui):
@@ -51,6 +47,7 @@ class ConvertColorWithGui(FunctionWithGui):
     def __init__(self) -> None:
         self.input_gui = ImageWithGui()
         self.output_gui = ImageWithGui()
+        self.name = "Convert Color"
 
     def f(self, x: Any) -> Any:
         if x is None or self.color_conversion is None:
@@ -59,9 +56,6 @@ class ConvertColorWithGui(FunctionWithGui):
         self.output_gui.color_type = self.color_conversion.dst_color
         self.output_gui.refresh_image()
         return r
-
-    def name(self) -> str:
-        return f"Convert Color - {self.color_conversion}"
 
     def old_gui_params(self) -> bool:
         input_image = self.input_gui.value

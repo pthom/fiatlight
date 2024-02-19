@@ -46,7 +46,6 @@ def make_int_editor(x: BoxedInt, params: IntEditParams | None = None) -> EditPar
 #             self.value = x
 #         def gui_data(self, label: str) -> None:
 #             imgui.text(f"{label}: {self.value}")
-#
 
 
 # def make_int_source(label: str, initial_value: int, params: IntEditParams) -> SourceWithGui:

@@ -19,11 +19,6 @@ class FunctionWithSettableParams(ABC, Generic[Input, Output]):
         pass
 
     @abstractmethod
-    def name(self) -> str:
-        """override this with the actual function name"""
-        pass
-
-    @abstractmethod
     def present_output(self, value: Output) -> None:
         """override this with the actual function output presentation"""
         pass

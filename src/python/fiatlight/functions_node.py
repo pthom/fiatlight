@@ -58,7 +58,7 @@ class FunctionNode:
             )
             ed.set_node_position(self.node_id, position)
 
-        imgui.text(self.function.name())
+        imgui.text(self.function.name)
         self._draw_exception_message()
 
         params_changed = self.function.old_gui_params()
@@ -93,7 +93,7 @@ class FunctionNode:
 
     def draw_node(self) -> None:
         def draw_title() -> None:
-            imgui.text(self.function.name())
+            imgui.text(self.function.name)
 
         def draw_exception_message() -> None:
             last_exception_message = self.last_exception_message
