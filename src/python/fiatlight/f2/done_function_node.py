@@ -1,8 +1,8 @@
 from imgui_bundle import imgui, imgui_node_editor as ed, icons_fontawesome, immapp, ImVec2, imgui_ctx
-from fiatlight.f2.observable_function import ObservableFunction
+from fiatlight.f2.function_container import FunctionContainer
 from fiatlight.internal import fl_widgets
 from fiatlight.config import config
-from typing import Optional, Any, TypeVar, Generic, Callable, TypeAlias
+from typing import Optional, Any, TypeVar, Generic, Callable
 
 
 Input = TypeVar("Input")
@@ -10,13 +10,8 @@ Output = TypeVar("Output")
 T = TypeVar("T")
 
 
-# Any function that can present a GUI for a given output
-PresentOutputGui: TypeAlias = Callable[[Output], None]
-
-
 class FunctionNode(Generic[Input, Output]):
-    _function: ObservableFunction[Input, Output]
-    output_gui: PresentOutputGui[Output]
+    _function: FunctionContainer[Input, Output]
 
     _next_function_node: Optional["FunctionNode[Output, Any]"]
 
@@ -27,10 +22,9 @@ class FunctionNode(Generic[Input, Output]):
 
     node_size: ImVec2  # will be set after the node is drawn once
 
-    def __init__(self, function: Callable[[Input], Output], output_gui: PresentOutputGui[Output]) -> None:
-        self._function = ObservableFunction(function)
+    def __init__(self, function: Callable[[Input], Output]) -> None:
+        self._function = FunctionContainer(function)
 
-        self.output_gui = output_gui
         self._next_function_node = None
 
         self.node_id = ed.NodeId.create()
@@ -135,7 +129,7 @@ def sandbox() -> None:
             self.parameters_with_gui = [
                 ParameterWithGui[BoxedInt](
                     "param1",
-                    edit_gui=make_int_editor(self.param1, edit_type=IntEditType.SLIDER),
+                    edit_gui=make_int_editor(self.param1, edit_type=IntEditType.slider),
                     present_gui=make_int_presenter(self.param1),
                 )
             ]

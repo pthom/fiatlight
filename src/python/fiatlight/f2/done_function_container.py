@@ -1,11 +1,6 @@
-from fiatlight.f2.parameter_with_gui import ParameterWithGui
-from fiatlight.f2.function_with_settable_params import (
-    FunctionWithSettableParams,
-    PureFunctionOrFunctionWithWrappedParams,
-)
+from fiatlight.f2.function_with_settable_params import FunctionWithSettableParams
 
-from typing import Any, Callable, TypeVar, Optional, Generic, List
-import inspect
+from typing import Any, TypeVar, Optional, Generic
 import sys
 import traceback
 
@@ -14,43 +9,28 @@ Input = TypeVar("Input")
 Output = TypeVar("Output")
 
 
-class ObservableFunction(Generic[Input, Output]):
-    """A class that represents a function that can be observed by other classes.
+class FunctionContainer(Generic[Input, Output]):
+    """A class that represents a function and its input and output.
     It stores the input and output of the function, as well as optional parameters
     It recomputes the output when the input is modified, or when the parameters are modified.
 
     It also stores the last exception message and traceback, if the function raised an exception.
     """
 
-    _function: PureFunctionOrFunctionWithWrappedParams[Input, Output]
+    _function: FunctionWithSettableParams[Input, Output]
     _input: Input | None
     _output: Output | None
-
-    _signature: inspect.Signature | None
 
     last_exception_message: Optional[str] = None
     last_exception_traceback: Optional[str] = None
 
-    def __init__(self, f: Callable[[Input], Output]) -> None:
+    def __init__(self, f: FunctionWithSettableParams[Input, Output]) -> None:
         self._function = f
         self._input = None
         self._output = None
-        try:
-            self._signature = inspect.signature(f)
-        except ValueError:
-            self._signature = None
 
     def name(self) -> str:
-        if isinstance(self._function, FunctionWithSettableParams):
-            return self._function.name()
-        else:
-            return self._function.__name__
-
-    def parameters_with_gui(self) -> List[ParameterWithGui[Any]]:
-        if isinstance(self._function, FunctionWithSettableParams):
-            return self._function.parameters_with_gui
-        else:
-            return []
+        return self._function.name()
 
     def _compute_output(self) -> None:
         if self._input is None:
@@ -82,22 +62,19 @@ class ObservableFunction(Generic[Input, Output]):
     def get_output(self) -> Output | None:
         return self._output
 
-    def signature(self) -> inspect.Signature | None:
-        return self._signature
 
-
-def sandbox1() -> None:
-    def f(a: int) -> int:
-        return a + 3
-
-    # obs_f = ObservableFunction(math.log)
-    obs_f = ObservableFunction(f)
-    obs_f.set_input(3)
-    print(obs_f.get_input())
-    print(obs_f.get_output())
-    # print(obs_f.signature())
-    # print(obs_f.nb_params())
-
-
-if __name__ == "__main__":
-    sandbox1()
+# def sandbox1() -> None:
+#     def f(a: int) -> int:
+#         return a + 3
+#
+#     # obs_f = FunctionContainer(math.log)
+#     obs_f = FunctionContainer(f)
+#     obs_f.set_input(3)
+#     print(obs_f.get_input())
+#     print(obs_f.get_output())
+#     # print(obs_f.signature())
+#     # print(obs_f.nb_params())
+#
+#
+# if __name__ == "__main__":
+#     sandbox1()

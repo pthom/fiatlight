@@ -3,69 +3,15 @@ from fiatlight.any_data_with_gui import AnyDataWithGui
 from fiatlight.function_with_gui import FunctionWithGui
 from fiatlight.config import config
 from fiatlight.internal import fl_widgets
-from imgui_bundle import imgui, imgui_node_editor as ed, icons_fontawesome, ImVec2, immapp
-from typing import List, Optional, Any, Sequence
+from imgui_bundle import imgui, imgui_node_editor as ed, icons_fontawesome, ImVec2, immapp, imgui_ctx
+from typing import Optional, Any
 import traceback
 import sys
 
 
-class FunctionsCompositionGraphOld:
-    function_nodes: List[FunctionNodeOld]
-
-    def __init__(self, functions: Sequence[FunctionWithGui]) -> None:
-        assert len(functions) > 0
-        f0 = functions[0]
-
-        input_fake_function = _InputWithGui()
-        input_fake_function.input_gui = f0.input_gui
-        input_fake_function.output_gui = f0.input_gui
-
-        input_node = FunctionNodeOld(input_fake_function)
-        self.function_nodes = []
-        self.function_nodes.append(input_node)
-
-        for f in functions:
-            self.function_nodes.append(FunctionNodeOld(f))
-
-        for i in range(len(self.function_nodes) - 1):
-            fn0 = self.function_nodes[i]
-            fn1 = self.function_nodes[i + 1]
-            fn0.next_function_node = fn1
-
-    def set_input(self, input: Any) -> None:
-        self.function_nodes[0].set_input(input)
-
-    def draw(self) -> None:
-        imgui.push_id(str(id(self)))
-
-        ed.begin("FunctionsCompositionGraphOld")
-        # draw function nodes
-        for i, fn in enumerate(self.function_nodes):
-            imgui.push_id(str(id(fn)))
-            fn.draw_node(idx=i)
-            imgui.pop_id()
-        # Note: those loops shall not be merged
-        for fn in self.function_nodes:
-            fn.draw_link()
-        ed.end()
-
-        imgui.pop_id()
-
-
-class _InputWithGui(FunctionWithGui):
-    def f(self, x: Any) -> Any:
-        return x
-
-    def gui_params(self) -> bool:
-        return False
-
-    def name(self) -> str:
-        return "Input"
-
-
-class FunctionNodeOld:
+class FunctionNode:
     function: FunctionWithGui
-    next_function_node: Optional[FunctionNodeOld]
+    next_function_node: Optional[FunctionNode]
     input_data_with_gui: AnyDataWithGui
     output_data_with_gui: AnyDataWithGui
 
@@ -76,6 +22,8 @@ class FunctionNodeOld:
     pin_input: ed.PinId
     pin_output: ed.PinId
     link_id: ed.LinkId
+
+    node_size: ImVec2  # will be set after the node is drawn once
 
     def __init__(self, function: FunctionWithGui) -> None:
         self.function = function
@@ -96,7 +44,7 @@ class FunctionNodeOld:
             return
         fl_widgets.text("Exception:\n" + self.last_exception_message, max_line_width=30, color=config.colors.error)
 
-    def draw_node(self, idx: int) -> None:
+    def old_draw_node(self, idx: int) -> None:
         assert self.function is not None
 
         ed.begin_node(self.node_id)
@@ -123,12 +71,6 @@ class FunctionNodeOld:
             imgui.text(icons_fontawesome.ICON_FA_CIRCLE)
             ed.end_pin()
 
-        draw_input_set_data = idx == 0
-        if draw_input_set_data:
-            new_value = self.input_data_with_gui.gui_set_input()
-            if new_value is not None:
-                self.set_input(new_value)
-
         def draw_output() -> None:
             if self.output_data_with_gui.get() is None:
                 imgui.text("None")
@@ -146,6 +88,62 @@ class FunctionNodeOld:
         draw_output()
 
         ed.end_node()
+
+    def draw_node(self) -> None:
+        def draw_title() -> None:
+            imgui.text(self.function.name())
+
+        def draw_exception_message() -> None:
+            last_exception_message = self.last_exception_message
+            if last_exception_message is None:
+                return
+            fl_widgets.text("Exception:\n" + last_exception_message, max_line_width=30, color=config.colors.error)
+
+        def draw_input_pin() -> None:
+            ed.begin_pin(self.pin_input, ed.PinKind.input)
+            imgui.text(icons_fontawesome.ICON_FA_ARROW_CIRCLE_LEFT)
+            if self.function.input_gui.value is None:
+                imgui.same_line()
+                imgui.text("No input")
+            ed.end_pin()
+
+        def draw_function_output() -> None:
+            with imgui_ctx.push_id("output"):
+                output = self.function.output_gui.value
+                if output is None:
+                    imgui.text("None")
+                else:
+                    self.function.output_gui.gui_data(function_name=self.function.name())
+
+        def draw_output_pin() -> None:
+            if hasattr(self, "node_size"):
+                imgui.same_line(self.node_size.x - immapp.em_size(2))
+                ed.begin_pin(self.pin_output, ed.PinKind.output)
+                imgui.text(icons_fontawesome.ICON_FA_ARROW_CIRCLE_RIGHT)
+                ed.end_pin()
+
+        def edit_params() -> bool:
+            from imgui_bundle import imgui_ctx
+
+            changed = False
+            if self.function.parameters_with_gui is not None:
+                for param in self.function.parameters_with_gui:
+                    with imgui_ctx.push_obj_id(param):
+                        if param.edit_gui is not None:
+                            imgui.text(param.name + ":")
+                            changed = param.edit_gui() or changed
+            return changed
+
+        ed.begin_node(self.node_id)
+        draw_title()
+        draw_input_pin()
+        draw_output_pin()
+        draw_exception_message()
+        if edit_params():
+            self._invoke_function()
+        draw_function_output()
+        ed.end_node()
+        self.node_size = imgui.get_item_rect_size()
 
     def draw_link(self) -> None:
         if self.next_function_node is None:
