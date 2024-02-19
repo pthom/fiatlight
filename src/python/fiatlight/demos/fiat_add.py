@@ -1,6 +1,6 @@
 from typing import Any
 from imgui_bundle import imgui, immapp
-from fiatlight import IntWithGui, FunctionWithGui, FunctionsCompositionGraph
+from fiatlight import IntWithGui, FunctionWithGui, FunctionsCompositionGraphOld
 
 
 class AddWithGui(FunctionWithGui):
@@ -26,7 +26,7 @@ class AddWithGui(FunctionWithGui):
 
 def main() -> None:
     functions = [AddWithGui(), AddWithGui(), AddWithGui()]
-    functions_graph = FunctionsCompositionGraph(functions)
+    functions_graph = FunctionsCompositionGraphOld(functions)
 
     functions_graph.set_input(1)
 

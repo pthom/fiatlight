@@ -9,7 +9,7 @@ import traceback
 import sys
 
 
-class FunctionsCompositionGraph:
+class FunctionsCompositionGraphOld:
     function_nodes: List[FunctionNodeOld]
 
     def __init__(self, functions: Sequence[FunctionWithGui]) -> None:
@@ -38,7 +38,7 @@ class FunctionsCompositionGraph:
     def draw(self) -> None:
         imgui.push_id(str(id(self)))
 
-        ed.begin("FunctionsCompositionGraph")
+        ed.begin("FunctionsCompositionGraphOld")
         # draw function nodes
         for i, fn in enumerate(self.function_nodes):
             imgui.push_id(str(id(fn)))
