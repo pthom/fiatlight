@@ -95,8 +95,8 @@ class OilPaintingWithGui(FunctionWithGui[ImageUInt8, ImageUInt8]):
             assert type(x) == np.ndarray
             r = np.zeros_like(x)
             # pip install opencv-contrib-python
-            r = cv2.xphoto.oilPainting(x, self.size, self.dynRatio, self.color_conversion)  # type: ignore
-            return r
+            r = cv2.xphoto.oilPainting(x, self.size, self.dynRatio, self.color_conversion)
+            return r  # type: ignore
 
         self.f_impl = f
 
@@ -115,7 +115,8 @@ def main() -> None:
     # split_lut_merge_gui = Split_Lut_Merge_WithGui(ColorType.BGR)
     # functions = [split_lut_merge_gui.split, split_lut_merge_gui.lut, split_lut_merge_gui.merge, OilPaintingWithGui()]
 
-    functions = [GaussianBlurWithGui(), CannyWithGui()]
+    # functions = [GaussianBlurWithGui(), CannyWithGui(), OilPaintingWithGui()]
+    functions = [GaussianBlurWithGui(), OilPaintingWithGui()]
 
     # functions = [img_proc.SplitChannelsWithGui(), img_proc.MergeChannelsWithGui(), img_proc.ConvertColorWithGui()]
     # functions = [img_proc.ConvertColorWithGui(), img_proc.ConvertColorWithGui()]
