@@ -67,4 +67,4 @@ class SourceWithGui(FunctionWithGui[DummySource, Any]):
         self.f_impl = f
 
 
-__all__ = ["FunctionWithGui", "AnyDataWithGui"]
+__all__ = ["FunctionWithGui", "AnyDataWithGui", "FunctionParameterWithGui", "SourceWithGui"]
