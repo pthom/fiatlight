@@ -57,7 +57,7 @@ class SourceWithGui(FunctionWithGui[DummySource, Any]):
 
     def __init__(self, initial_value_with_gui: AnyDataWithGui, source_name: str = "Source") -> None:
         self.output_gui = initial_value_with_gui
-        self.parameters_with_gui = [FunctionParameterWithGui("source", initial_value_with_gui)]
+        self.parameters_with_gui = [FunctionParameterWithGui("##source", initial_value_with_gui)]
         self.name = source_name
 
         def f(_: Any) -> Any:
