@@ -79,7 +79,7 @@ class FunctionNode(Generic[Input, Output]):
 
         def draw_output_pin() -> None:
             if hasattr(self, "node_size"):
-                imgui.same_line(self.node_size.x - immapp.em_size(2))
+                imgui.same_line(self.node_size.x - immapp.em_size(3))
                 ed.begin_pin(self.pin_output, ed.PinKind.output)
                 imgui.text(icons_fontawesome.ICON_FA_ARROW_CIRCLE_RIGHT)
                 ed.end_pin()
@@ -118,17 +118,21 @@ class FunctionNode(Generic[Input, Output]):
             input_data = None
         else:
             input_data = self.input_data_with_gui.get()
+
         if self.function is not None:
-            try:
-                r = self.function.f(input_data)
-                self.last_exception_message = None
-                self.last_exception_traceback = None
-            except Exception as e:
-                self.last_exception_message = str(e)
-                exc_type, exc_value, exc_traceback = sys.exc_info()
-                traceback_details = traceback.format_exception(exc_type, exc_value, exc_traceback)
-                self.last_exception_traceback = "".join(traceback_details)
+            if input_data is None and not isinstance(self.function, SourceWithGui):
                 r = None
+            else:
+                try:
+                    r = self.function.f(input_data)
+                    self.last_exception_message = None
+                    self.last_exception_traceback = None
+                except Exception as e:
+                    self.last_exception_message = str(e)
+                    exc_type, exc_value, exc_traceback = sys.exc_info()
+                    traceback_details = traceback.format_exception(exc_type, exc_value, exc_traceback)
+                    self.last_exception_traceback = "".join(traceback_details)
+                    r = None
 
             self.output_data_with_gui.set(r)
             if self.next_function_node is not None:
