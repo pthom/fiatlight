@@ -1,6 +1,6 @@
 from fiatlight.any_data_with_gui import AnyDataWithGui
 
-from typing import Any, List, final, Callable
+from typing import Any, List, final, Callable, TypeVar, Generic
 from dataclasses import dataclass
 
 
@@ -14,7 +14,11 @@ class DummySource:
     pass
 
 
-class FunctionWithGui:
+Input = TypeVar("Input")
+Output = TypeVar("Output")
+
+
+class FunctionWithGui(Generic[Input, Output]):
     """Override this class with your functions which you want to visualize in a graph
     // FunctionWithGui: any function that can be presented visually, with
     // - a displayed name
@@ -33,10 +37,10 @@ class FunctionWithGui:
     name: str
 
     # set this with the actual function implementation at construction time
-    f_impl: Callable[[Any], Any] | None = None
+    f_impl: Callable[[Input], Output] | None = None
 
     @final
-    def f(self, x: Any) -> Any:
+    def f(self, x: Input) -> Output:
         assert self.f_impl is not None
         return self.f_impl(x)
 
@@ -48,7 +52,7 @@ class FunctionWithGui:
         return False
 
 
-class SourceWithGui(FunctionWithGui):
+class SourceWithGui(FunctionWithGui[DummySource, Any]):
     """A source function that does not take any input and returns a user editable value"""
 
     def __init__(self, initial_value_with_gui: AnyDataWithGui, source_name: str = "Source") -> None:

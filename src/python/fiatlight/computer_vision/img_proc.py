@@ -1,6 +1,6 @@
 from typing import Any
 from fiatlight import FunctionWithGui
-from fiatlight.computer_vision import ImageUInt8
+from fiatlight.computer_vision import ImageUInt8, Image
 from fiatlight.computer_vision.image_with_gui import ImageWithGui, ImageChannelsWithGui
 from fiatlight.computer_vision import cv_color_type, cv_color_type_gui
 
@@ -13,7 +13,7 @@ def split_channels(image: ImageUInt8) -> ImageUInt8:
     return depth_first
 
 
-class SplitChannelsWithGui(FunctionWithGui):
+class SplitChannelsWithGui(FunctionWithGui[Image, Image]):
     def __init__(self) -> None:
         self.input_gui = ImageWithGui()
         self.output_gui = ImageChannelsWithGui()
@@ -27,7 +27,7 @@ class SplitChannelsWithGui(FunctionWithGui):
         self.f_impl = f
 
 
-class MergeChannelsWithGui(FunctionWithGui):
+class MergeChannelsWithGui(FunctionWithGui[Image, Image]):
     def __init__(self) -> None:
         self.input_gui = ImageChannelsWithGui()
         self.output_gui = ImageWithGui()
@@ -43,7 +43,7 @@ class MergeChannelsWithGui(FunctionWithGui):
         self.f_impl = f
 
 
-class ConvertColorWithGui(FunctionWithGui):
+class ConvertColorWithGui(FunctionWithGui[ImageUInt8, ImageUInt8]):
     color_conversion: cv_color_type.ColorConversion | None = None
     input_gui: ImageWithGui
     output_gui: ImageWithGui
