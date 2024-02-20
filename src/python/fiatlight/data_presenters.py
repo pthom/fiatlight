@@ -1,7 +1,7 @@
-from imgui_bundle import imgui, hello_imgui, imgui_knobs, imgui_toggle
+from imgui_bundle import imgui, hello_imgui, imgui_knobs, imgui_toggle, imgui_ctx
 from fiatlight.any_data_with_gui import AnyDataWithGui
 from fiatlight.function_with_gui import SourceWithGui
-
+from fiatlight.internal import osd_widgets
 
 from typing import Any, Callable, TypeAlias
 from dataclasses import dataclass
@@ -12,8 +12,65 @@ ImGuiKnobVariant_: TypeAlias = imgui_knobs.ImGuiKnobVariant_
 ToggleConfig: TypeAlias = imgui_toggle.ToggleConfig
 
 
+def versatile_gui_data(value: Any) -> None:
+    def _add_details_button(obj: Any, detail_gui: Callable[[], None]) -> None:
+        with imgui_ctx.push_obj_id(obj):
+            if imgui.button("show details"):
+                osd_widgets.set_detail_gui(detail_gui)
+            if imgui.is_item_hovered():
+                osd_widgets.set_tooltip(
+                    "Click to show details, then open the Info tab at the bottom to see the full string"
+                )
+
+    if value is None:
+        imgui.text("None")
+    elif isinstance(value, int):
+        imgui.text(f"Int Value={value}")
+    elif isinstance(value, float):
+        imgui.text(f"Float Value={value:.4f}")
+        if imgui.is_item_hovered():
+            osd_widgets.set_tooltip(f"{value}")
+    elif isinstance(value, str):
+        max_len = 30
+        if len(value) > max_len:
+            imgui.text(f"Str len={len(value)}")
+            imgui.text('"' + value[:max_len])
+
+            def detail_gui() -> None:
+                imgui.input_text_multiline("##value_text", value)
+
+            _add_details_button(value, detail_gui)
+            if imgui.is_item_hovered():
+                osd_widgets.set_tooltip(
+                    "Click to show details, then open the Info tab at the bottom to see the full string"
+                )
+        else:
+            imgui.text('"' + value + '"')
+    elif isinstance(value, list):
+        imgui.text(f"List len={len(value)}")
+        for i, v in enumerate(value):
+            if i >= 5:
+
+                def detail_gui() -> None:
+                    for i, v in enumerate(value):
+                        versatile_gui_data(v)
+
+                _add_details_button(value, detail_gui)
+                break
+            else:
+                versatile_gui_data(v)
+    elif isinstance(value, tuple):
+        # imgui.text(f"Tuple len={len(value)}")
+        strs = [str(v) for v in value]
+        tuple_str = "(" + ", ".join(strs) + ")"
+        imgui.text(tuple_str)
+
+    else:
+        raise Exception(f"versatile_gui_data Unsupported type: {type(value)}")
+
+
 def _present_str(x: Any) -> None:
-    imgui.text(str(x))
+    versatile_gui_data(x)
 
 
 ########################################################################################################################
@@ -100,7 +157,8 @@ def make_int_with_gui(initial_value: int, params: IntEditParams | None = None) -
 
 def make_int_source(initial_value: int, params: IntEditParams | None = None, label: str = "Source") -> SourceWithGui:
     x = make_int_with_gui(initial_value, params)
-    return SourceWithGui(x, label)
+    r = SourceWithGui(x, label)
+    return r
 
 
 ########################################################################################################################
@@ -200,6 +258,7 @@ class BoolEditType(Enum):
     toggle = 3
 
 
+@dataclass
 class BoolEditParams:
     label: str = "##bool"
     edit_type: BoolEditType = BoolEditType.checkbox
@@ -306,6 +365,22 @@ def make_str_with_gui(initial_value: str, params: StrEditParams | None = None) -
 def make_str_source(initial_value: str, params: StrEditParams | None = None, label: str = "Source") -> SourceWithGui:
     x = make_str_with_gui(initial_value, params)
     return SourceWithGui(x, label)
+
+
+########################################################################################################################
+#                               Any dispatcher
+########################################################################################################################
+def make_any_with_gui(initial_value: Any, label: str = "##any") -> AnyDataWithGui:
+    if isinstance(initial_value, int):
+        return make_int_with_gui(initial_value, IntEditParams(label=label))
+    elif isinstance(initial_value, float):
+        return make_float_with_gui(initial_value, FloatEditParams(label=label))
+    elif isinstance(initial_value, str):
+        return make_str_with_gui(initial_value, StrEditParams(label=label))
+    elif isinstance(initial_value, bool):
+        return make_bool_with_gui(initial_value, BoolEditParams(label=label))
+    else:
+        raise ValueError(f"Unsupported type: {type(initial_value)}")
 
 
 ########################################################################################################################
