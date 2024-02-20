@@ -101,6 +101,9 @@ class FiatlightGui:
         with imgui_ctx.push_obj_id(self):
             if imgui.begin_tab_bar("InfoPanelTabBar"):
                 if imgui.begin_tab_item_simple("Info"):
+                    if imgui.button("Reset graph layout"):
+                        self._functions_composition_graph.shall_layout_graph = True
+
                     details_gui = osd_widgets.get_detail_gui()
                     if details_gui is not None:
                         details_gui()
