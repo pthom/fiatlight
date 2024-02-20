@@ -2,6 +2,7 @@ from typing import Any, Optional, Sequence
 from imgui_bundle import imgui, imgui_ctx
 from fiatlight.any_data_with_gui import AnyDataWithGui
 from fiatlight.function_with_gui import FunctionWithGui
+from fiatlight.function_with_gui import FunctionWithGui, Input, Output
 from fiatlight.functions_graph import FunctionsGraph
 from fiatlight.fiatlight_types import PureFunction, PureFunctionOrFunctionWithGui
 from fiatlight.internal import osd_widgets
@@ -104,6 +105,7 @@ class VersatileDataWithGui(AnyDataWithGui):
 
 
 class VersatileFunctionWithGui(FunctionWithGui):
+class VersatileFunctionWithGui(FunctionWithGui[Input, Output]):
     inner_function: PureFunction
     inner_function_name: str
 
@@ -126,7 +128,7 @@ class VersatileFunctionWithGui(FunctionWithGui):
         return False
 
 
-def to_function_with_gui(f: PureFunctionOrFunctionWithGui) -> FunctionWithGui:
+def to_function_with_gui(f: PureFunctionOrFunctionWithGui) -> FunctionWithGui[Any, Any]:
     if isinstance(f, FunctionWithGui):
         return f
     else:

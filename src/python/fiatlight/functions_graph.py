@@ -6,12 +6,12 @@ from typing import List, Any, Sequence
 
 
 class FunctionsGraph:
-    function_nodes: List[FunctionNode]
+    function_nodes: List[FunctionNode[Any, Any]]
     shall_layout_graph: bool = False
 
     _idx_frame: int = 0
 
-    def __init__(self, functions: Sequence[FunctionWithGui]) -> None:
+    def __init__(self, functions: Sequence[FunctionWithGui[Any, Any]]) -> None:
         assert len(functions) > 0
         self.function_nodes = []
         for f in functions:

@@ -1,6 +1,6 @@
 from __future__ import annotations
 from fiatlight.function_with_gui import FunctionWithGui
-from fiatlight.computer_vision import ImageUInt8
+from fiatlight.computer_vision import ImageUInt8, Image
 from fiatlight.computer_vision.image_with_gui import ImageWithGui
 from fiatlight.computer_vision.cv_color_type import CvColorConversionCode
 from fiatlight.fiatlight_gui import FiatlightGuiParams, fiatlight_run
@@ -18,7 +18,7 @@ def demos_assets_folder() -> str:
     return assets_dir
 
 
-class GaussianBlurWithGui(FunctionWithGui):
+class GaussianBlurWithGui(FunctionWithGui[Image, Image]):
     sigma_x: float = 3.0
     sigma_y: float = 3.0
 
@@ -43,7 +43,7 @@ class GaussianBlurWithGui(FunctionWithGui):
         return changed1 or changed2
 
 
-class CannyWithGui(FunctionWithGui):
+class CannyWithGui(FunctionWithGui[Image, Image]):
     t_lower = 100  # Lower Threshold
     t_upper = 200  # Upper threshold
     aperture_size = 5  # Aperture size (3, 5, or 7)
@@ -80,7 +80,7 @@ class CannyWithGui(FunctionWithGui):
         return changed1 or changed2 or changed3
 
 
-class OilPaintingWithGui(FunctionWithGui):
+class OilPaintingWithGui(FunctionWithGui[ImageUInt8, ImageUInt8]):
     dynRatio = 1  # image is divided by dynRatio before histogram processing
     size = 3  # size neighbouring size is 2-size+1
     color_conversion: CvColorConversionCode  # color space conversion code
