@@ -2,10 +2,16 @@ from imgui_bundle import imgui, ImVec4
 from fiatlight.internal import osd_widgets
 
 
-def text_custom(msg: str, max_width_pixels: float | None = None, color: ImVec4 | None = None) -> None:
+def text_custom(
+    msg: str, max_width_pixels: float | None = None, color: ImVec4 | None = None, remove_after_double_hash: bool = True
+) -> None:
+    if remove_after_double_hash:
+        msg = msg.split("##", 1)[0]
+    if len(msg) == 0:
+        return
+
     msg_orig = msg
     is_truncated = False
-    lines = msg.split("\n")
 
     def truncate_line(line: str, max_chars: int) -> str:
         if len(line) > max_chars:
@@ -15,11 +21,10 @@ def text_custom(msg: str, max_width_pixels: float | None = None, color: ImVec4 |
         return line
 
     def truncate_lines(max_chars: int) -> str:
+        lines = msg.split("\n")
         return "\n".join(truncate_line(line, max_chars) for line in lines)
 
-    if max_width_pixels is None:
-        msg = msg_orig
-    else:
+    if max_width_pixels is not None:
         font_approx_width = imgui.get_font_size() * 0.8
         max_chars = int(max_width_pixels / font_approx_width)
         msg = truncate_lines(max_chars)

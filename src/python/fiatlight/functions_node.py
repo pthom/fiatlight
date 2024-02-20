@@ -40,7 +40,7 @@ class FunctionNode(Generic[Input, Output]):
 
     def draw_node(self) -> None:
         def draw_title() -> None:
-            imgui.text(self.function.name)
+            fl_widgets.text_custom(self.function.name)
 
         def draw_exception_message() -> None:
             last_exception_message = self.last_exception_message
@@ -79,7 +79,7 @@ class FunctionNode(Generic[Input, Output]):
 
         def draw_output_pin() -> None:
             if hasattr(self, "node_size"):
-                imgui.same_line(self.node_size.x - immapp.em_size(3))
+                imgui.same_line(self.node_size.x - immapp.em_size(2.5))
                 ed.begin_pin(self.pin_output, ed.PinKind.output)
                 imgui.text(icons_fontawesome.ICON_FA_ARROW_CIRCLE_RIGHT)
                 ed.end_pin()
@@ -91,7 +91,7 @@ class FunctionNode(Generic[Input, Output]):
             if self.function.parameters_with_gui is not None:
                 for param in self.function.parameters_with_gui:
                     with imgui_ctx.push_obj_id(param):
-                        imgui.text(param.name + ":")
+                        fl_widgets.text_custom(param.name + ":")
                         changed = param.parameter_with_gui.call_gui_edit() or changed
             return changed
 
