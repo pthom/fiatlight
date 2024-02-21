@@ -136,6 +136,12 @@ class LutParamsWithGui(AnyDataWithGui):
         return changed
 
 
+def lut_with_params(params: lut.LutParams, image: ImageUInt8) -> ImageUInt8:
+    lut_table = lut.lut_params_to_table(params)
+    r = lut.apply_lut_to_uint8_image(image, lut_table)
+    return r
+
+
 class LutImageWithGui(FunctionWithGui[ImageUInt8, ImageUInt8]):
     lut_params_with_gui: LutParamsWithGui
     input_gui: ImageWithGui
@@ -148,9 +154,8 @@ class LutImageWithGui(FunctionWithGui[ImageUInt8, ImageUInt8]):
         self.name = "LUT"
 
         def f(x: ImageUInt8) -> ImageUInt8:
-            # assert type(x) == ImageUInt8
-            image_adjusted = lut.apply_lut_to_uint8_image(x, self.lut_params_with_gui.lut_table())
-            return image_adjusted
+            r = lut_with_params(self.lut_params_with_gui.value, x)
+            return r
 
         self.f_impl = f
 

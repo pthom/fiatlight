@@ -28,12 +28,10 @@ def lut_params_to_table(params: LutParams) -> LutTable:
     return lut_uint8
 
 
-# def apply_lut_to_float01_image(image: ImageFloat, lut_table: LutTable) -> ImageFloat:
-#     image_uint8: ImageUInt8 = (image * 255.0).astype(np.uint8)
-#     image_with_lut_uint8 = np.zeros_like(image_uint8)
-#     cv2.LUT(image_uint8, lut_table, image_with_lut_uint8)
-#     image_adjusted: ImageFloat = image_with_lut_uint8.astype(float) / 255.0
-#     return image_adjusted
+def lut_with_params(params: LutParams, image: ImageUInt8) -> ImageUInt8:
+    lut_table = lut_params_to_table(params)
+    r = apply_lut_to_uint8_image(image, lut_table)
+    return r
 
 
 def apply_lut_to_uint8_image(image: ImageUInt8, lut_table: LutTable) -> ImageUInt8:
