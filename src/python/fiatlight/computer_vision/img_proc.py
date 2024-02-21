@@ -1,5 +1,5 @@
 from typing import Any
-from fiatlight import FunctionWithGui
+from fiatlight import FunctionWithGui, FunctionParameterWithGui
 from fiatlight.computer_vision import ImageUInt8, Image
 from fiatlight.computer_vision.image_with_gui import ImageWithGui, ImageChannelsWithGui
 from fiatlight.computer_vision import cv_color_type, cv_color_type_gui
@@ -44,30 +44,23 @@ class MergeChannelsWithGui(FunctionWithGui[Image, Image]):
 
 
 class ConvertColorWithGui(FunctionWithGui[ImageUInt8, ImageUInt8]):
-    color_conversion: cv_color_type.ColorConversion | None = None
+    color_conversion_with_gui: cv_color_type_gui.ConvertColorWithGui
     input_gui: ImageWithGui
     output_gui: ImageWithGui
 
-    def __init__(self) -> None:
+    def __init__(self, color_conversion: cv_color_type.ColorConversion | None = None) -> None:
+        self.color_conversion_with_gui = cv_color_type_gui.ConvertColorWithGui(color_conversion)
         self.input_gui = ImageWithGui()
         self.output_gui = ImageWithGui()
         self.name = "Convert Color"
 
         def f(x: Any) -> Any:
-            if x is None or self.color_conversion is None:
+            if x is None or self.color_conversion_with_gui.value is None:
                 return None
-            r = self.color_conversion.convert_image(x)
-            self.output_gui.color_type = self.color_conversion.dst_color
+            r = self.color_conversion_with_gui.value.convert_image(x)
+            self.output_gui.color_type = self.color_conversion_with_gui.value.dst_color
             self.output_gui.refresh_image()
             return r
 
         self.f_impl = f
-
-    def old_gui_params(self) -> bool:
-        input_image = self.input_gui.value
-        if input_image is None:
-            return False
-
-        assert isinstance(input_image, np.ndarray)
-        changed, self.color_conversion = cv_color_type_gui.gui_color_conversion(self.color_conversion, input_image)
-        return changed
+        self.parameters_with_gui = [FunctionParameterWithGui("color_conversion", self.color_conversion_with_gui)]

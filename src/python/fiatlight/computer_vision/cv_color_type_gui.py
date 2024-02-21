@@ -1,22 +1,14 @@
 from fiatlight.computer_vision.cv_color_type import ColorConversion, ColorType, OptionalColorConversion
+from fiatlight import AnyDataWithGui
 from imgui_bundle import imgui_ctx, imgui
-from numpy.typing import NDArray
-from typing import Any, Tuple
+from typing import Tuple
 
 
-def gui_color_conversion(
-    color_conversion: OptionalColorConversion, input_image: NDArray[Any]
-) -> Tuple[bool, OptionalColorConversion]:
+def gui_color_conversion(color_conversion: OptionalColorConversion) -> Tuple[bool, OptionalColorConversion]:
     changed = False
-
+    available_src_colors = ColorType.all_color_types()
     if color_conversion is None:
-        color_conversion = ColorConversion.make_default_color_conversion(input_image)
-        if color_conversion is not None:
-            changed = True  # we just created a new color conversion
-    if color_conversion is None:
-        return False, None
-
-    available_src_colors = ColorType.available_color_types_for_image(input_image)
+        color_conversion = ColorConversion(ColorType.BGR, ColorType.RGB)
     with imgui_ctx.begin_group():
         with imgui_ctx.push_id("source_color"):
             imgui.text("Source color")
@@ -37,3 +29,18 @@ def gui_color_conversion(
                     changed = True
 
     return changed, color_conversion
+
+
+class ConvertColorWithGui(AnyDataWithGui):
+    value: ColorConversion | None
+
+    def __init__(self, value: ColorConversion | None = None) -> None:
+        def edit_gui(name: str) -> bool:
+            imgui.text(name)
+            changed, self.value = gui_color_conversion(self.value)
+            return changed
+
+        def present_gui(name: str) -> None:
+            imgui.text(f"{name}: {self.value}")
+
+        super().__init__(value, present_gui, edit_gui)
