@@ -125,6 +125,7 @@ def main() -> None:
             cv_color_type.ColorConversion(cv_color_type.ColorType.BGR, cv_color_type.ColorType.Gray)
         ),
         lut_gui.LutImageWithGui(),
+        img_proc.ConvertColorWithGui(),
     ]
 
     fiatlight_run(
