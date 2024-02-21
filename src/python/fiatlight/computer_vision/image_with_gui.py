@@ -42,6 +42,7 @@ class ImageWithGui(AnyDataWithGui):
         color_conversion_to_bgr = self._color_conversion_to_bgr()
         if self.value is not None and color_conversion_to_bgr is not None:
             self.image_converted = color_conversion_to_bgr.convert_image(self.value)
+        self.refresh_image()
 
     def refresh_image(self) -> None:
         self._needs_refresh = True
