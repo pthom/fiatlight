@@ -20,21 +20,19 @@ class LutParamsWithGui(AnyDataWithGui):
         super().__init__()
         self.value = value if value is not None else lut.LutParams()
 
-        def gui_present(name: str) -> None:
-            self._show_lut_graph(name)
+        def gui_present() -> None:
+            self._show_lut_graph()
 
         self.gui_present_impl = gui_present
-        self.gui_edit_impl = lambda name: self.gui_params(name)
+        self.gui_edit_impl = lambda: self.gui_params()
 
     def _lut_graph_size(self) -> int:
         return int(immapp.em_size(self._lut_graph_size_em))
 
-    def _show_lut_graph(self, channel_name: str) -> Point2d:
+    def _show_lut_graph(self) -> Point2d:
         if not hasattr(self, "_lut_graph"):
             self._prepare_lut_graph()
-        mouse_position = immvision.image_display(
-            channel_name, self._lut_graph, refresh_image=self._lut_graph_needs_refresh
-        )
+        mouse_position = immvision.image_display("##lut", self._lut_graph, refresh_image=self._lut_graph_needs_refresh)
         self._lut_graph_needs_refresh = False
         return mouse_position
 
@@ -87,11 +85,11 @@ class LutParamsWithGui(AnyDataWithGui):
 
         return changed
 
-    def gui_params(self, channel_name: str) -> bool:
+    def gui_params(self) -> bool:
         changed = False
 
         imgui.begin_group()
-        mouse_position = self._show_lut_graph(channel_name)
+        mouse_position = self._show_lut_graph()
         if self.handle_graph_mouse_edit(mouse_position):
             changed = True
 

@@ -35,12 +35,11 @@ class ConvertColorWithGui(AnyDataWithGui):
     value: ColorConversion | None
 
     def __init__(self, value: ColorConversion | None = None) -> None:
-        def edit_gui(name: str) -> bool:
-            imgui.text(name)
+        def edit_gui() -> bool:
             changed, self.value = gui_color_conversion(self.value)
             return changed
 
-        def present_gui(name: str) -> None:
-            imgui.text(f"{name}: {self.value}")
+        def present_gui() -> None:
+            imgui.text(str(self.value))
 
         super().__init__(value, present_gui, edit_gui)
