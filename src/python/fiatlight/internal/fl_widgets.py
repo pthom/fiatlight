@@ -58,7 +58,7 @@ def draw_node_gui_right_align(parent_node: ed.NodeId, gui_function: VoidFunction
     imgui.begin_group()
     gui_function()
     imgui.end_group()
-    RIGHT_ALIGN_WIDTH[item_id] = imgui.get_item_rect_size().x + 20  # 20 ???
+    RIGHT_ALIGN_WIDTH[item_id] = imgui.get_item_rect_size().x + 22  # 20 ???
 
     # print(f"RIGHT_ALIGN_WIDTH: {RIGHT_ALIGN_WIDTH[item_id]} parent_size.x: {parent_size.x} pos_x: {pos_x}")
 

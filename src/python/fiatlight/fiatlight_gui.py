@@ -1,28 +1,22 @@
-# type: ignore
-
-from fiatlight.function_with_gui import FunctionWithGui
 from fiatlight.function_node_gui import FunctionNodeGui
-from fiatlight import versatile
 from fiatlight.config import config
 from fiatlight.functions_graph_gui import FunctionsGraphGui
+from fiatlight.functions_graph import FunctionsGraph
 from fiatlight.internal import osd_widgets
 from imgui_bundle import immapp, imgui, imgui_ctx
 from typing import Any
 from imgui_bundle import hello_imgui, ImVec2, immvision
 
-from typing import List, Tuple, Sequence
+from typing import List, Tuple
 
 
 class FiatlightGuiParams:
-    initial_value: Any
-    functions_graph: Sequence[FunctionWithGui] | None
     show_image_inspector: bool
     runner_params: hello_imgui.RunnerParams
     addons: immapp.AddOnsParams
 
     def __init__(
         self,
-        functions_graph: Sequence[FunctionWithGui] | None = None,
         app_title: str = "fiatlight",
         window_size: Tuple[int, int] | None = None,
         initial_value: Any = None,
@@ -30,7 +24,6 @@ class FiatlightGuiParams:
         runner_params: hello_imgui.RunnerParams | None = None,
         addons: immapp.AddOnsParams | None = None,
     ) -> None:
-        self.functions_graph = functions_graph
         self.initial_value = initial_value
         self.show_image_inspector = show_image_inspector
 
@@ -66,35 +59,37 @@ class FiatlightGuiParams:
 
 class FiatlightGui:
     params: FiatlightGuiParams
-    _functions_composition_graph: FunctionsGraphGui
+    _functions_graph_gui: FunctionsGraphGui
     _main_dock_space_id: str
     _info_dock_space_id: str = "info_dock"
     _idx_frame: int = 0
 
-    def __init__(self, params: FiatlightGuiParams) -> None:
+    def __init__(self, functions_graph: FunctionsGraph, params: FiatlightGuiParams | None = None) -> None:
+        if params is None:
+            params = FiatlightGuiParams()
         self.params = params
-        if self.params.functions_graph is not None:
-            functions_with_gui = [versatile.to_function_with_gui(f) for f in self.params.functions_graph]
-        else:
-            functions_with_gui = []
-        self._functions_composition_graph = FunctionsGraphGui(functions_with_gui)
+        self._functions_graph_gui = FunctionsGraphGui(functions_graph)
 
-    def _function_nodes(self) -> List[FunctionNodeGui]:  # type: ignore
-        return self._functions_composition_graph.function_nodes_gui
+    def _function_nodes(self) -> List[FunctionNodeGui]:
+        return self._functions_graph_gui.function_nodes_gui
 
     def _has_one_exception(self) -> bool:
-        return any(fn.function.last_exception_message is not None for fn in self._function_nodes())
+        return any(
+            fn.function_node.function_with_gui.last_exception_message is not None for fn in self._function_nodes()
+        )
 
     def _draw_exceptions(self) -> None:
         for function_node in self._function_nodes():
-            if function_node.function.last_exception_message is not None:
-                function_name = function_node.function.name
+            last_exception_message = function_node.function_node.function_with_gui.last_exception_message
+            last_exception_traceback = function_node.function_node.function_with_gui.last_exception_traceback
+            if last_exception_message is not None:
+                function_name = function_node.function_node.name
                 imgui.text_colored(
                     config.colors.error,
-                    f"Exception in {function_name}: {function_node.function.last_exception_message}",
+                    f"Exception in {function_name}: {last_exception_message}",
                 )
-                if function_node.function.last_exception_traceback is not None:
-                    msg = function_node.function.last_exception_traceback
+                if last_exception_traceback is not None:
+                    msg = last_exception_traceback
                     nb_lines = msg.count("\n") + 1
                     text_size = ImVec2(imgui.get_window_width(), immapp.em_size(nb_lines))
                     imgui.input_text_multiline("##error", msg, text_size)
@@ -105,7 +100,7 @@ class FiatlightGui:
             if imgui.begin_tab_bar("InfoPanelTabBar"):
                 if imgui.begin_tab_item_simple("Info"):
                     if imgui.button("Reset graph layout"):
-                        self._functions_composition_graph.shall_layout_graph = True
+                        self._functions_graph_gui.shall_layout_graph = True
 
                     details_gui = osd_widgets.get_detail_gui()
                     if details_gui is not None:
@@ -124,7 +119,7 @@ class FiatlightGui:
             # the window size is not available on the first frames,
             # and the node editor uses it to compute the initial position of the nodes
             # window_size = imgui.get_window_size()
-            self._functions_composition_graph.draw()
+            self._functions_graph_gui.draw()
 
     def _dockable_windows(self) -> List[hello_imgui.DockableWindow]:
         main_window = hello_imgui.DockableWindow(
@@ -158,13 +153,11 @@ class FiatlightGui:
         return [split_main_info]
 
     def run(self) -> None:
-        self._functions_composition_graph.set_input(self.params.initial_value)
-
         self.params.runner_params.docking_params.docking_splits += self._docking_splits()
         self.params.runner_params.docking_params.dockable_windows += self._dockable_windows()
         immapp.run(self.params.runner_params, self.params.addons)
 
 
-def fiatlight_run(params: FiatlightGuiParams) -> None:
-    fiatlight_gui = FiatlightGui(params)
+def fiatlight_run(functions_graph: FunctionsGraph, params: FiatlightGuiParams | None = None) -> None:
+    fiatlight_gui = FiatlightGui(functions_graph, params)
     fiatlight_gui.run()
