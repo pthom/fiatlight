@@ -1,26 +1,26 @@
-from fiatlight.fiatlight_types import MixedFunctionsGraph
+from fiatlight.function_with_gui import FunctionWithGui
 from fiatlight import versatile
 from fiatlight.config import config
 from fiatlight.functions_graph import FunctionsGraph
-from fiatlight.functions_node import FunctionNode
+from fiatlight.function_node import FunctionNode
 from fiatlight.internal import osd_widgets
 from imgui_bundle import immapp, imgui, imgui_ctx
 from typing import Any
 from imgui_bundle import hello_imgui, ImVec2, immvision
 
-from typing import List, Tuple
+from typing import List, Tuple, Sequence
 
 
 class FiatlightGuiParams:
     initial_value: Any
-    functions_graph: MixedFunctionsGraph | None
+    functions_graph: Sequence[FunctionWithGui] | None
     show_image_inspector: bool
     runner_params: hello_imgui.RunnerParams
     addons: immapp.AddOnsParams
 
     def __init__(
         self,
-        functions_graph: MixedFunctionsGraph | None = None,
+        functions_graph: Sequence[FunctionWithGui] | None = None,
         app_title: str = "fiatlight",
         window_size: Tuple[int, int] | None = None,
         initial_value: Any = None,
