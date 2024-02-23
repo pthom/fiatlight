@@ -4,33 +4,31 @@ from fiatlight.internal.fl_widgets import draw_node_gui_right_align
 from fiatlight.config import config
 from fiatlight.internal import fl_widgets
 from imgui_bundle import imgui, imgui_node_editor as ed, icons_fontawesome, ImVec2, imgui_ctx, hello_imgui
-from typing import Optional, List
+from typing import List
 
 
 class FunctionNode:
     function: FunctionWithGui
-    next_function_node: Optional[FunctionNode]
 
     node_id: ed.NodeId
-    pin_input: List[ed.PinId]
-    pin_output: List[ed.PinId]
+    pins_input: List[ed.PinId]
+    pins_output: List[ed.PinId]
     link_id: ed.LinkId
 
     node_size: ImVec2 | None = None  # will be set after the node is drawn once
 
     def __init__(self, function: FunctionWithGui) -> None:
         self.function = function
-        self.next_function_node = None
 
         self.node_id = ed.NodeId.create()
 
-        self.pin_input = []
+        self.pins_input = []
         for _ in function.inputs_with_gui:
-            self.pin_input.append(ed.PinId.create())
+            self.pins_input.append(ed.PinId.create())
 
-        self.pin_output = []
+        self.pins_output = []
         for _ in function.outputs_with_gui:
-            self.pin_output.append(ed.PinId.create())
+            self.pins_output.append(ed.PinId.create())
 
         self.link_id = ed.LinkId.create()
 
@@ -54,14 +52,14 @@ class FunctionNode:
             )
 
         def draw_input_pins() -> None:
-            for input_param, pin_input in zip(self.function.inputs_with_gui, self.pin_input):
+            for input_param, pin_input in zip(self.function.inputs_with_gui, self.pins_input):
                 ed.begin_pin(pin_input, ed.PinKind.input)
                 imgui.text(icons_fontawesome.ICON_FA_ARROW_CIRCLE_LEFT + " " + input_param.name)
                 ed.end_pin()
 
         def draw_output_pins() -> None:
             def draw() -> None:
-                for output_param, pin_output in zip(self.function.outputs_with_gui, self.pin_output):
+                for output_param, pin_output in zip(self.function.outputs_with_gui, self.pins_output):
                     ed.begin_pin(pin_output, ed.PinKind.output)
                     imgui.text(output_param.name + " " + icons_fontawesome.ICON_FA_ARROW_CIRCLE_RIGHT)
                     ed.end_pin()
@@ -95,11 +93,6 @@ class FunctionNode:
         draw_output_pins()
         ed.end_node()
         self.node_size = ed.get_node_size(self.node_id)
-
-    def draw_link(self) -> None:
-        if self.next_function_node is None:
-            return
-        # ed.link(self.link_id, self.pin_output, self.next_function_node.pin_input)
 
 
 def sandbox() -> None:
