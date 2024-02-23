@@ -75,7 +75,7 @@ def node_separator(parent_node: ed.NodeId, text: str = "") -> None:
 
     spacing_x = imgui.get_style().item_spacing.x / 2.0
 
-    cur_pos = imgui.get_cursor_pos()
+    cur_pos = imgui.get_cursor_screen_pos()
     p1 = ImVec2(node_pos.x + spacing_x, cur_pos.y + spacing_y / 2)
     p2 = ImVec2(p1.x + node_size.x - 1.0 - 2 * spacing_x, p1.y)
 
@@ -87,7 +87,7 @@ def node_separator(parent_node: ed.NodeId, text: str = "") -> None:
 
     def draw_line(p1: ImVec2, p2: ImVec2) -> None:
         color32 = get_color32(imgui.Col_.separator)
-        imgui.get_foreground_draw_list().add_line(p1, p2, color32, thickness)
+        imgui.get_foreground_draw_list().add_line(ed.canvas_to_screen(p1), ed.canvas_to_screen(p2), color32, thickness)
 
     if len(text) == 0:
         draw_line(p1, p2)
@@ -95,12 +95,14 @@ def node_separator(parent_node: ed.NodeId, text: str = "") -> None:
         text = " " + text + " "
         text_size = imgui.calc_text_size(text)
         p11 = p1
-        p12 = ImVec2(p1.x + (p2.x - p1.x - text_size.x) / 2, p1.y)
+        p12 = ImVec2(p1.x + (p2.x - p1.x - text_size.x) / 4, p1.y)
         p21 = ImVec2(p12.x + text_size.x, p12.y)
         p22 = p2
         draw_line(p11, p12)
         draw_line(p21, p22)
         p_text = ImVec2(p12.x, p12.y - imgui.get_font_size() / 2)
-        color32 = get_color32(imgui.Col_.text)
-        imgui.get_foreground_draw_list().add_text(p_text, color32, text)
+        orig_cursor_pos = imgui.get_cursor_screen_pos()
+        imgui.set_cursor_screen_pos(p_text)
+        text_custom(text)
+        imgui.set_cursor_screen_pos(orig_cursor_pos)
     imgui.dummy(ImVec2(0, spacing_y))
