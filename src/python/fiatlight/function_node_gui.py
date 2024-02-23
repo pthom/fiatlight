@@ -1,10 +1,31 @@
 from __future__ import annotations
-from fiatlight.function_node import FunctionNode
+from fiatlight.function_node import FunctionNode, FunctionNodeLink
 from fiatlight.internal.fl_widgets import draw_node_gui_right_align
 from fiatlight.config import config
 from fiatlight.internal import fl_widgets
 from imgui_bundle import imgui, imgui_node_editor as ed, icons_fontawesome, ImVec2, imgui_ctx, hello_imgui
-from typing import Dict
+from typing import Dict, List
+
+
+class FunctionNodeLinkGui:
+    function_node_link: FunctionNodeLink
+    link_id: ed.LinkId
+    start_id: ed.PinId
+    end_id: ed.PinId
+
+    def __init__(self, function_node_link: FunctionNodeLink, function_nodes: List[FunctionNodeGui]) -> None:
+        self.function_node_link = function_node_link
+        self.link_id = ed.LinkId.create()
+        for f in function_nodes:
+            if f.function_node.function_with_gui == function_node_link.src_function_node.function_with_gui:
+                self.start_id = f.pins_output[function_node_link.src_output_name]
+            if f.function_node.function_with_gui == function_node_link.dst_function_node.function_with_gui:
+                self.end_id = f.pins_input[function_node_link.dst_input_name]
+        assert hasattr(self, "start_id")
+        assert hasattr(self, "end_id")
+
+    def draw(self) -> None:
+        ed.link(self.link_id, self.start_id, self.end_id)
 
 
 class FunctionNodeGui:
