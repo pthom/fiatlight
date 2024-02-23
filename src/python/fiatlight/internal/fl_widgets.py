@@ -1,5 +1,8 @@
 from imgui_bundle import imgui, ImVec4
 from fiatlight.internal import osd_widgets
+from fiatlight.fiatlight_types import VoidFunction
+from imgui_bundle import imgui_node_editor as ed
+from typing import Dict
 
 
 def text_custom(
@@ -36,3 +39,27 @@ def text_custom(
 
     if is_truncated and imgui.is_item_hovered():
         osd_widgets.set_tooltip(msg_orig)
+
+
+RIGHT_ALIGN_WIDTH: Dict[int, float] = {}
+
+
+def draw_node_gui_right_align(parent_node: ed.NodeId, gui_function: VoidFunction) -> None:
+    parent_size = ed.get_node_size(parent_node)
+    item_id = imgui.get_id("align_right")
+    imgui.push_id(item_id)
+
+    if item_id not in RIGHT_ALIGN_WIDTH.keys():
+        pos_x = 0.0
+    else:
+        pos_x = parent_size.x - RIGHT_ALIGN_WIDTH[item_id]
+
+    imgui.same_line(pos_x)
+    imgui.begin_group()
+    gui_function()
+    imgui.end_group()
+    RIGHT_ALIGN_WIDTH[item_id] = imgui.get_item_rect_size().x + 20  # 20 ???
+
+    # print(f"RIGHT_ALIGN_WIDTH: {RIGHT_ALIGN_WIDTH[item_id]} parent_size.x: {parent_size.x} pos_x: {pos_x}")
+
+    imgui.pop_id()

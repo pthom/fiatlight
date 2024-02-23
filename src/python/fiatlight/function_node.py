@@ -1,34 +1,10 @@
 from __future__ import annotations
 from fiatlight.function_with_gui import FunctionWithGui, FunctionParameterWithGui
-from fiatlight.fiatlight_types import VoidFunction
+from fiatlight.internal.fl_widgets import draw_node_gui_right_align
 from fiatlight.config import config
 from fiatlight.internal import fl_widgets
 from imgui_bundle import imgui, imgui_node_editor as ed, icons_fontawesome, ImVec2, imgui_ctx, hello_imgui
-from typing import Optional, List, Dict
-
-
-RIGHT_ALIGN_WIDTH: Dict[imgui.ID, float] = {}
-
-
-def draw_node_gui_right_align(parent_node: ed.NodeId, gui_function: VoidFunction) -> None:
-    parent_size = ed.get_node_size(parent_node)
-    item_id = imgui.get_id("align_right")
-    imgui.push_id(item_id)
-
-    if item_id not in RIGHT_ALIGN_WIDTH.keys():
-        pos_x = 0.0
-    else:
-        pos_x = parent_size.x - RIGHT_ALIGN_WIDTH[item_id]
-
-    imgui.same_line(pos_x)
-    imgui.begin_group()
-    gui_function()
-    imgui.end_group()
-    RIGHT_ALIGN_WIDTH[item_id] = imgui.get_item_rect_size().x + 20  # 20 ???
-
-    # print(f"RIGHT_ALIGN_WIDTH: {RIGHT_ALIGN_WIDTH[item_id]} parent_size.x: {parent_size.x} pos_x: {pos_x}")
-
-    imgui.pop_id()
+from typing import Optional, List
 
 
 class FunctionNode:
