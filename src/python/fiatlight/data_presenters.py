@@ -1,6 +1,7 @@
 from imgui_bundle import imgui, hello_imgui, imgui_knobs, imgui_toggle, imgui_ctx
 from fiatlight.any_data_with_gui import AnyDataWithGui
 from fiatlight.function_with_gui import SourceWithGui
+from fiatlight.to_gui import DataWithGuiParamsBase
 from fiatlight.internal import osd_widgets
 
 from typing import Any, Callable, TypeAlias
@@ -83,7 +84,9 @@ class IntEditType(Enum):
 
 
 @dataclass
-class IntWithGuiParams:
+class IntWithGuiParams(DataWithGuiParamsBase[int]):
+    default_edit_value = 0
+    #
     edit_type: IntEditType = IntEditType.slider
     # Common
     label: str = "##int"
@@ -165,7 +168,7 @@ def make_int_with_gui(
 
         return changed
 
-    r.gui_edit_impl = edit
+    r.gui_edit_impl = lambda: params.edit_handle_none(r, edit)
 
     return r
 
@@ -189,7 +192,8 @@ class FloatEditType(Enum):
 
 
 @dataclass
-class FloatWithGuiParams:
+class FloatWithGuiParams(DataWithGuiParamsBase[float]):
+    default_edit_value = 0.0
     label: str = "##float"
     v_min: float = 0.0
     v_max: float = 10.0
@@ -272,7 +276,7 @@ def make_float_with_gui(initial_value: float | None = None, params: FloatWithGui
 
         return changed
 
-    r.gui_edit_impl = edit
+    r.gui_edit_impl = lambda: params.edit_handle_none(r, edit)
 
     return r
 
@@ -294,7 +298,8 @@ class BoolEditType(Enum):
 
 
 @dataclass
-class BoolWithGuiParams:
+class BoolWithGuiParams(DataWithGuiParamsBase[bool]):
+    default_edit_value = False
     label: str = "##bool"
     edit_type: BoolEditType = BoolEditType.checkbox
     # Specific to toggle
@@ -336,7 +341,7 @@ def make_bool_with_gui(
 
         return changed
 
-    r.gui_edit_impl = edit
+    r.gui_edit_impl = lambda: params.edit_handle_none(r, edit)
 
     return r
 
@@ -351,7 +356,8 @@ class StrEditType(Enum):
 
 
 @dataclass
-class StrWithGuiParams:
+class StrWithGuiParams(DataWithGuiParamsBase[str]):
+    default_edit_value = ""
     label: str = "##str"
     edit_type: StrEditType = StrEditType.input
     input_flags: int = imgui.InputTextFlags_.none.value
@@ -407,7 +413,7 @@ def make_str_with_gui(
 
         return changed
 
-    r.gui_edit_impl = edit
+    r.gui_edit_impl = lambda: params.edit_handle_none(r, edit)
 
     return r
 

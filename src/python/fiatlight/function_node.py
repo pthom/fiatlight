@@ -106,7 +106,7 @@ def sandbox() -> None:
     from fiatlight.to_gui import any_function_to_function_with_gui
     from imgui_bundle import immapp
 
-    def add(x: int = 1, y: int = 2) -> int:
+    def add(x: int, y: int = 2) -> int:
         return x + y
 
     function_with_gui = any_function_to_function_with_gui(add)
