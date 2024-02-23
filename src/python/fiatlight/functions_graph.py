@@ -1,5 +1,5 @@
 from __future__ import annotations
-from fiatlight.functions_node import FunctionNode
+from fiatlight.function_node import FunctionNode
 from fiatlight.function_with_gui import FunctionWithGui
 from imgui_bundle import imgui, imgui_node_editor as ed, hello_imgui, ImVec2
 from typing import List, Any, Sequence
@@ -23,7 +23,8 @@ class FunctionsGraph:
             fn0.next_function_node = fn1
 
     def set_input(self, input: Any) -> None:
-        self.function_nodes[0].set_input(input)
+        assert False
+        # self.function_nodes[0].set_input(input)
 
     def _layout_graph_if_required(self) -> None:
         def are_all_nodes_on_zero() -> bool:
