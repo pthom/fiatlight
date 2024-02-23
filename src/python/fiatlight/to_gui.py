@@ -1,19 +1,9 @@
 from fiatlight.any_data_with_gui import AnyDataWithGui
 from fiatlight.function_with_gui import FunctionWithGui, FunctionParameterWithGui
-from fiatlight.data_presenters import (
-    make_int_with_gui,
-    make_str_with_gui,
-    make_bool_with_gui,
-    make_float_with_gui,
-    IntWithGuiParams,
-    StrWithGuiParams,
-    BoolWithGuiParams,
-    FloatWithGuiParams,
-)
 import inspect
 
 from dataclasses import dataclass
-from typing import TypeAlias, Callable, List, Type, Any
+from typing import TypeAlias, Callable, Type, Any
 
 
 GuiEditParams: TypeAlias = Any
@@ -34,16 +24,10 @@ class TypeToGuiInfo:
         return typeclass is self.standard_type_class
 
 
-ALL_TYPE_TO_GUI_INFO: List[TypeToGuiInfo] = [
-    TypeToGuiInfo(int, make_int_with_gui, IntWithGuiParams()),
-    TypeToGuiInfo(float, make_float_with_gui, FloatWithGuiParams()),
-    TypeToGuiInfo(str, make_str_with_gui, StrWithGuiParams()),
-    TypeToGuiInfo(bool, make_bool_with_gui, BoolWithGuiParams()),
-]
-
-
 def any_typeclass_to_data_with_gui(typeclass: Type[Any], default_value: Any | None = None) -> AnyDataWithGui:
-    for type_to_gui_info in ALL_TYPE_TO_GUI_INFO:
+    from fiatlight.all_to_gui import all_type_to_gui_info
+
+    for type_to_gui_info in all_type_to_gui_info():
         if type_to_gui_info.is_type(typeclass):
             return type_to_gui_info.gui_type_factory(default_value, type_to_gui_info.default_edit_params)
     raise ValueError(f"Type {typeclass} not supported by any_typeclass_to_data_with_gui")
