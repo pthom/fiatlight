@@ -1,8 +1,5 @@
-from typing import Optional, Any, Callable, final
-
-
-VoidFunction = Callable[[], None]
-BoolFunction = Callable[[], bool]
+from fiatlight.fiatlight_types import BoolFunction, VoidFunction
+from typing import Optional, Any, final
 
 
 class AnyDataWithGui:

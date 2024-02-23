@@ -3,7 +3,7 @@ from imgui_bundle import imgui
 from fiatlight.any_data_with_gui import AnyDataWithGui
 from fiatlight.function_with_gui import FunctionWithGui
 from fiatlight.functions_graph import FunctionsGraph
-from fiatlight.fiatlight_types import PureFunction, PureFunctionOrFunctionWithGui
+from fiatlight.fiatlight_types import PureFunction
 from fiatlight.data_presenters import versatile_gui_data
 
 
@@ -41,7 +41,7 @@ class VersatileFunctionWithGui(FunctionWithGui):
         return False
 
 
-def to_function_with_gui(f: PureFunctionOrFunctionWithGui) -> FunctionWithGui:
+def to_function_with_gui(f: Any) -> FunctionWithGui:
     if isinstance(f, FunctionWithGui):
         return f
     else:
