@@ -1,13 +1,44 @@
 from fiatlight.any_data_with_gui import AnyDataWithGui
 from fiatlight.function_with_gui import FunctionWithGui, FunctionParameterWithGui
+from fiatlight.fiatlight_types import BoolFunction
+from imgui_bundle import icons_fontawesome
 import inspect
 
 from dataclasses import dataclass
-from typing import TypeAlias, Callable, Type, Any
+from typing import TypeAlias, Callable, Type, Any, Generic, TypeVar
 
 
 GuiEditParams: TypeAlias = Any
 StandardType: TypeAlias = Any
+
+
+T = TypeVar("T")
+
+
+class DataWithGuiParamsBase(Generic[T]):
+    # default value will be used when editing, if initial_value is None
+    default_edit_value: T
+
+    def edit_handle_none(self, data: AnyDataWithGui, edit_function: BoolFunction) -> bool:
+        """Transform an edit function (BoolFunction) into a function that handles None values
+        by proposing to set the value to the default value or to None"""
+        from imgui_bundle import imgui
+
+        if data.value is None:
+            imgui.text("None!")
+            imgui.same_line()
+            if imgui.small_button(icons_fontawesome.ICON_FA_PLUS):
+                data.value = self.default_edit_value
+                return True
+            else:
+                return False
+        else:
+            changed = edit_function()
+            imgui.same_line()
+            if imgui.small_button(icons_fontawesome.ICON_FA_TRASH):
+                data.value = None
+                changed = True
+            return changed
 
 
 @dataclass
