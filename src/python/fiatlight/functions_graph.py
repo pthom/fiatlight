@@ -42,10 +42,10 @@ class FunctionsGraph:
         r: FunctionsGraph
 
         # Fill the functions
-        def fill_functions_with_gui():
+        def fill_functions_with_gui() -> None:
             r.functions = [any_function_to_function_with_gui(f) for f in functions]
 
-        def check_functions_input_output():
+        def check_functions_input_output() -> None:
             # They should all accept a single input (InputType), except the first one, which can accept multiple inputs
             for i, f in enumerate(r.functions):
                 if i != 0:
@@ -61,7 +61,7 @@ class FunctionsGraph:
             # for fn0, fn1 in fn_pairs:
             #     assert fn0.outputs_with_gui[0].parameter_with_gui.typeclass == fn1.inputs_with_gui[0].parameter_with_gui.typeclass
 
-        def fill_links():
+        def fill_links() -> None:
             r.links = []
             for i in range(len(r.functions) - 1):
                 fn = r.functions[i]
@@ -89,7 +89,7 @@ def sandbox() -> None:
     def mul2(a: int) -> int:
         return a * 2
 
-    def div3(a: int) -> int:
+    def div3(a: int) -> float:
         return a / 3
 
     fg = FunctionsGraph.from_function_composition([add, mul2, div3])

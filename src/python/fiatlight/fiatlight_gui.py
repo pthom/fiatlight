@@ -1,8 +1,10 @@
+# type: ignore
+
 from fiatlight.function_with_gui import FunctionWithGui
+from fiatlight.function_node_gui import FunctionNodeGui
 from fiatlight import versatile
 from fiatlight.config import config
 from fiatlight.functions_graph_gui import FunctionsGraphGui
-from fiatlight.function_node import FunctionNode
 from fiatlight.internal import osd_widgets
 from imgui_bundle import immapp, imgui, imgui_ctx
 from typing import Any
@@ -77,8 +79,8 @@ class FiatlightGui:
             functions_with_gui = []
         self._functions_composition_graph = FunctionsGraphGui(functions_with_gui)
 
-    def _function_nodes(self) -> List[FunctionNode]:
-        return self._functions_composition_graph.function_nodes
+    def _function_nodes(self) -> List[FunctionNodeGui]:  # type: ignore
+        return self._functions_composition_graph.function_nodes_gui
 
     def _has_one_exception(self) -> bool:
         return any(fn.function.last_exception_message is not None for fn in self._function_nodes())

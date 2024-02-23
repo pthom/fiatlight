@@ -47,7 +47,7 @@ RIGHT_ALIGN_WIDTH: Dict[int, float] = {}
 def draw_node_gui_right_align(parent_node: ed.NodeId, gui_function: VoidFunction) -> None:
     parent_size = ed.get_node_size(parent_node)
     item_id = imgui.get_id("align_right")
-    imgui.push_id(item_id)
+    imgui.push_id(str(item_id))
 
     if item_id not in RIGHT_ALIGN_WIDTH.keys():
         pos_x = 0.0
