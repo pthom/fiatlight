@@ -5,7 +5,7 @@ from imgui_bundle import imgui, imgui_node_editor as ed, hello_imgui, ImVec2
 from typing import List, Any, Sequence
 
 
-class FunctionsGraph:
+class FunctionsGraphGui:
     function_nodes: List[FunctionNode]
     shall_layout_graph: bool = False
 
@@ -61,7 +61,7 @@ class FunctionsGraph:
         self._layout_graph_if_required()
         imgui.push_id(str(id(self)))
 
-        ed.begin("FunctionsGraph")
+        ed.begin("FunctionsGraphGui")
         # draw function nodes
         for fn in self.function_nodes:
             imgui.push_id(str(id(fn)))

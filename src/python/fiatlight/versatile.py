@@ -2,7 +2,7 @@
 # from imgui_bundle import imgui
 # from fiatlight.any_data_with_gui import AnyDataWithGui
 # from fiatlight.function_with_gui import FunctionWithGui
-# from fiatlight.functions_graph import FunctionsGraph
+# from fiatlight.functions_graph import FunctionsGraphGui
 # from fiatlight.fiatlight_types import PureFunction
 # from fiatlight.data_presenters import versatile_gui_data
 #
@@ -48,8 +48,8 @@
 #         return VersatileFunctionWithGui(f)
 #
 #
-# class VersatileFunctionsGraph(FunctionsGraph):
+# class VersatileFunctionsGraph(FunctionsGraphGui):
 #     def __init__(self, functions: Sequence[PureFunction]) -> None:
 #         functions_with_gui = [to_function_with_gui(f) for f in functions]
-#         FunctionsGraph.__init__(self, functions_with_gui)
+#         FunctionsGraphGui.__init__(self, functions_with_gui)
 #         # super.__init__(self, functions_with_gui)
