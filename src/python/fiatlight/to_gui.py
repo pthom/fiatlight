@@ -25,23 +25,23 @@ StandardType: TypeAlias = Any
 @dataclass
 class TypeToGuiInfo:
     standard_type_class: Type[Any]
-    standard_type_name: str
     gui_type_factory: Callable[[StandardType | None, GuiEditParams | None, GuiPresentParams | None], AnyDataWithGui]
     default_edit_params: GuiEditParams
     default_present_params: GuiEditParams
 
     def is_type(self, typeclass: Type[Any] | str) -> bool:
-        # in some circumstances, typeclass is a string... I don't know why, must be a limitation of the type system
+        # in some circumstances, typeclass is a string...
+        # I don't know why, must be a limitation of the type system
         if isinstance(typeclass, str):
-            return typeclass == self.standard_type_name
+            typeclass = eval(typeclass)
         return typeclass is self.standard_type_class
 
 
 ALL_TYPE_TO_GUI_INFO: List[TypeToGuiInfo] = [
-    TypeToGuiInfo(int, "int", make_int_with_gui, IntEditParams(), NoDataPresentParams()),
-    TypeToGuiInfo(float, "float", make_float_with_gui, FloatEditParams(), NoDataPresentParams()),
-    TypeToGuiInfo(str, "str", make_str_with_gui, StrEditParams(), NoDataPresentParams()),
-    TypeToGuiInfo(bool, "bool", make_bool_with_gui, BoolEditParams(), NoDataPresentParams()),
+    TypeToGuiInfo(int, make_int_with_gui, IntEditParams(), NoDataPresentParams()),
+    TypeToGuiInfo(float, make_float_with_gui, FloatEditParams(), NoDataPresentParams()),
+    TypeToGuiInfo(str, make_str_with_gui, StrEditParams(), NoDataPresentParams()),
+    TypeToGuiInfo(bool, make_bool_with_gui, BoolEditParams(), NoDataPresentParams()),
 ]
 
 
@@ -77,31 +77,32 @@ def any_function_to_function_with_gui(f: Callable[..., Any]) -> FunctionWithGui:
     sig = inspect.signature(f)
     params = sig.parameters
     for name, param in params.items():
-        print(f"Name: {name}")
-        print(f"Default: {param.default}")
-        print(f"Annotation: {param.annotation}")
-        print("-----")
-
         function_with_gui.inputs_with_gui.append(any_param_to_param_with_gui(name, param))
 
     return_annotation = sig.return_annotation
     if return_annotation is inspect.Parameter.empty:
         raise ValueError(f"Function {f.__name__} has no return type annotation")
 
-    if isinstance(return_annotation, tuple):
-        for i, item_annotation in enumerate(return_annotation):
-            if item_annotation is inspect.Parameter.empty:
-                raise ValueError(f"Function {f.__name__} has no return type annotation for item {i}")
+    return_annotation_str = str(return_annotation)
+    is_tuple = return_annotation_str.startswith("typing.Tuple") or return_annotation_str.startswith("tuple")
+    if is_tuple:
+        return_annotation_inner_str = return_annotation_str[return_annotation_str.index("[") + 1 : -1]
+        tuple_type_annotation_strs = return_annotation_inner_str.split(", ")
+        tuple_type_annotations = [eval(annotation_str) for annotation_str in tuple_type_annotation_strs]
+        for i, annotation in enumerate(tuple_type_annotations):
             function_with_gui.outputs_with_gui.append(
-                FunctionParameterWithGui(f"output_{i}", any_typeclass_to_data_with_gui(item_annotation))
+                FunctionParameterWithGui(f"output_{i}", any_typeclass_to_data_with_gui(annotation))
             )
+
+        # for i, item_annotation in enumerate(return_annotation):
+        #     if item_annotation is inspect.Parameter.empty:
+        #         raise ValueError(f"Function {f.__name__} has no return type annotation for item {i}")
+        #     function_with_gui.outputs_with_gui.append(
+        #         FunctionParameterWithGui(f"output_{i}", any_typeclass_to_data_with_gui(item_annotation))
+        #     )
     else:
         function_with_gui.outputs_with_gui.append(
             FunctionParameterWithGui("output", any_typeclass_to_data_with_gui(sig.return_annotation))
         )
 
     return function_with_gui
-
-
-def add(x: int, y: int = 2) -> (int, int):
-    return x + y, x * y

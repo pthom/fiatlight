@@ -5,6 +5,7 @@ from fiatlight.to_gui import (
 )
 
 import pytest
+from typing import Tuple
 
 
 class Dummy:
@@ -33,7 +34,7 @@ def test_any_typeclass_to_data_with_gui() -> None:
 
 
 def test_any_value_to_data_with_gui() -> None:
-    a = any_value_to_data_with_gui(1).value == 1
+    a = any_value_to_data_with_gui(1)
     assert a.value == 1
 
 
@@ -76,7 +77,7 @@ def test_any_function_to_function_with_gui_one_output() -> None:
 
 
 def test_any_function_to_function_with_gui_two_outputs() -> None:
-    def add_mult(a: int, b: int = 2) -> (int, int):
+    def add_mult(a: int, b: int = 2) -> tuple[int, int]:
         return a + b, a * b
 
     add_mult_gui = any_function_to_function_with_gui(add_mult)
@@ -118,21 +119,9 @@ def test_any_function_to_function_with_gui_two_outputs() -> None:
     assert add_mult_gui.last_exception_message is not None
 
 
-# def test_sandbox() -> None:
-#     from fiatlight.to_gui import any_function_to_function_with_gui
-#     from fiatlight.function_node import FunctionNode
-#     from imgui_bundle import immapp, imgui_node_editor as ed
-#
-#     def add(x: int = 1, y: int = 2) -> int:
-#         return x + y
-#
-#     function_with_gui = any_function_to_function_with_gui(add)
-#     print(function_with_gui)
-#     function_node = FunctionNode(function_with_gui)
-#
-#     def gui() -> None:
-#         ed.begin("Functions Graph")
-#         function_node.draw_node()
-#         ed.end()
-#
-#     immapp.run(gui, with_node_editor=True)
+def test_any_function_to_function_with_gui_two_outputs_old_style() -> None:
+    def add_mult(a: int, b: int = 2) -> Tuple[int, int]:
+        return a + b, a * b
+
+    add_mult_gui = any_function_to_function_with_gui(add_mult)
+    assert len(add_mult_gui.outputs_with_gui) == 2
