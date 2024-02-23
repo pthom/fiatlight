@@ -102,7 +102,7 @@
 #     functions = [
 #         dp.make_str_source(
 #             poem,
-#             dp.StrEditParams(
+#             dp.StrWithGuiParams(
 #                 edit_type=dp.StrEditType.multiline,
 #                 height_em=3,
 #             ),
