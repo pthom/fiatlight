@@ -107,7 +107,7 @@ class IntEditParams:
     knob_steps: int = 0
 
 
-def make_int_with_gui(initial_value: int, params: IntEditParams | None = None) -> AnyDataWithGui:
+def make_int_with_gui(initial_value: int | None = None, params: IntEditParams | None = None) -> AnyDataWithGui:
     if params is None:
         params = IntEditParams()
     r = AnyDataWithGui()
@@ -194,7 +194,7 @@ class FloatEditParams:
     knob_steps: int = 0
 
 
-def make_float_with_gui(initial_value: float, params: FloatEditParams | None = None) -> AnyDataWithGui:
+def make_float_with_gui(initial_value: float | None = None, params: FloatEditParams | None = None) -> AnyDataWithGui:
     if params is None:
         params = FloatEditParams()
     r = AnyDataWithGui()
@@ -266,7 +266,7 @@ class BoolEditParams:
     toggle_config: ToggleConfig | None = None
 
 
-def make_bool_with_gui(initial_value: bool, params: BoolEditParams | None = None) -> AnyDataWithGui:
+def make_bool_with_gui(initial_value: bool | None = None, params: BoolEditParams | None = None) -> AnyDataWithGui:
     if params is None:
         params = BoolEditParams()
     r = AnyDataWithGui()
@@ -325,7 +325,7 @@ class StrEditParams:
     height_em: int = 5
 
 
-def make_str_with_gui(initial_value: str, params: StrEditParams | None = None) -> AnyDataWithGui:
+def make_str_with_gui(initial_value: str | None = None, params: StrEditParams | None = None) -> AnyDataWithGui:
     if params is None:
         params = StrEditParams()
     r = AnyDataWithGui()
