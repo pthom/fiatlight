@@ -40,6 +40,24 @@ class FunctionWithGui:
         self.inputs_with_gui = []
         self.outputs_with_gui = []
 
+    def all_inputs_ids(self) -> List[str]:
+        return [param.name for param in self.inputs_with_gui]
+
+    def all_outputs_ids(self) -> List[str]:
+        return [param.name for param in self.outputs_with_gui]
+
+    def input_of_name(self, name: str) -> AnyDataWithGui:
+        for param in self.inputs_with_gui:
+            if param.name == name:
+                return param.parameter_with_gui
+        assert False, f"input {name} not found"
+
+    def output_of_name(self, name: str) -> AnyDataWithGui:
+        for param in self.outputs_with_gui:
+            if param.name == name:
+                return param.parameter_with_gui
+        assert False, f"output {name} not found"
+
     @final
     def invoke(self) -> Any:
         assert self.f_impl is not None
