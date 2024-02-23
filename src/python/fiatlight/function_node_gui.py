@@ -1,5 +1,5 @@
 from __future__ import annotations
-from fiatlight.function_with_gui import FunctionWithGui
+from fiatlight.function_node import FunctionNode
 from fiatlight.internal.fl_widgets import draw_node_gui_right_align
 from fiatlight.config import config
 from fiatlight.internal import fl_widgets
@@ -8,7 +8,7 @@ from typing import Dict
 
 
 class FunctionNodeGui:
-    function: FunctionWithGui
+    function_node: FunctionNode
 
     node_id: ed.NodeId
     pins_input: Dict[str, ed.PinId]
@@ -16,25 +16,25 @@ class FunctionNodeGui:
 
     node_size: ImVec2 | None = None  # will be set after the node is drawn once
 
-    def __init__(self, function: FunctionWithGui) -> None:
-        self.function = function
+    def __init__(self, function_node: FunctionNode) -> None:
+        self.function_node = function_node
 
         self.node_id = ed.NodeId.create()
 
         self.pins_input = {}
-        for input_with_gui in function.inputs_with_gui:
+        for input_with_gui in self.function_node.function_with_gui.inputs_with_gui:
             self.pins_input[input_with_gui.name] = ed.PinId.create()
 
         self.pins_output = {}
-        for output_with_gui in function.outputs_with_gui:
+        for output_with_gui in self.function_node.function_with_gui.outputs_with_gui:
             self.pins_output[output_with_gui.name] = ed.PinId.create()
 
     def draw_node(self) -> None:
         def draw_title() -> None:
-            fl_widgets.text_custom(self.function.name)
+            fl_widgets.text_custom(self.function_node.name)
 
         def draw_exception_message() -> None:
-            last_exception_message = self.function.last_exception_message
+            last_exception_message = self.function_node.function_with_gui.last_exception_message
             if last_exception_message is None:
                 return
 
@@ -64,7 +64,7 @@ class FunctionNodeGui:
             draw_node_gui_right_align(self.node_id, draw)
 
         def draw_function_outputs() -> None:
-            for output_param in self.function.outputs_with_gui:
+            for output_param in self.function_node.function_with_gui.outputs_with_gui:
                 with imgui_ctx.push_obj_id(output_param):
                     fl_widgets.text_custom(output_param.name + ":")
                     if output_param.parameter_with_gui.value is None:
@@ -74,7 +74,7 @@ class FunctionNodeGui:
 
         def draw_function_inputs() -> bool:
             changed = False
-            for input_param in self.function.inputs_with_gui:
+            for input_param in self.function_node.function_with_gui.inputs_with_gui:
                 with imgui_ctx.push_obj_id(input_param):
                     fl_widgets.text_custom(input_param.name + ":")
                     changed = input_param.parameter_with_gui.call_gui_edit() or changed
@@ -85,7 +85,7 @@ class FunctionNodeGui:
         draw_input_pins()
         draw_exception_message()
         if draw_function_inputs():
-            self.function.invoke()
+            self.function_node.invoke_function()
         draw_function_outputs()
         imgui.new_line()
         draw_output_pins()
@@ -101,11 +101,12 @@ def sandbox() -> None:
         return x + y
 
     function_with_gui = any_function_to_function_with_gui(add)
-    function_node = FunctionNodeGui(function_with_gui)
+    function_node = FunctionNode(function_with_gui, name="add")
+    function_node_gui = FunctionNodeGui(function_node)
 
     def gui() -> None:
         ed.begin("Functions Graph")
-        function_node.draw_node()
+        function_node_gui.draw_node()
         ed.end()
 
     immapp.run(gui, with_node_editor=True)
