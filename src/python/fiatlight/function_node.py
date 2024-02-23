@@ -36,20 +36,23 @@ class FunctionNode:
     function_with_gui: FunctionWithGui
     name: str
     output_links: list[FunctionNodeLink]
+    input_links: list[FunctionNodeLink]
 
     def __init__(self, function_with_gui: FunctionWithGui, name: str) -> None:
         self.function_with_gui = function_with_gui
         self.name = name
         self.output_links = []
+        self.input_links = []
 
-    def add_output_link(self, src_output_name: str, dst_input_name: str, dst_function_node: "FunctionNode") -> None:
-        link = FunctionNodeLink(
-            src_function_node=self,
-            src_output_name=src_output_name,
-            dst_function_node=dst_function_node,
-            dst_input_name=dst_input_name,
-        )
+    def add_output_link(self, link: FunctionNodeLink) -> None:
         self.output_links.append(link)
+
+    def add_input_link(self, link: FunctionNodeLink) -> None:
+        self.input_links.append(link)
+
+    def has_input_link(self, parameter_name: str) -> bool:
+        r = any(link.dst_input_name == parameter_name for link in self.input_links)
+        return r
 
     def invoke_function(self) -> None:
         self.function_with_gui.invoke()
