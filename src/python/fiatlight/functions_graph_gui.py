@@ -1,36 +1,15 @@
 from __future__ import annotations
-from fiatlight.functions_graph import FunctionsGraph, FunctionsLink
-from fiatlight.function_node_gui import FunctionNodeGui
+from fiatlight.functions_graph import FunctionsGraph
+from fiatlight.function_node_gui import FunctionNodeGui, FunctionNodeLinkGui
 from imgui_bundle import imgui, imgui_node_editor as ed, hello_imgui, ImVec2
 from typing import List
-
-
-class FunctionsLinkGui:
-    function_link: FunctionsLink
-    link_id: ed.LinkId
-    start_id: ed.PinId
-    end_id: ed.PinId
-
-    def __init__(self, function_link: FunctionsLink, function_nodes: List[FunctionNodeGui]) -> None:
-        self.function_link = function_link
-        self.link_id = ed.LinkId.create()
-        for f in function_nodes:
-            if f.function == function_link.source:
-                self.start_id = f.pins_output[function_link.source_output_id]
-            if f.function == function_link.target:
-                self.end_id = f.pins_input[function_link.target_input_id]
-        assert hasattr(self, "start_id")
-        assert hasattr(self, "end_id")
-
-    def draw(self) -> None:
-        ed.link(self.link_id, self.start_id, self.end_id)
 
 
 class FunctionsGraphGui:
     functions_graph: FunctionsGraph
 
     function_nodes_gui: List[FunctionNodeGui]
-    functions_links_gui: List[FunctionsLinkGui]
+    functions_links_gui: List[FunctionNodeLinkGui]
 
     shall_layout_graph: bool = False
 
@@ -40,12 +19,12 @@ class FunctionsGraphGui:
         self.functions_graph = functions_graph
 
         self.function_nodes_gui = []
-        for f in self.functions_graph.functions:
+        for f in self.functions_graph.functions_nodes:
             self.function_nodes_gui.append(FunctionNodeGui(f))
 
         self.functions_links_gui = []
-        for link in self.functions_graph.links:
-            link_gui = FunctionsLinkGui(link, self.function_nodes_gui)
+        for link in self.functions_graph.functions_nodes_links:
+            link_gui = FunctionNodeLinkGui(link, self.function_nodes_gui)
             self.functions_links_gui.append(link_gui)
 
     def _layout_graph_if_required(self) -> None:
@@ -111,9 +90,6 @@ def sandbox() -> None:
         return a / 3
 
     fg = FunctionsGraph.from_function_composition([add, mul2, div3])
-    print(fg.functions)
-    print(fg.links)
-
     fgg = FunctionsGraphGui(fg)
 
     from imgui_bundle import immapp

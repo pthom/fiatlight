@@ -24,7 +24,7 @@ class FunctionsGraph:
         f_node = FunctionNode(f_gui, unique_name)
         self.functions_nodes.append(f_node)
 
-    def _add_function(self, f: PureFunction):
+    def _add_function(self, f: PureFunction) -> None:
         f_gui = any_function_to_function_with_gui(f)
         self._add_function_with_gui(f_gui)
 
