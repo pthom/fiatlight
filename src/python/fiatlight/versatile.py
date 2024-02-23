@@ -1,7 +1,7 @@
 from typing import Any, Optional, Sequence
 from imgui_bundle import imgui
 from fiatlight.any_data_with_gui import AnyDataWithGui
-from fiatlight.function_with_gui import FunctionWithGui, Input, Output
+from fiatlight.function_with_gui import FunctionWithGui
 from fiatlight.functions_graph import FunctionsGraph
 from fiatlight.fiatlight_types import PureFunction, PureFunctionOrFunctionWithGui
 from fiatlight.data_presenters import versatile_gui_data
@@ -18,7 +18,7 @@ class VersatileDataWithGui(AnyDataWithGui):
         imgui.pop_id()
 
 
-class VersatileFunctionWithGui(FunctionWithGui[Input, Output]):
+class VersatileFunctionWithGui(FunctionWithGui):
     inner_function: PureFunction
     inner_function_name: str
 
@@ -41,7 +41,7 @@ class VersatileFunctionWithGui(FunctionWithGui[Input, Output]):
         return False
 
 
-def to_function_with_gui(f: PureFunctionOrFunctionWithGui) -> FunctionWithGui[Any, Any]:
+def to_function_with_gui(f: PureFunctionOrFunctionWithGui) -> FunctionWithGui:
     if isinstance(f, FunctionWithGui):
         return f
     else:

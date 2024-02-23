@@ -1,17 +1,17 @@
 from __future__ import annotations
 from fiatlight.any_data_with_gui import AnyDataWithGui
-from fiatlight.function_with_gui import FunctionWithGui, SourceWithGui, Input, Output
+from fiatlight.function_with_gui import FunctionWithGui, SourceWithGui
 from fiatlight.config import config
 from fiatlight.internal import fl_widgets
 from imgui_bundle import imgui, imgui_node_editor as ed, icons_fontawesome, ImVec2, immapp, imgui_ctx, hello_imgui
-from typing import Optional, Any, Generic
+from typing import Optional, Any
 import traceback
 import sys
 
 
-class FunctionNode(Generic[Input, Output]):
-    function: FunctionWithGui[Input, Output]
-    next_function_node: Optional[FunctionNode[Output, Any]]
+class FunctionNode:
+    function: FunctionWithGui
+    next_function_node: Optional[FunctionNode]
     input_data_with_gui: AnyDataWithGui | None
     output_data_with_gui: AnyDataWithGui | None
 
@@ -25,7 +25,7 @@ class FunctionNode(Generic[Input, Output]):
 
     node_size: ImVec2  # will be set after the node is drawn once
 
-    def __init__(self, function: FunctionWithGui[Input, Output]) -> None:
+    def __init__(self, function: FunctionWithGui) -> None:
         self.function = function
         self.next_function_node = None
         self.input_data_with_gui = function.input_gui
