@@ -1,3 +1,5 @@
+# type: ignore
+
 from __future__ import annotations
 from fiatlight.function_with_gui import FunctionWithGui
 from fiatlight.computer_vision import ImageUInt8

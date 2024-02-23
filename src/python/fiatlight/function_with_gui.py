@@ -11,8 +11,9 @@ class FunctionParameterWithGui:
 
 
 class FunctionWithGui:
-    """Override this class with your functions which you want to visualize in a graph
-    // FunctionWithGui: any function that can be presented visually, with
+    """FunctionWithGui: any function that can be presented visually, with
+    Override this class with your functions which you want to visualize in a graph
+    //
     // - a displayed name
     // - a gui in order to modify the internal params
     // - a pure function f: AnyDataWithGui -> AnyDataWithGui

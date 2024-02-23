@@ -4,16 +4,15 @@ from fiatlight.internal.fl_widgets import draw_node_gui_right_align
 from fiatlight.config import config
 from fiatlight.internal import fl_widgets
 from imgui_bundle import imgui, imgui_node_editor as ed, icons_fontawesome, ImVec2, imgui_ctx, hello_imgui
-from typing import List
+from typing import Dict
 
 
-class FunctionNode:
+class FunctionNodeGui:
     function: FunctionWithGui
 
     node_id: ed.NodeId
-    pins_input: List[ed.PinId]
-    pins_output: List[ed.PinId]
-    link_id: ed.LinkId
+    pins_input: Dict[str, ed.PinId]
+    pins_output: Dict[str, ed.PinId]
 
     node_size: ImVec2 | None = None  # will be set after the node is drawn once
 
@@ -22,15 +21,13 @@ class FunctionNode:
 
         self.node_id = ed.NodeId.create()
 
-        self.pins_input = []
-        for _ in function.inputs_with_gui:
-            self.pins_input.append(ed.PinId.create())
+        self.pins_input = {}
+        for input_with_gui in function.inputs_with_gui:
+            self.pins_input[input_with_gui.name] = ed.PinId.create()
 
-        self.pins_output = []
-        for _ in function.outputs_with_gui:
-            self.pins_output.append(ed.PinId.create())
-
-        self.link_id = ed.LinkId.create()
+        self.pins_output = {}
+        for output_with_gui in function.outputs_with_gui:
+            self.pins_output[output_with_gui.name] = ed.PinId.create()
 
     def draw_node(self) -> None:
         def draw_title() -> None:
@@ -52,16 +49,16 @@ class FunctionNode:
             )
 
         def draw_input_pins() -> None:
-            for input_param, pin_input in zip(self.function.inputs_with_gui, self.pins_input):
+            for name, pin_input in self.pins_input.items():
                 ed.begin_pin(pin_input, ed.PinKind.input)
-                imgui.text(icons_fontawesome.ICON_FA_ARROW_CIRCLE_LEFT + " " + input_param.name)
+                imgui.text(icons_fontawesome.ICON_FA_ARROW_CIRCLE_LEFT + " " + name)
                 ed.end_pin()
 
         def draw_output_pins() -> None:
             def draw() -> None:
-                for output_param, pin_output in zip(self.function.outputs_with_gui, self.pins_output):
+                for name, pin_output in self.pins_output.items():
                     ed.begin_pin(pin_output, ed.PinKind.output)
-                    imgui.text(output_param.name + " " + icons_fontawesome.ICON_FA_ARROW_CIRCLE_RIGHT)
+                    imgui.text(name + " " + icons_fontawesome.ICON_FA_ARROW_CIRCLE_RIGHT)
                     ed.end_pin()
 
             draw_node_gui_right_align(self.node_id, draw)
@@ -90,6 +87,7 @@ class FunctionNode:
         if draw_function_inputs():
             self.function.invoke()
         draw_function_outputs()
+        imgui.new_line()
         draw_output_pins()
         ed.end_node()
         self.node_size = ed.get_node_size(self.node_id)
@@ -103,7 +101,7 @@ def sandbox() -> None:
         return x + y
 
     function_with_gui = any_function_to_function_with_gui(add)
-    function_node = FunctionNode(function_with_gui)
+    function_node = FunctionNodeGui(function_with_gui)
 
     def gui() -> None:
         ed.begin("Functions Graph")
