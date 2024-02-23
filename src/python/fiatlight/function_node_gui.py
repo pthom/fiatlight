@@ -97,8 +97,12 @@ class FunctionNodeGui:
             changed = False
             for input_param in self.function_node.function_with_gui.inputs_with_gui:
                 with imgui_ctx.push_obj_id(input_param):
-                    fl_widgets.text_custom(input_param.name + ":")
-                    changed = input_param.parameter_with_gui.call_gui_edit() or changed
+                    if self.function_node.has_input_link(input_param.name):
+                        fl_widgets.text_custom(input_param.name + ":")
+                        input_param.parameter_with_gui.call_gui_present()
+                    else:
+                        fl_widgets.text_custom(input_param.name + ":")
+                        changed = input_param.parameter_with_gui.call_gui_edit() or changed
             return changed
 
         ed.begin_node(self.node_id)
@@ -107,6 +111,7 @@ class FunctionNodeGui:
         draw_exception_message()
         if draw_function_inputs():
             self.function_node.invoke_function()
+        fl_widgets.node_separator(self.node_id, text="Outputs")
         draw_function_outputs()
         imgui.new_line()
         draw_output_pins()

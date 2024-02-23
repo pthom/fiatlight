@@ -71,6 +71,8 @@ class FunctionsGraph:
                     dst_function_node=fn_next,
                     dst_input_name=fn_next.function_with_gui.inputs_with_gui[0].name,
                 )
+                fn.add_output_link(link)
+                fn_next.add_input_link(link)
                 r.functions_nodes_links.append(link)
 
         r = FunctionsGraph(secret_key=FunctionsGraph._secret_key)

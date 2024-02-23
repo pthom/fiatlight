@@ -66,8 +66,8 @@ class FunctionsGraphGui:
                 imgui.pop_id()
 
         def draw_links() -> None:
-            for fn in self.function_nodes_gui:
-                pass
+            for link in self.functions_links_gui:
+                link.draw()
 
         self._layout_graph_if_required()
         imgui.push_id(str(id(self)))
@@ -83,11 +83,11 @@ def sandbox() -> None:
     def add(a: int, b: int = 2) -> int:
         return a + b
 
-    def mul2(a: int) -> int:
-        return a * 2
+    def mul2(x: int) -> int:
+        return x * 2
 
-    def div3(a: int) -> float:
-        return a / 3
+    def div3(x: int) -> float:
+        return x / 3
 
     fg = FunctionsGraph.from_function_composition([add, mul2, div3])
     fgg = FunctionsGraphGui(fg)
