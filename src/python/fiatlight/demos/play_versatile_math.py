@@ -13,7 +13,7 @@ def main() -> None:
 
     functions = [
         # data_presenters.make_float_source(4,
-        #                                   dp.FloatEditParams(
+        #                                   dp.FloatWithGuiParams(
         #                                       edit_type=data_presenters.FloatEditType.drag,
         #                                       input_step=0.1,
         #                                       input_step_fast=1,
@@ -23,7 +23,7 @@ def main() -> None:
         #                                   )),
         data_presenters.make_int_source(
             4,
-            dp.IntEditParams(
+            dp.IntWithGuiParams(
                 edit_type=dp.IntEditType.knob,
                 v_min=-1000,
                 v_max=1000,

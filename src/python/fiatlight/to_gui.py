@@ -5,11 +5,10 @@ from fiatlight.data_presenters import (
     make_str_with_gui,
     make_bool_with_gui,
     make_float_with_gui,
-    IntEditParams,
-    StrEditParams,
-    BoolEditParams,
-    FloatEditParams,
-    NoDataPresentParams,
+    IntWithGuiParams,
+    StrWithGuiParams,
+    BoolWithGuiParams,
+    FloatWithGuiParams,
 )
 import inspect
 
@@ -18,16 +17,14 @@ from typing import TypeAlias, Callable, List, Type, Any
 
 
 GuiEditParams: TypeAlias = Any
-GuiPresentParams: TypeAlias = Any
 StandardType: TypeAlias = Any
 
 
 @dataclass
 class TypeToGuiInfo:
     standard_type_class: Type[Any]
-    gui_type_factory: Callable[[StandardType | None, GuiEditParams | None, GuiPresentParams | None], AnyDataWithGui]
+    gui_type_factory: Callable[[StandardType | None, GuiEditParams | None], AnyDataWithGui]
     default_edit_params: GuiEditParams
-    default_present_params: GuiEditParams
 
     def is_type(self, typeclass: Type[Any] | str) -> bool:
         # in some circumstances, typeclass is a string...
@@ -38,19 +35,17 @@ class TypeToGuiInfo:
 
 
 ALL_TYPE_TO_GUI_INFO: List[TypeToGuiInfo] = [
-    TypeToGuiInfo(int, make_int_with_gui, IntEditParams(), NoDataPresentParams()),
-    TypeToGuiInfo(float, make_float_with_gui, FloatEditParams(), NoDataPresentParams()),
-    TypeToGuiInfo(str, make_str_with_gui, StrEditParams(), NoDataPresentParams()),
-    TypeToGuiInfo(bool, make_bool_with_gui, BoolEditParams(), NoDataPresentParams()),
+    TypeToGuiInfo(int, make_int_with_gui, IntWithGuiParams()),
+    TypeToGuiInfo(float, make_float_with_gui, FloatWithGuiParams()),
+    TypeToGuiInfo(str, make_str_with_gui, StrWithGuiParams()),
+    TypeToGuiInfo(bool, make_bool_with_gui, BoolWithGuiParams()),
 ]
 
 
 def any_typeclass_to_data_with_gui(typeclass: Type[Any], default_value: Any | None = None) -> AnyDataWithGui:
     for type_to_gui_info in ALL_TYPE_TO_GUI_INFO:
         if type_to_gui_info.is_type(typeclass):
-            return type_to_gui_info.gui_type_factory(
-                default_value, type_to_gui_info.default_edit_params, type_to_gui_info.default_present_params
-            )
+            return type_to_gui_info.gui_type_factory(default_value, type_to_gui_info.default_edit_params)
     raise ValueError(f"Type {typeclass} not supported by any_typeclass_to_data_with_gui")
 
 
@@ -93,13 +88,6 @@ def any_function_to_function_with_gui(f: Callable[..., Any]) -> FunctionWithGui:
             function_with_gui.outputs_with_gui.append(
                 FunctionParameterWithGui(f"output_{i}", any_typeclass_to_data_with_gui(annotation))
             )
-
-        # for i, item_annotation in enumerate(return_annotation):
-        #     if item_annotation is inspect.Parameter.empty:
-        #         raise ValueError(f"Function {f.__name__} has no return type annotation for item {i}")
-        #     function_with_gui.outputs_with_gui.append(
-        #         FunctionParameterWithGui(f"output_{i}", any_typeclass_to_data_with_gui(item_annotation))
-        #     )
     else:
         function_with_gui.outputs_with_gui.append(
             FunctionParameterWithGui("output", any_typeclass_to_data_with_gui(sig.return_annotation))

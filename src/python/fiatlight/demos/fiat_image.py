@@ -95,8 +95,8 @@ class OilPaintingWithGui(FunctionWithGui):
             assert type(x) == np.ndarray
             r = np.zeros_like(x)
             # pip install opencv-contrib-python
-            r = cv2.xphoto.oilPainting(x, self.size, self.dynRatio, self.color_conversion)
-            return r  # type: ignore
+            r = cv2.xphoto.oilPainting(x, self.size, self.dynRatio, self.color_conversion)  # type: ignore
+            return r
 
         self.f_impl = f
 
