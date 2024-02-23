@@ -1,5 +1,5 @@
 from __future__ import annotations
-from fiatlight.function_with_gui import FunctionWithGui, FunctionParameterWithGui
+from fiatlight.function_with_gui import FunctionWithGui
 from fiatlight.internal.fl_widgets import draw_node_gui_right_align
 from fiatlight.config import config
 from fiatlight.internal import fl_widgets
@@ -103,22 +103,13 @@ class FunctionNode:
 
 
 def sandbox() -> None:
-    from fiatlight.data_presenters import make_int_with_gui
+    from fiatlight.to_gui import any_function_to_function_with_gui
     from imgui_bundle import immapp
 
-    function_with_gui = FunctionWithGui()
-    function_with_gui.name = "Add"
-    function_with_gui.inputs_with_gui = [
-        FunctionParameterWithGui("x", make_int_with_gui(1)),
-        FunctionParameterWithGui("y", make_int_with_gui(2)),
-    ]
-    function_with_gui.outputs_with_gui = [FunctionParameterWithGui("output", make_int_with_gui())]
-
-    def f(x: int, y: int) -> int:
+    def add(x: int = 1, y: int = 2) -> int:
         return x + y
 
-    function_with_gui.f_impl = f
-
+    function_with_gui = any_function_to_function_with_gui(add)
     function_node = FunctionNode(function_with_gui)
 
     def gui() -> None:
