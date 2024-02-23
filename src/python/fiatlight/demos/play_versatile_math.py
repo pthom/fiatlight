@@ -4,6 +4,10 @@ from fiatlight import data_presenters
 import math
 
 
+def sin(x: float) -> float:
+    return math.sin(x)
+
+
 def main() -> None:
     from fiatlight import data_presenters as dp
 
@@ -27,22 +31,22 @@ def main() -> None:
                 knob_variant=dp.ImGuiKnobVariant_.tick.value,
             ),
         ),
-        math.sin,
-        math.log,
-        math.exp,
-        math.cos,
-        math.exp,
-        math.sin,
-        math.log,
-        math.cos,
-        math.exp,
-        math.sin,
-        math.log,
-        math.cos,
-        math.exp,
-        math.sin,
-        math.log,
-        math.cos,
+        # math.sin,
+        # math.log,
+        # math.exp,
+        # math.cos,
+        # math.exp,
+        # math.sin,
+        # math.log,
+        # math.cos,
+        # math.exp,
+        # math.sin,
+        # math.log,
+        # math.cos,
+        # math.exp,
+        # math.sin,
+        # math.log,
+        # math.cos,
     ]
 
     fiatlight_run(FiatlightGuiParams(functions_graph=functions, app_title="play_versatile_math", initial_value=0))

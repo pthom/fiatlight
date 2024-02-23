@@ -36,6 +36,10 @@ class FunctionWithGui:
     # set this with the actual function implementation at construction time
     f_impl: Callable[..., Any] | None = None
 
+    def __init__(self) -> None:
+        self.inputs_with_gui = []
+        self.outputs_with_gui = []
+
     @final
     def invoke(self) -> Any:
         assert self.f_impl is not None
