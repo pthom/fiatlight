@@ -142,7 +142,7 @@ def lut_with_params(params: lut.LutParams, image: ImageUInt8) -> ImageUInt8:
     return r
 
 
-class LutImageWithGui(FunctionWithGui[ImageUInt8, ImageUInt8]):
+class LutImageWithGui(FunctionWithGui):
     lut_params_with_gui: LutParamsWithGui
     input_gui: ImageWithGui
     output_gui: ImageWithGui

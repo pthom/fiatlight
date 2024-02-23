@@ -77,7 +77,7 @@ class FiatlightGui:
             functions_with_gui = []
         self._functions_composition_graph = FunctionsGraph(functions_with_gui)
 
-    def _function_nodes(self) -> List[FunctionNode[Any, Any]]:
+    def _function_nodes(self) -> List[FunctionNode]:
         return self._functions_composition_graph.function_nodes
 
     def _has_one_exception(self) -> bool:
