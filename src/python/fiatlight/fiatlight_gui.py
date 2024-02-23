@@ -81,17 +81,18 @@ class FiatlightGui:
         return self._functions_composition_graph.function_nodes
 
     def _has_one_exception(self) -> bool:
-        return any(fn.last_exception_message is not None for fn in self._function_nodes())
+        return any(fn.function.last_exception_message is not None for fn in self._function_nodes())
 
     def _draw_exceptions(self) -> None:
         for function_node in self._function_nodes():
-            if function_node.last_exception_message is not None:
+            if function_node.function.last_exception_message is not None:
                 function_name = function_node.function.name
                 imgui.text_colored(
-                    config.colors.error, f"Exception in {function_name}: {function_node.last_exception_message}"
+                    config.colors.error,
+                    f"Exception in {function_name}: {function_node.function.last_exception_message}",
                 )
-                if function_node.last_exception_traceback is not None:
-                    msg = function_node.last_exception_traceback
+                if function_node.function.last_exception_traceback is not None:
+                    msg = function_node.function.last_exception_traceback
                     nb_lines = msg.count("\n") + 1
                     text_size = ImVec2(imgui.get_window_width(), immapp.em_size(nb_lines))
                     imgui.input_text_multiline("##error", msg, text_size)

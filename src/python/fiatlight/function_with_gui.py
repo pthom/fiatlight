@@ -1,6 +1,6 @@
 from fiatlight.any_data_with_gui import AnyDataWithGui
 
-from typing import Any, List, final, Callable
+from typing import Any, List, final, Callable, Optional
 from dataclasses import dataclass
 
 
@@ -19,29 +19,48 @@ class FunctionWithGui:
     """
 
     # input_gui and output_gui should be filled during construction
-    input_gui: AnyDataWithGui | None = None
-    output_gui: AnyDataWithGui | None = None
+    inputs_with_gui: List[FunctionParameterWithGui]
+    outputs_with_gui: List[FunctionParameterWithGui]
+    # input_gui: AnyDataWithGui | None = None
+    # output_gui: AnyDataWithGui | None = None
 
     # parameters_with_gui should be filled during construction
-    parameters_with_gui: List[FunctionParameterWithGui] | None = None
+    # parameters_with_gui: List[FunctionParameterWithGui] | None = None
+
+    last_exception_message: Optional[str] = None
+    last_exception_traceback: Optional[str] = None
 
     # the name of the function
     name: str
 
     # set this with the actual function implementation at construction time
-    f_impl: Callable[[Any], Any] | None = None
+    f_impl: Callable[..., Any] | None = None
 
     @final
-    def f(self, x: Any) -> Any:
+    def invoke(self) -> Any:
         assert self.f_impl is not None
-        return self.f_impl(x)
+        values = [param.parameter_with_gui.value for param in self.inputs_with_gui]
+        try:
+            fn_output = self.f_impl(*values)
+            if not isinstance(fn_output, tuple):
+                assert len(self.outputs_with_gui) == 1
+                self.outputs_with_gui[0].parameter_with_gui.value = fn_output
+            else:
+                assert len(fn_output) == len(self.outputs_with_gui)
+                for i, output_with_gui in enumerate(self.outputs_with_gui):
+                    output_with_gui.parameter_with_gui.value = fn_output[i]
+            self.last_exception_message = None
+            self.last_exception_traceback = None
+        except Exception as e:
+            self.last_exception_message = str(e)
+            import traceback
+            import sys
 
-    def old_gui_params(self) -> bool:
-        """override this if you want to provide a gui for the function inner params
-        (i.e. neither input nor output params, but the function internal state)
-        It should return True if the inner params were changed.
-        """
-        return False
+            exc_type, exc_value, exc_traceback = sys.exc_info()
+            traceback_details = traceback.format_exception(exc_type, exc_value, exc_traceback)
+            self.last_exception_traceback = "".join(traceback_details)
+            for output_with_gui in self.outputs_with_gui:
+                output_with_gui.parameter_with_gui.value = None
 
 
 class SourceWithGui(FunctionWithGui):
