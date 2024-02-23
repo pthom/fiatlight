@@ -87,7 +87,8 @@ class FunctionNodeGui:
         def draw_function_outputs() -> None:
             for output_param in self.function_node.function_with_gui.outputs_with_gui:
                 with imgui_ctx.push_obj_id(output_param):
-                    fl_widgets.text_custom(output_param.name + ":")
+                    if len(self.function_node.function_with_gui.outputs_with_gui) > 1:
+                        fl_widgets.text_custom(output_param.name + ":")
                     if output_param.parameter_with_gui.value is None:
                         imgui.text("None")
                     else:
@@ -111,7 +112,7 @@ class FunctionNodeGui:
         draw_exception_message()
         if draw_function_inputs():
             self.function_node.invoke_function()
-        fl_widgets.node_separator(self.node_id, text="Outputs")
+        fl_widgets.node_separator(self.node_id, text="Output")
         draw_function_outputs()
         imgui.new_line()
         draw_output_pins()

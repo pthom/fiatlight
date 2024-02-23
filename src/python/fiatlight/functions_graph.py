@@ -28,6 +28,14 @@ class FunctionsGraph:
         f_gui = any_function_to_function_with_gui(f)
         self._add_function_with_gui(f_gui)
 
+    def add_function_composition(self, functions: list[PureFunction]) -> None:
+        composition = FunctionsGraph.from_function_composition(functions)
+        self.merge_graph(composition)
+
+    def merge_graph(self, other: "FunctionsGraph") -> None:
+        self.functions_nodes.extend(other.functions_nodes)
+        self.functions_nodes_links.extend(other.functions_nodes_links)
+
     @staticmethod
     def from_function_composition(functions: list[PureFunction]) -> "FunctionsGraph":
         """Create a FunctionsGraph from a list of PureFunctions([InputType] -> OutputType)
