@@ -368,22 +368,6 @@ def make_str_source(initial_value: str, params: StrEditParams | None = None, lab
 
 
 ########################################################################################################################
-#                               Any dispatcher
-########################################################################################################################
-def make_any_with_gui(initial_value: Any, label: str = "##any") -> AnyDataWithGui:
-    if isinstance(initial_value, int):
-        return make_int_with_gui(initial_value, IntEditParams(label=label))
-    elif isinstance(initial_value, float):
-        return make_float_with_gui(initial_value, FloatEditParams(label=label))
-    elif isinstance(initial_value, str):
-        return make_str_with_gui(initial_value, StrEditParams(label=label))
-    elif isinstance(initial_value, bool):
-        return make_bool_with_gui(initial_value, BoolEditParams(label=label))
-    else:
-        raise ValueError(f"Unsupported type: {type(initial_value)}")
-
-
-########################################################################################################################
 #                               __all__
 ########################################################################################################################
 
