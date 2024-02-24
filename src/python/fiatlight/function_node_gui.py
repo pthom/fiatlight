@@ -42,6 +42,8 @@ class FunctionNodeGui:
     node_size: ImVec2 | None = None  # will be set after the node is drawn once
     _first_frame = True
 
+    _MIN_NODE_WIDTH_EM = 5
+
     def __init__(self, function_node: FunctionNode) -> None:
         self.function_node = function_node
 
@@ -74,60 +76,59 @@ class FunctionNodeGui:
                 "Exception:\n" + last_exception_message, max_width_pixels=exception_width, color=config.colors.error
             )
 
-        def draw_output_pins() -> None:
-            def draw() -> None:
-                for name, pin_output in self.pins_output.items():
+        def draw_function_outputs() -> None:
+            def draw_output_pin(pin_output: ed.PinId) -> None:
+                def draw() -> None:
                     ed.begin_pin(pin_output, ed.PinKind.output)
-                    if len(self.function_node.function_with_gui.outputs_with_gui) > 1:
-                        imgui.text(name + " " + icons_fontawesome.ICON_FA_ARROW_CIRCLE_RIGHT)
-                    else:
-                        imgui.text(icons_fontawesome.ICON_FA_ARROW_CIRCLE_RIGHT)
+                    imgui.text(icons_fontawesome.ICON_FA_ARROW_CIRCLE_RIGHT)
                     ed.end_pin()
 
-            draw_node_gui_right_align(self.node_id, draw)
+                draw_node_gui_right_align(self.node_id, draw)
 
-        def draw_function_outputs() -> None:
+            def draw_output_value() -> None:
+                if len(self.function_node.function_with_gui.outputs_with_gui) > 1:
+                    fl_widgets.text_custom(output_param.name + ":")
+                if output_param.parameter_with_gui.value is None:
+                    imgui.text("None")
+                else:
+                    output_param.parameter_with_gui.call_gui_present()
+
             for output_param in self.function_node.function_with_gui.outputs_with_gui:
                 with imgui_ctx.push_obj_id(output_param):
-                    if len(self.function_node.function_with_gui.outputs_with_gui) > 1:
-                        fl_widgets.text_custom(output_param.name + ":")
-                    if output_param.parameter_with_gui.value is None:
-                        imgui.text("None")
-                    else:
-                        output_param.parameter_with_gui.call_gui_present()
-
-        def draw_input_pins() -> None:
-            for name, pin_input in self.pins_input.items():
-                ed.begin_pin(pin_input, ed.PinKind.input)
-                imgui.text(icons_fontawesome.ICON_FA_ARROW_CIRCLE_LEFT + " " + name)
-                ed.end_pin()
+                    draw_output_value()
+                    imgui.same_line()
+                    draw_output_pin(self.pins_output[output_param.name])
 
         def draw_function_inputs() -> bool:
             changed = False
             if len(self.function_node.function_with_gui.inputs_with_gui) == 0:
                 changed = self._first_frame
+
+            def draw_input_pin(name: str, pin_input: ed.PinId) -> None:
+                ed.begin_pin(pin_input, ed.PinKind.input)
+                imgui.text(icons_fontawesome.ICON_FA_ARROW_CIRCLE_LEFT + " " + name)
+                ed.end_pin()
+
             for input_param in self.function_node.function_with_gui.inputs_with_gui:
                 with imgui_ctx.push_obj_id(input_param):
-                    if self.function_node.has_input_link(input_param.name):
-                        fl_widgets.text_custom(input_param.name + ":")
-                        imgui.same_line()
-                        input_param.parameter_with_gui.call_gui_present()
-                    else:
-                        fl_widgets.text_custom(input_param.name + ":")
-                        imgui.same_line()
+                    draw_input_pin(input_param.name, self.pins_input[input_param.name])
+                    imgui.same_line()
+                    if not self.function_node.has_input_link(input_param.name):
                         changed = input_param.parameter_with_gui.call_gui_edit() or changed
+                    else:
+                        imgui.new_line()
             return changed
 
         ed.begin_node(self.node_id)
+        imgui.dummy(ImVec2(hello_imgui.em_size(self._MIN_NODE_WIDTH_EM), 1))
         draw_title()
-        draw_input_pins()
-        draw_exception_message()
         if draw_function_inputs():
             self.function_node.invoke_function()
-        fl_widgets.node_separator(self.node_id, text="Output")
+        draw_exception_message()
+        output_separator_str = "Outputs" if len(self.function_node.function_with_gui.outputs_with_gui) > 1 else "Output"
+        fl_widgets.node_separator(self.node_id, text=output_separator_str)
         draw_function_outputs()
         # imgui.new_line()
-        draw_output_pins()
         ed.end_node()
         self.node_size = ed.get_node_size(self.node_id)
         self._first_frame = False
