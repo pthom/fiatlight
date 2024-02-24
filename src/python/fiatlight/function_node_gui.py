@@ -36,6 +36,7 @@ class FunctionNodeGui:
     pins_output: Dict[str, ed.PinId]
 
     node_size: ImVec2 | None = None  # will be set after the node is drawn once
+    _first_frame = True
 
     def __init__(self, function_node: FunctionNode) -> None:
         self.function_node = function_node
@@ -96,6 +97,8 @@ class FunctionNodeGui:
 
         def draw_function_inputs() -> bool:
             changed = False
+            if len(self.function_node.function_with_gui.inputs_with_gui) == 0:
+                changed = self._first_frame
             for input_param in self.function_node.function_with_gui.inputs_with_gui:
                 with imgui_ctx.push_obj_id(input_param):
                     if self.function_node.has_input_link(input_param.name):
@@ -118,6 +121,7 @@ class FunctionNodeGui:
         draw_output_pins()
         ed.end_node()
         self.node_size = ed.get_node_size(self.node_id)
+        self._first_frame = False
 
 
 def sandbox() -> None:
