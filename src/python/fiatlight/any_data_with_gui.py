@@ -4,16 +4,16 @@ from typing import Optional, Any, final
 
 class AnyDataWithGui:
     """
-    Override this class with your types, and implement a draw function that presents it content
+    Instantiate this class with your types, and provide draw functions that presents it content
     """
 
+    # The value of the data
     value: Any = None
 
-    # Set if needed by implementing a draw function that presents the data content
+    # Provide a draw function that presents the data content
     gui_present_impl: VoidFunction | None = None
 
-    # Set if needed by implementing a draw function that presents an edit interface for the data
-    # and returns True if the data was changed
+    # Provide a draw function that presents an editable interface for the data, and returns True if changed
     gui_edit_impl: BoolFunction | None = None
 
     def __init__(
@@ -33,10 +33,3 @@ class AnyDataWithGui:
         if self.gui_edit_impl is not None:
             return self.gui_edit_impl()
         return False
-
-    def set(self, v: Any) -> None:
-        """Override this if you want to add more behavior when setting the value"""
-        self.value = v
-
-    def get(self) -> Optional[Any]:
-        return self.value

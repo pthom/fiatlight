@@ -39,7 +39,8 @@ def main() -> None:
     def log(x: float) -> float:
         return math.log(x)
 
-    functions_graph = FunctionsGraph.from_function_composition([float_source, sin, log])
+    functions_graph = FunctionsGraph.from_function_composition([float_source, sin, log, sin])
+    functions_graph.add_function_composition([float_source, sin, log, sin])
 
     fiatlight_run(
         functions_graph,
