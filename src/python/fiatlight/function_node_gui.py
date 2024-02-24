@@ -8,6 +8,8 @@ from typing import Dict, List
 
 
 class FunctionNodeLinkGui:
+    """The GUI representation as a visual link for a FunctionNodeLink"""
+
     function_node_link: FunctionNodeLink
     link_id: ed.LinkId
     start_id: ed.PinId
@@ -29,6 +31,8 @@ class FunctionNodeLinkGui:
 
 
 class FunctionNodeGui:
+    """The GUI representation as a visual node for a FunctionNode"""
+
     function_node: FunctionNode
 
     node_id: ed.NodeId
@@ -70,12 +74,6 @@ class FunctionNodeGui:
                 "Exception:\n" + last_exception_message, max_width_pixels=exception_width, color=config.colors.error
             )
 
-        def draw_input_pins() -> None:
-            for name, pin_input in self.pins_input.items():
-                ed.begin_pin(pin_input, ed.PinKind.input)
-                imgui.text(icons_fontawesome.ICON_FA_ARROW_CIRCLE_LEFT + " " + name)
-                ed.end_pin()
-
         def draw_output_pins() -> None:
             def draw() -> None:
                 for name, pin_output in self.pins_output.items():
@@ -97,6 +95,12 @@ class FunctionNodeGui:
                         imgui.text("None")
                     else:
                         output_param.parameter_with_gui.call_gui_present()
+
+        def draw_input_pins() -> None:
+            for name, pin_input in self.pins_input.items():
+                ed.begin_pin(pin_input, ed.PinKind.input)
+                imgui.text(icons_fontawesome.ICON_FA_ARROW_CIRCLE_LEFT + " " + name)
+                ed.end_pin()
 
         def draw_function_inputs() -> bool:
             changed = False
@@ -122,7 +126,7 @@ class FunctionNodeGui:
             self.function_node.invoke_function()
         fl_widgets.node_separator(self.node_id, text="Output")
         draw_function_outputs()
-        imgui.new_line()
+        # imgui.new_line()
         draw_output_pins()
         ed.end_node()
         self.node_size = ed.get_node_size(self.node_id)
