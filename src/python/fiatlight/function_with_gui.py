@@ -5,32 +5,32 @@ from dataclasses import dataclass
 
 
 @dataclass
-class FunctionParameterWithGui:
+class NamedDataWithGui:
     name: str
     parameter_with_gui: AnyDataWithGui
 
 
 class FunctionWithGui:
-    """FunctionWithGui: any function that can be presented visually, with
-    Override this class with your functions which you want to visualize in a graph
-    //
-    // - a displayed name
-    // - a gui in order to modify the internal params
-    // - a pure function f: AnyDataWithGui -> AnyDataWithGui
+    """Instantiate this class with your functions, to make them available in a graph
+    You need to provide:
+    - the name of the function
+    - the implementation of the function (f_impl)
+    - the inputs and outputs of the function, as a list of NamedDataWithGui
     """
-
-    # input_gui and output_gui should be filled during construction
-    inputs_with_gui: List[FunctionParameterWithGui]
-    outputs_with_gui: List[FunctionParameterWithGui]
 
     # set this with the actual function implementation at construction time
     f_impl: Callable[..., Any] | None = None
 
-    last_exception_message: Optional[str] = None
-    last_exception_traceback: Optional[str] = None
-
     # the name of the function
     name: str
+
+    # input_gui and output_gui should be filled during construction
+    inputs_with_gui: List[NamedDataWithGui]
+    outputs_with_gui: List[NamedDataWithGui]
+
+    # if the last call raised an exception, the message is stored here
+    last_exception_message: Optional[str] = None
+    last_exception_traceback: Optional[str] = None
 
     def __init__(self) -> None:
         self.inputs_with_gui = []
@@ -86,7 +86,7 @@ class SourceWithGui(FunctionWithGui):
 
     def __init__(self, initial_value_with_gui: AnyDataWithGui, source_name: str = "Source") -> None:
         self.output_gui = initial_value_with_gui
-        self.parameters_with_gui = [FunctionParameterWithGui("##source", initial_value_with_gui)]
+        self.parameters_with_gui = [NamedDataWithGui("##source", initial_value_with_gui)]
         self.name = source_name
 
         def f(_: Any) -> Any:
@@ -96,4 +96,4 @@ class SourceWithGui(FunctionWithGui):
         self.f_impl = f
 
 
-__all__ = ["FunctionWithGui", "AnyDataWithGui", "FunctionParameterWithGui", "SourceWithGui"]
+__all__ = ["FunctionWithGui", "AnyDataWithGui", "NamedDataWithGui", "SourceWithGui"]

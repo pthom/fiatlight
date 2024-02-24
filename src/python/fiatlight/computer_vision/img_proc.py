@@ -1,5 +1,5 @@
 from typing import Any
-from fiatlight import FunctionWithGui, FunctionParameterWithGui
+from fiatlight import FunctionWithGui, NamedDataWithGui
 from fiatlight.computer_vision import ImageUInt8
 from fiatlight.computer_vision.image_with_gui import ImageWithGui, ImageChannelsWithGui
 from fiatlight.computer_vision import cv_color_type, cv_color_type_gui
@@ -63,4 +63,4 @@ class ConvertColorWithGui(FunctionWithGui):
             return r
 
         self.f_impl = f
-        self.parameters_with_gui = [FunctionParameterWithGui("color_conversion", self.color_conversion_with_gui)]
+        self.parameters_with_gui = [NamedDataWithGui("color_conversion", self.color_conversion_with_gui)]
