@@ -26,12 +26,18 @@ class FunctionsGraph:
         self.functions_nodes = []
         self.functions_nodes_links = []
 
+    def ensure_unique_names(self) -> None:
+        """Make sure all names are unique"""
+        names = [fn.unique_name for fn in self.functions_nodes]
+        duplicated_names = [name for name in names if names.count(name) > 1]
+        for duplicated_name in duplicated_names:
+            functions_with_duplicated_name = [fn for fn in self.functions_nodes if fn.unique_name == duplicated_name]
+            for i, fn in enumerate(functions_with_duplicated_name):
+                fn.unique_name = f"{fn.unique_name}_{i}"
+
     def _add_function_with_gui(self, f_gui: FunctionWithGui) -> None:
         # Make sure all names are unique (is this useful?)
-        all_names = [f.name for f in self.functions_nodes]
-        unique_name = f_gui.name if f_gui.name not in all_names else f_gui.name + "-" + str(len(all_names))
-
-        f_node = FunctionNode(f_gui, unique_name)
+        f_node = FunctionNode(f_gui, f_gui.name)
         self.functions_nodes.append(f_node)
 
     def _add_function(self, f: PureFunction) -> None:
@@ -50,9 +56,7 @@ class FunctionsGraph:
     def from_function_composition(functions: list[PureFunction]) -> "FunctionsGraph":
         """Create a FunctionsGraph from a list of PureFunctions([InputType] -> OutputType)
         * They should all be pure functions
-        * They should all accept a single input (InputType), except the first one, which can accept multiple inputs
-        * They should all return a single value (OutputType)
-        * They should all be composable: the output type of one should be the input type of the next
+        * The output[0] of one should be the input[0] of the next
         """
         r: FunctionsGraph
 
@@ -60,22 +64,6 @@ class FunctionsGraph:
         def fill_functions_with_gui() -> None:
             for f in functions:
                 r._add_function(f)
-
-        def check_functions_input_output() -> None:
-            # They should all accept a single input (InputType), except the first one, which can accept multiple inputs
-            for i, f in enumerate(r.functions_nodes):
-                if i != 0:
-                    assert len(f.function_with_gui.inputs_with_gui) == 1
-
-            # They should all return a single value (OutputType)
-            for f in r.functions_nodes:
-                assert len(f.function_with_gui.outputs_with_gui) == 1
-
-            # They should all be composable: the output type of one should be the input type of the next
-            # Not implemented yet, since we don't have the type information yet
-            # fn_pairs = functional_utils.overlapping_pairs(r.functions)
-            # for fn0, fn1 in fn_pairs:
-            #     assert fn0.outputs_with_gui[0].parameter_with_gui.typeclass == fn1.inputs_with_gui[0].parameter_with_gui.typeclass
 
         def fill_links() -> None:
             r.functions_nodes_links = []
@@ -95,7 +83,6 @@ class FunctionsGraph:
 
         r = FunctionsGraph(secret_key=FunctionsGraph._secret_key)
         fill_functions_with_gui()
-        check_functions_input_output()
         fill_links()
         return r
 
