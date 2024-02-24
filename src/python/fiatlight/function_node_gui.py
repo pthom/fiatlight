@@ -1,6 +1,7 @@
 from __future__ import annotations
 from fiatlight.function_node import FunctionNode, FunctionNodeLink
 from fiatlight.internal.fl_widgets import draw_node_gui_right_align
+from fiatlight.internal import osd_widgets
 from fiatlight.config import config
 from fiatlight.internal import fl_widgets
 from imgui_bundle import imgui, imgui_node_editor as ed, icons_fontawesome, ImVec2, imgui_ctx, hello_imgui
@@ -57,14 +58,13 @@ class FunctionNodeGui:
         for output_with_gui in self.function_node.function_with_gui.outputs_with_gui:
             self.pins_output[output_with_gui.name] = ed.PinId.create()
 
-    def draw_node(self) -> None:
+    def draw_node(self, unique_name: str) -> None:
         def draw_title() -> None:
             fn_name = self.function_node.function_with_gui.name
-            unique_name = self.function_node.unique_name
             fl_widgets.text_custom(fn_name)
             if unique_name != fn_name:
-                imgui.same_line()
-                fl_widgets.text_custom(f" (id: {unique_name})")
+                if imgui.is_item_hovered():
+                    osd_widgets.set_tooltip(f" (id: {unique_name})")
 
         def draw_exception_message() -> None:
             last_exception_message = self.function_node.function_with_gui.last_exception_message
@@ -152,7 +152,7 @@ def sandbox() -> None:
 
     def gui() -> None:
         ed.begin("Functions Graph")
-        function_node_gui.draw_node()
+        function_node_gui.draw_node("add")
         ed.end()
 
     immapp.run(gui, with_node_editor=True)

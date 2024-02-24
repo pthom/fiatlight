@@ -26,14 +26,23 @@ class FunctionsGraph:
         self.functions_nodes = []
         self.functions_nodes_links = []
 
-    def ensure_unique_names(self) -> None:
+    def function_unique_name(self, function_node: FunctionNode) -> str:
         """Make sure all names are unique"""
-        names = [fn.unique_name for fn in self.functions_nodes]
+        names = [fn.function_with_gui.name for fn in self.functions_nodes]
         duplicated_names = [name for name in names if names.count(name) > 1]
-        for duplicated_name in duplicated_names:
-            functions_with_duplicated_name = [fn for fn in self.functions_nodes if fn.unique_name == duplicated_name]
-            for i, fn in enumerate(functions_with_duplicated_name):
-                fn.unique_name = f"{fn.unique_name}_{i}"
+        if function_node.function_with_gui.name not in duplicated_names:
+            return function_node.function_with_gui.name
+        else:
+            functions_with_same_name = [
+                fn for fn in self.functions_nodes if fn.function_with_gui.name == function_node.function_with_gui.name
+            ]
+            this_function_idx = functions_with_same_name.index(function_node)
+            return f"{function_node.function_with_gui.name}_{this_function_idx + 1}"
+
+        # for duplicated_name in duplicated_names:
+        #     functions_with_duplicated_name = [fn for fn in self.functions_nodes if fn.unique_name == duplicated_name]
+        #     for i, fn in enumerate(functions_with_duplicated_name):
+        #         fn.unique_name = f"{fn.unique_name}_{i}"
 
     def _add_function_with_gui(self, f_gui: FunctionWithGui) -> None:
         # Make sure all names are unique (is this useful?)
