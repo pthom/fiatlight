@@ -1,5 +1,5 @@
 from fiatlight.any_data_with_gui import AnyDataWithGui
-from fiatlight.function_with_gui import FunctionWithGui, FunctionParameterWithGui
+from fiatlight.function_with_gui import FunctionWithGui, NamedDataWithGui
 from fiatlight.fiatlight_types import BoolFunction
 from imgui_bundle import icons_fontawesome
 import inspect
@@ -68,7 +68,7 @@ def any_value_to_data_with_gui(value: Any) -> AnyDataWithGui:
     return any_typeclass_to_data_with_gui(type(value), value)
 
 
-def any_param_to_param_with_gui(name: str, param: inspect.Parameter) -> FunctionParameterWithGui:
+def any_param_to_param_with_gui(name: str, param: inspect.Parameter) -> NamedDataWithGui:
     default_value = param.default if param.default is not inspect.Parameter.empty else None
     annotation = param.annotation if param.annotation is not inspect.Parameter.empty else None
 
@@ -76,7 +76,7 @@ def any_param_to_param_with_gui(name: str, param: inspect.Parameter) -> Function
         raise ValueError(f"Parameter {name} has no type annotation")
 
     as_any_data_with_gui = any_typeclass_to_data_with_gui(annotation, default_value)
-    return FunctionParameterWithGui(name, as_any_data_with_gui)
+    return NamedDataWithGui(name, as_any_data_with_gui)
 
 
 def any_function_to_function_with_gui(f: Callable[..., Any]) -> FunctionWithGui:
@@ -104,11 +104,11 @@ def any_function_to_function_with_gui(f: Callable[..., Any]) -> FunctionWithGui:
         tuple_type_annotations = [eval(annotation_str) for annotation_str in tuple_type_annotation_strs]
         for i, annotation in enumerate(tuple_type_annotations):
             function_with_gui.outputs_with_gui.append(
-                FunctionParameterWithGui(f"output_{i}", any_typeclass_to_data_with_gui(annotation))
+                NamedDataWithGui(f"output_{i}", any_typeclass_to_data_with_gui(annotation))
             )
     else:
         function_with_gui.outputs_with_gui.append(
-            FunctionParameterWithGui("output", any_typeclass_to_data_with_gui(sig.return_annotation))
+            NamedDataWithGui("output", any_typeclass_to_data_with_gui(sig.return_annotation))
         )
 
     return function_with_gui
