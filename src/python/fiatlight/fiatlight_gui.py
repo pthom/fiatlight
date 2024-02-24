@@ -79,14 +79,16 @@ class FiatlightGui:
         )
 
     def _draw_exceptions(self) -> None:
-        for function_node in self._function_nodes():
-            last_exception_message = function_node.function_node.function_with_gui.last_exception_message
-            last_exception_traceback = function_node.function_node.function_with_gui.last_exception_traceback
+        for function_node_gui in self._function_nodes():
+            last_exception_message = function_node_gui.function_node.function_with_gui.last_exception_message
+            last_exception_traceback = function_node_gui.function_node.function_with_gui.last_exception_traceback
             if last_exception_message is not None:
-                function_name = function_node.function_node.unique_name
+                function_unique_name = self._functions_graph_gui.functions_graph.function_unique_name(
+                    function_node_gui.function_node
+                )
                 imgui.text_colored(
                     config.colors.error,
-                    f"Exception in {function_name}: {last_exception_message}",
+                    f"Exception in {function_unique_name}: {last_exception_message}",
                 )
                 if last_exception_traceback is not None:
                     msg = last_exception_traceback
