@@ -83,7 +83,7 @@ class FiatlightGui:
             last_exception_message = function_node.function_node.function_with_gui.last_exception_message
             last_exception_traceback = function_node.function_node.function_with_gui.last_exception_traceback
             if last_exception_message is not None:
-                function_name = function_node.function_node.name
+                function_name = function_node.function_node.unique_name
                 imgui.text_colored(
                     config.colors.error,
                     f"Exception in {function_name}: {last_exception_message}",

@@ -29,18 +29,18 @@ class FunctionNode:
     """A FunctionWithGui that is included in a FunctionGraph
     It stores:
         - the FunctionWithGui
-        - a name (which is the name of the function, + a number if there are multiple nodes with the same name)
+        - a unique name (which is the name of the function, + a number if there are multiple nodes with the same name)
         - a list of FunctionNodeLink
     """
 
     function_with_gui: FunctionWithGui
-    name: str
+    unique_name: str
     output_links: list[FunctionNodeLink]
     input_links: list[FunctionNodeLink]
 
     def __init__(self, function_with_gui: FunctionWithGui, name: str) -> None:
         self.function_with_gui = function_with_gui
-        self.name = name
+        self.unique_name = name
         self.output_links = []
         self.input_links = []
 

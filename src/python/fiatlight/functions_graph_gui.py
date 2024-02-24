@@ -17,6 +17,7 @@ class FunctionsGraphGui:
 
     def __init__(self, functions_graph: FunctionsGraph) -> None:
         self.functions_graph = functions_graph
+        self.functions_graph.ensure_unique_names()
 
         self.function_nodes_gui = []
         for f in self.functions_graph.functions_nodes:

@@ -59,7 +59,12 @@ class FunctionNodeGui:
 
     def draw_node(self) -> None:
         def draw_title() -> None:
-            fl_widgets.text_custom(self.function_node.name)
+            fn_name = self.function_node.function_with_gui.name
+            unique_name = self.function_node.unique_name
+            fl_widgets.text_custom(fn_name)
+            if unique_name != fn_name:
+                imgui.same_line()
+                fl_widgets.text_custom(f" (id: {unique_name})")
 
         def draw_exception_message() -> None:
             last_exception_message = self.function_node.function_with_gui.last_exception_message
