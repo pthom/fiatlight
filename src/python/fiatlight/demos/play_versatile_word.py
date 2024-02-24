@@ -127,8 +127,8 @@ def main() -> None:
         FunctionsGraph.from_function_composition(
             [
                 get_poem,
-                # remove_non_letters,
-                # str_lower,
+                remove_non_letters,
+                str_lower,
                 # split_words,
                 # remove_empty_words,
                 # sorted,

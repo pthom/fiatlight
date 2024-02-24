@@ -80,7 +80,10 @@ class FunctionNodeGui:
             def draw() -> None:
                 for name, pin_output in self.pins_output.items():
                     ed.begin_pin(pin_output, ed.PinKind.output)
-                    imgui.text(name + " " + icons_fontawesome.ICON_FA_ARROW_CIRCLE_RIGHT)
+                    if len(self.function_node.function_with_gui.outputs_with_gui) > 1:
+                        imgui.text(name + " " + icons_fontawesome.ICON_FA_ARROW_CIRCLE_RIGHT)
+                    else:
+                        imgui.text(icons_fontawesome.ICON_FA_ARROW_CIRCLE_RIGHT)
                     ed.end_pin()
 
             draw_node_gui_right_align(self.node_id, draw)
@@ -103,9 +106,11 @@ class FunctionNodeGui:
                 with imgui_ctx.push_obj_id(input_param):
                     if self.function_node.has_input_link(input_param.name):
                         fl_widgets.text_custom(input_param.name + ":")
+                        imgui.same_line()
                         input_param.parameter_with_gui.call_gui_present()
                     else:
                         fl_widgets.text_custom(input_param.name + ":")
+                        imgui.same_line()
                         changed = input_param.parameter_with_gui.call_gui_edit() or changed
             return changed
 

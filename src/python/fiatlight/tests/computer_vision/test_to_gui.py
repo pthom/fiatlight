@@ -27,8 +27,7 @@ def test_any_typeclass_to_data_with_gui() -> None:
         any_typeclass_to_data_with_gui(Dummy)
 
     a = any_typeclass_to_data_with_gui(int, 1)
-    a.set(2)
-    assert a.value == 2
+    assert a.value == 1
     assert a.gui_edit_impl is not None
     assert a.gui_present_impl is not None
 

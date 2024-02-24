@@ -22,20 +22,15 @@ class FunctionWithGui:
     # input_gui and output_gui should be filled during construction
     inputs_with_gui: List[FunctionParameterWithGui]
     outputs_with_gui: List[FunctionParameterWithGui]
-    # input_gui: AnyDataWithGui | None = None
-    # output_gui: AnyDataWithGui | None = None
 
-    # parameters_with_gui should be filled during construction
-    # parameters_with_gui: List[FunctionParameterWithGui] | None = None
+    # set this with the actual function implementation at construction time
+    f_impl: Callable[..., Any] | None = None
 
     last_exception_message: Optional[str] = None
     last_exception_traceback: Optional[str] = None
 
     # the name of the function
     name: str
-
-    # set this with the actual function implementation at construction time
-    f_impl: Callable[..., Any] | None = None
 
     def __init__(self) -> None:
         self.inputs_with_gui = []
