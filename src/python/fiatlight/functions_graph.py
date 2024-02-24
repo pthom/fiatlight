@@ -5,6 +5,16 @@ from fiatlight.to_gui import any_function_to_function_with_gui
 
 
 class FunctionsGraph:
+    """A graph of FunctionNodes
+    This contains a graph of FunctionNodes modeled as a list of FunctionNode and a list of FunctionNodeLink
+    (which are the links between the outputs of a FunctionNode and the inputs of another FunctionNode)
+
+    This class only stores the data representation of the graph, and does not deal with its GUI representation
+    (for this, see FunctionGraphGui)
+
+    This class is not meant to be instantiated directly. Use the factory methods instead.
+    """
+
     functions_nodes: list[FunctionNode]
     functions_nodes_links: list[FunctionNodeLink]
 

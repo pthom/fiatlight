@@ -92,7 +92,7 @@ class IntWithGuiParams(DataWithGuiParamsBase[int]):
     label: str = "##int"
     v_min: int = 0
     v_max: int = 10
-    width_em: float = 10
+    width_em: float = 6
     format: str = "%d"
     # Specific to slider_int and drag_int
     slider_flags: int = imgui.SliderFlags_.none.value
@@ -198,7 +198,7 @@ class FloatWithGuiParams(DataWithGuiParamsBase[float]):
     v_min: float = 0.0
     v_max: float = 10.0
     format: str = "%.3f"
-    width_em: float = 10
+    width_em: float = 6
     edit_type: FloatEditType = FloatEditType.slider
     # Specific to slider_float
     slider_flags: int = imgui.SliderFlags_.none.value
@@ -361,7 +361,7 @@ class StrWithGuiParams(DataWithGuiParamsBase[str]):
     label: str = "##str"
     edit_type: StrEditType = StrEditType.input
     input_flags: int = imgui.InputTextFlags_.none.value
-    width_em: float = 10  # if 0, then use all available width
+    width_em: float = 6  # if 0, then use all available width
     # Callbacks
     callback: Callable[[imgui.InputTextCallbackData], int] = None  # type: ignore
     user_data: Any | None = None
