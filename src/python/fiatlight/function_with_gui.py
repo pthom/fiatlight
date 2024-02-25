@@ -38,28 +38,28 @@ class FunctionWithGui:
     def input_of_name(self, name: str) -> AnyDataWithGui[Any]:
         for param in self.inputs_with_gui:
             if param.name == name:
-                return param.parameter_with_gui
+                return param.data_with_gui
         assert False, f"input {name} not found"
 
     def output_of_name(self, name: str) -> AnyDataWithGui[Any]:
         for param in self.outputs_with_gui:
             if param.name == name:
-                return param.parameter_with_gui
+                return param.data_with_gui
         assert False, f"output {name} not found"
 
     @final
     def invoke(self) -> Any:
         assert self.f_impl is not None
-        values = [param.parameter_with_gui.value for param in self.inputs_with_gui]
+        values = [param.data_with_gui.value for param in self.inputs_with_gui]
         try:
             fn_output = self.f_impl(*values)
             if not isinstance(fn_output, tuple):
                 assert len(self.outputs_with_gui) == 1
-                self.outputs_with_gui[0].parameter_with_gui.value = fn_output
+                self.outputs_with_gui[0].data_with_gui.value = fn_output
             else:
                 assert len(fn_output) == len(self.outputs_with_gui)
                 for i, output_with_gui in enumerate(self.outputs_with_gui):
-                    output_with_gui.parameter_with_gui.value = fn_output[i]
+                    output_with_gui.data_with_gui.value = fn_output[i]
             self.last_exception_message = None
             self.last_exception_traceback = None
         except Exception as e:
@@ -71,7 +71,7 @@ class FunctionWithGui:
             traceback_details = traceback.format_exception(exc_type, exc_value, exc_traceback)
             self.last_exception_traceback = "".join(traceback_details)
             for output_with_gui in self.outputs_with_gui:
-                output_with_gui.parameter_with_gui.value = None
+                output_with_gui.data_with_gui.value = None
 
     # def to_json(self) -> str:
     #     dict_repr = {
@@ -126,7 +126,7 @@ def sandbox() -> None:
         return foo.a
 
     add_gui = any_function_to_function_with_gui(add)
-    add_gui.inputs_with_gui[0].parameter_with_gui.value = Foo()
+    add_gui.inputs_with_gui[0].data_with_gui.value = Foo()
     # s = add_gui.to_json()
     # print(s)
 

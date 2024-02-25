@@ -93,10 +93,10 @@ class FunctionNodeGui:
             def draw_output_value() -> None:
                 if len(self.function_node.function_with_gui.outputs_with_gui) > 1:
                     fl_widgets.text_custom(output_param.name + ":")
-                if output_param.parameter_with_gui.value is None:
+                if output_param.data_with_gui.value is None:
                     imgui.text("None")
                 else:
-                    output_param.parameter_with_gui.call_gui_present()
+                    output_param.data_with_gui.call_gui_present()
 
             for output_param in self.function_node.function_with_gui.outputs_with_gui:
                 with imgui_ctx.push_obj_id(output_param):
@@ -119,7 +119,7 @@ class FunctionNodeGui:
                     draw_input_pin(input_param.name, self.pins_input[input_param.name])
                     imgui.same_line()
                     if not self.function_node.has_input_link(input_param.name):
-                        changed = input_param.parameter_with_gui.call_gui_edit() or changed
+                        changed = input_param.data_with_gui.call_gui_edit() or changed
                     else:
                         imgui.new_line()
             return changed

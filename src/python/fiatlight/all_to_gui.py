@@ -23,3 +23,6 @@ _ALL_TYPE_TO_GUI_INFO: List[TypeToGuiInfo] = [
 
 def all_type_to_gui_info() -> List[TypeToGuiInfo]:
     return _ALL_TYPE_TO_GUI_INFO
+
+
+__all__ = ["all_type_to_gui_info", "TypeToGuiInfo"]

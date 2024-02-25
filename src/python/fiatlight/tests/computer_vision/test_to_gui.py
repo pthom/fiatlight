@@ -51,27 +51,27 @@ def test_any_function_to_function_with_gui_one_output() -> None:
     assert add_gui.inputs_with_gui[0].name == "a"
     assert add_gui.inputs_with_gui[1].name == "b"
     assert add_gui.outputs_with_gui[0].name == "output"
-    assert add_gui.inputs_with_gui[0].parameter_with_gui.value is None
-    assert add_gui.inputs_with_gui[1].parameter_with_gui.value == 2
-    assert add_gui.outputs_with_gui[0].parameter_with_gui.value is None
+    assert add_gui.inputs_with_gui[0].data_with_gui.value is None
+    assert add_gui.inputs_with_gui[1].data_with_gui.value == 2
+    assert add_gui.outputs_with_gui[0].data_with_gui.value is None
 
     # Test after invoke
-    add_gui.inputs_with_gui[0].parameter_with_gui.value = 1
+    add_gui.inputs_with_gui[0].data_with_gui.value = 1
     add_gui.invoke()
-    assert add_gui.outputs_with_gui[0].parameter_with_gui.value == 3
+    assert add_gui.outputs_with_gui[0].data_with_gui.value == 3
     assert add_gui.last_exception_message is None
 
     # Test after invoke with different default value
-    add_gui.inputs_with_gui[0].parameter_with_gui.value = 1
-    add_gui.inputs_with_gui[1].parameter_with_gui.value = 3
+    add_gui.inputs_with_gui[0].data_with_gui.value = 1
+    add_gui.inputs_with_gui[1].data_with_gui.value = 3
     add_gui.invoke()
-    assert add_gui.outputs_with_gui[0].parameter_with_gui.value == 4
+    assert add_gui.outputs_with_gui[0].data_with_gui.value == 4
     assert add_gui.last_exception_message is None
 
     # Test after invoke with exception
-    add_gui.inputs_with_gui[0].parameter_with_gui.value = "a"
+    add_gui.inputs_with_gui[0].data_with_gui.value = "a"
     add_gui.invoke()
-    assert add_gui.outputs_with_gui[0].parameter_with_gui.value is None
+    assert add_gui.outputs_with_gui[0].data_with_gui.value is None
     assert add_gui.last_exception_message is not None
 
 
@@ -90,31 +90,31 @@ def test_any_function_to_function_with_gui_two_outputs() -> None:
     assert add_mult_gui.inputs_with_gui[1].name == "b"
     assert add_mult_gui.outputs_with_gui[0].name == "output_0"
     assert add_mult_gui.outputs_with_gui[1].name == "output_1"
-    assert add_mult_gui.inputs_with_gui[0].parameter_with_gui.value is None
-    assert add_mult_gui.inputs_with_gui[1].parameter_with_gui.value == 2
-    assert add_mult_gui.outputs_with_gui[0].parameter_with_gui.value is None
-    assert add_mult_gui.outputs_with_gui[1].parameter_with_gui.value is None
+    assert add_mult_gui.inputs_with_gui[0].data_with_gui.value is None
+    assert add_mult_gui.inputs_with_gui[1].data_with_gui.value == 2
+    assert add_mult_gui.outputs_with_gui[0].data_with_gui.value is None
+    assert add_mult_gui.outputs_with_gui[1].data_with_gui.value is None
 
     # Test after invoke
-    add_mult_gui.inputs_with_gui[0].parameter_with_gui.value = 1
+    add_mult_gui.inputs_with_gui[0].data_with_gui.value = 1
     add_mult_gui.invoke()
-    assert add_mult_gui.outputs_with_gui[0].parameter_with_gui.value == 3
-    assert add_mult_gui.outputs_with_gui[1].parameter_with_gui.value == 2
+    assert add_mult_gui.outputs_with_gui[0].data_with_gui.value == 3
+    assert add_mult_gui.outputs_with_gui[1].data_with_gui.value == 2
     assert add_mult_gui.last_exception_message is None
 
     # Test after invoke with different default value
-    add_mult_gui.inputs_with_gui[0].parameter_with_gui.value = 1
-    add_mult_gui.inputs_with_gui[1].parameter_with_gui.value = 3
+    add_mult_gui.inputs_with_gui[0].data_with_gui.value = 1
+    add_mult_gui.inputs_with_gui[1].data_with_gui.value = 3
     add_mult_gui.invoke()
-    assert add_mult_gui.outputs_with_gui[0].parameter_with_gui.value == 4
-    assert add_mult_gui.outputs_with_gui[1].parameter_with_gui.value == 3
+    assert add_mult_gui.outputs_with_gui[0].data_with_gui.value == 4
+    assert add_mult_gui.outputs_with_gui[1].data_with_gui.value == 3
     assert add_mult_gui.last_exception_message is None
 
     # Test after invoke with exception
-    add_mult_gui.inputs_with_gui[0].parameter_with_gui.value = "a"
+    add_mult_gui.inputs_with_gui[0].data_with_gui.value = "a"
     add_mult_gui.invoke()
-    assert add_mult_gui.outputs_with_gui[0].parameter_with_gui.value is None
-    assert add_mult_gui.outputs_with_gui[1].parameter_with_gui.value is None
+    assert add_mult_gui.outputs_with_gui[0].data_with_gui.value is None
+    assert add_mult_gui.outputs_with_gui[1].data_with_gui.value is None
     assert add_mult_gui.last_exception_message is not None
 
 
