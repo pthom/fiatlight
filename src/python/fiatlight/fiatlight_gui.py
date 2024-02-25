@@ -2,12 +2,13 @@ from fiatlight.function_node_gui import FunctionNodeGui
 from fiatlight.config import config
 from fiatlight.functions_graph_gui import FunctionsGraphGui
 from fiatlight.functions_graph import FunctionsGraph
-from fiatlight.internal import osd_widgets
+from fiatlight.internal import osd_widgets, functional_utils
 from imgui_bundle import immapp, imgui, imgui_ctx
 from typing import Any
 from imgui_bundle import hello_imgui, ImVec2, immvision
 
 import json
+import logging
 from typing import List, Tuple
 
 
@@ -155,20 +156,33 @@ class FiatlightGui:
         )
         return [split_main_info]
 
+    def _node_state_filename(self) -> str:
+        return hello_imgui.ini_settings_location(self.params.runner_params)[:-4] + "_fiatlight.json"
+
     def _save_state(self) -> None:
-        ini_file = hello_imgui.ini_settings_location(self.params.runner_params)
-        state_json_file = ini_file[:-4] + "_fiatlight.json"
         json_data = self._functions_graph_gui.functions_graph.to_json()
-        with open(state_json_file, "w") as f:
+        with open(self._node_state_filename(), "w") as f:
             json_str = json.dumps(json_data, indent=4)
             f.write(json_str)
-        print(ini_file)
+
+    def _load_state(self) -> None:
+        try:
+            with open(self._node_state_filename(), "r") as f:
+                json_data = json.load(f)
+                self._functions_graph_gui.functions_graph.fill_from_json(json_data)
+        except FileNotFoundError:
+            logging.info(f"State file {self._node_state_filename()} not found, using default state")
 
     def run(self) -> None:
         self.params.runner_params.docking_params.docking_splits += self._docking_splits()
         self.params.runner_params.docking_params.dockable_windows += self._dockable_windows()
 
-        self.params.runner_params.callbacks.before_exit = self._save_state
+        self.params.runner_params.callbacks.before_exit = functional_utils.sequence_void_functions(
+            self._save_state, self.params.runner_params.callbacks.before_exit
+        )
+        self.params.runner_params.callbacks.post_init = functional_utils.sequence_void_functions(
+            self._load_state, self.params.runner_params.callbacks.post_init
+        )
 
         immapp.run(self.params.runner_params, self.params.addons)
 
