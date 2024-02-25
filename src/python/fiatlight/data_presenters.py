@@ -1,7 +1,6 @@
 from imgui_bundle import imgui, hello_imgui, imgui_knobs, imgui_toggle, imgui_ctx
 from fiatlight.any_data_with_gui import AnyDataWithGui
 from fiatlight.function_with_gui import SourceWithGui
-from fiatlight.to_gui import DataWithGuiParamsBase
 from fiatlight.internal import osd_widgets
 
 from typing import Any, Callable, TypeAlias
@@ -84,7 +83,7 @@ class IntEditType(Enum):
 
 
 @dataclass
-class IntWithGuiParams(DataWithGuiParamsBase[int]):
+class IntWithGuiParams:
     edit_type: IntEditType = IntEditType.slider
     # Common
     label: str = "##int"
@@ -167,7 +166,7 @@ def make_int_with_gui(
 
         return changed
 
-    r.gui_edit_impl = lambda: params.edit_handle_none(r, edit)
+    r.gui_edit_impl = edit
 
     r.default_value_provider = lambda: 0
 
@@ -193,7 +192,7 @@ class FloatEditType(Enum):
 
 
 @dataclass
-class FloatWithGuiParams(DataWithGuiParamsBase[float]):
+class FloatWithGuiParams:
     label: str = "##float"
     v_min: float = 0.0
     v_max: float = 10.0
@@ -279,7 +278,7 @@ def make_float_with_gui(
 
         return changed
 
-    r.gui_edit_impl = lambda: params.edit_handle_none(r, edit)
+    r.gui_edit_impl = edit
 
     r.default_value_provider = lambda: 0.0
 
@@ -303,7 +302,7 @@ class BoolEditType(Enum):
 
 
 @dataclass
-class BoolWithGuiParams(DataWithGuiParamsBase[bool]):
+class BoolWithGuiParams:
     default_edit_value = False
     label: str = "##bool"
     edit_type: BoolEditType = BoolEditType.checkbox
@@ -347,7 +346,7 @@ def make_bool_with_gui(
 
         return changed
 
-    r.gui_edit_impl = lambda: params.edit_handle_none(r, edit)
+    r.gui_edit_impl = edit
 
     r.default_value_provider = lambda: False
 
@@ -364,7 +363,7 @@ class StrEditType(Enum):
 
 
 @dataclass
-class StrWithGuiParams(DataWithGuiParamsBase[str]):
+class StrWithGuiParams:
     default_edit_value = ""
     label: str = "##str"
     edit_type: StrEditType = StrEditType.input
@@ -422,7 +421,7 @@ def make_str_with_gui(
 
         return changed
 
-    r.gui_edit_impl = lambda: params.edit_handle_none(r, edit)
+    r.gui_edit_impl = edit
 
     r.default_value_provider = lambda: ""
 

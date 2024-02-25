@@ -3,11 +3,14 @@ This module provides a class to wrap any data with a GUI (AnyDataWithGui), and a
 See example implementation for a custom type at the bottom of this file.
 """
 from fiatlight.fiatlight_types import BoolFunction, VoidFunction, JsonPrimitiveOrDict, JsonDict
-from typing import Optional, final, Callable, TypeVar, Generic
+from typing import Optional, final, Callable, TypeVar, Generic, TypeAlias
 from dataclasses import dataclass
+from imgui_bundle import imgui, icons_fontawesome
 
 # DataType: TypeAlias = Any
 DataType = TypeVar("DataType")
+
+DefaultValueProvider: TypeAlias = Callable[[], DataType]
 
 
 class AnyDataWithGui(Generic[DataType]):
@@ -32,8 +35,8 @@ class AnyDataWithGui(Generic[DataType]):
     to_dict_impl: Callable[[DataType], JsonDict] | None = None
     from_dict_impl: Callable[[JsonDict], DataType] | None = None
 
-    # default value provider: if value is None, this function will be called to provide a default value
-    default_value_provider: Callable[[], DataType] | None = None
+    # default value provider: this function will be called to provide a default value if needed
+    default_value_provider: DefaultValueProvider[DataType]
 
     def _has_custom_serialization(self) -> bool:
         return self.to_dict_impl is not None and self.from_dict_impl is not None
@@ -85,9 +88,23 @@ class AnyDataWithGui(Generic[DataType]):
 
     @final
     def call_gui_edit(self) -> bool:
-        if self.gui_edit_impl is not None:
-            return self.gui_edit_impl()
-        return False
+        if self.gui_edit_impl is None:
+            return False
+        if self.value is None:
+            imgui.text("None!")
+            imgui.same_line()
+            if imgui.small_button(icons_fontawesome.ICON_FA_PLUS):
+                self.value = self.default_value_provider()
+                return True
+            else:
+                return False
+        else:
+            changed = self.gui_edit_impl()
+            imgui.same_line()
+            if imgui.small_button(icons_fontawesome.ICON_FA_TRASH):
+                self.value = None
+                changed = True
+            return changed
 
 
 @dataclass
