@@ -1,0 +1,204 @@
+@startuml
+
+package FunctionGui {
+    class AnyDataWithGui <<[DataType]>>{
+      Add a visual representation
+      (edit / present) to any data
+      ---
+      + value: DataType
+      ----
+      + gui_present_impl: VoidFunction
+      + gui_edit_impl: BoolFunction
+      + default_value_provider: []->DataType
+    }
+
+    class NamedDataWithGui <<[DataType]>>{
+      A named DataWithGui, used
+      to stored function inputs and outputs
+      ---
+      + name: String
+      + value: DataType
+      ----
+      + gui_present_impl: VoidFunction
+      + gui_edit_impl: BoolFunction
+      + default_value_provider: []->DataType
+    }
+
+    NamedDataWithGui *-- AnyDataWithGui
+
+
+    class FunctionWithGui {
+      Wrapper around a function (f_impl)
+      that adds a visual representation
+      to its inputs and outputs
+      ---
+      + f_impl: Callable[..., Any]
+      + name: str
+      ---
+      + inputs_with_gui: List[NamedDataWithGui]
+      + outputs_with_gui: List[NamedDataWithGui]
+      ---
+      - last_exception_message: str | None
+      ---
+      + invoke()
+      ---
+      invoke will call f_impl with inputs_with_gui values
+      and store the result in outputs_with_gui
+    }
+
+    FunctionWithGui "1" *-- "n" NamedDataWithGui : list[inputs]
+    FunctionWithGui "1" *-- "n"  NamedDataWithGui : list[outputs]
+
+}
+
+package FunctionGuiFactory {
+
+    class TypeToGuiInfo {
+        A class that stores the information
+        on how to convert a standard type
+        to a type with a visual representation
+        ---
+        + standard_type_class: Type
+        ---
+        + gui_type_factory:
+          (StandardType, Params) -> AnyDataWithGui
+        ---
+        + default_params
+    }
+
+
+    entity _ALL_TYPE_TO_GUI_INFO {
+        all converters
+    }
+
+    _ALL_TYPE_TO_GUI_INFO *-- "n" TypeToGuiInfo
+
+    interface API <<free functions>> {
+        + register_type_to_gui_info()
+        ---
+        + any_typeclass_to_data_with_gui()
+        + any_value_to_data_with_gui()
+        + any_param_to_param_with_gui()
+        + any_function_to_function_with_gui()
+    }
+
+    API ...> AnyDataWithGui: produces
+    API ...> FunctionWithGui: produces
+    API ...> _ALL_TYPE_TO_GUI_INFO: uses
+}
+
+
+package FunctionGraph {
+    class FunctionNode {
+        A node in a graph of functions
+        ---
+        + function_with_gui
+        + output_links: List[FunctionNodeLink]
+        + input_links: List[FunctionNodeLink]
+    }
+
+
+    class FunctionNodeLink {
+        A link between two function nodes
+        ---
+        + src_function_node
+        + src_output_name
+        + dst_function_node
+        + dst_input_name
+    }
+
+    FunctionNode *-- FunctionWithGui
+    FunctionNode "1" *-- "n" FunctionNodeLink: output_links
+    FunctionNode "1" *-- "n" FunctionNodeLink: input_links
+
+    FunctionNodeLink "src, dst" o--  FunctionNode: src, dst
+
+
+    class FunctionsGraph {
+        A graph of FunctionNodes
+        ---
+        + functions_nodes
+        + functions_nodes_links
+    }
+
+    FunctionsGraph "1" *-- "n" FunctionNode
+    FunctionsGraph "1" *-- "n" FunctionNodeLink
+
+}
+
+
+package GraphGui {
+    class FunctionNodeLinkGui{
+        The GUI representation
+         for a FunctionNodeLink
+        ---
+        + function_node_link
+        ---
+        (specific to imgui-node-editor)
+        + link_id: ed.LinkId
+        + start_id: ed.PinId
+        + end_id: ed.PinId
+    }
+
+
+    FunctionNodeLinkGui *-- FunctionNodeLink
+
+    class FunctionNodeGui {
+        The GUI representation
+        for a FunctionNode
+        ---
+        function_node
+        ---
+        (specific to imgui-node-editor)
+        + node_id: ed.NodeId
+        + pins_input: Dict[str, ed.PinId]
+        + pins_output: Dict[str, ed.PinId]
+    }
+
+    FunctionNodeGui *-- FunctionNode
+
+
+    class FunctionsGraphGui {
+        The GUI representation
+        for a FunctionsGraph
+        ---
+        functions_graph
+        function_nodes_gui: List[FunctionNodeGui]
+        functions_links_gui: List[FunctionNodeLinkGui]
+
+    }
+
+    FunctionsGraphGui *-- FunctionsGraph
+    FunctionsGraphGui "1" *-- "n" FunctionNodeGui
+    FunctionsGraphGui "1" *-- "n" FunctionNodeLinkGui
+
+
+    class FiatlightGuiParams {
+        + show_image_inspector: bool
+        + runner_params: hello_imgui.RunnerParams
+        + addons: immapp.AddOnsParams
+    }
+
+
+    class FiatlightGui {
+        Runs an application
+        that presents a function graph
+        for a Fiatlight
+        ---
+        + functions_graph_gui
+        + params
+        ---
+        + run()
+    }
+
+    FiatlightGui *-- FunctionsGraphGui
+    FiatlightGui *-- FiatlightGuiParams
+
+    class Functions <<free function>> {
+        + run(functions_graph, params)
+    }
+
+    Functions ... FiatlightGui: uses
+}
+
+@enduml

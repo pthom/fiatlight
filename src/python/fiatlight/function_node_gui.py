@@ -125,8 +125,8 @@ class FunctionNodeGui:
             return changed
 
         ed.begin_node(self.node_id)
-        imgui.dummy(ImVec2(hello_imgui.em_size(self._MIN_NODE_WIDTH_EM), 1))
         draw_title()
+        imgui.dummy(ImVec2(hello_imgui.em_size(self._MIN_NODE_WIDTH_EM), 1))
         if draw_function_inputs():
             self.function_node.invoke_function()
         draw_exception_message()
