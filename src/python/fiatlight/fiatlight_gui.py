@@ -7,6 +7,7 @@ from imgui_bundle import immapp, imgui, imgui_ctx
 from typing import Any
 from imgui_bundle import hello_imgui, ImVec2, immvision
 
+import json
 from typing import List, Tuple
 
 
@@ -154,9 +155,21 @@ class FiatlightGui:
         )
         return [split_main_info]
 
+    def _save_state(self) -> None:
+        ini_file = hello_imgui.ini_settings_location(self.params.runner_params)
+        state_json_file = ini_file[:-4] + "_fiatlight.json"
+        json_data = self._functions_graph_gui.functions_graph.to_json()
+        with open(state_json_file, "w") as f:
+            json_str = json.dumps(json_data, indent=4)
+            f.write(json_str)
+        print(ini_file)
+
     def run(self) -> None:
         self.params.runner_params.docking_params.docking_splits += self._docking_splits()
         self.params.runner_params.docking_params.dockable_windows += self._dockable_windows()
+
+        self.params.runner_params.callbacks.before_exit = self._save_state
+
         immapp.run(self.params.runner_params, self.params.addons)
 
 
