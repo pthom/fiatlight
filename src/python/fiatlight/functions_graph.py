@@ -1,6 +1,6 @@
 from fiatlight import FunctionWithGui
 from fiatlight.function_node import FunctionNode, FunctionNodeLink
-from fiatlight.fiatlight_types import PureFunction
+from fiatlight.fiatlight_types import PureFunction, JsonDict
 from fiatlight.to_gui import any_function_to_function_with_gui
 
 
@@ -94,6 +94,21 @@ class FunctionsGraph:
         fill_functions_with_gui()
         fill_links()
         return r
+
+    def to_json(self) -> JsonDict:
+        """We do not save the links, only the values stored inside the functions."""
+        data = {
+            "functions_nodes": [fn.function_with_gui.to_json() for fn in self.functions_nodes],
+        }
+        return data
+
+    def fill_from_json(self, json_data: JsonDict) -> None:
+        nodes_data = json_data["functions_nodes"]
+        if len(nodes_data) != len(self.functions_nodes):
+            raise ValueError("The number of functions in the json does not match the number of functions in the graph")
+
+        for i, fn in enumerate(self.functions_nodes):
+            fn.function_with_gui.fill_from_json(nodes_data[i])
 
 
 def sandbox() -> None:

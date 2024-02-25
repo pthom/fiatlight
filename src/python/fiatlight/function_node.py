@@ -1,4 +1,5 @@
 from fiatlight.function_with_gui import FunctionWithGui
+import json
 
 
 class FunctionNodeLink:
@@ -58,3 +59,15 @@ class FunctionNode:
             dst_input = link.dst_function_node.function_with_gui.input_of_name(link.dst_input_name)
             dst_input.value = src_output.value
             link.dst_function_node.invoke_function()
+
+    def to_json(self) -> str:
+        """We do not save the links, only the values stored inside the function.
+        The links are reconstructed when loading the graph."""
+        r = {
+            "function_with_gui": self.function_with_gui.to_json(),
+        }
+        return json.dumps(r)
+
+    def fill_from_json(self, json_str: str) -> None:
+        d = json.loads(json_str)
+        self.function_with_gui.fill_from_json(d["function_with_gui"])

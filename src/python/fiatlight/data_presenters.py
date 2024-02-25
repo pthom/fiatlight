@@ -169,7 +169,7 @@ def make_int_with_gui(
 
     r.gui_edit_impl = lambda: params.edit_handle_none(r, edit)
 
-    r.default_value = lambda: 0
+    r.default_value_provider = lambda: 0
 
     return r
 
@@ -281,7 +281,7 @@ def make_float_with_gui(
 
     r.gui_edit_impl = lambda: params.edit_handle_none(r, edit)
 
-    r.default_value = lambda: 0.0
+    r.default_value_provider = lambda: 0.0
 
     return r
 
@@ -349,7 +349,7 @@ def make_bool_with_gui(
 
     r.gui_edit_impl = lambda: params.edit_handle_none(r, edit)
 
-    r.default_value = lambda: False
+    r.default_value_provider = lambda: False
 
     return r
 
@@ -424,7 +424,7 @@ def make_str_with_gui(
 
     r.gui_edit_impl = lambda: params.edit_handle_none(r, edit)
 
-    r.default_value = lambda: ""
+    r.default_value_provider = lambda: ""
 
     return r
 

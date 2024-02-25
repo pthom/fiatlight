@@ -1,5 +1,5 @@
 from fiatlight.any_data_with_gui import AnyDataWithGui, NamedDataWithGui
-
+from fiatlight.fiatlight_types import JsonDict
 from typing import Any, List, final, Callable, Optional
 
 
@@ -73,13 +73,24 @@ class FunctionWithGui:
             for output_with_gui in self.outputs_with_gui:
                 output_with_gui.data_with_gui.value = None
 
-    # def to_json(self) -> str:
-    #     dict_repr = {
-    #         "name": self.name,
-    #         "inputs_with_gui": [param.to_dict() for param in self.inputs_with_gui],
-    #         "outputs_with_gui": [param.to_dict() for param in self.outputs_with_gui],
-    #     }
-    #     return json.dumps(dict_repr)
+    def to_json(self) -> JsonDict:
+        inputs_dicts = [param.to_json() for param in self.inputs_with_gui]
+        outputs_dicts = [param.to_json() for param in self.outputs_with_gui]
+        function_dict = {"name": self.name, "inputs": inputs_dicts, "outputs": outputs_dicts}
+        return function_dict
+
+    def fill_from_json(self, json_data: JsonDict) -> None:
+        self.name = json_data["name"]
+        inputs_json = json_data["inputs"]
+        outputs_json = json_data["outputs"]
+        if len(inputs_json) != len(self.inputs_with_gui):
+            raise ValueError(f"Expected {len(self.inputs_with_gui)} inputs, got {len(inputs_json)}")
+        if len(outputs_json) != len(self.outputs_with_gui):
+            raise ValueError(f"Expected {len(self.outputs_with_gui)} outputs, got {len(outputs_json)}")
+        for i, param_json in enumerate(inputs_json):
+            self.inputs_with_gui[i].fill_from_json(param_json)
+        for i, param_json in enumerate(outputs_json):
+            self.outputs_with_gui[i].fill_from_json(param_json)
 
 
 class SourceWithGui(FunctionWithGui):
@@ -116,8 +127,8 @@ def sandbox() -> None:
         r.value = default_value
         r.gui_edit_impl = lambda: False
         r.gui_present_impl = lambda: None
-        r.to_dict = lambda x: {"a": x.a}
-        r.from_dict = lambda d: Foo(a=d["a"])
+        r.to_dict_impl = lambda x: {"a": x.a}
+        r.from_dict_impl = lambda d: Foo(a=d["a"])
         return r
 
     _ALL_TYPE_TO_GUI_INFO.append(TypeToGuiInfo(Foo, make_foo_with_gui, None))
