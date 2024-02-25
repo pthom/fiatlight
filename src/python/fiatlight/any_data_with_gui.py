@@ -1,3 +1,7 @@
+"""
+This module provides a class to wrap any data with a GUI (AnyDataWithGui), and a class to wrap a named data with a GUI.
+See example implementation for a custom type at the bottom of this file.
+"""
 from fiatlight.fiatlight_types import BoolFunction, VoidFunction
 from typing import Optional, Any, final, Callable, TypeVar, Generic
 from dataclasses import dataclass
@@ -49,7 +53,7 @@ class AnyDataWithGui(Generic[DataType]):
         else:
             raise ValueError(f"Cannot serialize {self.value}, it has no __dict__ attribute.")
 
-    def from_json(self, json_str: str) -> None:
+    def fill_from_json(self, json_str: str) -> None:
         if json_str == "null":
             self.value = None
         else:
@@ -65,7 +69,8 @@ class AnyDataWithGui(Generic[DataType]):
                     # Ouch, what if value is None?
                     # We need a way to know the type of the value, or to have a default value
                     if self.value is None:
-                        assert self.default_value is not None
+                        if self.default_value is None:
+                            raise ValueError("Cannot deserialize a None value without a default_value")
                         self.value = self.default_value()
                     self.value.__dict__.update(as_dict)
 
@@ -94,4 +99,81 @@ class AnyDataWithGui(Generic[DataType]):
 @dataclass
 class NamedDataWithGui(Generic[DataType]):
     name: str
-    parameter_with_gui: AnyDataWithGui[DataType]
+    data_with_gui: AnyDataWithGui[DataType]
+
+    def to_json(self) -> str:
+        data_json = self.data_with_gui.to_json()
+        named_data_dict = {"name": self.name, "data": json.loads(data_json)}
+        return json.dumps(named_data_dict)
+
+    def fill_from_json(self, json_str: str) -> None:
+        named_data_dict = json.loads(json_str)
+        self.name = named_data_dict["name"]
+        data_json = json.dumps(named_data_dict["data"])
+        self.data_with_gui.fill_from_json(data_json)
+
+
+##############################################################################################################
+# Example implementation for a custom type
+##############################################################################################################
+class Foo:
+    x: int
+
+    def __init__(self, x: int) -> None:
+        self.x = x
+
+
+class FooGuiParams:
+    """Any params that could be used to provide additional parameters to the GUI implementation of Foo"""
+
+    pass
+
+
+def make_foo_with_gui(initial_value: Foo | None, gui_params: FooGuiParams | None = None) -> AnyDataWithGui[Foo]:
+    """gui_params is not used in this example,
+    but could be used to provide additional parameters to the GUI implementation"""
+    from imgui_bundle import imgui
+
+    r = AnyDataWithGui[Foo]()
+    r.value = initial_value
+
+    # Edit and present functions
+    def edit() -> bool:
+        assert r.value is not None
+        changed, r.value.x = imgui.input_int("x", r.value.x)
+        return changed
+
+    def present() -> None:
+        assert r.value is not None
+        imgui.text(f"x: {r.value.x}")
+
+    r.gui_edit_impl = edit
+    r.gui_present_impl = present
+
+    # default value provider
+    r.default_value = lambda: Foo(x=0)
+
+    # Optional implementation of serialization and deserialization functions
+    # (if not provided, the default serialization will be used, by serializing the __dict__ attribute of the value)
+    r.to_dict = lambda x: {"x": x.x}
+    r.from_dict = lambda d: Foo(x=d["x"])
+
+    return r
+
+
+def test_foo_with_gui() -> None:
+    # Register the Foo type with its GUI implementation (do this once at the beginning of your program)
+    from fiatlight.all_to_gui import all_type_to_gui_info, TypeToGuiInfo
+
+    all_type_to_gui_info().append(TypeToGuiInfo(Foo, make_foo_with_gui, FooGuiParams()))
+
+    # Use the Foo type with its GUI implementation
+    from fiatlight.to_gui import any_value_to_data_with_gui
+
+    foo = Foo(1)
+    foo_gui = any_value_to_data_with_gui(foo)
+    assert foo_gui.value == foo
+
+
+if __name__ == "__main__":
+    test_foo_with_gui()
