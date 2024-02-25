@@ -85,8 +85,6 @@ class IntEditType(Enum):
 
 @dataclass
 class IntWithGuiParams(DataWithGuiParamsBase[int]):
-    default_edit_value = 0
-    #
     edit_type: IntEditType = IntEditType.slider
     # Common
     label: str = "##int"
@@ -112,10 +110,10 @@ class IntWithGuiParams(DataWithGuiParamsBase[int]):
 def make_int_with_gui(
     initial_value: int | None = None,
     params: IntWithGuiParams | None = None,
-) -> AnyDataWithGui:
+) -> AnyDataWithGui[int]:
     if params is None:
         params = IntWithGuiParams()
-    r = AnyDataWithGui()
+    r = AnyDataWithGui[int]()
     r.value = initial_value
 
     r.gui_present_impl = lambda: _versatile_gui_present(r.value)
@@ -124,6 +122,7 @@ def make_int_with_gui(
 
     def edit() -> bool:
         nonlocal first_frame
+        assert r.value is not None
         changed = False
         imgui.set_next_item_width(hello_imgui.em_size(params.width_em))
         if params.edit_type == IntEditType.slider:
@@ -170,8 +169,7 @@ def make_int_with_gui(
 
     r.gui_edit_impl = lambda: params.edit_handle_none(r, edit)
 
-    r.to_dict = lambda x: {"value": x}
-    r.from_dict = lambda x: x["value"]
+    r.default_value = lambda: 0
 
     return r
 
@@ -196,7 +194,6 @@ class FloatEditType(Enum):
 
 @dataclass
 class FloatWithGuiParams(DataWithGuiParamsBase[float]):
-    default_edit_value = 0.0
     label: str = "##float"
     v_min: float = 0.0
     v_max: float = 10.0
@@ -218,10 +215,12 @@ class FloatWithGuiParams(DataWithGuiParamsBase[float]):
     knob_steps: int = 0
 
 
-def make_float_with_gui(initial_value: float | None = None, params: FloatWithGuiParams | None = None) -> AnyDataWithGui:
+def make_float_with_gui(
+    initial_value: float | None = None, params: FloatWithGuiParams | None = None
+) -> AnyDataWithGui[float]:
     if params is None:
         params = FloatWithGuiParams()
-    r = AnyDataWithGui()
+    r = AnyDataWithGui[float]()
     r.value = initial_value
 
     r.gui_present_impl = lambda: _versatile_gui_present(r.value)
@@ -230,6 +229,7 @@ def make_float_with_gui(initial_value: float | None = None, params: FloatWithGui
 
     def edit() -> bool:
         nonlocal first_frame
+        assert r.value is not None
         changed = False
         imgui.set_next_item_width(hello_imgui.em_size(params.width_em))
         if params.edit_type == FloatEditType.slider:
@@ -281,6 +281,8 @@ def make_float_with_gui(initial_value: float | None = None, params: FloatWithGui
 
     r.gui_edit_impl = lambda: params.edit_handle_none(r, edit)
 
+    r.default_value = lambda: 0.0
+
     return r
 
 
@@ -312,10 +314,10 @@ class BoolWithGuiParams(DataWithGuiParamsBase[bool]):
 def make_bool_with_gui(
     initial_value: bool | None = None,
     params: BoolWithGuiParams | None = None,
-) -> AnyDataWithGui:
+) -> AnyDataWithGui[bool]:
     if params is None:
         params = BoolWithGuiParams()
-    r = AnyDataWithGui()
+    r = AnyDataWithGui[bool]()
     r.value = initial_value
 
     r.gui_present_impl = lambda: _versatile_gui_present(r.value)
@@ -324,6 +326,7 @@ def make_bool_with_gui(
 
     def edit() -> bool:
         assert params is not None
+        assert r.value is not None
         nonlocal first_frame
         changed = False
         if params.edit_type == BoolEditType.checkbox:
@@ -345,6 +348,8 @@ def make_bool_with_gui(
         return changed
 
     r.gui_edit_impl = lambda: params.edit_handle_none(r, edit)
+
+    r.default_value = lambda: False
 
     return r
 
@@ -377,10 +382,10 @@ class StrWithGuiParams(DataWithGuiParamsBase[str]):
 def make_str_with_gui(
     initial_value: str | None = None,
     params: StrWithGuiParams | None = None,
-) -> AnyDataWithGui:
+) -> AnyDataWithGui[str]:
     if params is None:
         params = StrWithGuiParams()
-    r = AnyDataWithGui()
+    r = AnyDataWithGui[str]()
     r.value = initial_value
 
     r.gui_present_impl = lambda: _versatile_gui_present(r.value)
@@ -389,6 +394,7 @@ def make_str_with_gui(
 
     def edit() -> bool:
         nonlocal first_frame
+        assert r.value is not None
         changed = False
         imgui.set_next_item_width(hello_imgui.em_size(params.width_em))
         if params.edit_type == StrEditType.input:
@@ -417,6 +423,8 @@ def make_str_with_gui(
         return changed
 
     r.gui_edit_impl = lambda: params.edit_handle_none(r, edit)
+
+    r.default_value = lambda: ""
 
     return r
 

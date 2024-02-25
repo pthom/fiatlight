@@ -1,13 +1,6 @@
-from fiatlight.any_data_with_gui import AnyDataWithGui
+from fiatlight.any_data_with_gui import AnyDataWithGui, NamedDataWithGui
 
 from typing import Any, List, final, Callable, Optional
-from dataclasses import dataclass
-
-
-@dataclass
-class NamedDataWithGui:
-    name: str
-    parameter_with_gui: AnyDataWithGui
 
 
 class FunctionWithGui:
@@ -25,8 +18,8 @@ class FunctionWithGui:
     name: str
 
     # input_gui and output_gui should be filled during construction
-    inputs_with_gui: List[NamedDataWithGui]
-    outputs_with_gui: List[NamedDataWithGui]
+    inputs_with_gui: List[NamedDataWithGui[Any]]
+    outputs_with_gui: List[NamedDataWithGui[Any]]
 
     # if the last call raised an exception, the message is stored here
     last_exception_message: Optional[str] = None
@@ -42,13 +35,13 @@ class FunctionWithGui:
     def all_outputs_ids(self) -> List[str]:
         return [param.name for param in self.outputs_with_gui]
 
-    def input_of_name(self, name: str) -> AnyDataWithGui:
+    def input_of_name(self, name: str) -> AnyDataWithGui[Any]:
         for param in self.inputs_with_gui:
             if param.name == name:
                 return param.parameter_with_gui
         assert False, f"input {name} not found"
 
-    def output_of_name(self, name: str) -> AnyDataWithGui:
+    def output_of_name(self, name: str) -> AnyDataWithGui[Any]:
         for param in self.outputs_with_gui:
             if param.name == name:
                 return param.parameter_with_gui
@@ -92,7 +85,7 @@ class FunctionWithGui:
 class SourceWithGui(FunctionWithGui):
     """A source function that does not take any input and returns a user editable value"""
 
-    def __init__(self, initial_value_with_gui: AnyDataWithGui, source_name: str = "Source") -> None:
+    def __init__(self, initial_value_with_gui: AnyDataWithGui[Any], source_name: str = "Source") -> None:
         self.output_gui = initial_value_with_gui
         self.parameters_with_gui = [NamedDataWithGui("##source", initial_value_with_gui)]
         self.name = source_name
@@ -118,8 +111,8 @@ def sandbox() -> None:
         def __init__(self, a: int = 0):
             self.a = a
 
-    def make_foo_with_gui(default_value: Foo | None, _: Any | None = None) -> AnyDataWithGui:
-        r = AnyDataWithGui()
+    def make_foo_with_gui(default_value: Foo | None, _: Any | None = None) -> AnyDataWithGui[Foo]:
+        r = AnyDataWithGui[Foo]()
         r.value = default_value
         r.gui_edit_impl = lambda: False
         r.gui_present_impl = lambda: None

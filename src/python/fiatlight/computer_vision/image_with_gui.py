@@ -1,7 +1,7 @@
 from __future__ import annotations
 from typing import Any
 
-from fiatlight.computer_vision.image_types import ImageUInt8
+from fiatlight.computer_vision.image_types import ImageUInt8, Image
 from fiatlight.any_data_with_gui import AnyDataWithGui
 from imgui_bundle import immvision, imgui
 from imgui_bundle import portable_file_dialogs as pfd
@@ -16,7 +16,7 @@ import cv2
 _INSPECT_ID: int = 0
 
 
-class ImageWithGui(AnyDataWithGui):
+class ImageWithGui(AnyDataWithGui[Image]):
     # value: Optional[ImageUInt8]
     image_params: immvision.ImageParams
     open_file_dialog: Optional[pfd.open_file] = None
@@ -56,6 +56,7 @@ class ImageWithGui(AnyDataWithGui):
         _, self.image_params.image_display_size = gui_edit_size(self.image_params.image_display_size)
 
     def _gui_image(self) -> None:
+        assert self.value is not None
         can_convert_to_bgr = self._color_conversion_to_bgr() is not None
         if can_convert_to_bgr:
             _, self.view_with_bgr_conversion = imgui.checkbox("View as BGR", self.view_with_bgr_conversion)
@@ -94,7 +95,7 @@ class ImageWithGui(AnyDataWithGui):
         return result
 
 
-class ImageChannelsWithGui(AnyDataWithGui):
+class ImageChannelsWithGui(AnyDataWithGui[Image]):
     images_params: immvision.ImageParams
 
     def __init__(

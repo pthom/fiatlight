@@ -1,17 +1,19 @@
 from fiatlight.fiatlight_types import BoolFunction, VoidFunction
-from typing import Optional, Any, final, Callable, TypeAlias
+from typing import Optional, Any, final, Callable, TypeVar, Generic
+from dataclasses import dataclass
 import json
 
-DataType: TypeAlias = Any
+# DataType: TypeAlias = Any
+DataType = TypeVar("DataType")
 
 
-class AnyDataWithGui:
+class AnyDataWithGui(Generic[DataType]):
     """
     Instantiate this class with your types, and provide draw functions that presents it content
     """
 
     # The value of the data
-    value: DataType = None
+    value: DataType | None = None
 
     # Provide a draw function that presents the data content
     gui_present_impl: VoidFunction | None = None
@@ -25,6 +27,9 @@ class AnyDataWithGui:
     # or as a json string (for int, float, str, bool, and None)
     to_dict: Callable[[DataType], dict[str, Any]] | None = None
     from_dict: Callable[[dict[str, Any]], DataType] | None = None
+
+    # default value provider: if value is None, this function will be called to provide a default value
+    default_value: Callable[[], DataType] | None = None
 
     def _has_custom_serialization(self) -> bool:
         return self.to_dict is not None and self.from_dict is not None
@@ -50,7 +55,7 @@ class AnyDataWithGui:
         else:
             as_dict_or_value = json.loads(json_str)
             if isinstance(as_dict_or_value, (str, int, float, bool)):
-                self.value = as_dict_or_value
+                self.value = as_dict_or_value  # type: ignore
             else:
                 as_dict = as_dict_or_value
                 if self._has_custom_serialization():
@@ -59,11 +64,14 @@ class AnyDataWithGui:
                 else:
                     # Ouch, what if value is None?
                     # We need a way to know the type of the value, or to have a default value
+                    if self.value is None:
+                        assert self.default_value is not None
+                        self.value = self.default_value()
                     self.value.__dict__.update(as_dict)
 
     def __init__(
         self,
-        value: DataType = None,
+        value: DataType | None = None,
         gui_present: Optional[VoidFunction] = None,
         gui_edit: Optional[BoolFunction] = None,
     ) -> None:
@@ -81,3 +89,9 @@ class AnyDataWithGui:
         if self.gui_edit_impl is not None:
             return self.gui_edit_impl()
         return False
+
+
+@dataclass
+class NamedDataWithGui(Generic[DataType]):
+    name: str
+    parameter_with_gui: AnyDataWithGui[DataType]
