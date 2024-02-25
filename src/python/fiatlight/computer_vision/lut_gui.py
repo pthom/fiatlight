@@ -9,7 +9,7 @@ from imgui_bundle import immapp, imgui, immvision
 Point2d: TypeAlias = Tuple[float, float]
 
 
-class LutParamsWithGui(AnyDataWithGui):
+class LutParamsWithGui(AnyDataWithGui[lut.LutParams]):
     value: lut.LutParams
 
     _lut_graph: ImageUInt8

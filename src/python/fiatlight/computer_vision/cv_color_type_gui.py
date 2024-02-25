@@ -31,7 +31,7 @@ def gui_color_conversion(color_conversion: OptionalColorConversion) -> Tuple[boo
     return changed, color_conversion
 
 
-class ConvertColorWithGui(AnyDataWithGui):
+class ConvertColorWithGui(AnyDataWithGui[ColorConversion]):
     value: ColorConversion | None
 
     def __init__(self, value: ColorConversion | None = None) -> None:

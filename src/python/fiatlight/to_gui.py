@@ -1,4 +1,4 @@
-from fiatlight.any_data_with_gui import AnyDataWithGui
+from fiatlight.any_data_with_gui import AnyDataWithGui, DataType
 from fiatlight.function_with_gui import FunctionWithGui, NamedDataWithGui
 from fiatlight.fiatlight_types import BoolFunction
 from imgui_bundle import icons_fontawesome
@@ -19,7 +19,7 @@ class DataWithGuiParamsBase(Generic[T]):
     # default value will be used when editing, if initial_value is None
     default_edit_value: T
 
-    def edit_handle_none(self, data: AnyDataWithGui, edit_function: BoolFunction) -> bool:
+    def edit_handle_none(self, data: AnyDataWithGui[Any], edit_function: BoolFunction) -> bool:
         """Transform an edit function (BoolFunction) into a function that handles None values
         by proposing to set the value to the default value or to None"""
         from imgui_bundle import imgui
@@ -44,7 +44,7 @@ class DataWithGuiParamsBase(Generic[T]):
 @dataclass
 class TypeToGuiInfo:
     standard_type_class: Type[Any]
-    gui_type_factory: Callable[[StandardType | None, GuiEditParams | None], AnyDataWithGui]
+    gui_type_factory: Callable[[StandardType | None, GuiEditParams | None], AnyDataWithGui[Any]]
     default_edit_params: GuiEditParams
 
     def is_type(self, typeclass: Type[Any] | str) -> bool:
@@ -55,7 +55,9 @@ class TypeToGuiInfo:
         return typeclass is self.standard_type_class
 
 
-def any_typeclass_to_data_with_gui(typeclass: Type[Any], default_value: Any | None = None) -> AnyDataWithGui:
+def any_typeclass_to_data_with_gui(
+    typeclass: Type[DataType], default_value: DataType | None = None
+) -> AnyDataWithGui[DataType]:
     from fiatlight.all_to_gui import all_type_to_gui_info
 
     for type_to_gui_info in all_type_to_gui_info():
@@ -64,11 +66,11 @@ def any_typeclass_to_data_with_gui(typeclass: Type[Any], default_value: Any | No
     raise ValueError(f"Type {typeclass} not supported by any_typeclass_to_data_with_gui")
 
 
-def any_value_to_data_with_gui(value: Any) -> AnyDataWithGui:
+def any_value_to_data_with_gui(value: DataType) -> AnyDataWithGui[DataType]:
     return any_typeclass_to_data_with_gui(type(value), value)
 
 
-def any_param_to_param_with_gui(name: str, param: inspect.Parameter) -> NamedDataWithGui:
+def any_param_to_param_with_gui(name: str, param: inspect.Parameter) -> NamedDataWithGui[Any]:
     default_value = param.default if param.default is not inspect.Parameter.empty else None
     annotation = param.annotation if param.annotation is not inspect.Parameter.empty else None
 
