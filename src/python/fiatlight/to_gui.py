@@ -86,11 +86,11 @@ def any_function_to_function_with_gui(f: Callable[..., Any]) -> FunctionWithGui:
 
     try:
         sig = inspect.signature(f)
-        params = sig.parameters
-        for name, param in params.items():
-            function_with_gui.inputs_with_gui.append(any_param_to_param_with_gui(name, param))
     except ValueError as e:
         raise ValueError(f"Function {f.__name__} has no type annotations") from e
+    params = sig.parameters
+    for name, param in params.items():
+        function_with_gui.inputs_with_gui.append(any_param_to_param_with_gui(name, param))
 
     return_annotation = sig.return_annotation
     if return_annotation is inspect.Parameter.empty:
