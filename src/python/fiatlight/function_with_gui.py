@@ -80,6 +80,14 @@ class FunctionWithGui:
             for output_with_gui in self.outputs_with_gui:
                 output_with_gui.parameter_with_gui.value = None
 
+    # def to_json(self) -> str:
+    #     dict_repr = {
+    #         "name": self.name,
+    #         "inputs_with_gui": [param.to_dict() for param in self.inputs_with_gui],
+    #         "outputs_with_gui": [param.to_dict() for param in self.outputs_with_gui],
+    #     }
+    #     return json.dumps(dict_repr)
+
 
 class SourceWithGui(FunctionWithGui):
     """A source function that does not take any input and returns a user editable value"""
@@ -97,3 +105,38 @@ class SourceWithGui(FunctionWithGui):
 
 
 __all__ = ["FunctionWithGui", "AnyDataWithGui", "NamedDataWithGui", "SourceWithGui"]
+
+
+def sandbox() -> None:
+    from fiatlight.to_gui import any_function_to_function_with_gui
+    from fiatlight.all_to_gui import _ALL_TYPE_TO_GUI_INFO
+    from fiatlight.to_gui import TypeToGuiInfo
+
+    class Foo:
+        a: int
+
+        def __init__(self, a: int = 0):
+            self.a = a
+
+    def make_foo_with_gui(default_value: Foo | None, _: Any | None = None) -> AnyDataWithGui:
+        r = AnyDataWithGui()
+        r.value = default_value
+        r.gui_edit_impl = lambda: False
+        r.gui_present_impl = lambda: None
+        r.to_dict = lambda x: {"a": x.a}
+        r.from_dict = lambda d: Foo(a=d["a"])
+        return r
+
+    _ALL_TYPE_TO_GUI_INFO.append(TypeToGuiInfo(Foo, make_foo_with_gui, None))
+
+    def add(foo: Foo) -> int:
+        return foo.a
+
+    add_gui = any_function_to_function_with_gui(add)
+    add_gui.inputs_with_gui[0].parameter_with_gui.value = Foo()
+    # s = add_gui.to_json()
+    # print(s)
+
+
+if __name__ == "__main__":
+    sandbox()
