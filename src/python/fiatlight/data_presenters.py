@@ -1,5 +1,5 @@
 from imgui_bundle import imgui, hello_imgui, imgui_knobs, imgui_toggle, imgui_ctx
-from fiatlight.any_data_with_gui import AnyDataWithGui
+from fiatlight.any_data_with_gui import AnyDataWithGui, Unspecified, UnspecifiedValue, ErrorValue
 from fiatlight.function_with_gui import SourceWithGui
 from fiatlight.internal import osd_widgets
 
@@ -23,6 +23,10 @@ def _versatile_gui_present(value: Any) -> None:
 
     if value is None:
         imgui.text("None")
+    elif value is UnspecifiedValue:
+        imgui.text("Unspecified")
+    elif value is ErrorValue:
+        imgui.text("Error")
     elif isinstance(value, int):
         imgui.text(f"{value}")
     elif isinstance(value, float):
@@ -107,7 +111,7 @@ class IntWithGuiParams:
 
 
 def make_int_with_gui(
-    initial_value: int | None = None,
+    initial_value: int | Unspecified = UnspecifiedValue,
     params: IntWithGuiParams | None = None,
 ) -> AnyDataWithGui[int]:
     if params is None:
@@ -121,7 +125,7 @@ def make_int_with_gui(
 
     def edit() -> bool:
         nonlocal first_frame
-        assert r.value is not None
+        assert isinstance(r.value, int)
         changed = False
         imgui.set_next_item_width(hello_imgui.em_size(params.width_em))
         if params.edit_type == IntEditType.slider:
@@ -215,7 +219,7 @@ class FloatWithGuiParams:
 
 
 def make_float_with_gui(
-    initial_value: float | None = None, params: FloatWithGuiParams | None = None
+    initial_value: float | Unspecified = UnspecifiedValue, params: FloatWithGuiParams | None = None
 ) -> AnyDataWithGui[float]:
     if params is None:
         params = FloatWithGuiParams()
@@ -228,7 +232,7 @@ def make_float_with_gui(
 
     def edit() -> bool:
         nonlocal first_frame
-        assert r.value is not None
+        assert isinstance(r.value, float)
         changed = False
         imgui.set_next_item_width(hello_imgui.em_size(params.width_em))
         if params.edit_type == FloatEditType.slider:
@@ -311,7 +315,7 @@ class BoolWithGuiParams:
 
 
 def make_bool_with_gui(
-    initial_value: bool | None = None,
+    initial_value: bool | Unspecified = UnspecifiedValue,
     params: BoolWithGuiParams | None = None,
 ) -> AnyDataWithGui[bool]:
     if params is None:
@@ -325,7 +329,7 @@ def make_bool_with_gui(
 
     def edit() -> bool:
         assert params is not None
-        assert r.value is not None
+        assert isinstance(r.value, bool)
         nonlocal first_frame
         changed = False
         if params.edit_type == BoolEditType.checkbox:
@@ -379,7 +383,7 @@ class StrWithGuiParams:
 
 
 def make_str_with_gui(
-    initial_value: str | None = None,
+    initial_value: str | Unspecified = UnspecifiedValue,
     params: StrWithGuiParams | None = None,
 ) -> AnyDataWithGui[str]:
     if params is None:
@@ -393,7 +397,7 @@ def make_str_with_gui(
 
     def edit() -> bool:
         nonlocal first_frame
-        assert r.value is not None
+        assert isinstance(r.value, str)
         changed = False
         imgui.set_next_item_width(hello_imgui.em_size(params.width_em))
         if params.edit_type == StrEditType.input:
@@ -458,6 +462,9 @@ __all__ = [
     "make_str_source",
     # Bool
     "ToggleConfig",
+    "BoolWithGuiParams",
+    "BoolEditType",
+    "make_bool_with_gui",
 ]
 
 

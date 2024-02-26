@@ -2,7 +2,7 @@ from __future__ import annotations
 from typing import Any
 
 from fiatlight.computer_vision.image_types import ImageUInt8, Image
-from fiatlight.any_data_with_gui import AnyDataWithGui
+from fiatlight.any_data_with_gui import AnyDataWithGui, Unspecified, UnspecifiedValue
 from imgui_bundle import immvision, imgui
 from imgui_bundle import portable_file_dialogs as pfd
 from fiatlight.computer_vision import cv_color_type
@@ -27,7 +27,9 @@ class ImageWithGui(AnyDataWithGui[Image]):
 
     _needs_refresh: bool = False
 
-    def __init__(self, image: Optional[ImageUInt8] = None, zoom_key: str = "z", image_display_width: int = 200) -> None:
+    def __init__(
+        self, image: ImageUInt8 | Unspecified = UnspecifiedValue, zoom_key: str = "z", image_display_width: int = 200
+    ) -> None:
         self.value = image
         self.first_frame = True
         self.image_params = immvision.ImageParams()
@@ -35,13 +37,13 @@ class ImageWithGui(AnyDataWithGui[Image]):
         self.image_params.zoom_key = zoom_key
         self.gui_present_impl = lambda: self._gui_present_impl()
 
-    def set(self, v: Any) -> None:
-        assert v is None or type(v) == np.ndarray
+    def set(self, v: Image | Unspecified) -> None:
+        assert isinstance(v, (np.ndarray, Unspecified))
         self.value = v
         self.first_frame = True
         color_conversion_to_bgr = self._color_conversion_to_bgr()
-        if self.value is not None and color_conversion_to_bgr is not None:
-            self.image_converted = color_conversion_to_bgr.convert_image(self.value)
+        if isinstance(self.value, np.ndarray) and color_conversion_to_bgr is not None:
+            self.image_converted = color_conversion_to_bgr.convert_image(self.value)  # type: ignore
         self.refresh_image()
 
     def refresh_image(self) -> None:
@@ -56,7 +58,7 @@ class ImageWithGui(AnyDataWithGui[Image]):
         _, self.image_params.image_display_size = gui_edit_size(self.image_params.image_display_size)
 
     def _gui_image(self) -> None:
-        assert self.value is not None
+        assert isinstance(self.value, np.ndarray)
         can_convert_to_bgr = self._color_conversion_to_bgr() is not None
         if can_convert_to_bgr:
             _, self.view_with_bgr_conversion = imgui.checkbox("View as BGR", self.view_with_bgr_conversion)
@@ -100,7 +102,7 @@ class ImageChannelsWithGui(AnyDataWithGui[Image]):
 
     def __init__(
         self,
-        images: Optional[ImageUInt8] = None,  # images is a numpy of several image along the first axis
+        images: ImageUInt8 | Unspecified = UnspecifiedValue,  # images is a numpy of several image along the first axis
         zoom_key: str = "z",
         image_display_width: int = 200,
     ) -> None:
@@ -122,7 +124,7 @@ class ImageChannelsWithGui(AnyDataWithGui[Image]):
         self.first_frame = False
 
         changed, self.image_params.image_display_size = gui_edit_size(self.image_params.image_display_size)
-        if self.value is not None:
+        if isinstance(self.value, np.ndarray):
             for i, image in enumerate(self.value):
                 self.image_params.refresh_image = refresh_image
                 label = f"channel {i}"

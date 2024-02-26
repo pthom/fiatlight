@@ -3,6 +3,7 @@ import enum
 import cv2
 from typing import TypeAlias, Any
 from numpy.typing import NDArray
+from fiatlight.computer_vision.image_types import ImageUInt8
 
 
 CvColorConversionCode: TypeAlias = int
@@ -82,31 +83,16 @@ class ColorConversion:
     def conversion_code(self) -> Optional[CvColorConversionCode]:
         return self.src_color.conversion_code(self.dst_color)
 
-    def convert_image(self, image: NDArray[Any]) -> Optional[NDArray[Any]]:
+    def convert_image(self, image: ImageUInt8) -> ImageUInt8:
         conversion_code = self.conversion_code()
         assert conversion_code is not None
-        return cv2.cvtColor(image, conversion_code)
+        return cv2.cvtColor(image, conversion_code)  # type: ignore
 
     def __str__(self) -> str:
         return f"{self.src_color.name}=>{self.dst_color.name}"
 
-    @staticmethod
-    def make_default_color_conversion(image: NDArray[Any]) -> "OptionalColorConversion":
-        available_src_colors = ColorType.available_color_types_for_image(image)
-        if len(available_src_colors) == 0:
-            return None
-        src_color = available_src_colors[0]
-        available_dst_colors = src_color.available_conversion_outputs()
-        if len(available_dst_colors) == 0:
-            return None
-        dst_color = available_dst_colors[0]
-        return ColorConversion(src_color, dst_color)
 
-
-OptionalColorConversion: TypeAlias = Optional[ColorConversion]
-
-
-def _optional_cv_color_conversion_code_between(type1: ColorType, type2: ColorType) -> Optional[CvColorConversionCode]:
+def _optional_cv_color_conversion_code_between(type1: ColorType, type2: ColorType) -> CvColorConversionCode | None:
     conversions: Dict[ColorType, CvColorConversionCode]
     if type1 == ColorType.BGR:
         conversions = {
