@@ -1,4 +1,4 @@
-from fiatlight.any_data_with_gui import AnyDataWithGui, NamedDataWithGui
+from fiatlight.any_data_with_gui import AnyDataWithGui, NamedDataWithGui, Unspecified, ErrorValue, UnspecifiedValue
 from fiatlight.fiatlight_types import JsonDict
 from typing import Any, List, final, Callable, Optional
 
@@ -50,7 +50,18 @@ class FunctionWithGui:
     @final
     def invoke(self) -> Any:
         assert self.f_impl is not None
+
+        self.last_exception_message = None
+        self.last_exception_traceback = None
+
         values = [param.data_with_gui.value for param in self.inputs_with_gui]
+
+        # if any of the inputs is an error or unspecified, we do not call the function
+        if any(value is ErrorValue or value is UnspecifiedValue for value in values):
+            for output_with_gui in self.outputs_with_gui:
+                output_with_gui.data_with_gui.value = UnspecifiedValue
+            return
+
         try:
             fn_output = self.f_impl(*values)
             if not isinstance(fn_output, tuple):
@@ -60,8 +71,6 @@ class FunctionWithGui:
                 assert len(fn_output) == len(self.outputs_with_gui)
                 for i, output_with_gui in enumerate(self.outputs_with_gui):
                     output_with_gui.data_with_gui.value = fn_output[i]
-            self.last_exception_message = None
-            self.last_exception_traceback = None
         except Exception as e:
             self.last_exception_message = str(e)
             import traceback
@@ -71,7 +80,7 @@ class FunctionWithGui:
             traceback_details = traceback.format_exception(exc_type, exc_value, exc_traceback)
             self.last_exception_traceback = "".join(traceback_details)
             for output_with_gui in self.outputs_with_gui:
-                output_with_gui.data_with_gui.value = None
+                output_with_gui.data_with_gui.value = ErrorValue
 
     def to_json(self) -> JsonDict:
         inputs_dicts = [param.to_json() for param in self.inputs_with_gui]
@@ -122,7 +131,7 @@ def sandbox() -> None:
         def __init__(self, a: int = 0):
             self.a = a
 
-    def make_foo_with_gui(default_value: Foo | None, _: Any | None = None) -> AnyDataWithGui[Foo]:
+    def make_foo_with_gui(default_value: Foo | Unspecified, _: Any | None = None) -> AnyDataWithGui[Foo]:
         r = AnyDataWithGui[Foo]()
         r.value = default_value
         r.gui_edit_impl = lambda: False

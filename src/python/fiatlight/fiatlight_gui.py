@@ -169,9 +169,14 @@ class FiatlightGui:
         try:
             with open(self._node_state_filename(), "r") as f:
                 json_data = json.load(f)
-                self._functions_graph_gui.functions_graph.fill_from_json(json_data)
         except FileNotFoundError:
-            logging.info(f"State file {self._node_state_filename()} not found, using default state")
+            logging.info(f"FiatlightGui: state file {self._node_state_filename()} not found, using default state")
+            return
+
+        try:
+            self._functions_graph_gui.functions_graph.fill_from_json(json_data)
+        except Exception as e:
+            logging.error(f"FiatlightGui: Error loading state file {self._node_state_filename()}: {e}")
 
     def run(self) -> None:
         self.params.runner_params.docking_params.docking_splits += self._docking_splits()

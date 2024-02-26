@@ -1,4 +1,4 @@
-from fiatlight.any_data_with_gui import AnyDataWithGui, DataType
+from fiatlight.any_data_with_gui import AnyDataWithGui, DataType, Unspecified, UnspecifiedValue
 from fiatlight.function_with_gui import FunctionWithGui, NamedDataWithGui
 import inspect
 
@@ -13,12 +13,12 @@ StandardType: TypeAlias = Any
 @dataclass
 class TypeToGuiInfo:
     standard_type_class: Type[Any]
-    gui_type_factory: Callable[[StandardType | None, GuiEditParams | None], AnyDataWithGui[Any]]
+    gui_type_factory: Callable[[StandardType | Unspecified, GuiEditParams | None], AnyDataWithGui[Any]]
     default_edit_params: GuiEditParams
 
 
 def any_typeclass_to_data_with_gui(
-    typeclass_or_str: Type[DataType] | str, default_value: DataType | None = None
+    typeclass_or_str: Type[DataType] | str, default_value: DataType | Unspecified = UnspecifiedValue
 ) -> AnyDataWithGui[DataType]:
     from fiatlight.all_to_gui import all_type_to_gui_info
 
@@ -37,8 +37,8 @@ def any_value_to_data_with_gui(value: DataType) -> AnyDataWithGui[DataType]:
 
 
 def any_param_to_param_with_gui(name: str, param: inspect.Parameter) -> NamedDataWithGui[Any]:
-    default_value = param.default if param.default is not inspect.Parameter.empty else None
-    annotation = param.annotation if param.annotation is not inspect.Parameter.empty else None
+    default_value = param.default if param.default is not inspect.Parameter.empty else UnspecifiedValue
+    annotation = param.annotation
 
     if annotation is None or annotation is inspect.Parameter.empty:
         raise ValueError(f"Parameter {name} has no type annotation")

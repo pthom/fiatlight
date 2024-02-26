@@ -1,14 +1,12 @@
-from fiatlight.computer_vision.cv_color_type import ColorConversion, ColorType, OptionalColorConversion
-from fiatlight import AnyDataWithGui
+from fiatlight.computer_vision.cv_color_type import ColorConversion, ColorType
+from fiatlight.any_data_with_gui import AnyDataWithGui, Unspecified, UnspecifiedValue
 from imgui_bundle import imgui_ctx, imgui
 from typing import Tuple
 
 
-def gui_color_conversion(color_conversion: OptionalColorConversion) -> Tuple[bool, OptionalColorConversion]:
+def gui_color_conversion(color_conversion: ColorConversion) -> Tuple[bool, ColorConversion]:
     changed = False
     available_src_colors = ColorType.all_color_types()
-    if color_conversion is None:
-        color_conversion = ColorConversion(ColorType.BGR, ColorType.RGB)
     with imgui_ctx.begin_group():
         with imgui_ctx.push_id("source_color"):
             imgui.text("Source color")
@@ -32,14 +30,14 @@ def gui_color_conversion(color_conversion: OptionalColorConversion) -> Tuple[boo
 
 
 class ConvertColorWithGui(AnyDataWithGui[ColorConversion]):
-    value: ColorConversion | None
-
-    def __init__(self, value: ColorConversion | None = None) -> None:
+    def __init__(self, value: ColorConversion | Unspecified = UnspecifiedValue) -> None:
         def edit_gui() -> bool:
+            assert isinstance(self.value, ColorConversion)
             changed, self.value = gui_color_conversion(self.value)
             return changed
 
         def present_gui() -> None:
+            assert isinstance(self.value, ColorConversion)
             imgui.text(str(self.value))
 
         super().__init__(value, present_gui, edit_gui)

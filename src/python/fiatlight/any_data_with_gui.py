@@ -2,7 +2,7 @@
 This module provides a class to wrap any data with a GUI (AnyDataWithGui), and a class to wrap a named data with a GUI.
 See example implementation for a custom type at the bottom of this file.
 """
-from fiatlight.fiatlight_types import BoolFunction, VoidFunction, JsonPrimitiveOrDict, JsonDict
+from fiatlight.fiatlight_types import BoolFunction, VoidFunction, JsonDict
 from typing import Optional, final, Callable, TypeVar, Generic, TypeAlias
 from dataclasses import dataclass
 from imgui_bundle import imgui, icons_fontawesome
@@ -13,6 +13,32 @@ DataType = TypeVar("DataType")
 DefaultValueProvider: TypeAlias = Callable[[], DataType]
 
 
+class Unspecified:
+    """A marker for an unspecified value, used as a default value for AnyDataWithGui.
+    It is akin to None, but it is used to signal that the value has not been set yet.
+    """
+
+    def __init__(self, secret: int) -> None:
+        if secret != 42:
+            raise ValueError("UnspecifiedClass should not be instantiated directly, use the UnspecifiedValue constant")
+
+
+UnspecifiedValue = Unspecified(42)
+
+
+class Error:
+    """A marker for an error value, used as a default value for AnyDataWithGui.
+    It is akin to None, but it is used to differentiate between a None value
+    and a value that has been set to an error value, after a failed function call"""
+
+    def __init__(self, secret: int) -> None:
+        if secret != 42:
+            raise ValueError("ErrorClass should not be instantiated directly, use the ErrorValue constant")
+
+
+ErrorValue = Error(42)
+
+
 class AnyDataWithGui(Generic[DataType]):
     """
     Instantiate this class with your types, and provide draw functions that presents it content.
@@ -20,7 +46,7 @@ class AnyDataWithGui(Generic[DataType]):
     """
 
     # The value of the data
-    value: DataType | None = None
+    value: DataType | Unspecified | Error = UnspecifiedValue
 
     # Provide a draw function that presents the data content
     gui_present_impl: VoidFunction | None = None
@@ -41,39 +67,46 @@ class AnyDataWithGui(Generic[DataType]):
     def _has_custom_serialization(self) -> bool:
         return self.to_dict_impl is not None and self.from_dict_impl is not None
 
-    def to_json(self) -> JsonPrimitiveOrDict:
-        if self.value is None:
-            return None
+    def to_json(self) -> JsonDict:
+        if isinstance(self.value, Unspecified):
+            return {"type": "Unspecified"}
+        elif isinstance(self.value, Error):
+            return {"type": "Error"}
         elif isinstance(self.value, (str, int, float, bool)):
-            return self.value
+            return {"type": "Primitive", "value": self.value}
         elif self.to_dict_impl is not None:
             as_dict = self.to_dict_impl(self.value)
-            return as_dict
+            return {"type": "Custom", "value": as_dict}
         elif hasattr(self.value, "__dict__"):
             as_dict = self.value.__dict__
-            return as_dict
+            return {"type": "Dict", "value": as_dict}
         else:
             raise ValueError(f"Cannot serialize {self.value}, it has no __dict__ attribute.")
 
-    def fill_from_json(self, json_data: JsonPrimitiveOrDict) -> None:
-        if json_data is None:
-            self.value = None
-        elif isinstance(json_data, (str, int, float, bool)):
-            self.value = json_data  # type: ignore
+    def fill_from_json(self, json_data: JsonDict) -> None:
+        if "type" not in json_data:
+            raise ValueError(f"Cannot deserialize {json_data}")
+        if json_data["type"] == "Unspecified":
+            self.value = UnspecifiedValue
+        elif json_data["type"] == "Error":
+            self.value = ErrorValue
+        elif json_data["type"] == "Primitive":
+            self.value = json_data["value"]
+        elif json_data["type"] == "Custom":
+            assert self.from_dict_impl is not None
+            self.value = self.from_dict_impl(json_data["value"])
+        elif json_data["type"] == "Dict":
+            if self.value is None:
+                if self.default_value_provider is None:
+                    raise ValueError("Cannot deserialize a None value without a default_value_provider")
+                self.value = self.default_value_provider()
+            self.value.__dict__.update(json_data["value"])
         else:
-            if self._has_custom_serialization():
-                assert self.from_dict_impl is not None
-                self.value = self.from_dict_impl(json_data)
-            else:
-                if self.value is None:
-                    if self.default_value_provider is None:
-                        raise ValueError("Cannot deserialize a None value without a default_value_provider")
-                    self.value = self.default_value_provider()
-                self.value.__dict__.update(json_data)
+            raise ValueError(f"Cannot deserialize {json_data}")
 
     def __init__(
         self,
-        value: DataType | None = None,
+        value: DataType | Unspecified = UnspecifiedValue,
         gui_present: Optional[VoidFunction] = None,
         gui_edit: Optional[BoolFunction] = None,
     ) -> None:
@@ -90,8 +123,8 @@ class AnyDataWithGui(Generic[DataType]):
     def call_gui_edit(self) -> bool:
         if self.gui_edit_impl is None:
             return False
-        if self.value is None:
-            imgui.text("None!")
+        if isinstance(self.value, Unspecified):
+            imgui.text("Unspecified!")
             imgui.same_line()
             if imgui.small_button(icons_fontawesome.ICON_FA_PLUS):
                 self.value = self.default_value_provider()
@@ -102,7 +135,7 @@ class AnyDataWithGui(Generic[DataType]):
             changed = self.gui_edit_impl()
             imgui.same_line()
             if imgui.small_button(icons_fontawesome.ICON_FA_TRASH):
-                self.value = None
+                self.value = UnspecifiedValue
                 changed = True
             return changed
 
@@ -138,7 +171,7 @@ class FooGuiParams:
     pass
 
 
-def make_foo_with_gui(initial_value: Foo | None, gui_params: FooGuiParams | None = None) -> AnyDataWithGui[Foo]:
+def make_foo_with_gui(initial_value: Foo | Unspecified, gui_params: FooGuiParams | None = None) -> AnyDataWithGui[Foo]:
     """gui_params is not used in this example,
     but could be used to provide additional parameters to the GUI implementation"""
     from imgui_bundle import imgui
@@ -148,12 +181,12 @@ def make_foo_with_gui(initial_value: Foo | None, gui_params: FooGuiParams | None
 
     # Edit and present functions
     def edit() -> bool:
-        assert r.value is not None
+        assert isinstance(r.value, Foo)
         changed, r.value.x = imgui.input_int("x", r.value.x)
         return changed
 
     def present() -> None:
-        assert r.value is not None
+        assert isinstance(r.value, Foo)
         imgui.text(f"x: {r.value.x}")
 
     r.gui_edit_impl = edit

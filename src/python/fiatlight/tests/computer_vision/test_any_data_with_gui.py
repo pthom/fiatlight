@@ -1,10 +1,10 @@
-from fiatlight.any_data_with_gui import NamedDataWithGui
+from fiatlight.any_data_with_gui import NamedDataWithGui, Unspecified
 from fiatlight.to_gui import any_value_to_data_with_gui, any_typeclass_to_data_with_gui
 
 
 def test_creation() -> None:
     a = any_typeclass_to_data_with_gui(int)
-    assert a.value is None
+    assert isinstance(a.value, Unspecified)
     assert a.gui_edit_impl is not None
     assert a.gui_present_impl is not None
     assert a.default_value_provider is not None
@@ -12,11 +12,11 @@ def test_creation() -> None:
     assert a.value == 0
 
 
-def test_any_serialization() -> None:
+def test_primitive_serialization() -> None:
     a = any_value_to_data_with_gui(1)
     assert a.value == 1
-    print(a.to_json())
-    a.fill_from_json(2)
+    assert a.to_json() == {"type": "Primitive", "value": 1}
+    a.fill_from_json({"type": "Primitive", "value": 2})
     assert a.value == 2
 
 
@@ -30,9 +30,9 @@ def test_named_data_with_gui_creation() -> None:
 def test_named_data_with_gui_serialization() -> None:
     d = any_value_to_data_with_gui(1)
     n = NamedDataWithGui("x", d)
-    assert n.to_json() == {"name": "x", "data": 1}
+    assert n.to_json() == {"name": "x", "data": {"type": "Primitive", "value": 1}}
 
-    n.fill_from_json({"name": "x", "data": 2})
+    n.fill_from_json({"name": "x", "data": {"type": "Primitive", "value": 2}})
     assert n.name == "x"
     assert n.data_with_gui.value == 2
 
@@ -51,15 +51,16 @@ def test_custom_data_with_gui_serialization() -> None:
     foo = Foo(1)
     foo_gui = any_value_to_data_with_gui(foo)
     assert foo_gui.value == foo
+    assert foo_gui.to_json() == {"type": "Dict", "value": {"x": 1}}
 
-    assert foo_gui.to_json() == {"x": 1}
-    foo_gui.fill_from_json({"x": 2})
+    foo_gui.fill_from_json({"type": "Dict", "value": {"x": 2}})
+    assert isinstance(foo_gui.value, Foo)
     assert foo_gui.value.x == 2
 
     named_data = NamedDataWithGui("foo", foo_gui)
-    assert named_data.to_json() == {"name": "foo", "data": {"x": 2}}
+    assert named_data.to_json() == {"name": "foo", "data": {"type": "Dict", "value": {"x": 2}}}
 
-    named_data.fill_from_json({"name": "foo", "data": {"x": 3}})
+    named_data.fill_from_json({"name": "foo", "data": {"type": "Dict", "value": {"x": 3}}})
     assert named_data.name == "foo"
-    assert named_data.data_with_gui.value is not None
+    assert isinstance(named_data.data_with_gui.value, Foo)
     assert named_data.data_with_gui.value.x == 3

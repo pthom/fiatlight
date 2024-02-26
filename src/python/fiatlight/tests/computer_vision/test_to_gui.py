@@ -3,6 +3,7 @@ from fiatlight.to_gui import (
     any_value_to_data_with_gui,
     any_function_to_function_with_gui,
 )
+from fiatlight.any_data_with_gui import UnspecifiedValue, ErrorValue
 
 import pytest
 from typing import Tuple
@@ -13,13 +14,13 @@ class Dummy:
 
 
 def test_any_typeclass_to_data_with_gui() -> None:
-    assert any_typeclass_to_data_with_gui(int).value is None
+    assert any_typeclass_to_data_with_gui(int).value is UnspecifiedValue
     assert any_typeclass_to_data_with_gui(int, 1).value == 1
-    assert any_typeclass_to_data_with_gui(float).value is None
+    assert any_typeclass_to_data_with_gui(float).value is UnspecifiedValue
     assert any_typeclass_to_data_with_gui(float, 1.0).value == 1.0
-    assert any_typeclass_to_data_with_gui(str).value is None
+    assert any_typeclass_to_data_with_gui(str).value is UnspecifiedValue
     assert any_typeclass_to_data_with_gui(str, "a").value == "a"
-    assert any_typeclass_to_data_with_gui(bool).value is None
+    assert any_typeclass_to_data_with_gui(bool).value is UnspecifiedValue
     assert any_typeclass_to_data_with_gui(bool, True).value is True
     assert any_typeclass_to_data_with_gui(bool, False).value is False
 
@@ -51,9 +52,9 @@ def test_any_function_to_function_with_gui_one_output() -> None:
     assert add_gui.inputs_with_gui[0].name == "a"
     assert add_gui.inputs_with_gui[1].name == "b"
     assert add_gui.outputs_with_gui[0].name == "output"
-    assert add_gui.inputs_with_gui[0].data_with_gui.value is None
+    assert add_gui.inputs_with_gui[0].data_with_gui.value is UnspecifiedValue
     assert add_gui.inputs_with_gui[1].data_with_gui.value == 2
-    assert add_gui.outputs_with_gui[0].data_with_gui.value is None
+    assert add_gui.outputs_with_gui[0].data_with_gui.value is UnspecifiedValue
 
     # Test after invoke
     add_gui.inputs_with_gui[0].data_with_gui.value = 1
@@ -71,7 +72,7 @@ def test_any_function_to_function_with_gui_one_output() -> None:
     # Test after invoke with exception
     add_gui.inputs_with_gui[0].data_with_gui.value = "a"
     add_gui.invoke()
-    assert add_gui.outputs_with_gui[0].data_with_gui.value is None
+    assert add_gui.outputs_with_gui[0].data_with_gui.value is ErrorValue
     assert add_gui.last_exception_message is not None
 
 
@@ -90,10 +91,10 @@ def test_any_function_to_function_with_gui_two_outputs() -> None:
     assert add_mult_gui.inputs_with_gui[1].name == "b"
     assert add_mult_gui.outputs_with_gui[0].name == "output_0"
     assert add_mult_gui.outputs_with_gui[1].name == "output_1"
-    assert add_mult_gui.inputs_with_gui[0].data_with_gui.value is None
+    assert add_mult_gui.inputs_with_gui[0].data_with_gui.value is UnspecifiedValue
     assert add_mult_gui.inputs_with_gui[1].data_with_gui.value == 2
-    assert add_mult_gui.outputs_with_gui[0].data_with_gui.value is None
-    assert add_mult_gui.outputs_with_gui[1].data_with_gui.value is None
+    assert add_mult_gui.outputs_with_gui[0].data_with_gui.value is UnspecifiedValue
+    assert add_mult_gui.outputs_with_gui[1].data_with_gui.value is UnspecifiedValue
 
     # Test after invoke
     add_mult_gui.inputs_with_gui[0].data_with_gui.value = 1
@@ -113,8 +114,8 @@ def test_any_function_to_function_with_gui_two_outputs() -> None:
     # Test after invoke with exception
     add_mult_gui.inputs_with_gui[0].data_with_gui.value = "a"
     add_mult_gui.invoke()
-    assert add_mult_gui.outputs_with_gui[0].data_with_gui.value is None
-    assert add_mult_gui.outputs_with_gui[1].data_with_gui.value is None
+    assert add_mult_gui.outputs_with_gui[0].data_with_gui.value is ErrorValue
+    assert add_mult_gui.outputs_with_gui[1].data_with_gui.value is ErrorValue
     assert add_mult_gui.last_exception_message is not None
 
 
@@ -124,3 +125,20 @@ def test_any_function_to_function_with_gui_two_outputs_old_style() -> None:
 
     add_mult_gui = any_function_to_function_with_gui(add_mult)
     assert len(add_mult_gui.outputs_with_gui) == 2
+
+
+# def test_any_list_to_data_with_gui() -> None:
+#     from typing import List
+#     import inspect
+#     a: List[int] = [1, 2, 3]
+#     t = type(a)
+#
+#     def foo(a: list[int]) -> int:
+#         return len(a)
+#
+#     sig = inspect.signature(foo)
+#
+#     fg = any_function_to_function_with_gui(foo)
+#
+#     ag = any_value_to_data_with_gui([1, 2, 3])
+#     print(ag)
