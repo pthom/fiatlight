@@ -31,7 +31,7 @@ def test_serialization() -> None:
         "outputs": [{"data": {"type": "Unspecified"}, "name": "output"}],
     }
     add_gui.fill_from_json(json_data)
-    assert add_gui.inputs_with_gui[0].data_with_gui.value is UnspecifiedValue
+    assert add_gui.inputs_with_gui[0].data_with_gui.value is UnspecifiedValue  # type: ignore
     assert add_gui.inputs_with_gui[1].data_with_gui.value == 2
     assert add_gui.outputs_with_gui[0].data_with_gui.value is UnspecifiedValue
     assert add_gui.name == "add"

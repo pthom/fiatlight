@@ -1,4 +1,5 @@
-from fiatlight.any_data_with_gui import AnyDataWithGui, DataType, Unspecified, UnspecifiedValue
+from fiatlight.fiatlight_types import UnspecifiedValue
+from fiatlight.any_data_with_gui import AnyDataGuiHandlers, AnyDataWithGui, DataType
 from fiatlight.function_with_gui import FunctionWithGui, NamedDataWithGui
 import inspect
 
@@ -11,15 +12,13 @@ StandardType: TypeAlias = Any
 
 
 @dataclass
-class TypeToGuiInfo:
+class TypeToGuiHandlers:
     standard_type_class: Type[Any]
-    gui_type_factory: Callable[[StandardType | Unspecified, GuiEditParams | None], AnyDataWithGui[Any]]
+    gui_type_factory: Callable[[GuiEditParams | None], AnyDataGuiHandlers[Any]]
     default_edit_params: GuiEditParams
 
 
-def any_typeclass_to_data_with_gui(
-    typeclass_or_str: Type[DataType] | str, default_value: DataType | Unspecified = UnspecifiedValue
-) -> AnyDataWithGui[DataType]:
+def any_typeclass_to_data_handlers(typeclass_or_str: Type[DataType] | str) -> AnyDataGuiHandlers[DataType]:
     from fiatlight.all_to_gui import all_type_to_gui_info
 
     # in some circumstances, typeclass is a string...I don't know why, must be a limitation of the type system
@@ -28,12 +27,13 @@ def any_typeclass_to_data_with_gui(
 
     for type_to_gui_info in all_type_to_gui_info():
         if typeclass is type_to_gui_info.standard_type_class:
-            return type_to_gui_info.gui_type_factory(default_value, type_to_gui_info.default_edit_params)
+            return type_to_gui_info.gui_type_factory(type_to_gui_info.default_edit_params)
     raise ValueError(f"Type {typeclass} not supported by any_typeclass_to_data_with_gui")
 
 
 def any_value_to_data_with_gui(value: DataType) -> AnyDataWithGui[DataType]:
-    return any_typeclass_to_data_with_gui(type(value), value)
+    handlers = any_typeclass_to_data_handlers(type(value))
+    return AnyDataWithGui(value, handlers)
 
 
 def any_param_to_param_with_gui(name: str, param: inspect.Parameter) -> NamedDataWithGui[Any]:
@@ -50,8 +50,9 @@ def any_param_to_param_with_gui(name: str, param: inspect.Parameter) -> NamedDat
         list_type = eval(list_type_str)
         raise ValueError(f"List type {list_type} not supported by any_param_to_param_with_gui")
     else:
-        as_any_data_with_gui: AnyDataWithGui[Any] = any_typeclass_to_data_with_gui(annotation, default_value)
-        return NamedDataWithGui(name, as_any_data_with_gui)
+        handlers: AnyDataGuiHandlers[Any] = any_typeclass_to_data_handlers(annotation)
+        data_with_gui = AnyDataWithGui(default_value, handlers)
+        return NamedDataWithGui(name, data_with_gui)
 
 
 def any_function_to_function_with_gui(f: Callable[..., Any]) -> FunctionWithGui:
@@ -78,12 +79,12 @@ def any_function_to_function_with_gui(f: Callable[..., Any]) -> FunctionWithGui:
         tuple_type_annotation_strs = return_annotation_inner_str.split(", ")
         tuple_type_annotations = [eval(annotation_str) for annotation_str in tuple_type_annotation_strs]
         for i, annotation in enumerate(tuple_type_annotations):
-            function_with_gui.outputs_with_gui.append(
-                NamedDataWithGui(f"output_{i}", any_typeclass_to_data_with_gui(annotation))
-            )
+            handlers: AnyDataGuiHandlers[Any] = any_typeclass_to_data_handlers(annotation)
+            data_with_gui = AnyDataWithGui(UnspecifiedValue, handlers)
+            function_with_gui.outputs_with_gui.append(NamedDataWithGui(f"output_{i}", data_with_gui))
     else:
-        function_with_gui.outputs_with_gui.append(
-            NamedDataWithGui("output", any_typeclass_to_data_with_gui(sig.return_annotation))
-        )
+        handlers = any_typeclass_to_data_handlers(sig.return_annotation)
+        data_with_gui = AnyDataWithGui(UnspecifiedValue, handlers)
+        function_with_gui.outputs_with_gui.append(NamedDataWithGui("output", data_with_gui))
 
     return function_with_gui

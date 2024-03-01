@@ -1,4 +1,5 @@
-from fiatlight.any_data_with_gui import AnyDataWithGui, NamedDataWithGui, Unspecified, ErrorValue, UnspecifiedValue
+from fiatlight.fiatlight_types import UnspecifiedValue, ErrorValue
+from fiatlight.any_data_with_gui import AnyDataWithGui, NamedDataWithGui, AnyDataGuiHandlers
 from fiatlight.fiatlight_types import JsonDict
 from typing import Any, List, final, Callable, Optional
 
@@ -123,7 +124,7 @@ __all__ = ["FunctionWithGui", "AnyDataWithGui", "NamedDataWithGui", "SourceWithG
 def sandbox() -> None:
     from fiatlight.to_gui import any_function_to_function_with_gui
     from fiatlight.all_to_gui import _ALL_TYPE_TO_GUI_INFO
-    from fiatlight.to_gui import TypeToGuiInfo
+    from fiatlight.to_gui import TypeToGuiHandlers
 
     class Foo:
         a: int
@@ -131,16 +132,15 @@ def sandbox() -> None:
         def __init__(self, a: int = 0):
             self.a = a
 
-    def make_foo_with_gui(default_value: Foo | Unspecified, _: Any | None = None) -> AnyDataWithGui[Foo]:
-        r = AnyDataWithGui[Foo]()
-        r.value = default_value
-        r.gui_edit_impl = lambda: False
-        r.gui_present_impl = lambda: None
+    def make_foo_with_gui(_: Any | None = None) -> AnyDataGuiHandlers[Foo]:
+        r = AnyDataGuiHandlers[Foo]()
+        r.gui_edit_impl = lambda x: (False, x)
+        r.gui_present_impl = lambda x: None
         r.to_dict_impl = lambda x: {"a": x.a}
         r.from_dict_impl = lambda d: Foo(a=d["a"])
         return r
 
-    _ALL_TYPE_TO_GUI_INFO.append(TypeToGuiInfo(Foo, make_foo_with_gui, None))
+    _ALL_TYPE_TO_GUI_INFO.append(TypeToGuiHandlers(Foo, make_foo_with_gui, None))
 
     def add(foo: Foo) -> int:
         return foo.a

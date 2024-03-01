@@ -2,7 +2,8 @@ from __future__ import annotations
 from typing import Any
 
 from fiatlight.computer_vision.image_types import ImageUInt8, Image
-from fiatlight.any_data_with_gui import AnyDataWithGui, Unspecified, UnspecifiedValue
+from fiatlight.fiatlight_types import Unspecified, UnspecifiedValue
+from fiatlight.any_data_with_gui import AnyDataWithGui
 from imgui_bundle import immvision, imgui
 from imgui_bundle import portable_file_dialogs as pfd
 from fiatlight.computer_vision import cv_color_type

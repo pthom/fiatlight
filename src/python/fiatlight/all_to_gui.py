@@ -1,9 +1,9 @@
-from fiatlight.to_gui import TypeToGuiInfo
+from fiatlight.to_gui import TypeToGuiHandlers
 from fiatlight.data_presenters import (
-    make_int_with_gui,
-    make_str_with_gui,
-    make_bool_with_gui,
-    make_float_with_gui,
+    make_int_gui_handlers,
+    make_str_gui_handlers,
+    make_bool_gui_handlers,
+    make_float_gui_handlers,
     IntWithGuiParams,
     StrWithGuiParams,
     BoolWithGuiParams,
@@ -13,16 +13,16 @@ from fiatlight.data_presenters import (
 from typing import List
 
 
-_ALL_TYPE_TO_GUI_INFO: List[TypeToGuiInfo] = [
-    TypeToGuiInfo(int, make_int_with_gui, IntWithGuiParams()),
-    TypeToGuiInfo(float, make_float_with_gui, FloatWithGuiParams()),
-    TypeToGuiInfo(str, make_str_with_gui, StrWithGuiParams()),
-    TypeToGuiInfo(bool, make_bool_with_gui, BoolWithGuiParams()),
+_ALL_TYPE_TO_GUI_INFO: List[TypeToGuiHandlers] = [
+    TypeToGuiHandlers(int, make_int_gui_handlers, IntWithGuiParams()),
+    TypeToGuiHandlers(float, make_float_gui_handlers, FloatWithGuiParams()),
+    TypeToGuiHandlers(str, make_str_gui_handlers, StrWithGuiParams()),
+    TypeToGuiHandlers(bool, make_bool_gui_handlers, BoolWithGuiParams()),
 ]
 
 
-def all_type_to_gui_info() -> List[TypeToGuiInfo]:
+def all_type_to_gui_info() -> List[TypeToGuiHandlers]:
     return _ALL_TYPE_TO_GUI_INFO
 
 
-__all__ = ["all_type_to_gui_info", "TypeToGuiInfo"]
+__all__ = ["all_type_to_gui_info", "TypeToGuiHandlers"]

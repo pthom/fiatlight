@@ -1,9 +1,9 @@
 from fiatlight.to_gui import (
-    any_typeclass_to_data_with_gui,
+    any_typeclass_to_data_handlers,
     any_value_to_data_with_gui,
     any_function_to_function_with_gui,
 )
-from fiatlight.any_data_with_gui import UnspecifiedValue, ErrorValue
+from fiatlight.fiatlight_types import UnspecifiedValue, ErrorValue
 
 import pytest
 from typing import Tuple
@@ -14,27 +14,15 @@ class Dummy:
 
 
 def test_any_typeclass_to_data_with_gui() -> None:
-    assert any_typeclass_to_data_with_gui(int).value is UnspecifiedValue
-    assert any_typeclass_to_data_with_gui(int, 1).value == 1
-    assert any_typeclass_to_data_with_gui(float).value is UnspecifiedValue
-    assert any_typeclass_to_data_with_gui(float, 1.0).value == 1.0
-    assert any_typeclass_to_data_with_gui(str).value is UnspecifiedValue
-    assert any_typeclass_to_data_with_gui(str, "a").value == "a"
-    assert any_typeclass_to_data_with_gui(bool).value is UnspecifiedValue
-    assert any_typeclass_to_data_with_gui(bool, True).value is True
-    assert any_typeclass_to_data_with_gui(bool, False).value is False
+    assert any_typeclass_to_data_handlers(int).gui_present_impl is not None
 
     with pytest.raises(ValueError):
-        any_typeclass_to_data_with_gui(Dummy)
-
-    a = any_typeclass_to_data_with_gui(int, 1)
-    assert a.value == 1
-    assert a.gui_edit_impl is not None
-    assert a.gui_present_impl is not None
+        any_typeclass_to_data_handlers(Dummy)
 
 
 def test_any_value_to_data_with_gui() -> None:
     a = any_value_to_data_with_gui(1)
+    assert a.handlers.gui_present_impl is not None
     assert a.value == 1
 
 
