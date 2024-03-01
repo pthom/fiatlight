@@ -1,6 +1,7 @@
 from fiatlight.fiatlight_types import UnspecifiedValue
 from fiatlight.any_data_with_gui import AnyDataGuiHandlers, AnyDataWithGui, DataType
 from fiatlight.function_with_gui import FunctionWithGui, NamedDataWithGui
+from fiatlight.standard_gui_handlers import make_list_gui_handlers
 import inspect
 
 from dataclasses import dataclass
@@ -25,10 +26,19 @@ def any_typeclass_to_data_handlers(typeclass_or_str: Type[DataType] | str) -> An
     typeclass: Type[DataType]
     typeclass = eval(typeclass_or_str) if isinstance(typeclass_or_str, str) else typeclass_or_str
 
-    for type_to_gui_info in all_type_to_gui_info():
-        if typeclass is type_to_gui_info.standard_type_class:
-            return type_to_gui_info.gui_type_factory(type_to_gui_info.default_edit_params)
-    raise ValueError(f"Type {typeclass} not supported by any_typeclass_to_data_with_gui")
+    typeclass_str = str(typeclass)
+    is_list = typeclass_str.startswith("typing.List") or typeclass_str.startswith("list")
+    if is_list:
+        list_type_str = typeclass_str[typeclass_str.index("[") + 1 : -1]
+        list_type = eval(list_type_str)
+        item_handlers = any_typeclass_to_data_handlers(list_type)  # type: ignore
+        list_handlers = make_list_gui_handlers(item_handlers)
+        return list_handlers  # type: ignore
+    else:
+        for type_to_gui_info in all_type_to_gui_info():
+            if typeclass is type_to_gui_info.standard_type_class:
+                return type_to_gui_info.gui_type_factory(type_to_gui_info.default_edit_params)
+        raise ValueError(f"Type {typeclass} not supported by any_typeclass_to_data_with_gui")
 
 
 def any_value_to_data_with_gui(value: DataType) -> AnyDataWithGui[DataType]:
@@ -43,16 +53,9 @@ def any_param_to_param_with_gui(name: str, param: inspect.Parameter) -> NamedDat
     if annotation is None or annotation is inspect.Parameter.empty:
         raise ValueError(f"Parameter {name} has no type annotation")
 
-    annotation_str = str(annotation)
-    is_list = annotation_str.startswith("typing.List") or annotation_str.startswith("list")
-    if is_list:
-        list_type_str = annotation_str[annotation_str.index("[") + 1 : -1]
-        list_type = eval(list_type_str)
-        raise ValueError(f"List type {list_type} not supported by any_param_to_param_with_gui")
-    else:
-        handlers: AnyDataGuiHandlers[Any] = any_typeclass_to_data_handlers(annotation)
-        data_with_gui = AnyDataWithGui(default_value, handlers)
-        return NamedDataWithGui(name, data_with_gui)
+    handlers: AnyDataGuiHandlers[Any] = any_typeclass_to_data_handlers(annotation)
+    data_with_gui = AnyDataWithGui(default_value, handlers)
+    return NamedDataWithGui(name, data_with_gui)
 
 
 def any_function_to_function_with_gui(f: Callable[..., Any]) -> FunctionWithGui:

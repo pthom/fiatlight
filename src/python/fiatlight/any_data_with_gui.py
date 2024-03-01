@@ -26,10 +26,10 @@ class AnyDataGuiHandlers(Generic[DataType]):
 
     # Provide a draw function that presents the data content.
     # If not provided, the data will be presented as imgui.text(str(data))
-    gui_present_impl: Callable[[DataType], None] | None = None
+    gui_present_impl: Callable[[DataType], None]
 
     # Provide a draw function that presents an editable interface for the data, and returns (True, new_value) if changed
-    gui_edit_impl: Callable[[DataType], Tuple[bool, DataType]] | None = None
+    gui_edit_impl: Callable[[DataType], Tuple[bool, DataType]]
 
     # Optional serialization and deserialization functions for DataType
     # If provided, these functions will be used to serialize and deserialize the data with a custom dict format.

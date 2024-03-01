@@ -1,11 +1,13 @@
 from imgui_bundle import imgui, hello_imgui, imgui_knobs, imgui_toggle, imgui_ctx
+from imgui_bundle import icons_fontawesome
 from fiatlight.fiatlight_types import UnspecifiedValue, ErrorValue
-from fiatlight.any_data_with_gui import AnyDataGuiHandlers
+from fiatlight.any_data_with_gui import AnyDataGuiHandlers, DataType
 from fiatlight.internal import osd_widgets
 
 from typing import Any, Callable, TypeAlias, Tuple
 from dataclasses import dataclass
 from enum import Enum
+import copy
 
 
 ########################################################################################################################
@@ -356,6 +358,62 @@ def make_str_gui_handlers(params: StrWithGuiParams | None = None) -> AnyDataGuiH
     r.gui_present_impl = lambda x: _versatile_gui_present(x)
     r.gui_edit_impl = edit
     r.default_value_provider = lambda: ""
+    return r
+
+
+########################################################################################################################
+#                               List Handlers
+########################################################################################################################
+def make_list_gui_handlers(item_gui_handlers: AnyDataGuiHandlers[DataType]) -> AnyDataGuiHandlers[list[DataType]]:
+    def edit(x: list[Any]) -> Tuple[bool, list[Any]]:
+        assert isinstance(x, list)
+        changed = False
+        new_x = x
+        imgui.new_line()
+        for i, item in enumerate(x):
+            imgui.push_id(str(i))
+            changed_i, new_item = item_gui_handlers.gui_edit_impl(item)
+            if changed_i:
+                changed = True
+                x[i] = new_item
+
+            imgui.same_line()
+            if imgui.small_button(icons_fontawesome.ICON_FA_MINUS):
+                new_x = copy.copy(x)
+                new_x.pop(i)
+                changed = True
+            imgui.same_line()
+            if imgui.button(icons_fontawesome.ICON_FA_PLUS):
+                new_x = copy.copy(x)
+                new_x.insert(i, item_gui_handlers.default_value_provider())
+                changed = True
+            imgui.pop_id()
+
+        if imgui.button(icons_fontawesome.ICON_FA_PLUS):
+            new_x = copy.copy(x)
+            new_x.append(item_gui_handlers.default_value_provider())
+            changed = True
+
+        return changed, new_x
+
+    def present(x: list[Any]) -> None:
+        for i, item in enumerate(x):
+            item_gui_handlers.gui_present_impl(item)
+
+    r = AnyDataGuiHandlers[list[Any]]()
+    r.gui_present_impl = present
+    r.gui_edit_impl = edit
+    r.default_value_provider = lambda: []
+
+    item_to_dict_impl = item_gui_handlers.to_dict_impl
+    item_from_dict_impl = item_gui_handlers.from_dict_impl
+    if item_to_dict_impl is not None and item_from_dict_impl is not None:
+        r.to_dict_impl = lambda x: {"values": [item_to_dict_impl(item) for item in x]}
+        r.from_dict_impl = lambda d: [item_from_dict_impl(item_dict) for item_dict in d["values"]]
+    else:
+        r.to_dict_impl = lambda x: {"values": x}
+        r.from_dict_impl = lambda d: d["values"]
+
     return r
 
 
