@@ -1,9 +1,9 @@
 from imgui_bundle import imgui, hello_imgui, imgui_knobs, imgui_toggle, imgui_ctx
-from fiatlight.any_data_with_gui import AnyDataWithGui, Unspecified, UnspecifiedValue, ErrorValue
-from fiatlight.function_with_gui import SourceWithGui
+from fiatlight.fiatlight_types import UnspecifiedValue, ErrorValue
+from fiatlight.any_data_with_gui import AnyDataGuiHandlers
 from fiatlight.internal import osd_widgets
 
-from typing import Any, Callable, TypeAlias
+from typing import Any, Callable, TypeAlias, Tuple
 from dataclasses import dataclass
 from enum import Enum
 
@@ -110,78 +110,55 @@ class IntWithGuiParams:
     knob_steps: int = 0
 
 
-def make_int_with_gui(
-    initial_value: int | Unspecified = UnspecifiedValue,
-    params: IntWithGuiParams | None = None,
-) -> AnyDataWithGui[int]:
-    if params is None:
-        params = IntWithGuiParams()
-    r = AnyDataWithGui[int]()
-    r.value = initial_value
+def make_int_gui_handlers(params: IntWithGuiParams | None = None) -> AnyDataGuiHandlers[int]:
+    _params = params if params is not None else IntWithGuiParams()
 
-    r.gui_present_impl = lambda: _versatile_gui_present(r.value)
-
-    first_frame = True
-
-    def edit() -> bool:
-        nonlocal first_frame
-        assert isinstance(r.value, int)
+    def edit(x: int) -> Tuple[bool, int]:
+        assert isinstance(x, int)
         changed = False
-        imgui.set_next_item_width(hello_imgui.em_size(params.width_em))
-        if params.edit_type == IntEditType.slider:
-            changed, r.value = imgui.slider_int(
-                params.label,
-                r.value,
-                params.v_min,
-                params.v_max,
-                params.format,
-                params.slider_flags,
+        imgui.set_next_item_width(hello_imgui.em_size(_params.width_em))
+        if _params.edit_type == IntEditType.slider:
+            changed, x = imgui.slider_int(
+                _params.label,
+                x,
+                _params.v_min,
+                _params.v_max,
+                _params.format,
+                _params.slider_flags,
             )
-        elif params.edit_type == IntEditType.input:
-            changed, r.value = imgui.input_int(
-                params.label, r.value, params.input_step, params.input_step_fast, params.input_flags
+        elif _params.edit_type == IntEditType.input:
+            changed, x = imgui.input_int(
+                _params.label, x, _params.input_step, _params.input_step_fast, _params.input_flags
             )
-        elif params.edit_type == IntEditType.drag:
-            changed, r.value = imgui.drag_int(
-                params.label,
-                r.value,
-                params.v_speed,
-                params.v_min,
-                params.v_max,
-                params.format,
-                params.slider_flags,
+        elif _params.edit_type == IntEditType.drag:
+            changed, x = imgui.drag_int(
+                _params.label,
+                x,
+                _params.v_speed,
+                _params.v_min,
+                _params.v_max,
+                _params.format,
+                _params.slider_flags,
             )
-        elif params.edit_type == IntEditType.knob:
-            changed, r.value = imgui_knobs.knob_int(
-                params.label,
-                r.value,
-                params.v_min,
-                params.v_max,
-                params.knob_speed,
-                params.format,
-                params.knob_variant,
-                hello_imgui.em_size(params.knob_size_em),
-                params.knob_steps,
+        elif _params.edit_type == IntEditType.knob:
+            changed, x = imgui_knobs.knob_int(
+                _params.label,
+                x,
+                _params.v_min,
+                _params.v_max,
+                _params.knob_speed,
+                _params.format,
+                _params.knob_variant,
+                hello_imgui.em_size(_params.knob_size_em),
+                _params.knob_steps,
             )
 
-        if first_frame:
-            changed = True
-            first_frame = False
+        return changed, x
 
-        return changed
-
+    r = AnyDataGuiHandlers[int]()
+    r.gui_present_impl = lambda x: _versatile_gui_present(x)
     r.gui_edit_impl = edit
-
     r.default_value_provider = lambda: 0
-
-    return r
-
-
-def make_int_source(
-    initial_value: int, edit_params: IntWithGuiParams | None = None, label: str = "Source"
-) -> SourceWithGui:
-    x = make_int_with_gui(initial_value, edit_params)
-    r = SourceWithGui(x, label)
     return r
 
 
@@ -218,45 +195,36 @@ class FloatWithGuiParams:
     knob_steps: int = 0
 
 
-def make_float_with_gui(
-    initial_value: float | Unspecified = UnspecifiedValue, params: FloatWithGuiParams | None = None
-) -> AnyDataWithGui[float]:
+def make_float_gui_handlers(params: FloatWithGuiParams | None = None) -> AnyDataGuiHandlers[float]:
     if params is None:
         params = FloatWithGuiParams()
-    r = AnyDataWithGui[float]()
-    r.value = initial_value
 
-    r.gui_present_impl = lambda: _versatile_gui_present(r.value)
-
-    first_frame = True
-
-    def edit() -> bool:
-        nonlocal first_frame
-        assert isinstance(r.value, float)
+    def edit(x: float) -> Tuple[bool, float]:
+        assert isinstance(x, float)
         changed = False
         imgui.set_next_item_width(hello_imgui.em_size(params.width_em))
         if params.edit_type == FloatEditType.slider:
-            changed, r.value = imgui.slider_float(
+            changed, x = imgui.slider_float(
                 params.label,
-                r.value,
+                x,
                 params.v_min,
                 params.v_max,
                 params.format,
                 params.slider_flags,
             )
         elif params.edit_type == FloatEditType.input:
-            changed, r.value = imgui.input_float(
+            changed, x = imgui.input_float(
                 params.label,
-                r.value,
+                x,
                 params.input_step,
                 params.input_step_fast,
                 params.format,
                 params.input_flags,
             )
         elif params.edit_type == FloatEditType.drag:
-            changed, r.value = imgui.drag_float(
+            changed, x = imgui.drag_float(
                 params.label,
-                r.value,
+                x,
                 params.v_speed,
                 params.v_min,
                 params.v_max,
@@ -264,9 +232,9 @@ def make_float_with_gui(
                 params.slider_flags,
             )
         elif params.edit_type == FloatEditType.knob:
-            changed, r.value = imgui_knobs.knob(
+            changed, x = imgui_knobs.knob(
                 params.label,
-                r.value,
+                x,
                 params.v_min,
                 params.v_max,
                 params.knob_speed,
@@ -276,24 +244,13 @@ def make_float_with_gui(
                 params.knob_steps,
             )
 
-        if first_frame:
-            changed = True
-            first_frame = False
+        return changed, x
 
-        return changed
-
+    r = AnyDataGuiHandlers[float]()
+    r.gui_present_impl = lambda x: _versatile_gui_present(x)
     r.gui_edit_impl = edit
-
     r.default_value_provider = lambda: 0.0
-
     return r
-
-
-def make_float_source(
-    initial_value: float, edit_params: FloatWithGuiParams | None = None, label: str = "Source"
-) -> SourceWithGui:
-    x = make_float_with_gui(initial_value, edit_params)
-    return SourceWithGui(x, label)
 
 
 ########################################################################################################################
@@ -314,46 +271,32 @@ class BoolWithGuiParams:
     toggle_config: ToggleConfig | None = None
 
 
-def make_bool_with_gui(
-    initial_value: bool | Unspecified = UnspecifiedValue,
-    params: BoolWithGuiParams | None = None,
-) -> AnyDataWithGui[bool]:
+def make_bool_gui_handlers(params: BoolWithGuiParams | None = None) -> AnyDataGuiHandlers[bool]:
     if params is None:
         params = BoolWithGuiParams()
-    r = AnyDataWithGui[bool]()
-    r.value = initial_value
 
-    r.gui_present_impl = lambda: _versatile_gui_present(r.value)
-
-    first_frame = True
-
-    def edit() -> bool:
+    def edit(x: bool) -> Tuple[bool, bool]:
         assert params is not None
-        assert isinstance(r.value, bool)
-        nonlocal first_frame
+        assert isinstance(x, bool)
         changed = False
         if params.edit_type == BoolEditType.checkbox:
-            changed, r.value = imgui.checkbox(params.label, r.value)
+            changed, x = imgui.checkbox(params.label, x)
         elif params.edit_type == BoolEditType.radio_button:
-            new_value = imgui.radio_button(params.label, r.value)
-            if new_value != r.value:
-                r.value = new_value
+            new_x = imgui.radio_button(params.label, x)
+            if new_x != x:
+                x = new_x
                 changed = True
         elif params.edit_type == BoolEditType.toggle:
             if params.toggle_config is None:
                 raise ValueError("toggle_config must be set for BoolEditType.toggle")
-            changed, r.value = imgui_toggle.toggle(params.label, r.value, params.toggle_config)
+            changed, x = imgui_toggle.toggle(params.label, x, params.toggle_config)
 
-        if first_frame:
-            changed = True
-            first_frame = False
+        return changed, x
 
-        return changed
-
+    r = AnyDataGuiHandlers[bool]()
+    r.gui_present_impl = lambda x: _versatile_gui_present(x)
     r.gui_edit_impl = edit
-
     r.default_value_provider = lambda: False
-
     return r
 
 
@@ -382,61 +325,38 @@ class StrWithGuiParams:
     height_em: int = 5
 
 
-def make_str_with_gui(
-    initial_value: str | Unspecified = UnspecifiedValue,
-    params: StrWithGuiParams | None = None,
-) -> AnyDataWithGui[str]:
+def make_str_gui_handlers(params: StrWithGuiParams | None = None) -> AnyDataGuiHandlers[str]:
     if params is None:
         params = StrWithGuiParams()
-    r = AnyDataWithGui[str]()
-    r.value = initial_value
 
-    r.gui_present_impl = lambda: _versatile_gui_present(r.value)
-
-    first_frame = True
-
-    def edit() -> bool:
-        nonlocal first_frame
-        assert isinstance(r.value, str)
+    def edit(x: str) -> Tuple[bool, str]:
+        assert isinstance(x, str)
         changed = False
         imgui.set_next_item_width(hello_imgui.em_size(params.width_em))
         if params.edit_type == StrEditType.input:
-            changed, r.value = imgui.input_text(
-                params.label, r.value, params.input_flags, params.callback, params.user_data
-            )
+            changed, x = imgui.input_text(params.label, x, params.input_flags, params.callback, params.user_data)
         elif params.edit_type == StrEditType.input_with_hint:
-            changed, r.value = imgui.input_text_with_hint(
+            changed, x = imgui.input_text_with_hint(
                 params.label,
                 params.hint,
-                r.value,
+                x,
                 params.input_flags,
                 params.callback,
                 params.user_data,
             )
         elif params.edit_type == StrEditType.multiline:
             size = hello_imgui.em_to_vec2(params.width_em, params.height_em)
-            changed, r.value = imgui.input_text_multiline(
-                params.label, r.value, size, params.input_flags, params.callback, params.user_data
+            changed, x = imgui.input_text_multiline(
+                params.label, x, size, params.input_flags, params.callback, params.user_data
             )
 
-        if first_frame:
-            changed = True
-            first_frame = False
+        return changed, x
 
-        return changed
-
+    r = AnyDataGuiHandlers[str]()
+    r.gui_present_impl = lambda x: _versatile_gui_present(x)
     r.gui_edit_impl = edit
-
     r.default_value_provider = lambda: ""
-
     return r
-
-
-def make_str_source(
-    initial_value: str, edit_params: StrWithGuiParams | None = None, label: str = "Source"
-) -> SourceWithGui:
-    x = make_str_with_gui(initial_value, edit_params)
-    return SourceWithGui(x, label)
 
 
 ########################################################################################################################
@@ -447,24 +367,21 @@ __all__ = [
     # Ints
     "IntWithGuiParams",
     "IntEditType",
-    "make_int_with_gui",
-    "make_int_source",
+    "make_int_gui_handlers",
     # Floats
     "FloatWithGuiParams",
     "FloatEditType",
-    "make_float_with_gui",
-    "make_float_source",
+    "make_float_gui_handlers",
     "ImGuiKnobVariant_",
     # Str
     "StrWithGuiParams",
     "StrEditType",
-    "make_str_with_gui",
-    "make_str_source",
+    "make_str_gui_handlers",
     # Bool
     "ToggleConfig",
     "BoolWithGuiParams",
     "BoolEditType",
-    "make_bool_with_gui",
+    "make_bool_gui_handlers",
 ]
 
 

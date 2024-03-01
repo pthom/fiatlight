@@ -17,7 +17,7 @@ class LutParamsWithGui(AnyDataWithGui[lut.LutParams]):
     _lut_graph_size_em: float = 2.0
 
     def __init__(self, value: lut.LutParams | None = None) -> None:
-        super().__init__()
+        super().__init__()  # type: ignore
         self.value = value if value is not None else lut.LutParams()
 
         def gui_present() -> None:

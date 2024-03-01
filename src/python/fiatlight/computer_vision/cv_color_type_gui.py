@@ -1,5 +1,5 @@
 from fiatlight.computer_vision.cv_color_type import ColorConversion, ColorType
-from fiatlight.any_data_with_gui import AnyDataWithGui, Unspecified, UnspecifiedValue
+from fiatlight.any_data_with_gui import AnyDataGuiHandlers
 from imgui_bundle import imgui_ctx, imgui
 from typing import Tuple
 
@@ -29,15 +29,8 @@ def gui_color_conversion(color_conversion: ColorConversion) -> Tuple[bool, Color
     return changed, color_conversion
 
 
-class ConvertColorWithGui(AnyDataWithGui[ColorConversion]):
-    def __init__(self, value: ColorConversion | Unspecified = UnspecifiedValue) -> None:
-        def edit_gui() -> bool:
-            assert isinstance(self.value, ColorConversion)
-            changed, self.value = gui_color_conversion(self.value)
-            return changed
-
-        def present_gui() -> None:
-            assert isinstance(self.value, ColorConversion)
-            imgui.text(str(self.value))
-
-        super().__init__(value, present_gui, edit_gui)
+def make_color_conversion_gui_handlers() -> AnyDataGuiHandlers[ColorConversion]:
+    r = AnyDataGuiHandlers[ColorConversion]()
+    r.gui_edit_impl = gui_color_conversion
+    r.gui_present_impl = lambda x: imgui.text(str(x))
+    return r

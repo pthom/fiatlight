@@ -1,8 +1,7 @@
 from typing import Any
-from fiatlight import FunctionWithGui, NamedDataWithGui, Unspecified, UnspecifiedValue
+from fiatlight import FunctionWithGui
 from fiatlight.computer_vision import ImageUInt8
 from fiatlight.computer_vision.image_with_gui import ImageWithGui, ImageChannelsWithGui
-from fiatlight.computer_vision import cv_color_type, cv_color_type_gui
 
 import numpy as np
 
@@ -43,24 +42,24 @@ class MergeChannelsWithGui(FunctionWithGui):
         self.f_impl = f
 
 
-class ConvertColorWithGui(FunctionWithGui):
-    color_conversion_with_gui: cv_color_type_gui.ConvertColorWithGui
-    input_gui: ImageWithGui
-    output_gui: ImageWithGui
-
-    def __init__(self, color_conversion: cv_color_type.ColorConversion | Unspecified = UnspecifiedValue) -> None:
-        self.color_conversion_with_gui = cv_color_type_gui.ConvertColorWithGui(color_conversion)
-        self.input_gui = ImageWithGui()
-        self.output_gui = ImageWithGui()
-        self.name = "Convert Color"
-
-        def f(x: Any) -> Any:
-            assert isinstance(x, np.ndarray)
-            assert isinstance(self.color_conversion_with_gui.value, cv_color_type.ColorConversion)
-            r = self.color_conversion_with_gui.value.convert_image(x)
-            self.output_gui.color_type = self.color_conversion_with_gui.value.dst_color
-            self.output_gui.refresh_image()
-            return r
-
-        self.f_impl = f
-        self.parameters_with_gui = [NamedDataWithGui("color_conversion", self.color_conversion_with_gui)]
+# class ConvertColorWithGui(FunctionWithGui):
+#     color_conversion_with_gui: AnyDataGuiHandlers[cv_color_type.ColorConversion]
+#     input_gui: ImageWithGui
+#     output_gui: ImageWithGui
+#
+#     def __init__(self, color_conversion: cv_color_type.ColorConversion | Unspecified = UnspecifiedValue) -> None:
+#         self.color_conversion_with_gui = cv_color_type_gui.ConvertColorWithGui(color_conversion)
+#         self.input_gui = ImageWithGui()
+#         self.output_gui = ImageWithGui()
+#         self.name = "Convert Color"
+#
+#         def f(x: Any) -> Any:
+#             assert isinstance(x, np.ndarray)
+#             assert isinstance(self.color_conversion_with_gui.value, cv_color_type.ColorConversion)
+#             r = self.color_conversion_with_gui.value.convert_image(x)
+#             self.output_gui.color_type = self.color_conversion_with_gui.value.dst_color
+#             self.output_gui.refresh_image()
+#             return r
+#
+#         self.f_impl = f
+#         self.parameters_with_gui = [NamedDataWithGui("color_conversion", self.color_conversion_with_gui)]
