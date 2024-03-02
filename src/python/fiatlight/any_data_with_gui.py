@@ -68,6 +68,8 @@ class AnyDataWithGui(Generic[DataType]):
             return {"type": "Error"}
         elif isinstance(self.value, (str, int, float, bool)):
             return {"type": "Primitive", "value": self.value}
+        elif self.value is None:
+            return {"type": "Primitive", "value": None}
         # elif self.handlers.to_dict_impl is not None:
         #     as_dict = self.handlers.to_dict_impl(self.value)
         #     return {"type": "Custom", "value": as_dict}
