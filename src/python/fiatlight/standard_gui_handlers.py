@@ -16,7 +16,7 @@ import copy
 def versatile_gui_present(value: Any) -> None:
     def _add_details_button(obj: Any, detail_gui: Callable[[], None]) -> None:
         with imgui_ctx.push_obj_id(obj):
-            if imgui.button("show details"):
+            if imgui.button("details"):
                 osd_widgets.set_detail_gui(detail_gui)
             if imgui.is_item_hovered():
                 osd_widgets.set_tooltip(

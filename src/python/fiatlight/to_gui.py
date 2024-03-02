@@ -1,3 +1,5 @@
+import logging
+
 from fiatlight.fiatlight_types import UnspecifiedValue
 from fiatlight.any_data_with_gui import (
     AnyDataGuiHandlers,
@@ -13,7 +15,7 @@ import inspect
 
 from dataclasses import dataclass
 from typing import TypeAlias, Callable, Type, Any
-
+import typing  # needed for eval
 
 GuiEditParams: TypeAlias = Any
 StandardType: TypeAlias = Any
@@ -21,7 +23,7 @@ StandardType: TypeAlias = Any
 
 @dataclass
 class TypeToGuiHandlers:
-    standard_type_class: Type[Any]
+    standard_type_class: Type[typing.Any]
     gui_type_factory: Callable[[GuiEditParams | None], AnyDataGuiHandlers[Any]]
     default_edit_params: GuiEditParams
 
@@ -45,7 +47,9 @@ def any_typeclass_to_data_handlers(typeclass_or_str: Type[DataType] | str) -> An
         for type_to_gui_info in all_type_to_gui_info():
             if typeclass is type_to_gui_info.standard_type_class:
                 return type_to_gui_info.gui_type_factory(type_to_gui_info.default_edit_params)
-        raise ValueError(f"Type {typeclass} not supported by any_typeclass_to_data_with_gui")
+        # if we reach this point, we have no GUI implementation for the type
+        logging.warning(f"Type {typeclass} not supported by any_typeclass_to_data_with_gui")
+        return AnyDataGuiHandlers[DataType]()
 
 
 def any_value_to_data_with_gui(value: DataType) -> AnyDataWithGui[DataType]:
