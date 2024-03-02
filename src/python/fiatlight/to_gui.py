@@ -1,6 +1,6 @@
 from fiatlight.fiatlight_types import UnspecifiedValue
 from fiatlight.any_data_with_gui import AnyDataGuiHandlers, AnyDataWithGui, DataType, OutputWithGui
-from fiatlight.function_with_gui import FunctionWithGui, NamedDataWithGui
+from fiatlight.function_with_gui import FunctionWithGui, ParamWithGui
 from fiatlight.standard_gui_handlers import make_list_gui_handlers
 import inspect
 
@@ -46,7 +46,7 @@ def any_value_to_data_with_gui(value: DataType) -> AnyDataWithGui[DataType]:
     return AnyDataWithGui(value, handlers)
 
 
-def any_param_to_param_with_gui(name: str, param: inspect.Parameter) -> NamedDataWithGui[Any]:
+def any_param_to_param_with_gui(name: str, param: inspect.Parameter) -> ParamWithGui[Any]:
     default_value = param.default if param.default is not inspect.Parameter.empty else UnspecifiedValue
     annotation = param.annotation
 
@@ -57,7 +57,7 @@ def any_param_to_param_with_gui(name: str, param: inspect.Parameter) -> NamedDat
         handlers = any_typeclass_to_data_handlers(annotation)
 
     data_with_gui = AnyDataWithGui(default_value, handlers)
-    return NamedDataWithGui(name, data_with_gui)
+    return ParamWithGui(name, data_with_gui)
 
 
 def any_function_to_function_with_gui(f: Callable[..., Any]) -> FunctionWithGui:

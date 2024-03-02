@@ -1,5 +1,5 @@
 from fiatlight.fiatlight_types import UnspecifiedValue, ErrorValue
-from fiatlight.any_data_with_gui import AnyDataWithGui, NamedDataWithGui, AnyDataGuiHandlers, OutputWithGui
+from fiatlight.any_data_with_gui import AnyDataWithGui, ParamWithGui, AnyDataGuiHandlers, OutputWithGui
 from fiatlight.fiatlight_types import JsonDict
 from typing import Any, List, final, Callable, Optional
 
@@ -9,7 +9,7 @@ class FunctionWithGui:
     You need to provide:
     - the name of the function
     - the implementation of the function (f_impl)
-    - the inputs and outputs of the function, as a list of NamedDataWithGui
+    - the inputs and outputs of the function, as a list of ParamWithGui
     """
 
     # set this with the actual function implementation at construction time
@@ -19,7 +19,7 @@ class FunctionWithGui:
     name: str
 
     # input_gui and output_gui should be filled during construction
-    inputs_with_gui: List[NamedDataWithGui[Any]]
+    inputs_with_gui: List[ParamWithGui[Any]]
     outputs_with_gui: List[OutputWithGui[Any]]
 
     # if the last call raised an exception, the message is stored here
@@ -93,7 +93,7 @@ class SourceWithGui(FunctionWithGui):
 
     def __init__(self, initial_value_with_gui: AnyDataWithGui[Any], source_name: str = "Source") -> None:
         self.output_gui = initial_value_with_gui
-        self.parameters_with_gui = [NamedDataWithGui("##source", initial_value_with_gui)]
+        self.parameters_with_gui = [ParamWithGui("##source", initial_value_with_gui)]
         self.name = source_name
 
         def f(_: Any) -> Any:
@@ -103,7 +103,7 @@ class SourceWithGui(FunctionWithGui):
         self.f_impl = f
 
 
-__all__ = ["FunctionWithGui", "AnyDataWithGui", "NamedDataWithGui", "SourceWithGui"]
+__all__ = ["FunctionWithGui", "AnyDataWithGui", "ParamWithGui", "SourceWithGui"]
 
 
 def sandbox() -> None:

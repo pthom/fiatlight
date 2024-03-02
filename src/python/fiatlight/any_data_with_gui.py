@@ -150,7 +150,7 @@ class AnyDataWithGui(Generic[DataType]):
 
 
 @dataclass
-class NamedDataWithGui(Generic[DataType]):
+class ParamWithGui(Generic[DataType]):
     name: str
     data_with_gui: AnyDataWithGui[DataType]
 
