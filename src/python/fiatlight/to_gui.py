@@ -1,5 +1,5 @@
 from fiatlight.fiatlight_types import UnspecifiedValue
-from fiatlight.any_data_with_gui import AnyDataGuiHandlers, AnyDataWithGui, DataType
+from fiatlight.any_data_with_gui import AnyDataGuiHandlers, AnyDataWithGui, DataType, OutputWithGui
 from fiatlight.function_with_gui import FunctionWithGui, NamedDataWithGui
 from fiatlight.standard_gui_handlers import make_list_gui_handlers
 import inspect
@@ -77,7 +77,7 @@ def any_function_to_function_with_gui(f: Callable[..., Any]) -> FunctionWithGui:
     if return_annotation is inspect.Parameter.empty:
         handlers_none = AnyDataGuiHandlers[Any]()
         data_with_gui = AnyDataWithGui(UnspecifiedValue, handlers_none)
-        function_with_gui.outputs_with_gui.append(NamedDataWithGui("output", data_with_gui))
+        function_with_gui.outputs_with_gui.append(OutputWithGui(data_with_gui))
     else:
         return_annotation_str = str(return_annotation)
         is_tuple = return_annotation_str.startswith("typing.Tuple") or return_annotation_str.startswith("tuple")
@@ -88,10 +88,10 @@ def any_function_to_function_with_gui(f: Callable[..., Any]) -> FunctionWithGui:
             for i, annotation in enumerate(tuple_type_annotations):
                 handlers: AnyDataGuiHandlers[Any] = any_typeclass_to_data_handlers(annotation)
                 data_with_gui = AnyDataWithGui(UnspecifiedValue, handlers)
-                function_with_gui.outputs_with_gui.append(NamedDataWithGui(f"output_{i}", data_with_gui))
+                function_with_gui.outputs_with_gui.append(OutputWithGui(data_with_gui))
         else:
             handlers = any_typeclass_to_data_handlers(sig.return_annotation)
             data_with_gui = AnyDataWithGui(UnspecifiedValue, handlers)
-            function_with_gui.outputs_with_gui.append(NamedDataWithGui("output", data_with_gui))
+            function_with_gui.outputs_with_gui.append(OutputWithGui(data_with_gui))
 
     return function_with_gui

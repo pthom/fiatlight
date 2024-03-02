@@ -20,7 +20,6 @@ def test_serialization() -> None:
             {"data": {"type": "Unspecified"}, "name": "b"},
         ],
         "name": "add",
-        "outputs": [{"data": {"type": "Unspecified"}, "name": "output"}],
     }
 
     json_data = {
@@ -29,7 +28,6 @@ def test_serialization() -> None:
             {"data": {"type": "Primitive", "value": 2}, "name": "a"},
         ],
         "name": "add",
-        "outputs": [{"data": {"type": "Unspecified"}, "name": "output"}],
     }
     add_gui.fill_from_json(json_data)
     assert add_gui.inputs_with_gui[0].data_with_gui.value is UnspecifiedValue  # type: ignore

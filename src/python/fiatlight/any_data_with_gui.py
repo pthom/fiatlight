@@ -165,6 +165,11 @@ class NamedDataWithGui(Generic[DataType]):
             self.data_with_gui.fill_from_json(json_data["data"])
 
 
+@dataclass
+class OutputWithGui(Generic[DataType]):
+    data_with_gui: AnyDataWithGui[DataType]
+
+
 ##############################################################################################################
 # Example implementation for a custom type
 ##############################################################################################################

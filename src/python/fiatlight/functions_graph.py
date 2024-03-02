@@ -82,7 +82,7 @@ class FunctionsGraph:
 
                 link = FunctionNodeLink(
                     src_function_node=fn,
-                    src_output_name=fn.function_with_gui.outputs_with_gui[0].name,
+                    src_output_idx=0,
                     dst_function_node=fn_next,
                     dst_input_name=fn_next.function_with_gui.inputs_with_gui[0].name,
                 )

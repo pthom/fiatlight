@@ -1,5 +1,5 @@
 from fiatlight.fiatlight_types import UnspecifiedValue, ErrorValue
-from fiatlight.any_data_with_gui import AnyDataWithGui, NamedDataWithGui, AnyDataGuiHandlers
+from fiatlight.any_data_with_gui import AnyDataWithGui, NamedDataWithGui, AnyDataGuiHandlers, OutputWithGui
 from fiatlight.fiatlight_types import JsonDict
 from typing import Any, List, final, Callable, Optional
 
@@ -20,7 +20,7 @@ class FunctionWithGui:
 
     # input_gui and output_gui should be filled during construction
     inputs_with_gui: List[NamedDataWithGui[Any]]
-    outputs_with_gui: List[NamedDataWithGui[Any]]
+    outputs_with_gui: List[OutputWithGui[Any]]
 
     # if the last call raised an exception, the message is stored here
     last_exception_message: Optional[str] = None
@@ -33,20 +33,11 @@ class FunctionWithGui:
     def all_inputs_ids(self) -> List[str]:
         return [param.name for param in self.inputs_with_gui]
 
-    def all_outputs_ids(self) -> List[str]:
-        return [param.name for param in self.outputs_with_gui]
-
     def input_of_name(self, name: str) -> AnyDataWithGui[Any]:
         for param in self.inputs_with_gui:
             if param.name == name:
                 return param.data_with_gui
         assert False, f"input {name} not found"
-
-    def output_of_name(self, name: str) -> AnyDataWithGui[Any]:
-        for param in self.outputs_with_gui:
-            if param.name == name:
-                return param.data_with_gui
-        assert False, f"output {name} not found"
 
     @final
     def invoke(self) -> Any:
@@ -85,22 +76,16 @@ class FunctionWithGui:
 
     def to_json(self) -> JsonDict:
         inputs_dicts = [param.to_json() for param in self.inputs_with_gui]
-        outputs_dicts = [param.to_json() for param in self.outputs_with_gui]
-        function_dict = {"name": self.name, "inputs": inputs_dicts, "outputs": outputs_dicts}
+        function_dict = {"name": self.name, "inputs": inputs_dicts}
         return function_dict
 
     def fill_from_json(self, json_data: JsonDict) -> None:
         self.name = json_data["name"]
         inputs_json = json_data["inputs"]
-        outputs_json = json_data["outputs"]
         if len(inputs_json) != len(self.inputs_with_gui):
             raise ValueError(f"Expected {len(self.inputs_with_gui)} inputs, got {len(inputs_json)}")
-        if len(outputs_json) != len(self.outputs_with_gui):
-            raise ValueError(f"Expected {len(self.outputs_with_gui)} outputs, got {len(outputs_json)}")
         for i, param_json in enumerate(inputs_json):
             self.inputs_with_gui[i].fill_from_json(param_json)
-        for i, param_json in enumerate(outputs_json):
-            self.outputs_with_gui[i].fill_from_json(param_json)
 
 
 class SourceWithGui(FunctionWithGui):

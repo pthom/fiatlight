@@ -4,8 +4,9 @@ from fiatlight.internal.fl_widgets import draw_node_gui_right_align
 from fiatlight.internal import osd_widgets
 from fiatlight.config import config
 from fiatlight.internal import fl_widgets
+from fiatlight.any_data_with_gui import OutputWithGui
 from imgui_bundle import imgui, imgui_node_editor as ed, icons_fontawesome, ImVec2, imgui_ctx, hello_imgui
-from typing import Dict, List
+from typing import Dict, List, Any
 
 
 class FunctionNodeLinkGui:
@@ -21,7 +22,7 @@ class FunctionNodeLinkGui:
         self.link_id = ed.LinkId.create()
         for f in function_nodes:
             if f.function_node.function_with_gui == function_node_link.src_function_node.function_with_gui:
-                self.start_id = f.pins_output[function_node_link.src_output_name]
+                self.start_id = f.pins_output[function_node_link.src_output_idx]
             if f.function_node.function_with_gui == function_node_link.dst_function_node.function_with_gui:
                 self.end_id = f.pins_input[function_node_link.dst_input_name]
         assert hasattr(self, "start_id")
@@ -38,7 +39,7 @@ class FunctionNodeGui:
 
     node_id: ed.NodeId
     pins_input: Dict[str, ed.PinId]
-    pins_output: Dict[str, ed.PinId]
+    pins_output: Dict[int, ed.PinId]
 
     node_size: ImVec2 | None = None  # will be set after the node is drawn once
     _first_frame = True
@@ -55,8 +56,8 @@ class FunctionNodeGui:
             self.pins_input[input_with_gui.name] = ed.PinId.create()
 
         self.pins_output = {}
-        for output_with_gui in self.function_node.function_with_gui.outputs_with_gui:
-            self.pins_output[output_with_gui.name] = ed.PinId.create()
+        for i, output_with_gui in enumerate(self.function_node.function_with_gui.outputs_with_gui):
+            self.pins_output[i] = ed.PinId.create()
 
     def draw_node(self, unique_name: str) -> None:
         def draw_title() -> None:
@@ -90,19 +91,19 @@ class FunctionNodeGui:
 
                 draw_node_gui_right_align(self.node_id, draw)
 
-            def draw_output_value() -> None:
+            def draw_output_value(output_idx: int, output_param: OutputWithGui[Any]) -> None:
                 if len(self.function_node.function_with_gui.outputs_with_gui) > 1:
-                    fl_widgets.text_custom(output_param.name + ":")
+                    fl_widgets.text_custom(str(output_idx) + ": ")
                 if output_param.data_with_gui.value is None:
                     imgui.text("None")
                 else:
                     output_param.data_with_gui.call_gui_present()
 
-            for output_param in self.function_node.function_with_gui.outputs_with_gui:
+            for i, output_param in enumerate(self.function_node.function_with_gui.outputs_with_gui):
                 with imgui_ctx.push_obj_id(output_param):
-                    draw_output_value()
+                    draw_output_value(i, output_param)
                     imgui.same_line()
-                    draw_output_pin(self.pins_output[output_param.name])
+                    draw_output_pin(self.pins_output[i])
 
         def draw_function_inputs() -> bool:
             changed = False
