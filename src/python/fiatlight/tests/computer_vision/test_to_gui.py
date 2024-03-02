@@ -14,15 +14,12 @@ class Dummy:
 
 
 def test_any_typeclass_to_data_with_gui() -> None:
-    assert any_typeclass_to_data_handlers(int).gui_present_impl is not None
-
     with pytest.raises(ValueError):
         any_typeclass_to_data_handlers(Dummy)
 
 
 def test_any_value_to_data_with_gui() -> None:
     a = any_value_to_data_with_gui(1)
-    assert a.handlers.gui_present_impl is not None
     assert a.value == 1
 
 

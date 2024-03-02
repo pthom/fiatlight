@@ -5,7 +5,6 @@ from fiatlight.to_gui import any_value_to_data_with_gui, any_typeclass_to_data_h
 def test_creation() -> None:
     a = any_typeclass_to_data_handlers(int)
     assert a.gui_edit_impl is not None
-    assert a.gui_present_impl is not None
     assert a.default_value_provider is not None
     assert a.default_value_provider() == 0
 

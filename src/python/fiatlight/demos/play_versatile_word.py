@@ -137,7 +137,7 @@ def main() -> None:
                 str_lower,
                 split_words,
                 remove_empty_words,
-                # sorted,
+                sorted,
                 # run_length_encode,
                 # sort_word_with_counts,
                 # display_word_with_counts,

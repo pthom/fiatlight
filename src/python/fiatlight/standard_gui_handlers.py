@@ -364,6 +364,8 @@ def make_list_gui_handlers(item_gui_handlers: AnyDataGuiHandlers[DataType]) -> A
     def edit(x: list[Any]) -> Tuple[bool, list[Any]]:
         assert isinstance(x, list)
         item_gui_edit_impl = item_gui_handlers.gui_edit_impl
+        default_value_provider = item_gui_handlers.default_value_provider
+
         if item_gui_edit_impl is None:
             return False, x
         changed = False
@@ -381,17 +383,21 @@ def make_list_gui_handlers(item_gui_handlers: AnyDataGuiHandlers[DataType]) -> A
                 new_x = copy.copy(x)
                 new_x.pop(i)
                 changed = True
-            imgui.same_line()
-            if imgui.button(icons_fontawesome.ICON_FA_PLUS):
-                new_x = copy.copy(x)
-                new_x.insert(i, item_gui_handlers.default_value_provider())
-                changed = True
+
+            if default_value_provider is not None:
+                imgui.same_line()
+                if imgui.button(icons_fontawesome.ICON_FA_PLUS):
+                    new_x = copy.copy(x)
+                    new_x.insert(i, default_value_provider())
+                    changed = True
+
             imgui.pop_id()
 
-        if imgui.button(icons_fontawesome.ICON_FA_PLUS):
-            new_x = copy.copy(x)
-            new_x.append(item_gui_handlers.default_value_provider())
-            changed = True
+        if default_value_provider is not None:
+            if imgui.button(icons_fontawesome.ICON_FA_PLUS):
+                new_x = copy.copy(x)
+                new_x.append(default_value_provider())
+                changed = True
 
         return changed, new_x
 

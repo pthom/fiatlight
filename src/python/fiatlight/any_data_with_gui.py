@@ -3,16 +3,13 @@ This module provides a class to wrap any data with a GUI (AnyDataWithGui), and a
 See example implementation for a custom type at the bottom of this file.
 """
 from fiatlight.fiatlight_types import Error, ErrorValue, Unspecified, UnspecifiedValue, JsonDict
-from typing import final, Callable, TypeVar, Generic, TypeAlias, Tuple
+from typing import final, Callable, TypeVar, Generic, Tuple
 from dataclasses import dataclass
 from imgui_bundle import imgui, icons_fontawesome
 import logging
 
 # DataType: TypeAlias = Any
 DataType = TypeVar("DataType")
-
-
-DefaultValueProvider: TypeAlias = Callable[[], DataType]
 
 
 class AnyDataGuiHandlers(Generic[DataType]):
@@ -41,7 +38,7 @@ class AnyDataGuiHandlers(Generic[DataType]):
     # from_dict_impl: Callable[[JsonDict], DataType] | None = None
 
     # default value provider: this function will be called to provide a default value if needed
-    default_value_provider: DefaultValueProvider[DataType]
+    default_value_provider: Callable[[], DataType] | None = None
 
 
 class AnyDataWithGui(Generic[DataType]):
@@ -80,6 +77,7 @@ class AnyDataWithGui(Generic[DataType]):
         elif isinstance(self.value, list):
             # return {"type": "List", "value": [AnyDataWithGui(x, self.handlers).to_json() for x in self.value]}
             logging.warning("List serialization not implemented yet")
+            return {"type": "List"}
         else:
             raise ValueError(f"Cannot serialize {self.value}, it has no __dict__ attribute.")
 
@@ -101,6 +99,9 @@ class AnyDataWithGui(Generic[DataType]):
                     raise ValueError("Cannot deserialize a None value without a default_value_provider")
                 self.value = self.handlers.default_value_provider()
             self.value.__dict__.update(json_data["value"])
+        elif json_data["type"] == "List":
+            logging.warning("List deserialization not implemented yet")
+            return
         else:
             raise ValueError(f"Cannot deserialize {json_data}")
 
@@ -126,11 +127,15 @@ class AnyDataWithGui(Generic[DataType]):
         if isinstance(self.value, Unspecified):
             imgui.text("Unspecified!")
             imgui.same_line()
-            if imgui.small_button(icons_fontawesome.ICON_FA_PLUS):
-                self.value = self.handlers.default_value_provider()
-                return True
-            else:
+            default_value_provider = self.handlers.default_value_provider
+            if default_value_provider is None:
                 return False
+            else:
+                if imgui.small_button(icons_fontawesome.ICON_FA_PLUS):
+                    self.value = default_value_provider()
+                    return True
+                else:
+                    return False
         else:
             changed, new_value = self.handlers.gui_edit_impl(self.value)
             if changed:
