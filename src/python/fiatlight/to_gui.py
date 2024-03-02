@@ -74,7 +74,9 @@ def any_param_to_param_with_gui(name: str, param: inspect.Parameter) -> ParamWit
         param_kind = ParamKind.PositionalOnly
     elif param.kind is inspect.Parameter.KEYWORD_ONLY:
         param_kind = ParamKind.KeywordOnly
-    return ParamWithGui(name, data_with_gui, param_kind)
+
+    default_value = param.default if param.default is not inspect.Parameter.empty else UnspecifiedValue
+    return ParamWithGui(name, data_with_gui, param_kind, default_value)
 
 
 def any_function_to_function_with_gui(f: Callable[..., Any]) -> FunctionWithGui:

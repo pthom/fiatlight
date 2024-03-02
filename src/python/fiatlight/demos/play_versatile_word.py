@@ -120,6 +120,9 @@ def main() -> None:
     def get_poem() -> str:
         return poem
 
+    def sort_words(words: List[str], reverse: bool = False) -> List[str]:
+        return sorted(words, reverse=reverse)
+
     from fiatlight.functions_graph import FunctionsGraph
     from fiatlight.fiatlight_gui import fiatlight_run, FiatlightGuiParams
 
@@ -131,7 +134,7 @@ def main() -> None:
                 str_lower,
                 split_words,
                 remove_empty_words,
-                sorted,
+                sort_words,
                 run_length_encode,
                 sort_word_with_counts,
                 display_word_with_counts,

@@ -1,4 +1,5 @@
 from fiatlight.any_data_with_gui import ParamWithGui, ParamKind
+from fiatlight.fiatlight_types import UnspecifiedValue
 from fiatlight.to_gui import any_value_to_data_with_gui, any_typeclass_to_data_handlers
 
 
@@ -19,14 +20,14 @@ def test_primitive_serialization() -> None:
 
 def test_named_data_with_gui_creation() -> None:
     x = any_value_to_data_with_gui(1)
-    n = ParamWithGui("x", x, ParamKind.PositionalOrKeyword)
+    n = ParamWithGui("x", x, ParamKind.PositionalOrKeyword, UnspecifiedValue)
     assert n.name == "x"
     assert n.data_with_gui.value == 1
 
 
 def test_named_data_with_gui_serialization() -> None:
     d = any_value_to_data_with_gui(1)
-    n = ParamWithGui("x", d, ParamKind.PositionalOrKeyword)
+    n = ParamWithGui("x", d, ParamKind.PositionalOrKeyword, UnspecifiedValue)
     assert n.to_json() == {"name": "x", "data": {"type": "Primitive", "value": 1}}
 
     n.fill_from_json({"name": "x", "data": {"type": "Primitive", "value": 2}})
@@ -54,7 +55,7 @@ def test_custom_data_with_gui_serialization() -> None:
     assert isinstance(foo_gui.value, Foo)
     assert foo_gui.value.x == 2
 
-    named_data = ParamWithGui("foo", foo_gui, ParamKind.PositionalOrKeyword)
+    named_data = ParamWithGui("foo", foo_gui, ParamKind.PositionalOrKeyword, UnspecifiedValue)
     assert named_data.to_json() == {"name": "foo", "data": {"type": "Dict", "value": {"x": 2}}}
 
     named_data.fill_from_json({"name": "foo", "data": {"type": "Dict", "value": {"x": 3}}})
