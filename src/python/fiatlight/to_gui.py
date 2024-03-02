@@ -1,6 +1,13 @@
 from fiatlight.fiatlight_types import UnspecifiedValue
-from fiatlight.any_data_with_gui import AnyDataGuiHandlers, AnyDataWithGui, DataType, OutputWithGui
-from fiatlight.function_with_gui import FunctionWithGui, ParamWithGui
+from fiatlight.any_data_with_gui import (
+    AnyDataGuiHandlers,
+    AnyDataWithGui,
+    DataType,
+    OutputWithGui,
+    ParamKind,
+    ParamWithGui,
+)
+from fiatlight.function_with_gui import FunctionWithGui
 from fiatlight.standard_gui_handlers import make_list_gui_handlers
 import inspect
 
@@ -57,7 +64,13 @@ def any_param_to_param_with_gui(name: str, param: inspect.Parameter) -> ParamWit
         handlers = any_typeclass_to_data_handlers(annotation)
 
     data_with_gui = AnyDataWithGui(default_value, handlers)
-    return ParamWithGui(name, data_with_gui)
+
+    param_kind = ParamKind.PositionalOrKeyword
+    if param.kind is inspect.Parameter.POSITIONAL_ONLY:
+        param_kind = ParamKind.PositionalOnly
+    elif param.kind is inspect.Parameter.KEYWORD_ONLY:
+        param_kind = ParamKind.KeywordOnly
+    return ParamWithGui(name, data_with_gui, param_kind)
 
 
 def any_function_to_function_with_gui(f: Callable[..., Any]) -> FunctionWithGui:

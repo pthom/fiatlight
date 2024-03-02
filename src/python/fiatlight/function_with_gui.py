@@ -1,5 +1,5 @@
 from fiatlight.fiatlight_types import UnspecifiedValue, ErrorValue
-from fiatlight.any_data_with_gui import AnyDataWithGui, ParamWithGui, AnyDataGuiHandlers, OutputWithGui
+from fiatlight.any_data_with_gui import AnyDataWithGui, ParamWithGui, AnyDataGuiHandlers, OutputWithGui, ParamKind
 from fiatlight.fiatlight_types import JsonDict
 from typing import Any, List, final, Callable, Optional
 
@@ -47,6 +47,14 @@ class FunctionWithGui:
         self.last_exception_traceback = None
 
         values = [param.data_with_gui.value for param in self.inputs_with_gui]
+        positional_only_values = [
+            param.data_with_gui.value for param in self.inputs_with_gui if param.param_kind == ParamKind.PositionalOnly
+        ]
+        keyword_values = {
+            param.name: param.data_with_gui.value
+            for param in self.inputs_with_gui
+            if param.param_kind != ParamKind.PositionalOnly
+        }
 
         # if any of the inputs is an error or unspecified, we do not call the function
         if any(value is ErrorValue or value is UnspecifiedValue for value in values):
@@ -55,7 +63,7 @@ class FunctionWithGui:
             return
 
         try:
-            fn_output = self.f_impl(*values)
+            fn_output = self.f_impl(*positional_only_values, **keyword_values)
             if not isinstance(fn_output, tuple):
                 assert len(self.outputs_with_gui) == 1
                 self.outputs_with_gui[0].data_with_gui.value = fn_output
@@ -88,22 +96,7 @@ class FunctionWithGui:
             self.inputs_with_gui[i].fill_from_json(param_json)
 
 
-class SourceWithGui(FunctionWithGui):
-    """A source function that does not take any input and returns a user editable value"""
-
-    def __init__(self, initial_value_with_gui: AnyDataWithGui[Any], source_name: str = "Source") -> None:
-        self.output_gui = initial_value_with_gui
-        self.parameters_with_gui = [ParamWithGui("##source", initial_value_with_gui)]
-        self.name = source_name
-
-        def f(_: Any) -> Any:
-            assert self.output_gui is not None
-            return self.output_gui.value
-
-        self.f_impl = f
-
-
-__all__ = ["FunctionWithGui", "AnyDataWithGui", "ParamWithGui", "SourceWithGui"]
+__all__ = ["FunctionWithGui", "AnyDataWithGui", "ParamWithGui"]
 
 
 def sandbox() -> None:
