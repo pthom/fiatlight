@@ -6,6 +6,7 @@ from fiatlight.fiatlight_types import Error, ErrorValue, Unspecified, Unspecifie
 from typing import final, Callable, TypeVar, Generic, Tuple
 from dataclasses import dataclass
 from imgui_bundle import imgui, icons_fontawesome
+from enum import Enum
 import logging
 
 # DataType: TypeAlias = Any
@@ -149,10 +150,17 @@ class AnyDataWithGui(Generic[DataType]):
             return changed
 
 
+class ParamKind(Enum):
+    PositionalOnly = 0
+    PositionalOrKeyword = 1
+    KeywordOnly = 3
+
+
 @dataclass
 class ParamWithGui(Generic[DataType]):
     name: str
     data_with_gui: AnyDataWithGui[DataType]
+    param_kind: ParamKind
 
     def to_json(self) -> JsonDict:
         data_json = self.data_with_gui.to_json()

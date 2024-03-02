@@ -1,6 +1,6 @@
 from typing import Tuple, Optional, TypeAlias
 import math
-from fiatlight import FunctionWithGui, AnyDataWithGui, ParamWithGui
+from fiatlight import FunctionWithGui, AnyDataWithGui, ParamWithGui, ParamKind
 from fiatlight.computer_vision import ImageUInt8, ImageWithGui
 from fiatlight.computer_vision import lut
 from imgui_bundle import immapp, imgui, immvision
@@ -159,7 +159,7 @@ class LutImageWithGui(FunctionWithGui):
 
         self.f_impl = f
 
-        self.parameters_with_gui = [ParamWithGui("LUT Params", self.lut_params_with_gui)]
+        self.parameters_with_gui = [ParamWithGui("LUT Params", self.lut_params_with_gui, ParamKind.PositionalOrKeyword)]
 
 
 #
