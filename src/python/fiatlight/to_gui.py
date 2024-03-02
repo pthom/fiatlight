@@ -50,10 +50,12 @@ def any_param_to_param_with_gui(name: str, param: inspect.Parameter) -> NamedDat
     default_value = param.default if param.default is not inspect.Parameter.empty else UnspecifiedValue
     annotation = param.annotation
 
+    handlers: AnyDataGuiHandlers[Any]
     if annotation is None or annotation is inspect.Parameter.empty:
-        raise ValueError(f"Parameter {name} has no type annotation")
+        handlers = AnyDataGuiHandlers[Any]()
+    else:
+        handlers = any_typeclass_to_data_handlers(annotation)
 
-    handlers: AnyDataGuiHandlers[Any] = any_typeclass_to_data_handlers(annotation)
     data_with_gui = AnyDataWithGui(default_value, handlers)
     return NamedDataWithGui(name, data_with_gui)
 
@@ -73,21 +75,23 @@ def any_function_to_function_with_gui(f: Callable[..., Any]) -> FunctionWithGui:
 
     return_annotation = sig.return_annotation
     if return_annotation is inspect.Parameter.empty:
-        raise ValueError(f"Function {f.__name__} has no return type annotation")
-
-    return_annotation_str = str(return_annotation)
-    is_tuple = return_annotation_str.startswith("typing.Tuple") or return_annotation_str.startswith("tuple")
-    if is_tuple:
-        return_annotation_inner_str = return_annotation_str[return_annotation_str.index("[") + 1 : -1]
-        tuple_type_annotation_strs = return_annotation_inner_str.split(", ")
-        tuple_type_annotations = [eval(annotation_str) for annotation_str in tuple_type_annotation_strs]
-        for i, annotation in enumerate(tuple_type_annotations):
-            handlers: AnyDataGuiHandlers[Any] = any_typeclass_to_data_handlers(annotation)
-            data_with_gui = AnyDataWithGui(UnspecifiedValue, handlers)
-            function_with_gui.outputs_with_gui.append(NamedDataWithGui(f"output_{i}", data_with_gui))
-    else:
-        handlers = any_typeclass_to_data_handlers(sig.return_annotation)
+        handlers = AnyDataGuiHandlers[Any]()
         data_with_gui = AnyDataWithGui(UnspecifiedValue, handlers)
         function_with_gui.outputs_with_gui.append(NamedDataWithGui("output", data_with_gui))
+    else:
+        return_annotation_str = str(return_annotation)
+        is_tuple = return_annotation_str.startswith("typing.Tuple") or return_annotation_str.startswith("tuple")
+        if is_tuple:
+            return_annotation_inner_str = return_annotation_str[return_annotation_str.index("[") + 1 : -1]
+            tuple_type_annotation_strs = return_annotation_inner_str.split(", ")
+            tuple_type_annotations = [eval(annotation_str) for annotation_str in tuple_type_annotation_strs]
+            for i, annotation in enumerate(tuple_type_annotations):
+                handlers: AnyDataGuiHandlers[Any] = any_typeclass_to_data_handlers(annotation)
+                data_with_gui = AnyDataWithGui(UnspecifiedValue, handlers)
+                function_with_gui.outputs_with_gui.append(NamedDataWithGui(f"output_{i}", data_with_gui))
+        else:
+            handlers = any_typeclass_to_data_handlers(sig.return_annotation)
+            data_with_gui = AnyDataWithGui(UnspecifiedValue, handlers)
+            function_with_gui.outputs_with_gui.append(NamedDataWithGui("output", data_with_gui))
 
     return function_with_gui
