@@ -13,16 +13,51 @@ import copy
 ########################################################################################################################
 #                               _versatile_gui_present
 ########################################################################################################################
-def versatile_gui_present(value: Any) -> None:
-    def _add_details_button(obj: Any, detail_gui: Callable[[], None]) -> None:
-        with imgui_ctx.push_obj_id(obj):
-            if imgui.button("details"):
-                osd_widgets.set_detail_gui(detail_gui)
+def _add_details_button(obj: Any, detail_gui: Callable[[], None]) -> None:
+    with imgui_ctx.push_obj_id(obj):
+        if imgui.button("details"):
+            osd_widgets.set_detail_gui(detail_gui)
+        if imgui.is_item_hovered():
+            osd_widgets.set_tooltip(
+                "Click to show details, then open the Info tab at the bottom to see the full string"
+            )
+
+
+def _versatile_present_str(value: str) -> None:
+    statics = _versatile_present_str
+    if not hasattr(statics, "expand_str"):
+        statics.expand_str = {}  # : Dict[imgui.ID, bool]
+
+    max_len = 30
+    if len(value) > max_len:
+        id = imgui.get_id("str")  # it will be unique, since a lot of calls of imgui.push_id are made before
+        if id not in statics.expand_str:
+            statics.expand_str[id] = False
+
+        is_expanded = statics.expand_str[id]
+        _, is_expanded = imgui.checkbox("Expand", is_expanded)
+        statics.expand_str[id] = is_expanded
+
+        if not is_expanded:
+            imgui.text(f"Str len={len(value)}")
+            imgui.text('"' + value[:max_len])
+
+            def detail_gui() -> None:
+                imgui.input_text_multiline("##value_text", value)
+
+            _add_details_button(value, detail_gui)
             if imgui.is_item_hovered():
                 osd_widgets.set_tooltip(
                     "Click to show details, then open the Info tab at the bottom to see the full string"
                 )
+        else:
+            imgui.text(f"Str len={len(value)}")
+            imgui.text('"' + value + '"')
+    else:
+        imgui.text('"' + value + '"')
 
+
+def versatile_gui_present(value: Any) -> None:
     if value is None:
         imgui.text("None")
     elif value is UnspecifiedValue:
@@ -36,21 +71,7 @@ def versatile_gui_present(value: Any) -> None:
         if imgui.is_item_hovered():
             osd_widgets.set_tooltip(f"{value}")
     elif isinstance(value, str):
-        max_len = 30
-        if len(value) > max_len:
-            imgui.text(f"Str len={len(value)}")
-            imgui.text('"' + value[:max_len])
-
-            def detail_gui() -> None:
-                imgui.input_text_multiline("##value_text", value)
-
-            _add_details_button(value, detail_gui)
-            if imgui.is_item_hovered():
-                osd_widgets.set_tooltip(
-                    "Click to show details, then open the Info tab at the bottom to see the full string"
-                )
-        else:
-            imgui.text('"' + value + '"')
+        _versatile_present_str(value)
     elif isinstance(value, list):
         imgui.text(f"List len={len(value)}")
         for i, v in enumerate(value):
