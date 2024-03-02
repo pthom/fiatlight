@@ -13,7 +13,7 @@ import copy
 ########################################################################################################################
 #                               _versatile_gui_present
 ########################################################################################################################
-def _versatile_gui_present(value: Any) -> None:
+def versatile_gui_present(value: Any) -> None:
     def _add_details_button(obj: Any, detail_gui: Callable[[], None]) -> None:
         with imgui_ctx.push_obj_id(obj):
             if imgui.button("show details"):
@@ -58,12 +58,12 @@ def _versatile_gui_present(value: Any) -> None:
 
                 def detail_gui() -> None:
                     for i, v in enumerate(value):
-                        _versatile_gui_present(v)
+                        versatile_gui_present(v)
 
                 _add_details_button(value, detail_gui)
                 break
             else:
-                _versatile_gui_present(v)
+                versatile_gui_present(v)
     elif isinstance(value, tuple):
         # imgui.text(f"Tuple len={len(value)}")
         strs = [str(v) for v in value]
@@ -158,7 +158,6 @@ def make_int_gui_handlers(params: IntWithGuiParams | None = None) -> AnyDataGuiH
         return changed, x
 
     r = AnyDataGuiHandlers[int]()
-    r.gui_present_impl = lambda x: _versatile_gui_present(x)
     r.gui_edit_impl = edit
     r.default_value_provider = lambda: 0
     return r
@@ -249,7 +248,6 @@ def make_float_gui_handlers(params: FloatWithGuiParams | None = None) -> AnyData
         return changed, x
 
     r = AnyDataGuiHandlers[float]()
-    r.gui_present_impl = lambda x: _versatile_gui_present(x)
     r.gui_edit_impl = edit
     r.default_value_provider = lambda: 0.0
     return r
@@ -296,7 +294,6 @@ def make_bool_gui_handlers(params: BoolWithGuiParams | None = None) -> AnyDataGu
         return changed, x
 
     r = AnyDataGuiHandlers[bool]()
-    r.gui_present_impl = lambda x: _versatile_gui_present(x)
     r.gui_edit_impl = edit
     r.default_value_provider = lambda: False
     return r
@@ -355,7 +352,6 @@ def make_str_gui_handlers(params: StrWithGuiParams | None = None) -> AnyDataGuiH
         return changed, x
 
     r = AnyDataGuiHandlers[str]()
-    r.gui_present_impl = lambda x: _versatile_gui_present(x)
     r.gui_edit_impl = edit
     r.default_value_provider = lambda: ""
     return r
@@ -367,12 +363,15 @@ def make_str_gui_handlers(params: StrWithGuiParams | None = None) -> AnyDataGuiH
 def make_list_gui_handlers(item_gui_handlers: AnyDataGuiHandlers[DataType]) -> AnyDataGuiHandlers[list[DataType]]:
     def edit(x: list[Any]) -> Tuple[bool, list[Any]]:
         assert isinstance(x, list)
+        item_gui_edit_impl = item_gui_handlers.gui_edit_impl
+        if item_gui_edit_impl is None:
+            return False, x
         changed = False
         new_x = x
         imgui.new_line()
         for i, item in enumerate(x):
             imgui.push_id(str(i))
-            changed_i, new_item = item_gui_handlers.gui_edit_impl(item)
+            changed_i, new_item = item_gui_edit_impl(item)
             if changed_i:
                 changed = True
                 x[i] = new_item
@@ -396,23 +395,22 @@ def make_list_gui_handlers(item_gui_handlers: AnyDataGuiHandlers[DataType]) -> A
 
         return changed, new_x
 
-    def present(x: list[Any]) -> None:
-        for i, item in enumerate(x):
-            item_gui_handlers.gui_present_impl(item)
+    # def present(x: list[Any]) -> None:
+    #     for i, item in enumerate(x):
+    #         item_gui_handlers.gui_present_impl(item)
 
     r = AnyDataGuiHandlers[list[Any]]()
-    r.gui_present_impl = present
     r.gui_edit_impl = edit
     r.default_value_provider = lambda: []
 
-    item_to_dict_impl = item_gui_handlers.to_dict_impl
-    item_from_dict_impl = item_gui_handlers.from_dict_impl
-    if item_to_dict_impl is not None and item_from_dict_impl is not None:
-        r.to_dict_impl = lambda x: {"values": [item_to_dict_impl(item) for item in x]}
-        r.from_dict_impl = lambda d: [item_from_dict_impl(item_dict) for item_dict in d["values"]]
-    else:
-        r.to_dict_impl = lambda x: {"values": x}
-        r.from_dict_impl = lambda d: d["values"]
+    # item_to_dict_impl = item_gui_handlers.to_dict_impl
+    # item_from_dict_impl = item_gui_handlers.from_dict_impl
+    # if item_to_dict_impl is not None and item_from_dict_impl is not None:
+    #     r.to_dict_impl = lambda x: {"values": [item_to_dict_impl(item) for item in x]}
+    #     r.from_dict_impl = lambda d: [item_from_dict_impl(item_dict) for item_dict in d["values"]]
+    # else:
+    #     r.to_dict_impl = lambda x: {"values": x}
+    #     r.from_dict_impl = lambda d: d["values"]
 
     return r
 
