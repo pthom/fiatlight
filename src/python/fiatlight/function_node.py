@@ -6,23 +6,23 @@ class FunctionNodeLink:
     """A link from the one of the output of a FunctionNode to one of the inputs of another FunctionNode"""
 
     src_function_node: "FunctionNode"
-    src_output_name: str
+    src_output_idx: int
     dst_function_node: "FunctionNode"
     dst_input_name: str
 
     def __init__(
         self,
         src_function_node: "FunctionNode",
-        src_output_name: str,
+        src_output_idx: int,
         dst_function_node: "FunctionNode",
         dst_input_name: str,
     ) -> None:
         self.src_function_node = src_function_node
-        self.src_output_name = src_output_name
+        self.src_output_idx = src_output_idx
         self.dst_function_node = dst_function_node
         self.dst_input_name = dst_input_name
 
-        assert src_output_name in src_function_node.function_with_gui.all_outputs_ids()
+        assert src_output_idx < len(src_function_node.function_with_gui.outputs_with_gui)
         assert dst_input_name in dst_function_node.function_with_gui.all_inputs_ids()
 
 
@@ -55,9 +55,9 @@ class FunctionNode:
     def invoke_function(self) -> None:
         self.function_with_gui.invoke()
         for link in self.output_links:
-            src_output = self.function_with_gui.output_of_name(link.src_output_name)
+            src_output = self.function_with_gui.outputs_with_gui[link.src_output_idx]
             dst_input = link.dst_function_node.function_with_gui.input_of_name(link.dst_input_name)
-            dst_input.value = src_output.value
+            dst_input.value = src_output.data_with_gui.value
             link.dst_function_node.invoke_function()
 
     def to_json(self) -> str:

@@ -36,7 +36,6 @@ def test_any_function_to_function_with_gui_one_output() -> None:
     assert len(add_gui.outputs_with_gui) == 1
     assert add_gui.inputs_with_gui[0].name == "a"
     assert add_gui.inputs_with_gui[1].name == "b"
-    assert add_gui.outputs_with_gui[0].name == "output"
     assert add_gui.inputs_with_gui[0].data_with_gui.value is UnspecifiedValue
     assert add_gui.inputs_with_gui[1].data_with_gui.value == 2
     assert add_gui.outputs_with_gui[0].data_with_gui.value is UnspecifiedValue
@@ -74,8 +73,6 @@ def test_any_function_to_function_with_gui_two_outputs() -> None:
     assert len(add_mult_gui.outputs_with_gui) == 2
     assert add_mult_gui.inputs_with_gui[0].name == "a"
     assert add_mult_gui.inputs_with_gui[1].name == "b"
-    assert add_mult_gui.outputs_with_gui[0].name == "output_0"
-    assert add_mult_gui.outputs_with_gui[1].name == "output_1"
     assert add_mult_gui.inputs_with_gui[0].data_with_gui.value is UnspecifiedValue
     assert add_mult_gui.inputs_with_gui[1].data_with_gui.value == 2
     assert add_mult_gui.outputs_with_gui[0].data_with_gui.value is UnspecifiedValue
