@@ -136,8 +136,8 @@ def sandbox() -> None:
         r = AnyDataGuiHandlers[Foo]()
         r.gui_edit_impl = lambda x: (False, x)
         r.gui_present_impl = lambda x: None
-        r.to_dict_impl = lambda x: {"a": x.a}
-        r.from_dict_impl = lambda d: Foo(a=d["a"])
+        # r.to_dict_impl = lambda x: {"a": x.a}
+        # r.from_dict_impl = lambda d: Foo(a=d["a"])
         return r
 
     _ALL_TYPE_TO_GUI_INFO.append(TypeToGuiHandlers(Foo, make_foo_with_gui, None))

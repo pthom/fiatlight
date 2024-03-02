@@ -6,6 +6,7 @@ from fiatlight.fiatlight_types import Error, ErrorValue, Unspecified, Unspecifie
 from typing import final, Callable, TypeVar, Generic, TypeAlias, Tuple
 from dataclasses import dataclass
 from imgui_bundle import imgui, icons_fontawesome
+import logging
 
 # DataType: TypeAlias = Any
 DataType = TypeVar("DataType")
@@ -25,18 +26,19 @@ class AnyDataGuiHandlers(Generic[DataType]):
     """
 
     # Provide a draw function that presents the data content.
-    # If not provided, the data will be presented as imgui.text(str(data))
-    gui_present_impl: Callable[[DataType], None]
+    # If not provided, the data will be presented using versatile_gui_present
+    gui_present_impl: Callable[[DataType], None] | None = None
 
     # Provide a draw function that presents an editable interface for the data, and returns (True, new_value) if changed
-    gui_edit_impl: Callable[[DataType], Tuple[bool, DataType]]
+    gui_edit_impl: Callable[[DataType], Tuple[bool, DataType]] | None = None
 
+    # (On hold)
     # Optional serialization and deserialization functions for DataType
     # If provided, these functions will be used to serialize and deserialize the data with a custom dict format.
     # If not provided, "value" will be serialized as a dict of its __dict__ attribute,
     # or as a json string (for int, float, str, bool, and None)
-    to_dict_impl: Callable[[DataType], JsonDict] | None = None
-    from_dict_impl: Callable[[JsonDict], DataType] | None = None
+    # to_dict_impl: Callable[[DataType], JsonDict] | None = None
+    # from_dict_impl: Callable[[JsonDict], DataType] | None = None
 
     # default value provider: this function will be called to provide a default value if needed
     default_value_provider: DefaultValueProvider[DataType]
@@ -54,9 +56,6 @@ class AnyDataWithGui(Generic[DataType]):
     # Handlers
     handlers: AnyDataGuiHandlers[DataType]
 
-    def _has_custom_serialization(self) -> bool:
-        return self.handlers.to_dict_impl is not None and self.handlers.from_dict_impl is not None
-
     def __init__(
         self,
         value: DataType | Unspecified,
@@ -72,12 +71,15 @@ class AnyDataWithGui(Generic[DataType]):
             return {"type": "Error"}
         elif isinstance(self.value, (str, int, float, bool)):
             return {"type": "Primitive", "value": self.value}
-        elif self.handlers.to_dict_impl is not None:
-            as_dict = self.handlers.to_dict_impl(self.value)
-            return {"type": "Custom", "value": as_dict}
+        # elif self.handlers.to_dict_impl is not None:
+        #     as_dict = self.handlers.to_dict_impl(self.value)
+        #     return {"type": "Custom", "value": as_dict}
         elif hasattr(self.value, "__dict__"):
             as_dict = self.value.__dict__
             return {"type": "Dict", "value": as_dict}
+        elif isinstance(self.value, list):
+            # return {"type": "List", "value": [AnyDataWithGui(x, self.handlers).to_json() for x in self.value]}
+            logging.warning("List serialization not implemented yet")
         else:
             raise ValueError(f"Cannot serialize {self.value}, it has no __dict__ attribute.")
 
@@ -90,9 +92,9 @@ class AnyDataWithGui(Generic[DataType]):
             self.value = ErrorValue
         elif json_data["type"] == "Primitive":
             self.value = json_data["value"]
-        elif json_data["type"] == "Custom":
-            assert self.handlers.from_dict_impl is not None
-            self.value = self.handlers.from_dict_impl(json_data["value"])
+        # elif json_data["type"] == "Custom":
+        #     assert self.handlers.from_dict_impl is not None
+        #     self.value = self.handlers.from_dict_impl(json_data["value"])
         elif json_data["type"] == "Dict":
             if self.value is None:
                 if self.handlers.default_value_provider is None:
@@ -104,14 +106,17 @@ class AnyDataWithGui(Generic[DataType]):
 
     @final
     def call_gui_present(self) -> None:
-        if self.handlers.gui_present_impl is None:
-            return
         if isinstance(self.value, Unspecified):
             imgui.text("Unspecified!")
         elif isinstance(self.value, Error):
             imgui.text("Error!")
         else:
-            self.handlers.gui_present_impl(self.value)
+            if self.handlers.gui_present_impl is None:
+                from fiatlight.standard_gui_handlers import versatile_gui_present
+
+                versatile_gui_present(self.value)
+            else:
+                self.handlers.gui_present_impl(self.value)
 
     @final
     def call_gui_edit(self) -> bool:
@@ -149,7 +154,8 @@ class NamedDataWithGui(Generic[DataType]):
 
     def fill_from_json(self, json_data: JsonDict) -> None:
         self.name = json_data["name"]
-        self.data_with_gui.fill_from_json(json_data["data"])
+        if "data" in json_data:
+            self.data_with_gui.fill_from_json(json_data["data"])
 
 
 ##############################################################################################################
