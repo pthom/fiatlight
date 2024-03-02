@@ -123,21 +123,26 @@ def main() -> None:
     def sort_words(words: List[str], reverse: bool = False) -> List[str]:
         return sorted(words, reverse=reverse)
 
+    def make_words() -> List[str]:
+        return ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"]
+
     from fiatlight.functions_graph import FunctionsGraph
     from fiatlight.fiatlight_gui import fiatlight_run, FiatlightGuiParams
 
     fiatlight_run(
         FunctionsGraph.from_function_composition(
             [
-                get_poem,
-                remove_non_letters,
-                str_lower,
-                split_words,
-                remove_empty_words,
+                make_words,
                 sort_words,
-                run_length_encode,
-                sort_word_with_counts,
-                display_word_with_counts,
+                # get_poem,
+                # remove_non_letters,
+                # str_lower,
+                # split_words,
+                # remove_empty_words,
+                # sort_words,
+                # run_length_encode,
+                # sort_word_with_counts,
+                # display_word_with_counts,
             ]
         ),
         FiatlightGuiParams(

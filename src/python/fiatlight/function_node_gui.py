@@ -4,6 +4,7 @@ from fiatlight.internal.fl_widgets import draw_node_gui_right_align
 from fiatlight.internal import osd_widgets
 from fiatlight.config import config
 from fiatlight.internal import fl_widgets
+from fiatlight.fiatlight_types import UnspecifiedValue
 from fiatlight.any_data_with_gui import OutputWithGui
 from imgui_bundle import imgui, imgui_node_editor as ed, icons_fontawesome, ImVec2, imgui_ctx, hello_imgui
 from typing import Dict, List, Any
@@ -120,7 +121,18 @@ class FunctionNodeGui:
                     draw_input_pin(input_param.name, self.pins_input[input_param.name])
                     imgui.same_line()
                     if not self.function_node.has_input_link(input_param.name):
+                        imgui.begin_group()
                         changed = input_param.data_with_gui.call_gui_edit() or changed
+                        if (
+                            input_param.data_with_gui.value is UnspecifiedValue
+                            and input_param.default_value is not UnspecifiedValue
+                        ):
+                            try:
+                                default_str = str(input_param.default_value)
+                            except Exception:
+                                default_str = "???"
+                            imgui.text(f"(Default: {default_str})")
+                        imgui.end_group()
                     else:
                         imgui.new_line()
             return changed

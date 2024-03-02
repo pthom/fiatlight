@@ -79,16 +79,19 @@ class FunctionsGraph:
             for i in range(len(r.functions_nodes) - 1):
                 fn = r.functions_nodes[i]
                 fn_next = r.functions_nodes[i + 1]
-
-                link = FunctionNodeLink(
-                    src_function_node=fn,
-                    src_output_idx=0,
-                    dst_function_node=fn_next,
-                    dst_input_name=fn_next.function_with_gui.inputs_with_gui[0].name,
-                )
-                fn.add_output_link(link)
-                fn_next.add_input_link(link)
-                r.functions_nodes_links.append(link)
+                if (
+                    len(fn.function_with_gui.outputs_with_gui) >= 1
+                    and len(fn_next.function_with_gui.inputs_with_gui) >= 1
+                ):
+                    link = FunctionNodeLink(
+                        src_function_node=fn,
+                        src_output_idx=0,
+                        dst_function_node=fn_next,
+                        dst_input_name=fn_next.function_with_gui.inputs_with_gui[0].name,
+                    )
+                    fn.add_output_link(link)
+                    fn_next.add_input_link(link)
+                    r.functions_nodes_links.append(link)
 
         r = FunctionsGraph(secret_key=FunctionsGraph._secret_key)
         fill_functions_with_gui()
