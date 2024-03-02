@@ -84,11 +84,10 @@ class FunctionWithGui:
 
     def to_json(self) -> JsonDict:
         inputs_dicts = [param.to_json() for param in self.inputs_with_gui]
-        function_dict = {"name": self.name, "inputs": inputs_dicts}
+        function_dict = {"inputs": inputs_dicts}
         return function_dict
 
     def fill_from_json(self, json_data: JsonDict) -> None:
-        self.name = json_data["name"]
         inputs_json = json_data["inputs"]
         if len(inputs_json) != len(self.inputs_with_gui):
             raise ValueError(f"Expected {len(self.inputs_with_gui)} inputs, got {len(inputs_json)}")
