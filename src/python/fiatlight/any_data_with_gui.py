@@ -174,6 +174,15 @@ class ParamWithGui(Generic[DataType]):
         if "data" in json_data:
             self.data_with_gui.fill_from_json(json_data["data"])
 
+    def get_value_or_default(self) -> DataType | Unspecified | Error:
+        param_value = self.data_with_gui.value
+        if isinstance(param_value, Error):
+            return ErrorValue
+        elif isinstance(param_value, Unspecified):
+            return self.default_value
+        else:
+            return self.data_with_gui.value
+
 
 @dataclass
 class OutputWithGui(Generic[DataType]):

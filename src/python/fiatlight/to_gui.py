@@ -58,7 +58,6 @@ def any_value_to_data_with_gui(value: DataType) -> AnyDataWithGui[DataType]:
 
 
 def any_param_to_param_with_gui(name: str, param: inspect.Parameter) -> ParamWithGui[Any]:
-    default_value = param.default if param.default is not inspect.Parameter.empty else UnspecifiedValue
     annotation = param.annotation
 
     handlers: AnyDataGuiHandlers[Any]
@@ -67,7 +66,7 @@ def any_param_to_param_with_gui(name: str, param: inspect.Parameter) -> ParamWit
     else:
         handlers = any_typeclass_to_data_handlers(annotation)
 
-    data_with_gui = AnyDataWithGui(default_value, handlers)
+    data_with_gui = AnyDataWithGui(UnspecifiedValue, handlers)
 
     param_kind = ParamKind.PositionalOrKeyword
     if param.kind is inspect.Parameter.POSITIONAL_ONLY:

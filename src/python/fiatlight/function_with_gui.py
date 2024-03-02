@@ -1,6 +1,5 @@
-from fiatlight.fiatlight_types import UnspecifiedValue, ErrorValue
+from fiatlight.fiatlight_types import UnspecifiedValue, ErrorValue, JsonDict
 from fiatlight.any_data_with_gui import AnyDataWithGui, ParamWithGui, AnyDataGuiHandlers, OutputWithGui, ParamKind
-from fiatlight.fiatlight_types import JsonDict
 from typing import Any, List, final, Callable, Optional
 
 
@@ -46,18 +45,19 @@ class FunctionWithGui:
         self.last_exception_message = None
         self.last_exception_traceback = None
 
-        values = [param.data_with_gui.value for param in self.inputs_with_gui]
-        positional_only_values = [
-            param.data_with_gui.value for param in self.inputs_with_gui if param.param_kind == ParamKind.PositionalOnly
-        ]
-        keyword_values = {
-            param.name: param.data_with_gui.value
-            for param in self.inputs_with_gui
-            if param.param_kind != ParamKind.PositionalOnly
-        }
+        positional_only_values = []
+        for param in self.inputs_with_gui:
+            if param.param_kind == ParamKind.PositionalOnly:
+                positional_only_values.append(param.get_value_or_default())
+
+        keyword_values = {}
+        for param in self.inputs_with_gui:
+            if param.param_kind != ParamKind.PositionalOnly:
+                keyword_values[param.name] = param.get_value_or_default()
 
         # if any of the inputs is an error or unspecified, we do not call the function
-        if any(value is ErrorValue or value is UnspecifiedValue for value in values):
+        all_params = positional_only_values + list(keyword_values.values())
+        if any(value is ErrorValue or value is UnspecifiedValue for value in all_params):
             for output_with_gui in self.outputs_with_gui:
                 output_with_gui.data_with_gui.value = UnspecifiedValue
             return
