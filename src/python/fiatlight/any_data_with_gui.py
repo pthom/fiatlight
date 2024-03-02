@@ -162,6 +162,7 @@ class ParamWithGui(Generic[DataType]):
     name: str
     data_with_gui: AnyDataWithGui[DataType]
     param_kind: ParamKind
+    default_value: DataType | Unspecified
 
     def to_json(self) -> JsonDict:
         data_json = self.data_with_gui.to_json()
