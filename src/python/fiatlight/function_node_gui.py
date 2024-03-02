@@ -45,7 +45,7 @@ class FunctionNodeGui:
     node_size: ImVec2 | None = None  # will be set after the node is drawn once
     _first_frame = True
 
-    _MIN_NODE_WIDTH_EM = 5
+    _MIN_NODE_WIDTH_EM = 6
 
     def __init__(self, function_node: FunctionNode) -> None:
         self.function_node = function_node
