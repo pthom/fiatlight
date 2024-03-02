@@ -75,8 +75,8 @@ def any_function_to_function_with_gui(f: Callable[..., Any]) -> FunctionWithGui:
 
     return_annotation = sig.return_annotation
     if return_annotation is inspect.Parameter.empty:
-        handlers = AnyDataGuiHandlers[Any]()
-        data_with_gui = AnyDataWithGui(UnspecifiedValue, handlers)
+        handlers_none = AnyDataGuiHandlers[Any]()
+        data_with_gui = AnyDataWithGui(UnspecifiedValue, handlers_none)
         function_with_gui.outputs_with_gui.append(NamedDataWithGui("output", data_with_gui))
     else:
         return_annotation_str = str(return_annotation)

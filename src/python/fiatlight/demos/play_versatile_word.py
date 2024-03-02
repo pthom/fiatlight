@@ -120,10 +120,8 @@ def main() -> None:
     def get_poem() -> str:
         return poem
 
-    def count_letters(s: List[str]) -> int:
-        lens = [len(word) for word in s]
-        r = sum(lens)
-        return r
+    def make_some_words() -> List[str]:
+        return ["a", "b", "c", "a", "b", "a", "a"]
 
     from fiatlight.functions_graph import FunctionsGraph
     from fiatlight.fiatlight_gui import fiatlight_run, FiatlightGuiParams
@@ -131,13 +129,14 @@ def main() -> None:
     fiatlight_run(
         FunctionsGraph.from_function_composition(
             [
-                # count_letters
-                get_poem,
-                remove_non_letters,
-                str_lower,
-                split_words,
-                remove_empty_words,
+                make_some_words,
                 sorted,
+                # get_poem,
+                # remove_non_letters,
+                # str_lower,
+                # split_words,
+                # remove_empty_words,
+                # sorted,
                 # run_length_encode,
                 # sort_word_with_counts,
                 # display_word_with_counts,
