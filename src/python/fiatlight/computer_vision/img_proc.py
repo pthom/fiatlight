@@ -62,4 +62,4 @@ class MergeChannelsWithGui(FunctionWithGui):
 #             return r
 #
 #         self.f_impl = f
-#         self.parameters_with_gui = [NamedDataWithGui("color_conversion", self.color_conversion_with_gui)]
+#         self.parameters_with_gui = [ParamWithGui("color_conversion", self.color_conversion_with_gui)]
