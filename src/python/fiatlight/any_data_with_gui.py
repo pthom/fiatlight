@@ -125,6 +125,7 @@ class AnyDataWithGui(Generic[DataType]):
     @final
     def call_gui_edit(self) -> bool:
         if self.handlers.gui_edit_impl is None:
+            self.call_gui_present()
             return False
         assert not isinstance(self.value, Error)
         if isinstance(self.value, Unspecified):

@@ -120,26 +120,21 @@ def main() -> None:
     def get_poem() -> str:
         return poem
 
-    def make_some_words() -> List[str]:
-        return ["a", "b", "c", "a", "b", "a", "a"]
-
     from fiatlight.functions_graph import FunctionsGraph
     from fiatlight.fiatlight_gui import fiatlight_run, FiatlightGuiParams
 
     fiatlight_run(
         FunctionsGraph.from_function_composition(
             [
-                make_some_words,
+                get_poem,
+                remove_non_letters,
+                str_lower,
+                split_words,
+                remove_empty_words,
                 sorted,
-                # get_poem,
-                # remove_non_letters,
-                # str_lower,
-                # split_words,
-                # remove_empty_words,
-                # sorted,
-                # run_length_encode,
-                # sort_word_with_counts,
-                # display_word_with_counts,
+                run_length_encode,
+                sort_word_with_counts,
+                display_word_with_counts,
             ]
         ),
         FiatlightGuiParams(

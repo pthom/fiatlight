@@ -93,7 +93,7 @@ class FunctionNodeGui:
 
             def draw_output_value(output_idx: int, output_param: OutputWithGui[Any]) -> None:
                 if len(self.function_node.function_with_gui.outputs_with_gui) > 1:
-                    fl_widgets.text_custom(str(output_idx) + ": ")
+                    fl_widgets.text_custom(f"Output {output_idx}: ")
                 if output_param.data_with_gui.value is None:
                     imgui.text("None")
                 else:
