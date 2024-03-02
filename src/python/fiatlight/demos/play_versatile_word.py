@@ -132,17 +132,15 @@ def main() -> None:
     fiatlight_run(
         FunctionsGraph.from_function_composition(
             [
-                make_words,
+                get_poem,
+                str_lower,
+                remove_non_letters,
+                split_words,
+                remove_empty_words,
                 sort_words,
-                # get_poem,
-                # remove_non_letters,
-                # str_lower,
-                # split_words,
-                # remove_empty_words,
-                # sort_words,
-                # run_length_encode,
-                # sort_word_with_counts,
-                # display_word_with_counts,
+                run_length_encode,
+                sort_word_with_counts,
+                display_word_with_counts,
             ]
         ),
         FiatlightGuiParams(
