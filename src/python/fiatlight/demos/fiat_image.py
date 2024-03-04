@@ -111,30 +111,40 @@ class OilPaintingWithGui(FunctionWithGui):
 
 
 def main() -> None:
+    from fiatlight.functions_graph import FunctionsGraph
+
     image = cv2.imread(demos_assets_folder() + "/images/house.jpg")
     image = cv2.resize(image, (int(image.shape[1] * 0.5), int(image.shape[0] * 0.5)))
 
-    # split_lut_merge_gui = Split_Lut_Merge_WithGui(ColorType.BGR)
-    # functions = [split_lut_merge_gui.split, split_lut_merge_gui.lut, split_lut_merge_gui.merge, OilPaintingWithGui()]
+    def make_image() -> ImageUInt8:
+        return image
 
-    # functions = [GaussianBlurWithGui(), CannyWithGui(), OilPaintingWithGui()]
-
-    from fiatlight.computer_vision import img_proc, cv_color_type, lut_gui
-
-    # functions = [img_proc.SplitChannelsWithGui(), lut.LutChannelsWithGui(), img_proc.MergeChannelsWithGui(), OilPaintingWithGui()]
-    functions = [
-        img_proc.ConvertColorWithGui(
-            cv_color_type.ColorConversion(cv_color_type.ColorType.BGR, cv_color_type.ColorType.Gray)
-        ),
-        lut_gui.LutImageWithGui(),
-        img_proc.ConvertColorWithGui(),
-    ]
+    functions = [make_image]
+    functions_graph = FunctionsGraph.from_function_composition(functions)
 
     fiatlight_run(
+        functions_graph,
         FiatlightGuiParams(
-            functions_graph=functions, app_title="fiat_image", initial_value=image, show_image_inspector=True
-        )
+            app_title="play_versatile_math",
+            window_size=(1600, 1000),
+            show_image_inspector=True,
+        ),
     )
+
+    # functions = [img_proc.SplitChannelsWithGui(), lut.LutChannelsWithGui(), img_proc.MergeChannelsWithGui(), OilPaintingWithGui()]
+    # functions = [
+    #     img_proc.ConvertColorWithGui(
+    #         cv_color_type.ColorConversion(cv_color_type.ColorType.BGR, cv_color_type.ColorType.Gray)
+    #     ),
+    #     lut_gui.LutImageWithGui(),
+    #     img_proc.ConvertColorWithGui(),
+    # ]
+    #
+    # fiatlight_run(
+    #     FiatlightGuiParams(
+    #         functions_graph=functions, app_title="fiat_image", initial_value=image, show_image_inspector=True
+    #     )
+    # )
 
 
 if __name__ == "__main__":
