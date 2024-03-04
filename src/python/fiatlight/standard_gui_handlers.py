@@ -3,6 +3,7 @@ from imgui_bundle import icons_fontawesome
 from fiatlight.fiatlight_types import UnspecifiedValue, ErrorValue
 from fiatlight.any_data_with_gui import AnyDataGuiHandlers, DataType
 from fiatlight.internal import osd_widgets
+from fiatlight.internal.registry import AutoRegistry
 
 from typing import Any, Callable, TypeAlias, Tuple
 from dataclasses import dataclass
@@ -23,20 +24,16 @@ def _add_details_button(obj: Any, detail_gui: Callable[[], None]) -> None:
             )
 
 
-def _versatile_present_str(value: str) -> None:
-    statics = _versatile_present_str
-    if not hasattr(statics, "expand_str"):
-        statics.expand_str = {}  # : Dict[imgui.ID, bool]
+EXPANDED_STR_REGISTRY: AutoRegistry[bool] = AutoRegistry(bool)
 
+
+def _versatile_present_str(value: str) -> None:
     max_len = 30
     if len(value) > max_len:
         id = imgui.get_id("str")  # it will be unique, since a lot of calls of imgui.push_id are made before
-        if id not in statics.expand_str:
-            statics.expand_str[id] = False
-
-        is_expanded = statics.expand_str[id]
+        is_expanded = EXPANDED_STR_REGISTRY.get(id)
         _, is_expanded = imgui.checkbox("Expand", is_expanded)
-        statics.expand_str[id] = is_expanded
+        EXPANDED_STR_REGISTRY[id] = is_expanded
 
         if not is_expanded:
             imgui.text(f"Str len={len(value)}")

@@ -1,7 +1,9 @@
 from imgui_bundle import imgui, ImVec4
 from fiatlight.internal import osd_widgets
+from fiatlight.internal.registry import AutoRegistry
 from imgui_bundle import imgui_node_editor as ed, ImVec2, hello_imgui
 from typing import Callable
+from dataclasses import dataclass
 
 
 GuiFunction = Callable[[], None]
@@ -43,19 +45,24 @@ def text_custom(
         osd_widgets.set_tooltip(msg_orig)
 
 
+@dataclass
 class _RightAlignData:
-    parent_width: float
-    item_width: float
+    parent_width: float = 0
+    item_width: float = 0
+
+
+class _RightAlign:
+    align_datas: AutoRegistry[_RightAlignData]
 
     def __init__(self) -> None:
-        self.parent_width = 0
-        self.item_width = 0
+        self.align_datas = AutoRegistry(_RightAlignData)
 
-    def show_gui(self, parent_width: float, gui_function: GuiFunction) -> None:
+    def right_align(self, item_id: int, parent_width: float, gui_function: GuiFunction) -> None:
+        right_align_data = self.align_datas.get(item_id)
         pos_x = 1000.0
         right_margin = hello_imgui.em_size(0.8)
-        if parent_width == self.parent_width and self.item_width > 0:
-            pos_x = parent_width - self.item_width - right_margin
+        if parent_width == right_align_data.parent_width and right_align_data.item_width > 0:
+            pos_x = parent_width - right_align_data.item_width - right_margin
 
         dc = imgui.get_current_context().current_window.dc
         cursor_max_pos_x = dc.cursor_max_pos.x
@@ -68,24 +75,17 @@ class _RightAlignData:
         dc.cursor_max_pos.x = cursor_max_pos_x
         dc.cursor_pos_prev_line.x = cursor_pos_prev_line_x
 
-        self.item_width = imgui.get_item_rect_size().x
-        self.parent_width = parent_width
+        right_align_data.item_width = imgui.get_item_rect_size().x
+        right_align_data.parent_width = parent_width
 
 
-def _get_right_align_data(item_id: int) -> _RightAlignData:
-    static = _get_right_align_data
-    if not hasattr(static, "data"):
-        static.data = {}  # : Dict[int, RightAlignData]
-    if item_id not in static.data:
-        static.data[item_id] = _RightAlignData()
-    return static.data[item_id]
+_RIGHT_ALIGN = _RightAlign()
 
 
 def draw_node_gui_right_align(parent_node: ed.NodeId, gui_function: GuiFunction) -> None:
     parent_size = ed.get_node_size(parent_node)
     item_id = imgui.get_id("align_right")  # will be unique for each item, since imgui.push_id is used before
-    right_align_data = _get_right_align_data(item_id)
-    right_align_data.show_gui(parent_size.x, gui_function)
+    _RIGHT_ALIGN.right_align(item_id, parent_size.x, gui_function)
 
 
 def node_separator(parent_node: ed.NodeId, text: str = "") -> None:
