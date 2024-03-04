@@ -1,5 +1,4 @@
-from imgui_bundle import imgui, hello_imgui, imgui_knobs, imgui_toggle, imgui_ctx
-from imgui_bundle import icons_fontawesome
+from imgui_bundle import imgui, hello_imgui, imgui_knobs, imgui_toggle, icons_fontawesome
 from fiatlight.fiatlight_types import UnspecifiedValue, ErrorValue
 from fiatlight.any_data_with_gui import AnyDataGuiHandlers, DataType
 from fiatlight.internal import osd_widgets
@@ -11,47 +10,40 @@ from enum import Enum
 import copy
 
 
+GuiFunction = Callable[[], None]
+
 ########################################################################################################################
 #                               _versatile_gui_present
 ########################################################################################################################
-def _add_details_button(obj: Any, detail_gui: Callable[[], None]) -> None:
-    with imgui_ctx.push_obj_id(obj):
-        if imgui.button("details"):
-            osd_widgets.set_detail_gui(detail_gui)
-        if imgui.is_item_hovered():
-            osd_widgets.set_tooltip(
-                "Click to show details, then open the Info tab at the bottom to see the full string"
-            )
 
 
-EXPANDED_STR_REGISTRY: AutoRegistry[bool] = AutoRegistry(bool)
+EXPANDED_REGISTRY: AutoRegistry[bool] = AutoRegistry(bool)
 
 
-def _versatile_present_str(value: str) -> None:
-    max_len = 30
-    if len(value) > max_len:
-        id = imgui.get_id("str")  # it will be unique, since a lot of calls of imgui.push_id are made before
-        is_expanded = EXPANDED_STR_REGISTRY.get(id)
-        _, is_expanded = imgui.checkbox("Expand", is_expanded)
-        EXPANDED_STR_REGISTRY[id] = is_expanded
+def _present_expandable_str(value_extract: str, value_full: str) -> None:
+    id = imgui.get_id("expand")  # it will be unique, since a lot of calls of imgui.push_id are made before
+    is_expanded = EXPANDED_REGISTRY.get(id)
 
-        if not is_expanded:
-            imgui.text(f"Str len={len(value)}")
-            imgui.text('"' + value[:max_len])
+    def detail_gui() -> None:
+        imgui.input_text_multiline("##value_text", value_full)
 
-            def detail_gui() -> None:
-                imgui.input_text_multiline("##value_text", value)
+    _, is_expanded = imgui.checkbox("Expand", is_expanded)
+    EXPANDED_REGISTRY[id] = is_expanded
+    imgui.same_line()
+    if imgui.button(icons_fontawesome.ICON_FA_BOOK):
+        osd_widgets.set_detail_gui(detail_gui)
+    if imgui.is_item_hovered():
+        osd_widgets.set_tooltip("Click to show details, then open the Info tab at the bottom to see the full string")
+    imgui.same_line()
+    if imgui.button(icons_fontawesome.ICON_FA_COPY):
+        imgui.set_clipboard_text(value_full)
+    if imgui.is_item_hovered():
+        osd_widgets.set_tooltip("Copy to clipboard")
 
-            _add_details_button(value, detail_gui)
-            if imgui.is_item_hovered():
-                osd_widgets.set_tooltip(
-                    "Click to show details, then open the Info tab at the bottom to see the full string"
-                )
-        else:
-            imgui.text(f"Str len={len(value)}")
-            imgui.text('"' + value + '"')
+    if not is_expanded:
+        imgui.text(value_extract + "\n[...]")
     else:
-        imgui.text('"' + value + '"')
+        imgui.text(value_full)
 
 
 def versatile_gui_present(value: Any) -> None:
@@ -68,22 +60,23 @@ def versatile_gui_present(value: Any) -> None:
         if imgui.is_item_hovered():
             osd_widgets.set_tooltip(f"{value}")
     elif isinstance(value, str):
-        _versatile_present_str(value)
+        imgui.text(f"str len={len(value)}")
+        max_len = 30
+        if len(value) < max_len:
+            imgui.text('"' + value + '"')
+        else:
+            _present_expandable_str(value[:max_len], value)
     elif isinstance(value, list):
-        imgui.text(f"List len={len(value)}")
-        for i, v in enumerate(value):
-            if i >= 5:
-
-                def detail_gui() -> None:
-                    for i, v in enumerate(value):
-                        versatile_gui_present(v)
-
-                _add_details_button(value, detail_gui)
-                break
-            else:
-                versatile_gui_present(v)
+        value_full_str = "\n".join(str(item) for item in value)
+        imgui.text(f"list len={len(value)}")
+        max_len = 10
+        if len(value) < max_len:
+            imgui.text(value_full_str)
+        else:
+            value_extract_str = "\n".join(str(item) for item in value[:max_len])
+            _present_expandable_str(value_extract_str, value_full_str)
     elif isinstance(value, tuple):
-        # imgui.text(f"Tuple len={len(value)}")
+        imgui.text(f"Tuple len={len(value)}")
         strs = [str(v) for v in value]
         tuple_str = "(" + ", ".join(strs) + ")"
         imgui.text(tuple_str)

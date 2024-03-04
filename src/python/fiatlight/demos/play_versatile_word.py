@@ -96,27 +96,6 @@ def display_word_with_counts(words: List[WordWithCount]) -> str:
 
 
 def main() -> None:
-    # from fiatlight import data_presenters as dp
-    #
-    # functions = [
-    #     dp.make_str_source(
-    #         poem,
-    #         dp.StrWithGuiParams(
-    #             edit_type=dp.StrEditType.multiline,
-    #             height_em=3,
-    #         ),
-    #     ),
-    #     remove_non_letters,
-    #     str_lower,
-    #     split_words,
-    #     remove_empty_words,
-    #     sorted,
-    #     run_length_encode,
-    #     sort_word_with_counts,
-    #     display_word_with_counts,
-    # ]
-    # fiatlight_run(FiatlightGuiParams(functions_graph=functions, app_title="play_versatile_word", initial_value=poem))
-
     def get_poem() -> str:
         return poem
 
