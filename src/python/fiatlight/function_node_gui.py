@@ -43,7 +43,6 @@ class FunctionNodeGui:
     pins_output: Dict[int, ed.PinId]
 
     node_size: ImVec2 | None = None  # will be set after the node is drawn once
-    _first_frame = True
 
     _MIN_NODE_WIDTH_EM = 6
 
@@ -67,6 +66,10 @@ class FunctionNodeGui:
             if unique_name != fn_name:
                 if imgui.is_item_hovered():
                     osd_widgets.set_tooltip(f" (id: {unique_name})")
+
+            fn_doc = self.function_node.function_with_gui.doc()
+            if fn_doc is not None:
+                imgui.text(fn_doc)
 
         def draw_exception_message() -> None:
             last_exception_message = self.function_node.function_with_gui.last_exception_message
@@ -108,8 +111,6 @@ class FunctionNodeGui:
 
         def draw_function_inputs() -> bool:
             changed = False
-            if len(self.function_node.function_with_gui.inputs_with_gui) == 0:
-                changed = self._first_frame
 
             def draw_input_pin(name: str, pin_input: ed.PinId) -> None:
                 ed.begin_pin(pin_input, ed.PinKind.input)
@@ -149,7 +150,6 @@ class FunctionNodeGui:
         # imgui.new_line()
         ed.end_node()
         self.node_size = ed.get_node_size(self.node_id)
-        self._first_frame = False
 
 
 def sandbox() -> None:
