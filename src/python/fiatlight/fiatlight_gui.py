@@ -178,6 +178,10 @@ class FiatlightGui:
         except Exception as e:
             logging.error(f"FiatlightGui: Error loading state file {self._node_state_filename()}: {e}")
 
+    def _post_init(self) -> None:
+        self._load_state()
+        self._functions_graph_gui.functions_graph.invoke_top_leaf_functions()
+
     def run(self) -> None:
         self.params.runner_params.docking_params.docking_splits += self._docking_splits()
         self.params.runner_params.docking_params.dockable_windows += self._dockable_windows()
@@ -186,7 +190,7 @@ class FiatlightGui:
             self._save_state, self.params.runner_params.callbacks.before_exit
         )
         self.params.runner_params.callbacks.post_init = functional_utils.sequence_void_functions(
-            self._load_state, self.params.runner_params.callbacks.post_init
+            self._post_init, self.params.runner_params.callbacks.post_init
         )
 
         immapp.run(self.params.runner_params, self.params.addons)

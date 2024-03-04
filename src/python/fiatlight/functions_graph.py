@@ -113,6 +113,12 @@ class FunctionsGraph:
         for i, fn in enumerate(self.functions_nodes):
             fn.function_with_gui.fill_from_json(nodes_data[i])
 
+    def invoke_top_leaf_functions(self) -> None:
+        """Invoke all the leaves of the graph"""
+        for fn in self.functions_nodes:
+            if len(fn.input_links) == 0:
+                fn.invoke_function()
+
 
 def sandbox() -> None:
     def add(a: int, b: int = 2) -> int:
