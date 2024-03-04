@@ -38,8 +38,13 @@ class FunctionWithGui:
                 return param.data_with_gui
         assert False, f"input {name} not found"
 
+    def doc(self) -> Optional[str]:
+        if self.f_impl is None:
+            return None
+        return self.f_impl.__doc__
+
     @final
-    def invoke(self) -> Any:
+    def invoke(self) -> None:
         assert self.f_impl is not None
 
         self.last_exception_message = None
