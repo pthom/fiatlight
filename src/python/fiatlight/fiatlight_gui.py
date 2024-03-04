@@ -3,7 +3,7 @@ from fiatlight.config import config
 from fiatlight.functions_graph_gui import FunctionsGraphGui
 from fiatlight.functions_graph import FunctionsGraph
 from fiatlight.internal import osd_widgets, functional_utils
-from imgui_bundle import immapp, imgui, imgui_ctx
+from imgui_bundle import immapp, imgui, imgui_ctx, ImVec4
 from typing import Any
 from imgui_bundle import hello_imgui, ImVec2, immvision
 
@@ -103,9 +103,6 @@ class FiatlightGui:
         with imgui_ctx.push_obj_id(self):
             if imgui.begin_tab_bar("InfoPanelTabBar"):
                 if imgui.begin_tab_item_simple("Info"):
-                    if imgui.button("Reset graph layout"):
-                        self._functions_graph_gui.shall_layout_graph = True
-
                     details_gui = osd_widgets.get_detail_gui()
                     if details_gui is not None:
                         details_gui()
@@ -114,6 +111,10 @@ class FiatlightGui:
                     self._draw_exceptions()
                     imgui.end_tab_item()
                 imgui.end_tab_bar()
+
+    def _top_toolbar(self) -> None:
+        if imgui.button("Reset graph layout"):
+            self._functions_graph_gui.shall_layout_graph = True
 
     def _draw_functions_graph(self) -> None:
         self._idx_frame += 1
@@ -191,6 +192,13 @@ class FiatlightGui:
         )
         self.params.runner_params.callbacks.post_init = functional_utils.sequence_void_functions(
             self._post_init, self.params.runner_params.callbacks.post_init
+        )
+
+        top_toolbar_options = hello_imgui.EdgeToolbarOptions(size_em=2.4, window_bg=ImVec4(0.3, 0.3, 0.3, 1.0))
+        self.params.runner_params.callbacks.add_edge_toolbar(
+            edge_toolbar_type=hello_imgui.EdgeToolbarType.top,
+            gui_function=lambda: self._top_toolbar(),
+            options=top_toolbar_options,
         )
 
         immapp.run(self.params.runner_params, self.params.addons)
