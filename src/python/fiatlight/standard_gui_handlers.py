@@ -24,14 +24,23 @@ def _present_expandable_str(value_extract: str, value_full: str) -> None:
     id = imgui.get_id("expand")  # it will be unique, since a lot of calls of imgui.push_id are made before
     is_expanded = EXPANDED_REGISTRY.get(id)
 
-    def detail_gui() -> None:
-        imgui.input_text_multiline("##value_text", value_full)
-
     _, is_expanded = imgui.checkbox("Expand", is_expanded)
     EXPANDED_REGISTRY[id] = is_expanded
     imgui.same_line()
+
+    def detail_gui() -> None:
+        imgui.input_text_multiline("##value_text", value_full)
+
     if imgui.button(icons_fontawesome.ICON_FA_BOOK):
         osd_widgets.set_detail_gui(detail_gui)
+
+    # if imgui.button(icons_fontawesome.ICON_FA_BOOK):
+    #     imgui.open_popup("expandable_str_popup")
+    # imgui.set_next_window_pos(ed.canvas_to_screen(imgui.get_cursor_pos()), imgui.Cond_.appearing.value)
+    # if imgui.begin_popup("expandable_str_popup"):
+    #     imgui.input_text_multiline("##value_text", value_full, ImVec2(0, hello_imgui.em_size(15)))
+    #     imgui.end_popup()
+
     if imgui.is_item_hovered():
         osd_widgets.set_tooltip("Click to show details, then open the Info tab at the bottom to see the full string")
     imgui.same_line()
