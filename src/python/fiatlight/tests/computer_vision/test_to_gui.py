@@ -15,7 +15,7 @@ class Dummy:
 
 def test_any_typeclass_to_data_with_gui() -> None:
     with pytest.raises(ValueError):
-        any_typeclass_to_data_handlers(Dummy)
+        any_typeclass_to_data_handlers("Dummy")
 
 
 def test_any_value_to_data_with_gui() -> None:

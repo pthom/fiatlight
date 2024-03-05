@@ -122,7 +122,7 @@ def sandbox() -> None:
         # r.from_dict_impl = lambda d: Foo(a=d["a"])
         return r
 
-    _ALL_TYPE_TO_GUI_INFO.append(TypeToGuiHandlers(Foo, make_foo_with_gui, None))
+    _ALL_TYPE_TO_GUI_INFO.append(TypeToGuiHandlers("Foo", make_foo_with_gui, None))
 
     def add(foo: Foo) -> int:
         return foo.a
