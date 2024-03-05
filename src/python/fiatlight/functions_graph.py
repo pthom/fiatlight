@@ -2,6 +2,10 @@ from fiatlight import FunctionWithGui
 from fiatlight.function_node import FunctionNode, FunctionNodeLink
 from fiatlight.fiatlight_types import PureFunction, JsonDict
 from fiatlight.to_gui import any_function_to_function_with_gui
+from typing import TypeAlias
+
+
+PureFunctionOrFunctionWithGui: TypeAlias = PureFunction | FunctionWithGui
 
 
 class FunctionsGraph:
@@ -53,7 +57,7 @@ class FunctionsGraph:
         f_gui = any_function_to_function_with_gui(f)
         self._add_function_with_gui(f_gui)
 
-    def add_function_composition(self, functions: list[PureFunction]) -> None:
+    def add_function_composition(self, functions: list[PureFunctionOrFunctionWithGui]) -> None:
         composition = FunctionsGraph.from_function_composition(functions)
         self.merge_graph(composition)
 
@@ -62,7 +66,7 @@ class FunctionsGraph:
         self.functions_nodes_links.extend(other.functions_nodes_links)
 
     @staticmethod
-    def from_function_composition(functions: list[PureFunction]) -> "FunctionsGraph":
+    def from_function_composition(functions: list[PureFunctionOrFunctionWithGui]) -> "FunctionsGraph":
         """Create a FunctionsGraph from a list of PureFunctions([InputType] -> OutputType)
         * They should all be pure functions
         * The output[0] of one should be the input[0] of the next
@@ -72,7 +76,10 @@ class FunctionsGraph:
         # Fill the functions
         def fill_functions_with_gui() -> None:
             for f in functions:
-                r._add_function(f)
+                if isinstance(f, FunctionWithGui):
+                    r._add_function_with_gui(f)
+                else:
+                    r._add_function(f)
 
         def fill_links() -> None:
             r.functions_nodes_links = []
