@@ -30,6 +30,9 @@ class TypeToGuiHandlers:
 def any_typeclass_to_data_handlers(type_class_name: str) -> AnyDataGuiHandlers[DataType]:
     from fiatlight.all_to_gui import all_type_to_gui_info
 
+    if type_class_name.startswith("<class '") and type_class_name.endswith("'>"):
+        type_class_name = type_class_name[8:-2]
+
     is_list = type_class_name.startswith("typing.List") or type_class_name.startswith("list")
     if is_list:
         list_type_str = type_class_name[type_class_name.index("[") + 1 : -1]
@@ -98,7 +101,7 @@ def any_function_to_function_with_gui(f: Callable[..., Any]) -> FunctionWithGui:
             tuple_type_annotation_strs = return_annotation_inner_str.split(", ")
             tuple_type_annotations = [eval(annotation_str) for annotation_str in tuple_type_annotation_strs]
             for i, annotation in enumerate(tuple_type_annotations):
-                handlers: AnyDataGuiHandlers[Any] = any_typeclass_to_data_handlers(annotation)
+                handlers: AnyDataGuiHandlers[Any] = any_typeclass_to_data_handlers(str(annotation))
                 data_with_gui = AnyDataWithGui(UnspecifiedValue, handlers)
                 function_with_gui.outputs_with_gui.append(OutputWithGui(data_with_gui))
         else:
