@@ -41,6 +41,9 @@ class AnyDataGuiHandlers(Generic[DataType]):
     # default value provider: this function will be called to provide a default value if needed
     default_value_provider: Callable[[], DataType] | None = None
 
+    # on_change: if provided, this function will be called when the value changes
+    on_change: Callable[[DataType], None] | None = None
+
 
 class AnyDataWithGui(Generic[DataType]):
     """
@@ -49,7 +52,7 @@ class AnyDataWithGui(Generic[DataType]):
     """
 
     # The value of the data
-    value: DataType | Unspecified | Error = UnspecifiedValue
+    _value: DataType | Unspecified | Error = UnspecifiedValue
 
     # Handlers
     handlers: AnyDataGuiHandlers[DataType]
@@ -59,8 +62,18 @@ class AnyDataWithGui(Generic[DataType]):
         value: DataType | Unspecified,
         handlers: AnyDataGuiHandlers[DataType],
     ) -> None:
-        self.value = value
         self.handlers = handlers
+        self.value = value
+
+    @property
+    def value(self) -> DataType | Unspecified | Error:
+        return self._value
+
+    @value.setter
+    def value(self, new_value: DataType | Unspecified | Error) -> None:
+        self._value = new_value
+        if self.handlers.on_change is not None and isinstance(new_value, (Unspecified, Error)) is False:
+            self.handlers.on_change(new_value)  # type: ignore
 
     def to_json(self) -> JsonDict:
         if isinstance(self.value, Unspecified):
