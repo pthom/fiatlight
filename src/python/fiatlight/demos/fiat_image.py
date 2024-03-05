@@ -112,6 +112,10 @@ class OilPaintingWithGui(FunctionWithGui):
 
 def main() -> None:
     from fiatlight.functions_graph import FunctionsGraph
+    from fiatlight.to_gui import any_function_to_function_with_gui
+    from fiatlight.computer_vision.image_gui import ImageHandlerParams, make_image_gui_handlers
+    from fiatlight.computer_vision.cv_color_type import ColorConversion
+    from fiatlight.computer_vision.cv_color_type_gui import make_color_conversion_gui_handlers
 
     image = cv2.imread(demos_assets_folder() + "/images/house.jpg")
     image = cv2.resize(image, (int(image.shape[1] * 0.5), int(image.shape[0] * 0.5)))
@@ -119,7 +123,17 @@ def main() -> None:
     def make_image() -> ImageUInt8:
         return image
 
-    functions = [make_image]
+    def color_convert(image: ImageUInt8, color_conversion: ColorConversion) -> ImageUInt8:
+        return color_conversion.convert_image(image)
+
+    make_image_gui = any_function_to_function_with_gui(make_image)
+    make_image_gui.set_output_gui_handler(make_image_gui_handlers(ImageHandlerParams()))
+
+    color_convert_gui = any_function_to_function_with_gui(color_convert)
+    color_convert_gui.set_input_gui_handler("color_conversion", make_color_conversion_gui_handlers())
+    color_convert_gui.set_output_gui_handler(make_image_gui_handlers(ImageHandlerParams()))
+
+    functions = [make_image_gui, color_convert_gui]
     functions_graph = FunctionsGraph.from_function_composition(functions)
 
     fiatlight_run(

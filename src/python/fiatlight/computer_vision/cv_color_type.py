@@ -92,6 +92,10 @@ class ColorConversion:
         return f"{self.src_color.name}=>{self.dst_color.name}"
 
 
+def color_convert(image: ImageUInt8, color_conversion: ColorConversion) -> ImageUInt8:
+    return color_conversion.convert_image(image)
+
+
 def _optional_cv_color_conversion_code_between(type1: ColorType, type2: ColorType) -> CvColorConversionCode | None:
     conversions: Dict[ColorType, CvColorConversionCode]
     if type1 == ColorType.BGR:
