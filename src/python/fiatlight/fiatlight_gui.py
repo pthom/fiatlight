@@ -162,15 +162,18 @@ class FiatlightGui:
 
     def _save_state(self) -> None:
         json_data = self._functions_graph_gui.functions_graph.to_json()
-        with open(self._node_state_filename(), "w") as f:
-            json_str = json.dumps(json_data, indent=4)
-            f.write(json_str)
+        try:
+            with open(self._node_state_filename(), "w") as f:
+                json_str = json.dumps(json_data, indent=4)
+                f.write(json_str)
+        except Exception as e:
+            logging.error(f"FiatlightGui: Error saving state file {self._node_state_filename()}: {e}")
 
     def _load_state(self) -> None:
         try:
             with open(self._node_state_filename(), "r") as f:
                 json_data = json.load(f)
-        except FileNotFoundError:
+        except (FileNotFoundError, json.JSONDecodeError):
             logging.info(f"FiatlightGui: state file {self._node_state_filename()} not found, using default state")
             return
 

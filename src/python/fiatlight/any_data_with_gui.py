@@ -95,7 +95,8 @@ class AnyDataWithGui(Generic[DataType]):
             logging.warning("List serialization not implemented yet")
             return {"type": "List"}
         else:
-            raise ValueError(f"Cannot serialize {self.value}, it has no __dict__ attribute.")
+            logging.warning(f"Cannot serialize {self.value}, it has no __dict__ attribute.")
+            return {"type": "Error"}
 
     def fill_from_json(self, json_data: JsonDict) -> None:
         if "type" not in json_data:
