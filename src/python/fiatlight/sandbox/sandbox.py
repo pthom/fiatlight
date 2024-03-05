@@ -48,7 +48,7 @@ Yours is the Earth and everything that's in it,
 node_id = ed.NodeId.create()
 
 
-def gui():
+def gui() -> None:
     global poem
 
     ed.begin("Graph")
