@@ -33,4 +33,5 @@ def make_color_conversion_gui_handlers() -> AnyDataGuiHandlers[ColorConversion]:
     r = AnyDataGuiHandlers[ColorConversion]()
     r.gui_edit_impl = gui_color_conversion
     r.gui_present_impl = lambda x: imgui.text(str(x))
+    r.default_value_provider = lambda: ColorConversion(ColorType.BGR, ColorType.RGB)
     return r

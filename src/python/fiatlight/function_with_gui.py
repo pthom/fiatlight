@@ -99,6 +99,18 @@ class FunctionWithGui:
         for i, param_json in enumerate(inputs_json):
             self.inputs_with_gui[i].fill_from_json(param_json)
 
+    def set_output_gui_handler(self, handler: AnyDataGuiHandlers[Any], output_idx: int = 0) -> None:
+        if output_idx >= len(self.outputs_with_gui):
+            raise ValueError(f"output_idx {output_idx} out of range")
+        self.outputs_with_gui[output_idx].data_with_gui.handlers = handler
+
+    def set_input_gui_handler(self, input_name: str, handler: AnyDataGuiHandlers[Any]) -> None:
+        for param in self.inputs_with_gui:
+            if param.name == input_name:
+                param.data_with_gui.handlers = handler
+                return
+        raise ValueError(f"input_name {input_name} not found")
+
 
 __all__ = ["FunctionWithGui", "AnyDataWithGui", "ParamWithGui"]
 
