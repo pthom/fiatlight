@@ -238,7 +238,7 @@ def test_foo_with_gui() -> None:
     # Register the Foo type with its GUI implementation (do this once at the beginning of your program)
     from fiatlight.all_to_gui import all_type_to_gui_info, TypeToGuiHandlers
 
-    all_type_to_gui_info().append(TypeToGuiHandlers(Foo, make_foo_gui_handlers, FooGuiParams()))
+    all_type_to_gui_info().append(TypeToGuiHandlers("Foo", make_foo_gui_handlers, FooGuiParams()))
 
     # Use the Foo type with its GUI implementation
     from fiatlight.to_gui import any_value_to_data_with_gui

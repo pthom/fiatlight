@@ -14,8 +14,7 @@ from fiatlight.standard_gui_handlers import make_list_gui_handlers
 import inspect
 
 from dataclasses import dataclass
-from typing import TypeAlias, Callable, Type, Any
-import typing  # needed for eval
+from typing import TypeAlias, Callable, Any
 
 GuiEditParams: TypeAlias = Any
 StandardType: TypeAlias = Any
@@ -23,37 +22,32 @@ StandardType: TypeAlias = Any
 
 @dataclass
 class TypeToGuiHandlers:
-    standard_type_class: Type[typing.Any]
+    type_class_name: str
     gui_type_factory: Callable[[GuiEditParams | None], AnyDataGuiHandlers[Any]]
     default_edit_params: GuiEditParams
 
 
-def any_typeclass_to_data_handlers(typeclass_or_str: Type[DataType] | str) -> AnyDataGuiHandlers[DataType]:
+def any_typeclass_to_data_handlers(type_class_name: str) -> AnyDataGuiHandlers[DataType]:
     from fiatlight.all_to_gui import all_type_to_gui_info
 
-    # in some circumstances, typeclass is a string...I don't know why, must be a limitation of the type system
-    typeclass: Type[DataType]
-    typeclass = eval(typeclass_or_str) if isinstance(typeclass_or_str, str) else typeclass_or_str
-
-    typeclass_str = str(typeclass)
-    is_list = typeclass_str.startswith("typing.List") or typeclass_str.startswith("list")
+    is_list = type_class_name.startswith("typing.List") or type_class_name.startswith("list")
     if is_list:
-        list_type_str = typeclass_str[typeclass_str.index("[") + 1 : -1]
-        list_type = eval(list_type_str)
-        item_handlers = any_typeclass_to_data_handlers(list_type)  # type: ignore
+        list_type_str = type_class_name[type_class_name.index("[") + 1 : -1]
+        item_handlers = any_typeclass_to_data_handlers(list_type_str)  # type: ignore
         list_handlers = make_list_gui_handlers(item_handlers)
         return list_handlers  # type: ignore
     else:
         for type_to_gui_info in all_type_to_gui_info():
-            if typeclass is type_to_gui_info.standard_type_class:
+            if type_class_name == type_to_gui_info.type_class_name:
                 return type_to_gui_info.gui_type_factory(type_to_gui_info.default_edit_params)
         # if we reach this point, we have no GUI implementation for the type
-        logging.warning(f"Type {typeclass} not supported by any_typeclass_to_data_with_gui")
+        logging.warning(f"Type {type_class_name} not supported by any_typeclass_to_data_with_gui")
         return AnyDataGuiHandlers[DataType]()
 
 
 def any_value_to_data_with_gui(value: DataType) -> AnyDataWithGui[DataType]:
-    handlers = any_typeclass_to_data_handlers(type(value))
+    type_class_name = str(type(value))
+    handlers: AnyDataGuiHandlers[DataType] = any_typeclass_to_data_handlers(type_class_name)
     return AnyDataWithGui(value, handlers)
 
 
@@ -64,7 +58,7 @@ def any_param_to_param_with_gui(name: str, param: inspect.Parameter) -> ParamWit
     if annotation is None or annotation is inspect.Parameter.empty:
         handlers = AnyDataGuiHandlers[Any]()
     else:
-        handlers = any_typeclass_to_data_handlers(annotation)
+        handlers = any_typeclass_to_data_handlers(str(annotation))
 
     data_with_gui = AnyDataWithGui(UnspecifiedValue, handlers)
 
@@ -108,7 +102,7 @@ def any_function_to_function_with_gui(f: Callable[..., Any]) -> FunctionWithGui:
                 data_with_gui = AnyDataWithGui(UnspecifiedValue, handlers)
                 function_with_gui.outputs_with_gui.append(OutputWithGui(data_with_gui))
         else:
-            handlers = any_typeclass_to_data_handlers(sig.return_annotation)
+            handlers = any_typeclass_to_data_handlers(str(sig.return_annotation))
             data_with_gui = AnyDataWithGui(UnspecifiedValue, handlers)
             function_with_gui.outputs_with_gui.append(OutputWithGui(data_with_gui))
 
