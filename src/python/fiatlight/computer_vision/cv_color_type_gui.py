@@ -1,6 +1,7 @@
 from fiatlight.computer_vision.cv_color_type import ColorConversion, ColorType
 from fiatlight.any_data_with_gui import AnyDataGuiHandlers
 from imgui_bundle import imgui_ctx, imgui
+from fiatlight import IconsFontAwesome6
 from typing import Tuple
 
 
@@ -31,7 +32,23 @@ def gui_color_conversion(color_conversion: ColorConversion) -> Tuple[bool, Color
 
 def make_color_conversion_gui_handlers() -> AnyDataGuiHandlers[ColorConversion]:
     r = AnyDataGuiHandlers[ColorConversion]()
-    r.gui_edit_impl = gui_color_conversion
+
+    show_edit_details = False
+
+    def edit(x: ColorConversion) -> Tuple[bool, ColorConversion]:
+        nonlocal show_edit_details
+        imgui.text(str(x))
+        imgui.same_line()
+        icon = IconsFontAwesome6.ICON_SQUARE_CARET_UP if show_edit_details else IconsFontAwesome6.ICON_SQUARE_CARET_DOWN
+        if imgui.button(icon):
+            show_edit_details = not show_edit_details
+        if show_edit_details:
+            changed, x = gui_color_conversion(x)
+            return changed, x
+        else:
+            return False, x
+
+    r.gui_edit_impl = edit
     r.gui_present_impl = lambda x: imgui.text(str(x))
     r.default_value_provider = lambda: ColorConversion(ColorType.BGR, ColorType.RGB)
     return r
