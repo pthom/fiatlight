@@ -134,7 +134,7 @@ def main() -> None:
 
     color_convert_gui = any_function_to_function_with_gui(color_convert)
     # color_convert_gui.set_input_gui_handler("image", make_image_gui_handlers())
-    color_convert_gui.set_input_gui_handler("color_conversion", make_color_conversion_gui_handlers())
+    # color_convert_gui.set_input_gui_handler("color_conversion", make_color_conversion_gui_handlers())
     # color_convert_gui.set_output_gui_handler(make_image_gui_handlers(ImageHandlerParams()))
 
     functions = [make_image_gui, color_convert_gui]
@@ -144,7 +144,7 @@ def main() -> None:
     fiatlight_run(
         functions_graph,
         FiatlightGuiParams(
-            app_title="play_versatile_math",
+            app_title="fiat_image",
             window_size=(1600, 1000),
             show_image_inspector=True,
         ),

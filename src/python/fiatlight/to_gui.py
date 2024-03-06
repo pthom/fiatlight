@@ -115,6 +115,6 @@ ALL_GUI_HANDLERS_FACTORIES: Dict[Typename, GuiHandlersFactory[Any]] = {
     "float": make_float_gui_handlers,
     "str": make_str_gui_handlers,
     "bool": make_bool_gui_handlers,
-    "List[str]": make_bool_gui_handlers,
-    "List[bool]": make_bool_gui_handlers,
+    # "List[str]": make_bool_gui_handlers,
+    # "List[bool]": make_bool_gui_handlers,
 }
