@@ -151,7 +151,7 @@ class AnyDataWithGui(Generic[DataType]):
             if default_value_provider is None:
                 return False
             else:
-                if imgui.small_button(IconsFontAwesome6.ICON_PLUS):
+                if imgui.button(IconsFontAwesome6.ICON_PLUS):
                     self.value = default_value_provider()
                     return True
                 else:
@@ -161,7 +161,7 @@ class AnyDataWithGui(Generic[DataType]):
             if changed:
                 self.value = new_value
             imgui.same_line()
-            if imgui.small_button(IconsFontAwesome6.ICON_TRASH_CAN):
+            if imgui.button(IconsFontAwesome6.ICON_TRASH_CAN):
                 self.value = UnspecifiedValue
                 changed = True
             return changed
