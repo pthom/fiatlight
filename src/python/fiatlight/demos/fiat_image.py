@@ -142,8 +142,11 @@ def main() -> None:
     def make_graph_with_register() -> FunctionsGraph:
         ALL_GUI_HANDLERS_FACTORIES["ImageUInt8"] = make_image_gui_handlers
         ALL_GUI_HANDLERS_FACTORIES["ColorConversion"] = make_color_conversion_gui_handlers
-        functions = [make_image, color_convert]
-        r = FunctionsGraph.from_function_composition(functions)
+        color_convert_gui = any_function_to_function_with_gui(color_convert)
+        color_convert_gui.set_output_gui_handler(make_image_gui_handlers(show_channels=True))
+        # functions = [make_image, color_convert]
+        functions = [make_image, color_convert_gui]
+        r = FunctionsGraph.from_function_composition(functions)  # type: ignore
         return r
 
     functions_graph = make_graph_with_register()
