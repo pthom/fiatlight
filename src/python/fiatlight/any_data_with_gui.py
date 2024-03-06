@@ -141,8 +141,9 @@ class AnyDataWithGui(Generic[DataType]):
         if self.handlers.gui_edit_impl is None:
             self.call_gui_present()
             return False
-        assert not isinstance(self.value, Error)
-        if isinstance(self.value, Unspecified):
+        if isinstance(self.value, Error):
+            imgui.text("Error!")
+        if isinstance(self.value, (Unspecified, Error)):
             imgui.text("Unspecified!")
             imgui.same_line()
             default_value_provider = self.handlers.default_value_provider

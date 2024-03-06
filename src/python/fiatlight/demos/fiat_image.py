@@ -123,17 +123,19 @@ def main() -> None:
     def make_image() -> ImageUInt8:
         return image
 
-    def color_convert(image: ImageUInt8, color_conversion: ColorConversion) -> ImageUInt8:
-        return color_conversion.convert_image(image)
-
     make_image_gui = any_function_to_function_with_gui(make_image)
     make_image_gui.set_output_gui_handler(make_image_gui_handlers(ImageHandlerParams()))
 
+    def color_convert(image: ImageUInt8, color_conversion: ColorConversion = ColorConversion()) -> ImageUInt8:
+        return color_conversion.convert_image(image)
+
     color_convert_gui = any_function_to_function_with_gui(color_convert)
+    color_convert_gui.set_input_gui_handler("image", make_image_gui_handlers())
     color_convert_gui.set_input_gui_handler("color_conversion", make_color_conversion_gui_handlers())
     color_convert_gui.set_output_gui_handler(make_image_gui_handlers(ImageHandlerParams()))
 
     functions = [make_image_gui, color_convert_gui]
+    # functions = [color_convert_gui]
     functions_graph = FunctionsGraph.from_function_composition(functions)
 
     fiatlight_run(
@@ -144,21 +146,6 @@ def main() -> None:
             show_image_inspector=True,
         ),
     )
-
-    # functions = [img_proc.SplitChannelsWithGui(), lut.LutChannelsWithGui(), img_proc.MergeChannelsWithGui(), OilPaintingWithGui()]
-    # functions = [
-    #     img_proc.ConvertColorWithGui(
-    #         cv_color_type.ColorConversion(cv_color_type.ColorType.BGR, cv_color_type.ColorType.Gray)
-    #     ),
-    #     lut_gui.LutImageWithGui(),
-    #     img_proc.ConvertColorWithGui(),
-    # ]
-    #
-    # fiatlight_run(
-    #     FiatlightGuiParams(
-    #         functions_graph=functions, app_title="fiat_image", initial_value=image, show_image_inspector=True
-    #     )
-    # )
 
 
 if __name__ == "__main__":
