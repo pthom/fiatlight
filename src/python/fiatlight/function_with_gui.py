@@ -117,8 +117,7 @@ __all__ = ["FunctionWithGui", "AnyDataWithGui", "ParamWithGui"]
 
 def sandbox() -> None:
     from fiatlight.to_gui import any_function_to_function_with_gui
-    from fiatlight.all_to_gui import _ALL_TYPE_TO_GUI_INFO
-    from fiatlight.to_gui import TypeToGuiHandlers
+    from fiatlight.to_gui import ALL_GUI_HANDLERS_FACTORIES
 
     class Foo:
         a: int
@@ -134,7 +133,7 @@ def sandbox() -> None:
         # r.from_dict_impl = lambda d: Foo(a=d["a"])
         return r
 
-    _ALL_TYPE_TO_GUI_INFO.append(TypeToGuiHandlers("Foo", make_foo_with_gui, None))
+    ALL_GUI_HANDLERS_FACTORIES["Foo"] = make_foo_with_gui
 
     def add(foo: Foo) -> int:
         return foo.a

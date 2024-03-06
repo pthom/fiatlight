@@ -36,12 +36,12 @@ def test_named_data_with_gui_serialization() -> None:
 
 
 def test_custom_data_with_gui_serialization() -> None:
-    from fiatlight.any_data_with_gui import Foo, make_foo_gui_handlers, FooGuiParams
+    from fiatlight.any_data_with_gui import Foo, make_foo_gui_handlers
 
     # Register the Foo type with its GUI implementation (do this once at the beginning of your program)
-    from fiatlight.all_to_gui import all_type_to_gui_info, TypeToGuiHandlers
+    from fiatlight.to_gui import ALL_GUI_HANDLERS_FACTORIES
 
-    all_type_to_gui_info().append(TypeToGuiHandlers("Foo", make_foo_gui_handlers, FooGuiParams()))
+    ALL_GUI_HANDLERS_FACTORIES["Foo"] = make_foo_gui_handlers
 
     # Use the Foo type with its GUI implementation
     from fiatlight.to_gui import any_value_to_data_with_gui

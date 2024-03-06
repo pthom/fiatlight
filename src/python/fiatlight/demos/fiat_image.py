@@ -1,5 +1,3 @@
-# type: ignore
-
 from __future__ import annotations
 from fiatlight.function_with_gui import FunctionWithGui
 from fiatlight.computer_vision import ImageUInt8
@@ -113,7 +111,7 @@ class OilPaintingWithGui(FunctionWithGui):
 def main() -> None:
     from fiatlight.functions_graph import FunctionsGraph
     from fiatlight.to_gui import any_function_to_function_with_gui
-    from fiatlight.computer_vision.image_gui import ImageHandlerParams, make_image_gui_handlers
+    from fiatlight.computer_vision.image_gui import make_image_gui_handlers
     from fiatlight.computer_vision.cv_color_type import ColorConversion
     from fiatlight.computer_vision.cv_color_type_gui import make_color_conversion_gui_handlers
 
@@ -121,18 +119,23 @@ def main() -> None:
     image = cv2.resize(image, (int(image.shape[1] * 0.5), int(image.shape[0] * 0.5)))
 
     def make_image() -> ImageUInt8:
-        return image
-
-    make_image_gui = any_function_to_function_with_gui(make_image)
-    make_image_gui.set_output_gui_handler(make_image_gui_handlers(ImageHandlerParams()))
+        return image  # type: ignore
 
     def color_convert(image: ImageUInt8, color_conversion: ColorConversion = ColorConversion()) -> ImageUInt8:
         return color_conversion.convert_image(image)
 
+    from fiatlight.to_gui import ALL_GUI_HANDLERS_FACTORIES
+
+    ALL_GUI_HANDLERS_FACTORIES["ImageUInt8"] = make_image_gui_handlers
+    ALL_GUI_HANDLERS_FACTORIES["ColorConversion"] = make_color_conversion_gui_handlers
+
+    make_image_gui = any_function_to_function_with_gui(make_image)
+    # make_image_gui.set_output_gui_handler(make_image_gui_handlers(ImageHandlerParams()))
+
     color_convert_gui = any_function_to_function_with_gui(color_convert)
-    color_convert_gui.set_input_gui_handler("image", make_image_gui_handlers())
+    # color_convert_gui.set_input_gui_handler("image", make_image_gui_handlers())
     color_convert_gui.set_input_gui_handler("color_conversion", make_color_conversion_gui_handlers())
-    color_convert_gui.set_output_gui_handler(make_image_gui_handlers(ImageHandlerParams()))
+    # color_convert_gui.set_output_gui_handler(make_image_gui_handlers(ImageHandlerParams()))
 
     functions = [make_image_gui, color_convert_gui]
     # functions = [color_convert_gui]
