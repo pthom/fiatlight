@@ -1,52 +1,50 @@
 from fiatlight.any_data_with_gui import AnyDataGuiHandlers
-from fiatlight.computer_vision.cv_color_type import ColorType
 from fiatlight.computer_vision.image_types import Image
 from imgui_bundle import immvision, imgui
 from imgui_bundle import portable_file_dialogs as pfd
 
 from typing import Optional, Tuple
-from dataclasses import dataclass
 import numpy as np
 import cv2
 
 _INSPECT_ID: int = 0
 
 
-@dataclass
-class ImagePresenterParams:
-    color_type: Optional[ColorType] = None
-    zoom_key: str = "z"
-    image_display_width: int = 200
-
-
-class ImageHandlerParams:
-    presenter_params: ImagePresenterParams
-
-    def __init__(self, presenter_params: ImagePresenterParams | None = None) -> None:
-        self.presenter_params = presenter_params if presenter_params is not None else ImagePresenterParams()
+def default_image_params() -> immvision.ImageParams:
+    r = immvision.ImageParams()
+    r.image_display_size = (200, 0)
+    r.zoom_key = "z"
+    return r
 
 
 class ImagePresenter:
     image_params: immvision.ImageParams
-    image_presenter_params: ImagePresenterParams
     image: Image
 
-    def __init__(self, image_presenter_params: ImagePresenterParams) -> None:
-        self.image_presenter_params = image_presenter_params
-        self.image_params = immvision.ImageParams()
-        self.image_params.image_display_size = (image_presenter_params.image_display_width, 0)
-        self.image_params.zoom_key = image_presenter_params.zoom_key
+    def __init__(self, image_params: immvision.ImageParams | None = None) -> None:
+        self.image_params = default_image_params() if image_params is None else image_params
 
     def set_image(self, image: Image) -> None:
         self.image = image
         self.image_params.refresh_image = True
-        if self.image_presenter_params.color_type is not None:
-            conversion_to_bgr = self.image_presenter_params.color_type.color_conversion_to_bgr()
-            if conversion_to_bgr is not None:
-                self.image_bgr = conversion_to_bgr.convert_image(self.image)  # type: ignore
+
+    def gui_size(self) -> None:
+        ratio = 1.2
+        imgui.push_button_repeat(True)
+        imgui.text("Thumbnail size")
+        imgui.same_line()
+        if imgui.small_button(" smaller "):
+            w, h = self.image_params.image_display_size
+            self.image_params.image_display_size = (int(w / ratio), int(h / ratio))
+        imgui.same_line()
+        if imgui.small_button(" bigger "):
+            w, h = self.image_params.image_display_size
+            self.image_params.image_display_size = (int(w * ratio), int(h * ratio))
+        imgui.pop_button_repeat()
 
     def gui(self) -> None:
         assert self.image is not None
+        self.gui_size()
         immvision.image("##output", self.image, self.image_params)
         if imgui.small_button("Inspect"):
             global _INSPECT_ID
@@ -56,10 +54,8 @@ class ImagePresenter:
         self.image_params.refresh_image = False
 
 
-def make_image_gui_handlers(params: ImageHandlerParams | None = None) -> AnyDataGuiHandlers[Image]:
-    _params = params if params is not None else ImageHandlerParams()
-
-    image_presenter = ImagePresenter(image_presenter_params=_params.presenter_params)
+def make_image_gui_handlers(image_params: immvision.ImageParams | None = None) -> AnyDataGuiHandlers[Image]:
+    image_presenter = ImagePresenter(image_params)
     open_file_dialog: Optional[pfd.open_file] = None
 
     def edit(image: Image) -> Tuple[bool, Image]:

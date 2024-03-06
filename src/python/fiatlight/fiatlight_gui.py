@@ -158,7 +158,7 @@ class FiatlightGui:
         return [split_main_info]
 
     def _node_state_filename(self) -> str:
-        return hello_imgui.ini_settings_location(self.params.runner_params)[:-4] + "_fiatlight.json"
+        return hello_imgui.ini_settings_location(self.params.runner_params)[:-4] + ".fiatlight.json"
 
     def _save_state(self) -> None:
         json_data = self._functions_graph_gui.functions_graph.to_json()
