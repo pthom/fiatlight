@@ -5,7 +5,8 @@ See example implementation for a custom type at the bottom of this file.
 from fiatlight.fiatlight_types import Error, ErrorValue, Unspecified, UnspecifiedValue, JsonDict
 from typing import final, Callable, TypeVar, Generic, Tuple
 from dataclasses import dataclass
-from imgui_bundle import imgui, icons_fontawesome
+from imgui_bundle import imgui
+from fiatlight import IconsFontAwesome6
 from enum import Enum
 import logging
 
@@ -150,7 +151,7 @@ class AnyDataWithGui(Generic[DataType]):
             if default_value_provider is None:
                 return False
             else:
-                if imgui.small_button(icons_fontawesome.ICON_FA_PLUS):
+                if imgui.small_button(IconsFontAwesome6.ICON_PLUS):
                     self.value = default_value_provider()
                     return True
                 else:
@@ -160,7 +161,7 @@ class AnyDataWithGui(Generic[DataType]):
             if changed:
                 self.value = new_value
             imgui.same_line()
-            if imgui.small_button(icons_fontawesome.ICON_FA_TRASH):
+            if imgui.small_button(IconsFontAwesome6.ICON_TRASH_CAN):
                 self.value = UnspecifiedValue
                 changed = True
             return changed

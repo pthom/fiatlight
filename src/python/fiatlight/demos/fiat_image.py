@@ -14,7 +14,7 @@ import os
 
 def demos_assets_folder() -> str:
     this_dir = os.path.dirname(os.path.abspath(__file__))
-    assets_dir = os.path.abspath(f"{this_dir}/../../../demos_assets")
+    assets_dir = os.path.abspath(f"{this_dir}/../../../fiatlight_assets")
     return assets_dir
 
 
