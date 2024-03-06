@@ -74,7 +74,7 @@ def make_image_gui_handlers(params: ImageHandlerParams | None = None) -> AnyData
                 image_file = open_file_dialog.result()[0]
                 new_image = cv2.imread(image_file)
                 if new_image is not None:
-                    image = new_image
+                    image = new_image  # type: ignore
                     changed = True
             open_file_dialog = None
         return changed, image

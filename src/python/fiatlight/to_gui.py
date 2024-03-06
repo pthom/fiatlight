@@ -1,5 +1,3 @@
-import logging
-
 from fiatlight.fiatlight_types import UnspecifiedValue
 from fiatlight.any_data_with_gui import (
     AnyDataGuiHandlers,
@@ -11,41 +9,36 @@ from fiatlight.any_data_with_gui import (
 )
 from fiatlight.function_with_gui import FunctionWithGui
 from fiatlight.standard_gui_handlers import make_list_gui_handlers
+from fiatlight.standard_gui_handlers import (
+    make_int_gui_handlers,
+    make_str_gui_handlers,
+    make_bool_gui_handlers,
+    make_float_gui_handlers,
+)
 import inspect
-
-from dataclasses import dataclass
-from typing import TypeAlias, Callable, Any
-
-GuiEditParams: TypeAlias = Any
-StandardType: TypeAlias = Any
+import logging
+from typing import TypeAlias, Callable, Any, Dict
 
 
-@dataclass
-class TypeToGuiHandlers:
-    type_class_name: str
-    gui_type_factory: Callable[[GuiEditParams | None], AnyDataGuiHandlers[Any]]
-    default_edit_params: GuiEditParams
+GuiHandlersFactory = Callable[[], AnyDataGuiHandlers[DataType]]
 
 
-def any_typeclass_to_data_handlers(type_class_name: str) -> AnyDataGuiHandlers[DataType]:
-    from fiatlight.all_to_gui import all_type_to_gui_info
-
+def any_typeclass_to_data_handlers(type_class_name: str) -> AnyDataGuiHandlers[Any]:
     if type_class_name.startswith("<class '") and type_class_name.endswith("'>"):
         type_class_name = type_class_name[8:-2]
 
     is_list = type_class_name.startswith("typing.List") or type_class_name.startswith("list")
     if is_list:
         list_type_str = type_class_name[type_class_name.index("[") + 1 : -1]
-        item_handlers = any_typeclass_to_data_handlers(list_type_str)  # type: ignore
+        item_handlers = any_typeclass_to_data_handlers(list_type_str)
         list_handlers = make_list_gui_handlers(item_handlers)
-        return list_handlers  # type: ignore
+        return list_handlers
     else:
-        for type_to_gui_info in all_type_to_gui_info():
-            if type_class_name == type_to_gui_info.type_class_name:
-                return type_to_gui_info.gui_type_factory(type_to_gui_info.default_edit_params)
+        if type_class_name in ALL_GUI_HANDLERS_FACTORIES:
+            return ALL_GUI_HANDLERS_FACTORIES[type_class_name]()
         # if we reach this point, we have no GUI implementation for the type
         logging.warning(f"Type {type_class_name} not supported by any_typeclass_to_data_with_gui")
-        return AnyDataGuiHandlers[DataType]()
+        return AnyDataGuiHandlers()
 
 
 def any_value_to_data_with_gui(value: DataType) -> AnyDataWithGui[DataType]:
@@ -110,3 +103,18 @@ def any_function_to_function_with_gui(f: Callable[..., Any]) -> FunctionWithGui:
             function_with_gui.outputs_with_gui.append(OutputWithGui(data_with_gui))
 
     return function_with_gui
+
+
+# ----------------------------------------------------------------------------------------------------------------------
+#       all to gui
+# ----------------------------------------------------------------------------------------------------------------------
+Typename: TypeAlias = str
+
+ALL_GUI_HANDLERS_FACTORIES: Dict[Typename, GuiHandlersFactory[Any]] = {
+    "int": make_int_gui_handlers,
+    "float": make_float_gui_handlers,
+    "str": make_str_gui_handlers,
+    "bool": make_bool_gui_handlers,
+    "List[str]": make_bool_gui_handlers,
+    "List[bool]": make_bool_gui_handlers,
+}
