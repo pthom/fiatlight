@@ -126,21 +126,28 @@ def main() -> None:
 
     from fiatlight.to_gui import ALL_GUI_HANDLERS_FACTORIES
 
-    ALL_GUI_HANDLERS_FACTORIES["ImageUInt8"] = make_image_gui_handlers
-    ALL_GUI_HANDLERS_FACTORIES["ColorConversion"] = make_color_conversion_gui_handlers
+    def make_graph_manually() -> FunctionsGraph:
+        make_image_gui = any_function_to_function_with_gui(make_image)
+        make_image_gui.set_output_gui_handler(make_image_gui_handlers())
 
-    make_image_gui = any_function_to_function_with_gui(make_image)
-    # make_image_gui.set_output_gui_handler(make_image_gui_handlers(ImageHandlerParams()))
+        color_convert_gui = any_function_to_function_with_gui(color_convert)
+        color_convert_gui.set_input_gui_handler("image", make_image_gui_handlers())
+        color_convert_gui.set_input_gui_handler("color_conversion", make_color_conversion_gui_handlers())
+        color_convert_gui.set_output_gui_handler(make_image_gui_handlers())
 
-    color_convert_gui = any_function_to_function_with_gui(color_convert)
-    # color_convert_gui.set_input_gui_handler("image", make_image_gui_handlers())
-    # color_convert_gui.set_input_gui_handler("color_conversion", make_color_conversion_gui_handlers())
-    # color_convert_gui.set_output_gui_handler(make_image_gui_handlers(ImageHandlerParams()))
+        functions = [make_image_gui, color_convert_gui]
+        r = FunctionsGraph.from_function_composition(functions)
+        return r
 
-    functions = [make_image_gui, color_convert_gui]
-    # functions = [color_convert_gui]
-    functions_graph = FunctionsGraph.from_function_composition(functions)
+    def make_graph_with_register() -> FunctionsGraph:
+        ALL_GUI_HANDLERS_FACTORIES["ImageUInt8"] = make_image_gui_handlers
+        ALL_GUI_HANDLERS_FACTORIES["ColorConversion"] = make_color_conversion_gui_handlers
+        functions = [make_image, color_convert]
+        r = FunctionsGraph.from_function_composition(functions)
+        return r
 
+    functions_graph = make_graph_with_register()
+    # functions_graph = make_graph_manually()
     fiatlight_run(
         functions_graph,
         FiatlightGuiParams(
