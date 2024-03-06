@@ -76,7 +76,7 @@ class ColorConversion:
     src_color: ColorType
     dst_color: ColorType
 
-    def __init__(self, src_color: ColorType, dst_color: ColorType) -> None:
+    def __init__(self, src_color: ColorType = ColorType.RGB, dst_color: ColorType = ColorType.BGR) -> None:
         self.src_color = src_color
         self.dst_color = dst_color
 
