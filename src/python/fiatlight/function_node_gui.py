@@ -6,7 +6,8 @@ from fiatlight.config import config
 from fiatlight.internal import fl_widgets
 from fiatlight.fiatlight_types import UnspecifiedValue
 from fiatlight.any_data_with_gui import OutputWithGui
-from imgui_bundle import imgui, imgui_node_editor as ed, icons_fontawesome, ImVec2, imgui_ctx, hello_imgui
+from imgui_bundle import imgui, imgui_node_editor as ed, ImVec2, imgui_ctx, hello_imgui
+from fiatlight import IconsFontAwesome6
 from typing import Dict, List, Any
 
 
@@ -90,7 +91,7 @@ class FunctionNodeGui:
             def draw_output_pin(pin_output: ed.PinId) -> None:
                 def draw() -> None:
                     ed.begin_pin(pin_output, ed.PinKind.output)
-                    imgui.text(icons_fontawesome.ICON_FA_ARROW_CIRCLE_RIGHT)
+                    imgui.text(IconsFontAwesome6.ICON_CIRCLE_RIGHT)
                     ed.end_pin()
 
                 draw_node_gui_right_align(self.node_id, draw)
@@ -114,7 +115,7 @@ class FunctionNodeGui:
 
             def draw_input_pin(name: str, pin_input: ed.PinId) -> None:
                 ed.begin_pin(pin_input, ed.PinKind.input)
-                imgui.text(icons_fontawesome.ICON_FA_ARROW_CIRCLE_LEFT + " " + name)
+                imgui.text(IconsFontAwesome6.ICON_CIRCLE_LEFT + " " + name)
                 ed.end_pin()
 
             for input_param in self.function_node.function_with_gui.inputs_with_gui:

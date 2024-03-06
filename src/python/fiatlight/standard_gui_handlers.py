@@ -1,8 +1,9 @@
-from imgui_bundle import imgui, hello_imgui, imgui_knobs, imgui_toggle, icons_fontawesome
+from imgui_bundle import imgui, hello_imgui, imgui_knobs, imgui_toggle
 from fiatlight.fiatlight_types import UnspecifiedValue, ErrorValue
 from fiatlight.any_data_with_gui import AnyDataGuiHandlers, DataType
 from fiatlight.internal import osd_widgets
 from fiatlight.internal.registry import AutoRegistry
+from fiatlight import IconsFontAwesome6
 
 from typing import Any, Callable, TypeAlias, Tuple
 from dataclasses import dataclass
@@ -31,10 +32,10 @@ def _present_expandable_str(value_extract: str, value_full: str) -> None:
     def detail_gui() -> None:
         imgui.input_text_multiline("##value_text", value_full)
 
-    if imgui.button(icons_fontawesome.ICON_FA_BOOK):
+    if imgui.button(IconsFontAwesome6.ICON_BOOK):
         osd_widgets.set_detail_gui(detail_gui)
 
-    # if imgui.button(icons_fontawesome.ICON_FA_BOOK):
+    # if imgui.button(IconsFontAwesome6.ICON_BOOK):
     #     imgui.open_popup("expandable_str_popup")
     # imgui.set_next_window_pos(ed.canvas_to_screen(imgui.get_cursor_pos()), imgui.Cond_.appearing.value)
     # if imgui.begin_popup("expandable_str_popup"):
@@ -44,7 +45,7 @@ def _present_expandable_str(value_extract: str, value_full: str) -> None:
     if imgui.is_item_hovered():
         osd_widgets.set_tooltip("Click to show details, then open the Info tab at the bottom to see the full string")
     imgui.same_line()
-    if imgui.button(icons_fontawesome.ICON_FA_COPY):
+    if imgui.button(IconsFontAwesome6.ICON_COPY):
         imgui.set_clipboard_text(value_full)
     if imgui.is_item_hovered():
         osd_widgets.set_tooltip("Copy to clipboard")
@@ -399,14 +400,14 @@ def make_list_gui_handlers(item_gui_handlers: AnyDataGuiHandlers[DataType]) -> A
                 x[i] = new_item
 
             imgui.same_line()
-            if imgui.small_button(icons_fontawesome.ICON_FA_MINUS):
+            if imgui.small_button(IconsFontAwesome6.ICON_MINUS):
                 new_x = copy.copy(x)
                 new_x.pop(i)
                 changed = True
 
             if default_value_provider is not None:
                 imgui.same_line()
-                if imgui.button(icons_fontawesome.ICON_FA_PLUS):
+                if imgui.button(IconsFontAwesome6.ICON_PLUS):
                     new_x = copy.copy(x)
                     new_x.insert(i, default_value_provider())
                     changed = True
@@ -414,7 +415,7 @@ def make_list_gui_handlers(item_gui_handlers: AnyDataGuiHandlers[DataType]) -> A
             imgui.pop_id()
 
         if default_value_provider is not None:
-            if imgui.button(icons_fontawesome.ICON_FA_PLUS):
+            if imgui.button(IconsFontAwesome6.ICON_PLUS):
                 new_x = copy.copy(x)
                 new_x.append(default_value_provider())
                 changed = True

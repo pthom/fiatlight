@@ -1,3 +1,4 @@
+from fiatlight.internal.IconsFontAwesome6 import IconsFontAwesome6
 from fiatlight.fiatlight_types import Unspecified, UnspecifiedValue, Error, ErrorValue
 from fiatlight.any_data_with_gui import (
     DataType,
@@ -29,4 +30,6 @@ __all__ = [
     "FunctionWithGui",
     # from fiatlight.functions_graph_gui
     # "FunctionsGraphGui",
+    # from IconsFontAwesome6
+    "IconsFontAwesome6",
 ]
