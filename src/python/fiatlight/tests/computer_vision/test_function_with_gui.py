@@ -19,7 +19,6 @@ def test_serialization() -> None:
             {"data": {"type": "Primitive", "value": 1}, "name": "a"},
             {"data": {"type": "Unspecified"}, "name": "b"},
         ],
-        "name": "add",
     }
 
     json_data = {

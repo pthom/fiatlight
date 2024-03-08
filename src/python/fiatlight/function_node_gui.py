@@ -5,7 +5,7 @@ from fiatlight.internal import osd_widgets
 from fiatlight.config import config
 from fiatlight.internal import fl_widgets
 from fiatlight.fiatlight_types import UnspecifiedValue
-from fiatlight.any_data_with_gui import OutputWithGui
+from fiatlight.function_with_gui import OutputWithGui
 from imgui_bundle import imgui, imgui_node_editor as ed, ImVec2, imgui_ctx, hello_imgui
 from fiatlight import IconsFontAwesome6
 from typing import Dict, List, Any

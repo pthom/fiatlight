@@ -2,16 +2,11 @@
 This module provides a class to wrap any data with a GUI (AnyDataWithGui), and a class to wrap a named data with a GUI.
 See example implementation for a custom type at the bottom of this file.
 """
-from fiatlight.fiatlight_types import Error, ErrorValue, Unspecified, UnspecifiedValue, JsonDict
-from typing import final, Callable, TypeVar, Generic, Tuple
-from dataclasses import dataclass
+from fiatlight.fiatlight_types import Error, ErrorValue, Unspecified, UnspecifiedValue, JsonDict, DataType
+from typing import final, Callable, Generic, Tuple
 from imgui_bundle import imgui
 from fiatlight import IconsFontAwesome6
-from enum import Enum
 import logging
-
-# DataType: TypeAlias = Any
-DataType = TypeVar("DataType")
 
 
 class AnyDataGuiHandlers(Generic[DataType]):
@@ -165,44 +160,6 @@ class AnyDataWithGui(Generic[DataType]):
                 self.value = UnspecifiedValue
                 changed = True
             return changed
-
-
-class ParamKind(Enum):
-    PositionalOnly = 0
-    PositionalOrKeyword = 1
-    KeywordOnly = 3
-
-
-@dataclass
-class ParamWithGui(Generic[DataType]):
-    name: str
-    data_with_gui: AnyDataWithGui[DataType]
-    param_kind: ParamKind
-    default_value: DataType | Unspecified
-
-    def to_json(self) -> JsonDict:
-        data_json = self.data_with_gui.to_json()
-        data_dict = {"name": self.name, "data": data_json}
-        return data_dict
-
-    def fill_from_json(self, json_data: JsonDict) -> None:
-        self.name = json_data["name"]
-        if "data" in json_data:
-            self.data_with_gui.fill_from_json(json_data["data"])
-
-    def get_value_or_default(self) -> DataType | Unspecified | Error:
-        param_value = self.data_with_gui.value
-        if isinstance(param_value, Error):
-            return ErrorValue
-        elif isinstance(param_value, Unspecified):
-            return self.default_value
-        else:
-            return self.data_with_gui.value
-
-
-@dataclass
-class OutputWithGui(Generic[DataType]):
-    data_with_gui: AnyDataWithGui[DataType]
 
 
 ##############################################################################################################
