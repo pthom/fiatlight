@@ -65,9 +65,11 @@ class ImagePresenter:
 
     def gui(self) -> None:
         assert self.image is not None
-        _, self.show_channels = imgui.checkbox("Show channels", self.show_channels)
+        nb_channels = 1 if len(self.image.shape) == 2 else self.image.shape[2]
+        if nb_channels > 1:
+            _, self.show_channels = imgui.checkbox("Show channels", self.show_channels)
         self._gui_size()
-        if self.show_channels and len(self.image.shape) == 3:
+        if self.show_channels and nb_channels > 1:
             self._gui_channels()
         else:
             self._gui_image()
@@ -113,3 +115,10 @@ class ImageWithGui(AnyDataWithGui[Image]):
         self.callbacks.edit = edit
         self.callbacks.on_change = on_changed
         self.callbacks.default_value_provider = default_image
+
+
+class ImageChannelsWithGui(ImageWithGui):
+    """An ImageWithGui, used when we want to display the channels of an image as separate images (in the GUI)."""
+
+    def __init__(self):
+        super().__init__(show_channels=True)
