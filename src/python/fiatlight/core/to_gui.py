@@ -1,4 +1,4 @@
-from fiatlight.core import UnspecifiedValue, DataType, AnyDataGuiHandlers
+from fiatlight.core import UnspecifiedValue, DataType, AnyDataGuiCallbacks
 from fiatlight.core.any_data_with_gui import AnyDataWithGui
 from fiatlight.core.function_with_gui import FunctionWithGui, ParamKind, ParamWithGui, OutputWithGui
 from fiatlight.core import primitives_gui
@@ -19,7 +19,7 @@ def any_typeclass_to_gui(type_class_name: str) -> AnyDataWithGui[Any]:
     if is_list:
         list_type_str = type_class_name[type_class_name.index("[") + 1 : -1]
         item_gui = any_typeclass_to_gui(list_type_str)
-        list_gui = primitives_gui.make_list_gui(item_gui.handlers)
+        list_gui = primitives_gui.make_list_gui(item_gui.callbacks)
         return list_gui
     else:
         if type_class_name in ALL_GUI_FACTORIES:
@@ -70,7 +70,7 @@ def any_function_to_function_with_gui(f: Callable[..., Any]) -> FunctionWithGui:
 
     return_annotation = sig.return_annotation
     if return_annotation is inspect.Parameter.empty:
-        handlers_none = AnyDataGuiHandlers[Any]()
+        handlers_none = AnyDataGuiCallbacks[Any]()
         data_with_gui = AnyDataWithGui.from_handlers(handlers_none)
         function_with_gui.outputs_with_gui.append(OutputWithGui(data_with_gui))
     else:

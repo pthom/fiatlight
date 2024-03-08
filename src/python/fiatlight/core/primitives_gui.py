@@ -1,5 +1,5 @@
 from imgui_bundle import imgui, hello_imgui, imgui_knobs, imgui_toggle
-from fiatlight.core import UnspecifiedValue, ErrorValue, DataType, AnyDataWithGui, AnyDataGuiHandlers
+from fiatlight.core import UnspecifiedValue, ErrorValue, DataType, AnyDataWithGui, AnyDataGuiCallbacks
 from typing import Any, Callable, TypeAlias, Tuple
 from dataclasses import dataclass
 from enum import Enum
@@ -139,8 +139,8 @@ def make_int_gui(params: IntWithGuiParams | None = None) -> AnyDataWithGui[int]:
         return changed, x
 
     r = AnyDataWithGui[int]()
-    r.handlers.edit = edit
-    r.handlers.default_value_provider = lambda: 0
+    r.callbacks.edit = edit
+    r.callbacks.default_value_provider = lambda: 0
     return r
 
 
@@ -229,8 +229,8 @@ def make_float_gui(params: FloatWithGuiParams | None = None) -> AnyDataWithGui[f
         return changed, x
 
     r = AnyDataWithGui[float]()
-    r.handlers.edit = edit
-    r.handlers.default_value_provider = lambda: 0.0
+    r.callbacks.edit = edit
+    r.callbacks.default_value_provider = lambda: 0.0
     return r
 
 
@@ -275,8 +275,8 @@ def make_bool_gui(params: BoolWithGuiParams | None = None) -> AnyDataWithGui[boo
         return changed, x
 
     r = AnyDataWithGui[bool]()
-    r.handlers.edit = edit
-    r.handlers.default_value_provider = lambda: False
+    r.callbacks.edit = edit
+    r.callbacks.default_value_provider = lambda: False
     return r
 
 
@@ -333,15 +333,15 @@ def make_str_gui(params: StrWithGuiParams | None = None) -> AnyDataWithGui[str]:
         return changed, x
 
     r = AnyDataWithGui[str]()
-    r.handlers.edit = edit
-    r.handlers.default_value_provider = lambda: ""
+    r.callbacks.edit = edit
+    r.callbacks.default_value_provider = lambda: ""
     return r
 
 
 ########################################################################################################################
 #                               List Handlers
 ########################################################################################################################
-def make_list_gui(item_gui_handlers: AnyDataGuiHandlers[DataType]) -> AnyDataWithGui[list[DataType]]:
+def make_list_gui(item_gui_handlers: AnyDataGuiCallbacks[DataType]) -> AnyDataWithGui[list[DataType]]:
     def edit(x: list[Any]) -> Tuple[bool, list[Any]]:
         from fiatlight.widgets import IconsFontAwesome6
 
@@ -389,8 +389,8 @@ def make_list_gui(item_gui_handlers: AnyDataGuiHandlers[DataType]) -> AnyDataWit
     #         item_gui_handlers.present(item)
 
     r = AnyDataWithGui[list[Any]]()
-    r.handlers.edit = edit
-    r.handlers.default_value_provider = lambda: []
+    r.callbacks.edit = edit
+    r.callbacks.default_value_provider = lambda: []
 
     # item_to_dict_impl = item_gui_handlers.to_dict_impl
     # item_from_dict_impl = item_gui_handlers.from_dict_impl
