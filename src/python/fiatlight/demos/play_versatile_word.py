@@ -108,7 +108,7 @@ def main() -> None:
         return ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"]
 
     from fiatlight.functions_graph import FunctionsGraph
-    from fiatlight.fiatlight_gui import fiatlight_run, FiatlightGuiParams
+    from fiatlight.node_gui.fiatlight_gui import fiatlight_run, FiatlightGuiParams
 
     fiatlight_run(
         FunctionsGraph.from_function_composition(
