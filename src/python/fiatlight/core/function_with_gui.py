@@ -155,3 +155,14 @@ class FunctionWithGui:
                 param.data_with_gui = data_with_gui
                 return
         raise ValueError(f"input_name {input_name} not found")
+
+    def get_input_gui(self, input_name: str) -> AnyDataWithGui[Any]:
+        for param in self.inputs_with_gui:
+            if param.name == input_name:
+                return param.data_with_gui
+        raise ValueError(f"input_name {input_name} not found")
+
+    def get_output_gui(self, output_idx: int = 0) -> AnyDataWithGui[Any]:
+        if output_idx >= len(self.outputs_with_gui):
+            raise ValueError(f"output_idx {output_idx} out of range")
+        return self.outputs_with_gui[output_idx].data_with_gui

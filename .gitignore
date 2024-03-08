@@ -7,3 +7,4 @@ external/
 /.idea/
 TODO.txt
 /dist/
+priv_assets/

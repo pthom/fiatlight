@@ -11,6 +11,9 @@ from typing import TypeAlias, Callable, Any, Dict
 GuiFactory = Callable[[], AnyDataWithGui[DataType]]
 
 
+_COMPLAINTS_MISSING_GUI_FACTORY = []
+
+
 def any_typeclass_to_gui(type_class_name: str) -> AnyDataWithGui[Any]:
     if type_class_name.startswith("<class '") and type_class_name.endswith("'>"):
         type_class_name = type_class_name[8:-2]
@@ -18,7 +21,9 @@ def any_typeclass_to_gui(type_class_name: str) -> AnyDataWithGui[Any]:
     if type_class_name in ALL_GUI_FACTORIES:
         return ALL_GUI_FACTORIES[type_class_name]()
     # if we reach this point, we have no GUI implementation for the type
-    logging.warning(f"Type {type_class_name} not supported by any_typeclass_to_data_with_gui")
+    if type_class_name not in _COMPLAINTS_MISSING_GUI_FACTORY:
+        logging.warning(f"Type {type_class_name} not present in ALL_GUI_FACTORIES")
+        _COMPLAINTS_MISSING_GUI_FACTORY.append(type_class_name)
     return AnyDataWithGui.make_default()
 
 

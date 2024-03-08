@@ -1,4 +1,5 @@
 from typing import List, Tuple
+from fiatlight import AnyDataWithGui, FunctionsGraph, FiatGuiParams, fiat_run, any_function_to_function_with_gui
 
 
 poem = """
@@ -97,22 +98,60 @@ def display_word_with_counts(words: List[WordWithCount]) -> str:
     return r
 
 
+class TextFileWithGui(AnyDataWithGui[str]):
+    """An example of a custom GUI for a string.
+    It allows the user to select a text file and use its content."""
+
+    from imgui_bundle import portable_file_dialogs as pfd
+
+    open_file_dialog: pfd.open_file | None = None
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.callbacks.edit = self.edit
+        self.callbacks.present = self.present
+        self.callbacks.default_value_provider = lambda: poem
+
+    def edit(self) -> bool:
+        changed = False
+        from imgui_bundle import imgui
+
+        if imgui.button("Get from file"):
+            self.open_file_dialog = self.pfd.open_file("Select text file")
+        if self.open_file_dialog is not None and not self.open_file_dialog.ready():
+            if len(self.open_file_dialog.result()) > 0:
+                filename = self.open_file_dialog.result()[0]
+                with open(filename, "r") as f:
+                    self.value = f.read()
+                changed = True
+            self.open_file_dialog = None
+        return changed
+
+    def present(self) -> None:
+        from fiatlight import widgets
+
+        widgets.text_maybe_truncated(self.get_actual_value(), max_width_chars=30, max_lines=30)
+
+
 def main() -> None:
-    def get_poem() -> str:
-        return poem
+    def get_text(text: str = poem) -> str:
+        """This is our source of text.
+        By default, it uses the poem variable defined above.
+        It will be associated with a GUI that allows the user to select a text file
+        (see the TextFileWithGui class above).
+        """
+        return text
+
+    get_text_gui = any_function_to_function_with_gui(get_text)
+    get_text_gui.set_input_gui("text", TextFileWithGui())
 
     def sort_words(words: List[str], reverse: bool = False) -> List[str]:
         return sorted(words, reverse=reverse)
 
-    def make_words() -> List[str]:
-        return ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"]
-
-    from fiatlight import FunctionsGraph, fiat_run, FiatGuiParams
-
     fiat_run(
         FunctionsGraph.from_function_composition(
             [
-                get_poem,
+                get_text_gui,
                 str_lower,
                 remove_non_letters,
                 split_words,

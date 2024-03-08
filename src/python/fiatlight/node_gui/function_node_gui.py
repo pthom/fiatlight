@@ -58,7 +58,7 @@ class FunctionNodeGui:
     def draw_node(self, unique_name: str) -> None:
         def draw_title() -> None:
             fn_name = self.function_node.function_with_gui.name
-            widgets.text_custom(fn_name)
+            widgets.text_maybe_truncated(fn_name)
             if unique_name != fn_name:
                 if imgui.is_item_hovered():
                     widgets.osd_widgets.set_tooltip(f" (id: {unique_name})")
@@ -80,7 +80,7 @@ class FunctionNodeGui:
                 exception_width = self.node_size.x - hello_imgui.em_size(2)
                 if exception_width < min_exception_width:
                     exception_width = min_exception_width
-            widgets.text_custom(
+            widgets.text_maybe_truncated(
                 "Exception:\n" + last_exception_message,
                 max_width_pixels=exception_width,
                 color=FIATLIGHT_GUI_CONFIG.colors.error,
@@ -97,7 +97,7 @@ class FunctionNodeGui:
 
             def draw_output_value(output_idx: int, output_param: OutputWithGui[Any]) -> None:
                 if len(self.function_node.function_with_gui.outputs_with_gui) > 1:
-                    widgets.text_custom(f"Output {output_idx}: ")
+                    widgets.text_maybe_truncated(f"Output {output_idx}: ")
                 if output_param.data_with_gui.value is None:
                     imgui.text("None")
                 else:
@@ -135,7 +135,7 @@ class FunctionNodeGui:
                                 default_str = str(input_param.default_value)
                             except Exception:
                                 default_str = "???"
-                            imgui.text(f"(Default: {default_str})")
+                            widgets.text_maybe_truncated(f"(Default: {default_str})", max_width_chars=20, max_lines=3)
                         imgui.end_group()
                     else:
                         imgui.new_line()
