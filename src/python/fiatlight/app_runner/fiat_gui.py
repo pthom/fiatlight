@@ -13,7 +13,7 @@ import logging
 from typing import List, Tuple
 
 
-class FiatlightAssets:
+class FiatAssets:
     # font_awesome_6: imgui.ImFont
     default_font_with_fa6: imgui.ImFont
 
@@ -30,10 +30,10 @@ class FiatlightAssets:
         self.default_font_with_fa6 = hello_imgui.load_font("fonts/Font_Awesome_6_Free-Solid-900.otf", 15.0, font_params)
 
 
-FIATLIGHT_ASSETS = FiatlightAssets()
+FIATLIGHT_ASSETS = FiatAssets()
 
 
-class FiatlightGuiParams:
+class FiatGuiParams:
     show_image_inspector: bool
     runner_params: hello_imgui.RunnerParams
     addons: immapp.AddOnsParams
@@ -80,16 +80,16 @@ class FiatlightGuiParams:
         self._runner_params = runner_params
 
 
-class FiatlightGui:
-    params: FiatlightGuiParams
+class FiatGui:
+    params: FiatGuiParams
     _functions_graph_gui: FunctionsGraphGui
     _main_dock_space_id: str
     _info_dock_space_id: str = "info_dock"
     _idx_frame: int = 0
 
-    def __init__(self, functions_graph: FunctionsGraph, params: FiatlightGuiParams | None = None) -> None:
+    def __init__(self, functions_graph: FunctionsGraph, params: FiatGuiParams | None = None) -> None:
         if params is None:
-            params = FiatlightGuiParams()
+            params = FiatGuiParams()
         self.params = params
         self._functions_graph_gui = FunctionsGraphGui(functions_graph)
 
@@ -190,20 +190,20 @@ class FiatlightGui:
                 json_str = json.dumps(json_data, indent=4)
                 f.write(json_str)
         except Exception as e:
-            logging.error(f"FiatlightGui: Error saving state file {self._node_state_filename()}: {e}")
+            logging.error(f"FiatGui: Error saving state file {self._node_state_filename()}: {e}")
 
     def _load_state(self) -> None:
         try:
             with open(self._node_state_filename(), "r") as f:
                 json_data = json.load(f)
         except (FileNotFoundError, json.JSONDecodeError):
-            logging.info(f"FiatlightGui: state file {self._node_state_filename()} not found, using default state")
+            logging.info(f"FiatGui: state file {self._node_state_filename()} not found, using default state")
             return
 
         try:
             self._functions_graph_gui.functions_graph.fill_from_json(json_data)
         except Exception as e:
-            logging.error(f"FiatlightGui: Error loading state file {self._node_state_filename()}: {e}")
+            logging.error(f"FiatGui: Error loading state file {self._node_state_filename()}: {e}")
 
     def _post_init(self) -> None:
         self._load_state()
@@ -233,6 +233,6 @@ class FiatlightGui:
         immapp.run(self.params.runner_params, self.params.addons)
 
 
-def fiatlight_run(functions_graph: FunctionsGraph, params: FiatlightGuiParams | None = None) -> None:
-    fiatlight_gui = FiatlightGui(functions_graph, params)
-    fiatlight_gui.run()
+def fiat_run(functions_graph: FunctionsGraph, params: FiatGuiParams | None = None) -> None:
+    fiat_gui = FiatGui(functions_graph, params)
+    fiat_gui.run()

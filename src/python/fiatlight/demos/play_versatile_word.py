@@ -107,9 +107,9 @@ def main() -> None:
     def make_words() -> List[str]:
         return ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"]
 
-    from fiatlight import FunctionsGraph, fiatlight_run, FiatlightGuiParams
+    from fiatlight import FunctionsGraph, fiat_run, FiatGuiParams
 
-    fiatlight_run(
+    fiat_run(
         FunctionsGraph.from_function_composition(
             [
                 get_poem,
@@ -124,7 +124,7 @@ def main() -> None:
                 display_word_with_counts,
             ]
         ),
-        FiatlightGuiParams(
+        FiatGuiParams(
             app_title="play_versatile_word",
             window_size=(1600, 1000),
             show_image_inspector=True,
