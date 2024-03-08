@@ -1,4 +1,4 @@
-from typing import Callable, Any, TypeAlias
+from typing import Callable, Any, TypeAlias, TypeVar
 
 PureFunction: TypeAlias = Callable[..., Any]
 
@@ -31,6 +31,7 @@ class Error:
 
 ErrorValue = Error(42)
 
+DataType = TypeVar("DataType")
 
 JsonPrimitive = str | int | float | bool | None
 JsonDict = dict[str, Any]

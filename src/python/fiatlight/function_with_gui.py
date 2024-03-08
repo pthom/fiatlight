@@ -1,6 +1,46 @@
-from fiatlight.fiatlight_types import UnspecifiedValue, ErrorValue, JsonDict
-from fiatlight.any_data_with_gui import AnyDataWithGui, ParamWithGui, AnyDataGuiHandlers, OutputWithGui, ParamKind
-from typing import Any, List, final, Callable, Optional
+from fiatlight.fiatlight_types import UnspecifiedValue, ErrorValue, Unspecified, Error, JsonDict, DataType
+from fiatlight.any_data_with_gui import AnyDataWithGui, AnyDataGuiHandlers
+from typing import Any, List, final, Callable, Optional, Generic
+from dataclasses import dataclass
+from enum import Enum
+
+
+class ParamKind(Enum):
+    PositionalOnly = 0
+    PositionalOrKeyword = 1
+    KeywordOnly = 3
+
+
+@dataclass
+class ParamWithGui(Generic[DataType]):
+    name: str
+    data_with_gui: AnyDataWithGui[DataType]
+    param_kind: ParamKind
+    default_value: DataType | Unspecified
+
+    def to_json(self) -> JsonDict:
+        data_json = self.data_with_gui.to_json()
+        data_dict = {"name": self.name, "data": data_json}
+        return data_dict
+
+    def fill_from_json(self, json_data: JsonDict) -> None:
+        self.name = json_data["name"]
+        if "data" in json_data:
+            self.data_with_gui.fill_from_json(json_data["data"])
+
+    def get_value_or_default(self) -> DataType | Unspecified | Error:
+        param_value = self.data_with_gui.value
+        if isinstance(param_value, Error):
+            return ErrorValue
+        elif isinstance(param_value, Unspecified):
+            return self.default_value
+        else:
+            return self.data_with_gui.value
+
+
+@dataclass
+class OutputWithGui(Generic[DataType]):
+    data_with_gui: AnyDataWithGui[DataType]
 
 
 class FunctionWithGui:

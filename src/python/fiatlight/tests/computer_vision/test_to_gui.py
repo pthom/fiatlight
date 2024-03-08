@@ -5,7 +5,6 @@ from fiatlight.to_gui import (
 )
 from fiatlight.fiatlight_types import UnspecifiedValue, ErrorValue
 
-import pytest
 from typing import Tuple
 
 
@@ -14,8 +13,10 @@ class Dummy:
 
 
 def test_any_typeclass_to_data_with_gui() -> None:
-    with pytest.raises(ValueError):
-        any_typeclass_to_data_handlers("Dummy")
+    d = any_typeclass_to_data_handlers("Dummy")
+    assert d.gui_edit_impl is None
+    assert d.default_value_provider is None
+    assert d.default_value_provider is None
 
 
 def test_any_value_to_data_with_gui() -> None:
@@ -37,7 +38,7 @@ def test_any_function_to_function_with_gui_one_output() -> None:
     assert add_gui.inputs_with_gui[0].name == "a"
     assert add_gui.inputs_with_gui[1].name == "b"
     assert add_gui.inputs_with_gui[0].data_with_gui.value is UnspecifiedValue
-    assert add_gui.inputs_with_gui[1].data_with_gui.value == 2
+    assert add_gui.inputs_with_gui[1].default_value == 2
     assert add_gui.outputs_with_gui[0].data_with_gui.value is UnspecifiedValue
 
     # Test after invoke
@@ -74,7 +75,7 @@ def test_any_function_to_function_with_gui_two_outputs() -> None:
     assert add_mult_gui.inputs_with_gui[0].name == "a"
     assert add_mult_gui.inputs_with_gui[1].name == "b"
     assert add_mult_gui.inputs_with_gui[0].data_with_gui.value is UnspecifiedValue
-    assert add_mult_gui.inputs_with_gui[1].data_with_gui.value == 2
+    assert add_mult_gui.inputs_with_gui[1].default_value == 2
     assert add_mult_gui.outputs_with_gui[0].data_with_gui.value is UnspecifiedValue
     assert add_mult_gui.outputs_with_gui[1].data_with_gui.value is UnspecifiedValue
 

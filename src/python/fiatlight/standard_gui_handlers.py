@@ -1,6 +1,6 @@
 from imgui_bundle import imgui, hello_imgui, imgui_knobs, imgui_toggle
-from fiatlight.fiatlight_types import UnspecifiedValue, ErrorValue
-from fiatlight.any_data_with_gui import AnyDataGuiHandlers, DataType
+from fiatlight.fiatlight_types import UnspecifiedValue, ErrorValue, DataType
+from fiatlight.any_data_with_gui import AnyDataGuiHandlers
 from fiatlight.internal import osd_widgets
 from fiatlight.internal.registry import AutoRegistry
 from fiatlight import IconsFontAwesome6

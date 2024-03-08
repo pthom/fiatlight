@@ -1,5 +1,6 @@
-from fiatlight.any_data_with_gui import ParamWithGui, ParamKind, AnyDataGuiHandlers
+from fiatlight.any_data_with_gui import AnyDataGuiHandlers
 from fiatlight.fiatlight_types import UnspecifiedValue
+from fiatlight.function_with_gui import ParamKind, ParamWithGui
 from fiatlight.to_gui import any_value_to_data_with_gui, any_typeclass_to_data_handlers
 
 

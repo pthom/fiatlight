@@ -1,13 +1,6 @@
-from fiatlight.fiatlight_types import UnspecifiedValue
-from fiatlight.any_data_with_gui import (
-    AnyDataGuiHandlers,
-    AnyDataWithGui,
-    DataType,
-    OutputWithGui,
-    ParamKind,
-    ParamWithGui,
-)
-from fiatlight.function_with_gui import FunctionWithGui
+from fiatlight.fiatlight_types import UnspecifiedValue, DataType
+from fiatlight.any_data_with_gui import AnyDataGuiHandlers, AnyDataWithGui
+from fiatlight.function_with_gui import FunctionWithGui, ParamKind, ParamWithGui, OutputWithGui
 from fiatlight.standard_gui_handlers import make_list_gui_handlers
 from fiatlight.standard_gui_handlers import (
     make_int_gui_handlers,
