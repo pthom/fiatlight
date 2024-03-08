@@ -1,4 +1,4 @@
-from fiatlight import fiatlight_run, FiatlightGuiParams, FunctionsGraph
+from fiatlight import fiat_run, FiatGuiParams, FunctionsGraph
 import math
 
 
@@ -18,9 +18,9 @@ def main() -> None:
     functions_graph = FunctionsGraph.from_function_composition([float_source, sin, add_mul, log, sin])
     functions_graph.add_function_composition([float_source, sin, log, sin])
 
-    fiatlight_run(
+    fiat_run(
         functions_graph,
-        FiatlightGuiParams(
+        FiatGuiParams(
             app_title="play_versatile_math",
             window_size=(1600, 1000),
             show_image_inspector=True,

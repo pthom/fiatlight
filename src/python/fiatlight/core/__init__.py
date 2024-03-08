@@ -1,4 +1,4 @@
-from fiatlight.core.fiatlight_types import (
+from fiatlight.core.fiat_types import (
     Function,
     VoidFunction,
     BoolFunction,

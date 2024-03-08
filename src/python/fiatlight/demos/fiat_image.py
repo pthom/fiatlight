@@ -1,6 +1,6 @@
 from __future__ import annotations
 from fiatlight.computer_vision import ImageUInt8
-from fiatlight import FiatlightGuiParams, fiatlight_run
+from fiatlight import FiatGuiParams, fiat_run
 
 import cv2
 import os
@@ -142,9 +142,9 @@ def main() -> None:
 
     functions_graph = make_graph_with_register()
     # functions_graph = make_graph_manually()
-    fiatlight_run(
+    fiat_run(
         functions_graph,
-        FiatlightGuiParams(
+        FiatGuiParams(
             app_title="fiat_image",
             window_size=(1600, 1000),
             show_image_inspector=True,
