@@ -12,7 +12,7 @@ Point2d: TypeAlias = Tuple[float, float]
 class LutParamsWithGui(AnyDataWithGui[LutParams]):
     _lut_graph: ImageUInt8
     _lut_graph_needs_refresh: bool = True
-    _lut_graph_size_em: float = 2.0
+    _lut_graph_size_em: float = 3.5
 
     def __init__(self) -> None:
         super().__init__()
@@ -39,10 +39,10 @@ class LutParamsWithGui(AnyDataWithGui[LutParams]):
         return int(immapp.em_size(self._lut_graph_size_em))
 
     def _show_lut_graph(self) -> Point2d:
-        if not hasattr(self, "_lut_graph"):
+        refresh_image = self._lut_graph_needs_refresh
+        if refresh_image:
             self._prepare_lut_graph()
-        mouse_position = immvision.image_display("##lut", self._lut_graph, refresh_image=self._lut_graph_needs_refresh)
-        self._lut_graph_needs_refresh = False
+        mouse_position = immvision.image_display("##lut", self._lut_graph, refresh_image=refresh_image)
         return mouse_position
 
     def lut_table(self) -> LutTable:
@@ -53,7 +53,7 @@ class LutParamsWithGui(AnyDataWithGui[LutParams]):
 
         lut_table = self.lut_table()
         self._lut_graph = lut_table_graph(lut_table, self._lut_graph_size())
-        self._lut_graph_needs_refresh = True
+        self._lut_graph_needs_refresh = False
 
     def handle_graph_mouse_edit(self, mouse_position: Point2d) -> bool:
         drag_threshold = 0
@@ -146,7 +146,7 @@ class LutParamsWithGui(AnyDataWithGui[LutParams]):
         )
 
         if changed:
-            self._prepare_lut_graph()
+            self._lut_graph_needs_refresh = True
         imgui.end_group()
         return changed
 
