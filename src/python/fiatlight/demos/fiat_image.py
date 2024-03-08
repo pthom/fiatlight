@@ -1,5 +1,5 @@
 from __future__ import annotations
-from fiatlight.computer_vision import ImageUInt8
+from fiatlight.computer_vision import ImageUInt8, ImageUInt8Channels
 from fiatlight import FiatGuiParams, fiat_run
 
 import cv2
@@ -104,8 +104,9 @@ def demos_assets_folder() -> str:
 
 def main() -> None:
     from fiatlight.core import FunctionsGraph, any_function_to_function_with_gui, ALL_GUI_FACTORIES
-    from fiatlight.computer_vision.image_gui import ImageWithGui
     from fiatlight.computer_vision.cv_color_type import ColorConversion
+
+    from fiatlight.computer_vision.image_gui import ImageWithGui, ImageChannelsWithGui
     from fiatlight.computer_vision.cv_color_type_gui import ColorConversionWithGui
 
     image = cv2.imread(demos_assets_folder() + "/images/house.jpg")
@@ -114,7 +115,7 @@ def main() -> None:
     def make_image() -> ImageUInt8:
         return image  # type: ignore
 
-    def color_convert(image: ImageUInt8, color_conversion: ColorConversion = ColorConversion()) -> ImageUInt8:
+    def color_convert(image: ImageUInt8, color_conversion: ColorConversion = ColorConversion()) -> ImageUInt8Channels:
         return color_conversion.convert_image(image)
 
     def make_graph_manually() -> FunctionsGraph:
@@ -124,24 +125,24 @@ def main() -> None:
         color_convert_gui = any_function_to_function_with_gui(color_convert)
         color_convert_gui.set_input_gui("image", ImageWithGui())
         color_convert_gui.set_input_gui("color_conversion", ColorConversionWithGui())
-        color_convert_gui.set_output_gui(ImageWithGui())
+        color_convert_gui.set_output_gui(ImageWithGui(show_channels=True))
 
         functions = [make_image_gui, color_convert_gui]
         r = FunctionsGraph.from_function_composition(functions)
         return r
 
     def make_graph_with_register() -> FunctionsGraph:
+        # Register the GUI factories
         ALL_GUI_FACTORIES["ImageUInt8"] = ImageWithGui
+        ALL_GUI_FACTORIES["ImageUInt8Channels"] = ImageChannelsWithGui
         ALL_GUI_FACTORIES["ColorConversion"] = ColorConversionWithGui
-        color_convert_gui = any_function_to_function_with_gui(color_convert)
-        color_convert_gui.set_output_gui(ImageWithGui(show_channels=True))
-        # functions = [make_image, color_convert]
-        functions = [make_image, color_convert_gui]
+
+        functions = [make_image, color_convert]
         r = FunctionsGraph.from_function_composition(functions)  # type: ignore
         return r
 
-    functions_graph = make_graph_with_register()
-    # functions_graph = make_graph_manually()
+    # functions_graph = make_graph_with_register()
+    functions_graph = make_graph_manually()
     fiat_run(
         functions_graph,
         FiatGuiParams(
