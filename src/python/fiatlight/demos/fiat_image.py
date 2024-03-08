@@ -1,6 +1,6 @@
 from __future__ import annotations
 from fiatlight.computer_vision import ImageUInt8
-from fiatlight.node_gui.fiatlight_gui import FiatlightGuiParams, fiatlight_run
+from fiatlight import FiatlightGuiParams, fiatlight_run
 
 import cv2
 import os
@@ -103,8 +103,7 @@ def demos_assets_folder() -> str:
 
 
 def main() -> None:
-    from fiatlight.functions_graph import FunctionsGraph
-    from fiatlight.to_gui import any_function_to_function_with_gui
+    from fiatlight.core import FunctionsGraph, any_function_to_function_with_gui, ALL_GUI_HANDLERS_FACTORIES
     from fiatlight.computer_vision.image_gui import make_image_gui_handlers
     from fiatlight.computer_vision.cv_color_type import ColorConversion
     from fiatlight.computer_vision.cv_color_type_gui import make_color_conversion_gui_handlers
@@ -117,8 +116,6 @@ def main() -> None:
 
     def color_convert(image: ImageUInt8, color_conversion: ColorConversion = ColorConversion()) -> ImageUInt8:
         return color_conversion.convert_image(image)
-
-    from fiatlight.to_gui import ALL_GUI_HANDLERS_FACTORIES
 
     def make_graph_manually() -> FunctionsGraph:
         make_image_gui = any_function_to_function_with_gui(make_image)

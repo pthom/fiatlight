@@ -1,5 +1,5 @@
 from fiatlight import UnspecifiedValue, Unspecified
-from fiatlight.to_gui import any_function_to_function_with_gui
+from fiatlight.core import any_function_to_function_with_gui
 from typing import List
 
 

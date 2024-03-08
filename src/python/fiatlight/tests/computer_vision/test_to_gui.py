@@ -1,9 +1,9 @@
-from fiatlight.to_gui import (
+from fiatlight.core.to_gui import (
     any_typeclass_to_data_handlers,
     any_value_to_data_with_gui,
     any_function_to_function_with_gui,
 )
-from fiatlight.fiatlight_types import UnspecifiedValue, ErrorValue
+from fiatlight.core import UnspecifiedValue, ErrorValue
 
 from typing import Tuple
 

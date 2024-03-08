@@ -1,4 +1,4 @@
-from fiatlight.function_with_gui import FunctionWithGui
+from fiatlight.core.function_with_gui import FunctionWithGui
 import json
 
 

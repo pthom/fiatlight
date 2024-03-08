@@ -1,5 +1,6 @@
-from fiatlight.fiatlight_types import UnspecifiedValue, ErrorValue, Unspecified, Error, JsonDict, DataType
-from fiatlight.any_data_with_gui import AnyDataWithGui, AnyDataGuiHandlers
+from fiatlight.core import UnspecifiedValue, ErrorValue, Unspecified, Error, JsonDict, DataType
+from fiatlight.core.any_data_gui_handlers import AnyDataGuiHandlers
+from fiatlight.core.any_data_with_gui import AnyDataWithGui
 from typing import Any, List, final, Callable, Optional, Generic
 from dataclasses import dataclass
 from enum import Enum
@@ -152,12 +153,9 @@ class FunctionWithGui:
         raise ValueError(f"input_name {input_name} not found")
 
 
-__all__ = ["FunctionWithGui", "AnyDataWithGui", "ParamWithGui"]
-
-
 def sandbox() -> None:
-    from fiatlight.to_gui import any_function_to_function_with_gui
-    from fiatlight.to_gui import ALL_GUI_HANDLERS_FACTORIES
+    from fiatlight.core.to_gui import any_function_to_function_with_gui
+    from fiatlight.core.to_gui import ALL_GUI_HANDLERS_FACTORIES
 
     class Foo:
         a: int

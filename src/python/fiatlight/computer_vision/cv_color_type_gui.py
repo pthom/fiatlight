@@ -1,5 +1,5 @@
 from fiatlight.computer_vision.cv_color_type import ColorConversion, ColorType
-from fiatlight.any_data_with_gui import AnyDataGuiHandlers
+from fiatlight.core import AnyDataGuiHandlers
 from imgui_bundle import imgui_ctx, imgui
 from fiatlight import IconsFontAwesome6
 from typing import Tuple

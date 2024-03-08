@@ -1,4 +1,4 @@
-from fiatlight.any_data_with_gui import AnyDataGuiHandlers
+from fiatlight.core import AnyDataGuiHandlers
 from fiatlight.computer_vision.image_types import Image
 from imgui_bundle import immvision, imgui
 from imgui_bundle import portable_file_dialogs as pfd
