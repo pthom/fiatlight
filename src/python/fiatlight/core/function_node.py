@@ -1,5 +1,4 @@
-from fiatlight.core.function_with_gui import FunctionWithGui
-import json
+from fiatlight.core.function_with_gui import FunctionWithGui, JsonDict, ParamWithGui
 
 
 class FunctionNodeLink:
@@ -52,6 +51,10 @@ class FunctionNode:
         r = any(link.dst_input_name == parameter_name for link in self.input_links)
         return r
 
+    def user_editable_params(self) -> list[ParamWithGui]:
+        r = [param for param in self.function_with_gui.inputs_with_gui if not self.has_input_link(param.name)]
+        return r
+
     def invoke_function(self) -> None:
         self.function_with_gui.invoke()
         for link in self.output_links:
@@ -60,14 +63,13 @@ class FunctionNode:
             dst_input.value = src_output.data_with_gui.value
             link.dst_function_node.invoke_function()
 
-    def to_json(self) -> str:
-        """We do not save the links, only the values stored inside the function.
-        The links are reconstructed when loading the graph."""
-        r = {
-            "function_with_gui": self.function_with_gui.to_json(),
-        }
-        return json.dumps(r)
+    def save_user_inputs_to_json(self) -> JsonDict:
+        r = {}
+        for param in self.user_editable_params():
+            r[param.name] = param.data_with_gui.to_json()
+        return r
 
-    def fill_from_json(self, json_str: str) -> None:
-        d = json.loads(json_str)
-        self.function_with_gui.fill_from_json(d["function_with_gui"])
+    def fill_user_inputs_from_json(self, json_data: JsonDict) -> None:
+        for param in self.user_editable_params():
+            if param.name in json_data:
+                param.data_with_gui.fill_from_json(json_data[param.name])

@@ -111,7 +111,7 @@ class AnyDataWithGui(Generic[DataType]):
         #     assert self.callbacks.from_dict_impl is not None
         #     self.value = self.callbacks.from_dict_impl(json_data["value"])
         elif json_data["type"] == "Dict":
-            if self.value is None:
+            if self.value is UnspecifiedValue:
                 if self.callbacks.default_value_provider is None:
                     raise ValueError("Cannot deserialize a None value without a default_value_provider")
                 self.value = self.callbacks.default_value_provider()

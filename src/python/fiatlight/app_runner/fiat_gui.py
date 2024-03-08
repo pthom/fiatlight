@@ -108,7 +108,7 @@ class FiatGui:
             last_exception_message = function_node_gui.function_node.function_with_gui.last_exception_message
             last_exception_traceback = function_node_gui.function_node.function_with_gui.last_exception_traceback
             if last_exception_message is not None:
-                function_unique_name = self._functions_graph_gui.functions_graph.function_unique_name(
+                function_unique_name = self._functions_graph_gui.functions_graph.function_node_unique_name(
                     function_node_gui.function_node
                 )
                 imgui.text_colored(
@@ -184,7 +184,7 @@ class FiatGui:
         return hello_imgui.ini_settings_location(self.params.runner_params)[:-4] + ".fiatlight.json"
 
     def _save_state(self) -> None:
-        json_data = self._functions_graph_gui.functions_graph.to_json()
+        json_data = self._functions_graph_gui.functions_graph.save_user_inputs_to_json()
         try:
             with open(self._node_state_filename(), "w") as f:
                 json_str = json.dumps(json_data, indent=4)
@@ -201,7 +201,7 @@ class FiatGui:
             return
 
         try:
-            self._functions_graph_gui.functions_graph.fill_from_json(json_data)
+            self._functions_graph_gui.functions_graph.fill_user_inputs_from_json(json_data)
         except Exception as e:
             logging.error(f"FiatGui: Error loading state file {self._node_state_filename()}: {e}")
 

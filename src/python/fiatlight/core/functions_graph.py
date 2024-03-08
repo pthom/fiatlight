@@ -27,7 +27,7 @@ class FunctionsGraph:
         self.functions_nodes = []
         self.functions_nodes_links = []
 
-    def function_unique_name(self, function_node: FunctionNode) -> str:
+    def function_node_unique_name(self, function_node: FunctionNode) -> str:
         """Make sure all names are unique"""
         names = [fn.function_with_gui.name for fn in self.functions_nodes]
         duplicated_names = [name for name in names if names.count(name) > 1]
@@ -40,10 +40,12 @@ class FunctionsGraph:
             this_function_idx = functions_with_same_name.index(function_node)
             return f"{function_node.function_with_gui.name}_{this_function_idx + 1}"
 
-        # for duplicated_name in duplicated_names:
-        #     functions_with_duplicated_name = [fn for fn in self.functions_nodes if fn.unique_name == duplicated_name]
-        #     for i, fn in enumerate(functions_with_duplicated_name):
-        #         fn.unique_name = f"{fn.unique_name}_{i}"
+    def function_node_with_unique_name(self, function_name: str) -> FunctionNode:
+        """Get the function with the unique name"""
+        for fn in self.functions_nodes:
+            if self.function_node_unique_name(fn) == function_name:
+                return fn
+        raise ValueError(f"No function with the name {function_name}")
 
     def _add_function_with_gui(self, f_gui: FunctionWithGui) -> None:
         # Make sure all names are unique (is this useful?)
@@ -102,20 +104,22 @@ class FunctionsGraph:
         fill_links()
         return r
 
-    def to_json(self) -> JsonDict:
-        """We do not save the links, only the values stored inside the functions."""
-        data = {
-            "functions_nodes": [fn.function_with_gui.to_json() for fn in self.functions_nodes],
-        }
-        return data
+    def save_user_inputs_to_json(self) -> JsonDict:
+        """Saves the user inputs, i.e. the functions params that are editable in the GUI
+        (this excludes the params that are set by the links between the functions)"""
+        fn_data = {}
+        for function_node in self.functions_nodes:
+            fn_data[self.function_node_unique_name(function_node)] = function_node.save_user_inputs_to_json()
+        return {"functions_nodes": fn_data}
 
-    def fill_from_json(self, json_data: JsonDict) -> None:
-        nodes_data = json_data["functions_nodes"]
-        if len(nodes_data) != len(self.functions_nodes):
-            raise ValueError("The number of functions in the json does not match the number of functions in the graph")
-
-        for i, fn in enumerate(self.functions_nodes):
-            fn.function_with_gui.fill_from_json(nodes_data[i])
+    def fill_user_inputs_from_json(self, json_data: JsonDict) -> None:
+        """Restores the user inputs from a json dict"""
+        if "functions_nodes" not in json_data:
+            return
+        fn_data = json_data["functions_nodes"]
+        for unique_name, fn_json in fn_data.items():
+            fn = self.function_node_with_unique_name(unique_name)
+            fn.fill_user_inputs_from_json(fn_json)
 
     def invoke_top_leaf_functions(self) -> None:
         """Invoke all the leaves of the graph"""

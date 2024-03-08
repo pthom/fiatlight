@@ -62,7 +62,7 @@ class FunctionsGraphGui:
         def draw_nodes() -> None:
             for fn in self.function_nodes_gui:
                 imgui.push_id(str(id(fn)))
-                fn.draw_node(self.functions_graph.function_unique_name(fn.function_node))
+                fn.draw_node(self.functions_graph.function_node_unique_name(fn.function_node))
                 imgui.pop_id()
 
         def draw_links() -> None:
