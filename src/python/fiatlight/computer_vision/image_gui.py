@@ -3,27 +3,31 @@ from fiatlight.computer_vision.image_types import Image
 from imgui_bundle import immvision, imgui
 from imgui_bundle import portable_file_dialogs as pfd
 
-from typing import Optional, Tuple, Sequence
+from typing import Optional, Tuple, Sequence, TypeAlias
 import numpy as np
 import cv2
+
+
+ImagePresenterParams: TypeAlias = immvision.ImageParams
+
 
 _INSPECT_ID: int = 0
 
 
-def default_image_params() -> immvision.ImageParams:
-    r = immvision.ImageParams()
+def default_image_params() -> ImagePresenterParams:
+    r = ImagePresenterParams()
     r.image_display_size = (200, 0)
     r.zoom_key = "z"
     return r
 
 
 class ImagePresenter:
-    image_params: immvision.ImageParams
+    image_params: ImagePresenterParams
     image: Image
     image_channels: Sequence[Image]
     show_channels: bool = False
 
-    def __init__(self, image_params: immvision.ImageParams | None = None, show_channels: bool = False) -> None:
+    def __init__(self, image_params: ImagePresenterParams | None = None, show_channels: bool = False) -> None:
         self.image_params = default_image_params() if image_params is None else image_params
         self.show_channels = show_channels
 
@@ -120,5 +124,5 @@ class ImageWithGui(AnyDataWithGui[Image]):
 class ImageChannelsWithGui(ImageWithGui):
     """An ImageWithGui, used when we want to display the channels of an image as separate images (in the GUI)."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(show_channels=True)

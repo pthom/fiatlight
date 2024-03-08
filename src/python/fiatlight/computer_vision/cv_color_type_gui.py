@@ -1,7 +1,6 @@
 from fiatlight.computer_vision.cv_color_type import ColorConversion, ColorType
 from fiatlight.core import AnyDataWithGui
 from imgui_bundle import imgui_ctx, imgui
-from fiatlight import IconsFontAwesome6
 from typing import Tuple
 
 
@@ -37,6 +36,8 @@ class ColorConversionWithGui(AnyDataWithGui[ColorConversion]):
         super().__init__()
 
         def edit(x: ColorConversion) -> Tuple[bool, ColorConversion]:
+            from fiatlight.widgets import IconsFontAwesome6
+
             imgui.text(str(x))
             imgui.same_line()
             icon = (

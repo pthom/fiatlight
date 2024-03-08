@@ -1,4 +1,4 @@
-from fiatlight import core, app_runner, node_gui, utils, widgets, computer_vision
+from fiatlight import core, app_runner, node_gui, utils, widgets
 from fiatlight.core import (
     Function,
     VoidFunction,
@@ -38,7 +38,6 @@ __all__ = [
     "node_gui",
     "utils",
     "widgets",
-    "computer_vision",
     #
     # from fiatlight.core
     #

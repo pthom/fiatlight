@@ -1,4 +1,6 @@
 from __future__ import annotations
+
+import fiatlight.computer_vision
 from fiatlight.computer_vision import ImageUInt8, ImageUInt8Channels
 from fiatlight import FiatGuiParams, fiat_run
 
@@ -103,11 +105,12 @@ def demos_assets_folder() -> str:
 
 
 def main() -> None:
-    from fiatlight.core import FunctionsGraph, any_function_to_function_with_gui, ALL_GUI_FACTORIES
+    from fiatlight.core import FunctionsGraph, any_function_to_function_with_gui
     from fiatlight.computer_vision.cv_color_type import ColorConversion
 
-    from fiatlight.computer_vision.image_gui import ImageWithGui, ImageChannelsWithGui
+    from fiatlight.computer_vision.image_gui import ImageWithGui
     from fiatlight.computer_vision.cv_color_type_gui import ColorConversionWithGui
+    from fiatlight.computer_vision import lut_with_params
 
     image = cv2.imread(demos_assets_folder() + "/images/house.jpg")
     image = cv2.resize(image, (int(image.shape[1] * 0.5), int(image.shape[0] * 0.5)))
@@ -133,16 +136,20 @@ def main() -> None:
 
     def make_graph_with_register() -> FunctionsGraph:
         # Register the GUI factories
-        ALL_GUI_FACTORIES["ImageUInt8"] = ImageWithGui
-        ALL_GUI_FACTORIES["ImageUInt8Channels"] = ImageChannelsWithGui
-        ALL_GUI_FACTORIES["ColorConversion"] = ColorConversionWithGui
+        fiatlight.computer_vision.register_gui_factories()
+        # Note: computer_vision.register_gui_factories() will do this:
+        #     ALL_GUI_FACTORIES["ImageUInt8"] = ImageWithGui
+        #     ALL_GUI_FACTORIES["ImageUInt8Channels"] = ImageChannelsWithGui
+        #     ALL_GUI_FACTORIES["ColorConversion"] = ColorConversionWithGui
+        #     ALL_GUI_FACTORIES["lut.LutParams"] = LutParamsWithGui
 
-        functions = [make_image, color_convert]
+        # functions = [make_image, color_convert]
+        functions = [make_image, lut_with_params]
         r = FunctionsGraph.from_function_composition(functions)  # type: ignore
         return r
 
-    # functions_graph = make_graph_with_register()
-    functions_graph = make_graph_manually()
+    functions_graph = make_graph_with_register()
+    # functions_graph = make_graph_manually()
     fiat_run(
         functions_graph,
         FiatGuiParams(
