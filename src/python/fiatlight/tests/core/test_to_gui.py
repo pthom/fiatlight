@@ -1,5 +1,5 @@
 from fiatlight.core.to_gui import (
-    any_typeclass_to_data_handlers,
+    any_typeclass_to_gui,
     any_value_to_data_with_gui,
     any_function_to_function_with_gui,
 )
@@ -13,10 +13,10 @@ class Dummy:
 
 
 def test_any_typeclass_to_data_with_gui() -> None:
-    d = any_typeclass_to_data_handlers("Dummy")
-    assert d.gui_edit_impl is None
-    assert d.default_value_provider is None
-    assert d.default_value_provider is None
+    d = any_typeclass_to_gui("Dummy")
+    assert d.handlers.gui_edit_impl is None
+    assert d.handlers.default_value_provider is None
+    assert d.handlers.default_value_provider is None
 
 
 def test_any_value_to_data_with_gui() -> None:

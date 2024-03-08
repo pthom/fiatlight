@@ -1,13 +1,13 @@
-from fiatlight.core import AnyDataGuiHandlers, UnspecifiedValue
+from fiatlight.core import AnyDataWithGui, UnspecifiedValue
 from fiatlight.core import ParamKind, ParamWithGui
-from fiatlight.core.to_gui import any_value_to_data_with_gui, any_typeclass_to_data_handlers
+from fiatlight.core.to_gui import any_value_to_data_with_gui, any_typeclass_to_gui
 
 
 def test_creation() -> None:
-    a: AnyDataGuiHandlers[int] = any_typeclass_to_data_handlers("int")
-    assert a.gui_edit_impl is not None
-    assert a.default_value_provider is not None
-    assert a.default_value_provider() == 0
+    a: AnyDataWithGui[int] = any_typeclass_to_gui("int")
+    assert a.handlers.gui_edit_impl is not None
+    assert a.handlers.default_value_provider is not None
+    assert a.handlers.default_value_provider() == 0
 
 
 def test_primitive_serialization() -> None:
@@ -36,12 +36,12 @@ def test_named_data_with_gui_serialization() -> None:
 
 
 def test_custom_data_with_gui_serialization() -> None:
-    from fiatlight.core.any_data_with_gui import Foo, make_foo_gui_handlers
+    from fiatlight.core.any_data_with_gui import Foo, FooWithGui
 
     # Register the Foo type with its GUI implementation (do this once at the beginning of your program)
-    from fiatlight.core import ALL_GUI_HANDLERS_FACTORIES
+    from fiatlight.core import ALL_GUI_FACTORIES
 
-    ALL_GUI_HANDLERS_FACTORIES["Foo"] = make_foo_gui_handlers
+    ALL_GUI_FACTORIES["Foo"] = FooWithGui
 
     # Use the Foo type with its GUI implementation
     from fiatlight.core.to_gui import any_value_to_data_with_gui

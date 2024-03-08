@@ -1,5 +1,5 @@
 from fiatlight.computer_vision.cv_color_type import ColorConversion, ColorType
-from fiatlight.core import AnyDataGuiHandlers
+from fiatlight.core import AnyDataWithGui
 from imgui_bundle import imgui_ctx, imgui
 from fiatlight import IconsFontAwesome6
 from typing import Tuple
@@ -30,25 +30,28 @@ def gui_color_conversion(color_conversion: ColorConversion) -> Tuple[bool, Color
     return changed, color_conversion
 
 
-def make_color_conversion_gui_handlers() -> AnyDataGuiHandlers[ColorConversion]:
-    r = AnyDataGuiHandlers[ColorConversion]()
+class ColorConversionWithGui(AnyDataWithGui[ColorConversion]):
+    show_edit_details: bool = False
 
-    show_edit_details = False
+    def __init__(self) -> None:
+        super().__init__()
 
-    def edit(x: ColorConversion) -> Tuple[bool, ColorConversion]:
-        nonlocal show_edit_details
-        imgui.text(str(x))
-        imgui.same_line()
-        icon = IconsFontAwesome6.ICON_SQUARE_CARET_UP if show_edit_details else IconsFontAwesome6.ICON_SQUARE_CARET_DOWN
-        if imgui.button(icon):
-            show_edit_details = not show_edit_details
-        if show_edit_details:
-            changed, x = gui_color_conversion(x)
-            return changed, x
-        else:
-            return False, x
+        def edit(x: ColorConversion) -> Tuple[bool, ColorConversion]:
+            imgui.text(str(x))
+            imgui.same_line()
+            icon = (
+                IconsFontAwesome6.ICON_SQUARE_CARET_UP
+                if self.show_edit_details
+                else IconsFontAwesome6.ICON_SQUARE_CARET_DOWN
+            )
+            if imgui.button(icon):
+                self.show_edit_details = not self.show_edit_details
+            if self.show_edit_details:
+                changed, x = gui_color_conversion(x)
+                return changed, x
+            else:
+                return False, x
 
-    r.gui_edit_impl = edit
-    r.gui_present_impl = lambda x: imgui.text(str(x))
-    r.default_value_provider = lambda: ColorConversion(ColorType.BGR, ColorType.RGB)
-    return r
+        self.handlers.gui_edit_impl = edit
+        self.handlers.gui_present_impl = lambda x: imgui.text(str(x))
+        self.handlers.default_value_provider = lambda: ColorConversion(ColorType.BGR, ColorType.RGB)

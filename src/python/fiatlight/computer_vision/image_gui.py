@@ -1,4 +1,4 @@
-from fiatlight.core import AnyDataGuiHandlers
+from fiatlight.core import AnyDataWithGui
 from fiatlight.computer_vision.image_types import Image
 from imgui_bundle import immvision, imgui
 from imgui_bundle import portable_file_dialogs as pfd
@@ -74,42 +74,42 @@ class ImagePresenter:
         self.image_params.refresh_image = False
 
 
-def make_image_gui_handlers(
-    image_params: immvision.ImageParams | None = None, show_channels: bool = False
-) -> AnyDataGuiHandlers[Image]:
-    image_presenter = ImagePresenter(image_params, show_channels)
-    open_file_dialog: Optional[pfd.open_file] = None
+class ImageWithGui(AnyDataWithGui[Image]):
+    image_presenter: ImagePresenter
+    open_file_dialog: Optional[pfd.open_file]
 
-    def edit(image: Image) -> Tuple[bool, Image]:
-        nonlocal open_file_dialog
-        changed = False
-        if imgui.button("Select image file"):
-            open_file_dialog = pfd.open_file(
-                "Select image file", filters=["*.png", "*.jpg", "*.jpeg", "*.bmp", "*.tga"]
-            )
-        if open_file_dialog is not None and open_file_dialog.ready():
-            if len(open_file_dialog.result()) == 1:
-                image_file = open_file_dialog.result()[0]
-                new_image = cv2.imread(image_file)
-                if new_image is not None:
-                    image = new_image  # type: ignore
-                    changed = True
-            open_file_dialog = None
-        return changed, image
+    def __init__(self, image_params: immvision.ImageParams | None = None, show_channels: bool = False) -> None:
+        super().__init__()
+        self.image_presenter = ImagePresenter(image_params, show_channels)
+        self.open_file_dialog = None
 
-    def present(_x: Image) -> None:
-        image_presenter.gui()
+        def edit(image: Image) -> Tuple[bool, Image]:
+            changed = False
+            if imgui.button("Select image file"):
+                self.open_file_dialog = pfd.open_file(
+                    "Select image file", filters=["*.png", "*.jpg", "*.jpeg", "*.bmp", "*.tga"]
+                )
+            if self.open_file_dialog is not None and self.open_file_dialog.ready():
+                if len(self.open_file_dialog.result()) == 1:
+                    image_file = self.open_file_dialog.result()[0]
+                    new_image = cv2.imread(image_file)
+                    if new_image is not None:
+                        image = new_image  # type: ignore
+                        changed = True
+                self.open_file_dialog = None
+            return changed, image
 
-    def on_changed(x: Image) -> None:
-        image_presenter.set_image(x)
+        def present(_x: Image) -> None:
+            self.image_presenter.gui()
 
-    def default_image() -> Image:
-        # Return a 1x1 black RGB image
-        return np.zeros((1, 1, 3), dtype=np.uint8)
+        def on_changed(x: Image) -> None:
+            self.image_presenter.set_image(x)
 
-    r = AnyDataGuiHandlers[Image]()
-    r.gui_present_impl = present
-    r.gui_edit_impl = edit
-    r.on_change = on_changed
-    r.default_value_provider = default_image
-    return r
+        def default_image() -> Image:
+            # Return a 1x1 black RGB image
+            return np.zeros((1, 1, 3), dtype=np.uint8)
+
+        self.handlers.gui_present_impl = present
+        self.handlers.gui_edit_impl = edit
+        self.handlers.on_change = on_changed
+        self.handlers.default_value_provider = default_image
