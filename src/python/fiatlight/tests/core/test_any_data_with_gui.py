@@ -5,7 +5,7 @@ from fiatlight.core.to_gui import any_value_to_data_with_gui, any_typeclass_to_g
 
 def test_creation() -> None:
     a: AnyDataWithGui[int] = any_typeclass_to_gui("int")
-    assert a.handlers.gui_edit_impl is not None
+    assert a.handlers.edit is not None
     assert a.handlers.default_value_provider is not None
     assert a.handlers.default_value_provider() == 0
 

@@ -52,6 +52,6 @@ class ColorConversionWithGui(AnyDataWithGui[ColorConversion]):
             else:
                 return False, x
 
-        self.handlers.gui_edit_impl = edit
-        self.handlers.gui_present_impl = lambda x: imgui.text(str(x))
+        self.handlers.edit = edit
+        self.handlers.present = lambda x: imgui.text(str(x))
         self.handlers.default_value_provider = lambda: ColorConversion(ColorType.BGR, ColorType.RGB)

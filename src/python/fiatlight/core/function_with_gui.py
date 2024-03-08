@@ -150,36 +150,3 @@ class FunctionWithGui:
                 param.data_with_gui = data_with_gui
                 return
         raise ValueError(f"input_name {input_name} not found")
-
-
-def sandbox() -> None:
-    from fiatlight.core.to_gui import any_function_to_function_with_gui
-    from fiatlight.core.to_gui import ALL_GUI_FACTORIES
-
-    class Foo:
-        a: int
-
-        def __init__(self, a: int = 0):
-            self.a = a
-
-    def make_foo_with_gui() -> AnyDataWithGui[Foo]:
-        r: AnyDataWithGui[Foo] = AnyDataWithGui.make_default()
-        r.handlers.gui_edit_impl = lambda x: (False, x)
-        r.handlers.gui_present_impl = lambda x: None
-        # r.handlers.to_dict_impl = lambda x: {"a": x.a}
-        # r.handlers.from_dict_impl = lambda d: Foo(a=d["a"])
-        return r
-
-    ALL_GUI_FACTORIES["Foo"] = make_foo_with_gui
-
-    def add(foo: Foo) -> int:
-        return foo.a
-
-    add_gui = any_function_to_function_with_gui(add)
-    add_gui.inputs_with_gui[0].data_with_gui.value = Foo()
-    # s = add_gui.to_json()
-    # print(s)
-
-
-if __name__ == "__main__":
-    sandbox()

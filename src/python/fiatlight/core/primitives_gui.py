@@ -139,7 +139,7 @@ def make_int_gui(params: IntWithGuiParams | None = None) -> AnyDataWithGui[int]:
         return changed, x
 
     r = AnyDataWithGui[int]()
-    r.handlers.gui_edit_impl = edit
+    r.handlers.edit = edit
     r.handlers.default_value_provider = lambda: 0
     return r
 
@@ -229,7 +229,7 @@ def make_float_gui(params: FloatWithGuiParams | None = None) -> AnyDataWithGui[f
         return changed, x
 
     r = AnyDataWithGui[float]()
-    r.handlers.gui_edit_impl = edit
+    r.handlers.edit = edit
     r.handlers.default_value_provider = lambda: 0.0
     return r
 
@@ -275,7 +275,7 @@ def make_bool_gui(params: BoolWithGuiParams | None = None) -> AnyDataWithGui[boo
         return changed, x
 
     r = AnyDataWithGui[bool]()
-    r.handlers.gui_edit_impl = edit
+    r.handlers.edit = edit
     r.handlers.default_value_provider = lambda: False
     return r
 
@@ -333,7 +333,7 @@ def make_str_gui(params: StrWithGuiParams | None = None) -> AnyDataWithGui[str]:
         return changed, x
 
     r = AnyDataWithGui[str]()
-    r.handlers.gui_edit_impl = edit
+    r.handlers.edit = edit
     r.handlers.default_value_provider = lambda: ""
     return r
 
@@ -346,7 +346,7 @@ def make_list_gui(item_gui_handlers: AnyDataGuiHandlers[DataType]) -> AnyDataWit
         from fiatlight.widgets import IconsFontAwesome6
 
         assert isinstance(x, list)
-        item_gui_edit_impl = item_gui_handlers.gui_edit_impl
+        item_gui_edit_impl = item_gui_handlers.edit
         default_value_provider = item_gui_handlers.default_value_provider
 
         if item_gui_edit_impl is None:
@@ -386,10 +386,10 @@ def make_list_gui(item_gui_handlers: AnyDataGuiHandlers[DataType]) -> AnyDataWit
 
     # def present(x: list[Any]) -> None:
     #     for i, item in enumerate(x):
-    #         item_gui_handlers.gui_present_impl(item)
+    #         item_gui_handlers.present(item)
 
     r = AnyDataWithGui[list[Any]]()
-    r.handlers.gui_edit_impl = edit
+    r.handlers.edit = edit
     r.handlers.default_value_provider = lambda: []
 
     # item_to_dict_impl = item_gui_handlers.to_dict_impl
