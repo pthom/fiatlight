@@ -1,33 +1,40 @@
-# type: ignore
-
 from typing import Tuple, Optional, TypeAlias
 import math
-from fiatlight import FunctionWithGui, AnyDataWithGui, ParamWithGui, ParamKind
-from fiatlight.computer_vision import ImageUInt8, ImageWithGui
-from fiatlight.fiatlight_types import UnspecifiedValue
-from fiatlight.computer_vision import lut
+from fiatlight import AnyDataWithGui
+from fiatlight.computer_vision import ImageUInt8
+from fiatlight.computer_vision.lut import LutParams, LutTable
 from imgui_bundle import immapp, imgui, immvision
 
 
 Point2d: TypeAlias = Tuple[float, float]
 
 
-class LutParamsWithGui(AnyDataWithGui[lut.LutParams]):
-    value: lut.LutParams
-
+class LutParamsWithGui(AnyDataWithGui[LutParams]):
     _lut_graph: ImageUInt8
     _lut_graph_needs_refresh: bool = True
     _lut_graph_size_em: float = 2.0
 
-    def __init__(self, value: lut.LutParams | None = None) -> None:
-        super().__init__()  # type: ignore
-        self.value = value if value is not None else lut.LutParams()
+    def __init__(self) -> None:
+        super().__init__()
 
-        def gui_present() -> None:
+        def present(_: LutParams) -> None:
             self._show_lut_graph()
 
-        self.gui_present_impl = gui_present
-        self.gui_edit_impl = lambda: self.gui_params()
+        def edit(_: LutParams) -> Tuple[bool, LutParams]:
+            changed = self.gui_params()
+            return changed, self.lut_params()
+
+        def on_change(_: LutParams) -> None:
+            self._lut_graph_needs_refresh = True
+
+        self.callbacks.present = present
+        self.callbacks.edit = edit
+        self.callbacks.on_change = on_change
+        self.callbacks.default_value_provider = lambda: LutParams()
+
+    def lut_params(self) -> LutParams:
+        assert isinstance(self.value, LutParams)
+        return self.value
 
     def _lut_graph_size(self) -> int:
         return int(immapp.em_size(self._lut_graph_size_em))
@@ -39,12 +46,14 @@ class LutParamsWithGui(AnyDataWithGui[lut.LutParams]):
         self._lut_graph_needs_refresh = False
         return mouse_position
 
-    def lut_table(self) -> lut.LutTable:
-        return lut.lut_params_to_table(self.value)
+    def lut_table(self) -> LutTable:
+        return self.lut_params().to_table()
 
     def _prepare_lut_graph(self) -> None:
+        from fiatlight.computer_vision.lut import lut_table_graph
+
         lut_table = self.lut_table()
-        self._lut_graph = lut.present_lut_table(lut_table, self._lut_graph_size())
+        self._lut_graph = lut_table_graph(lut_table, self._lut_graph_size())
         self._lut_graph_needs_refresh = True
 
     def handle_graph_mouse_edit(self, mouse_position: Point2d) -> bool:
@@ -74,16 +83,16 @@ class LutParamsWithGui(AnyDataWithGui[lut.LutParams]):
 
             delta_edge = 0.37
             if drag_horizontal and mouse_position_normalized[1] < delta_edge:
-                self.value.min_in = mouse_position_normalized[0]
+                self.lut_params().min_in = mouse_position_normalized[0]
                 changed = True
             elif drag_horizontal and mouse_position_normalized[1] > 1.0 - delta_edge:
-                self.value.max_in = mouse_position_normalized[0]
+                self.lut_params().max_in = mouse_position_normalized[0]
                 changed = True
             elif drag_vertical and mouse_position_normalized[0] < delta_edge:
-                self.value.min_out = mouse_position_normalized[1]
+                self.lut_params().min_out = mouse_position_normalized[1]
                 changed = True
             elif drag_vertical and mouse_position_normalized[0] > 1.0 - delta_edge:
-                self.value.max_out = mouse_position_normalized[1]
+                self.lut_params().max_out = mouse_position_normalized[1]
                 changed = True
 
         return changed
@@ -97,9 +106,9 @@ class LutParamsWithGui(AnyDataWithGui[lut.LutParams]):
             changed = True
 
         if imgui.small_button("Reset"):
-            self.value.min_in, self.value.max_in = (0.0, 1.0)
-            self.value.min_out, self.value.max_out = (0.0, 1.0)
-            self.value.pow_exponent = 1.0
+            self.lut_params().min_in, self.lut_params().max_in = (0.0, 1.0)
+            self.lut_params().min_out, self.lut_params().max_out = (0.0, 1.0)
+            self.lut_params().pow_exponent = 1.0
             changed = True
         imgui.end_group()
 
@@ -129,9 +138,13 @@ class LutParamsWithGui(AnyDataWithGui[lut.LutParams]):
                 v_min = v_max - 0.01
             return v_min, v_max
 
-        self.value.pow_exponent = show_slider("Gamma power", self.value.pow_exponent, 0.0, 10.0, True)
-        self.value.min_in, self.value.max_in = show_two_01_sliders("In", self.value.min_in, self.value.max_in)
-        self.value.min_out, self.value.max_out = show_two_01_sliders("Out", self.value.min_out, self.value.max_out)
+        self.lut_params().pow_exponent = show_slider("Gamma power", self.lut_params().pow_exponent, 0.0, 10.0, True)
+        self.lut_params().min_in, self.lut_params().max_in = show_two_01_sliders(
+            "In", self.lut_params().min_in, self.lut_params().max_in
+        )
+        self.lut_params().min_out, self.lut_params().max_out = show_two_01_sliders(
+            "Out", self.lut_params().min_out, self.lut_params().max_out
+        )
 
         if changed:
             self._prepare_lut_graph()
@@ -139,32 +152,26 @@ class LutParamsWithGui(AnyDataWithGui[lut.LutParams]):
         return changed
 
 
-def lut_with_params(params: lut.LutParams, image: ImageUInt8) -> ImageUInt8:
-    lut_table = lut.lut_params_to_table(params)
-    r = lut.apply_lut_to_uint8_image(image, lut_table)
-    return r
-
-
-class LutImageWithGui(FunctionWithGui):
-    lut_params_with_gui: LutParamsWithGui
-    input_gui: ImageWithGui
-    output_gui: ImageWithGui
-
-    def __init__(self) -> None:
-        self.lut_params_with_gui = LutParamsWithGui()
-        self.input_gui = ImageWithGui()
-        self.output_gui = ImageWithGui()
-        self.name = "LUT"
-
-        def f(x: ImageUInt8) -> ImageUInt8:
-            r = lut_with_params(self.lut_params_with_gui.value, x)
-            return r
-
-        self.f_impl = f
-
-        self.parameters_with_gui = [
-            ParamWithGui("LUT Params", self.lut_params_with_gui, ParamKind.PositionalOrKeyword, UnspecifiedValue)
-        ]
+# class LutImageWithGui(FunctionWithGui):
+#     lut_params_with_gui: LutParamsWithGui
+#     input_gui: ImageWithGui
+#     output_gui: ImageWithGui
+#
+#     def __init__(self) -> None:
+#         self.lut_params_with_gui = LutParamsWithGui()
+#         self.input_gui = ImageWithGui()
+#         self.output_gui = ImageWithGui()
+#         self.name = "LUT"
+#
+#         def f(x: ImageUInt8) -> ImageUInt8:
+#             r = lut_with_params(self.lut_params_with_gui.value, x)
+#             return r
+#
+#         self.f_impl = f
+#
+#         self.parameters_with_gui = [
+#             ParamWithGui("LUT Params", self.lut_params_with_gui, ParamKind.PositionalOrKeyword, UnspecifiedValue)
+#         ]
 
 
 #

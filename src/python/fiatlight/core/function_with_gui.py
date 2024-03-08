@@ -24,7 +24,8 @@ class ParamWithGui(Generic[DataType]):
         return data_dict
 
     def fill_from_json(self, json_data: JsonDict) -> None:
-        self.name = json_data["name"]
+        if json_data["name"] != self.name:
+            raise ValueError(f"Expected name {self.name}, got {json_data['name']}")
         if "data" in json_data:
             self.data_with_gui.fill_from_json(json_data["data"])
 
@@ -136,8 +137,12 @@ class FunctionWithGui:
         inputs_json = json_data["inputs"]
         if len(inputs_json) != len(self.inputs_with_gui):
             raise ValueError(f"Expected {len(self.inputs_with_gui)} inputs, got {len(inputs_json)}")
-        for i, param_json in enumerate(inputs_json):
-            self.inputs_with_gui[i].fill_from_json(param_json)
+        for param_json in inputs_json:
+            param_name = param_json["name"]
+            for input_param in self.inputs_with_gui:
+                if input_param.name == param_name:
+                    input_param.fill_from_json(param_json)
+                    break
 
     def set_output_gui(self, data_with_gui: AnyDataWithGui[Any], output_idx: int = 0) -> None:
         if output_idx >= len(self.outputs_with_gui):

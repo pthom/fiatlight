@@ -5,7 +5,7 @@ import numpy as np
 from fiatlight.computer_vision import ImageUInt8
 
 
-LutTable: TypeAlias = NDArray[np.uint8]
+LutTable: TypeAlias = NDArray[np.uint8]  # an array of 256 elements (LUT, aka Look-Up Table values)
 
 
 class LutParams:
@@ -15,33 +15,31 @@ class LutParams:
     max_in: float = 1.0  # <=> 255
     max_out: float = 1.0
 
+    def to_table(self) -> LutTable:
+        x = np.arange(0.0, 1.0, 1.0 / 256.0)
+        y = (x - self.min_in) / (self.max_in - self.min_in)
+        y = np.clip(y, 0.0, 1.0)
+        y = np.power(y, self.pow_exponent)
+        y = np.clip(y, 0.0, 1.0)
+        y = self.min_out + (self.max_out - self.min_out) * y
+        y = np.clip(y, 0.0, 1.0)
+        lut_uint8 = (y * 255.0).astype(np.uint8)
+        return lut_uint8
 
-def lut_params_to_table(params: LutParams) -> LutTable:
-    x = np.arange(0.0, 1.0, 1.0 / 256.0)
-    y = (x - params.min_in) / (params.max_in - params.min_in)
-    y = np.clip(y, 0.0, 1.0)
-    y = np.power(y, params.pow_exponent)
-    y = np.clip(y, 0.0, 1.0)
-    y = params.min_out + (params.max_out - params.min_out) * y
-    y = np.clip(y, 0.0, 1.0)
-    lut_uint8 = (y * 255.0).astype(np.uint8)
-    return lut_uint8
 
-
-def lut_with_params(params: LutParams, image: ImageUInt8) -> ImageUInt8:
-    lut_table = lut_params_to_table(params)
-    r = apply_lut_to_uint8_image(image, lut_table)
+def lut_with_params(image: ImageUInt8, params: LutParams) -> ImageUInt8:
+    r = lut(image, params.to_table())
     return r
 
 
-def apply_lut_to_uint8_image(image: ImageUInt8, lut_table: LutTable) -> ImageUInt8:
-    # image_with_lut_uint8 = np.zeros_like(image)
-    # cv2.LUT(image, lut_table, image_with_lut_uint8)
+def lut(image: ImageUInt8, lut_table: LutTable) -> ImageUInt8:
+    assert len(lut_table) == 256
     image_with_lut_uint8 = cv2.LUT(image, lut_table)
     return image_with_lut_uint8  # type: ignore
 
 
-def present_lut_table(lut_table: LutTable, size: int) -> ImageUInt8:
+def lut_table_graph(lut_table: LutTable, size: int) -> ImageUInt8:
+    """A small image representing the LUT table."""
     from imgui_bundle import immvision
 
     image = np.zeros((size, size, 4), dtype=np.uint8)
