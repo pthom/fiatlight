@@ -109,7 +109,7 @@ class ImageWithGui(AnyDataWithGui[Image]):
             # Return a 1x1 black RGB image
             return np.zeros((1, 1, 3), dtype=np.uint8)
 
-        self.handlers.present = present
-        self.handlers.edit = edit
-        self.handlers.on_change = on_changed
-        self.handlers.default_value_provider = default_image
+        self.callbacks.present = present
+        self.callbacks.edit = edit
+        self.callbacks.on_change = on_changed
+        self.callbacks.default_value_provider = default_image

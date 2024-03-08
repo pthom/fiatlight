@@ -14,9 +14,9 @@ class Dummy:
 
 def test_any_typeclass_to_data_with_gui() -> None:
     d = any_typeclass_to_gui("Dummy")
-    assert d.handlers.edit is None
-    assert d.handlers.default_value_provider is None
-    assert d.handlers.default_value_provider is None
+    assert d.callbacks.edit is None
+    assert d.callbacks.default_value_provider is None
+    assert d.callbacks.default_value_provider is None
 
 
 def test_any_value_to_data_with_gui() -> None:

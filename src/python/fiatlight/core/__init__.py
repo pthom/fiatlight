@@ -11,7 +11,7 @@ from fiatlight.core.fiat_types import (
     JsonPrimitive,
     JsonPrimitiveOrDict,
 )
-from fiatlight.core.any_data_gui_handlers import AnyDataGuiHandlers
+from fiatlight.core.any_data_gui_callbacks import AnyDataGuiCallbacks
 from fiatlight.core.any_data_with_gui import AnyDataWithGui
 from fiatlight.core.function_with_gui import ParamKind, ParamWithGui, OutputWithGui, FunctionWithGui
 from fiatlight.core.to_gui import any_function_to_function_with_gui, ALL_GUI_FACTORIES
@@ -33,7 +33,7 @@ __all__ = [
     "JsonPrimitive",
     "JsonPrimitiveOrDict",
     # from any_data_gui_handlers
-    "AnyDataGuiHandlers",
+    "AnyDataGuiCallbacks",
     # from any_data_with_gui
     "AnyDataWithGui",
     # from function_with_gui

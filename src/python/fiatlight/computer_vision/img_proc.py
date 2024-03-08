@@ -41,7 +41,7 @@ def split_channels(image: ImageUInt8) -> ImageUInt8:
 #
 #
 # class ConvertColorWithGui(FunctionWithGui):
-#     color_conversion_with_gui: AnyDataGuiHandlers[cv_color_type.ColorConversion]
+#     color_conversion_with_gui: AnyDataGuiCallbacks[cv_color_type.ColorConversion]
 #     input_gui: ImageWithGui
 #     output_gui: ImageWithGui
 #

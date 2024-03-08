@@ -3,7 +3,7 @@ This module provides a class to wrap any data with a GUI (AnyDataWithGui), and a
 See example implementation for a custom type at the bottom of this file.
 """
 from fiatlight.core import Error, ErrorValue, Unspecified, UnspecifiedValue, JsonDict, DataType
-from fiatlight.core.any_data_gui_handlers import AnyDataGuiHandlers
+from fiatlight.core.any_data_gui_callbacks import AnyDataGuiCallbacks
 from typing import final, Generic, Tuple, Callable
 from imgui_bundle import imgui
 import logging
@@ -19,15 +19,15 @@ class AnyDataWithGui(Generic[DataType]):
     _value: DataType | Unspecified | Error = UnspecifiedValue
 
     # Handlers
-    handlers: AnyDataGuiHandlers[DataType]
+    callbacks: AnyDataGuiCallbacks[DataType]
 
     def __init__(self) -> None:
-        self.handlers = AnyDataGuiHandlers.no_handlers()
+        self.callbacks = AnyDataGuiCallbacks.no_handlers()
 
     @staticmethod
-    def from_handlers(handlers: AnyDataGuiHandlers[DataType]) -> "AnyDataWithGui[DataType]":
+    def from_handlers(handlers: AnyDataGuiCallbacks[DataType]) -> "AnyDataWithGui[DataType]":
         r: AnyDataWithGui[DataType] = AnyDataWithGui()
-        r.handlers = handlers
+        r.callbacks = handlers
         return r
 
     @staticmethod
@@ -42,10 +42,10 @@ class AnyDataWithGui(Generic[DataType]):
         on_change: Callable[[DataType], None] | None = None,
     ) -> "AnyDataWithGui[DataType]":
         r = AnyDataWithGui[DataType]()
-        r.handlers.present = present
-        r.handlers.edit = edit
-        r.handlers.default_value_provider = default_value_provider
-        r.handlers.on_change = on_change
+        r.callbacks.present = present
+        r.callbacks.edit = edit
+        r.callbacks.default_value_provider = default_value_provider
+        r.callbacks.on_change = on_change
         return r
 
     @property
@@ -55,8 +55,8 @@ class AnyDataWithGui(Generic[DataType]):
     @value.setter
     def value(self, new_value: DataType | Unspecified | Error) -> None:
         self._value = new_value
-        if self.handlers.on_change is not None and isinstance(new_value, (Unspecified, Error)) is False:
-            self.handlers.on_change(new_value)  # type: ignore
+        if self.callbacks.on_change is not None and isinstance(new_value, (Unspecified, Error)) is False:
+            self.callbacks.on_change(new_value)  # type: ignore
 
     def to_json(self) -> JsonDict:
         if isinstance(self.value, Unspecified):
@@ -67,14 +67,14 @@ class AnyDataWithGui(Generic[DataType]):
             return {"type": "Primitive", "value": self.value}
         elif self.value is None:
             return {"type": "Primitive", "value": None}
-        # elif self.handlers.to_dict_impl is not None:
-        #     as_dict = self.handlers.to_dict_impl(self.value)
+        # elif self.callbacks.to_dict_impl is not None:
+        #     as_dict = self.callbacks.to_dict_impl(self.value)
         #     return {"type": "Custom", "value": as_dict}
         elif hasattr(self.value, "__dict__"):
             as_dict = self.value.__dict__
             return {"type": "Dict", "value": as_dict}
         elif isinstance(self.value, list):
-            # return {"type": "List", "value": [AnyDataWithGui(x, self.handlers).to_json() for x in self.value]}
+            # return {"type": "List", "value": [AnyDataWithGui(x, self.callbacks).to_json() for x in self.value]}
             logging.warning("List serialization not implemented yet")
             return {"type": "List"}
         else:
@@ -91,13 +91,13 @@ class AnyDataWithGui(Generic[DataType]):
         elif json_data["type"] == "Primitive":
             self.value = json_data["value"]
         # elif json_data["type"] == "Custom":
-        #     assert self.handlers.from_dict_impl is not None
-        #     self.value = self.handlers.from_dict_impl(json_data["value"])
+        #     assert self.callbacks.from_dict_impl is not None
+        #     self.value = self.callbacks.from_dict_impl(json_data["value"])
         elif json_data["type"] == "Dict":
             if self.value is None:
-                if self.handlers.default_value_provider is None:
+                if self.callbacks.default_value_provider is None:
                     raise ValueError("Cannot deserialize a None value without a default_value_provider")
-                self.value = self.handlers.default_value_provider()
+                self.value = self.callbacks.default_value_provider()
             self.value.__dict__.update(json_data["value"])
         elif json_data["type"] == "List":
             logging.warning("List deserialization not implemented yet")
@@ -112,18 +112,18 @@ class AnyDataWithGui(Generic[DataType]):
         elif isinstance(self.value, Error):
             imgui.text("Error!")
         else:
-            if self.handlers.present is None:
+            if self.callbacks.present is None:
                 from fiatlight.core.primitives_gui import versatile_gui_present
 
                 versatile_gui_present(self.value)
             else:
-                self.handlers.present(self.value)
+                self.callbacks.present(self.value)
 
     @final
     def call_gui_edit(self) -> bool:
         from fiatlight.widgets import IconsFontAwesome6
 
-        if self.handlers.edit is None:
+        if self.callbacks.edit is None:
             self.call_gui_present()
             return False
         if isinstance(self.value, Error):
@@ -131,7 +131,7 @@ class AnyDataWithGui(Generic[DataType]):
         if isinstance(self.value, (Unspecified, Error)):
             imgui.text("Unspecified!")
             imgui.same_line()
-            default_value_provider = self.handlers.default_value_provider
+            default_value_provider = self.callbacks.default_value_provider
             if default_value_provider is None:
                 return False
             else:
@@ -141,7 +141,7 @@ class AnyDataWithGui(Generic[DataType]):
                 else:
                     return False
         else:
-            changed, new_value = self.handlers.edit(self.value)
+            changed, new_value = self.callbacks.edit(self.value)
             if changed:
                 self.value = new_value
             imgui.same_line()
@@ -177,9 +177,9 @@ class FooWithGui(AnyDataWithGui[Foo]):
         # r.from_dict_impl = lambda d: Foo(x=d["x"])
 
         super().__init__()
-        self.handlers.edit = edit
-        self.handlers.present = present
-        self.handlers.default_value_provider = lambda: Foo(x=0)
+        self.callbacks.edit = edit
+        self.callbacks.present = present
+        self.callbacks.default_value_provider = lambda: Foo(x=0)
 
 
 def test_foo_with_gui() -> None:
