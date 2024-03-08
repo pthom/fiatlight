@@ -3,7 +3,7 @@ from fiatlight.computer_vision.image_types import Image
 from imgui_bundle import immvision, imgui
 from imgui_bundle import portable_file_dialogs as pfd
 
-from typing import Optional, Tuple, Sequence, TypeAlias
+from typing import Optional, Sequence, TypeAlias
 import numpy as np
 import cv2
 
@@ -88,37 +88,32 @@ class ImageWithGui(AnyDataWithGui[Image]):
         super().__init__()
         self.image_presenter = ImagePresenter(image_params, show_channels)
         self.open_file_dialog = None
+        self.callbacks.edit = self.edit
+        self.callbacks.present = self.present
+        self.callbacks.on_change = self.on_change
+        self.callbacks.default_value_provider = lambda: np.zeros((1, 1, 3), dtype=np.uint8)
 
-        def edit(image: Image) -> Tuple[bool, Image]:
-            changed = False
-            if imgui.button("Select image file"):
-                self.open_file_dialog = pfd.open_file(
-                    "Select image file", filters=["*.png", "*.jpg", "*.jpeg", "*.bmp", "*.tga"]
-                )
-            if self.open_file_dialog is not None and self.open_file_dialog.ready():
-                if len(self.open_file_dialog.result()) == 1:
-                    image_file = self.open_file_dialog.result()[0]
-                    new_image = cv2.imread(image_file)
-                    if new_image is not None:
-                        image = new_image  # type: ignore
-                        changed = True
-                self.open_file_dialog = None
-            return changed, image
+    def edit(self) -> bool:
+        changed = False
+        if imgui.button("Select image file"):
+            self.open_file_dialog = pfd.open_file(
+                "Select image file", filters=["*.png", "*.jpg", "*.jpeg", "*.bmp", "*.tga"]
+            )
+        if self.open_file_dialog is not None and self.open_file_dialog.ready():
+            if len(self.open_file_dialog.result()) == 1:
+                image_file = self.open_file_dialog.result()[0]
+                new_image = cv2.imread(image_file)
+                if new_image is not None:
+                    self.value = new_image  # type: ignore
+                    changed = True
+            self.open_file_dialog = None
+        return changed
 
-        def present(_x: Image) -> None:
-            self.image_presenter.gui()
+    def present(self) -> None:
+        self.image_presenter.gui()
 
-        def on_changed(x: Image) -> None:
-            self.image_presenter.set_image(x)
-
-        def default_image() -> Image:
-            # Return a 1x1 black RGB image
-            return np.zeros((1, 1, 3), dtype=np.uint8)
-
-        self.callbacks.present = present
-        self.callbacks.edit = edit
-        self.callbacks.on_change = on_changed
-        self.callbacks.default_value_provider = default_image
+    def on_change(self) -> None:
+        self.image_presenter.set_image(self.get_actual_value())
 
 
 class ImageChannelsWithGui(ImageWithGui):

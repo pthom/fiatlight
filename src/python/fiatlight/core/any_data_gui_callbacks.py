@@ -1,5 +1,5 @@
-from fiatlight.core import DataType
-from typing import Callable, Generic, Tuple
+from fiatlight.core import DataType, VoidFunction, BoolFunction
+from typing import Callable, Generic
 
 
 class AnyDataGuiCallbacks(Generic[DataType]):
@@ -12,10 +12,10 @@ class AnyDataGuiCallbacks(Generic[DataType]):
 
     # Provide a draw function that presents the data content.
     # If not provided, the data will be presented using versatile_gui_present
-    present: Callable[[DataType], None] | None = None
+    present: VoidFunction | None = None
 
-    # Provide a draw function that presents an editable interface for the data, and returns (True, new_value) if changed
-    edit: Callable[[DataType], Tuple[bool, DataType]] | None = None
+    # Provide a draw function that presents an editable interface for the data, and returns True if changed
+    edit: BoolFunction | None = None
 
     # (On hold)
     # Optional serialization and deserialization functions for DataType
@@ -29,7 +29,7 @@ class AnyDataGuiCallbacks(Generic[DataType]):
     default_value_provider: Callable[[], DataType] | None = None
 
     # on_change: if provided, this function will be called when the value changes
-    on_change: Callable[[DataType], None] | None = None
+    on_change: VoidFunction | None = None
 
     @staticmethod
     def no_handlers() -> "AnyDataGuiCallbacks[DataType]":

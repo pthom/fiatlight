@@ -16,21 +16,20 @@ class LutParamsWithGui(AnyDataWithGui[LutParams]):
 
     def __init__(self) -> None:
         super().__init__()
-
-        def present(_: LutParams) -> None:
-            self._show_lut_graph()
-
-        def edit(_: LutParams) -> Tuple[bool, LutParams]:
-            changed = self.gui_params()
-            return changed, self.lut_params()
-
-        def on_change(_: LutParams) -> None:
-            self._lut_graph_needs_refresh = True
-
-        self.callbacks.present = present
-        self.callbacks.edit = edit
-        self.callbacks.on_change = on_change
+        self.callbacks.present = self.present
+        self.callbacks.edit = self.edit
+        self.callbacks.on_change = self.on_change
         self.callbacks.default_value_provider = lambda: LutParams()
+
+    def present(self) -> None:
+        self._show_lut_graph()
+
+    def edit(self) -> bool:
+        changed = self.gui_params()
+        return changed
+
+    def on_change(self) -> None:
+        self._lut_graph_needs_refresh = True
 
     def lut_params(self) -> LutParams:
         assert isinstance(self.value, LutParams)
