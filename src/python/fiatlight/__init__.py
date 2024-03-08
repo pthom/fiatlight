@@ -12,14 +12,14 @@ __all__ = [
     "UnspecifiedValue",
     "Error",
     "ErrorValue",
-    # from fiatlight.any_data_with_gui
     "DataType",
+    # from fiatlight.any_data_with_gui
     "AnyDataGuiHandlers",
     "AnyDataWithGui",
+    # from fiatlight.function_with_gui
     "ParamKind",
     "ParamWithGui",
     "OutputWithGui",
-    # from fiatlight.function_with_gui
     "FunctionWithGui",
     # from fiatlight.functions_graph_gui
     # "FunctionsGraphGui",

@@ -1,6 +1,6 @@
-from fiatlight.function_node_gui import FunctionNodeGui
-from fiatlight.config import config
-from fiatlight.functions_graph_gui import FunctionsGraphGui
+from fiatlight.node_gui.function_node_gui import FunctionNodeGui
+from fiatlight.node_gui.config import config
+from fiatlight.node_gui.functions_graph_gui import FunctionsGraphGui
 from fiatlight.functions_graph import FunctionsGraph
 from fiatlight.internal import osd_widgets, functional_utils
 from imgui_bundle import immapp, imgui, imgui_ctx, ImVec4
@@ -19,7 +19,7 @@ class FiatlightAssets:
 
     def load_assets(self) -> None:
         this_dir = os.path.dirname(os.path.abspath(__file__))
-        assets_folder = os.path.abspath(f"{this_dir}/../../fiatlight_assets")
+        assets_folder = os.path.abspath(f"{this_dir}/../../../fiatlight_assets")
         hello_imgui.set_assets_folder(assets_folder)
         self.default_font_with_fa6 = hello_imgui.load_font("fonts/DroidSans.ttf", 15.0)
 

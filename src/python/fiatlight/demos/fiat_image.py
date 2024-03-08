@@ -1,6 +1,6 @@
 from __future__ import annotations
 from fiatlight.computer_vision import ImageUInt8
-from fiatlight.fiatlight_gui import FiatlightGuiParams, fiatlight_run
+from fiatlight.node_gui.fiatlight_gui import FiatlightGuiParams, fiatlight_run
 
 import cv2
 import os

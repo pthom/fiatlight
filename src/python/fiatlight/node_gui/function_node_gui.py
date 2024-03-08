@@ -2,7 +2,7 @@ from __future__ import annotations
 from fiatlight.function_node import FunctionNode, FunctionNodeLink
 from fiatlight.internal.fl_widgets import draw_node_gui_right_align
 from fiatlight.internal import osd_widgets
-from fiatlight.config import config
+from fiatlight.node_gui.config import config
 from fiatlight.internal import fl_widgets
 from fiatlight.fiatlight_types import UnspecifiedValue
 from fiatlight.function_with_gui import OutputWithGui
