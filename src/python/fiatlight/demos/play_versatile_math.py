@@ -1,6 +1,4 @@
-from fiatlight.node_gui.fiatlight_gui import fiatlight_run, FiatlightGuiParams
-from fiatlight.functions_graph import FunctionsGraph
-
+from fiatlight import fiatlight_run, FiatlightGuiParams, FunctionsGraph
 import math
 
 

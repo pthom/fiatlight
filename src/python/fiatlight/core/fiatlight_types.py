@@ -1,7 +1,6 @@
 from typing import Callable, Any, TypeAlias, TypeVar
 
-PureFunction: TypeAlias = Callable[..., Any]
-
+Function: TypeAlias = Callable[..., Any]
 VoidFunction = Callable[[], None]
 BoolFunction = Callable[[], bool]
 

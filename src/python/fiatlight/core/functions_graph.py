@@ -1,11 +1,8 @@
-from fiatlight import FunctionWithGui
-from fiatlight.function_node import FunctionNode, FunctionNodeLink
-from fiatlight.fiatlight_types import PureFunction, JsonDict
-from fiatlight.to_gui import any_function_to_function_with_gui
-from typing import TypeAlias, Sequence
-
-
-PureFunctionOrFunctionWithGui: TypeAlias = PureFunction | FunctionWithGui
+from fiatlight.core.function_with_gui import FunctionWithGui
+from fiatlight.core.function_node import FunctionNode, FunctionNodeLink
+from fiatlight.core import Function, JsonDict
+from fiatlight.core.to_gui import any_function_to_function_with_gui
+from typing import Sequence
 
 
 class FunctionsGraph:
@@ -53,11 +50,11 @@ class FunctionsGraph:
         f_node = FunctionNode(f_gui, f_gui.name)
         self.functions_nodes.append(f_node)
 
-    def _add_function(self, f: PureFunction) -> None:
+    def _add_function(self, f: Function) -> None:
         f_gui = any_function_to_function_with_gui(f)
         self._add_function_with_gui(f_gui)
 
-    def add_function_composition(self, functions: Sequence[PureFunctionOrFunctionWithGui]) -> None:
+    def add_function_composition(self, functions: Sequence[Function | FunctionWithGui]) -> None:
         composition = FunctionsGraph.from_function_composition(functions)
         self.merge_graph(composition)
 
@@ -66,7 +63,7 @@ class FunctionsGraph:
         self.functions_nodes_links.extend(other.functions_nodes_links)
 
     @staticmethod
-    def from_function_composition(functions: Sequence[PureFunctionOrFunctionWithGui]) -> "FunctionsGraph":
+    def from_function_composition(functions: Sequence[Function | FunctionWithGui]) -> "FunctionsGraph":
         """Create a FunctionsGraph from a list of PureFunctions([InputType] -> OutputType)
         * They should all be pure functions
         * The output[0] of one should be the input[0] of the next

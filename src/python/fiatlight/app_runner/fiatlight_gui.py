@@ -1,8 +1,8 @@
 from fiatlight.node_gui.function_node_gui import FunctionNodeGui
-from fiatlight.node_gui.config import config
 from fiatlight.node_gui.functions_graph_gui import FunctionsGraphGui
-from fiatlight.functions_graph import FunctionsGraph
-from fiatlight.internal import osd_widgets, functional_utils
+from fiatlight.core import FunctionsGraph
+from fiatlight.widgets import osd_widgets
+from fiatlight.utils import functional_utils
 from imgui_bundle import immapp, imgui, imgui_ctx, ImVec4
 from typing import Any
 from imgui_bundle import hello_imgui, ImVec2, immvision
@@ -103,6 +103,8 @@ class FiatlightGui:
 
     def _draw_exceptions(self) -> None:
         for function_node_gui in self._function_nodes():
+            from fiatlight.app_runner import FIATLIGHT_GUI_CONFIG
+
             last_exception_message = function_node_gui.function_node.function_with_gui.last_exception_message
             last_exception_traceback = function_node_gui.function_node.function_with_gui.last_exception_traceback
             if last_exception_message is not None:
@@ -110,7 +112,7 @@ class FiatlightGui:
                     function_node_gui.function_node
                 )
                 imgui.text_colored(
-                    config.colors.error,
+                    FIATLIGHT_GUI_CONFIG.colors.error,
                     f"Exception in {function_unique_name}: {last_exception_message}",
                 )
                 if last_exception_traceback is not None:

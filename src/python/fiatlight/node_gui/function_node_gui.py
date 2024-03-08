@@ -1,13 +1,8 @@
 from __future__ import annotations
-from fiatlight.function_node import FunctionNode, FunctionNodeLink
-from fiatlight.internal.fl_widgets import draw_node_gui_right_align
-from fiatlight.internal import osd_widgets
-from fiatlight.node_gui.config import config
-from fiatlight.internal import fl_widgets
-from fiatlight.fiatlight_types import UnspecifiedValue
-from fiatlight.function_with_gui import OutputWithGui
+from fiatlight.core import FunctionNode, FunctionNodeLink, UnspecifiedValue, OutputWithGui
+from fiatlight import widgets
+from fiatlight.widgets import IconsFontAwesome6
 from imgui_bundle import imgui, imgui_node_editor as ed, ImVec2, imgui_ctx, hello_imgui
-from fiatlight import IconsFontAwesome6
 from typing import Dict, List, Any
 
 
@@ -63,16 +58,18 @@ class FunctionNodeGui:
     def draw_node(self, unique_name: str) -> None:
         def draw_title() -> None:
             fn_name = self.function_node.function_with_gui.name
-            fl_widgets.text_custom(fn_name)
+            widgets.text_custom(fn_name)
             if unique_name != fn_name:
                 if imgui.is_item_hovered():
-                    osd_widgets.set_tooltip(f" (id: {unique_name})")
+                    widgets.osd_widgets.set_tooltip(f" (id: {unique_name})")
 
             fn_doc = self.function_node.function_with_gui.doc()
             if fn_doc is not None:
                 imgui.text(fn_doc)
 
         def draw_exception_message() -> None:
+            from fiatlight.app_runner import FIATLIGHT_GUI_CONFIG
+
             last_exception_message = self.function_node.function_with_gui.last_exception_message
             if last_exception_message is None:
                 return
@@ -83,8 +80,10 @@ class FunctionNodeGui:
                 exception_width = self.node_size.x - hello_imgui.em_size(2)
                 if exception_width < min_exception_width:
                     exception_width = min_exception_width
-            fl_widgets.text_custom(
-                "Exception:\n" + last_exception_message, max_width_pixels=exception_width, color=config.colors.error
+            widgets.text_custom(
+                "Exception:\n" + last_exception_message,
+                max_width_pixels=exception_width,
+                color=FIATLIGHT_GUI_CONFIG.colors.error,
             )
 
         def draw_function_outputs() -> None:
@@ -94,11 +93,11 @@ class FunctionNodeGui:
                     imgui.text(IconsFontAwesome6.ICON_CIRCLE_RIGHT)
                     ed.end_pin()
 
-                draw_node_gui_right_align(self.node_id, draw)
+                widgets.node_utils.draw_node_gui_right_align(self.node_id, draw)
 
             def draw_output_value(output_idx: int, output_param: OutputWithGui[Any]) -> None:
                 if len(self.function_node.function_with_gui.outputs_with_gui) > 1:
-                    fl_widgets.text_custom(f"Output {output_idx}: ")
+                    widgets.text_custom(f"Output {output_idx}: ")
                 if output_param.data_with_gui.value is None:
                     imgui.text("None")
                 else:
@@ -146,7 +145,7 @@ class FunctionNodeGui:
             self.function_node.invoke_function()
         draw_exception_message()
         output_separator_str = "Outputs" if len(self.function_node.function_with_gui.outputs_with_gui) > 1 else "Output"
-        fl_widgets.node_separator(self.node_id, text=output_separator_str)
+        widgets.node_utils.node_separator(self.node_id, text=output_separator_str)
         draw_function_outputs()
         # imgui.new_line()
         ed.end_node()
@@ -154,7 +153,7 @@ class FunctionNodeGui:
 
 
 def sandbox() -> None:
-    from fiatlight.to_gui import any_function_to_function_with_gui
+    from fiatlight.core import any_function_to_function_with_gui
     from imgui_bundle import immapp
 
     def add(x: int, y: int = 2) -> int:

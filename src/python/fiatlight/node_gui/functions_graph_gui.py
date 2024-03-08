@@ -1,5 +1,5 @@
 from __future__ import annotations
-from fiatlight.functions_graph import FunctionsGraph
+from fiatlight.core import FunctionsGraph
 from fiatlight.node_gui.function_node_gui import FunctionNodeGui, FunctionNodeLinkGui
 from imgui_bundle import imgui, imgui_node_editor as ed, hello_imgui, ImVec2
 from typing import List

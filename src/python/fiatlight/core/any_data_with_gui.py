@@ -2,43 +2,11 @@
 This module provides a class to wrap any data with a GUI (AnyDataWithGui), and a class to wrap a named data with a GUI.
 See example implementation for a custom type at the bottom of this file.
 """
-from fiatlight.fiatlight_types import Error, ErrorValue, Unspecified, UnspecifiedValue, JsonDict, DataType
-from typing import final, Callable, Generic, Tuple
+from fiatlight.core import Error, ErrorValue, Unspecified, UnspecifiedValue, JsonDict, DataType
+from fiatlight.core.any_data_gui_handlers import AnyDataGuiHandlers
+from typing import final, Generic, Tuple
 from imgui_bundle import imgui
-from fiatlight import IconsFontAwesome6
 import logging
-
-
-class AnyDataGuiHandlers(Generic[DataType]):
-    """
-    Collection of callbacks for a given type
-    - edit and present: the GUI implementation of the type
-    - to_dict and from_dict: the serialization and deserialization functions (optional)
-    - default_value_provider: the function that provides a default value for the type
-
-    See example implementation for a custom type at the bottom of this file.
-    """
-
-    # Provide a draw function that presents the data content.
-    # If not provided, the data will be presented using versatile_gui_present
-    gui_present_impl: Callable[[DataType], None] | None = None
-
-    # Provide a draw function that presents an editable interface for the data, and returns (True, new_value) if changed
-    gui_edit_impl: Callable[[DataType], Tuple[bool, DataType]] | None = None
-
-    # (On hold)
-    # Optional serialization and deserialization functions for DataType
-    # If provided, these functions will be used to serialize and deserialize the data with a custom dict format.
-    # If not provided, "value" will be serialized as a dict of its __dict__ attribute,
-    # or as a json string (for int, float, str, bool, and None)
-    # to_dict_impl: Callable[[DataType], JsonDict] | None = None
-    # from_dict_impl: Callable[[JsonDict], DataType] | None = None
-
-    # default value provider: this function will be called to provide a default value if needed
-    default_value_provider: Callable[[], DataType] | None = None
-
-    # on_change: if provided, this function will be called when the value changes
-    on_change: Callable[[DataType], None] | None = None
 
 
 class AnyDataWithGui(Generic[DataType]):
@@ -126,7 +94,7 @@ class AnyDataWithGui(Generic[DataType]):
             imgui.text("Error!")
         else:
             if self.handlers.gui_present_impl is None:
-                from fiatlight.standard_gui_handlers import versatile_gui_present
+                from fiatlight.core.standard_gui_handlers import versatile_gui_present
 
                 versatile_gui_present(self.value)
             else:
@@ -134,6 +102,8 @@ class AnyDataWithGui(Generic[DataType]):
 
     @final
     def call_gui_edit(self) -> bool:
+        from fiatlight.widgets import IconsFontAwesome6
+
         if self.handlers.gui_edit_impl is None:
             self.call_gui_present()
             return False
@@ -209,12 +179,9 @@ def make_foo_gui_handlers(_gui_params: FooGuiParams | None = None) -> AnyDataGui
 
 def test_foo_with_gui() -> None:
     # Register the Foo type with its GUI implementation (do this once at the beginning of your program)
-    from fiatlight.to_gui import ALL_GUI_HANDLERS_FACTORIES
+    from fiatlight.core.to_gui import ALL_GUI_HANDLERS_FACTORIES, any_value_to_data_with_gui
 
     ALL_GUI_HANDLERS_FACTORIES["Foo"] = make_foo_gui_handlers
-
-    # Use the Foo type with its GUI implementation
-    from fiatlight.to_gui import any_value_to_data_with_gui
 
     foo = Foo(1)
     foo_gui = any_value_to_data_with_gui(foo)

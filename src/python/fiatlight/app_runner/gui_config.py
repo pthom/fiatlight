@@ -1,12 +1,12 @@
 from imgui_bundle import ImVec4
 
 
-class FiatLightColors:
+class FiatlightColors:
     error = ImVec4(1.0, 0.6, 0.3, 1)
 
 
 class FiatlightConfig:
-    colors = FiatLightColors()
+    colors = FiatlightColors()
 
 
-config = FiatlightConfig()
+FIATLIGHT_GUI_CONFIG = FiatlightConfig()

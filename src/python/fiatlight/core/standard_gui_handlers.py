@@ -1,10 +1,5 @@
 from imgui_bundle import imgui, hello_imgui, imgui_knobs, imgui_toggle
-from fiatlight.fiatlight_types import UnspecifiedValue, ErrorValue, DataType
-from fiatlight.any_data_with_gui import AnyDataGuiHandlers
-from fiatlight.internal import osd_widgets
-from fiatlight.internal.registry import AutoRegistry
-from fiatlight import IconsFontAwesome6
-
+from fiatlight.core import UnspecifiedValue, ErrorValue, DataType, AnyDataGuiHandlers
 from typing import Any, Callable, TypeAlias, Tuple
 from dataclasses import dataclass
 from enum import Enum
@@ -18,45 +13,10 @@ GuiFunction = Callable[[], None]
 ########################################################################################################################
 
 
-EXPANDED_REGISTRY: AutoRegistry[bool] = AutoRegistry(bool)
-
-
-def _present_expandable_str(value_extract: str, value_full: str) -> None:
-    id = imgui.get_id("expand")  # it will be unique, since a lot of calls of imgui.push_id are made before
-    is_expanded = EXPANDED_REGISTRY.get(id)
-
-    _, is_expanded = imgui.checkbox("Expand", is_expanded)
-    EXPANDED_REGISTRY[id] = is_expanded
-    imgui.same_line()
-
-    def detail_gui() -> None:
-        imgui.input_text_multiline("##value_text", value_full)
-
-    if imgui.button(IconsFontAwesome6.ICON_BOOK):
-        osd_widgets.set_detail_gui(detail_gui)
-
-    # if imgui.button(IconsFontAwesome6.ICON_BOOK):
-    #     imgui.open_popup("expandable_str_popup")
-    # imgui.set_next_window_pos(ed.canvas_to_screen(imgui.get_cursor_pos()), imgui.Cond_.appearing.value)
-    # if imgui.begin_popup("expandable_str_popup"):
-    #     imgui.input_text_multiline("##value_text", value_full, ImVec2(0, hello_imgui.em_size(15)))
-    #     imgui.end_popup()
-
-    if imgui.is_item_hovered():
-        osd_widgets.set_tooltip("Click to show details, then open the Info tab at the bottom to see the full string")
-    imgui.same_line()
-    if imgui.button(IconsFontAwesome6.ICON_COPY):
-        imgui.set_clipboard_text(value_full)
-    if imgui.is_item_hovered():
-        osd_widgets.set_tooltip("Copy to clipboard")
-
-    if not is_expanded:
-        imgui.text(value_extract + "\n[...]")
-    else:
-        imgui.text(value_full)
-
-
 def versatile_gui_present(value: Any) -> None:
+    from fiatlight.widgets.text_custom import present_expandable_str
+    from fiatlight.widgets import osd_widgets
+
     if value is None:
         imgui.text("None")
     elif value is UnspecifiedValue:
@@ -75,7 +35,7 @@ def versatile_gui_present(value: Any) -> None:
         if len(value) < max_len:
             imgui.text('"' + value + '"')
         else:
-            _present_expandable_str(value[:max_len], value)
+            present_expandable_str(value[:max_len], value)
     elif isinstance(value, list):
         value_full_str = "\n".join(str(item) for item in value)
         imgui.text(f"list len={len(value)}")
@@ -84,7 +44,7 @@ def versatile_gui_present(value: Any) -> None:
             imgui.text(value_full_str)
         else:
             value_extract_str = "\n".join(str(item) for item in value[:max_len])
-            _present_expandable_str(value_extract_str, value_full_str)
+            present_expandable_str(value_extract_str, value_full_str)
     elif isinstance(value, tuple):
         imgui.text(f"Tuple len={len(value)}")
         strs = [str(v) for v in value]
@@ -383,6 +343,8 @@ def make_str_gui_handlers(params: StrWithGuiParams | None = None) -> AnyDataGuiH
 ########################################################################################################################
 def make_list_gui_handlers(item_gui_handlers: AnyDataGuiHandlers[DataType]) -> AnyDataGuiHandlers[list[DataType]]:
     def edit(x: list[Any]) -> Tuple[bool, list[Any]]:
+        from fiatlight.widgets import IconsFontAwesome6
+
         assert isinstance(x, list)
         item_gui_edit_impl = item_gui_handlers.gui_edit_impl
         default_value_provider = item_gui_handlers.default_value_provider

@@ -1,13 +1,8 @@
-from fiatlight.fiatlight_types import UnspecifiedValue, DataType
-from fiatlight.any_data_with_gui import AnyDataGuiHandlers, AnyDataWithGui
-from fiatlight.function_with_gui import FunctionWithGui, ParamKind, ParamWithGui, OutputWithGui
-from fiatlight.standard_gui_handlers import make_list_gui_handlers
-from fiatlight.standard_gui_handlers import (
-    make_int_gui_handlers,
-    make_str_gui_handlers,
-    make_bool_gui_handlers,
-    make_float_gui_handlers,
-)
+from fiatlight.core import UnspecifiedValue, DataType, AnyDataGuiHandlers
+from fiatlight.core.any_data_with_gui import AnyDataWithGui
+from fiatlight.core.function_with_gui import FunctionWithGui, ParamKind, ParamWithGui, OutputWithGui
+from fiatlight.core import standard_gui_handlers
+
 import inspect
 import logging
 from typing import TypeAlias, Callable, Any, Dict
@@ -24,7 +19,7 @@ def any_typeclass_to_data_handlers(type_class_name: str) -> AnyDataGuiHandlers[A
     if is_list:
         list_type_str = type_class_name[type_class_name.index("[") + 1 : -1]
         item_handlers = any_typeclass_to_data_handlers(list_type_str)
-        list_handlers = make_list_gui_handlers(item_handlers)
+        list_handlers = standard_gui_handlers.make_list_gui_handlers(item_handlers)
         return list_handlers
     else:
         if type_class_name in ALL_GUI_HANDLERS_FACTORIES:
@@ -104,10 +99,10 @@ def any_function_to_function_with_gui(f: Callable[..., Any]) -> FunctionWithGui:
 Typename: TypeAlias = str
 
 ALL_GUI_HANDLERS_FACTORIES: Dict[Typename, GuiHandlersFactory[Any]] = {
-    "int": make_int_gui_handlers,
-    "float": make_float_gui_handlers,
-    "str": make_str_gui_handlers,
-    "bool": make_bool_gui_handlers,
+    "int": standard_gui_handlers.make_int_gui_handlers,
+    "float": standard_gui_handlers.make_float_gui_handlers,
+    "str": standard_gui_handlers.make_str_gui_handlers,
+    "bool": standard_gui_handlers.make_bool_gui_handlers,
     # "List[str]": make_bool_gui_handlers,
     # "List[bool]": make_bool_gui_handlers,
 }
