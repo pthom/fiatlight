@@ -58,6 +58,14 @@ class AnyDataWithGui(Generic[DataType]):
         if self.callbacks.on_change is not None and isinstance(new_value, (Unspecified, Error)) is False:
             self.callbacks.on_change(new_value)  # type: ignore
 
+    def get_actual_value(self) -> DataType:
+        if isinstance(self.value, Unspecified):
+            raise ValueError("Cannot get value of Unspecified")
+        elif isinstance(self.value, Error):
+            raise ValueError("Cannot get value of Error")
+        else:
+            return self.value
+
     def to_json(self) -> JsonDict:
         if isinstance(self.value, Unspecified):
             return {"type": "Unspecified"}

@@ -19,7 +19,7 @@ def any_typeclass_to_gui(type_class_name: str) -> AnyDataWithGui[Any]:
     if is_list:
         list_type_str = type_class_name[type_class_name.index("[") + 1 : -1]
         item_gui = any_typeclass_to_gui(list_type_str)
-        list_gui = primitives_gui.make_list_gui(item_gui.callbacks)
+        list_gui = primitives_gui.ListWithGui(item_gui.callbacks)
         return list_gui
     else:
         if type_class_name in ALL_GUI_FACTORIES:
@@ -96,8 +96,8 @@ def any_function_to_function_with_gui(f: Callable[..., Any]) -> FunctionWithGui:
 Typename: TypeAlias = str
 
 ALL_GUI_FACTORIES: Dict[Typename, GuiFactory[Any]] = {
-    "int": primitives_gui.make_int_gui,
-    "float": primitives_gui.make_float_gui,
-    "str": primitives_gui.make_str_gui,
-    "bool": primitives_gui.make_bool_gui,
+    "int": primitives_gui.IntWithGui,
+    "float": primitives_gui.FloatWithGui,
+    "str": primitives_gui.StrWithGui,
+    "bool": primitives_gui.BoolWithGui,
 }

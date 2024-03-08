@@ -93,55 +93,56 @@ class IntWithGuiParams:
     knob_steps: int = 0
 
 
-def make_int_gui(params: IntWithGuiParams | None = None) -> AnyDataWithGui[int]:
-    _params = params if params is not None else IntWithGuiParams()
+class IntWithGui(AnyDataWithGui[int]):
+    params: IntWithGuiParams
 
-    def edit(x: int) -> Tuple[bool, int]:
-        assert isinstance(x, int)
-        changed = False
-        imgui.set_next_item_width(hello_imgui.em_size(_params.width_em))
-        if _params.edit_type == IntEditType.slider:
-            changed, x = imgui.slider_int(
-                _params.label,
-                x,
-                _params.v_min,
-                _params.v_max,
-                _params.format,
-                _params.slider_flags,
-            )
-        elif _params.edit_type == IntEditType.input:
-            changed, x = imgui.input_int(
-                _params.label, x, _params.input_step, _params.input_step_fast, _params.input_flags
-            )
-        elif _params.edit_type == IntEditType.drag:
-            changed, x = imgui.drag_int(
-                _params.label,
-                x,
-                _params.v_speed,
-                _params.v_min,
-                _params.v_max,
-                _params.format,
-                _params.slider_flags,
-            )
-        elif _params.edit_type == IntEditType.knob:
-            changed, x = imgui_knobs.knob_int(
-                _params.label,
-                x,
-                _params.v_min,
-                _params.v_max,
-                _params.knob_speed,
-                _params.format,
-                _params.knob_variant,
-                hello_imgui.em_size(_params.knob_size_em),
-                _params.knob_steps,
-            )
+    def __init__(self, params: IntWithGuiParams | None = None) -> None:
+        super().__init__()
+        self.params = params if params is not None else IntWithGuiParams()
 
-        return changed, x
+        def edit(x: int) -> Tuple[bool, int]:
+            assert isinstance(x, int)
+            changed = False
+            imgui.set_next_item_width(hello_imgui.em_size(self.params.width_em))
+            if self.params.edit_type == IntEditType.slider:
+                changed, x = imgui.slider_int(
+                    self.params.label,
+                    x,
+                    self.params.v_min,
+                    self.params.v_max,
+                    self.params.format,
+                    self.params.slider_flags,
+                )
+            elif self.params.edit_type == IntEditType.input:
+                changed, x = imgui.input_int(
+                    self.params.label, x, self.params.input_step, self.params.input_step_fast, self.params.input_flags
+                )
+            elif self.params.edit_type == IntEditType.drag:
+                changed, x = imgui.drag_int(
+                    self.params.label,
+                    x,
+                    self.params.v_speed,
+                    self.params.v_min,
+                    self.params.v_max,
+                    self.params.format,
+                    self.params.slider_flags,
+                )
+            elif self.params.edit_type == IntEditType.knob:
+                changed, x = imgui_knobs.knob_int(
+                    self.params.label,
+                    x,
+                    self.params.v_min,
+                    self.params.v_max,
+                    self.params.knob_speed,
+                    self.params.format,
+                    self.params.knob_variant,
+                    hello_imgui.em_size(self.params.knob_size_em),
+                    self.params.knob_steps,
+                )
+            return changed, x
 
-    r = AnyDataWithGui[int]()
-    r.callbacks.edit = edit
-    r.callbacks.default_value_provider = lambda: 0
-    return r
+        self.callbacks.edit = edit
+        self.callbacks.default_value_provider = lambda: 0
 
 
 ########################################################################################################################
@@ -177,61 +178,62 @@ class FloatWithGuiParams:
     knob_steps: int = 0
 
 
-def make_float_gui(params: FloatWithGuiParams | None = None) -> AnyDataWithGui[float]:
-    if params is None:
-        params = FloatWithGuiParams()
+class FloatWithGui(AnyDataWithGui[float]):
+    params: FloatWithGuiParams
 
-    def edit(x: float) -> Tuple[bool, float]:
-        assert isinstance(x, float)
-        changed = False
-        imgui.set_next_item_width(hello_imgui.em_size(params.width_em))
-        if params.edit_type == FloatEditType.slider:
-            changed, x = imgui.slider_float(
-                params.label,
-                x,
-                params.v_min,
-                params.v_max,
-                params.format,
-                params.slider_flags,
-            )
-        elif params.edit_type == FloatEditType.input:
-            changed, x = imgui.input_float(
-                params.label,
-                x,
-                params.input_step,
-                params.input_step_fast,
-                params.format,
-                params.input_flags,
-            )
-        elif params.edit_type == FloatEditType.drag:
-            changed, x = imgui.drag_float(
-                params.label,
-                x,
-                params.v_speed,
-                params.v_min,
-                params.v_max,
-                params.format,
-                params.slider_flags,
-            )
-        elif params.edit_type == FloatEditType.knob:
-            changed, x = imgui_knobs.knob(
-                params.label,
-                x,
-                params.v_min,
-                params.v_max,
-                params.knob_speed,
-                params.format,
-                params.knob_variant,
-                hello_imgui.em_size(params.knob_size_em),
-                params.knob_steps,
-            )
+    def __init__(self, params: FloatWithGuiParams | None = None) -> None:
+        super().__init__()
+        self.params = params if params is not None else FloatWithGuiParams()
 
-        return changed, x
+        def edit(x: float) -> Tuple[bool, float]:
+            assert isinstance(x, float)
+            changed = False
+            imgui.set_next_item_width(hello_imgui.em_size(self.params.width_em))
+            if self.params.edit_type == FloatEditType.slider:
+                changed, x = imgui.slider_float(
+                    self.params.label,
+                    x,
+                    self.params.v_min,
+                    self.params.v_max,
+                    self.params.format,
+                    self.params.slider_flags,
+                )
+            elif self.params.edit_type == FloatEditType.input:
+                changed, x = imgui.input_float(
+                    self.params.label,
+                    x,
+                    self.params.input_step,
+                    self.params.input_step_fast,
+                    self.params.format,
+                    self.params.input_flags,
+                )
+            elif self.params.edit_type == FloatEditType.drag:
+                changed, x = imgui.drag_float(
+                    self.params.label,
+                    x,
+                    self.params.v_speed,
+                    self.params.v_min,
+                    self.params.v_max,
+                    self.params.format,
+                    self.params.slider_flags,
+                )
+            elif self.params.edit_type == FloatEditType.knob:
+                changed, x = imgui_knobs.knob(
+                    self.params.label,
+                    x,
+                    self.params.v_min,
+                    self.params.v_max,
+                    self.params.knob_speed,
+                    self.params.format,
+                    self.params.knob_variant,
+                    hello_imgui.em_size(self.params.knob_size_em),
+                    self.params.knob_steps,
+                )
 
-    r = AnyDataWithGui[float]()
-    r.callbacks.edit = edit
-    r.callbacks.default_value_provider = lambda: 0.0
-    return r
+            return changed, x
+
+        self.callbacks.edit = edit
+        self.callbacks.default_value_provider = lambda: 0.0
 
 
 ########################################################################################################################
@@ -252,32 +254,32 @@ class BoolWithGuiParams:
     toggle_config: ToggleConfig | None = None
 
 
-def make_bool_gui(params: BoolWithGuiParams | None = None) -> AnyDataWithGui[bool]:
-    if params is None:
-        params = BoolWithGuiParams()
+class BoolWithGui(AnyDataWithGui[bool]):
+    params: BoolWithGuiParams
 
-    def edit(x: bool) -> Tuple[bool, bool]:
-        assert params is not None
-        assert isinstance(x, bool)
-        changed = False
-        if params.edit_type == BoolEditType.checkbox:
-            changed, x = imgui.checkbox(params.label, x)
-        elif params.edit_type == BoolEditType.radio_button:
-            new_x = imgui.radio_button(params.label, x)
-            if new_x != x:
-                x = new_x
-                changed = True
-        elif params.edit_type == BoolEditType.toggle:
-            if params.toggle_config is None:
-                raise ValueError("toggle_config must be set for BoolEditType.toggle")
-            changed, x = imgui_toggle.toggle(params.label, x, params.toggle_config)
+    def __init__(self, params: BoolWithGuiParams | None = None):
+        super().__init__()
+        self.params = params if params is not None else BoolWithGuiParams()
 
-        return changed, x
+        def edit(x: bool) -> Tuple[bool, bool]:
+            assert isinstance(x, bool)
+            changed = False
+            if self.params.edit_type == BoolEditType.checkbox:
+                changed, x = imgui.checkbox(self.params.label, x)
+            elif self.params.edit_type == BoolEditType.radio_button:
+                new_x = imgui.radio_button(self.params.label, x)
+                if new_x != x:
+                    x = new_x
+                    changed = True
+            elif self.params.edit_type == BoolEditType.toggle:
+                if self.params.toggle_config is None:
+                    raise ValueError("toggle_config must be set for BoolEditType.toggle")
+                changed, x = imgui_toggle.toggle(self.params.label, x, self.params.toggle_config)
 
-    r = AnyDataWithGui[bool]()
-    r.callbacks.edit = edit
-    r.callbacks.default_value_provider = lambda: False
-    return r
+            return changed, x
+
+        self.callbacks.edit = edit
+        self.callbacks.default_value_provider = lambda: False
 
 
 ########################################################################################################################
@@ -286,7 +288,7 @@ def make_bool_gui(params: BoolWithGuiParams | None = None) -> AnyDataWithGui[boo
 class StrEditType(Enum):
     input = 1
     input_with_hint = 2
-    multiline = 3
+    multiline = 3  # multiline text input does *not* work inside a Node
 
 
 @dataclass
@@ -305,49 +307,72 @@ class StrWithGuiParams:
     height_em: int = 5
 
 
-def make_str_gui(params: StrWithGuiParams | None = None) -> AnyDataWithGui[str]:
-    if params is None:
-        params = StrWithGuiParams()
+class StrWithGui(AnyDataWithGui[str]):
+    params: StrWithGuiParams
 
-    def edit(x: str) -> Tuple[bool, str]:
-        assert isinstance(x, str)
-        changed = False
-        imgui.set_next_item_width(hello_imgui.em_size(params.width_em))
-        if params.edit_type == StrEditType.input:
-            changed, x = imgui.input_text(params.label, x, params.input_flags, params.callback, params.user_data)
-        elif params.edit_type == StrEditType.input_with_hint:
-            changed, x = imgui.input_text_with_hint(
-                params.label,
-                params.hint,
-                x,
-                params.input_flags,
-                params.callback,
-                params.user_data,
-            )
-        elif params.edit_type == StrEditType.multiline:
-            size = hello_imgui.em_to_vec2(params.width_em, params.height_em)
-            changed, x = imgui.input_text_multiline(
-                params.label, x, size, params.input_flags, params.callback, params.user_data
-            )
+    def __init__(self, params: StrWithGuiParams | None = None) -> None:
+        super().__init__()
+        self.params = params if params is not None else StrWithGuiParams()
 
-        return changed, x
+        def edit(x: str) -> Tuple[bool, str]:
+            assert isinstance(x, str)
+            changed = False
+            imgui.set_next_item_width(hello_imgui.em_size(self.params.width_em))
+            if self.params.edit_type == StrEditType.input:
+                changed, x = imgui.input_text(
+                    self.params.label, x, self.params.input_flags, self.params.callback, self.params.user_data
+                )
+            elif self.params.edit_type == StrEditType.input_with_hint:
+                changed, x = imgui.input_text_with_hint(
+                    self.params.label,
+                    self.params.hint,
+                    x,
+                    self.params.input_flags,
+                    self.params.callback,
+                    self.params.user_data,
+                )
+            elif self.params.edit_type == StrEditType.multiline:
+                size = hello_imgui.em_to_vec2(self.params.width_em, self.params.height_em)
+                changed, x = imgui.input_text_multiline(
+                    self.params.label, x, size, self.params.input_flags, self.params.callback, self.params.user_data
+                )
 
-    r = AnyDataWithGui[str]()
-    r.callbacks.edit = edit
-    r.callbacks.default_value_provider = lambda: ""
-    return r
+            return changed, x
+
+        self.callbacks.edit = edit
+        self.callbacks.default_value_provider = lambda: ""
 
 
 ########################################################################################################################
 #                               List Handlers
 ########################################################################################################################
-def make_list_gui(item_gui_handlers: AnyDataGuiCallbacks[DataType]) -> AnyDataWithGui[list[DataType]]:
-    def edit(x: list[Any]) -> Tuple[bool, list[Any]]:
+class ListWithGui(AnyDataWithGui[list[DataType]]):
+    item_gui_handlers: AnyDataGuiCallbacks[DataType]
+
+    def __init__(self, item_gui_handlers: AnyDataGuiCallbacks[DataType]) -> None:
+        super().__init__()
+        self.item_gui_handlers = item_gui_handlers
+        self.callbacks.edit = lambda x: self.edit(x)
+        self.callbacks.default_value_provider = lambda: []
+        # def present(x: list[Any]) -> None:
+        #     for i, item in enumerate(x):
+        #         item_gui_handlers.present(item)
+
+        # item_to_dict_impl = item_gui_handlers.to_dict_impl
+        # item_from_dict_impl = item_gui_handlers.from_dict_impl
+        # if item_to_dict_impl is not None and item_from_dict_impl is not None:
+        #     r.to_dict_impl = lambda x: {"values": [item_to_dict_impl(item) for item in x]}
+        #     r.from_dict_impl = lambda d: [item_from_dict_impl(item_dict) for item_dict in d["values"]]
+        # else:
+        #     r.to_dict_impl = lambda x: {"values": x}
+        #     r.from_dict_impl = lambda d: d["values"]
+
+    def edit(self, x: list[Any]) -> Tuple[bool, list[Any]]:
         from fiatlight.widgets import IconsFontAwesome6
 
         assert isinstance(x, list)
-        item_gui_edit_impl = item_gui_handlers.edit
-        default_value_provider = item_gui_handlers.default_value_provider
+        item_gui_edit_impl = self.item_gui_handlers.edit
+        default_value_provider = self.item_gui_handlers.default_value_provider
 
         if item_gui_edit_impl is None:
             return False, x
@@ -384,25 +409,6 @@ def make_list_gui(item_gui_handlers: AnyDataGuiCallbacks[DataType]) -> AnyDataWi
 
         return changed, new_x
 
-    # def present(x: list[Any]) -> None:
-    #     for i, item in enumerate(x):
-    #         item_gui_handlers.present(item)
-
-    r = AnyDataWithGui[list[Any]]()
-    r.callbacks.edit = edit
-    r.callbacks.default_value_provider = lambda: []
-
-    # item_to_dict_impl = item_gui_handlers.to_dict_impl
-    # item_from_dict_impl = item_gui_handlers.from_dict_impl
-    # if item_to_dict_impl is not None and item_from_dict_impl is not None:
-    #     r.to_dict_impl = lambda x: {"values": [item_to_dict_impl(item) for item in x]}
-    #     r.from_dict_impl = lambda d: [item_from_dict_impl(item_dict) for item_dict in d["values"]]
-    # else:
-    #     r.to_dict_impl = lambda x: {"values": x}
-    #     r.from_dict_impl = lambda d: d["values"]
-
-    return r
-
 
 ########################################################################################################################
 #                               __all__
@@ -412,22 +418,24 @@ __all__ = [
     # Ints
     "IntWithGuiParams",
     "IntEditType",
-    "make_int_gui",
+    "IntWithGui",
     # Floats
     "FloatWithGuiParams",
     "FloatEditType",
-    "make_float_gui",
+    "FloatWithGui",
     "ImGuiKnobVariant_",
     # Str
     "StrWithGuiParams",
     "StrEditType",
-    "make_str_gui",
+    "StrWithGui",
     # Bool
     "ToggleConfig",
     "BoolWithGuiParams",
     "BoolEditType",
-    "make_bool_gui",
-    #
+    "BoolWithGui",
+    # List
+    "ListWithGui",
+    # Versatile present
     "versatile_gui_present",
 ]
 
