@@ -1,7 +1,4 @@
-from typing import Any
-from fiatlight import FunctionWithGui
 from fiatlight.computer_vision import ImageUInt8
-from fiatlight.computer_vision.image_with_gui import ImageWithGui, ImageChannelsWithGui
 
 import numpy as np
 
@@ -12,36 +9,37 @@ def split_channels(image: ImageUInt8) -> ImageUInt8:
     return depth_first
 
 
-class SplitChannelsWithGui(FunctionWithGui):
-    def __init__(self) -> None:
-        self.input_gui = ImageWithGui()
-        self.output_gui = ImageChannelsWithGui()
-        self.name = "Split Channels"
-
-        def f(x: Any) -> Any:
-            assert type(x) == np.ndarray
-            channels = split_channels(x)
-            return channels
-
-        self.f_impl = f
-
-
-class MergeChannelsWithGui(FunctionWithGui):
-    def __init__(self) -> None:
-        self.input_gui = ImageChannelsWithGui()
-        self.output_gui = ImageWithGui()
-        self.name = "Merge Channels"
-
-        def f(x: Any) -> Any:
-            assert type(x) == np.ndarray
-            channels = [c for c in x]
-            image_stacked = np.dstack(channels)
-            # image_uint8 = (image_stacked * 255.0).astype("uint8")
-            return image_stacked
-
-        self.f_impl = f
-
-
+#
+# class SplitChannelsWithGui(FunctionWithGui):
+#     def __init__(self) -> None:
+#         self.input_gui = ImageWithGui()
+#         self.output_gui = ImageChannelsWithGui()
+#         self.name = "Split Channels"
+#
+#         def f(x: Any) -> Any:
+#             assert type(x) == np.ndarray
+#             channels = split_channels(x)
+#             return channels
+#
+#         self.f_impl = f
+#
+#
+# class MergeChannelsWithGui(FunctionWithGui):
+#     def __init__(self) -> None:
+#         self.input_gui = ImageChannelsWithGui()
+#         self.output_gui = ImageWithGui()
+#         self.name = "Merge Channels"
+#
+#         def f(x: Any) -> Any:
+#             assert type(x) == np.ndarray
+#             channels = [c for c in x]
+#             image_stacked = np.dstack(channels)
+#             # image_uint8 = (image_stacked * 255.0).astype("uint8")
+#             return image_stacked
+#
+#         self.f_impl = f
+#
+#
 # class ConvertColorWithGui(FunctionWithGui):
 #     color_conversion_with_gui: AnyDataGuiHandlers[cv_color_type.ColorConversion]
 #     input_gui: ImageWithGui

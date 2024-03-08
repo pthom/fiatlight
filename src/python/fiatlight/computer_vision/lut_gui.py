@@ -1,3 +1,5 @@
+# type: ignore
+
 from typing import Tuple, Optional, TypeAlias
 import math
 from fiatlight import FunctionWithGui, AnyDataWithGui, ParamWithGui, ParamKind
