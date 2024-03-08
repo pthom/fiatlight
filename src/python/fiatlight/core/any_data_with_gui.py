@@ -2,9 +2,18 @@
 This module provides a class to wrap any data with a GUI (AnyDataWithGui), and a class to wrap a named data with a GUI.
 See example implementation for a custom type at the bottom of this file.
 """
-from fiatlight.core import Error, ErrorValue, Unspecified, UnspecifiedValue, JsonDict, DataType
+from fiatlight.core import (
+    Error,
+    ErrorValue,
+    Unspecified,
+    UnspecifiedValue,
+    JsonDict,
+    DataType,
+    VoidFunction,
+    BoolFunction,
+)
 from fiatlight.core.any_data_gui_callbacks import AnyDataGuiCallbacks
-from typing import final, Generic, Tuple, Callable
+from typing import final, Generic, Callable
 from imgui_bundle import imgui
 import logging
 
@@ -15,7 +24,7 @@ class AnyDataWithGui(Generic[DataType]):
     See example implementation for a custom type at the bottom of this file.
     """
 
-    # The value of the data
+    # The value of the data - can be a DataType, Unspecified, or Error
     _value: DataType | Unspecified | Error = UnspecifiedValue
 
     # Handlers
@@ -36,10 +45,10 @@ class AnyDataWithGui(Generic[DataType]):
 
     @staticmethod
     def from_callbacks(
-        present: Callable[[DataType], None] | None = None,
-        edit: Callable[[DataType], Tuple[bool, DataType]] | None = None,
+        present: VoidFunction | None = None,
+        edit: BoolFunction | None = None,
         default_value_provider: Callable[[], DataType] | None = None,
-        on_change: Callable[[DataType], None] | None = None,
+        on_change: VoidFunction | None = None,
     ) -> "AnyDataWithGui[DataType]":
         r = AnyDataWithGui[DataType]()
         r.callbacks.present = present
@@ -56,7 +65,7 @@ class AnyDataWithGui(Generic[DataType]):
     def value(self, new_value: DataType | Unspecified | Error) -> None:
         self._value = new_value
         if self.callbacks.on_change is not None and isinstance(new_value, (Unspecified, Error)) is False:
-            self.callbacks.on_change(new_value)  # type: ignore
+            self.callbacks.on_change()
 
     def get_actual_value(self) -> DataType:
         if isinstance(self.value, Unspecified):
@@ -125,7 +134,7 @@ class AnyDataWithGui(Generic[DataType]):
 
                 versatile_gui_present(self.value)
             else:
-                self.callbacks.present(self.value)
+                self.callbacks.present()
 
     @final
     def call_gui_edit(self) -> bool:
@@ -149,9 +158,7 @@ class AnyDataWithGui(Generic[DataType]):
                 else:
                     return False
         else:
-            changed, new_value = self.callbacks.edit(self.value)
-            if changed:
-                self.value = new_value
+            changed = self.callbacks.edit()
             imgui.same_line()
             if imgui.button(IconsFontAwesome6.ICON_TRASH_CAN):
                 self.value = UnspecifiedValue
@@ -171,23 +178,19 @@ class Foo:
 
 class FooWithGui(AnyDataWithGui[Foo]):
     def __init__(self) -> None:
-        # Edit and present functions
-        def edit(value: Foo) -> Tuple[bool, Foo]:
-            changed, value.x = imgui.input_int("x", value.x)
-            return changed, value
-
-        def present(value: Foo) -> None:
-            imgui.text(f"x: {value.x}")
-
-        # Optional implementation of serialization and deserialization functions
-        # (if not provided, the default serialization will be used, by serializing the __dict__ attribute of the value)
-        # r.to_dict_impl = lambda x: {"x": x.x}
-        # r.from_dict_impl = lambda d: Foo(x=d["x"])
-
         super().__init__()
-        self.callbacks.edit = edit
-        self.callbacks.present = present
+        self.callbacks.edit = self.edit
+        self.callbacks.present = self.present
         self.callbacks.default_value_provider = lambda: Foo(x=0)
+
+    # Edit and present functions
+    def edit(self) -> bool:
+        assert isinstance(self.value, Foo)
+        changed, self.value.x = imgui.input_int("x", self.value.x)
+        return changed
+
+    def present(self) -> None:
+        imgui.text(f"x: {self.get_actual_value()}")
 
 
 def test_foo_with_gui() -> None:

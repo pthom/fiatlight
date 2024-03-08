@@ -16,8 +16,8 @@ def test_create_function_with_gui() -> None:
     class FooWithGui(AnyDataWithGui[Foo]):
         def __init__(self) -> None:
             super().__init__()
-            self.callbacks.edit = lambda x: (False, x)
-            self.callbacks.present = lambda x: None
+            self.callbacks.edit = lambda: False
+            self.callbacks.present = lambda: None
             # self.callbacks.to_dict_impl = lambda x: {"a": x.a}
             # self.callbacks.from_dict_impl = lambda d: Foo(a=d["a"])
 

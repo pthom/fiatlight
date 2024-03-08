@@ -34,25 +34,28 @@ class ColorConversionWithGui(AnyDataWithGui[ColorConversion]):
 
     def __init__(self) -> None:
         super().__init__()
-
-        def edit(x: ColorConversion) -> Tuple[bool, ColorConversion]:
-            from fiatlight.widgets import IconsFontAwesome6
-
-            imgui.text(str(x))
-            imgui.same_line()
-            icon = (
-                IconsFontAwesome6.ICON_SQUARE_CARET_UP
-                if self.show_edit_details
-                else IconsFontAwesome6.ICON_SQUARE_CARET_DOWN
-            )
-            if imgui.button(icon):
-                self.show_edit_details = not self.show_edit_details
-            if self.show_edit_details:
-                changed, x = gui_color_conversion(x)
-                return changed, x
-            else:
-                return False, x
-
-        self.callbacks.edit = edit
-        self.callbacks.present = lambda x: imgui.text(str(x))
+        self.callbacks.edit = self.edit
+        self.callbacks.present = self.present
         self.callbacks.default_value_provider = lambda: ColorConversion(ColorType.BGR, ColorType.RGB)
+
+    def present(self) -> None:
+        imgui.text(str(self.get_actual_value()))
+
+    def edit(self) -> bool:
+        value = self.get_actual_value()
+        from fiatlight.widgets import IconsFontAwesome6
+
+        imgui.text(str(value))
+        imgui.same_line()
+        icon = (
+            IconsFontAwesome6.ICON_SQUARE_CARET_UP
+            if self.show_edit_details
+            else IconsFontAwesome6.ICON_SQUARE_CARET_DOWN
+        )
+        if imgui.button(icon):
+            self.show_edit_details = not self.show_edit_details
+        if self.show_edit_details:
+            changed, value = gui_color_conversion(value)
+            return changed
+        else:
+            return False

@@ -17,10 +17,7 @@ def any_typeclass_to_gui(type_class_name: str) -> AnyDataWithGui[Any]:
 
     is_list = type_class_name.startswith("typing.List") or type_class_name.startswith("list")
     if is_list:
-        list_type_str = type_class_name[type_class_name.index("[") + 1 : -1]
-        item_gui = any_typeclass_to_gui(list_type_str)
-        list_gui = primitives_gui.ListWithGui(item_gui.callbacks)
-        return list_gui
+        return primitives_gui.ListWithGui()
     else:
         if type_class_name in ALL_GUI_FACTORIES:
             return ALL_GUI_FACTORIES[type_class_name]()
