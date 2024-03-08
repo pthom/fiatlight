@@ -15,15 +15,11 @@ def any_typeclass_to_gui(type_class_name: str) -> AnyDataWithGui[Any]:
     if type_class_name.startswith("<class '") and type_class_name.endswith("'>"):
         type_class_name = type_class_name[8:-2]
 
-    is_list = type_class_name.startswith("typing.List") or type_class_name.startswith("list")
-    if is_list:
-        return primitives_gui.ListWithGui()
-    else:
-        if type_class_name in ALL_GUI_FACTORIES:
-            return ALL_GUI_FACTORIES[type_class_name]()
-        # if we reach this point, we have no GUI implementation for the type
-        logging.warning(f"Type {type_class_name} not supported by any_typeclass_to_data_with_gui")
-        return AnyDataWithGui.make_default()
+    if type_class_name in ALL_GUI_FACTORIES:
+        return ALL_GUI_FACTORIES[type_class_name]()
+    # if we reach this point, we have no GUI implementation for the type
+    logging.warning(f"Type {type_class_name} not supported by any_typeclass_to_data_with_gui")
+    return AnyDataWithGui.make_default()
 
 
 def any_value_to_data_with_gui(value: DataType) -> AnyDataWithGui[DataType]:

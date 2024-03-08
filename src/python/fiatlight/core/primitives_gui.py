@@ -1,5 +1,5 @@
 from imgui_bundle import imgui, hello_imgui, imgui_knobs, imgui_toggle
-from fiatlight.core import UnspecifiedValue, ErrorValue, DataType, AnyDataWithGui
+from fiatlight.core import UnspecifiedValue, ErrorValue, AnyDataWithGui
 from typing import Any, Callable, TypeAlias
 from dataclasses import dataclass
 from enum import Enum
@@ -348,20 +348,6 @@ class StrWithGui(AnyDataWithGui[str]):
 
 
 ########################################################################################################################
-#                               List Handlers
-########################################################################################################################
-class ListWithGui(AnyDataWithGui[list[DataType]]):
-    def __init__(self) -> None:
-        super().__init__()
-        self.callbacks.edit = self.edit
-        self.callbacks.default_value_provider = lambda: []
-
-    def edit(self) -> bool:
-        imgui.text("Edit not implemented for ListWithGui")
-        return False
-
-
-########################################################################################################################
 #                               __all__
 ########################################################################################################################
 
@@ -384,8 +370,6 @@ __all__ = [
     "BoolWithGuiParams",
     "BoolEditType",
     "BoolWithGui",
-    # List
-    "ListWithGui",
     # Versatile present
     "versatile_gui_present",
 ]
