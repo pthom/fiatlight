@@ -1,4 +1,6 @@
-from fiatlight.core.function_with_gui import FunctionWithGui, JsonDict, ParamWithGui
+from fiatlight.core.function_with_gui import FunctionWithGui, ParamWithGui
+from fiatlight.core import JsonDict
+from typing import Any
 
 
 class FunctionNodeLink:
@@ -51,7 +53,7 @@ class FunctionNode:
         r = any(link.dst_input_name == parameter_name for link in self.input_links)
         return r
 
-    def user_editable_params(self) -> list[ParamWithGui]:
+    def user_editable_params(self) -> list[ParamWithGui[Any]]:
         r = [param for param in self.function_with_gui.inputs_with_gui if not self.has_input_link(param.name)]
         return r
 

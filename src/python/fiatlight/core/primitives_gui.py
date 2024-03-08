@@ -13,8 +13,18 @@ GuiFunction = Callable[[], None]
 
 
 def versatile_gui_present(value: Any) -> None:
-    from fiatlight.widgets.text_custom import present_expandable_str
-    from fiatlight.widgets import osd_widgets
+    from fiatlight import widgets
+
+    def show_text(s: str) -> None:
+        widgets.text_maybe_truncated(
+            s,
+            max_width_chars=30,
+            max_lines=10,
+            show_full_as_tooltip=False,
+            show_copy_button=True,
+            show_details_button=True,
+            show_expand_checkbox=True,
+        )
 
     if value is None:
         imgui.text("None")
@@ -27,23 +37,14 @@ def versatile_gui_present(value: Any) -> None:
     elif isinstance(value, float):
         imgui.text(f"{value:.4f}")
         if imgui.is_item_hovered():
-            osd_widgets.set_tooltip(f"{value}")
+            widgets.osd_widgets.set_tooltip(f"{value}")
     elif isinstance(value, str):
         imgui.text(f"str len={len(value)}")
-        max_len = 30
-        if len(value) < max_len:
-            imgui.text('"' + value + '"')
-        else:
-            present_expandable_str(value[:max_len], value)
+        show_text(value)
     elif isinstance(value, list):
         value_full_str = "\n".join(str(item) for item in value)
         imgui.text(f"list len={len(value)}")
-        max_len = 10
-        if len(value) < max_len:
-            imgui.text(value_full_str)
-        else:
-            value_extract_str = "\n".join(str(item) for item in value[:max_len])
-            present_expandable_str(value_extract_str, value_full_str)
+        show_text(value_full_str)
     elif isinstance(value, tuple):
         imgui.text(f"Tuple len={len(value)}")
         strs = [str(v) for v in value]
