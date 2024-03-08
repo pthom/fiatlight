@@ -12,10 +12,10 @@ class AnyDataGuiHandlers(Generic[DataType]):
 
     # Provide a draw function that presents the data content.
     # If not provided, the data will be presented using versatile_gui_present
-    gui_present_impl: Callable[[DataType], None] | None = None
+    present: Callable[[DataType], None] | None = None
 
     # Provide a draw function that presents an editable interface for the data, and returns (True, new_value) if changed
-    gui_edit_impl: Callable[[DataType], Tuple[bool, DataType]] | None = None
+    edit: Callable[[DataType], Tuple[bool, DataType]] | None = None
 
     # (On hold)
     # Optional serialization and deserialization functions for DataType

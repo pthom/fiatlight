@@ -42,8 +42,8 @@ class AnyDataWithGui(Generic[DataType]):
         on_change: Callable[[DataType], None] | None = None,
     ) -> "AnyDataWithGui[DataType]":
         r = AnyDataWithGui[DataType]()
-        r.handlers.gui_present_impl = present
-        r.handlers.gui_edit_impl = edit
+        r.handlers.present = present
+        r.handlers.edit = edit
         r.handlers.default_value_provider = default_value_provider
         r.handlers.on_change = on_change
         return r
@@ -112,18 +112,18 @@ class AnyDataWithGui(Generic[DataType]):
         elif isinstance(self.value, Error):
             imgui.text("Error!")
         else:
-            if self.handlers.gui_present_impl is None:
+            if self.handlers.present is None:
                 from fiatlight.core.primitives_gui import versatile_gui_present
 
                 versatile_gui_present(self.value)
             else:
-                self.handlers.gui_present_impl(self.value)
+                self.handlers.present(self.value)
 
     @final
     def call_gui_edit(self) -> bool:
         from fiatlight.widgets import IconsFontAwesome6
 
-        if self.handlers.gui_edit_impl is None:
+        if self.handlers.edit is None:
             self.call_gui_present()
             return False
         if isinstance(self.value, Error):
@@ -141,7 +141,7 @@ class AnyDataWithGui(Generic[DataType]):
                 else:
                     return False
         else:
-            changed, new_value = self.handlers.gui_edit_impl(self.value)
+            changed, new_value = self.handlers.edit(self.value)
             if changed:
                 self.value = new_value
             imgui.same_line()
@@ -177,8 +177,8 @@ class FooWithGui(AnyDataWithGui[Foo]):
         # r.from_dict_impl = lambda d: Foo(x=d["x"])
 
         super().__init__()
-        self.handlers.gui_edit_impl = edit
-        self.handlers.gui_present_impl = present
+        self.handlers.edit = edit
+        self.handlers.present = present
         self.handlers.default_value_provider = lambda: Foo(x=0)
 
 
