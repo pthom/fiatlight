@@ -117,6 +117,9 @@ class FunctionNodeGui:
                 imgui.text(IconsFontAwesome6.ICON_CIRCLE_LEFT + " " + name)
                 ed.end_pin()
 
+            if len(self.function_node.function_with_gui.inputs_with_gui) > 1:
+                widgets.node_utils.node_separator(self.node_id, text="Params")
+
             for input_param in self.function_node.function_with_gui.inputs_with_gui:
                 with imgui_ctx.push_obj_id(input_param):
                     draw_input_pin(input_param.name, self.pins_input[input_param.name])
