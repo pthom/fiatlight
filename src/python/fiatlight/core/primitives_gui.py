@@ -1,5 +1,5 @@
 from imgui_bundle import imgui, hello_imgui, imgui_knobs, imgui_toggle
-from fiatlight.core import UnspecifiedValue, ErrorValue, DataType, AnyDataGuiHandlers
+from fiatlight.core import UnspecifiedValue, ErrorValue, DataType, AnyDataWithGui, AnyDataGuiHandlers
 from typing import Any, Callable, TypeAlias, Tuple
 from dataclasses import dataclass
 from enum import Enum
@@ -93,7 +93,7 @@ class IntWithGuiParams:
     knob_steps: int = 0
 
 
-def make_int_gui_handlers(params: IntWithGuiParams | None = None) -> AnyDataGuiHandlers[int]:
+def make_int_gui(params: IntWithGuiParams | None = None) -> AnyDataWithGui[int]:
     _params = params if params is not None else IntWithGuiParams()
 
     def edit(x: int) -> Tuple[bool, int]:
@@ -138,9 +138,9 @@ def make_int_gui_handlers(params: IntWithGuiParams | None = None) -> AnyDataGuiH
 
         return changed, x
 
-    r = AnyDataGuiHandlers[int]()
-    r.gui_edit_impl = edit
-    r.default_value_provider = lambda: 0
+    r = AnyDataWithGui[int]()
+    r.handlers.gui_edit_impl = edit
+    r.handlers.default_value_provider = lambda: 0
     return r
 
 
@@ -177,7 +177,7 @@ class FloatWithGuiParams:
     knob_steps: int = 0
 
 
-def make_float_gui_handlers(params: FloatWithGuiParams | None = None) -> AnyDataGuiHandlers[float]:
+def make_float_gui(params: FloatWithGuiParams | None = None) -> AnyDataWithGui[float]:
     if params is None:
         params = FloatWithGuiParams()
 
@@ -228,9 +228,9 @@ def make_float_gui_handlers(params: FloatWithGuiParams | None = None) -> AnyData
 
         return changed, x
 
-    r = AnyDataGuiHandlers[float]()
-    r.gui_edit_impl = edit
-    r.default_value_provider = lambda: 0.0
+    r = AnyDataWithGui[float]()
+    r.handlers.gui_edit_impl = edit
+    r.handlers.default_value_provider = lambda: 0.0
     return r
 
 
@@ -252,7 +252,7 @@ class BoolWithGuiParams:
     toggle_config: ToggleConfig | None = None
 
 
-def make_bool_gui_handlers(params: BoolWithGuiParams | None = None) -> AnyDataGuiHandlers[bool]:
+def make_bool_gui(params: BoolWithGuiParams | None = None) -> AnyDataWithGui[bool]:
     if params is None:
         params = BoolWithGuiParams()
 
@@ -274,9 +274,9 @@ def make_bool_gui_handlers(params: BoolWithGuiParams | None = None) -> AnyDataGu
 
         return changed, x
 
-    r = AnyDataGuiHandlers[bool]()
-    r.gui_edit_impl = edit
-    r.default_value_provider = lambda: False
+    r = AnyDataWithGui[bool]()
+    r.handlers.gui_edit_impl = edit
+    r.handlers.default_value_provider = lambda: False
     return r
 
 
@@ -305,7 +305,7 @@ class StrWithGuiParams:
     height_em: int = 5
 
 
-def make_str_gui_handlers(params: StrWithGuiParams | None = None) -> AnyDataGuiHandlers[str]:
+def make_str_gui(params: StrWithGuiParams | None = None) -> AnyDataWithGui[str]:
     if params is None:
         params = StrWithGuiParams()
 
@@ -332,16 +332,16 @@ def make_str_gui_handlers(params: StrWithGuiParams | None = None) -> AnyDataGuiH
 
         return changed, x
 
-    r = AnyDataGuiHandlers[str]()
-    r.gui_edit_impl = edit
-    r.default_value_provider = lambda: ""
+    r = AnyDataWithGui[str]()
+    r.handlers.gui_edit_impl = edit
+    r.handlers.default_value_provider = lambda: ""
     return r
 
 
 ########################################################################################################################
 #                               List Handlers
 ########################################################################################################################
-def make_list_gui_handlers(item_gui_handlers: AnyDataGuiHandlers[DataType]) -> AnyDataGuiHandlers[list[DataType]]:
+def make_list_gui(item_gui_handlers: AnyDataGuiHandlers[DataType]) -> AnyDataWithGui[list[DataType]]:
     def edit(x: list[Any]) -> Tuple[bool, list[Any]]:
         from fiatlight.widgets import IconsFontAwesome6
 
@@ -388,9 +388,9 @@ def make_list_gui_handlers(item_gui_handlers: AnyDataGuiHandlers[DataType]) -> A
     #     for i, item in enumerate(x):
     #         item_gui_handlers.gui_present_impl(item)
 
-    r = AnyDataGuiHandlers[list[Any]]()
-    r.gui_edit_impl = edit
-    r.default_value_provider = lambda: []
+    r = AnyDataWithGui[list[Any]]()
+    r.handlers.gui_edit_impl = edit
+    r.handlers.default_value_provider = lambda: []
 
     # item_to_dict_impl = item_gui_handlers.to_dict_impl
     # item_from_dict_impl = item_gui_handlers.from_dict_impl
@@ -412,21 +412,23 @@ __all__ = [
     # Ints
     "IntWithGuiParams",
     "IntEditType",
-    "make_int_gui_handlers",
+    "make_int_gui",
     # Floats
     "FloatWithGuiParams",
     "FloatEditType",
-    "make_float_gui_handlers",
+    "make_float_gui",
     "ImGuiKnobVariant_",
     # Str
     "StrWithGuiParams",
     "StrEditType",
-    "make_str_gui_handlers",
+    "make_str_gui",
     # Bool
     "ToggleConfig",
     "BoolWithGuiParams",
     "BoolEditType",
-    "make_bool_gui_handlers",
+    "make_bool_gui",
+    #
+    "versatile_gui_present",
 ]
 
 

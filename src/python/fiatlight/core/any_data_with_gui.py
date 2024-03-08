@@ -4,7 +4,7 @@ See example implementation for a custom type at the bottom of this file.
 """
 from fiatlight.core import Error, ErrorValue, Unspecified, UnspecifiedValue, JsonDict, DataType
 from fiatlight.core.any_data_gui_handlers import AnyDataGuiHandlers
-from typing import final, Generic, Tuple
+from typing import final, Generic, Tuple, Callable
 from imgui_bundle import imgui
 import logging
 
@@ -21,13 +21,32 @@ class AnyDataWithGui(Generic[DataType]):
     # Handlers
     handlers: AnyDataGuiHandlers[DataType]
 
-    def __init__(
-        self,
-        value: DataType | Unspecified,
-        handlers: AnyDataGuiHandlers[DataType],
-    ) -> None:
-        self.handlers = handlers
-        self.value = value
+    def __init__(self) -> None:
+        self.handlers = AnyDataGuiHandlers.no_handlers()
+
+    @staticmethod
+    def from_handlers(handlers: AnyDataGuiHandlers[DataType]) -> "AnyDataWithGui[DataType]":
+        r: AnyDataWithGui[DataType] = AnyDataWithGui()
+        r.handlers = handlers
+        return r
+
+    @staticmethod
+    def make_default() -> "AnyDataWithGui[DataType]":
+        return AnyDataWithGui()
+
+    @staticmethod
+    def from_callbacks(
+        present: Callable[[DataType], None] | None = None,
+        edit: Callable[[DataType], Tuple[bool, DataType]] | None = None,
+        default_value_provider: Callable[[], DataType] | None = None,
+        on_change: Callable[[DataType], None] | None = None,
+    ) -> "AnyDataWithGui[DataType]":
+        r = AnyDataWithGui[DataType]()
+        r.handlers.gui_present_impl = present
+        r.handlers.gui_edit_impl = edit
+        r.handlers.default_value_provider = default_value_provider
+        r.handlers.on_change = on_change
+        return r
 
     @property
     def value(self) -> DataType | Unspecified | Error:
@@ -94,7 +113,7 @@ class AnyDataWithGui(Generic[DataType]):
             imgui.text("Error!")
         else:
             if self.handlers.gui_present_impl is None:
-                from fiatlight.core.standard_gui_handlers import versatile_gui_present
+                from fiatlight.core.primitives_gui import versatile_gui_present
 
                 versatile_gui_present(self.value)
             else:
@@ -142,46 +161,32 @@ class Foo:
         self.x = x
 
 
-class FooGuiParams:
-    """Any params that could be used to provide additional parameters to the GUI implementation of Foo"""
+class FooWithGui(AnyDataWithGui[Foo]):
+    def __init__(self) -> None:
+        # Edit and present functions
+        def edit(value: Foo) -> Tuple[bool, Foo]:
+            changed, value.x = imgui.input_int("x", value.x)
+            return changed, value
 
-    pass
+        def present(value: Foo) -> None:
+            imgui.text(f"x: {value.x}")
 
+        # Optional implementation of serialization and deserialization functions
+        # (if not provided, the default serialization will be used, by serializing the __dict__ attribute of the value)
+        # r.to_dict_impl = lambda x: {"x": x.x}
+        # r.from_dict_impl = lambda d: Foo(x=d["x"])
 
-def make_foo_gui_handlers(_gui_params: FooGuiParams | None = None) -> AnyDataGuiHandlers[Foo]:
-    """_gui_params is not used in this example,
-    but could be used to provide additional parameters to the GUI implementation"""
-    from imgui_bundle import imgui
-
-    # Edit and present functions
-    def edit(value: Foo) -> Tuple[bool, Foo]:
-        changed, value.x = imgui.input_int("x", value.x)
-        return changed, value
-
-    def present(value: Foo) -> None:
-        imgui.text(f"x: {value.x}")
-
-    r = AnyDataGuiHandlers[Foo]()
-
-    r.gui_edit_impl = edit
-    r.gui_present_impl = present
-
-    # default value provider
-    r.default_value_provider = lambda: Foo(x=0)
-
-    # Optional implementation of serialization and deserialization functions
-    # (if not provided, the default serialization will be used, by serializing the __dict__ attribute of the value)
-    # r.to_dict_impl = lambda x: {"x": x.x}
-    # r.from_dict_impl = lambda d: Foo(x=d["x"])
-
-    return r
+        super().__init__()
+        self.handlers.gui_edit_impl = edit
+        self.handlers.gui_present_impl = present
+        self.handlers.default_value_provider = lambda: Foo(x=0)
 
 
 def test_foo_with_gui() -> None:
     # Register the Foo type with its GUI implementation (do this once at the beginning of your program)
-    from fiatlight.core.to_gui import ALL_GUI_HANDLERS_FACTORIES, any_value_to_data_with_gui
+    from fiatlight.core.to_gui import ALL_GUI_FACTORIES, any_value_to_data_with_gui
 
-    ALL_GUI_HANDLERS_FACTORIES["Foo"] = make_foo_gui_handlers
+    ALL_GUI_FACTORIES["Foo"] = FooWithGui
 
     foo = Foo(1)
     foo_gui = any_value_to_data_with_gui(foo)

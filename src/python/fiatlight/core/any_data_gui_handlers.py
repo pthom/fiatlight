@@ -30,3 +30,7 @@ class AnyDataGuiHandlers(Generic[DataType]):
 
     # on_change: if provided, this function will be called when the value changes
     on_change: Callable[[DataType], None] | None = None
+
+    @staticmethod
+    def no_handlers() -> "AnyDataGuiHandlers[DataType]":
+        return AnyDataGuiHandlers[DataType]()

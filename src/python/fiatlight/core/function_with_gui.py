@@ -1,5 +1,4 @@
 from fiatlight.core import UnspecifiedValue, ErrorValue, Unspecified, Error, JsonDict, DataType
-from fiatlight.core.any_data_gui_handlers import AnyDataGuiHandlers
 from fiatlight.core.any_data_with_gui import AnyDataWithGui
 from typing import Any, List, final, Callable, Optional, Generic
 from dataclasses import dataclass
@@ -140,22 +139,22 @@ class FunctionWithGui:
         for i, param_json in enumerate(inputs_json):
             self.inputs_with_gui[i].fill_from_json(param_json)
 
-    def set_output_gui_handler(self, handler: AnyDataGuiHandlers[Any], output_idx: int = 0) -> None:
+    def set_output_gui(self, data_with_gui: AnyDataWithGui[Any], output_idx: int = 0) -> None:
         if output_idx >= len(self.outputs_with_gui):
             raise ValueError(f"output_idx {output_idx} out of range")
-        self.outputs_with_gui[output_idx].data_with_gui.handlers = handler
+        self.outputs_with_gui[output_idx].data_with_gui = data_with_gui
 
-    def set_input_gui_handler(self, input_name: str, handler: AnyDataGuiHandlers[Any]) -> None:
+    def set_input_gui(self, input_name: str, data_with_gui: AnyDataWithGui[Any]) -> None:
         for param in self.inputs_with_gui:
             if param.name == input_name:
-                param.data_with_gui.handlers = handler
+                param.data_with_gui = data_with_gui
                 return
         raise ValueError(f"input_name {input_name} not found")
 
 
 def sandbox() -> None:
     from fiatlight.core.to_gui import any_function_to_function_with_gui
-    from fiatlight.core.to_gui import ALL_GUI_HANDLERS_FACTORIES
+    from fiatlight.core.to_gui import ALL_GUI_FACTORIES
 
     class Foo:
         a: int
@@ -163,15 +162,15 @@ def sandbox() -> None:
         def __init__(self, a: int = 0):
             self.a = a
 
-    def make_foo_with_gui(_: Any | None = None) -> AnyDataGuiHandlers[Foo]:
-        r = AnyDataGuiHandlers[Foo]()
-        r.gui_edit_impl = lambda x: (False, x)
-        r.gui_present_impl = lambda x: None
-        # r.to_dict_impl = lambda x: {"a": x.a}
-        # r.from_dict_impl = lambda d: Foo(a=d["a"])
+    def make_foo_with_gui() -> AnyDataWithGui[Foo]:
+        r: AnyDataWithGui[Foo] = AnyDataWithGui.make_default()
+        r.handlers.gui_edit_impl = lambda x: (False, x)
+        r.handlers.gui_present_impl = lambda x: None
+        # r.handlers.to_dict_impl = lambda x: {"a": x.a}
+        # r.handlers.from_dict_impl = lambda d: Foo(a=d["a"])
         return r
 
-    ALL_GUI_HANDLERS_FACTORIES["Foo"] = make_foo_with_gui
+    ALL_GUI_FACTORIES["Foo"] = make_foo_with_gui
 
     def add(foo: Foo) -> int:
         return foo.a

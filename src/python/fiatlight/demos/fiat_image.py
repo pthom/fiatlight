@@ -103,10 +103,10 @@ def demos_assets_folder() -> str:
 
 
 def main() -> None:
-    from fiatlight.core import FunctionsGraph, any_function_to_function_with_gui, ALL_GUI_HANDLERS_FACTORIES
-    from fiatlight.computer_vision.image_gui import make_image_gui_handlers
+    from fiatlight.core import FunctionsGraph, any_function_to_function_with_gui, ALL_GUI_FACTORIES
+    from fiatlight.computer_vision.image_gui import ImageWithGui
     from fiatlight.computer_vision.cv_color_type import ColorConversion
-    from fiatlight.computer_vision.cv_color_type_gui import make_color_conversion_gui_handlers
+    from fiatlight.computer_vision.cv_color_type_gui import ColorConversionWithGui
 
     image = cv2.imread(demos_assets_folder() + "/images/house.jpg")
     image = cv2.resize(image, (int(image.shape[1] * 0.5), int(image.shape[0] * 0.5)))
@@ -119,22 +119,22 @@ def main() -> None:
 
     def make_graph_manually() -> FunctionsGraph:
         make_image_gui = any_function_to_function_with_gui(make_image)
-        make_image_gui.set_output_gui_handler(make_image_gui_handlers())
+        make_image_gui.set_output_gui(ImageWithGui())
 
         color_convert_gui = any_function_to_function_with_gui(color_convert)
-        color_convert_gui.set_input_gui_handler("image", make_image_gui_handlers())
-        color_convert_gui.set_input_gui_handler("color_conversion", make_color_conversion_gui_handlers())
-        color_convert_gui.set_output_gui_handler(make_image_gui_handlers())
+        color_convert_gui.set_input_gui("image", ImageWithGui())
+        color_convert_gui.set_input_gui("color_conversion", ColorConversionWithGui())
+        color_convert_gui.set_output_gui(ImageWithGui())
 
         functions = [make_image_gui, color_convert_gui]
         r = FunctionsGraph.from_function_composition(functions)
         return r
 
     def make_graph_with_register() -> FunctionsGraph:
-        ALL_GUI_HANDLERS_FACTORIES["ImageUInt8"] = make_image_gui_handlers
-        ALL_GUI_HANDLERS_FACTORIES["ColorConversion"] = make_color_conversion_gui_handlers
+        ALL_GUI_FACTORIES["ImageUInt8"] = ImageWithGui
+        ALL_GUI_FACTORIES["ColorConversion"] = ColorConversionWithGui
         color_convert_gui = any_function_to_function_with_gui(color_convert)
-        color_convert_gui.set_output_gui_handler(make_image_gui_handlers(show_channels=True))
+        color_convert_gui.set_output_gui(ImageWithGui(show_channels=True))
         # functions = [make_image, color_convert]
         functions = [make_image, color_convert_gui]
         r = FunctionsGraph.from_function_composition(functions)  # type: ignore
