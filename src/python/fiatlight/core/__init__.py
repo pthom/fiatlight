@@ -21,6 +21,20 @@ from fiatlight.core.function_node import FunctionNode, FunctionNodeLink
 from fiatlight.core.functions_graph import FunctionsGraph
 from fiatlight.core.function_signature import get_function_signature
 from fiatlight.core.composite_gui import OptionalWithGui, EnumWithGui
+from fiatlight.core.primitives_gui import (
+    IntWithGui,
+    IntWithGuiParams,
+    IntEditType,
+    FloatWithGui,
+    FloatWithGuiParams,
+    FloatEditType,
+    BoolWithGui,
+    BoolWithGuiParams,
+    BoolEditType,
+    StrWithGui,
+    StrWithGuiParams,
+    StrEditType,
+)
 
 
 __all__ = [
@@ -60,4 +74,17 @@ __all__ = [
     # from composite_gui
     "OptionalWithGui",
     "EnumWithGui",
+    # from primitives_gui
+    "IntWithGui",
+    "IntWithGuiParams",
+    "IntEditType",
+    "FloatWithGui",
+    "FloatWithGuiParams",
+    "FloatEditType",
+    "BoolWithGui",
+    "BoolWithGuiParams",
+    "BoolEditType",
+    "StrWithGui",
+    "StrWithGuiParams",
+    "StrEditType",
 ]

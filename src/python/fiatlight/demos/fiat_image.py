@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import fiatlight.computer_vision
 from fiatlight.computer_vision import ImageUInt8, ImageUInt8Channels
 from fiatlight import FiatGuiParams, fiat_run
 
@@ -14,97 +13,8 @@ def demos_assets_folder() -> str:
     return assets_dir
 
 
-# class GaussianBlurWithGui(FunctionWithGui):
-#     sigma_x: float = 3.0
-#     sigma_y: float = 3.0
-#
-#     def __init__(self) -> None:
-#         self.input_gui = ImageWithGui()
-#         self.output_gui = ImageWithGui()
-#         self.name = "Gaussian Blur"
-#
-#         def f(x: Any) -> ImageUInt8:
-#             assert type(x) == np.ndarray
-#             ksize = (0, 0)
-#             blur: ImageUInt8 = cv2.GaussianBlur(x, ksize=ksize, sigmaX=self.sigma_x, sigmaY=self.sigma_y)  # type: ignore
-#             return blur
-#
-#         self.f_impl = f
-#
-#     def old_gui_params(self) -> bool:
-#         imgui.set_next_item_width(100)
-#         changed1, self.sigma_x = imgui.slider_float("sigma_x", self.sigma_x, 0.1, 15.0)
-#         imgui.set_next_item_width(100)
-#         changed2, self.sigma_y = imgui.slider_float("sigma_y", self.sigma_y, 0.1, 15.0)
-#         return changed1 or changed2
-#
-#
-# class CannyWithGui(FunctionWithGui):
-#     t_lower = 100  # Lower Threshold
-#     t_upper = 200  # Upper threshold
-#     aperture_size = 5  # Aperture size (3, 5, or 7)
-#
-#     def __init__(self) -> None:
-#         self.input_gui = ImageWithGui()
-#         self.output_gui = ImageWithGui()
-#         self.name = "Canny"
-#
-#         def f(x: Any) -> ImageUInt8:
-#             assert type(x) == np.ndarray
-#             edge: ImageUInt8 = cv2.Canny(x, self.t_lower, self.t_upper, apertureSize=self.aperture_size)  # type: ignore
-#             return edge
-#
-#         self.f_impl = f
-#
-#     def old_gui_params(self) -> bool:
-#         imgui.set_next_item_width(100)
-#         changed1, self.t_lower = imgui.slider_int("t_lower", self.t_lower, 0, 255)
-#         imgui.set_next_item_width(100)
-#         changed2, self.t_upper = imgui.slider_int("t_upper", self.t_upper, 0, 255)
-#         imgui.set_next_item_width(100)
-#
-#         imgui.text("Aperture")
-#         imgui.same_line()
-#         changed3 = False
-#         for aperture_value in [3, 5, 7]:
-#             clicked: bool
-#             clicked, self.aperture_size = imgui.radio_button(str(aperture_value), self.aperture_size, aperture_value)
-#             if clicked:
-#                 changed3 = True
-#             imgui.same_line()
-#         imgui.new_line()
-#         return changed1 or changed2 or changed3
-#
-#
-# class OilPaintingWithGui(FunctionWithGui):
-#     dynRatio = 1  # image is divided by dynRatio before histogram processing
-#     size = 3  # size neighbouring size is 2-size+1
-#     color_conversion: CvColorConversionCode  # color space conversion code
-#
-#     def __init__(self) -> None:
-#         self.input_gui = ImageWithGui()
-#         self.output_gui = ImageWithGui()
-#         self.color_conversion = cv2.COLOR_BGR2HSV
-#         self.name = "Oil Painting"
-#
-#         def f(x: Any) -> ImageUInt8:
-#             assert type(x) == np.ndarray
-#             r = np.zeros_like(x)
-#             # pip install opencv-contrib-python
-#             r = cv2.xphoto.oilPainting(x, self.size, self.dynRatio, self.color_conversion)  # type: ignore
-#             return r
-#
-#         self.f_impl = f
-#
-#     def old_gui_params(self) -> bool:
-#         imgui.set_next_item_width(100)
-#         changed1, self.dynRatio = imgui.slider_int("dynRatio", self.dynRatio, 1, 10)
-#         imgui.set_next_item_width(100)
-#         changed2, self.size = imgui.slider_int("size", self.size, 1, 10)
-#         return changed1 or changed2
-
-
 def main() -> None:
+    import fiatlight
     from fiatlight.core import FunctionsGraph, any_function_to_function_with_gui
     from fiatlight.computer_vision.cv_color_type import ColorConversion
 
@@ -123,6 +33,13 @@ def main() -> None:
 
     def oil_paint(image: ImageUInt8, size: int = 1, dynRatio: int = 3) -> ImageUInt8:
         return cv2.xphoto.oilPainting(image, size, dynRatio, cv2.COLOR_BGR2HSV)  # type: ignore
+
+    def blur_image(image: ImageUInt8, sigma: float = 5.0) -> ImageUInt8:
+        ksize = (0, 0)
+        return cv2.GaussianBlur(image, ksize, sigmaX=sigma, sigmaY=sigma)  # type: ignore
+
+    def canny(image: ImageUInt8, t_lower: int = int, t_upper: int = int, aperture_size: int = 5) -> ImageUInt8:
+        return cv2.Canny(image, t_lower, t_upper, apertureSize=aperture_size)  # type: ignore
 
     def make_graph_manually() -> FunctionsGraph:
         make_image_gui = any_function_to_function_with_gui(make_image)
@@ -151,12 +68,44 @@ def main() -> None:
         # (import required to get an automatic Gui for the enums in lut_channels_in_colorspace params)
         from fiatlight.computer_vision import ColorType  # noqa
 
-        functions = [make_image, lut_channels_in_colorspace, oil_paint]
+        functions = [make_image, lut_channels_in_colorspace, blur_image, oil_paint]
         r = FunctionsGraph.from_function_composition(functions, globals(), locals())  # type: ignore
         return r
 
-    functions_graph = make_graph_with_register()
+    def make_canny_graph() -> FunctionsGraph:
+        fiatlight.computer_vision.register_gui_factories()
+
+        # Customize min / max values for the input parameters in the GUI of the canny node
+        canny_gui = any_function_to_function_with_gui(canny)
+
+        # t_lower between 0 and 255
+        t_lower_input = canny_gui.input_of_name("t_lower")
+        assert isinstance(t_lower_input, fiatlight.core.IntWithGui)
+        t_lower_input.params.v_min = 0
+        t_lower_input.params.v_max = 255
+
+        # t_upper between 0 and 255
+        t_upper_input = canny_gui.input_of_name("t_upper")
+        assert isinstance(t_upper_input, fiatlight.core.IntWithGui)
+        t_upper_input.params.v_min = 0
+        t_upper_input.params.v_max = 255
+
+        # aperture_size between 3, 5, 7
+        aperture_size_input = canny_gui.input_of_name("aperture_size")
+        assert isinstance(aperture_size_input, fiatlight.core.IntWithGui)
+        aperture_size_input.params.edit_type = fiatlight.core.IntEditType.input
+        aperture_size_input.params.v_min = 3
+        aperture_size_input.params.v_max = 7
+        aperture_size_input.params.input_step = 2
+
+        functions = [make_image, blur_image, canny_gui]
+        r = FunctionsGraph.from_function_composition(functions, globals(), locals())
+        return r
+
+    # functions_graph = make_graph_with_register()
     # functions_graph = make_graph_manually()
+    functions_graph = make_canny_graph()
+
     fiat_run(
         functions_graph,
         FiatGuiParams(
