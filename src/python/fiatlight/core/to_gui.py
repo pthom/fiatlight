@@ -2,11 +2,12 @@ from fiatlight.core import UnspecifiedValue, DataType, AnyDataGuiCallbacks
 from fiatlight.core.any_data_with_gui import AnyDataWithGui
 from fiatlight.core.function_with_gui import FunctionWithGui, ParamKind, ParamWithGui, OutputWithGui
 from fiatlight.core import primitives_gui
+from fiatlight.core.optional_gui import OptionalWithGui
 from fiatlight.core.function_signature import get_function_signature
 
 import inspect
 import logging
-from typing import TypeAlias, Callable, Any, Dict
+from typing import TypeAlias, Callable, Any, Dict, Tuple
 
 
 GuiFactory = Callable[[], AnyDataWithGui[DataType]]
@@ -15,12 +16,27 @@ GuiFactory = Callable[[], AnyDataWithGui[DataType]]
 _COMPLAINTS_MISSING_GUI_FACTORY = []
 
 
+def extract_optional_typeclass(type_class_name: str) -> Tuple[bool, str]:
+    if type_class_name.startswith("typing.Optional[") and type_class_name.endswith("]"):
+        return True, type_class_name[16:-1]
+    if type_class_name.endswith(" | None"):
+        return True, type_class_name[:-7]
+    return False, type_class_name
+
+
 def any_typeclass_to_gui(type_class_name: str) -> AnyDataWithGui[Any]:
     if type_class_name.startswith("<class '") and type_class_name.endswith("'>"):
         type_class_name = type_class_name[8:-2]
 
+    is_optional, type_class_name = extract_optional_typeclass(type_class_name)
+
     if type_class_name in ALL_GUI_FACTORIES:
-        return ALL_GUI_FACTORIES[type_class_name]()
+        if not is_optional:
+            return ALL_GUI_FACTORIES[type_class_name]()
+        else:
+            inner_gui = ALL_GUI_FACTORIES[type_class_name]()
+            return OptionalWithGui(inner_gui)
+
     # if we reach this point, we have no GUI implementation for the type
     if type_class_name not in _COMPLAINTS_MISSING_GUI_FACTORY:
         logging.warning(f"Type {type_class_name} not present in ALL_GUI_FACTORIES")
