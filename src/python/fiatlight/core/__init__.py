@@ -17,6 +17,7 @@ from fiatlight.core.function_with_gui import ParamKind, ParamWithGui, OutputWith
 from fiatlight.core.to_gui import any_function_to_function_with_gui, ALL_GUI_FACTORIES
 from fiatlight.core.function_node import FunctionNode, FunctionNodeLink
 from fiatlight.core.functions_graph import FunctionsGraph
+from fiatlight.core.function_signature import get_function_signature
 
 
 __all__ = [
@@ -32,6 +33,8 @@ __all__ = [
     "JsonDict",
     "JsonPrimitive",
     "JsonPrimitiveOrDict",
+    # from function_signature
+    "get_function_signature",
     # from any_data_gui_handlers
     "AnyDataGuiCallbacks",
     # from any_data_with_gui
