@@ -1,9 +1,7 @@
 from __future__ import annotations
 
-from fiatlight.computer_vision import ImageUInt8, ImageUInt8Channels
-from fiatlight import FiatGuiParams, fiat_run
-
 import cv2
+import fiatlight
 import os
 
 
@@ -14,13 +12,14 @@ def demos_assets_folder() -> str:
 
 
 def main() -> None:
-    import fiatlight
-    from fiatlight.core import FunctionsGraph, any_function_to_function_with_gui
-    from fiatlight.computer_vision.cv_color_type import ColorConversion
-
-    from fiatlight.computer_vision.image_gui import ImageWithGui
-    from fiatlight.computer_vision.cv_color_type_gui import ColorConversionWithGui
-    from fiatlight.computer_vision.lut import lut_channels_in_colorspace
+    from fiatlight import FunctionsGraph, FiatGuiParams, fiat_run, any_function_to_function_with_gui
+    from fiatlight.computer_vision import (
+        ImageUInt8,
+        ImageUInt8Channels,
+        ImageWithGui,
+        ColorConversionWithGui,
+        lut_channels_in_colorspace,
+    )
 
     image = cv2.imread(demos_assets_folder() + "/images/house.jpg")
     image = cv2.resize(image, (int(image.shape[1] * 0.5), int(image.shape[0] * 0.5)))
@@ -28,7 +27,11 @@ def main() -> None:
     def make_image() -> ImageUInt8:
         return image  # type: ignore
 
-    def color_convert(image: ImageUInt8, color_conversion: ColorConversion = ColorConversion()) -> ImageUInt8Channels:
+    def color_convert(
+        image: ImageUInt8, color_conversion: fiatlight.computer_vision.ColorConversion | None = None
+    ) -> ImageUInt8Channels:
+        if color_conversion is None:
+            return image
         return color_conversion.convert_image(image)
 
     def oil_paint(image: ImageUInt8, size: int = 1, dynRatio: int = 3) -> ImageUInt8:
@@ -38,23 +41,23 @@ def main() -> None:
         ksize = (0, 0)
         return cv2.GaussianBlur(image, ksize, sigmaX=sigma, sigmaY=sigma)  # type: ignore
 
-    def canny(image: ImageUInt8, t_lower: int = int, t_upper: int = int, aperture_size: int = 5) -> ImageUInt8:
+    def canny(image: ImageUInt8, t_lower: float = 10.0, t_upper: float = 100.0, aperture_size: int = 5) -> ImageUInt8:
         return cv2.Canny(image, t_lower, t_upper, apertureSize=aperture_size)  # type: ignore
 
     def make_graph_manually() -> FunctionsGraph:
-        make_image_gui = any_function_to_function_with_gui(make_image)
+        make_image_gui = fiatlight.any_function_to_function_with_gui(make_image)
         make_image_gui.set_output_gui(ImageWithGui())
 
-        color_convert_gui = any_function_to_function_with_gui(color_convert)
+        color_convert_gui = fiatlight.any_function_to_function_with_gui(color_convert)
         color_convert_gui.set_input_gui("image", ImageWithGui())
         color_convert_gui.set_input_gui("color_conversion", ColorConversionWithGui())
         color_convert_gui.set_output_gui(ImageWithGui(show_channels=True))
 
         functions = [make_image_gui, color_convert_gui]
-        r = FunctionsGraph.from_function_composition(functions)
+        r = fiatlight.FunctionsGraph.from_function_composition(functions)
         return r
 
-    def make_graph_with_register() -> FunctionsGraph:
+    def make_graph_with_register() -> fiatlight.FunctionsGraph:
         # Register the GUI factories
         fiatlight.computer_vision.register_gui_factories()
         # Note: computer_vision.register_gui_factories() will do this:
@@ -80,15 +83,15 @@ def main() -> None:
 
         # t_lower between 0 and 255
         t_lower_input = canny_gui.input_of_name("t_lower")
-        assert isinstance(t_lower_input, fiatlight.core.IntWithGui)
-        t_lower_input.params.v_min = 0
-        t_lower_input.params.v_max = 255
+        assert isinstance(t_lower_input, fiatlight.core.FloatWithGui)
+        t_lower_input.params.v_min = 0.0
+        t_lower_input.params.v_max = 255.0
 
         # t_upper between 0 and 255
         t_upper_input = canny_gui.input_of_name("t_upper")
-        assert isinstance(t_upper_input, fiatlight.core.IntWithGui)
-        t_upper_input.params.v_min = 0
-        t_upper_input.params.v_max = 255
+        assert isinstance(t_upper_input, fiatlight.core.FloatWithGui)
+        t_upper_input.params.v_min = 0.0
+        t_upper_input.params.v_max = 255.0
 
         # aperture_size between 3, 5, 7
         aperture_size_input = canny_gui.input_of_name("aperture_size")
@@ -99,7 +102,7 @@ def main() -> None:
         aperture_size_input.params.input_step = 2
 
         functions = [make_image, blur_image, canny_gui]
-        r = FunctionsGraph.from_function_composition(functions, globals(), locals())
+        r = FunctionsGraph.from_function_composition(functions, globals(), locals())  # type: ignore
         return r
 
     # functions_graph = make_graph_with_register()
