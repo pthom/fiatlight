@@ -17,7 +17,6 @@ def main() -> None:
         ImageUInt8,
         ImageUInt8Channels,
         ImageWithGui,
-        ColorConversionWithGui,
         lut_channels_in_colorspace,
     )
 
@@ -48,12 +47,14 @@ def main() -> None:
         make_image_gui = fiatlight.any_function_to_function_with_gui(make_image)
         make_image_gui.set_output_gui(ImageWithGui())
 
-        color_convert_gui = fiatlight.any_function_to_function_with_gui(color_convert)
-        color_convert_gui.set_input_gui("image", ImageWithGui())
-        color_convert_gui.set_input_gui("color_conversion", ColorConversionWithGui())
-        color_convert_gui.set_output_gui(ImageWithGui(show_channels=True))
+        blur_image_gui = fiatlight.any_function_to_function_with_gui(blur_image)
+        blur_image_gui.set_input_gui("image", ImageWithGui())
+        blur_image_gui.set_input_gui(
+            "sigma", fiatlight.core.FloatWithGui(fiatlight.core.FloatWithGuiParams(v_min=0.1, v_max=40.0))
+        )
+        blur_image_gui.set_output_gui(ImageWithGui())
 
-        functions = [make_image_gui, color_convert_gui]
+        functions = [make_image_gui, blur_image_gui]
         r = fiatlight.FunctionsGraph.from_function_composition(functions)
         return r
 
@@ -71,7 +72,7 @@ def main() -> None:
         # (import required to get an automatic Gui for the enums in lut_channels_in_colorspace params)
         from fiatlight.computer_vision import ColorType  # noqa
 
-        functions = [make_image, lut_channels_in_colorspace, blur_image, oil_paint]
+        functions = [make_image, lut_channels_in_colorspace, oil_paint]
         r = FunctionsGraph.from_function_composition(functions, globals(), locals())  # type: ignore
         return r
 
@@ -105,9 +106,9 @@ def main() -> None:
         r = FunctionsGraph.from_function_composition(functions, globals(), locals())  # type: ignore
         return r
 
-    # functions_graph = make_graph_with_register()
+    functions_graph = make_graph_with_register()
     # functions_graph = make_graph_manually()
-    functions_graph = make_canny_graph()
+    # functions_graph = make_canny_graph()
 
     fiat_run(
         functions_graph,
