@@ -2,6 +2,7 @@ from fiatlight.core import UnspecifiedValue, DataType, AnyDataGuiCallbacks
 from fiatlight.core.any_data_with_gui import AnyDataWithGui
 from fiatlight.core.function_with_gui import FunctionWithGui, ParamKind, ParamWithGui, OutputWithGui
 from fiatlight.core import primitives_gui
+from fiatlight.core.function_signature import get_function_signature
 
 import inspect
 import logging
@@ -53,15 +54,30 @@ def any_param_to_param_with_gui(name: str, param: inspect.Parameter) -> ParamWit
     return ParamWithGui(name, data_with_gui, param_kind, default_value)
 
 
-def any_function_to_function_with_gui(f: Callable[..., Any]) -> FunctionWithGui:
+def any_function_to_function_with_gui(
+    f: Callable[..., Any],
+    *,
+    signature_string: str | None = None,
+    signatures_import_code: str | None = None,
+) -> FunctionWithGui:
+    """Create a FunctionWithGui from a function.
+
+    :param f: the function for which we want to create a FunctionWithGui
+    :param signature_string: a string representing the signature of the function
+    :param signatures_import_code: a string representing the code to import the types used in the signature_string
+    :return: a FunctionWithGui instance that wraps the function.
+    """
     function_with_gui = FunctionWithGui()
     function_with_gui.name = f.__name__
     function_with_gui.f_impl = f
 
     try:
-        sig = inspect.signature(f)
+        sig = get_function_signature(
+            f, signature_string=signature_string, signatures_import_code=signatures_import_code
+        )
     except ValueError as e:
-        raise ValueError(f"Function {f.__name__} has no type annotations") from e
+        raise ValueError(f"Failed to get the signature of the function {f.__name__}") from e
+
     params = sig.parameters
     for name, param in params.items():
         function_with_gui.inputs_with_gui.append(any_param_to_param_with_gui(name, param))
