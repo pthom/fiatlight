@@ -50,9 +50,9 @@ def lut_channels_with_params(
     nb_channels = image.shape[2]
     channels = cv2.split(image)
     assert len(channels) == nb_channels
-    result_channels = [lut_with_params(channels[i], lut_params[i]) for i in range(nb_channels)]
+    result_channels = [lut_with_params(channels[i], lut_params[i]) for i in range(nb_channels)]  # type: ignore
     result = cv2.merge(result_channels)
-    return result
+    return result  # type: ignore
 
 
 def lut_channels_in_colorspace(
