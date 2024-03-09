@@ -1,7 +1,8 @@
 from fiatlight.core.function_with_gui import FunctionWithGui
 from fiatlight.core.function_node import FunctionNode, FunctionNodeLink
-from fiatlight.core import Function, JsonDict
+from fiatlight.core import Function, JsonDict, GlobalsDict, LocalsDict
 from fiatlight.core.to_gui import any_function_to_function_with_gui
+
 from typing import Sequence
 
 
@@ -52,11 +53,21 @@ class FunctionsGraph:
         f_node = FunctionNode(f_gui, f_gui.name)
         self.functions_nodes.append(f_node)
 
-    def _add_function(self, f: Function) -> None:
-        f_gui = any_function_to_function_with_gui(f)
+    def _add_function(
+        self,
+        f: Function,
+        globals_dict: GlobalsDict | None = None,
+        locals_dict: LocalsDict | None = None,
+    ) -> None:
+        f_gui = any_function_to_function_with_gui(f, globals_dict=globals_dict, locals_dict=locals_dict)
         self._add_function_with_gui(f_gui)
 
-    def add_function_composition(self, functions: Sequence[Function | FunctionWithGui]) -> None:
+    def add_function_composition(
+        self,
+        functions: Sequence[Function | FunctionWithGui],
+        globals_dict: GlobalsDict | None = None,
+        locals_dict: LocalsDict | None = None,
+    ) -> None:
         composition = FunctionsGraph.from_function_composition(functions)
         self.merge_graph(composition)
 
@@ -65,11 +76,22 @@ class FunctionsGraph:
         self.functions_nodes_links.extend(other.functions_nodes_links)
 
     @staticmethod
-    def from_function_composition(functions: Sequence[Function | FunctionWithGui]) -> "FunctionsGraph":
+    def from_function_composition(
+        functions: Sequence[Function | FunctionWithGui],
+        globals_dict: GlobalsDict | None = None,
+        locals_dict: LocalsDict | None = None,
+    ) -> "FunctionsGraph":
         """Create a FunctionsGraph from a list of PureFunctions([InputType] -> OutputType)
         * They should all be pure functions
         * The output[0] of one should be the input[0] of the next
         """
+
+        # Make sure we don't modify the user namespace
+        if globals_dict is not None:
+            globals_dict = globals_dict.copy()
+        if locals_dict is not None:
+            locals_dict = locals_dict.copy()
+
         r: FunctionsGraph
 
         # Fill the functions
@@ -78,7 +100,7 @@ class FunctionsGraph:
                 if isinstance(f, FunctionWithGui):
                     r._add_function_with_gui(f)
                 else:
-                    r._add_function(f)
+                    r._add_function(f, globals_dict=globals_dict, locals_dict=locals_dict)
 
         def fill_links() -> None:
             r.functions_nodes_links = []

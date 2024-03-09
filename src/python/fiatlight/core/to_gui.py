@@ -2,8 +2,9 @@ from fiatlight.core import UnspecifiedValue, DataType, AnyDataGuiCallbacks
 from fiatlight.core.any_data_with_gui import AnyDataWithGui
 from fiatlight.core.function_with_gui import FunctionWithGui, ParamKind, ParamWithGui, OutputWithGui
 from fiatlight.core import primitives_gui
-from fiatlight.core.optional_gui import OptionalWithGui
+from fiatlight.core.composite_gui import OptionalWithGui, EnumWithGui
 from fiatlight.core.function_signature import get_function_signature
+from fiatlight.core.fiat_types import GlobalsDict, LocalsDict
 
 import inspect
 import logging
@@ -16,7 +17,7 @@ GuiFactory = Callable[[], AnyDataWithGui[DataType]]
 _COMPLAINTS_MISSING_GUI_FACTORY = []
 
 
-def extract_optional_typeclass(type_class_name: str) -> Tuple[bool, str]:
+def _extract_optional_typeclass(type_class_name: str) -> Tuple[bool, str]:
     if type_class_name.startswith("typing.Optional[") and type_class_name.endswith("]"):
         return True, type_class_name[16:-1]
     if type_class_name.endswith(" | None"):
@@ -24,13 +25,43 @@ def extract_optional_typeclass(type_class_name: str) -> Tuple[bool, str]:
     return False, type_class_name
 
 
-def any_typeclass_to_gui(type_class_name: str) -> AnyDataWithGui[Any]:
+def _extract_enum_typeclass(type_class_name: str) -> Tuple[bool, str]:
+    # An enum type will be displayed as
+    #     <enum 'EnumName'>
+    # or
+    #     <enum 'EnumName' of 'module_name'>
+    if type_class_name.startswith("<enum '") and type_class_name.endswith("'>"):
+        # extract the enum name between ''
+        first_quote = type_class_name.index("'")
+        second_quote = type_class_name.index("'", first_quote + 1)
+        return True, type_class_name[first_quote + 1 : second_quote]
+    return False, type_class_name
+
+
+def any_typeclass_to_gui(
+    type_class_name: str, *, globals_dict: GlobalsDict | None = None, locals_dict: LocalsDict | None = None
+) -> AnyDataWithGui[Any]:
     if type_class_name.startswith("<class '") and type_class_name.endswith("'>"):
         type_class_name = type_class_name[8:-2]
 
-    is_optional, type_class_name = extract_optional_typeclass(type_class_name)
+    is_optional, type_class_name = _extract_optional_typeclass(type_class_name)
+    is_enum, type_class_name = _extract_enum_typeclass(type_class_name)
 
-    if type_class_name in ALL_GUI_FACTORIES:
+    if is_enum:
+        try:
+            if globals_dict is not None and locals_dict is not None:
+                enum_class = eval(type_class_name, globals_dict, locals_dict)
+            else:
+                # If you get an error here (NameError: name 'MyEnum' is not defined),
+                # you need to pass the globals and locals
+                enum_class = eval(type_class_name)
+            r = EnumWithGui(enum_class)
+            return r
+        except NameError:
+            logging.warning(f"Enum {type_class_name} not found in globals and locals")
+            return AnyDataWithGui.make_default()
+
+    elif type_class_name in ALL_GUI_FACTORIES:
         if not is_optional:
             return ALL_GUI_FACTORIES[type_class_name]()
         else:
@@ -51,14 +82,20 @@ def any_value_to_data_with_gui(value: DataType) -> AnyDataWithGui[DataType]:
     return r
 
 
-def any_param_to_param_with_gui(name: str, param: inspect.Parameter) -> ParamWithGui[Any]:
+def any_param_to_param_with_gui(
+    name: str,
+    param: inspect.Parameter,
+    *,
+    globals_dict: GlobalsDict | None = None,
+    locals_dict: LocalsDict | None = None,
+) -> ParamWithGui[Any]:
     annotation = param.annotation
 
     data_with_gui: AnyDataWithGui[Any]
     if annotation is None or annotation is inspect.Parameter.empty:
         data_with_gui = AnyDataWithGui.make_default()
     else:
-        data_with_gui = any_typeclass_to_gui(str(annotation))
+        data_with_gui = any_typeclass_to_gui(str(annotation), globals_dict=globals_dict, locals_dict=locals_dict)
 
     param_kind = ParamKind.PositionalOrKeyword
     if param.kind is inspect.Parameter.POSITIONAL_ONLY:
@@ -73,12 +110,16 @@ def any_param_to_param_with_gui(name: str, param: inspect.Parameter) -> ParamWit
 def any_function_to_function_with_gui(
     f: Callable[..., Any],
     *,
+    globals_dict: GlobalsDict | None = None,
+    locals_dict: LocalsDict | None = None,
     signature_string: str | None = None,
     signatures_import_code: str | None = None,
 ) -> FunctionWithGui:
     """Create a FunctionWithGui from a function.
 
     :param f: the function for which we want to create a FunctionWithGui
+    :param globals_dict: the globals dictionary of the module where the function is defined
+    :param locals_dict: the locals dictionary of the module where the function is defined
     :param signature_string: a string representing the signature of the function
     :param signatures_import_code: a string representing the code to import the types used in the signature_string
     :return: a FunctionWithGui instance that wraps the function.
@@ -96,7 +137,9 @@ def any_function_to_function_with_gui(
 
     params = sig.parameters
     for name, param in params.items():
-        function_with_gui.inputs_with_gui.append(any_param_to_param_with_gui(name, param))
+        function_with_gui.inputs_with_gui.append(
+            any_param_to_param_with_gui(name, param, globals_dict=globals_dict, locals_dict=locals_dict)
+        )
 
     return_annotation = sig.return_annotation
     if return_annotation is inspect.Parameter.empty:
