@@ -151,28 +151,6 @@ class LutParamsWithGui(AnyDataWithGui[LutParams]):
         return changed
 
 
-# class LutImageWithGui(FunctionWithGui):
-#     lut_params_with_gui: LutParamsWithGui
-#     input_gui: ImageWithGui
-#     output_gui: ImageWithGui
-#
-#     def __init__(self) -> None:
-#         self.lut_params_with_gui = LutParamsWithGui()
-#         self.input_gui = ImageWithGui()
-#         self.output_gui = ImageWithGui()
-#         self.name = "LUT"
-#
-#         def f(x: ImageUInt8) -> ImageUInt8:
-#             r = lut_with_params(self.lut_params_with_gui.value, x)
-#             return r
-#
-#         self.f_impl = f
-#
-#         self.parameters_with_gui = [
-#             ParamWithGui("LUT Params", self.lut_params_with_gui, ParamKind.PositionalOrKeyword, UnspecifiedValue)
-#         ]
-
-
 #
 #
 # class LutChannelsWithGui(FunctionWithGui[Image, Image]):

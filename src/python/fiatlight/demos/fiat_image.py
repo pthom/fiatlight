@@ -110,7 +110,7 @@ def main() -> None:
 
     from fiatlight.computer_vision.image_gui import ImageWithGui
     from fiatlight.computer_vision.cv_color_type_gui import ColorConversionWithGui
-    from fiatlight.computer_vision import lut_with_params
+    from fiatlight.computer_vision import lut_channels_with_params
 
     image = cv2.imread(demos_assets_folder() + "/images/house.jpg")
     image = cv2.resize(image, (int(image.shape[1] * 0.5), int(image.shape[0] * 0.5)))
@@ -144,7 +144,7 @@ def main() -> None:
         #     ALL_GUI_FACTORIES["lut.LutParams"] = LutParamsWithGui
 
         # functions = [make_image, color_convert]
-        functions = [make_image, lut_with_params]
+        functions = [make_image, lut_channels_with_params]
         r = FunctionsGraph.from_function_composition(functions)  # type: ignore
         return r
 
