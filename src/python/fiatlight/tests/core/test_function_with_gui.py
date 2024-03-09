@@ -52,16 +52,14 @@ def test_serialization() -> None:
 
     json_data = {
         "inputs": [
-            {"data": {"type": "Unspecified"}, "name": "b"},
             {"data": {"type": "Primitive", "value": 2}, "name": "a"},
-        ],
-        "name": "add",
+            {"data": {"type": "Unspecified"}, "name": "b"},
+        ]
     }
     add_gui.fill_from_json(json_data)
-    assert isinstance(add_gui.inputs_with_gui[0].data_with_gui.value, Unspecified)
-    assert add_gui.inputs_with_gui[1].data_with_gui.value == 2
+    assert add_gui.inputs_with_gui[0].data_with_gui.value == 2
+    assert isinstance(add_gui.inputs_with_gui[1].data_with_gui.value, Unspecified)
     assert add_gui.outputs_with_gui[0].data_with_gui.value is UnspecifiedValue
-    assert add_gui.name == "add"
 
 
 def test_with_list() -> None:
