@@ -107,3 +107,17 @@ def test_get_function_signature() -> None:
         str(sig)
         == "(iterable: Iterable[~T], /, *, key: Optional[Callable[[~T], Any]] = None, reverse: bool = False) -> List[~T]"
     )
+
+
+def test_wrap_signature_to_gui() -> None:
+    from fiatlight.core import any_function_to_function_with_gui
+
+    sorted_gui = any_function_to_function_with_gui(
+        sorted, signature_string="(words: List[str], /, reverse: bool = False) -> List[str]"
+    )
+
+    sorted_gui.input_of_name("words").value = ["hello", "world"]
+    sorted_gui.input_of_name("reverse").value = True
+    sorted_gui.invoke()
+    obtained = sorted_gui.outputs_with_gui[0].data_with_gui.value
+    assert obtained == ["world", "hello"]

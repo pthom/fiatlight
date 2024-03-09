@@ -145,8 +145,19 @@ def main() -> None:
     get_text_gui = any_function_to_function_with_gui(get_text)
     get_text_gui.set_input_gui("text", TextFileWithGui())
 
-    def sort_words(words: List[str], reverse: bool = False) -> List[str]:
-        return sorted(words, reverse=reverse)
+    # In this example, we will use the standard `sorted` function,
+    # but we create a FunctionWithGui around it, by adding a signature_string,
+    # so that the `reverse` parameter can be displayed as a checkbox in the GUI.
+    # Notes:
+    # - in Python, the sorted signature is untyped (and reverse is also untyped):
+    #      def sorted(iterable, /, *, key=None, reverse=False)
+    # - the "/" in the signature means that the parameters before it are positional-only
+    #  (by default, fiatlight will try to specify all parameters using keywords, hence the need to specify this)
+    # - we could also use the following more generic signature_string:
+    #      "(iterable: Iterable[T], /, *, key: Optional[Callable[[T], Any]] = None, reverse: bool = False) -> List[T]"
+    sorted_gui = any_function_to_function_with_gui(
+        sorted, signature_string="(words: List[str], /, reverse: bool = False) -> List[str]"
+    )
 
     fiat_run(
         FunctionsGraph.from_function_composition(
@@ -156,8 +167,7 @@ def main() -> None:
                 remove_non_letters,
                 split_words,
                 remove_empty_words,
-                sort_words,
-                # sorted,
+                sorted_gui,
                 run_length_encode,
                 sort_word_with_counts,
                 display_word_with_counts,
