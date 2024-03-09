@@ -26,6 +26,7 @@ class ImagePresenter:
     image: Image
     image_channels: Sequence[Image]
     show_channels: bool = False
+    channel_layout_vertically: bool = False
 
     def __init__(self, image_params: ImagePresenterParams | None = None, show_channels: bool = False) -> None:
         self.image_params = default_image_params() if image_params is None else image_params
@@ -54,11 +55,17 @@ class ImagePresenter:
     def _gui_channels(self) -> None:
         for i, image_channel in enumerate(self.image_channels):
             label = f"channel {i}"
+            imgui.begin_group()
             immvision.image(label, image_channel, self.image_params)
             if imgui.small_button("Inspect"):
                 global _INSPECT_ID
                 immvision.inspector_add_image(image_channel, f"inspect {_INSPECT_ID} _ channel {i}")
                 _INSPECT_ID += 1
+            imgui.end_group()
+            if not self.channel_layout_vertically:
+                imgui.same_line()
+        if not self.channel_layout_vertically:
+            imgui.new_line()
 
     def _gui_image(self) -> None:
         immvision.image("##output", self.image, self.image_params)
@@ -72,6 +79,8 @@ class ImagePresenter:
         nb_channels = 1 if len(self.image.shape) == 2 else self.image.shape[2]
         if nb_channels > 1:
             _, self.show_channels = imgui.checkbox("Show channels", self.show_channels)
+            if self.show_channels:
+                _, self.channel_layout_vertically = imgui.checkbox("Vertical layout", self.channel_layout_vertically)
         self._gui_size()
         if self.show_channels and nb_channels > 1:
             self._gui_channels()
