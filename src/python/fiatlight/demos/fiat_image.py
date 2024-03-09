@@ -121,6 +121,9 @@ def main() -> None:
     def color_convert(image: ImageUInt8, color_conversion: ColorConversion = ColorConversion()) -> ImageUInt8Channels:
         return color_conversion.convert_image(image)
 
+    def oil_paint(image: ImageUInt8, size: int = 1, dynRatio: int = 3) -> ImageUInt8:
+        return cv2.xphoto.oilPainting(image, size, dynRatio, cv2.COLOR_BGR2HSV)  # type: ignore
+
     def make_graph_manually() -> FunctionsGraph:
         make_image_gui = any_function_to_function_with_gui(make_image)
         make_image_gui.set_output_gui(ImageWithGui())
@@ -148,7 +151,7 @@ def main() -> None:
         # (import required to get an automatic Gui for the enums in lut_channels_in_colorspace params)
         from fiatlight.computer_vision import ColorType  # noqa
 
-        functions = [make_image, lut_channels_in_colorspace]
+        functions = [make_image, lut_channels_in_colorspace, oil_paint]
         r = FunctionsGraph.from_function_composition(functions, globals(), locals())  # type: ignore
         return r
 
