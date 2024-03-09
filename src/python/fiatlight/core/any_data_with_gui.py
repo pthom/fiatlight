@@ -137,7 +137,8 @@ class AnyDataWithGui(Generic[DataType]):
                 self.callbacks.present()
 
     @final
-    def call_gui_edit(self) -> bool:
+    def call_gui_edit(self, display_trash: bool = True) -> bool:
+        # (display_trash is set to False for OptionalWithGui's inner_gui)
         from fiatlight.widgets import IconsFontAwesome6
 
         if self.callbacks.edit is None:
@@ -160,9 +161,10 @@ class AnyDataWithGui(Generic[DataType]):
         else:
             changed = self.callbacks.edit()
             imgui.same_line()
-            if imgui.button(IconsFontAwesome6.ICON_TRASH_CAN):
-                self.value = UnspecifiedValue
-                changed = True
+            if display_trash:
+                if imgui.button(IconsFontAwesome6.ICON_TRASH_CAN):
+                    self.value = UnspecifiedValue
+                    changed = True
             return changed
 
 

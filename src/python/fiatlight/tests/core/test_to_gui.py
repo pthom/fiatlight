@@ -5,7 +5,7 @@ from fiatlight.core.to_gui import (
 )
 from fiatlight.core import UnspecifiedValue, ErrorValue
 
-from typing import Tuple
+from typing import Tuple, Optional
 
 
 class Dummy:
@@ -110,18 +110,25 @@ def test_any_function_to_function_with_gui_two_outputs_old_style() -> None:
     assert len(add_mult_gui.outputs_with_gui) == 2
 
 
-# def test_any_list_to_data_with_gui() -> None:
-#     from typing import List
-#     import inspect
-#     a: List[int] = [1, 2, 3]
-#     t = type(a)
-#
-#     def foo(a: list[int]) -> int:
-#         return len(a)
-#
-#     sig = inspect.signature(foo)
-#
-#     fg = any_function_to_function_with_gui(foo)
-#
-#     ag = any_value_to_data_with_gui([1, 2, 3])
-#     print(ag)
+def test_function_with_optional_param() -> None:
+    from fiatlight.core.optional_gui import OptionalWithGui
+
+    def foo(a: int | None = None) -> int:
+        if a is None:
+            return 0
+        else:
+            return a + 2
+
+    def foo2(a: Optional[int] = None) -> int:
+        if a is None:
+            return 0
+        else:
+            return a + 2
+
+    foo_gui = any_function_to_function_with_gui(foo)
+    assert isinstance(foo_gui.inputs_with_gui[0].data_with_gui, OptionalWithGui)
+
+    foo2_gui = any_function_to_function_with_gui(foo2)
+    assert isinstance(foo2_gui.inputs_with_gui[0].data_with_gui, OptionalWithGui)
+
+    print("a")
