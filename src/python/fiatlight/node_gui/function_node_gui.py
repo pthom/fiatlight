@@ -126,7 +126,10 @@ class FunctionNodeGui:
                     imgui.same_line()
                     if not self.function_node.has_input_link(input_param.name):
                         imgui.begin_group()
-                        changed = input_param.data_with_gui.call_gui_edit() or changed
+                        changed = (
+                            input_param.data_with_gui.call_gui_edit(default_param_value=input_param.default_value)
+                            or changed
+                        )
                         if (
                             input_param.data_with_gui.value is UnspecifiedValue
                             and input_param.default_value is not UnspecifiedValue
