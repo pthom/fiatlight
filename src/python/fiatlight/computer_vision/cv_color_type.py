@@ -40,6 +40,13 @@ class ColorType(enum.Enum):
         else:
             return ColorConversion(self, ColorType.BGR)
 
+    def color_conversion_from_bgr(self) -> Optional["ColorConversion"]:
+        conversion_code = _optional_cv_color_conversion_code_between(ColorType.BGR, self)
+        if conversion_code is None:
+            return None
+        else:
+            return ColorConversion(ColorType.BGR, self)
+
     @staticmethod
     def available_color_types_for_image(image: NDArray[Any]) -> List["ColorType"]:
         nb_channels = image.shape[-1] if len(image.shape) == 3 else 1
