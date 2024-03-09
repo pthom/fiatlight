@@ -10,6 +10,8 @@ from fiatlight.core.fiat_types import (
     JsonDict,
     JsonPrimitive,
     JsonPrimitiveOrDict,
+    GlobalsDict,
+    LocalsDict,
 )
 from fiatlight.core.any_data_gui_callbacks import AnyDataGuiCallbacks
 from fiatlight.core.any_data_with_gui import AnyDataWithGui
@@ -18,6 +20,7 @@ from fiatlight.core.to_gui import any_function_to_function_with_gui, ALL_GUI_FAC
 from fiatlight.core.function_node import FunctionNode, FunctionNodeLink
 from fiatlight.core.functions_graph import FunctionsGraph
 from fiatlight.core.function_signature import get_function_signature
+from fiatlight.core.composite_gui import OptionalWithGui, EnumWithGui
 
 
 __all__ = [
@@ -33,6 +36,8 @@ __all__ = [
     "JsonDict",
     "JsonPrimitive",
     "JsonPrimitiveOrDict",
+    "GlobalsDict",
+    "LocalsDict",
     # from function_signature
     "get_function_signature",
     # from any_data_gui_handlers
@@ -52,4 +57,7 @@ __all__ = [
     "FunctionNodeLink",
     # from functions_graph
     "FunctionsGraph",
+    # from composite_gui
+    "OptionalWithGui",
+    "EnumWithGui",
 ]

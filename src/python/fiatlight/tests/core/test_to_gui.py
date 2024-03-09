@@ -111,7 +111,7 @@ def test_any_function_to_function_with_gui_two_outputs_old_style() -> None:
 
 
 def test_function_with_optional_param() -> None:
-    from fiatlight.core.optional_gui import OptionalWithGui
+    from fiatlight.core.composite_gui import OptionalWithGui
 
     def foo(a: int | None = None) -> int:
         if a is None:
@@ -132,3 +132,21 @@ def test_function_with_optional_param() -> None:
     assert isinstance(foo2_gui.inputs_with_gui[0].data_with_gui, OptionalWithGui)
 
     print("a")
+
+
+def test_enum_gui() -> None:
+    from fiatlight.core.composite_gui import EnumWithGui
+    from enum import Enum
+
+    class MyEnum(Enum):
+        A = 1
+        B = 2
+
+    my_enum_gui = any_typeclass_to_gui("<enum 'MyEnum'>", globals_dict=globals(), locals_dict=locals())
+    assert isinstance(my_enum_gui, EnumWithGui)
+
+    def foo(a: MyEnum) -> int:
+        return a.value
+
+    foo_gui = any_function_to_function_with_gui(foo, globals_dict=globals(), locals_dict=locals())
+    assert isinstance(foo_gui.inputs_with_gui[0].data_with_gui, EnumWithGui)

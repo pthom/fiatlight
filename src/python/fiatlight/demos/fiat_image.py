@@ -144,8 +144,12 @@ def main() -> None:
         #     ALL_GUI_FACTORIES["lut.LutParams"] = LutParamsWithGui
 
         # functions = [make_image, color_convert]
+
+        # (import required to get an automatic Gui for the enums in lut_channels_in_colorspace params)
+        from fiatlight.computer_vision import ColorType  # noqa
+
         functions = [make_image, lut_channels_in_colorspace]
-        r = FunctionsGraph.from_function_composition(functions)  # type: ignore
+        r = FunctionsGraph.from_function_composition(functions, globals(), locals())  # type: ignore
         return r
 
     functions_graph = make_graph_with_register()
