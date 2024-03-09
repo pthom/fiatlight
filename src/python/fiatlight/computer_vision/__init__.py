@@ -2,7 +2,7 @@ from fiatlight.computer_vision.image_types import ImageUInt8, ImageFloat, Image,
 from fiatlight.computer_vision.image_gui import ImageWithGui, ImageChannelsWithGui, ImagePresenterParams
 from fiatlight.computer_vision.cv_color_type import ColorConversion, ColorType
 from fiatlight.computer_vision.cv_color_type_gui import ColorConversionWithGui
-from fiatlight.computer_vision.lut import LutParams, LutTable, lut, lut_with_params
+from fiatlight.computer_vision.lut import LutParams, LutTable, lut, lut_with_params, lut_channels_with_params
 from fiatlight.computer_vision.lut_gui import LutParamsWithGui
 
 
@@ -39,6 +39,7 @@ __all__ = [
     "LutTable",
     "lut",
     "lut_with_params",
+    "lut_channels_with_params",
     # from lut_gui
     "LutParamsWithGui",
 ]

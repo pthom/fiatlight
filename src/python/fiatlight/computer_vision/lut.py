@@ -32,6 +32,27 @@ def lut_with_params(image: ImageUInt8, params: LutParams) -> ImageUInt8:
     return r
 
 
+def lut_channels_with_params(
+    image: ImageUInt8,
+    lut_channel_0: LutParams,
+    lut_channel_1: LutParams | None = None,
+    lut_channel_2: LutParams | None = None,
+    lut_channel_3: LutParams | None = None,
+) -> ImageUInt8:
+    lut_channel_1 = lut_channel_1 or lut_channel_0
+    lut_channel_2 = lut_channel_2 or lut_channel_0
+    lut_channel_3 = lut_channel_3 or lut_channel_0
+    lut_params = [lut_channel_0, lut_channel_1, lut_channel_2, lut_channel_3]
+    if len(image.shape) == 2:
+        return lut_with_params(image, lut_params[0])
+    nb_channels = image.shape[2]
+    channels = cv2.split(image)
+    assert len(channels) == nb_channels
+    result_channels = [lut_with_params(channels[i], lut_params[i]) for i in range(nb_channels)]
+    result = cv2.merge(result_channels)
+    return result
+
+
 def lut(image: ImageUInt8, lut_table: LutTable) -> ImageUInt8:
     assert len(lut_table) == 256
     image_with_lut_uint8 = cv2.LUT(image, lut_table)
