@@ -137,7 +137,9 @@ class AnyDataWithGui(Generic[DataType]):
                 self.callbacks.present()
 
     @final
-    def call_gui_edit(self, display_trash: bool = True) -> bool:
+    def call_gui_edit(
+        self, *, display_trash: bool = True, default_param_value: Unspecified | DataType = UnspecifiedValue
+    ) -> bool:
         # (display_trash is set to False for OptionalWithGui's inner_gui)
         from fiatlight.widgets import IconsFontAwesome6
 
@@ -150,11 +152,14 @@ class AnyDataWithGui(Generic[DataType]):
             imgui.text("Unspecified!")
             imgui.same_line()
             default_value_provider = self.callbacks.default_value_provider
-            if default_value_provider is None:
+            if default_value_provider is None and default_param_value is None:
                 return False
             else:
                 if imgui.button(IconsFontAwesome6.ICON_PLUS):
-                    self.value = default_value_provider()
+                    if default_param_value is not UnspecifiedValue:
+                        self.value = default_param_value
+                    else:
+                        self.value = default_value_provider()
                     return True
                 else:
                     return False
