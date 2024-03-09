@@ -135,7 +135,7 @@ class FunctionNodeGui:
                                 default_str = str(input_param.default_value)
                             except Exception:
                                 default_str = "???"
-                            widgets.text_maybe_truncated(f"(Default: {default_str})", max_width_chars=20, max_lines=3)
+                            widgets.text_maybe_truncated(f"(Default: {default_str})", max_width_chars=40, max_lines=3)
                         imgui.end_group()
                     else:
                         imgui.new_line()
