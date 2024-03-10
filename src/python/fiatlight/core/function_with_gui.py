@@ -66,6 +66,11 @@ class FunctionWithGui:
     last_exception_message: Optional[str] = None
     last_exception_traceback: Optional[str] = None
 
+    # if this is True, the function will be called automatically when any of the inputs change
+    invoke_automatically: bool = True
+    # if True, this indicates that the inputs have changed since the last call, and the function needs to be called
+    dirty: bool = True
+
     def __init__(self) -> None:
         self.inputs_with_gui = []
         self.outputs_with_gui = []
@@ -88,6 +93,9 @@ class FunctionWithGui:
     def invoke(self) -> None:
         assert self.f_impl is not None
 
+        if not self.dirty:
+            return
+
         self.last_exception_message = None
         self.last_exception_traceback = None
 
@@ -106,6 +114,7 @@ class FunctionWithGui:
         if any(value is ErrorValue or value is UnspecifiedValue for value in all_params):
             for output_with_gui in self.outputs_with_gui:
                 output_with_gui.data_with_gui.value = UnspecifiedValue
+            self.dirty = False
             return
 
         try:
@@ -128,9 +137,11 @@ class FunctionWithGui:
             for output_with_gui in self.outputs_with_gui:
                 output_with_gui.data_with_gui.value = ErrorValue
 
+        self.dirty = False
+
     def to_json(self) -> JsonDict:
         inputs_dicts = [param.to_json() for param in self.inputs_with_gui]
-        function_dict = {"inputs": inputs_dicts}
+        function_dict = {"inputs": inputs_dicts, "invoke_automatically": self.invoke_automatically}
         return function_dict
 
     def fill_from_json(self, json_data: JsonDict) -> None:
@@ -143,6 +154,7 @@ class FunctionWithGui:
                 if input_param.name == param_name:
                     input_param.fill_from_json(param_json)
                     break
+        self.invoke_automatically = json_data.get("invoke_automatically", True)
 
     def set_output_gui(self, data_with_gui: AnyDataWithGui[Any], output_idx: int = 0) -> None:
         if output_idx >= len(self.outputs_with_gui):

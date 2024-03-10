@@ -159,6 +159,7 @@ class AnyDataWithGui(Generic[DataType]):
                     if default_param_value is not UnspecifiedValue:
                         self.value = default_param_value
                     else:
+                        assert default_value_provider is not None
                         self.value = default_value_provider()
                     return True
                 else:
