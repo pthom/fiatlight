@@ -86,6 +86,19 @@ class FunctionNodeGui:
                 color=FIATLIGHT_GUI_CONFIG.colors.error,
             )
 
+        def draw_invoke_options() -> None:
+            invoke_changed, self.function_node.function_with_gui.invoke_automatically = imgui.checkbox(
+                "Auto refresh", self.function_node.function_with_gui.invoke_automatically
+            )
+            if invoke_changed and self.function_node.function_with_gui.invoke_automatically:
+                self.function_node.invoke_function()
+
+            if self.function_node.function_with_gui.dirty:
+                if imgui.button("Refresh"):
+                    self.function_node.invoke_function()
+                imgui.same_line()
+                imgui.text("(refresh needed)")
+
         def draw_function_outputs() -> None:
             def draw_output_pin(pin_output: ed.PinId) -> None:
                 def draw() -> None:
@@ -147,11 +160,15 @@ class FunctionNodeGui:
         ed.begin_node(self.node_id)
         draw_title()
         imgui.dummy(ImVec2(hello_imgui.em_size(self._MIN_NODE_WIDTH_EM), 1))
-        if draw_function_inputs():
-            self.function_node.invoke_function()
+        inputs_changed = draw_function_inputs()
+        if inputs_changed:
+            self.function_node.function_with_gui.dirty = True
+            if self.function_node.function_with_gui.invoke_automatically:
+                self.function_node.invoke_function()
         draw_exception_message()
         output_separator_str = "Outputs" if len(self.function_node.function_with_gui.outputs_with_gui) > 1 else "Output"
         widgets.node_utils.node_separator(self.node_id, text=output_separator_str)
+        draw_invoke_options()
         draw_function_outputs()
         # imgui.new_line()
         ed.end_node()
