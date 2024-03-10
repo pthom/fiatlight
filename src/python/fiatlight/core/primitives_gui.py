@@ -298,7 +298,7 @@ class StrWithGuiParams:
     label: str = "##str"
     edit_type: StrEditType = StrEditType.input
     input_flags: int = imgui.InputTextFlags_.none.value
-    width_em: float = 6  # if 0, then use all available width
+    width_em: float = 10  # if 0, then use all available width
     # Callbacks
     callback: Callable[[imgui.InputTextCallbackData], int] = None  # type: ignore
     user_data: Any | None = None
