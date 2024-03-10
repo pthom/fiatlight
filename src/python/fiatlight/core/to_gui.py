@@ -5,6 +5,7 @@ from fiatlight.core import primitives_gui
 from fiatlight.core.composite_gui import OptionalWithGui, EnumWithGui
 from fiatlight.core.function_signature import get_function_signature
 from fiatlight.core.fiat_types import GlobalsDict, LocalsDict
+from enum import Enum
 
 import inspect
 import logging
@@ -25,7 +26,9 @@ def _extract_optional_typeclass(type_class_name: str) -> Tuple[bool, str]:
     return False, type_class_name
 
 
-def _extract_enum_typeclass(type_class_name: str) -> Tuple[bool, str]:
+def _extract_enum_typeclass(
+    type_class_name: str, globals_dict: GlobalsDict, locals_dict: LocalsDict
+) -> Tuple[bool, str]:
     # An enum type will be displayed as
     #     <enum 'EnumName'>
     # or
@@ -35,6 +38,12 @@ def _extract_enum_typeclass(type_class_name: str) -> Tuple[bool, str]:
         first_quote = type_class_name.index("'")
         second_quote = type_class_name.index("'", first_quote + 1)
         return True, type_class_name[first_quote + 1 : second_quote]
+    try:
+        type_class = eval(type_class_name, globals_dict, locals_dict)
+        if issubclass(type_class, Enum):
+            return True, type_class_name
+    except NameError:
+        logging.warning(f"_extract_enum_typeclass: failed to evaluate {type_class_name}")
     return False, type_class_name
 
 
@@ -45,7 +54,7 @@ def any_typeclass_to_gui(
         type_class_name = type_class_name[8:-2]
 
     is_optional, type_class_name = _extract_optional_typeclass(type_class_name)
-    is_enum, type_class_name = _extract_enum_typeclass(type_class_name)
+    is_enum, type_class_name = _extract_enum_typeclass(type_class_name, globals_dict, locals_dict)
 
     if is_enum:
         try:
