@@ -2,7 +2,6 @@ from fiatlight.core import AnyDataWithGui, DataType, Unspecified, Error
 from imgui_bundle import imgui
 from enum import Enum
 from typing import Type
-from fiatlight.utils.registry import AutoRegistry
 
 
 class OptionalWithGui(AnyDataWithGui[DataType | None]):
@@ -56,9 +55,6 @@ class OptionalWithGui(AnyDataWithGui[DataType | None]):
             self.inner_gui.value = value
 
 
-_EXPANDED_ENUM_REGISTRY: AutoRegistry[bool] = AutoRegistry(bool)
-
-
 class EnumWithGui(AnyDataWithGui[Enum]):
     enum_type: Type[Enum]
 
@@ -80,23 +76,11 @@ class EnumWithGui(AnyDataWithGui[Enum]):
         assert not isinstance(self.value, (Unspecified, Error))
         changed = False
 
-        expand_id = imgui.get_id("expand")  # it will be unique, since a lot of calls of imgui.push_id are made before
-        is_expanded = _EXPANDED_ENUM_REGISTRY.get(expand_id)
-
         imgui.text(str(self.value))
-        imgui.same_line()
-        arrow_kind = imgui.Dir_.up.value if is_expanded else imgui.Dir_.down.value
-        if imgui.arrow_button("expand", arrow_kind):
-            is_expanded = not is_expanded
-
-        if is_expanded:
-            for enum_value in list(self.enum_type):
-                if imgui.radio_button(enum_value.name, self.value == enum_value):
-                    self.value = enum_value
-                    changed = True
-
-        _EXPANDED_ENUM_REGISTRY[expand_id] = is_expanded
-
+        for enum_value in list(self.enum_type):
+            if imgui.radio_button(enum_value.name, self.value == enum_value):
+                self.value = enum_value
+                changed = True
         return changed
 
 

@@ -124,4 +124,4 @@ def text_maybe_truncated(
 
     output_text(msg_truncated)
     if is_truncated and show_full_as_tooltip and imgui.is_item_hovered():
-        osd_widgets.set_tooltip(msg)
+        osd_widgets.set_tooltip(msg[:3000])

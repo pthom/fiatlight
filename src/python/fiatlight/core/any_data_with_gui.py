@@ -123,9 +123,22 @@ class AnyDataWithGui(Generic[DataType]):
             raise ValueError(f"Cannot deserialize {json_data}")
 
     @final
-    def call_gui_present(self) -> None:
+    def call_gui_present(self, default_param_value: Unspecified | DataType = UnspecifiedValue) -> None:
+        from fiatlight import widgets
+
         if isinstance(self.value, Unspecified):
-            imgui.text("Unspecified!")
+            if default_param_value is UnspecifiedValue:
+                imgui.text("Unspecified!")
+            else:
+                try:
+                    default_str = str(default_param_value)
+                except Exception:
+                    default_str = "???"
+                imgui.begin_group()
+                imgui.text("Unspecified!")
+                widgets.text_maybe_truncated("Default: " + default_str, max_width_chars=40, max_lines=3)
+                imgui.end_group()
+
         elif isinstance(self.value, Error):
             imgui.text("Error!")
         else:
@@ -151,13 +164,13 @@ class AnyDataWithGui(Generic[DataType]):
             imgui.text("Error!")
         if isinstance(self.value, (Unspecified, Error)):
             if default_param_value is not UnspecifiedValue:
-                imgui.begin_group()
-                imgui.text("Unspecified")
                 try:
                     default_str = str(default_param_value)
                 except Exception:
                     default_str = "???"
-                widgets.text_maybe_truncated(f"(Default: {default_str})", max_width_chars=40, max_lines=3)
+                imgui.begin_group()
+                imgui.text("Unspecified!")
+                widgets.text_maybe_truncated("Default: " + default_str, max_width_chars=40, max_lines=3)
                 imgui.end_group()
 
                 imgui.same_line()
