@@ -142,6 +142,7 @@ class AnyDataWithGui(Generic[DataType]):
     ) -> bool:
         # (display_trash is set to False for OptionalWithGui's inner_gui)
         from imgui_bundle import icons_fontawesome_4
+        from fiatlight import widgets
 
         if self.callbacks.edit is None:
             self.call_gui_present()
@@ -149,21 +150,34 @@ class AnyDataWithGui(Generic[DataType]):
         if isinstance(self.value, Error):
             imgui.text("Error!")
         if isinstance(self.value, (Unspecified, Error)):
-            imgui.text("Unspecified!")
-            imgui.same_line()
-            default_value_provider = self.callbacks.default_value_provider
-            if default_value_provider is None and default_param_value is None:
-                return False
-            else:
+            if default_param_value is not UnspecifiedValue:
+                imgui.begin_group()
+                imgui.text("Unspecified")
+                try:
+                    default_str = str(default_param_value)
+                except Exception:
+                    default_str = "???"
+                widgets.text_maybe_truncated(f"(Default: {default_str})", max_width_chars=40, max_lines=3)
+                imgui.end_group()
+
+                imgui.same_line()
                 if imgui.button(icons_fontawesome_4.ICON_FA_PLUS):
-                    if default_param_value is not UnspecifiedValue:
-                        self.value = default_param_value
-                    else:
-                        assert default_value_provider is not None
-                        self.value = default_value_provider()
+                    self.value = default_param_value
                     return True
                 else:
                     return False
+            else:
+                imgui.text("Unspecified!")
+                imgui.same_line()
+                default_value_provider = self.callbacks.default_value_provider
+                if default_value_provider is None:
+                    return False
+                else:
+                    if imgui.button(icons_fontawesome_4.ICON_FA_PLUS):
+                        self.value = default_value_provider()
+                        return True
+                    else:
+                        return False
         else:
             changed = self.callbacks.edit()
             imgui.same_line()
