@@ -42,7 +42,7 @@ def _extract_enum_typeclass(
         type_class = eval(type_class_name, globals_dict, locals_dict)
         if issubclass(type_class, Enum):
             return True, type_class_name
-    except NameError:
+    except (NameError, AttributeError):
         logging.warning(f"_extract_enum_typeclass: failed to evaluate {type_class_name}")
     return False, type_class_name
 
@@ -122,7 +122,6 @@ def any_function_to_function_with_gui(
     globals_dict: GlobalsDict | None = None,
     locals_dict: LocalsDict | None = None,
     signature_string: str | None = None,
-    signatures_import_code: str | None = None,
 ) -> FunctionWithGui:
     """Create a FunctionWithGui from a function.
 
@@ -130,7 +129,6 @@ def any_function_to_function_with_gui(
     :param globals_dict: the globals dictionary of the module where the function is defined
     :param locals_dict: the locals dictionary of the module where the function is defined
     :param signature_string: a string representing the signature of the function
-    :param signatures_import_code: a string representing the code to import the types used in the signature_string
     :return: a FunctionWithGui instance that wraps the function.
     """
     function_with_gui = FunctionWithGui()
@@ -138,9 +136,7 @@ def any_function_to_function_with_gui(
     function_with_gui.f_impl = f
 
     try:
-        sig = get_function_signature(
-            f, signature_string=signature_string, signatures_import_code=signatures_import_code
-        )
+        sig = get_function_signature(f, signature_string=signature_string)
     except ValueError as e:
         raise ValueError(f"Failed to get the signature of the function {f.__name__}") from e
 
