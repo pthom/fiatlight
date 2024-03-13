@@ -1,5 +1,5 @@
 from __future__ import annotations
-from fiatlight.core import FunctionNode, FunctionNodeLink, UnspecifiedValue, OutputWithGui
+from fiatlight.core import FunctionNode, FunctionNodeLink, OutputWithGui
 from fiatlight import widgets
 from imgui_bundle import imgui, imgui_node_editor as ed, ImVec2, imgui_ctx, hello_imgui, icons_fontawesome_4
 from typing import Dict, List, Any
@@ -132,31 +132,24 @@ class FunctionNodeGui:
                 imgui.text(icons_fontawesome_4.ICON_FA_ARROW_CIRCLE_LEFT + " " + name)
                 ed.end_pin()
 
-            if len(self.function_node.function_with_gui.inputs_with_gui) > 1:
+            if len(self.function_node.function_with_gui.inputs_with_gui) > 0:
                 widgets.node_utils.node_separator(self.node_id, text="Params")
 
             for input_param in self.function_node.function_with_gui.inputs_with_gui:
                 with imgui_ctx.push_obj_id(input_param):
                     draw_input_pin(input_param.name, self.pins_input[input_param.name])
                     imgui.same_line()
-                    if not self.function_node.has_input_link(input_param.name):
-                        imgui.begin_group()
+
+                    shall_show_edit = not self.function_node.has_input_link(input_param.name)
+
+                    if shall_show_edit:
                         changed = (
                             input_param.data_with_gui.call_gui_edit(default_param_value=input_param.default_value)
                             or changed
                         )
-                        if (
-                            input_param.data_with_gui.value is UnspecifiedValue
-                            and input_param.default_value is not UnspecifiedValue
-                        ):
-                            try:
-                                default_str = str(input_param.default_value)
-                            except Exception:
-                                default_str = "???"
-                            widgets.text_maybe_truncated(f"(Default: {default_str})", max_width_chars=40, max_lines=3)
-                        imgui.end_group()
                     else:
                         imgui.new_line()
+
             return changed
 
         ed.begin_node(self.node_id)
