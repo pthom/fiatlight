@@ -23,7 +23,7 @@ from fiatlight.core import (
     FunctionNodeLink,
     FunctionsGraph,
 )
-from fiatlight.widgets import IconsFontAwesome6
+
 from fiatlight.app_runner import fiat_run, FiatGuiParams
 
 # from fiatlight.fiatlight_types import PureFunction
@@ -68,8 +68,4 @@ __all__ = [
     #
     "fiat_run",
     "FiatGuiParams",
-    #
-    # from widgets
-    #
-    "IconsFontAwesome6",
 ]

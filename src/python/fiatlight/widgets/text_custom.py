@@ -69,7 +69,7 @@ def text_maybe_truncated(
     show_copy_button: bool = False,
     show_details_button: bool = False,
 ) -> None:
-    from fiatlight.widgets import IconsFontAwesome6
+    from imgui_bundle import icons_fontawesome_4
 
     def output_text(s: str) -> None:
         if color is not None:
@@ -98,7 +98,7 @@ def text_maybe_truncated(
         flag_shown_button = True
 
     if show_copy_button:
-        if imgui.button(IconsFontAwesome6.ICON_COPY):
+        if imgui.button(icons_fontawesome_4.ICON_FA_COPY):
             imgui.set_clipboard_text(msg)
         if imgui.is_item_hovered():
             osd_widgets.set_tooltip("Copy to clipboard")
@@ -106,7 +106,7 @@ def text_maybe_truncated(
         flag_shown_button = True
 
     if is_truncated and show_details_button:
-        if imgui.button(IconsFontAwesome6.ICON_BOOK):
+        if imgui.button(icons_fontawesome_4.ICON_FA_BOOK):
 
             def detail_gui() -> None:
                 imgui.input_text_multiline("##value_text", msg)

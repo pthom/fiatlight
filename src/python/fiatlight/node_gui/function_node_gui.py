@@ -1,8 +1,7 @@
 from __future__ import annotations
 from fiatlight.core import FunctionNode, FunctionNodeLink, UnspecifiedValue, OutputWithGui
 from fiatlight import widgets
-from fiatlight.widgets import IconsFontAwesome6
-from imgui_bundle import imgui, imgui_node_editor as ed, ImVec2, imgui_ctx, hello_imgui
+from imgui_bundle import imgui, imgui_node_editor as ed, ImVec2, imgui_ctx, hello_imgui, icons_fontawesome_4
 from typing import Dict, List, Any
 
 
@@ -65,7 +64,10 @@ class FunctionNodeGui:
 
             fn_doc = self.function_node.function_with_gui.doc()
             if fn_doc is not None:
-                imgui.text(fn_doc)
+                imgui.same_line()
+                imgui.text(icons_fontawesome_4.ICON_FA_QUESTION_CIRCLE)
+                if imgui.is_item_hovered():
+                    widgets.osd_widgets.set_tooltip(fn_doc)
 
         def draw_exception_message() -> None:
             from fiatlight.app_runner import FIATLIGHT_GUI_CONFIG
@@ -103,7 +105,7 @@ class FunctionNodeGui:
             def draw_output_pin(pin_output: ed.PinId) -> None:
                 def draw() -> None:
                     ed.begin_pin(pin_output, ed.PinKind.output)
-                    imgui.text(IconsFontAwesome6.ICON_CIRCLE_RIGHT)
+                    imgui.text(icons_fontawesome_4.ICON_FA_ARROW_CIRCLE_RIGHT)
                     ed.end_pin()
 
                 widgets.node_utils.draw_node_gui_right_align(self.node_id, draw)
@@ -127,7 +129,7 @@ class FunctionNodeGui:
 
             def draw_input_pin(name: str, pin_input: ed.PinId) -> None:
                 ed.begin_pin(pin_input, ed.PinKind.input)
-                imgui.text(IconsFontAwesome6.ICON_CIRCLE_LEFT + " " + name)
+                imgui.text(icons_fontawesome_4.ICON_FA_ARROW_CIRCLE_LEFT + " " + name)
                 ed.end_pin()
 
             if len(self.function_node.function_with_gui.inputs_with_gui) > 1:
