@@ -172,7 +172,7 @@ class FunctionNodeGui:
         widgets.node_utils.node_separator(self.node_id, text=output_separator_str)
         draw_invoke_options()
         draw_function_outputs()
-        # imgui.new_line()
+
         ed.end_node()
         self.node_size = ed.get_node_size(self.node_id)
 
