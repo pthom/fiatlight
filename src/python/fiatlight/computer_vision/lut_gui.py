@@ -22,7 +22,7 @@ class LutParamsWithGui(AnyDataWithGui[LutParams]):
         self.callbacks.default_value_provider = lambda: LutParams()
 
     def present(self) -> None:
-        self._show_lut_graph()
+        imgui.text("Lut(...)")
 
     def edit(self) -> bool:
         changed = self.gui_params()
