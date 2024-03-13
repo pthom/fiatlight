@@ -8,29 +8,8 @@ from typing import Any
 from imgui_bundle import hello_imgui, ImVec2, immvision
 
 import json
-import os
 import logging
 from typing import List, Tuple
-
-
-class FiatAssets:
-    # font_awesome_6: imgui.ImFont
-    default_font_with_fa6: imgui.ImFont
-
-    def load_assets(self) -> None:
-        this_dir = os.path.dirname(os.path.abspath(__file__))
-        assets_folder = os.path.abspath(f"{this_dir}/../../../fiatlight_assets")
-        hello_imgui.set_assets_folder(assets_folder)
-        self.default_font_with_fa6 = hello_imgui.load_font("fonts/DroidSans.ttf", 15.0)
-
-        font_params = hello_imgui.FontLoadingParams()
-        font_params.merge_to_last_font = True
-        font_params.use_full_glyph_range = True
-        # self.default_font_with_fa6 = hello_imgui.load_font("fonts/Font_Awesome_6_Free-Solid-900.otf", 15.0, font_params)
-        self.default_font_with_fa6 = hello_imgui.load_font("fonts/Font_Awesome_6_Free-Solid-900.otf", 15.0, font_params)
-
-
-FIATLIGHT_ASSETS = FiatAssets()
 
 
 class FiatGuiParams:
@@ -218,9 +197,6 @@ class FiatGui:
         )
         self.params.runner_params.callbacks.post_init = functional_utils.sequence_void_functions(
             self._post_init, self.params.runner_params.callbacks.post_init
-        )
-        self.params.runner_params.callbacks.load_additional_fonts = functional_utils.sequence_void_functions(
-            FIATLIGHT_ASSETS.load_assets, self.params.runner_params.callbacks.load_additional_fonts
         )
 
         top_toolbar_options = hello_imgui.EdgeToolbarOptions(size_em=2.4, window_bg=ImVec4(0.3, 0.3, 0.3, 1.0))
