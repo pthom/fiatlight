@@ -116,6 +116,8 @@ class TextFileWithGui(AnyDataWithGui[str]):
         changed = False
         from imgui_bundle import imgui
 
+        self.present()
+
         if imgui.button("Get from file"):
             self.open_file_dialog = self.pfd.open_file("Select text file")
         if self.open_file_dialog is not None and not self.open_file_dialog.ready():
@@ -130,7 +132,14 @@ class TextFileWithGui(AnyDataWithGui[str]):
     def present(self) -> None:
         from fiatlight import widgets
 
-        widgets.text_maybe_truncated(self.get_actual_value(), max_width_chars=30, max_lines=30)
+        widgets.text_maybe_truncated(
+            self.get_actual_value(),
+            max_width_chars=30,
+            max_lines=3,
+            show_full_as_tooltip=False,
+            show_copy_button=True,
+            show_details_button=True,
+        )
 
 
 def main() -> None:

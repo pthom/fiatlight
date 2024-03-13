@@ -28,6 +28,15 @@ class FunctionNodeLinkGui:
         ed.link(self.link_id, self.start_id, self.end_id)
 
 
+def my_expand_button(expanded: bool) -> bool:
+    icon = icons_fontawesome_4.ICON_FA_CARET_DOWN if expanded else icons_fontawesome_4.ICON_FA_CARET_RIGHT
+    clicked = imgui.button(icon)
+    if not clicked:
+        return expanded
+    else:
+        return not expanded
+
+
 class FunctionNodeGui:
     """The GUI representation as a visual node for a FunctionNode"""
 
@@ -41,6 +50,8 @@ class FunctionNodeGui:
 
     _MIN_NODE_WIDTH_EM = 6
 
+    show_edit_input: Dict[str, bool] = {}
+
     def __init__(self, function_node: FunctionNode) -> None:
         self.function_node = function_node
 
@@ -53,6 +64,10 @@ class FunctionNodeGui:
         self.pins_output = {}
         for i, output_with_gui in enumerate(self.function_node.function_with_gui.outputs_with_gui):
             self.pins_output[i] = ed.PinId.create()
+
+        self.show_edit_input = {
+            input_with_gui.name: False for input_with_gui in self.function_node.function_with_gui.inputs_with_gui
+        }
 
     def draw_node(self, unique_name: str) -> None:
         def draw_title() -> None:
@@ -127,28 +142,45 @@ class FunctionNodeGui:
         def draw_function_inputs() -> bool:
             changed = False
 
-            def draw_input_pin(name: str, pin_input: ed.PinId) -> None:
-                ed.begin_pin(pin_input, ed.PinKind.input)
-                imgui.text(icons_fontawesome_4.ICON_FA_ARROW_CIRCLE_LEFT + " " + name)
-                ed.end_pin()
-
             if len(self.function_node.function_with_gui.inputs_with_gui) > 0:
                 widgets.node_utils.node_separator(self.node_id, text="Params")
 
             for input_param in self.function_node.function_with_gui.inputs_with_gui:
                 with imgui_ctx.push_obj_id(input_param):
-                    draw_input_pin(input_param.name, self.pins_input[input_param.name])
+
+                    def show_edit_or_present() -> bool:
+                        def show_expand_btn_inner():
+                            imgui.text("     ")
+                            imgui.same_line()
+                            self.show_edit_input[input_name] = my_expand_button(self.show_edit_input[input_name])
+
+                        def show_expand_btn():
+                            widgets.node_utils.draw_node_gui_right_align(self.node_id, show_expand_btn_inner)
+
+                        r = False
+                        if self.show_edit_input[input_param.name]:
+                            imgui.same_line()
+                            show_expand_btn()
+                            r = input_param.data_with_gui.call_gui_edit(default_param_value=input_param.default_value)
+                        else:
+                            imgui.same_line()
+                            input_param.data_with_gui.call_gui_present(default_param_value=input_param.default_value)
+                            show_expand_btn()
+                        return r
+
+                    input_name = input_param.name
+
+                    ed.begin_pin(self.pins_input[input_name], ed.PinKind.input)
+                    imgui.text(icons_fontawesome_4.ICON_FA_ARROW_CIRCLE_LEFT)
+                    ed.end_pin()
                     imgui.same_line()
+                    imgui.text(input_name)
+                    # imgui.same_line()
 
-                    shall_show_edit = not self.function_node.has_input_link(input_param.name)
+                    has_link = self.function_node.has_input_link(input_param.name)
 
-                    if shall_show_edit:
-                        changed = (
-                            input_param.data_with_gui.call_gui_edit(default_param_value=input_param.default_value)
-                            or changed
-                        )
-                    else:
-                        imgui.new_line()
+                    if not has_link:
+                        changed = show_edit_or_present() or changed
 
             return changed
 
