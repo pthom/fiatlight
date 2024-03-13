@@ -8,8 +8,10 @@ import torch
 import numpy as np
 from enum import Enum
 
+import cv2
 from fiatlight import FunctionsGraph, fiat_run
-from fiatlight.computer_vision import ImageUInt8, register_gui_factories
+from fiatlight import computer_vision
+from fiatlight.computer_vision import ImageUInt8
 
 
 class DeviceType(Enum):
@@ -60,23 +62,19 @@ class StableDiffusionXLWrapper:
         return as_array
 
 
+def oil_paint(image: ImageUInt8, size: int = 1, dynRatio: int = 3) -> ImageUInt8:
+    """Applies oil painting effect to an image, using the OpenCV xphoto module."""
+    return cv2.xphoto.oilPainting(image, size, dynRatio, cv2.COLOR_BGR2HSV)  # type: ignore
+
+
 xlw = StableDiffusionXLWrapper()
 
 
-# def query_image(
-#         prompt:str = "A cinematic shot of a baby racoon wearing an intricate italian priest robe.",
-#
-#
-#     ) -> ImageUInt8:
-#     start = time.time()
-#     r = xlw.query(prompt)
-#     print("Time taken: ", time.time()-start)
-#     return r
-
-
 def main() -> None:
-    register_gui_factories()
-    graph = FunctionsGraph.from_function_composition([xlw.query])
+    computer_vision.register_gui_factories()
+    from fiatlight.computer_vision import ColorType  # noqa
+
+    graph = FunctionsGraph.from_function_composition([xlw.query, computer_vision.lut_channels_in_colorspace, oil_paint])
 
     fiat_run(graph)
 

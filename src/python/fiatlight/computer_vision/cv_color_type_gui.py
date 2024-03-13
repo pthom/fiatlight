@@ -1,6 +1,6 @@
 from fiatlight.computer_vision.cv_color_type import ColorConversion, ColorType
 from fiatlight.core import AnyDataWithGui
-from imgui_bundle import imgui_ctx, imgui
+from imgui_bundle import imgui_ctx, imgui, icons_fontawesome_4
 from typing import Tuple
 
 
@@ -43,14 +43,11 @@ class ColorConversionWithGui(AnyDataWithGui[ColorConversion]):
 
     def edit(self) -> bool:
         value = self.get_actual_value()
-        from fiatlight.widgets import IconsFontAwesome6
 
         imgui.text(str(value))
         imgui.same_line()
         icon = (
-            IconsFontAwesome6.ICON_SQUARE_CARET_UP
-            if self.show_edit_details
-            else IconsFontAwesome6.ICON_SQUARE_CARET_DOWN
+            icons_fontawesome_4.ICON_FA_CARET_UP if self.show_edit_details else icons_fontawesome_4.ICON_FA_CARET_DOWN
         )
         if imgui.button(icon):
             self.show_edit_details = not self.show_edit_details

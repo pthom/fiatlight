@@ -141,7 +141,7 @@ class AnyDataWithGui(Generic[DataType]):
         self, *, display_trash: bool = True, default_param_value: Unspecified | DataType = UnspecifiedValue
     ) -> bool:
         # (display_trash is set to False for OptionalWithGui's inner_gui)
-        from fiatlight.widgets import IconsFontAwesome6
+        from imgui_bundle import icons_fontawesome_4
 
         if self.callbacks.edit is None:
             self.call_gui_present()
@@ -155,7 +155,7 @@ class AnyDataWithGui(Generic[DataType]):
             if default_value_provider is None and default_param_value is None:
                 return False
             else:
-                if imgui.button(IconsFontAwesome6.ICON_PLUS):
+                if imgui.button(icons_fontawesome_4.ICON_FA_PLUS):
                     if default_param_value is not UnspecifiedValue:
                         self.value = default_param_value
                     else:
@@ -168,7 +168,7 @@ class AnyDataWithGui(Generic[DataType]):
             changed = self.callbacks.edit()
             imgui.same_line()
             if display_trash:
-                if imgui.button(IconsFontAwesome6.ICON_TRASH_CAN):
+                if imgui.button(icons_fontawesome_4.ICON_FA_TRASH):
                     self.value = UnspecifiedValue
                     changed = True
             return changed
