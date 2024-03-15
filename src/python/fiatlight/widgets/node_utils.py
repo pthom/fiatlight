@@ -92,3 +92,29 @@ def node_separator(parent_node: ed.NodeId, text: str = "") -> None:
         imgui.text(text)
         imgui.set_cursor_screen_pos(orig_cursor_pos)
     imgui.dummy(ImVec2(0, spacing_y))
+
+
+def sandbox():
+    from imgui_bundle import immapp
+
+    node_id = ed.NodeId(1)
+
+    def gui():
+        ed.begin("editor")
+        ed.begin_node(node_id)
+
+        imgui.dummy(ImVec2(100, 10))
+
+        imgui.text("ABCDEFGHUDD")
+        imgui.same_line()
+
+        draw_node_gui_right_align(node_id, lambda: imgui.text("Right Align"))
+
+        ed.end_node()
+        ed.end()
+
+    immapp.run(gui, with_node_editor=True)
+
+
+if __name__ == "__main__":
+    sandbox()
