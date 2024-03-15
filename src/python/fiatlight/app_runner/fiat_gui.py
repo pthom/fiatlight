@@ -199,6 +199,12 @@ class FiatGui:
             self._post_init, self.params.runner_params.callbacks.post_init
         )
 
+        from fiatlight.widgets.fontawesome6_ctx import _load_font_awesome_6
+
+        self.params.runner_params.callbacks.load_additional_fonts = functional_utils.sequence_void_functions(
+            hello_imgui.imgui_default_settings.load_default_font_with_font_awesome_icons, _load_font_awesome_6
+        )
+
         top_toolbar_options = hello_imgui.EdgeToolbarOptions(size_em=2.4, window_bg=ImVec4(0.3, 0.3, 0.3, 1.0))
         self.params.runner_params.callbacks.add_edge_toolbar(
             edge_toolbar_type=hello_imgui.EdgeToolbarType.top,

@@ -13,8 +13,9 @@ from fiatlight.core import (
     BoolFunction,
 )
 from fiatlight.core.any_data_gui_callbacks import AnyDataGuiCallbacks
+from fiatlight.widgets.fontawesome6_ctx import fontawesome_6_ctx, icons_fontawesome_6
 from typing import final, Generic, Callable
-from imgui_bundle import imgui
+from imgui_bundle import imgui, icons_fontawesome_4
 import logging
 
 
@@ -128,14 +129,18 @@ class AnyDataWithGui(Generic[DataType]):
 
         if isinstance(self.value, Unspecified):
             if default_param_value is UnspecifiedValue:
-                imgui.text("Unspecified!")
+                # imgui.text("Unspecified!")
+                with fontawesome_6_ctx():
+                    imgui.text(icons_fontawesome_6.ICON_FA_CROSS)
             else:
                 try:
                     default_str = str(default_param_value)
                 except Exception:
                     default_str = "???"
                 imgui.begin_group()
-                imgui.text("Unspecified!")
+                # imgui.text("Unspecified!")
+                with fontawesome_6_ctx():
+                    imgui.text(icons_fontawesome_6.ICON_FA_CROSS)
                 widgets.text_maybe_truncated("Default: " + default_str, max_width_chars=40, max_lines=3)
                 imgui.end_group()
 
@@ -154,7 +159,6 @@ class AnyDataWithGui(Generic[DataType]):
         self, *, display_trash: bool = True, default_param_value: Unspecified | DataType = UnspecifiedValue
     ) -> bool:
         # (display_trash is set to False for OptionalWithGui's inner_gui)
-        from imgui_bundle import icons_fontawesome_4
         from fiatlight import widgets
 
         if self.callbacks.edit is None:
