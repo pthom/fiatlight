@@ -224,7 +224,7 @@ def sandbox() -> None:
         function_node_gui.draw_node("add")
         ed.end()
 
-    immapp.run(gui, with_node_editor=True)
+    immapp.run(gui, with_node_editor=True, window_title="function_node_gui_sandbox")
 
 
 if __name__ == "__main__":
