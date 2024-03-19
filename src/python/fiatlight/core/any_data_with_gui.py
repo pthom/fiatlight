@@ -129,19 +129,22 @@ class AnyDataWithGui(Generic[DataType]):
 
         if isinstance(self.value, Unspecified):
             if default_param_value is UnspecifiedValue:
-                # imgui.text("Unspecified!")
                 with fontawesome_6_ctx():
-                    imgui.text(icons_fontawesome_6.ICON_FA_CROSS)
+                    imgui.text(icons_fontawesome_6.ICON_FA_CIRCLE_EXCLAMATION)
+                    if imgui.is_item_hovered(imgui.HoveredFlags_.delay_normal.value):
+                        widgets.osd_widgets.set_tooltip("Unspecified!")
             else:
                 try:
                     default_str = str(default_param_value)
                 except Exception:
                     default_str = "???"
                 imgui.begin_group()
-                # imgui.text("Unspecified!")
                 with fontawesome_6_ctx():
-                    imgui.text(icons_fontawesome_6.ICON_FA_CROSS)
-                widgets.text_maybe_truncated("Default: " + default_str, max_width_chars=40, max_lines=3)
+                    imgui.text(icons_fontawesome_6.ICON_FA_PLUG_CIRCLE_XMARK)
+                    if imgui.is_item_hovered(imgui.HoveredFlags_.delay_normal.value):
+                        widgets.osd_widgets.set_tooltip("Unspecified! Using default value.")
+                imgui.same_line()
+                widgets.text_maybe_truncated(default_str, max_width_chars=40, max_lines=3)
                 imgui.end_group()
 
         elif isinstance(self.value, Error):

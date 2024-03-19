@@ -9,8 +9,10 @@ _FONT_AWESOME_6: imgui.ImFont | None = None
 def _load_font_awesome_6():
     global _FONT_AWESOME_6
     print("_load_font_awesome_6")
-    font_size = 15
-    _FONT_AWESOME_6 = hello_imgui.load_font("fonts/DroidSans.ttf", font_size)
+    font_size = 17
+    font_params = hello_imgui.FontLoadingParams()
+    font_params.use_full_glyph_range = True
+    _FONT_AWESOME_6 = hello_imgui.load_font("fonts/Font_Awesome_6_Free-Solid-900.otf", font_size, font_params)
 
 
 class PushFontAwesome6:

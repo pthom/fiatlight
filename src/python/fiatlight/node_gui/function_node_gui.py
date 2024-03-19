@@ -220,9 +220,12 @@ def sandbox() -> None:
     function_node_gui = FunctionNodeGui(function_node)
 
     def gui() -> None:
+        from fiatlight import widgets
+
         ed.begin("Functions Graph")
         function_node_gui.draw_node("add")
         ed.end()
+        widgets.osd_widgets.render()
 
     immapp.run(gui, with_node_editor=True, window_title="function_node_gui_sandbox")
 
