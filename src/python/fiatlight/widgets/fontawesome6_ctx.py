@@ -6,7 +6,7 @@ import logging
 _FONT_AWESOME_6: imgui.ImFont | None = None
 
 
-def _load_font_awesome_6():
+def _load_font_awesome_6() -> None:
     global _FONT_AWESOME_6
     print("_load_font_awesome_6")
     font_size = 17
@@ -24,11 +24,11 @@ class PushFontAwesome6:
             # Fonts need to be loaded before the new frame starts,
             hello_imgui.get_runner_params().callbacks.load_additional_fonts = _load_font_awesome_6
 
-    def __enter__(self):
+    def __enter__(self) -> None:
         if _FONT_AWESOME_6 is not None:
             imgui.push_font(_FONT_AWESOME_6)
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(self, exc_type, exc_val, exc_tb) -> None:  # type: ignore
         try:
             if _FONT_AWESOME_6 is not None:
                 imgui.pop_font()
@@ -37,7 +37,7 @@ class PushFontAwesome6:
                 logging.error("Exception occurred in _BeginEnd context", exc_info=(exc_type, exc_val, exc_tb))
 
 
-def fontawesome_6_ctx():
+def fontawesome_6_ctx() -> PushFontAwesome6:
     return PushFontAwesome6()
 
 

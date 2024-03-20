@@ -149,7 +149,7 @@ class FunctionNodeGui:
                 with imgui_ctx.push_obj_id(input_param):
 
                     def show_edit_or_present() -> bool:
-                        def show_expand_btn_inner():
+                        def show_expand_btn_inner() -> None:
                             imgui.spring()
                             self.show_edit_input[input_name] = my_expand_button(self.show_edit_input[input_name])
 

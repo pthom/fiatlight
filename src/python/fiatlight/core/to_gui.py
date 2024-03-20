@@ -27,7 +27,7 @@ def _extract_optional_typeclass(type_class_name: str) -> Tuple[bool, str]:
 
 
 def _extract_enum_typeclass(
-    type_class_name: str, globals_dict: GlobalsDict, locals_dict: LocalsDict
+    type_class_name: str, globals_dict: GlobalsDict | None, locals_dict: LocalsDict | None
 ) -> Tuple[bool, str]:
     # An enum type will be displayed as
     #     <enum 'EnumName'>
