@@ -94,12 +94,12 @@ def node_separator(parent_node: ed.NodeId, text: str = "") -> None:
     imgui.dummy(ImVec2(0, spacing_y))
 
 
-def sandbox():
+def sandbox() -> None:
     from imgui_bundle import immapp
 
     node_id = ed.NodeId(1)
 
-    def gui():
+    def gui() -> None:
         ed.begin("editor")
         ed.begin_node(node_id)
 
