@@ -1,4 +1,4 @@
-from fiatlight.core import UnspecifiedValue, DataType, AnyDataGuiCallbacks
+from fiatlight.core import UnspecifiedValue, DataType
 from fiatlight.core.any_data_with_gui import AnyDataWithGui
 from fiatlight.core.function_with_gui import FunctionWithGui, ParamKind, ParamWithGui, OutputWithGui
 from fiatlight.core import primitives_gui
@@ -148,8 +148,7 @@ def any_function_to_function_with_gui(
 
     return_annotation = sig.return_annotation
     if return_annotation is inspect.Parameter.empty:
-        handlers_none = AnyDataGuiCallbacks[Any]()
-        data_with_gui = AnyDataWithGui.from_handlers(handlers_none)
+        data_with_gui = AnyDataWithGui.make_default()
         function_with_gui.outputs_with_gui.append(OutputWithGui(data_with_gui))
     else:
         return_annotation_str = str(return_annotation)
