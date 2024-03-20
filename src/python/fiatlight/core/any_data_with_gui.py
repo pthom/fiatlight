@@ -12,9 +12,9 @@ from fiatlight.core import (
     VoidFunction,
     BoolFunction,
 )
-from fiatlight.core.any_data_gui_callbacks import AnyDataGuiCallbacks
+from fiatlight.core.any_data_gui_callbacks import AnyDataGuiCallbacks  # noqa
 from fiatlight.widgets.fontawesome6_ctx import fontawesome_6_ctx, icons_fontawesome_6
-from typing import final, Generic, Callable
+from typing import final, Generic, Callable, Any
 from imgui_bundle import imgui, icons_fontawesome_4
 import logging
 
@@ -41,7 +41,7 @@ class AnyDataWithGui(Generic[DataType]):
         return r
 
     @staticmethod
-    def make_default() -> "AnyDataWithGui[DataType]":
+    def make_default() -> "AnyDataWithGui[Any]":
         return AnyDataWithGui()
 
     @staticmethod
