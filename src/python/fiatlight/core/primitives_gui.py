@@ -1,5 +1,6 @@
+import fiatlight.core
 from imgui_bundle import imgui, hello_imgui, imgui_knobs, imgui_toggle
-from fiatlight.core import UnspecifiedValue, ErrorValue, AnyDataWithGui
+from fiatlight.core import AnyDataWithGui
 from typing import Any, Callable, TypeAlias
 from dataclasses import dataclass
 from enum import Enum
@@ -12,47 +13,47 @@ GuiFunction = Callable[[], None]
 ########################################################################################################################
 
 
-def versatile_gui_present(value: Any) -> None:
-    from fiatlight import widgets
-
-    def show_text(s: str) -> None:
-        widgets.text_maybe_truncated(
-            s,
-            max_width_chars=30,
-            max_lines=10,
-            show_full_as_tooltip=False,
-            show_copy_button=True,
-            show_details_button=True,
-            show_expand_checkbox=True,
-        )
-
-    if value is None:
-        imgui.text("None")
-    elif value is UnspecifiedValue:
-        imgui.text("Unspecified")
-    elif value is ErrorValue:
-        imgui.text("Error")
-    elif isinstance(value, int):
-        imgui.text(f"{value}")
-    elif isinstance(value, float):
-        imgui.text(f"{value:.4f}")
-        if imgui.is_item_hovered():
-            widgets.osd_widgets.set_tooltip(f"{value}")
-    elif isinstance(value, str):
-        imgui.text(f"str len={len(value)}")
-        show_text(value)
-    elif isinstance(value, list):
-        value_full_str = "\n".join(str(item) for item in value)
-        imgui.text(f"list len={len(value)}")
-        show_text(value_full_str)
-    elif isinstance(value, tuple):
-        imgui.text(f"Tuple len={len(value)}")
-        strs = [str(v) for v in value]
-        tuple_str = "(" + ", ".join(strs) + ")"
-        imgui.text(tuple_str)
-
-    else:
-        raise Exception(f"versatile_gui_data Unsupported type: {type(value)}")
+# def versatile_gui_present(value: Any) -> None:
+#     from fiatlight import widgets
+#
+#     def show_text(s: str) -> None:
+#         widgets.text_maybe_truncated(
+#             s,
+#             max_width_chars=30,
+#             max_lines=10,
+#             show_full_as_tooltip=False,
+#             show_copy_button=True,
+#             show_details_button=True,
+#             show_expand_checkbox=True,
+#         )
+#
+#     if value is None:
+#         imgui.text("None")
+#     elif value is UnspecifiedValue:
+#         imgui.text("Unspecified")
+#     elif value is ErrorValue:
+#         imgui.text("Error")
+#     elif isinstance(value, int):
+#         imgui.text(f"{value}")
+#     elif isinstance(value, float):
+#         imgui.text(f"{value:.4f}")
+#         if imgui.is_item_hovered():
+#             widgets.osd_widgets.set_tooltip(f"{value}")
+#     elif isinstance(value, str):
+#         imgui.text(f"str len={len(value)}")
+#         show_text(value)
+#     # elif isinstance(value, list):
+#     #     value_full_str = "\n".join(str(item) for item in value)
+#     #     imgui.text(f"list len={len(value)}")
+#     #     show_text(value_full_str)
+#     # elif isinstance(value, tuple):
+#     #     imgui.text(f"Tuple len={len(value)}")
+#     #     strs = [str(v) for v in value]
+#     #     tuple_str = "(" + ", ".join(strs) + ")"
+#     #     imgui.text(tuple_str)
+#
+#     else:
+#         raise Exception(f"versatile_gui_data Unsupported type: {type(value)}")
 
 
 ########################################################################################################################
@@ -308,6 +309,20 @@ class StrWithGuiParams:
     height_em: int = 5
 
 
+def _escape_double_quoted_string(s: str) -> str:
+    replacements = {
+        "\\": "\\\\",
+        "\n": "\\n",
+        "\t": "\\t",
+        "\r": "\\r",
+        "\b": "\\b",
+        '"': '\\"',
+    }
+    for k, v in replacements.items():
+        s = s.replace(k, v)
+    return s
+
+
 class StrWithGui(AnyDataWithGui[str]):
     params: StrWithGuiParams
 
@@ -316,6 +331,17 @@ class StrWithGui(AnyDataWithGui[str]):
         self.params = params if params is not None else StrWithGuiParams()
         self.callbacks.edit = self.edit
         self.callbacks.default_value_provider = lambda: ""
+        self.callbacks.present_short_str = self.present_short_str
+
+    @staticmethod
+    def present_short_str(s: str) -> str:
+        if len(s) <= fiatlight.core.PRESENT_SHORT_STR_MAX_LENGTH:
+            r = s
+        else:
+            extract = s[: fiatlight.core.PRESENT_SHORT_STR_MAX_LENGTH - 4] + "(...)"
+            r = extract
+        r = '"' + _escape_double_quoted_string(r) + '"'
+        return r
 
     def edit(self) -> bool:
         assert isinstance(self.value, str)
@@ -371,8 +397,6 @@ __all__ = [
     "BoolWithGuiParams",
     "BoolEditType",
     "BoolWithGui",
-    # Versatile present
-    "versatile_gui_present",
 ]
 
 

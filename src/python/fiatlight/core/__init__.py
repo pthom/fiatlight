@@ -2,7 +2,6 @@ from fiatlight.core.fiat_types import (
     Function,
     VoidFunction,
     BoolFunction,
-    StrFunction,
     Unspecified,
     UnspecifiedValue,
     Error,
@@ -14,7 +13,7 @@ from fiatlight.core.fiat_types import (
     GlobalsDict,
     LocalsDict,
 )
-from fiatlight.core.any_data_gui_callbacks import AnyDataGuiCallbacks
+from fiatlight.core.any_data_gui_callbacks import AnyDataGuiCallbacks, PRESENT_SHORT_STR_MAX_LENGTH
 from fiatlight.core.any_data_with_gui import AnyDataWithGui
 from fiatlight.core.function_with_gui import ParamKind, ParamWithGui, OutputWithGui, FunctionWithGui
 from fiatlight.core.to_gui import any_function_to_function_with_gui, ALL_GUI_FACTORIES
@@ -43,7 +42,6 @@ __all__ = [
     "Function",
     "VoidFunction",
     "BoolFunction",
-    "StrFunction",
     "Unspecified",
     "UnspecifiedValue",
     "Error",
@@ -58,6 +56,7 @@ __all__ = [
     "get_function_signature",
     # from any_data_gui_handlers
     "AnyDataGuiCallbacks",
+    "PRESENT_SHORT_STR_MAX_LENGTH",
     # from any_data_with_gui
     "AnyDataWithGui",
     # from function_with_gui

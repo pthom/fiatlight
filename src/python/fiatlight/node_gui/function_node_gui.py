@@ -149,32 +149,30 @@ class FunctionNodeGui:
 
             for input_param in self.function_node.function_with_gui.inputs_with_gui:
                 with imgui_ctx.push_obj_id(input_param):
+                    input_name = input_param.name
 
-                    def show_edit_or_present() -> bool:
-                        def show_expand_btn_inner() -> None:
+                    def input_header_line() -> None:
+                        imgui.begin_horizontal("input")
+                        with imgui_ctx.push_style_color(
+                            imgui.Col_.text.value, widgets.COLORS[widgets.ColorType.InputPin]
+                        ):
+                            ed.begin_pin(self.pins_input[input_name], ed.PinKind.input)
+                            imgui.text(icons_fontawesome_4.ICON_FA_ARROW_CIRCLE_LEFT)
+                            ed.end_pin()
+                            imgui.text(input_name)
+                        input_param.data_with_gui.call_present_short_str(default_param_value=input_param.default_value)
+                        has_link = self.function_node.has_input_link(input_param.name)
+                        if not has_link:
                             imgui.spring()
                             self.show_edit_input[input_name] = my_expand_button(self.show_edit_input[input_name])
 
-                        r = False
-                        if self.show_edit_input[input_param.name]:
-                            show_expand_btn_inner()
-                            r = input_param.data_with_gui.call_gui_edit(default_param_value=input_param.default_value)
-                        else:
-                            input_param.data_with_gui.call_gui_present(default_param_value=input_param.default_value)
-                            show_expand_btn_inner()
-                        return r
+                        imgui.end_horizontal()
 
-                    input_name = input_param.name
-
-                    imgui.begin_horizontal("input")
-                    ed.begin_pin(self.pins_input[input_name], ed.PinKind.input)
-                    imgui.text(icons_fontawesome_4.ICON_FA_ARROW_CIRCLE_LEFT)
-                    ed.end_pin()
-                    imgui.text(input_name)
-                    has_link = self.function_node.has_input_link(input_param.name)
-                    if not has_link:
-                        changed = show_edit_or_present() or changed
-                    imgui.end_horizontal()
+                    input_header_line()
+                    if self.show_edit_input[input_name]:
+                        changed = changed or input_param.data_with_gui.call_gui_edit(
+                            default_param_value=input_param.default_value
+                        )
 
             return changed
 
@@ -208,8 +206,14 @@ def sandbox() -> None:
         TWO = 2
         THREE = 3
 
-    def add(e: MyEnum = MyEnum.ONE, x: int = 1, y: int = 2, s: str = "Hello") -> int:
-        return x + y + len(s) + e.value
+    def add(
+        e: MyEnum,
+        x: int = 1,
+        y: int = 2,
+        s: str = "Hello",
+    ) -> int:
+        return 10
+        # return x + y + len(s) + e.value
 
     function_with_gui = any_function_to_function_with_gui(add, globals_dict=globals(), locals_dict=locals())
     function_node = FunctionNode(function_with_gui, name="add")
