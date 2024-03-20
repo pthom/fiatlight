@@ -111,19 +111,17 @@ class FunctionNodeGui:
                 self.function_node.invoke_function()
 
             if self.function_node.function_with_gui.dirty:
+                imgui.begin_horizontal("refresh")
                 if imgui.button("Refresh"):
                     self.function_node.invoke_function()
-                imgui.same_line()
                 imgui.text("(refresh needed)")
+                imgui.end_horizontal()
 
         def draw_function_outputs() -> None:
             def draw_output_pin(pin_output: ed.PinId) -> None:
-                def draw() -> None:
-                    ed.begin_pin(pin_output, ed.PinKind.output)
-                    imgui.text(icons_fontawesome_4.ICON_FA_ARROW_CIRCLE_RIGHT)
-                    ed.end_pin()
-
-                widgets.node_utils.draw_node_gui_right_align(self.node_id, draw)
+                ed.begin_pin(pin_output, ed.PinKind.output)
+                imgui.text(icons_fontawesome_4.ICON_FA_ARROW_CIRCLE_RIGHT)
+                ed.end_pin()
 
             def draw_output_value(output_idx: int, output_param: OutputWithGui[Any]) -> None:
                 if len(self.function_node.function_with_gui.outputs_with_gui) > 1:
@@ -131,13 +129,17 @@ class FunctionNodeGui:
                 if output_param.data_with_gui.value is None:
                     imgui.text("None")
                 else:
+                    imgui.begin_vertical("present")
                     output_param.data_with_gui.call_gui_present()
+                    imgui.end_vertical()
 
             for i, output_param in enumerate(self.function_node.function_with_gui.outputs_with_gui):
                 with imgui_ctx.push_obj_id(output_param):
+                    imgui.begin_horizontal("output")
                     draw_output_value(i, output_param)
-                    imgui.same_line()
+                    imgui.spring()
                     draw_output_pin(self.pins_output[i])
+                    imgui.end_horizontal()
 
         def draw_function_inputs() -> bool:
             changed = False
@@ -188,8 +190,8 @@ class FunctionNodeGui:
         draw_exception_message()
         output_separator_str = "Outputs" if len(self.function_node.function_with_gui.outputs_with_gui) > 1 else "Output"
         widgets.node_utils.node_separator(self.node_id, text=output_separator_str)
-        # draw_invoke_options()
-        # draw_function_outputs()
+        draw_invoke_options()
+        draw_function_outputs()
 
         imgui.end_vertical()
         ed.end_node()
