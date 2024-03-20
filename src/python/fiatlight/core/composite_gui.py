@@ -76,7 +76,6 @@ class EnumWithGui(AnyDataWithGui[Enum]):
         assert not isinstance(self.value, (Unspecified, Error))
         changed = False
 
-        imgui.text(str(self.value))
         for enum_value in list(self.enum_type):
             if imgui.radio_button(enum_value.name, self.value == enum_value):
                 self.value = enum_value

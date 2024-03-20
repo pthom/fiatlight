@@ -3,7 +3,6 @@ from typing import Callable, Any, TypeAlias, TypeVar
 Function: TypeAlias = Callable[..., Any]
 VoidFunction = Callable[[], None]
 BoolFunction = Callable[[], bool]
-StrFunction = Callable[[], str]
 
 
 class Unspecified:
