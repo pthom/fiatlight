@@ -56,11 +56,12 @@ def gui() -> None:
     ed.begin_node(node_id)
     if imgui.button("O"):
         imgui.open_popup("expandable_str_popup")
+
+    ed.suspend()
     if imgui.begin_popup("expandable_str_popup"):
-        ed.suspend()
         imgui.input_text_multiline("##value_text", poem, ImVec2(0, hello_imgui.em_size(15)))
-        ed.resume()
         imgui.end_popup()
+    ed.resume()
 
     ed.end_node()
 

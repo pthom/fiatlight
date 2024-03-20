@@ -150,41 +150,34 @@ class FunctionNodeGui:
 
                     def show_edit_or_present() -> bool:
                         def show_expand_btn_inner():
-                            imgui.text("     ")
-                            imgui.same_line()
+                            imgui.spring()
                             self.show_edit_input[input_name] = my_expand_button(self.show_edit_input[input_name])
-
-                        def show_expand_btn():
-                            widgets.node_utils.draw_node_gui_right_align(self.node_id, show_expand_btn_inner)
 
                         r = False
                         if self.show_edit_input[input_param.name]:
-                            imgui.same_line()
-                            show_expand_btn()
+                            show_expand_btn_inner()
                             r = input_param.data_with_gui.call_gui_edit(default_param_value=input_param.default_value)
                         else:
-                            imgui.same_line()
                             input_param.data_with_gui.call_gui_present(default_param_value=input_param.default_value)
-                            show_expand_btn()
+                            show_expand_btn_inner()
                         return r
 
                     input_name = input_param.name
 
+                    imgui.begin_horizontal("input")
                     ed.begin_pin(self.pins_input[input_name], ed.PinKind.input)
                     imgui.text(icons_fontawesome_4.ICON_FA_ARROW_CIRCLE_LEFT)
                     ed.end_pin()
-                    imgui.same_line()
                     imgui.text(input_name)
-                    # imgui.same_line()
-
                     has_link = self.function_node.has_input_link(input_param.name)
-
                     if not has_link:
                         changed = show_edit_or_present() or changed
+                    imgui.end_horizontal()
 
             return changed
 
         ed.begin_node(self.node_id)
+        imgui.begin_vertical("node_content")
         draw_title()
         imgui.dummy(ImVec2(hello_imgui.em_size(self._MIN_NODE_WIDTH_EM), 1))
         inputs_changed = draw_function_inputs()
@@ -195,9 +188,10 @@ class FunctionNodeGui:
         draw_exception_message()
         output_separator_str = "Outputs" if len(self.function_node.function_with_gui.outputs_with_gui) > 1 else "Output"
         widgets.node_utils.node_separator(self.node_id, text=output_separator_str)
-        draw_invoke_options()
-        draw_function_outputs()
+        # draw_invoke_options()
+        # draw_function_outputs()
 
+        imgui.end_vertical()
         ed.end_node()
         self.node_size = ed.get_node_size(self.node_id)
 
