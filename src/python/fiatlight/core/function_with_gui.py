@@ -75,6 +75,20 @@ class FunctionWithGui:
         self.inputs_with_gui = []
         self.outputs_with_gui = []
 
+    def register_as_input_changes_callback(self) -> None:
+        """Register a callback that will be called when any of the inputs change.
+        This method should be called once the function is constructed and all inputs are set.
+        """
+        from fiatlight.utils import functional_utils
+
+        def input_changed_callback() -> None:
+            self.dirty = True
+
+        for input_with_gui in self.inputs_with_gui:
+            input_with_gui.data_with_gui.callbacks.on_change = functional_utils.sequence_void_functions(
+                input_with_gui.data_with_gui.callbacks.on_change, input_changed_callback
+            )
+
     def all_inputs_ids(self) -> List[str]:
         return [param.name for param in self.inputs_with_gui]
 

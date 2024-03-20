@@ -42,7 +42,7 @@ def _extract_enum_typeclass(
         type_class = eval(type_class_name, globals_dict, locals_dict)
         if issubclass(type_class, Enum):
             return True, type_class_name
-    except (NameError, AttributeError):
+    except (NameError, AttributeError, SyntaxError):
         logging.warning(f"_extract_enum_typeclass: failed to evaluate {type_class_name}")
     return False, type_class_name
 
@@ -164,6 +164,8 @@ def any_function_to_function_with_gui(
         else:
             data_with_gui = any_typeclass_to_gui(str(sig.return_annotation))
             function_with_gui.outputs_with_gui.append(OutputWithGui(data_with_gui))
+
+    function_with_gui.register_as_input_changes_callback()
 
     return function_with_gui
 
