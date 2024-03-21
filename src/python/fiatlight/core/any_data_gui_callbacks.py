@@ -13,9 +13,10 @@ class AnyDataGuiCallbacks(Generic[DataType]):
     - to_dict and from_dict: the serialization and deserialization functions (optional)
     """
 
-    # Provide a function that returns a one-line string info about the data content
+    # Provide a function that returns a string info about the data content
     # This string will be presented as a short description of the data in the GUI
-    # If possible, it should be short enough to fit in a single line inside a node (20 chars max)
+    #
+    # If possible, it should be short enough to fit in a single line inside a node (20 chars max).
     # If the result string is too long, or occupies more than one line, it will be truncated and followed by "..."
     # (and the rest of the string will be displayed in a tooltip)
     # For example, on complex types such as images, return something like "128x128x3 uint8"

@@ -64,9 +64,7 @@ def text_maybe_truncated(
     max_width_chars: int | None = None,
     max_lines: int | None = None,
     remove_after_double_hash: bool = True,
-    show_expand_checkbox: bool = False,
     show_full_as_tooltip: bool = True,
-    show_copy_button: bool = False,
     show_details_button: bool = False,
 ) -> None:
     from imgui_bundle import icons_fontawesome_4
@@ -85,26 +83,6 @@ def text_maybe_truncated(
         remove_after_double_hash=remove_after_double_hash,
     )
 
-    flag_shown_button = False
-
-    if show_expand_checkbox and is_truncated:
-        expand_id = imgui.get_id("expand")  # it will be unique, since a lot of calls of imgui.push_id are made before
-        is_expanded = _EXPANDED_REGISTRY.get(expand_id)
-        _, is_expanded = imgui.checkbox("Expand", is_expanded)
-        _EXPANDED_REGISTRY[expand_id] = is_expanded
-        if is_expanded:
-            msg_truncated = msg
-        imgui.same_line()
-        flag_shown_button = True
-
-    if show_copy_button:
-        if imgui.button(icons_fontawesome_4.ICON_FA_COPY):
-            imgui.set_clipboard_text(msg)
-        if imgui.is_item_hovered():
-            osd_widgets.set_tooltip("Copy to clipboard")
-        imgui.same_line()
-        flag_shown_button = True
-
     if is_truncated and show_details_button:
         if imgui.button(icons_fontawesome_4.ICON_FA_BOOK):
 
@@ -117,11 +95,7 @@ def text_maybe_truncated(
                 "Click to show details, then open the Info tab at the bottom to see the full string"
             )
         imgui.same_line()
-        flag_shown_button = True
-
-    if flag_shown_button:
-        imgui.new_line()
 
     output_text(msg_truncated)
     if is_truncated and show_full_as_tooltip and imgui.is_item_hovered():
-        osd_widgets.set_tooltip(msg[:3000])
+        osd_widgets.set_tooltip(msg[:1000])
