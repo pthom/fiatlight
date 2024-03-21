@@ -205,31 +205,35 @@ class AnyDataWithGui(Generic[DataType]):
                 default_str = "???"
         return default_str
 
-    def call_present_short_str(self, default_param_value: Unspecified | DataType = UnspecifiedValue) -> None:
+    def present_header_line(self, default_param_value: Unspecified | DataType = UnspecifiedValue) -> None:
         """Present the value on one line"""
         from fiatlight import widgets
 
+        icon: str | None = None
+        icon_tooltip: str | None = None
+        header_str: str
+
         if isinstance(self.value, Error):
-            imgui.text("Error!")
+            icon = icons_fontawesome_6.ICON_FA_BOMB
+            header_str = "Error!"
         elif isinstance(self.value, Unspecified):
             if isinstance(default_param_value, Unspecified):
-                with fontawesome_6_ctx():
-                    imgui.text(icons_fontawesome_6.ICON_FA_CIRCLE_EXCLAMATION)
-                    if imgui.is_item_hovered(imgui.HoveredFlags_.delay_normal.value):
-                        widgets.osd_widgets.set_tooltip("Unspecified!")
+                icon = icons_fontawesome_6.ICON_FA_CIRCLE_EXCLAMATION
+                icon_tooltip = "Unspecified!"
+                header_str = "Unspecified!"
             else:
-                imgui.begin_horizontal("Unspecified with default")
-                with fontawesome_6_ctx():
-                    imgui.text(icons_fontawesome_6.ICON_FA_PLUG_CIRCLE_XMARK)
-                    if imgui.is_item_hovered(imgui.HoveredFlags_.delay_normal.value):
-                        widgets.osd_widgets.set_tooltip("Unspecified! Using default value.")
-                default_str = self._datatype_value_to_str(default_param_value)
-                widgets.text_maybe_truncated(default_str, max_width_chars=40, max_lines=3)
-                imgui.end_horizontal()
-
+                icon = icons_fontawesome_6.ICON_FA_PLUG_CIRCLE_XMARK
+                icon_tooltip = "Unspecified! Using default value."
+                header_str = self._datatype_value_to_str(default_param_value)
         else:
-            value_str = self._datatype_value_to_str(self.value)
-            imgui.text(value_str)
+            header_str = self._datatype_value_to_str(self.value)
+
+        if icon is not None:
+            with fontawesome_6_ctx():
+                imgui.text(icon)
+            if icon_tooltip is not None and imgui.is_item_hovered(imgui.HoveredFlags_.delay_normal.value):
+                widgets.osd_widgets.set_tooltip(icon_tooltip)
+        widgets.text_maybe_truncated(header_str, max_width_chars=40, max_lines=3)
 
 
 ##############################################################################################################

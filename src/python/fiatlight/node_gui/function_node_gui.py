@@ -160,7 +160,7 @@ class FunctionNodeGui:
                             imgui.text(icons_fontawesome_4.ICON_FA_ARROW_CIRCLE_LEFT)
                             ed.end_pin()
                             imgui.text(input_name)
-                        input_param.data_with_gui.call_present_short_str(default_param_value=input_param.default_value)
+                        input_param.data_with_gui.present_header_line(default_param_value=input_param.default_value)
                         has_link = self.function_node.has_input_link(input_param.name)
                         if not has_link:
                             imgui.spring()
