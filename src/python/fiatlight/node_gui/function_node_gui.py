@@ -23,6 +23,9 @@ class InputParamHeaderLineElements:
 
     value_as_str: str | None = None
 
+    show_details_button: bool = False
+    details_button_tooltip: str = ""
+
 
 class OutputHeaderLineElements:
     """Data to be presented in a header line"""
@@ -33,6 +36,9 @@ class OutputHeaderLineElements:
     status_icon_tooltips: List[str] | None = None
 
     value_as_str: str | None = None
+
+    show_details_button: bool = False
+    details_button_tooltip: str = ""
 
 
 class FunctionNodeLinkGui:
@@ -58,14 +64,17 @@ class FunctionNodeLinkGui:
         ed.link(self.link_id, self.start_id, self.end_id)
 
 
-def _my_collapsible_button(expanded: bool) -> bool:
+def _my_collapsible_button(expanded: bool, tooltip_part: str) -> bool:
     """A button that toggles between expanded and collapsed states.
     Returns true if expanded, false if collapsed.
     Displays as a caret pointing down if expanded, and right if collapsed, as imgui.collapsing_header() does.
     """
     icon = icons_fontawesome_6.ICON_FA_CARET_DOWN if expanded else icons_fontawesome_6.ICON_FA_CARET_RIGHT
+    tooltip = "Hide " + tooltip_part if expanded else "Show " + tooltip_part
     with fontawesome_6_ctx():
         clicked = imgui.button(icon)
+        if imgui.is_item_hovered():
+            widgets.osd_widgets.set_tooltip(tooltip)
         if not clicked:
             return expanded
         else:
@@ -85,8 +94,8 @@ class FunctionNodeGui:
 
     _MIN_NODE_WIDTH_EM = 9
 
-    show_edit_input: Dict[str, bool] = {}
-    show_output_present: Dict[int, bool] = {}
+    show_input_details: Dict[str, bool] = {}
+    show_output_details: Dict[int, bool] = {}
 
     def __init__(self, function_node: FunctionNode) -> None:
         self.function_node = function_node
@@ -101,10 +110,10 @@ class FunctionNodeGui:
         for i, output_with_gui in enumerate(self.function_node.function_with_gui.outputs_with_gui):
             self.pins_output[i] = ed.PinId.create()
 
-        self.show_edit_input = {
+        self.show_input_details = {
             input_with_gui.name: False for input_with_gui in self.function_node.function_with_gui.inputs_with_gui
         }
-        self.show_output_present = {i: True for i in range(len(self.function_node.function_with_gui.outputs_with_gui))}
+        self.show_output_details = {i: True for i in range(len(self.function_node.function_with_gui.outputs_with_gui))}
 
     def _call_gui_present(self, value_with_gui: AnyDataWithGui[Any]) -> None:
         value = value_with_gui.value
@@ -236,6 +245,7 @@ class FunctionNodeGui:
             r.value_as_str = output_with_gui.data_with_gui.datatype_value_to_str(value)
             r.output_pin_color = widgets.ColorType.OutputPin
 
+        # fill r.status_icon and r.status_icon_tooltips
         has_output_links = len(self.function_node.output_links_for_idx(output_idx)) > 0
         if has_output_links:
             r.status_icon = icons_fontawesome_6.ICON_FA_LINK
@@ -243,6 +253,12 @@ class FunctionNodeGui:
         else:
             r.status_icon = icons_fontawesome_6.ICON_FA_PLUG_CIRCLE_XMARK
             r.status_icon_tooltips = ["Unlinked output!"]
+
+        # fill r.show_details_button and r.details_button_tooltip
+        can_present = output_with_gui.data_with_gui.can_present_value()
+        if can_present:
+            r.show_details_button = True
+            r.details_button_tooltip = "output details"
 
         return r
 
@@ -252,16 +268,19 @@ class FunctionNodeGui:
         has_link = self.function_node.has_input_link(input_param.name)
         r.status_icon_tooltips = []
 
+        # fill status_icon and status_icon_tooltips if there is a link
         if has_link:
             r.status_icon = icons_fontawesome_6.ICON_FA_LINK
             node_link_info = self.function_node.input_node_link_info(input_param.name)
             if node_link_info is not None:
                 r.status_icon_tooltips.append(node_link_info)
 
+        # fill status_icon and status_icon_tooltips if user edited
         if not has_link and not isinstance(input_param.data_with_gui.value, (Unspecified, Error)):
             r.status_icon = icons_fontawesome_6.ICON_FA_PENCIL
             r.status_icon_tooltips.append("User edited")
 
+        # fill value_as_str and input_pin_color (may set status_icon and status_icon_tooltips on error/unspecified)
         if isinstance(input_param.data_with_gui.value, Error):
             r.input_pin_color = widgets.ColorType.InputPinWithError
             r.status_icon = icons_fontawesome_6.ICON_FA_BOMB
@@ -280,8 +299,21 @@ class FunctionNodeGui:
         else:
             r.value_as_str = input_param.data_with_gui.datatype_value_to_str(input_param.data_with_gui.value)
 
+        # fill param_name and param_name_tooltip
         r.param_name = input_param.name
         r.param_name_tooltip = "This is an example param doc"
+
+        # fill show_details_button and details_button_tooltip
+        has_link = self.function_node.has_input_link(input_param.name)
+        if has_link:
+            can_present = input_param.data_with_gui.can_present_value()
+            if can_present:
+                r.show_details_button = True
+                r.details_button_tooltip = "linked input details"
+        else:
+            r.show_details_button = True
+            r.details_button_tooltip = "edit input"
+
         return r
 
     def _draw_output_header_line(self, idx_output: int) -> None:
@@ -299,11 +331,10 @@ class FunctionNodeGui:
         imgui.spring()
 
         # Show present button, if a custom present callback is available
-        can_present = self.function_node.function_with_gui.outputs_with_gui[
-            idx_output
-        ].data_with_gui.can_present_value()
-        if can_present:
-            self.show_output_present[idx_output] = _my_collapsible_button(self.show_output_present[idx_output])
+        if header_elements.show_details_button:
+            self.show_output_details[idx_output] = _my_collapsible_button(
+                self.show_output_details[idx_output], header_elements.details_button_tooltip
+            )
 
         # Show colored pin with possible tooltip
         with imgui_ctx.push_style_color(imgui.Col_.text.value, widgets.COLORS[header_elements.output_pin_color]):
@@ -320,7 +351,6 @@ class FunctionNodeGui:
 
     def _draw_input_header_line(self, input_param: ParamWithGui[Any]) -> None:
         imgui.begin_horizontal("input")
-        has_link = self.function_node.has_input_link(input_param.name)
         header_elements = self._input_param_header_elements(input_param)
         with imgui_ctx.push_style_color(imgui.Col_.text.value, widgets.COLORS[header_elements.input_pin_color]):
             input_name = input_param.name
@@ -345,9 +375,11 @@ class FunctionNodeGui:
         if header_elements.value_as_str is not None:
             widgets.text_maybe_truncated(header_elements.value_as_str, max_width_chars=40, max_lines=1)
 
-        if not has_link:
+        if header_elements.show_details_button:
             imgui.spring()
-            self.show_edit_input[input_name] = _my_collapsible_button(self.show_edit_input[input_name])
+            self.show_input_details[input_name] = _my_collapsible_button(
+                self.show_input_details[input_name], header_elements.details_button_tooltip
+            )
 
         imgui.end_horizontal()
 
@@ -406,7 +438,7 @@ class FunctionNodeGui:
                     with imgui_ctx.begin_horizontal("outputH"):
                         self._draw_output_header_line(idx_output)
                     can_present = output_param.data_with_gui.can_present_value()
-                    if can_present and self.show_output_present[idx_output]:
+                    if can_present and self.show_output_details[idx_output]:
                         self._call_gui_present(output_param.data_with_gui)
 
     def _draw_function_inputs(self) -> bool:
@@ -420,8 +452,13 @@ class FunctionNodeGui:
                 input_name = input_param.name
 
                 self._draw_input_header_line(input_param)
-                if self.show_edit_input[input_name]:
-                    changed = changed or self._call_gui_edit(input_param)
+
+                if self.show_input_details[input_name]:
+                    shall_show_edit = not self.function_node.has_input_link(input_name)
+                    if shall_show_edit:
+                        changed = changed or self._call_gui_edit(input_param)
+                    else:
+                        self._call_gui_present(input_param.data_with_gui)
 
         return changed
 
