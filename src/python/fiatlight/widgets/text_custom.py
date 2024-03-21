@@ -47,7 +47,7 @@ def _truncate_text(
         if max_lines is not None and len(lines) > max_lines:
             is_truncated = True
             lines = lines[:max_lines]
-            lines.append("...")
+            lines[-1] += " (...)"
         return lines
 
     truncated_y = truncate_lines()

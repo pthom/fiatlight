@@ -151,8 +151,8 @@ class AnyDataWithGui(Generic[DataType]):
             imgui.text("Error!")
         else:
             if self.callbacks.present is None:
-                if self.callbacks.present_short_str is not None:
-                    txt = self.callbacks.present_short_str(self.value)
+                if self.callbacks.present_str is not None:
+                    txt = self.callbacks.present_str(self.value)
                 else:
                     txt = str(self.value)
                 imgui.text(txt)
@@ -196,8 +196,8 @@ class AnyDataWithGui(Generic[DataType]):
 
     def _datatype_value_to_str(self, value: DataType) -> str:
         default_str: str
-        if self.callbacks.present_short_str is not None:
-            default_str = self.callbacks.present_short_str(value)
+        if self.callbacks.present_str is not None:
+            default_str = self.callbacks.present_str(value)
         else:
             try:
                 default_str = str(value)
@@ -233,7 +233,7 @@ class AnyDataWithGui(Generic[DataType]):
                 imgui.text(icon)
             if icon_tooltip is not None and imgui.is_item_hovered(imgui.HoveredFlags_.delay_normal.value):
                 widgets.osd_widgets.set_tooltip(icon_tooltip)
-        widgets.text_maybe_truncated(header_str, max_width_chars=40, max_lines=3)
+        widgets.text_maybe_truncated(header_str, max_width_chars=40, max_lines=1, show_expand_checkbox=True)
 
 
 ##############################################################################################################

@@ -13,16 +13,18 @@ class AnyDataGuiCallbacks(Generic[DataType]):
     - to_dict and from_dict: the serialization and deserialization functions (optional)
     """
 
-    # Provide a function that returns a *short* one-line string info about the data content (max 20 chars)
+    # Provide a function that returns a one-line string info about the data content
     # This string will be presented as a short description of the data in the GUI
-    # It should be short enough to fit in a single line inside a node (20 chars max)
+    # If possible, it should be short enough to fit in a single line inside a node (20 chars max)
+    # If the result string is too long, or occupies more than one line, it will be truncated and followed by "..."
+    # (and the rest of the string will be displayed in a tooltip)
     # For example, on complex types such as images, return something like "128x128x3 uint8"
     # If not provided, the data will be presented using str()
-    present_short_str: Callable[[DataType], str] | None = None
+    present_str: Callable[[DataType], str] | None = None
 
     # Provide a draw function that presents the data content for more complex types (images, etc.)
     # It will be presented in "expanded" mode, and can use imgui widgets on several lines.
-    # If not provided, the data will be presented using present_short_str
+    # If not provided, the data will be presented using present_str
     present: VoidFunction | None = None
 
     # Provide a draw function that presents an editable interface for the data, and returns True if changed
