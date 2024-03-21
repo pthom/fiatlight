@@ -9,11 +9,9 @@ from fiatlight.core import (
     UnspecifiedValue,
     JsonDict,
     DataType,
-    VoidFunction,
-    BoolFunction,
 )
 from fiatlight.core.any_data_gui_callbacks import AnyDataGuiCallbacks  # noqa
-from typing import Generic, Callable, Any
+from typing import Generic, Any
 from imgui_bundle import imgui
 import logging
 
@@ -42,20 +40,6 @@ class AnyDataWithGui(Generic[DataType]):
     @staticmethod
     def make_default() -> "AnyDataWithGui[Any]":
         return AnyDataWithGui()
-
-    @staticmethod
-    def from_callbacks(
-        present: VoidFunction | None = None,
-        edit: BoolFunction | None = None,
-        default_value_provider: Callable[[], DataType] | None = None,
-        on_change: VoidFunction | None = None,
-    ) -> "AnyDataWithGui[DataType]":
-        r = AnyDataWithGui[DataType]()
-        r.callbacks.present = present
-        r.callbacks.edit = edit
-        r.callbacks.default_value_provider = default_value_provider
-        r.callbacks.on_change = on_change
-        return r
 
     @property
     def value(self) -> DataType | Unspecified | Error:
@@ -136,7 +120,7 @@ class AnyDataWithGui(Generic[DataType]):
     def can_present_value(self) -> bool:
         if isinstance(self.value, (Error, Unspecified)):
             return False
-        return self.callbacks.present is not None
+        return self.callbacks.present_custom is not None
 
 
 ##############################################################################################################
@@ -153,7 +137,7 @@ class FooWithGui(AnyDataWithGui[Foo]):
     def __init__(self) -> None:
         super().__init__()
         self.callbacks.edit = self.edit
-        self.callbacks.present = self.present
+        self.callbacks.present_str = self.present_str
         self.callbacks.default_value_provider = lambda: Foo(x=0)
 
     # Edit and present functions
@@ -162,8 +146,9 @@ class FooWithGui(AnyDataWithGui[Foo]):
         changed, self.value.x = imgui.input_int("x", self.value.x)
         return changed
 
-    def present(self) -> None:
-        imgui.text(f"x: {self.get_actual_value()}")
+    @staticmethod
+    def present_str(value: Foo) -> None:
+        imgui.text(f"x: {value.x}")
 
 
 def test_foo_with_gui() -> None:

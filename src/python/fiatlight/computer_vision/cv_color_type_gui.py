@@ -33,11 +33,7 @@ class ColorConversionWithGui(AnyDataWithGui[ColorConversion]):
     def __init__(self) -> None:
         super().__init__()
         self.callbacks.edit = self.edit
-        self.callbacks.present = self.present
         self.callbacks.default_value_provider = lambda: ColorConversion(ColorType.BGR, ColorType.RGB)
-
-    def present(self) -> None:
-        imgui.text(str(self.get_actual_value()))
 
     def edit(self) -> bool:
         value = self.get_actual_value()
