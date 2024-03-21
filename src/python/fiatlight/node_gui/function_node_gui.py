@@ -388,7 +388,7 @@ class FunctionNodeGui:
         if last_exception_message is None:
             return
 
-        min_exception_width = hello_imgui.em_size(12)
+        min_exception_width = hello_imgui.em_size(16)
         exception_width = min_exception_width
         if self.node_size is not None:
             exception_width = self.node_size.x - hello_imgui.em_size(2)
@@ -498,13 +498,13 @@ def sandbox() -> None:
         THREE = 3
 
     def add(
-        a: int | None = None,
+        # a: int | None = None,
         # e: MyEnum,
-        x: int = 1,
-        y: int = 2,
-        s: str = "Hello",
-    ) -> int:
-        return 10
+        # x: int = 1,
+        # y: int = 2,
+        # s: str = "Hello",
+    ) -> List[str]:
+        return ["Hello", "World", "!"]
         # return x + y + len(s) + e.value
 
     function_with_gui = any_function_to_function_with_gui(add, globals_dict=globals(), locals_dict=locals())

@@ -2,7 +2,7 @@ from fiatlight.core import AnyDataWithGui, DataType, Unspecified, Error
 from fiatlight import widgets
 from imgui_bundle import imgui
 from enum import Enum
-from typing import Type
+from typing import Type, List
 
 
 class OptionalWithGui(AnyDataWithGui[DataType | None]):
@@ -76,6 +76,47 @@ class OptionalWithGui(AnyDataWithGui[DataType | None]):
         assert not isinstance(value, (Unspecified, Error))
         if value is not None:
             self.inner_gui.value = value
+
+
+class ListWithGui(AnyDataWithGui[List[DataType]]):
+    inner_gui: AnyDataWithGui[DataType]
+    MAX_PRESENTED_ELEMENTS = 15
+
+    def __init__(self, inner_gui: AnyDataWithGui[DataType]) -> None:
+        super().__init__()
+        self.inner_gui = inner_gui
+        self.callbacks.present_str = self.present_str
+        self.callbacks.edit = self.edit
+        self.callbacks.default_value_provider = lambda: []
+        self.callbacks.present_custom = self.present_custom
+
+    def _elements_str(self, value: List[DataType]) -> str:
+        nb_elements = len(value)
+        nb_digits = len(str(nb_elements))
+        strs = []
+        for i, element in enumerate(value):
+            value_str = self.inner_gui.datatype_value_to_str(element)
+            idx_str = str(i).rjust(nb_digits, "0")
+            strs.append(f"{idx_str}: {value_str}")
+            if i >= self.MAX_PRESENTED_ELEMENTS:
+                strs.append(f"...{nb_elements - self.MAX_PRESENTED_ELEMENTS} more elements")
+                break
+        return "\n".join(strs)
+
+    def present_str(self, value: List[DataType]) -> str:
+        nb_elements = len(value)
+        if nb_elements == 0:
+            return "Empty list"
+        r = f"List of {nb_elements} elements\n" + self._elements_str(value)
+        return r
+
+    def edit(self) -> bool:
+        imgui.text("Edit not implemented for ListWithGui")
+        return False
+
+    def present_custom(self):
+        txt = self._elements_str(self.value)
+        imgui.text(txt)
 
 
 class EnumWithGui(AnyDataWithGui[Enum]):

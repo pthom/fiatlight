@@ -2,7 +2,7 @@ from fiatlight.core import UnspecifiedValue, DataType
 from fiatlight.core.any_data_with_gui import AnyDataWithGui
 from fiatlight.core.function_with_gui import FunctionWithGui, ParamKind, ParamWithGui, OutputWithGui
 from fiatlight.core import primitives_gui
-from fiatlight.core.composite_gui import OptionalWithGui, EnumWithGui
+from fiatlight.core.composite_gui import OptionalWithGui, EnumWithGui, ListWithGui
 from fiatlight.core.function_signature import get_function_signature
 from fiatlight.core.fiat_types import GlobalsDict, LocalsDict
 from enum import Enum
@@ -47,6 +47,16 @@ def _extract_enum_typeclass(
     return False, type_class_name
 
 
+def _extract_list_typeclass(type_class_name: str) -> Tuple[bool, str]:
+    if type_class_name.startswith("typing.List[") and type_class_name.endswith("]"):
+        return True, type_class_name[12:-1]
+    elif type_class_name.startswith("List[") and type_class_name.endswith("]"):
+        return True, type_class_name[5:-1]
+    elif type_class_name.startswith("list[") and type_class_name.endswith("]"):
+        return True, type_class_name[5:-1]
+    return False, type_class_name
+
+
 def any_typeclass_to_gui(
     type_class_name: str, *, globals_dict: GlobalsDict | None = None, locals_dict: LocalsDict | None = None
 ) -> AnyDataWithGui[Any]:
@@ -55,6 +65,7 @@ def any_typeclass_to_gui(
 
     is_optional, type_class_name = _extract_optional_typeclass(type_class_name)
     is_enum, type_class_name = _extract_enum_typeclass(type_class_name, globals_dict, locals_dict)
+    is_list, type_class_name = _extract_list_typeclass(type_class_name)
 
     if is_enum:
         try:
@@ -71,11 +82,14 @@ def any_typeclass_to_gui(
             return AnyDataWithGui.make_default()
 
     elif type_class_name in ALL_GUI_FACTORIES:
-        if not is_optional:
-            return ALL_GUI_FACTORIES[type_class_name]()
-        else:
+        if is_optional:
             inner_gui = ALL_GUI_FACTORIES[type_class_name]()
             return OptionalWithGui(inner_gui)
+        elif is_list:
+            inner_gui = ALL_GUI_FACTORIES[type_class_name]()
+            return ListWithGui(inner_gui)
+        else:
+            return ALL_GUI_FACTORIES[type_class_name]()
 
     # if we reach this point, we have no GUI implementation for the type
     if type_class_name not in _COMPLAINTS_MISSING_GUI_FACTORY:
