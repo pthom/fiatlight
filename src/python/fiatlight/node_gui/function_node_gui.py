@@ -411,7 +411,7 @@ class FunctionNodeGui:
 
         fn_doc = self.function_node.function_with_gui.doc()
         if fn_doc is not None:
-            imgui.same_line()
+            imgui.spring()
             with fontawesome_6_ctx():
                 imgui.text(icons_fontawesome_6.ICON_FA_CIRCLE_QUESTION)
             if imgui.is_item_hovered():
@@ -434,7 +434,7 @@ class FunctionNodeGui:
     def _draw_function_outputs(self) -> None:
         for idx_output, output_param in enumerate(self.function_node.function_with_gui.outputs_with_gui):
             with imgui_ctx.push_obj_id(output_param):
-                with imgui_ctx.begin_vertical("outputV"):
+                with imgui_ctx.begin_group():
                     with imgui_ctx.begin_horizontal("outputH"):
                         self._draw_output_header_line(idx_output)
                     can_present = output_param.data_with_gui.can_present_value()
@@ -464,29 +464,30 @@ class FunctionNodeGui:
 
     def draw_node(self, unique_name: str) -> None:
         ed.begin_node(self.node_id)
-        imgui.begin_vertical("node_content")
+        with imgui_ctx.begin_vertical("node_content"):
+            # Title and doc
+            with imgui_ctx.begin_horizontal("Title"):
+                self._draw_title(unique_name)
+            imgui.dummy(ImVec2(hello_imgui.em_size(self._MIN_NODE_WIDTH_EM), 1))
 
-        # Title and doc
-        self._draw_title(unique_name)
-        imgui.dummy(ImVec2(hello_imgui.em_size(self._MIN_NODE_WIDTH_EM), 1))
+            # Inputs
+            inputs_changed = self._draw_function_inputs()
+            if inputs_changed:
+                self.function_node.function_with_gui.dirty = True
+                if self.function_node.function_with_gui.invoke_automatically:
+                    self.function_node.invoke_function()
 
-        # Inputs
-        inputs_changed = self._draw_function_inputs()
-        if inputs_changed:
-            self.function_node.function_with_gui.dirty = True
-            if self.function_node.function_with_gui.invoke_automatically:
-                self.function_node.invoke_function()
+            # Exceptions, if any
+            self._draw_exception_message()
 
-        # Exceptions, if any
-        self._draw_exception_message()
+            # Outputs
+            output_separator_str = (
+                "Outputs" if len(self.function_node.function_with_gui.outputs_with_gui) > 1 else "Output"
+            )
+            widgets.node_utils.node_separator(self.node_id, text=output_separator_str)
+            self._draw_invoke_options()
+            self._draw_function_outputs()
 
-        # Outputs
-        output_separator_str = "Outputs" if len(self.function_node.function_with_gui.outputs_with_gui) > 1 else "Output"
-        widgets.node_utils.node_separator(self.node_id, text=output_separator_str)
-        self._draw_invoke_options()
-        self._draw_function_outputs()
-
-        imgui.end_vertical()
         ed.end_node()
         self.node_size = ed.get_node_size(self.node_id)
 
