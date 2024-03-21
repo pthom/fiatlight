@@ -3,7 +3,7 @@ from fiatlight.core import FunctionNode, FunctionNodeLink, UnspecifiedValue, Boo
 from fiatlight.core import Error, Unspecified
 from fiatlight.core.function_with_gui import ParamWithGui
 from fiatlight import widgets
-from imgui_bundle import imgui, imgui_node_editor as ed, ImVec2, imgui_ctx, hello_imgui
+from imgui_bundle import imgui, imgui_node_editor as ed, ImVec2, imgui_ctx, hello_imgui, imgui_node_editor_ctx as ed_ctx
 from fiatlight.widgets.fontawesome6_ctx import icons_fontawesome_6, fontawesome_6_ctx
 from typing import Dict, List, Any
 from dataclasses import dataclass
@@ -338,39 +338,37 @@ class FunctionNodeGui:
 
         # Show colored pin with possible tooltip
         with imgui_ctx.push_style_color(imgui.Col_.text.value, widgets.COLORS[header_elements.output_pin_color]):
-            ed.begin_pin(self.pins_output[idx_output], ed.PinKind.output)
-            ed.pin_pivot_alignment(ImVec2(1, 0.5))
-            with fontawesome_6_ctx():
-                if header_elements.status_icon is not None:
-                    imgui.text(header_elements.status_icon)
-                    if header_elements.status_icon_tooltips is not None:
-                        tooltip_str = "\n".join(header_elements.status_icon_tooltips)
-                        if tooltip_str != "" and imgui.is_item_hovered():
-                            widgets.osd_widgets.set_tooltip(tooltip_str)
-            ed.end_pin()
+            with ed_ctx.begin_pin(self.pins_output[idx_output], ed.PinKind.output):
+                ed.pin_pivot_alignment(ImVec2(1, 0.5))
+                with fontawesome_6_ctx():
+                    if header_elements.status_icon is not None:
+                        imgui.text(header_elements.status_icon)
+                        if header_elements.status_icon_tooltips is not None:
+                            tooltip_str = "\n".join(header_elements.status_icon_tooltips)
+                            if tooltip_str != "" and imgui.is_item_hovered():
+                                widgets.osd_widgets.set_tooltip(tooltip_str)
 
     def _draw_input_header_line(self, input_param: ParamWithGui[Any]) -> None:
         imgui.begin_horizontal("input")
         header_elements = self._input_param_header_elements(input_param)
         with imgui_ctx.push_style_color(imgui.Col_.text.value, widgets.COLORS[header_elements.input_pin_color]):
             input_name = input_param.name
-            ed.begin_pin(self.pins_input[input_name], ed.PinKind.input)
-            ed.pin_pivot_alignment(ImVec2(0, 0.5))
-            with fontawesome_6_ctx():
-                # Pin status icon
-                if header_elements.status_icon is not None:
-                    imgui.text(header_elements.status_icon)
-                    if header_elements.status_icon_tooltips is not None:
-                        tooltip_str = "\n".join(header_elements.status_icon_tooltips)
-                        if tooltip_str != "" and imgui.is_item_hovered():
-                            widgets.osd_widgets.set_tooltip(tooltip_str)
+            with ed_ctx.begin_pin(self.pins_input[input_name], ed.PinKind.input):
+                ed.pin_pivot_alignment(ImVec2(0, 0.5))
+                with fontawesome_6_ctx():
+                    # Pin status icon
+                    if header_elements.status_icon is not None:
+                        imgui.text(header_elements.status_icon)
+                        if header_elements.status_icon_tooltips is not None:
+                            tooltip_str = "\n".join(header_elements.status_icon_tooltips)
+                            if tooltip_str != "" and imgui.is_item_hovered():
+                                widgets.osd_widgets.set_tooltip(tooltip_str)
 
-                # Param name
-                if header_elements.param_name is not None:
-                    imgui.text(header_elements.param_name)
-                    if header_elements.param_name_tooltip is not None and imgui.is_item_hovered():
-                        widgets.osd_widgets.set_tooltip(header_elements.param_name_tooltip)
-            ed.end_pin()
+                    # Param name
+                    if header_elements.param_name is not None:
+                        imgui.text(header_elements.param_name)
+                        if header_elements.param_name_tooltip is not None and imgui.is_item_hovered():
+                            widgets.osd_widgets.set_tooltip(header_elements.param_name_tooltip)
 
         if header_elements.value_as_str is not None:
             widgets.text_maybe_truncated(header_elements.value_as_str, max_width_chars=40, max_lines=1)
@@ -463,32 +461,29 @@ class FunctionNodeGui:
         return changed
 
     def draw_node(self, unique_name: str) -> None:
-        ed.begin_node(self.node_id)
-        with imgui_ctx.begin_vertical("node_content"):
-            # Title and doc
-            with imgui_ctx.begin_horizontal("Title"):
-                self._draw_title(unique_name)
-            imgui.dummy(ImVec2(hello_imgui.em_size(self._MIN_NODE_WIDTH_EM), 1))
+        with ed_ctx.begin_node(self.node_id):
+            with imgui_ctx.begin_vertical("node_content"):
+                # Title and doc
+                with imgui_ctx.begin_horizontal("Title"):
+                    self._draw_title(unique_name)
+                imgui.dummy(ImVec2(hello_imgui.em_size(self._MIN_NODE_WIDTH_EM), 1))
 
-            # Inputs
-            inputs_changed = self._draw_function_inputs()
-            if inputs_changed:
-                self.function_node.function_with_gui.dirty = True
-                if self.function_node.function_with_gui.invoke_automatically:
-                    self.function_node.invoke_function()
+                # Inputs
+                inputs_changed = self._draw_function_inputs()
+                if inputs_changed:
+                    self.function_node.function_with_gui.dirty = True
+                    if self.function_node.function_with_gui.invoke_automatically:
+                        self.function_node.invoke_function()
 
-            # Exceptions, if any
-            self._draw_exception_message()
-
-            # Outputs
-            output_separator_str = (
-                "Outputs" if len(self.function_node.function_with_gui.outputs_with_gui) > 1 else "Output"
-            )
-            widgets.node_utils.node_separator(self.node_id, text=output_separator_str)
-            self._draw_invoke_options()
-            self._draw_function_outputs()
-
-        ed.end_node()
+                # Outputs
+                output_separator_str = (
+                    "Outputs" if len(self.function_node.function_with_gui.outputs_with_gui) > 1 else "Output"
+                )
+                widgets.node_utils.node_separator(self.node_id, text=output_separator_str)
+                self._draw_invoke_options()
+                # Exceptions, if any
+                self._draw_exception_message()
+                self._draw_function_outputs()
         self.node_size = ed.get_node_size(self.node_id)
 
 
@@ -519,9 +514,8 @@ def sandbox() -> None:
     def gui() -> None:
         from fiatlight import widgets
 
-        ed.begin("Functions Graph")
-        function_node_gui.draw_node("add")
-        ed.end()
+        with ed_ctx.begin("Functions Graph"):
+            function_node_gui.draw_node("add")
         widgets.osd_widgets.render()
 
     immapp.run(gui, with_node_editor=True, window_title="function_node_gui_sandbox")
