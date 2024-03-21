@@ -109,7 +109,7 @@ class TextFileWithGui(AnyDataWithGui[str]):
     def __init__(self) -> None:
         super().__init__()
         self.callbacks.edit = self.edit
-        self.callbacks.present = self.present
+        self.callbacks.present_custom = self.present
         self.callbacks.default_value_provider = lambda: poem
 
     def edit(self) -> bool:

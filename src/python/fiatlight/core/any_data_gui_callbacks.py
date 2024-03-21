@@ -26,7 +26,7 @@ class AnyDataGuiCallbacks(Generic[DataType]):
     # Provide a draw function that presents the data content for more complex types (images, etc.)
     # It will be presented in "expanded" mode, and can use imgui widgets on several lines.
     # If not provided, the data will be presented using present_str
-    present: VoidFunction | None = None
+    present_custom: VoidFunction | None = None
 
     # Provide a draw function that presents an editable interface for the data, and returns True if changed
     edit: BoolFunction | None = None

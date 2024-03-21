@@ -117,7 +117,7 @@ class FunctionNodeGui:
 
     def _call_gui_present(self, value_with_gui: AnyDataWithGui[Any]) -> None:
         value = value_with_gui.value
-        fn_present = value_with_gui.callbacks.present
+        fn_present = value_with_gui.callbacks.present_custom
         assert value_with_gui.can_present_value()
         assert not isinstance(value, (Error, Unspecified))
         assert fn_present is not None

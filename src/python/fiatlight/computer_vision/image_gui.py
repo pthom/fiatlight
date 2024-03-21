@@ -98,7 +98,7 @@ class ImageWithGui(AnyDataWithGui[Image]):
         self.image_presenter = ImagePresenter(image_params, show_channels)
         self.open_file_dialog = None
         self.callbacks.edit = self.edit
-        self.callbacks.present = self.present
+        self.callbacks.present_custom = self.present
         self.callbacks.on_change = self.on_change
         self.callbacks.default_value_provider = lambda: np.zeros((1, 1, 3), dtype=np.uint8)
         self.callbacks.present_str = self.present_str

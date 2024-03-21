@@ -88,12 +88,8 @@ class EnumWithGui(AnyDataWithGui[Enum]):
         nb_values = len(list(self.enum_type))
         assert nb_values > 0
 
-        self.callbacks.present = self.present
         self.callbacks.edit = self.edit
         self.callbacks.default_value_provider = lambda: list(self.enum_type)[0]
-
-    def present(self) -> None:
-        imgui.text(str(self.value))
 
     def edit(self) -> bool:
         assert not isinstance(self.value, (Unspecified, Error))
