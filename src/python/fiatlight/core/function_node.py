@@ -1,6 +1,6 @@
 from fiatlight.core.function_with_gui import FunctionWithGui, ParamWithGui
 from fiatlight.core import JsonDict
-from typing import Any
+from typing import Any, List
 
 
 class FunctionNodeLink:
@@ -50,8 +50,12 @@ class FunctionNode:
         self.input_links.append(link)
 
     def input_node_link(self, parameter_name: str) -> FunctionNodeLink | None:
-        r = next((link for link in self.input_links if link.dst_input_name == parameter_name), None)
-        return r
+        input_links = list(link for link in self.input_links if link.dst_input_name == parameter_name)
+        assert len(list(input_links)) <= 1
+        if len(input_links) == 1:
+            return input_links[0]
+        else:
+            return None
 
     def has_input_link(self, parameter_name: str) -> bool:
         r = self.input_node_link(parameter_name) is not None
@@ -65,6 +69,18 @@ class FunctionNode:
         r = "linked to " + fn_name
         if len(link.src_function_node.function_with_gui.outputs_with_gui) > 1:
             r += f" (output {link.src_output_idx})"
+        return r
+
+    def output_links_for_idx(self, output_idx: int) -> List[FunctionNodeLink]:
+        output_links = list(link for link in self.output_links if link.src_output_idx == output_idx)
+        return output_links
+
+    def output_node_links_info(self, output_idx: int) -> List[str]:
+        output_links = self.output_links_for_idx(output_idx)
+        r = []
+        for link in output_links:
+            fn_name = link.dst_function_node.function_with_gui.name
+            r.append(f"linked to {fn_name} (input {link.dst_input_name})")
         return r
 
     def user_editable_params(self) -> list[ParamWithGui[Any]]:
