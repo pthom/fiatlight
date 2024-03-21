@@ -49,8 +49,22 @@ class FunctionNode:
     def add_input_link(self, link: FunctionNodeLink) -> None:
         self.input_links.append(link)
 
+    def input_node_link(self, parameter_name: str) -> FunctionNodeLink | None:
+        r = next((link for link in self.input_links if link.dst_input_name == parameter_name), None)
+        return r
+
     def has_input_link(self, parameter_name: str) -> bool:
-        r = any(link.dst_input_name == parameter_name for link in self.input_links)
+        r = self.input_node_link(parameter_name) is not None
+        return r
+
+    def input_node_link_info(self, parameter_name: str) -> str | None:
+        link = self.input_node_link(parameter_name)
+        if link is None:
+            return None
+        fn_name = link.src_function_node.function_with_gui.name
+        r = "linked to " + fn_name
+        if len(link.src_function_node.function_with_gui.outputs_with_gui) > 1:
+            r += f" (output {link.src_output_idx})"
         return r
 
     def user_editable_params(self) -> list[ParamWithGui[Any]]:

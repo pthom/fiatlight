@@ -26,6 +26,15 @@ class LutParams:
         lut_uint8 = (y * 255.0).astype(np.uint8)
         return lut_uint8
 
+    def is_default(self) -> bool:
+        return (
+            self.pow_exponent == 1.0
+            and self.min_in == 0.0
+            and self.min_out == 0.0
+            and self.max_in == 1.0
+            and self.max_out == 1.0
+        )
+
 
 def lut_with_params(image: ImageUInt8, params: LutParams) -> ImageUInt8:
     r = lut(image, params.to_table())

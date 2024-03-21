@@ -1,4 +1,5 @@
 from fiatlight.core import AnyDataWithGui, DataType, Unspecified, Error
+from fiatlight import widgets
 from imgui_bundle import imgui
 from enum import Enum
 from typing import Type
@@ -10,43 +11,65 @@ class OptionalWithGui(AnyDataWithGui[DataType | None]):
     def __init__(self, inner_gui: AnyDataWithGui[DataType]) -> None:
         super().__init__()
         self.inner_gui = inner_gui
-        self.callbacks.present = self.present
+        self.callbacks.present_str = self.present_str
         self.callbacks.edit = self.edit
         self.callbacks.on_change = self.on_change
-        self.callbacks.default_value_provider = lambda: None
+        self.callbacks.default_value_provider = self.default_provider
 
-    def present(self) -> None:
-        value = self.value
-        if value is None:
-            imgui.text("None")
+    def default_provider(self) -> DataType | None:
+        if self.inner_gui.callbacks.default_value_provider is None:
+            return None
         else:
-            assert not isinstance(value, (Unspecified, Error))
-            self.inner_gui.value = value
-            self.inner_gui.call_gui_present()
+            return self.inner_gui.callbacks.default_value_provider()
+
+    def present_str(self, value: DataType | None) -> str:
+        if value is None:
+            return "None"
+        else:
+            inner_present_str = self.inner_gui.callbacks.present_str
+            if inner_present_str is not None:
+                return inner_present_str(value)
+            else:
+                return str(value)
 
     def edit(self) -> bool:
         value = self.value
         assert not isinstance(value, (Unspecified, Error))
 
+        changed = False
+
         if value is None:
+            imgui.begin_horizontal("##OptionalH")
             imgui.text("Optional: None")
-            imgui.same_line()
             if imgui.button("Set"):
                 default_value_provider = self.inner_gui.callbacks.default_value_provider
                 assert default_value_provider is not None
                 self.value = default_value_provider()
-                return True
-            return False
+                changed = True
+            if imgui.is_item_hovered():
+                widgets.osd_widgets.set_tooltip("Set Optional to default value for this type.")
+            imgui.end_horizontal()
         else:
+            imgui.begin_vertical("##OptionalV")
+            imgui.begin_horizontal("##OptionalH")
             imgui.text("Optional: Set")
-            imgui.same_line()
             if imgui.button("Unset"):
                 self.value = None
-                return True
-            changed = self.inner_gui.call_gui_edit(display_trash=False)
-            if changed:
-                self.value = self.inner_gui.value
-            return changed
+                changed = True
+            if imgui.is_item_hovered():
+                widgets.osd_widgets.set_tooltip("Unset Optional.")
+            imgui.end_horizontal()
+            fn_edit = self.inner_gui.callbacks.edit
+            if fn_edit is not None:
+                changed_in_edit = fn_edit()
+                if changed_in_edit:
+                    self.value = self.inner_gui.value
+                    changed = True
+            else:
+                imgui.text("No edit function!")
+            imgui.end_vertical()
+
+        return changed
 
     def on_change(self) -> None:
         value = self.value

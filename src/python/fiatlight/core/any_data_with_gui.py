@@ -134,10 +134,7 @@ class AnyDataWithGui(Generic[DataType]):
                     if imgui.is_item_hovered(imgui.HoveredFlags_.delay_normal.value):
                         widgets.osd_widgets.set_tooltip("Unspecified!")
             else:
-                try:
-                    default_str = str(default_param_value)
-                except Exception:
-                    default_str = "???"
+                default_str = self.datatype_value_to_str(default_param_value)
                 imgui.begin_group()
                 with fontawesome_6_ctx():
                     imgui.text(icons_fontawesome_6.ICON_FA_PLUG_CIRCLE_XMARK)
@@ -159,42 +156,7 @@ class AnyDataWithGui(Generic[DataType]):
             else:
                 self.callbacks.present()
 
-    @final
-    def call_gui_edit(
-        self, *, display_trash: bool = True, default_param_value: Unspecified | DataType = UnspecifiedValue
-    ) -> bool:
-        # (display_trash is set to False for OptionalWithGui's inner_gui)
-        if isinstance(self.value, Error):
-            imgui.text("Error!")
-            return False
-        elif isinstance(self.value, Unspecified):
-            value_to_create: Unspecified | DataType = UnspecifiedValue
-            if not isinstance(default_param_value, Unspecified):
-                value_to_create = default_param_value
-            else:
-                if self.callbacks.default_value_provider is not None:
-                    value_to_create = self.callbacks.default_value_provider()
-
-            if not isinstance(value_to_create, Unspecified):
-                if imgui.button("Set"):
-                    self.value = value_to_create
-                    return True
-                else:
-                    return False
-            else:
-                imgui.text("no default value provider!")
-                return False
-        else:
-            changed = False
-            if display_trash:
-                if imgui.button("Unset"):
-                    self.value = UnspecifiedValue
-                    changed = True
-            if self.callbacks.edit is not None:
-                changed = changed or self.callbacks.edit()
-            return changed
-
-    def _datatype_value_to_str(self, value: DataType) -> str:
+    def datatype_value_to_str(self, value: DataType) -> str:
         default_str: str
         if self.callbacks.present_str is not None:
             default_str = self.callbacks.present_str(value)
@@ -204,36 +166,6 @@ class AnyDataWithGui(Generic[DataType]):
             except (TypeError, OverflowError):
                 default_str = "???"
         return default_str
-
-    def present_header_line(self, default_param_value: Unspecified | DataType = UnspecifiedValue) -> None:
-        """Present the value on one line"""
-        from fiatlight import widgets
-
-        icon: str | None = None
-        icon_tooltip: str | None = None
-        header_str: str
-
-        if isinstance(self.value, Error):
-            icon = icons_fontawesome_6.ICON_FA_BOMB
-            header_str = "Error!"
-        elif isinstance(self.value, Unspecified):
-            if isinstance(default_param_value, Unspecified):
-                icon = icons_fontawesome_6.ICON_FA_CIRCLE_EXCLAMATION
-                icon_tooltip = "Unspecified!"
-                header_str = "Unspecified!"
-            else:
-                icon = icons_fontawesome_6.ICON_FA_PLUG_CIRCLE_XMARK
-                icon_tooltip = "Unspecified! Using default value."
-                header_str = self._datatype_value_to_str(default_param_value)
-        else:
-            header_str = self._datatype_value_to_str(self.value)
-
-        if icon is not None:
-            with fontawesome_6_ctx():
-                imgui.text(icon)
-            if icon_tooltip is not None and imgui.is_item_hovered(imgui.HoveredFlags_.delay_normal.value):
-                widgets.osd_widgets.set_tooltip(icon_tooltip)
-        widgets.text_maybe_truncated(header_str, max_width_chars=40, max_lines=1, show_expand_checkbox=True)
 
 
 ##############################################################################################################

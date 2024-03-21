@@ -137,7 +137,6 @@ class TextFileWithGui(AnyDataWithGui[str]):
             max_width_chars=30,
             max_lines=3,
             show_full_as_tooltip=False,
-            show_copy_button=True,
             show_details_button=True,
         )
 

@@ -59,6 +59,7 @@ class StableDiffusionXLWrapper:
         )
         image = r.images[0]
         as_array = np.array(image)
+        as_array = cv2.cvtColor(as_array, cv2.COLOR_RGB2BGR)
         return as_array
 
 

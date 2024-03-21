@@ -16,13 +16,16 @@ class LutParamsWithGui(AnyDataWithGui[LutParams]):
 
     def __init__(self) -> None:
         super().__init__()
-        self.callbacks.present = self.present
+        self.callbacks.present_str = self.present_str
         self.callbacks.edit = self.edit
         self.callbacks.on_change = self.on_change
         self.callbacks.default_value_provider = lambda: LutParams()
 
-    def present(self) -> None:
-        imgui.text("Lut(...)")
+    @staticmethod
+    def present_str(lut_params: LutParams) -> str:
+        if lut_params.is_default():
+            return "Lut(default)"
+        return "Lut(...)"
 
     def edit(self) -> bool:
         changed = self.gui_params()
