@@ -166,6 +166,7 @@ class AnyDataWithGui(Generic[DataType]):
         # (display_trash is set to False for OptionalWithGui's inner_gui)
         if isinstance(self.value, Error):
             imgui.text("Error!")
+            return False
         elif isinstance(self.value, Unspecified):
             value_to_create: Unspecified | DataType = UnspecifiedValue
             if not isinstance(default_param_value, Unspecified):
@@ -182,45 +183,53 @@ class AnyDataWithGui(Generic[DataType]):
                     return False
             else:
                 imgui.text("no default value provider!")
+                return False
         else:
             changed = False
             if display_trash:
                 if imgui.button("Unset"):
                     self.value = UnspecifiedValue
                     changed = True
-            changed = changed or self.callbacks.edit()
+            if self.callbacks.edit is not None:
+                changed = changed or self.callbacks.edit()
             return changed
+
+    def _datatype_value_to_str(self, value: DataType) -> str:
+        default_str: str
+        if self.callbacks.present_short_str is not None:
+            default_str = self.callbacks.present_short_str(value)
+        else:
+            try:
+                default_str = str(value)
+            except (TypeError, OverflowError):
+                default_str = "???"
+        return default_str
 
     def call_present_short_str(self, default_param_value: Unspecified | DataType = UnspecifiedValue) -> None:
         """Present the value on one line"""
         from fiatlight import widgets
 
-        str_function = self.callbacks.present_short_str if self.callbacks.present_short_str is not None else str
-
         if isinstance(self.value, Error):
             imgui.text("Error!")
         elif isinstance(self.value, Unspecified):
-            if default_param_value is UnspecifiedValue:
+            if isinstance(default_param_value, Unspecified):
                 with fontawesome_6_ctx():
                     imgui.text(icons_fontawesome_6.ICON_FA_CIRCLE_EXCLAMATION)
                     if imgui.is_item_hovered(imgui.HoveredFlags_.delay_normal.value):
                         widgets.osd_widgets.set_tooltip("Unspecified!")
             else:
-                try:
-                    default_str = str_function(default_param_value)
-                except Exception:
-                    default_str = "???"
                 imgui.begin_horizontal("Unspecified with default")
                 with fontawesome_6_ctx():
                     imgui.text(icons_fontawesome_6.ICON_FA_PLUG_CIRCLE_XMARK)
                     if imgui.is_item_hovered(imgui.HoveredFlags_.delay_normal.value):
                         widgets.osd_widgets.set_tooltip("Unspecified! Using default value.")
+                default_str = self._datatype_value_to_str(default_param_value)
                 widgets.text_maybe_truncated(default_str, max_width_chars=40, max_lines=3)
                 imgui.end_horizontal()
 
         else:
-            txt = str_function(self.value)
-            imgui.text(txt)
+            value_str = self._datatype_value_to_str(self.value)
+            imgui.text(value_str)
 
 
 ##############################################################################################################
