@@ -101,6 +101,7 @@ class ImageWithGui(AnyDataWithGui[Image]):
         self.callbacks.present = self.present
         self.callbacks.on_change = self.on_change
         self.callbacks.default_value_provider = lambda: np.zeros((1, 1, 3), dtype=np.uint8)
+        self.callbacks.present_str = self.present_str
 
     def edit(self) -> bool:
         changed = False
@@ -120,6 +121,12 @@ class ImageWithGui(AnyDataWithGui[Image]):
 
     def present(self) -> None:
         self.image_presenter.gui()
+
+    @staticmethod
+    def present_str(image: Image) -> str:
+        r = f"Image {image.shape} {image.dtype}"
+        r += f"\n{image}"
+        return r
 
     def on_change(self) -> None:
         self.image_presenter.set_image(self.get_actual_value())

@@ -331,7 +331,7 @@ class StrWithGui(AnyDataWithGui[str]):
         self.params = params if params is not None else StrWithGuiParams()
         self.callbacks.edit = self.edit
         self.callbacks.default_value_provider = lambda: ""
-        self.callbacks.present_short_str = self.present_short_str
+        self.callbacks.present_str = self.present_short_str
 
     @staticmethod
     def present_short_str(s: str) -> str:
