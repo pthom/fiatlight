@@ -571,7 +571,7 @@ def sandbox() -> None:
 
         with ed_ctx.begin("Functions Graph"):
             function_node_gui.draw_node("add")
-        widgets.osd_widgets.render()
+        widgets.osd_widgets._OSD_WIDGETS.render()
 
     immapp.run(gui, with_node_editor=True, window_title="function_node_gui_sandbox")
 
