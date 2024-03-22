@@ -16,6 +16,7 @@ from fiatlight.core.fiat_types import (
     ImagePath,
     TextPath,
 )
+from fiatlight.core.fiatlight_style_definitions import fiatlight_style, FiatlightStyle, GuiColorType
 from fiatlight.core.any_data_gui_callbacks import AnyDataGuiCallbacks, PRESENT_SHORT_STR_MAX_LENGTH
 from fiatlight.core.any_data_with_gui import AnyDataWithGui
 from fiatlight.core.function_with_gui import ParamKind, ParamWithGui, OutputWithGui, FunctionWithGui
@@ -24,7 +25,6 @@ from fiatlight.core.function_node import FunctionNode, FunctionNodeLink
 from fiatlight.core.functions_graph import FunctionsGraph
 from fiatlight.core.function_signature import get_function_signature
 from fiatlight.core.composite_gui import OptionalWithGui, EnumWithGui
-from fiatlight.core.fiatlight_style import FiatlightStyle, fiatlight_style, ColorType
 from fiatlight.core.primitives_gui import (
     IntWithGui,
     IntWithGuiParams,
@@ -95,8 +95,8 @@ __all__ = [
     "StrWithGui",
     "StrWithGuiParams",
     "StrEditType",
-    # from fiatlight_style
-    "FiatlightStyle",
+    # from fiatlight_style_definitions
     "fiatlight_style",
-    "ColorType",
+    "FiatlightStyle",
+    "GuiColorType",
 ]

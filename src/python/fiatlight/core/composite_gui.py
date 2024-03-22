@@ -1,4 +1,4 @@
-from fiatlight import AnyDataWithGui, DataType, Unspecified, Error
+from fiatlight.core import AnyDataWithGui, DataType, Unspecified, Error, fiatlight_style
 from fiatlight import widgets
 from imgui_bundle import imgui
 from enum import Enum
@@ -103,8 +103,6 @@ class ListWithGui(AnyDataWithGui[List[DataType]]):
         return "\n".join(strs)
 
     def present_str(self, value: List[DataType]) -> str:
-        from fiatlight import fiatlight_style
-
         nb_elements = len(value)
         if nb_elements == 0:
             return "Empty list"
@@ -118,8 +116,6 @@ class ListWithGui(AnyDataWithGui[List[DataType]]):
         return False
 
     def present_custom(self) -> None:
-        from fiatlight import fiatlight_style
-
         txt = self._elements_str(self.get_actual_value(), fiatlight_style().list_maximum_elements_in_node)
         imgui.text(txt)
 
