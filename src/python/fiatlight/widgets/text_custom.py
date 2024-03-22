@@ -65,10 +65,7 @@ def text_maybe_truncated(
     max_lines: int | None = None,
     remove_after_double_hash: bool = True,
     show_full_as_tooltip: bool = True,
-    show_details_button: bool = False,
 ) -> None:
-    from imgui_bundle import icons_fontawesome_4
-
     def output_text(s: str) -> None:
         if color is not None:
             imgui.text_colored(color, s)
@@ -82,19 +79,6 @@ def text_maybe_truncated(
         max_lines=max_lines,
         remove_after_double_hash=remove_after_double_hash,
     )
-
-    if is_truncated and show_details_button:
-        if imgui.button(icons_fontawesome_4.ICON_FA_BOOK):
-
-            def detail_gui() -> None:
-                imgui.input_text_multiline("##value_text", msg)
-
-            osd_widgets.set_detail_gui(detail_gui)
-        if imgui.is_item_hovered():
-            osd_widgets.set_tooltip(
-                "Click to show details, then open the Info tab at the bottom to see the full string"
-            )
-        imgui.same_line()
 
     output_text(msg_truncated)
     if is_truncated and show_full_as_tooltip and imgui.is_item_hovered():

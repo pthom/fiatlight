@@ -1,6 +1,6 @@
 from fiatlight.core import AnyDataWithGui, DataType, Unspecified, Error, fiatlight_style
 from fiatlight import widgets
-from imgui_bundle import imgui
+from imgui_bundle import hello_imgui, imgui, imgui_node_editor as ed  # noqa
 from enum import Enum
 from typing import Type, List
 
@@ -81,6 +81,9 @@ class OptionalWithGui(AnyDataWithGui[DataType | None]):
 class ListWithGui(AnyDataWithGui[List[DataType]]):
     inner_gui: AnyDataWithGui[DataType]
 
+    popup_max_elements: int = 300
+    show_idx: bool = True
+
     def __init__(self, inner_gui: AnyDataWithGui[DataType]) -> None:
         super().__init__()
         self.inner_gui = inner_gui
@@ -99,7 +102,10 @@ class ListWithGui(AnyDataWithGui[List[DataType]]):
             if i >= max_presented_elements:
                 strs.append(f"...{nb_elements - max_presented_elements} more elements")
                 break
-            strs.append(f"{idx_str}: {value_str}")
+            if self.show_idx:
+                strs.append(f"{idx_str}: {value_str}")
+            else:
+                strs.append(value_str)
         return "\n".join(strs)
 
     def present_str(self, value: List[DataType]) -> str:
@@ -115,8 +121,25 @@ class ListWithGui(AnyDataWithGui[List[DataType]]):
         imgui.text("Edit not implemented for ListWithGui")
         return False
 
+    def popup_details(self) -> None:
+        assert not isinstance(self.value, (Unspecified, Error))
+        imgui.text("List elements")
+        _, self.show_idx = imgui.checkbox("Show index", self.show_idx)
+        txt = self._elements_str(self.value, self.popup_max_elements)
+        imgui.input_text_multiline("##ListElements", txt, hello_imgui.em_to_vec2(0, 20))
+
+        if self.popup_max_elements < len(self.value):
+            if imgui.button("Show more"):
+                self.popup_max_elements += 300
+
     def present_custom(self) -> None:
-        txt = self._elements_str(self.get_actual_value(), fiatlight_style().list_maximum_elements_in_node)
+        max_elements = fiatlight_style().list_maximum_elements_in_node
+        actual_value = self.get_actual_value()
+
+        if imgui.button("details"):
+            widgets.osd_widgets.add_popup("Details", self.popup_details)
+
+        txt = self._elements_str(actual_value, max_elements)
         imgui.text(txt)
 
 

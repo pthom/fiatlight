@@ -122,14 +122,8 @@ class FiatGui:
                     imgui.input_text_multiline("##error", msg, text_size)
 
     def _draw_info_panel(self) -> None:
-        osd_widgets.render()
         with imgui_ctx.push_obj_id(self):
             if imgui.begin_tab_bar("InfoPanelTabBar"):
-                if imgui.begin_tab_item_simple("Info"):
-                    details_gui = osd_widgets.get_detail_gui()
-                    if details_gui is not None:
-                        details_gui()
-                    imgui.end_tab_item()
                 if imgui.begin_tab_item_simple("Exceptions"):
                     self._draw_exceptions()
                     imgui.end_tab_item()
@@ -148,6 +142,8 @@ class FiatGui:
             # and the node editor uses it to compute the initial position of the nodes
             # window_size = imgui.get_window_size()
             self._functions_graph_gui.draw()
+
+        osd_widgets.render()
 
     def _dockable_windows(self) -> List[hello_imgui.DockableWindow]:
         main_window = hello_imgui.DockableWindow(
