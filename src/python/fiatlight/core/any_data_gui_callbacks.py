@@ -1,4 +1,4 @@
-from fiatlight.core import DataType, VoidFunction, BoolFunction
+from fiatlight.core import DataType, VoidFunction, BoolFunction, JsonDict
 from typing import Callable, Generic
 
 
@@ -36,6 +36,13 @@ class AnyDataGuiCallbacks(Generic[DataType]):
 
     # on_change: if provided, this function will be called when the value changes
     on_change: VoidFunction | None = None
+
+    # Optional serialization and deserialization of the GUI presentation options
+    # (i.e. anything that deals with how the data is presented in the GUI, not the data itself)
+    # If provided, these functions will be used to recreate the GUI presentation options when loading a graph,
+    # so that the GUI looks the same when the application is restarted.
+    save_gui_options_to_json: Callable[[], JsonDict] | None = None
+    load_gui_options_from_json: Callable[[JsonDict], None] | None = None
 
     # (On hold)
     # Optional serialization and deserialization functions for DataType

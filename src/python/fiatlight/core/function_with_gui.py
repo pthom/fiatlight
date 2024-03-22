@@ -18,16 +18,16 @@ class ParamWithGui(Generic[DataType]):
     param_kind: ParamKind
     default_value: DataType | Unspecified
 
-    def to_json(self) -> JsonDict:
-        data_json = self.data_with_gui.to_json()
+    def save_to_json(self) -> JsonDict:
+        data_json = self.data_with_gui.save_to_json()
         data_dict = {"name": self.name, "data": data_json}
         return data_dict
 
-    def fill_from_json(self, json_data: JsonDict) -> None:
+    def load_from_json(self, json_data: JsonDict) -> None:
         if json_data["name"] != self.name:
             raise ValueError(f"Expected name {self.name}, got {json_data['name']}")
         if "data" in json_data:
-            self.data_with_gui.fill_from_json(json_data["data"])
+            self.data_with_gui.load_from_json(json_data["data"])
 
     def get_value_or_default(self) -> DataType | Unspecified | Error:
         param_value = self.data_with_gui.value
@@ -153,12 +153,17 @@ class FunctionWithGui:
 
         self.dirty = False
 
-    def to_json(self) -> JsonDict:
-        inputs_dicts = [param.to_json() for param in self.inputs_with_gui]
+    def save_all_inputs_to_json(self) -> JsonDict:
+        """Save the current values of the inputs to a json dictionary.
+        Not used in a graph, since we only save inputs that are not linked to other functions.
+        """
+        inputs_dicts = [param.save_to_json() for param in self.inputs_with_gui]
         function_dict = {"inputs": inputs_dicts, "invoke_automatically": self.invoke_automatically}
         return function_dict
 
-    def fill_from_json(self, json_data: JsonDict) -> None:
+    def load_all_inputs_from_json(self, json_data: JsonDict) -> None:
+        """Load the values of the inputs from a json dictionary.
+        Not used in a graph, since we only save inputs that are not linked to other functions."""
         inputs_json = json_data["inputs"]
         if len(inputs_json) != len(self.inputs_with_gui):
             raise ValueError(f"Expected {len(self.inputs_with_gui)} inputs, got {len(inputs_json)}")
@@ -166,9 +171,40 @@ class FunctionWithGui:
             param_name = param_json["name"]
             for input_param in self.inputs_with_gui:
                 if input_param.name == param_name:
-                    input_param.fill_from_json(param_json)
+                    input_param.load_from_json(param_json)
                     break
         self.invoke_automatically = json_data.get("invoke_automatically", True)
+
+    def save_gui_options_to_json(self) -> JsonDict:
+        input_options = {}
+        for input_with_gui in self.inputs_with_gui:
+            if input_with_gui.data_with_gui.callbacks.save_gui_options_to_json is not None:
+                input_options[input_with_gui.name] = input_with_gui.data_with_gui.callbacks.save_gui_options_to_json()
+
+        output_options = {}
+        for i, output_with_gui in enumerate(self.outputs_with_gui):
+            if output_with_gui.data_with_gui.callbacks.save_gui_options_to_json is not None:
+                output_options[i] = output_with_gui.data_with_gui.callbacks.save_gui_options_to_json()
+
+        r = {"inputs": input_options, "outputs": output_options}
+        return r
+
+    def load_gui_options_from_json(self, json_data: JsonDict) -> None:
+        input_options = json_data.get("inputs", {})
+        for input_name, input_option in input_options.items():
+            for input_with_gui in self.inputs_with_gui:
+                callback_load = input_with_gui.data_with_gui.callbacks.load_gui_options_from_json
+                if input_with_gui.name == input_name and callback_load is not None:
+                    callback_load(input_option)
+                    break
+
+        output_options = json_data.get("outputs", {})
+        for output_idx, output_option in output_options.items():
+            output_idx = int(output_idx)
+            output_with_gui = self.outputs_with_gui[output_idx]
+            callback_load = output_with_gui.data_with_gui.callbacks.load_gui_options_from_json
+            if callback_load is not None:
+                callback_load(output_option)
 
     def set_output_gui(self, data_with_gui: AnyDataWithGui[Any], output_idx: int = 0) -> None:
         if output_idx >= len(self.outputs_with_gui):
