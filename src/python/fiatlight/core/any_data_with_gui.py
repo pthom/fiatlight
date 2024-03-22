@@ -147,8 +147,8 @@ class FooWithGui(AnyDataWithGui[Foo]):
         return changed
 
     @staticmethod
-    def present_str(value: Foo) -> None:
-        imgui.text(f"x: {value.x}")
+    def present_str(value: Foo) -> str:
+        return f"Foo: x={value.x}"
 
 
 def test_foo_with_gui() -> None:

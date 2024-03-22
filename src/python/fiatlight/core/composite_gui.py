@@ -80,7 +80,7 @@ class OptionalWithGui(AnyDataWithGui[DataType | None]):
 
 class ListWithGui(AnyDataWithGui[List[DataType]]):
     inner_gui: AnyDataWithGui[DataType]
-    MAX_PRESENTED_ELEMENTS = 15
+    MAX_PRESENTED_ELEMENTS = 10
 
     def __init__(self, inner_gui: AnyDataWithGui[DataType]) -> None:
         super().__init__()
@@ -97,10 +97,10 @@ class ListWithGui(AnyDataWithGui[List[DataType]]):
         for i, element in enumerate(value):
             value_str = self.inner_gui.datatype_value_to_str(element)
             idx_str = str(i).rjust(nb_digits, "0")
-            strs.append(f"{idx_str}: {value_str}")
             if i >= self.MAX_PRESENTED_ELEMENTS:
                 strs.append(f"...{nb_elements - self.MAX_PRESENTED_ELEMENTS} more elements")
                 break
+            strs.append(f"{idx_str}: {value_str}")
         return "\n".join(strs)
 
     def present_str(self, value: List[DataType]) -> str:
@@ -114,8 +114,8 @@ class ListWithGui(AnyDataWithGui[List[DataType]]):
         imgui.text("Edit not implemented for ListWithGui")
         return False
 
-    def present_custom(self):
-        txt = self._elements_str(self.value)
+    def present_custom(self) -> None:
+        txt = self._elements_str(self.get_actual_value())
         imgui.text(txt)
 
 
