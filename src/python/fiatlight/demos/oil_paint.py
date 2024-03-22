@@ -4,7 +4,7 @@ from fiatlight import ImagePath
 import cv2
 
 
-def image_source(image_file: ImagePath = fiatlight.demo_assets_dir() + "/images/house.jpg") -> ImageUInt8:
+def image_source(image_file: ImagePath = fiatlight.demo_assets_dir() + "/images/house.jpg") -> ImageUInt8:  # type: ignore
     image = cv2.imread(image_file)
     if image.shape[0] > 1000:
         k = 1000 / image.shape[0]

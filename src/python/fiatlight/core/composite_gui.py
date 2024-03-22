@@ -1,4 +1,4 @@
-from fiatlight.core import AnyDataWithGui, DataType, Unspecified, Error
+from fiatlight import AnyDataWithGui, DataType, Unspecified, Error
 from fiatlight import widgets
 from imgui_bundle import imgui
 from enum import Enum
@@ -80,7 +80,6 @@ class OptionalWithGui(AnyDataWithGui[DataType | None]):
 
 class ListWithGui(AnyDataWithGui[List[DataType]]):
     inner_gui: AnyDataWithGui[DataType]
-    max_presented_elements = 10
 
     def __init__(self, inner_gui: AnyDataWithGui[DataType]) -> None:
         super().__init__()
@@ -90,24 +89,28 @@ class ListWithGui(AnyDataWithGui[List[DataType]]):
         self.callbacks.default_value_provider = lambda: []
         self.callbacks.present_custom = self.present_custom
 
-    def _elements_str(self, value: List[DataType]) -> str:
+    def _elements_str(self, value: List[DataType], max_presented_elements: int) -> str:
         nb_elements = len(value)
         nb_digits = len(str(nb_elements))
         strs = []
         for i, element in enumerate(value):
             value_str = self.inner_gui.datatype_value_to_str(element)
             idx_str = str(i).rjust(nb_digits, "0")
-            if i >= self.max_presented_elements:
-                strs.append(f"...{nb_elements - self.max_presented_elements} more elements")
+            if i >= max_presented_elements:
+                strs.append(f"...{nb_elements - max_presented_elements} more elements")
                 break
             strs.append(f"{idx_str}: {value_str}")
         return "\n".join(strs)
 
     def present_str(self, value: List[DataType]) -> str:
+        from fiatlight import fiatlight_style
+
         nb_elements = len(value)
         if nb_elements == 0:
             return "Empty list"
-        r = f"List of {nb_elements} elements\n" + self._elements_str(value)
+        r = f"List of {nb_elements} elements\n" + self._elements_str(
+            value, fiatlight_style().list_maximum_elements_in_node
+        )
         return r
 
     def edit(self) -> bool:
@@ -115,7 +118,9 @@ class ListWithGui(AnyDataWithGui[List[DataType]]):
         return False
 
     def present_custom(self) -> None:
-        txt = self._elements_str(self.get_actual_value())
+        from fiatlight import fiatlight_style
+
+        txt = self._elements_str(self.get_actual_value(), fiatlight_style().list_maximum_elements_in_node)
         imgui.text(txt)
 
 

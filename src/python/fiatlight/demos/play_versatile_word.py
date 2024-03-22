@@ -1,5 +1,5 @@
 from typing import List, Tuple
-from fiatlight import AnyDataWithGui, FunctionsGraph, FiatGuiParams, fiat_run, any_function_to_function_with_gui
+from fiatlight import AnyDataWithGui, FunctionsGraph, fiat_run, any_function_to_function_with_gui
 
 
 poem = """
@@ -109,14 +109,12 @@ class TextFileWithGui(AnyDataWithGui[str]):
     def __init__(self) -> None:
         super().__init__()
         self.callbacks.edit = self.edit
-        self.callbacks.present_custom = self.present
+        self.callbacks.present_str = self.present_str
         self.callbacks.default_value_provider = lambda: poem
 
     def edit(self) -> bool:
         changed = False
         from imgui_bundle import imgui
-
-        self.present()
 
         if imgui.button("Get from file"):
             self.open_file_dialog = self.pfd.open_file("Select text file")
@@ -129,16 +127,8 @@ class TextFileWithGui(AnyDataWithGui[str]):
             self.open_file_dialog = None
         return changed
 
-    def present(self) -> None:
-        from fiatlight import widgets
-
-        widgets.text_maybe_truncated(
-            self.get_actual_value(),
-            max_width_chars=30,
-            max_lines=3,
-            show_full_as_tooltip=False,
-            show_details_button=True,
-        )
+    def present_str(self, value: str) -> str:
+        return value
 
 
 def main() -> None:
@@ -180,12 +170,7 @@ def main() -> None:
                 sort_word_with_counts,
                 display_word_with_counts,
             ]
-        ),
-        FiatGuiParams(
-            app_title="play_versatile_word",
-            window_size=(1600, 1000),
-            show_image_inspector=True,
-        ),
+        )
     )
 
 
