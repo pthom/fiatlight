@@ -4,7 +4,7 @@ from fiatlight import JsonDict
 from fiatlight.core import FunctionsGraph
 from fiatlight.node_gui.function_node_gui import FunctionNodeGui, FunctionNodeLinkGui
 from imgui_bundle import imgui, imgui_node_editor as ed, hello_imgui, ImVec2
-from typing import List
+from typing import List, Dict
 
 
 class FunctionsGraphGui:
@@ -80,12 +80,36 @@ class FunctionsGraphGui:
         imgui.pop_id()
         self._idx_frame += 1
 
+    def function_node_unique_name(self, function_node_gui: FunctionNodeGui) -> str:
+        return self.functions_graph.function_node_unique_name(function_node_gui.function_node)
+
+    def function_node_with_unique_name(self, function_name: str) -> FunctionNodeGui:
+        return next(fn for fn in self.function_nodes_gui if self.function_node_unique_name(fn) == function_name)
+
+    def all_function_nodes_with_unique_names(self) -> Dict[str, FunctionNodeGui]:
+        return {self.function_node_unique_name(fn): fn for fn in self.function_nodes_gui}
+
     def save_user_inputs_to_json(self) -> JsonDict:
-        r = self.functions_graph.save_user_inputs_to_json()
+        function_graph_dict = self.functions_graph.save_user_inputs_to_json()
+
+        function_gui_settings_dict = {}
+        for name, fn in self.all_function_nodes_with_unique_names().items():
+            function_gui_settings_dict[name] = fn.save_gui_options_to_json()
+
+        r = {
+            "functions_graph": function_graph_dict,
+            "functions_gui_settings": function_gui_settings_dict,
+        }
         return r
 
     def load_user_inputs_from_json(self, json_data: JsonDict) -> None:
-        self.functions_graph.load_user_inputs_from_json(json_data)
+        self.functions_graph.load_user_inputs_from_json(json_data["functions_graph"])
+
+        if "functions_gui_settings" in json_data:
+            function_gui_settings_dict = json_data["functions_gui_settings"]
+            for name, fn in self.all_function_nodes_with_unique_names().items():
+                if name in function_gui_settings_dict:
+                    fn.load_gui_options_from_json(function_gui_settings_dict[name])
 
 
 def sandbox() -> None:
