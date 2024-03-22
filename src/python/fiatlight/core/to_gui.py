@@ -81,15 +81,15 @@ def any_typeclass_to_gui(
             logging.warning(f"Enum {type_class_name} not found in globals and locals")
             return AnyDataWithGui.make_default()
 
-    elif type_class_name in ALL_GUI_FACTORIES:
-        if is_optional:
-            inner_gui = ALL_GUI_FACTORIES[type_class_name]()
-            return OptionalWithGui(inner_gui)
-        elif is_list:
-            inner_gui = ALL_GUI_FACTORIES[type_class_name]()
-            return ListWithGui(inner_gui)
-        else:
-            return ALL_GUI_FACTORIES[type_class_name]()
+    if is_optional:
+        inner_gui = any_typeclass_to_gui(type_class_name, globals_dict=globals_dict, locals_dict=locals_dict)
+        return OptionalWithGui(inner_gui)
+    elif is_list:
+        inner_gui = any_typeclass_to_gui(type_class_name, globals_dict=globals_dict, locals_dict=locals_dict)
+        return ListWithGui(inner_gui)
+
+    if type_class_name in ALL_GUI_FACTORIES:
+        return ALL_GUI_FACTORIES[type_class_name]()
 
     # if we reach this point, we have no GUI implementation for the type
     if type_class_name not in _COMPLAINTS_MISSING_GUI_FACTORY:
