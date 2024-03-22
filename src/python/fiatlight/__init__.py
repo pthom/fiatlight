@@ -21,6 +21,9 @@ from fiatlight.core import (
     FunctionNode,
     FunctionNodeLink,
     FunctionsGraph,
+    FilePath,
+    ImagePath,
+    TextPath,
 )
 from fiatlight import core, app_runner, node_gui, utils, widgets
 from fiatlight.app_runner import fiat_run, FiatGuiParams
@@ -68,6 +71,9 @@ __all__ = [
     "FunctionNode",
     "FunctionNodeLink",
     "FunctionsGraph",
+    "FilePath",
+    "ImagePath",
+    "TextPath",
     #
     # from app_runner
     #

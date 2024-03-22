@@ -1,6 +1,6 @@
 import fiatlight.core
-from imgui_bundle import imgui, hello_imgui, imgui_knobs, imgui_toggle
-from fiatlight.core import AnyDataWithGui
+from imgui_bundle import imgui, hello_imgui, imgui_knobs, imgui_toggle, portable_file_dialogs as pfd
+from fiatlight.core import AnyDataWithGui, FilePath
 from typing import Any, Callable, TypeAlias
 from dataclasses import dataclass
 from enum import Enum
@@ -372,6 +372,58 @@ class StrWithGui(AnyDataWithGui[str]):
             )
 
         return changed
+
+
+########################################################################################################################
+#                               File selector
+########################################################################################################################
+class FilePathWithGui(AnyDataWithGui[FilePath]):
+    filters: list[str]
+    default_path: str = ""
+
+    _open_file_dialog: pfd.open_file | None = None
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.callbacks.edit = self.edit
+        self.callbacks.default_value_provider = lambda: FilePath("")
+        self.callbacks.present_str = self.present_str
+        self.filters = []
+
+    def edit(self) -> bool:
+        changed = False
+        if imgui.button("Select file"):
+            self._open_file_dialog = pfd.open_file("Select image file", self.default_path, self.filters)
+        if self._open_file_dialog is not None and self._open_file_dialog.ready():
+            if len(self._open_file_dialog.result()) == 1:
+                selected_file = self._open_file_dialog.result()[0]
+                self.value = FilePath(selected_file)
+                changed = True
+            self._open_file_dialog = None
+        return changed
+
+    @staticmethod
+    def present_str(value: FilePath) -> str:
+        from pathlib import Path
+
+        # Returns two lines: the file name and the full path
+        # (which will be presented as a tooltip)
+        as_path = Path(value)
+        r = str(as_path.name) + "\n"
+        r += str(as_path.absolute())
+        return r
+
+
+class ImagePathWithGui(FilePathWithGui):
+    def __init__(self) -> None:
+        super().__init__()
+        self.filters = ["*.png", "*.jpg", "*.jpeg", "*.bmp", "*.tga"]
+
+
+class TextPathWithGui(FilePathWithGui):
+    def __init__(self) -> None:
+        super().__init__()
+        self.filters = ["*.txt"]
 
 
 ########################################################################################################################

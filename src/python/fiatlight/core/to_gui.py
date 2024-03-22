@@ -195,4 +195,7 @@ ALL_GUI_FACTORIES: Dict[Typename, GuiFactory[Any]] = {
     "float": primitives_gui.FloatWithGui,
     "str": primitives_gui.StrWithGui,
     "bool": primitives_gui.BoolWithGui,
+    "FilePath": primitives_gui.FilePathWithGui,
+    "TextPath": primitives_gui.TextPathWithGui,
+    "ImagePath": primitives_gui.ImagePathWithGui,
 }
