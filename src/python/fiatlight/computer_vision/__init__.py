@@ -11,6 +11,7 @@ from fiatlight.computer_vision.lut import (
     lut_channels_in_colorspace,
 )
 from fiatlight.computer_vision.lut_gui import LutParamsWithGui
+from fiatlight.core import composite_gui
 
 
 def register_gui_factories() -> None:
@@ -24,6 +25,10 @@ def register_gui_factories() -> None:
     ALL_GUI_FACTORIES["ColorConversion"] = ColorConversionWithGui
     ALL_GUI_FACTORIES["fiatlight.computer_vision.lut.LutParams"] = LutParamsWithGui
     ALL_GUI_FACTORIES["LutParams"] = LutParamsWithGui
+    ALL_GUI_FACTORIES["ColorType"] = lambda: composite_gui.EnumWithGui(ColorType)
+
+
+register_gui_factories()
 
 
 __all__ = [

@@ -25,7 +25,13 @@ from fiatlight.core import (
 from fiatlight import core, app_runner, node_gui, utils, widgets
 from fiatlight.app_runner import fiat_run, FiatGuiParams
 
-# from fiatlight.fiatlight_types import PureFunction
+
+def demo_assets_dir() -> str:
+    import os
+
+    this_dir = os.path.dirname(__file__)
+    assets_dir = os.path.abspath(f"{this_dir}/../../fiatlight_assets")
+    return assets_dir
 
 
 __all__ = [
@@ -67,4 +73,6 @@ __all__ = [
     #
     "fiat_run",
     "FiatGuiParams",
+    #
+    "demo_assets_dir",
 ]

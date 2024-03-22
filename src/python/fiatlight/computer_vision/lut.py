@@ -73,10 +73,12 @@ def lut_channels_in_colorspace(
     color_space_src: ColorType = ColorType.BGR,
     color_space_lut: ColorType = ColorType.HSV,
 ) -> ImageUInt8:
-    """Applies a LUT to an image, in a given color space.
+    """Applies a LUT to an image channels (i.e. adjust channels levels), in a given color space.
+
     The image is converted to the target color space (color_space_lut), the LUT is applied,
     and the image is converted back to the original color space (color_space_src).
     """
+
     image_color_conversion_1 = ColorConversion(color_space_src, color_space_lut)
     if image_color_conversion_1.conversion_code() is None:
         raise ValueError(f"Conversion from {color_space_src} to {color_space_lut} is not available")

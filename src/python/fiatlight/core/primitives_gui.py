@@ -76,7 +76,7 @@ class IntWithGuiParams:
     # Common
     label: str = "##int"
     v_min: int = 0
-    v_max: int = 10
+    v_max: int = 30
     width_em: float = 6
     format: str = "%d"
     # Specific to slider_int and drag_int

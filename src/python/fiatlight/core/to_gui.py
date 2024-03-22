@@ -43,7 +43,7 @@ def _extract_enum_typeclass(
         if issubclass(type_class, Enum):
             return True, type_class_name
     except (NameError, AttributeError, SyntaxError):
-        logging.warning(f"_extract_enum_typeclass: failed to evaluate {type_class_name}")
+        logging.debug(f"_extract_enum_typeclass: failed to evaluate {type_class_name}")
     return False, type_class_name
 
 
@@ -69,7 +69,9 @@ def any_typeclass_to_gui(
 
     if is_enum:
         try:
-            if globals_dict is not None and locals_dict is not None:
+            if type_class_name in ALL_GUI_FACTORIES:
+                return ALL_GUI_FACTORIES[type_class_name]()
+            elif globals_dict is not None and locals_dict is not None:
                 enum_class = eval(type_class_name, globals_dict, locals_dict)
             else:
                 # If you get an error here (NameError: name 'MyEnum' is not defined),
@@ -78,7 +80,7 @@ def any_typeclass_to_gui(
             r = EnumWithGui(enum_class)
             return r
         except NameError:
-            logging.warning(f"Enum {type_class_name} not found in globals and locals")
+            logging.warning(f"Enum {type_class_name}: enum not found in globals and locals")
             return AnyDataWithGui.make_default()
 
     if is_optional:
