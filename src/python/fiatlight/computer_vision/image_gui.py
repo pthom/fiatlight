@@ -1,3 +1,4 @@
+from fiatlight import JsonDict
 from fiatlight.core import AnyDataWithGui
 from fiatlight.computer_vision.image_types import Image
 from imgui_bundle import immvision, imgui
@@ -6,9 +7,21 @@ from imgui_bundle import portable_file_dialogs as pfd
 from typing import Optional, Sequence, TypeAlias
 import numpy as np
 import cv2
+import json
 
 
 ImagePresenterParams: TypeAlias = immvision.ImageParams
+
+
+def _save_image_params_to_json(image_params: ImagePresenterParams) -> JsonDict:
+    json_str = immvision.image_params_to_json(image_params)
+    json_dict: JsonDict = json.loads(json_str)
+    return json_dict
+
+
+def _load_image_params_from_json(data: JsonDict, image_params: ImagePresenterParams) -> None:
+    json_str = json.dumps(data)
+    immvision.fill_image_params_from_json(json_str, image_params)
 
 
 _INSPECT_ID: int = 0
@@ -22,9 +35,11 @@ def default_image_params() -> ImagePresenterParams:
 
 
 class ImagePresenter:
-    image_params: ImagePresenterParams
+    # Cached image and channels
     image: Image
     image_channels: Sequence[Image]
+    # User preferences below
+    image_params: ImagePresenterParams
     show_channels: bool = False
     channel_layout_vertically: bool = False
 
@@ -88,6 +103,21 @@ class ImagePresenter:
             self._gui_image()
         self.image_params.refresh_image = False
 
+    def save_gui_options_to_json(self) -> JsonDict:
+        image_params = _save_image_params_to_json(self.image_params)
+        r = {
+            "image_params": image_params,
+            "show_channels": self.show_channels,
+            "channel_layout_vertically": self.channel_layout_vertically,
+        }
+        return r
+
+    def load_gui_options_from_json(self, data: JsonDict) -> None:
+        image_params = data["image_params"]
+        _load_image_params_from_json(image_params, self.image_params)
+        self.show_channels = data["show_channels"]
+        self.channel_layout_vertically = data["channel_layout_vertically"]
+
 
 class ImageWithGui(AnyDataWithGui[Image]):
     image_presenter: ImagePresenter
@@ -102,6 +132,8 @@ class ImageWithGui(AnyDataWithGui[Image]):
         self.callbacks.on_change = self.on_change
         self.callbacks.default_value_provider = lambda: np.zeros((1, 1, 3), dtype=np.uint8)
         self.callbacks.present_str = self.present_str
+        self.callbacks.save_gui_options_to_json = self.save_gui_options_to_json
+        self.callbacks.load_gui_options_from_json = self.load_gui_options_from_json
 
     def edit(self) -> bool:
         changed = False
@@ -130,6 +162,12 @@ class ImageWithGui(AnyDataWithGui[Image]):
 
     def on_change(self) -> None:
         self.image_presenter.set_image(self.get_actual_value())
+
+    def save_gui_options_to_json(self) -> JsonDict:
+        return self.image_presenter.save_gui_options_to_json()
+
+    def load_gui_options_from_json(self, data: JsonDict) -> None:
+        self.image_presenter.load_gui_options_from_json(data)
 
 
 class ImageChannelsWithGui(ImageWithGui):

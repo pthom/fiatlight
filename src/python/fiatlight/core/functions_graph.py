@@ -134,14 +134,14 @@ class FunctionsGraph:
             fn_data[self.function_node_unique_name(function_node)] = function_node.save_user_inputs_to_json()
         return {"functions_nodes": fn_data}
 
-    def fill_user_inputs_from_json(self, json_data: JsonDict) -> None:
+    def load_user_inputs_from_json(self, json_data: JsonDict) -> None:
         """Restores the user inputs from a json dict"""
         if "functions_nodes" not in json_data:
             return
         fn_data = json_data["functions_nodes"]
         for unique_name, fn_json in fn_data.items():
             fn = self.function_node_with_unique_name(unique_name)
-            fn.fill_user_inputs_from_json(fn_json)
+            fn.load_user_inputs_from_json(fn_json)
 
     def invoke_top_leaf_functions(self) -> None:
         """Invoke all the leaves of the graph"""

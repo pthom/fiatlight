@@ -1,4 +1,3 @@
-from fiatlight import core, app_runner, node_gui, utils, widgets
 from fiatlight.core import (
     Function,
     VoidFunction,
@@ -23,7 +22,7 @@ from fiatlight.core import (
     FunctionNodeLink,
     FunctionsGraph,
 )
-
+from fiatlight import core, app_runner, node_gui, utils, widgets
 from fiatlight.app_runner import fiat_run, FiatGuiParams
 
 # from fiatlight.fiatlight_types import PureFunction

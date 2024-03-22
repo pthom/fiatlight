@@ -97,12 +97,17 @@ class FunctionNode:
             link.dst_function_node.invoke_function()
 
     def save_user_inputs_to_json(self) -> JsonDict:
-        r = {}
-        for param in self.user_editable_params():
-            r[param.name] = param.data_with_gui.to_json()
+        input_params = {}
+        for input_param in self.user_editable_params():
+            input_params[input_param.name] = input_param.save_to_json()
+
+        gui_options = self.function_with_gui.save_gui_options_to_json()
+        r = {"inputs": input_params, "gui_options": gui_options}
         return r
 
-    def fill_user_inputs_from_json(self, json_data: JsonDict) -> None:
-        for param in self.user_editable_params():
-            if param.name in json_data:
-                param.data_with_gui.fill_from_json(json_data[param.name])
+    def load_user_inputs_from_json(self, json_data: JsonDict) -> None:
+        input_params = json_data["inputs"]
+        for input_param in self.user_editable_params():
+            input_param.load_from_json(input_params[input_param.name])
+
+        self.function_with_gui.load_gui_options_from_json(json_data["gui_options"])

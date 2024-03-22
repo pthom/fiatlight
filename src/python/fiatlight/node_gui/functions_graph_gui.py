@@ -1,4 +1,6 @@
 from __future__ import annotations
+
+from fiatlight import JsonDict
 from fiatlight.core import FunctionsGraph
 from fiatlight.node_gui.function_node_gui import FunctionNodeGui, FunctionNodeLinkGui
 from imgui_bundle import imgui, imgui_node_editor as ed, hello_imgui, ImVec2
@@ -77,6 +79,13 @@ class FunctionsGraphGui:
         ed.end()
         imgui.pop_id()
         self._idx_frame += 1
+
+    def save_user_inputs_to_json(self) -> JsonDict:
+        r = self.functions_graph.save_user_inputs_to_json()
+        return r
+
+    def load_user_inputs_from_json(self, json_data: JsonDict) -> None:
+        self.functions_graph.load_user_inputs_from_json(json_data)
 
 
 def sandbox() -> None:

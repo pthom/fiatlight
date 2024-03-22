@@ -39,7 +39,7 @@ def test_serialization() -> None:
 
     add_gui.inputs_with_gui[0].data_with_gui.value = 1
 
-    json_data = add_gui.to_json()
+    json_data = add_gui.save_all_inputs_to_json()
     assert json_data == {
         "inputs": [
             {"data": {"type": "Primitive", "value": 1}, "name": "a"},
@@ -55,7 +55,7 @@ def test_serialization() -> None:
         ],
         "invoke_automatically": False,
     }
-    add_gui.fill_from_json(json_data)
+    add_gui.load_all_inputs_from_json(json_data)
     assert add_gui.inputs_with_gui[0].data_with_gui.value == 2
     assert isinstance(add_gui.inputs_with_gui[1].data_with_gui.value, Unspecified)
     assert add_gui.outputs_with_gui[0].data_with_gui.value is UnspecifiedValue

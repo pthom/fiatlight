@@ -163,7 +163,7 @@ class FiatGui:
         return hello_imgui.ini_settings_location(self.params.runner_params)[:-4] + ".fiatlight.json"
 
     def _save_state(self) -> None:
-        json_data = self._functions_graph_gui.functions_graph.save_user_inputs_to_json()
+        json_data = self._functions_graph_gui.save_user_inputs_to_json()
         try:
             with open(self._node_state_filename(), "w") as f:
                 json_str = json.dumps(json_data, indent=4)
@@ -180,7 +180,7 @@ class FiatGui:
             return
 
         try:
-            self._functions_graph_gui.functions_graph.fill_user_inputs_from_json(json_data)
+            self._functions_graph_gui.load_user_inputs_from_json(json_data)
         except Exception as e:
             logging.error(f"FiatGui: Error loading state file {self._node_state_filename()}: {e}")
 
