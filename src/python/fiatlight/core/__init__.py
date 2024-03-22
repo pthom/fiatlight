@@ -19,7 +19,7 @@ from fiatlight.core.fiat_types import (
 from fiatlight.core.any_data_gui_callbacks import AnyDataGuiCallbacks, PRESENT_SHORT_STR_MAX_LENGTH
 from fiatlight.core.any_data_with_gui import AnyDataWithGui
 from fiatlight.core.function_with_gui import ParamKind, ParamWithGui, OutputWithGui, FunctionWithGui
-from fiatlight.core.to_gui import any_function_to_function_with_gui, ALL_GUI_FACTORIES
+from fiatlight.core.to_gui import any_function_to_function_with_gui, gui_factories
 from fiatlight.core.function_node import FunctionNode, FunctionNodeLink
 from fiatlight.core.functions_graph import FunctionsGraph
 from fiatlight.core.function_signature import get_function_signature
@@ -73,7 +73,7 @@ __all__ = [
     "FunctionWithGui",
     # from to_gui
     "any_function_to_function_with_gui",
-    "ALL_GUI_FACTORIES",
+    "gui_factories",
     # from function_node
     "FunctionNode",
     "FunctionNodeLink",

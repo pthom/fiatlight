@@ -1,10 +1,14 @@
 import fiatlight
 from fiatlight.computer_vision import ImageUInt8, lut_channels_in_colorspace
+from fiatlight import ImagePath
 import cv2
 
 
-def image_source(image_file: fiatlight.ImagePath = fiatlight.demo_assets_dir() + "/images/house.jpg") -> ImageUInt8:
+def image_source(image_file: ImagePath = fiatlight.demo_assets_dir() + "/images/house.jpg") -> ImageUInt8:
     image = cv2.imread(image_file)
+    if image.shape[0] > 1000:
+        k = 1000 / image.shape[0]
+        image = cv2.resize(image, (0, 0), fx=k, fy=k)
     return image  # type: ignore
 
 

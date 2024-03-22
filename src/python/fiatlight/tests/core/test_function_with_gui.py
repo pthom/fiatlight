@@ -5,7 +5,7 @@ from typing import List
 
 def test_create_function_with_gui() -> None:
     from fiatlight.core.to_gui import any_function_to_function_with_gui
-    from fiatlight.core.to_gui import ALL_GUI_FACTORIES
+    from fiatlight.core.to_gui import gui_factories
 
     class Foo:
         a: int
@@ -18,7 +18,7 @@ def test_create_function_with_gui() -> None:
             super().__init__()
             self.callbacks.edit = lambda: False
 
-    ALL_GUI_FACTORIES["Foo"] = FooWithGui
+    gui_factories().add_factory("Foo", FooWithGui)
 
     def add(foo: Foo) -> int:
         return foo.a

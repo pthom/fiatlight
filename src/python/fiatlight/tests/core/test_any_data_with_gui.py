@@ -39,9 +39,9 @@ def test_custom_data_with_gui_serialization() -> None:
     from fiatlight.core.any_data_with_gui import Foo, FooWithGui
 
     # Register the Foo type with its GUI implementation (do this once at the beginning of your program)
-    from fiatlight.core import ALL_GUI_FACTORIES
+    from fiatlight.core import gui_factories
 
-    ALL_GUI_FACTORIES["Foo"] = FooWithGui
+    gui_factories().add_factory("Foo", FooWithGui)
 
     # Use the Foo type with its GUI implementation
     from fiatlight.core.to_gui import any_value_to_data_with_gui

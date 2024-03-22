@@ -15,17 +15,15 @@ from fiatlight.core import composite_gui
 
 
 def register_gui_factories() -> None:
-    from fiatlight.core import ALL_GUI_FACTORIES
+    from fiatlight.core import gui_factories
 
-    ALL_GUI_FACTORIES["ImageUInt8"] = ImageWithGui
-    ALL_GUI_FACTORIES["ImageUInt8Channels"] = ImageChannelsWithGui
-    ALL_GUI_FACTORIES["numpy.ndarray[typing.Any, numpy.dtype[numpy.uint8]]"] = ImageWithGui
+    gui_factories().add_factory("ImageUInt8", ImageWithGui)
+    gui_factories().add_factory("ImageUInt8Channels", ImageChannelsWithGui)
+    gui_factories().add_factory("numpy.ndarray[typing.Any, numpy.dtype[numpy.uint8]]", ImageWithGui)
 
-    ALL_GUI_FACTORIES["fiatlight.computer_vision.ColorConversion"] = ColorConversionWithGui
-    ALL_GUI_FACTORIES["ColorConversion"] = ColorConversionWithGui
-    ALL_GUI_FACTORIES["fiatlight.computer_vision.lut.LutParams"] = LutParamsWithGui
-    ALL_GUI_FACTORIES["LutParams"] = LutParamsWithGui
-    ALL_GUI_FACTORIES["ColorType"] = lambda: composite_gui.EnumWithGui(ColorType)
+    gui_factories().add_factory("ColorConversion", ColorConversionWithGui)
+    gui_factories().add_factory("ColorType", lambda: composite_gui.EnumWithGui(ColorType))
+    gui_factories().add_factory("fiatlight.computer_vision.lut.LutParams", LutParamsWithGui)
 
 
 register_gui_factories()

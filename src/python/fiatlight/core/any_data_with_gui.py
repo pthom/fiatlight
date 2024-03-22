@@ -153,9 +153,9 @@ class FooWithGui(AnyDataWithGui[Foo]):
 
 def test_foo_with_gui() -> None:
     # Register the Foo type with its GUI implementation (do this once at the beginning of your program)
-    from fiatlight.core.to_gui import ALL_GUI_FACTORIES, any_value_to_data_with_gui
+    from fiatlight.core.to_gui import any_value_to_data_with_gui, gui_factories
 
-    ALL_GUI_FACTORIES["Foo"] = FooWithGui
+    gui_factories().add_factory("Foo", FooWithGui)
 
     foo = Foo(1)
     foo_gui = any_value_to_data_with_gui(foo)

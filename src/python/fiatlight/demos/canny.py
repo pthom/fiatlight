@@ -20,8 +20,10 @@ def canny(image: ImageUInt8, t_lower: float = 10.0, t_upper: float = 100.0, aper
     return cv2.Canny(image, t_lower, t_upper, apertureSize=aperture_size)  # type: ignore
 
 
-def main() -> None:
-    # Customize min / max values for the input parameters in the GUI of the canny node
+def canny_with_gui() -> fiatlight.FunctionWithGui:
+    """Convert canny to a function with GUI,
+    then customize min / max values for the input parameters in the GUI of the canny node
+    """
     canny_gui = fiatlight.any_function_to_function_with_gui(canny)
 
     # t_lower between 0 and 255
@@ -44,7 +46,11 @@ def main() -> None:
     aperture_size_input.params.v_max = 7
     aperture_size_input.params.input_step = 2
 
-    functions = [make_image, blur_image, canny_gui]
+    return canny_gui
+
+
+def main() -> None:
+    functions = [make_image, blur_image, canny_with_gui()]
     functions_graph = fiatlight.FunctionsGraph.from_function_composition(functions, globals(), locals())  # type: ignore
 
     fiatlight.fiat_run(functions_graph, fiatlight.FiatGuiParams(show_image_inspector=True))
