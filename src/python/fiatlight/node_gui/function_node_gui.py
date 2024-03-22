@@ -5,7 +5,7 @@ from fiatlight.core import (
     UnspecifiedValue,
     BoolFunction,
     AnyDataWithGui,
-    ColorType,
+    GuiColorType,
     fiatlight_style,
 )
 from fiatlight.core import Error, Unspecified
@@ -21,7 +21,7 @@ from dataclasses import dataclass
 class InputParamHeaderLineElements:
     """Data to be presented in a header line"""
 
-    input_pin_color: ColorType = ColorType.InputPin
+    input_pin_color: GuiColorType = GuiColorType.InputPin
 
     status_icon: str | None = None
     status_icon_tooltips: List[str] | None = None
@@ -38,7 +38,7 @@ class InputParamHeaderLineElements:
 class OutputHeaderLineElements:
     """Data to be presented in a header line"""
 
-    output_pin_color: ColorType = ColorType.OutputPin
+    output_pin_color: GuiColorType = GuiColorType.OutputPin
 
     status_icon: str | None = None
     status_icon_tooltips: List[str] | None = None
@@ -245,13 +245,13 @@ class FunctionNodeGui:
         value = output_with_gui.data_with_gui.value
         if isinstance(value, Unspecified):
             r.value_as_str = "Unspecified!"
-            r.output_pin_color = ColorType.OutputPinUnspecified
+            r.output_pin_color = GuiColorType.OutputPinUnspecified
         elif isinstance(value, Error):
             r.value_as_str = "Error!"
-            r.output_pin_color = ColorType.OutputPinWithError
+            r.output_pin_color = GuiColorType.OutputPinWithError
         else:
             r.value_as_str = output_with_gui.data_with_gui.datatype_value_to_str(value)
-            r.output_pin_color = ColorType.OutputPin
+            r.output_pin_color = GuiColorType.OutputPin
 
         # fill r.status_icon and r.status_icon_tooltips
         has_output_links = len(self.function_node.output_links_for_idx(output_idx)) > 0
@@ -290,13 +290,13 @@ class FunctionNodeGui:
 
         # fill value_as_str and input_pin_color (may set status_icon and status_icon_tooltips on error/unspecified)
         if isinstance(input_param.data_with_gui.value, Error):
-            r.input_pin_color = ColorType.InputPinWithError
+            r.input_pin_color = GuiColorType.InputPinWithError
             r.status_icon = icons_fontawesome_6.ICON_FA_BOMB
             r.status_icon_tooltips.append("Error!")
             r.value_as_str = "Error!"
         elif isinstance(input_param.data_with_gui.value, Unspecified):
             if isinstance(input_param.default_value, Unspecified):
-                r.input_pin_color = ColorType.InputPinUnspecified
+                r.input_pin_color = GuiColorType.InputPinUnspecified
                 r.status_icon = icons_fontawesome_6.ICON_FA_CIRCLE_EXCLAMATION
                 r.status_icon_tooltips.append("Unspecified!")
                 r.value_as_str = "Unspecified!"
@@ -460,7 +460,7 @@ class FunctionNodeGui:
     def _draw_function_outputs(self) -> None:
         is_dirty = self.function_node.function_with_gui.dirty
         if is_dirty:
-            imgui.push_style_color(imgui.Col_.text.value, fiatlight_style().colors[ColorType.TextDirtyOutput])
+            imgui.push_style_color(imgui.Col_.text.value, fiatlight_style().colors[GuiColorType.TextDirtyOutput])
         for idx_output, output_param in enumerate(self.function_node.function_with_gui.outputs_with_gui):
             with imgui_ctx.push_obj_id(output_param):
                 with imgui_ctx.begin_group():
