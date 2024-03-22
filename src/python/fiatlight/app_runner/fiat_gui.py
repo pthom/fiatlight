@@ -9,7 +9,24 @@ from imgui_bundle import hello_imgui, ImVec2, immvision
 
 import json
 import logging
+import pathlib
 from typing import List, Tuple
+
+
+def _main_python_module_name() -> str:
+    import inspect
+
+    frame = inspect.currentframe()
+    while frame:
+        module = inspect.getmodule(frame)
+        module_name = module.__name__ if module is not None else None
+        if module_name != "__main__":
+            frame = frame.f_back
+        else:
+            frame_full_file = frame.f_code.co_filename
+            main_python_module_name = pathlib.Path(frame_full_file).stem
+            return main_python_module_name
+    return "fiatlight"
 
 
 class FiatGuiParams:
@@ -68,7 +85,11 @@ class FiatGui:
 
     def __init__(self, functions_graph: FunctionsGraph, params: FiatGuiParams | None = None) -> None:
         if params is None:
+            # params.runner_params.app_window_params.window_title
             params = FiatGuiParams()
+            # Set window_title from the name of the calling module
+            params.runner_params.app_window_params.window_title = _main_python_module_name()
+
         self.params = params
         self._functions_graph_gui = FunctionsGraphGui(functions_graph)
 
