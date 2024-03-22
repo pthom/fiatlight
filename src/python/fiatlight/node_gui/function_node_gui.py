@@ -428,20 +428,39 @@ class FunctionNodeGui:
                 widgets.osd_widgets.set_tooltip(fn_doc)
 
     def _draw_invoke_options(self) -> None:
-        with imgui_ctx.begin_horizontal("invoke"):
-            invoke_changed, self.function_node.function_with_gui.invoke_automatically = imgui.checkbox(
-                "Auto refresh", self.function_node.function_with_gui.invoke_automatically
-            )
-            if invoke_changed and self.function_node.function_with_gui.invoke_automatically:
-                self.function_node.invoke_function()
+        fn_with_gui = self.function_node.function_with_gui
+        btn_size = hello_imgui.em_to_vec2(4, 0)
 
-            if self.function_node.function_with_gui.dirty:
-                if imgui.button("Refresh"):
+        with fontawesome_6_ctx():
+            if fn_with_gui.invoke_automatically_can_set:
+                invoke_changed, fn_with_gui.invoke_automatically = imgui.checkbox(
+                    "##Auto refresh", self.function_node.function_with_gui.invoke_automatically
+                )
+                if imgui.is_item_hovered():
+                    widgets.osd_widgets.set_tooltip("Tick to invoke automatically.")
+                if invoke_changed and fn_with_gui.invoke_automatically:
                     self.function_node.invoke_function()
-                    d = self.function_node.function_with_gui.dirty
-                    print(d)
+
+            if fn_with_gui.dirty:
+                if imgui.button(icons_fontawesome_6.ICON_FA_ROTATE, btn_size):
+                    self.function_node.invoke_function()
+                if imgui.is_item_hovered():
+                    widgets.osd_widgets.set_tooltip("Refresh needed! Click to refresh.")
+
+            if not fn_with_gui.invoke_automatically:
+                if not fn_with_gui.dirty:
+                    imgui.text(icons_fontawesome_6.ICON_FA_CHECK)
+                    if imgui.is_item_hovered():
+                        widgets.osd_widgets.set_tooltip("Up to date!")
+                else:
+                    imgui.text(icons_fontawesome_6.ICON_FA_TRIANGLE_EXCLAMATION)
+                    if imgui.is_item_hovered():
+                        widgets.osd_widgets.set_tooltip("Refresh needed!")
 
     def _draw_function_outputs(self) -> None:
+        is_dirty = self.function_node.function_with_gui.dirty
+        if is_dirty:
+            imgui.push_style_color(imgui.Col_.text.value, fiatlight_style().colors[ColorType.TextDirtyOutput])
         for idx_output, output_param in enumerate(self.function_node.function_with_gui.outputs_with_gui):
             with imgui_ctx.push_obj_id(output_param):
                 with imgui_ctx.begin_group():
@@ -450,6 +469,8 @@ class FunctionNodeGui:
                     can_present = output_param.data_with_gui.can_present_value()
                     if can_present and self.show_output_details[idx_output]:
                         self._call_gui_present(output_param.data_with_gui)
+        if is_dirty:
+            imgui.pop_style_color()
 
     def _draw_function_inputs(self) -> bool:
         changed = False
@@ -491,8 +512,12 @@ class FunctionNodeGui:
                 output_separator_str = (
                     "Outputs" if len(self.function_node.function_with_gui.outputs_with_gui) > 1 else "Output"
                 )
+
                 widgets.node_utils.node_separator(self.node_id, text=output_separator_str)
-                self._draw_invoke_options()
+                with imgui_ctx.begin_horizontal("invoke_options"):
+                    imgui.spring()
+                    self._draw_invoke_options()
+
                 # Exceptions, if any
                 self._draw_exception_message()
                 self._draw_function_outputs()

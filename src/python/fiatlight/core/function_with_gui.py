@@ -68,26 +68,15 @@ class FunctionWithGui:
 
     # if this is True, the function will be called automatically when any of the inputs change
     invoke_automatically: bool = True
+    # if this is True, the user can set the invoke_automatically flag
+    invoke_automatically_can_set: bool = False
+
     # if True, this indicates that the inputs have changed since the last call, and the function needs to be called
     dirty: bool = True
 
     def __init__(self) -> None:
         self.inputs_with_gui = []
         self.outputs_with_gui = []
-
-    def register_as_input_changes_callback(self) -> None:
-        """Register a callback that will be called when any of the inputs change.
-        This method should be called once the function is constructed and all inputs are set.
-        """
-        from fiatlight.utils import functional_utils
-
-        def input_changed_callback() -> None:
-            self.dirty = True
-
-        for input_with_gui in self.inputs_with_gui:
-            input_with_gui.data_with_gui.callbacks.on_change = functional_utils.sequence_void_functions(
-                input_with_gui.data_with_gui.callbacks.on_change, input_changed_callback
-            )
 
     def all_inputs_ids(self) -> List[str]:
         return [param.name for param in self.inputs_with_gui]
@@ -186,7 +175,11 @@ class FunctionWithGui:
             if output_with_gui.data_with_gui.callbacks.save_gui_options_to_json is not None:
                 output_options[i] = output_with_gui.data_with_gui.callbacks.save_gui_options_to_json()
 
-        r = {"inputs": input_options, "outputs": output_options}
+        r = {
+            "inputs": input_options,
+            "outputs": output_options,
+            "invoke_automatically": self.invoke_automatically,
+        }
         return r
 
     def load_gui_options_from_json(self, json_data: JsonDict) -> None:
@@ -205,6 +198,8 @@ class FunctionWithGui:
             callback_load = output_with_gui.data_with_gui.callbacks.load_gui_options_from_json
             if callback_load is not None:
                 callback_load(output_option)
+
+        self.invoke_automatically = json_data.get("invoke_automatically", True)
 
     def set_output_gui(self, data_with_gui: AnyDataWithGui[Any], output_idx: int = 0) -> None:
         if output_idx >= len(self.outputs_with_gui):

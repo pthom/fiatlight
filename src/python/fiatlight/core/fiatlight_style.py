@@ -11,6 +11,8 @@ class ColorType(Enum):
     OutputPin = 3
     OutputPinUnspecified = 4
     OutputPinWithError = 5
+    #
+    TextDirtyOutput = 6
 
 
 class FiatlightStyle:
@@ -26,6 +28,7 @@ class FiatlightStyle:
             ColorType.OutputPin: ImVec4(0.4, 0.4, 1.0, 1.0),
             ColorType.OutputPinUnspecified: ImVec4(0.8, 0.4, 1.0, 1.0),
             ColorType.OutputPinWithError: ImVec4(1.0, 0.4, 0.4, 1.0),
+            ColorType.TextDirtyOutput: ImVec4(0.8, 0.8, 0.8, 0.4),
         }
 
 

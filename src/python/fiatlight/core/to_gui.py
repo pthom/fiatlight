@@ -179,8 +179,6 @@ def any_function_to_function_with_gui(
             data_with_gui = any_typeclass_to_gui(str(sig.return_annotation))
             function_with_gui.outputs_with_gui.append(OutputWithGui(data_with_gui))
 
-    function_with_gui.register_as_input_changes_callback()
-
     return function_with_gui
 
 
