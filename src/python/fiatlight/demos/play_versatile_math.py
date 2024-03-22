@@ -1,4 +1,4 @@
-from fiatlight import fiat_run, FunctionsGraph
+from fiatlight import FunctionsGraph, fiat_run
 import math
 
 
@@ -21,9 +21,9 @@ def main() -> None:
         """An example of a function that returns multiple values."""
         return a + b, a * b
 
-    # functions_graph = FunctionsGraph.from_function_composition([float_source, sin, add_mul, log, sin])
-    # functions_graph.add_function_composition([float_source, sin, log, sin, add_mul])
-    functions_graph = FunctionsGraph.from_function_composition([float_source])
+    functions_graph = FunctionsGraph.from_function_composition([float_source, sin, add_mul, log, sin])
+    functions_graph.add_function_composition([float_source, sin, log, sin, add_mul])
+
     fiat_run(functions_graph)
 
 
