@@ -1,7 +1,6 @@
-from fiatlight.core import UnspecifiedValue, DataType
+from fiatlight.core import UnspecifiedValue, DataType, primitives_gui
 from fiatlight.core.any_data_with_gui import AnyDataWithGui
 from fiatlight.core.function_with_gui import FunctionWithGui, ParamKind, ParamWithGui, OutputWithGui
-from fiatlight.core import primitives_gui
 from fiatlight.core.composite_gui import OptionalWithGui, EnumWithGui, ListWithGui
 from fiatlight.core.function_signature import get_function_signature
 from fiatlight.core.fiat_types import GlobalsDict, LocalsDict
@@ -69,8 +68,8 @@ def any_typeclass_to_gui(
 
     if is_enum:
         try:
-            if type_class_name in ALL_GUI_FACTORIES:
-                return ALL_GUI_FACTORIES[type_class_name]()
+            if gui_factories().can_handle_typename(type_class_name):
+                return gui_factories().factor(type_class_name)
             elif globals_dict is not None and locals_dict is not None:
                 enum_class = eval(type_class_name, globals_dict, locals_dict)
             else:
@@ -90,8 +89,8 @@ def any_typeclass_to_gui(
         inner_gui = any_typeclass_to_gui(type_class_name, globals_dict=globals_dict, locals_dict=locals_dict)
         return ListWithGui(inner_gui)
 
-    if type_class_name in ALL_GUI_FACTORIES:
-        return ALL_GUI_FACTORIES[type_class_name]()
+    if gui_factories().can_handle_typename(type_class_name):
+        return gui_factories().factor(type_class_name)
 
     # if we reach this point, we have no GUI implementation for the type
     if type_class_name not in _COMPLAINTS_MISSING_GUI_FACTORY:
@@ -190,12 +189,38 @@ def any_function_to_function_with_gui(
 # ----------------------------------------------------------------------------------------------------------------------
 Typename: TypeAlias = str
 
-ALL_GUI_FACTORIES: Dict[Typename, GuiFactory[Any]] = {
-    "int": primitives_gui.IntWithGui,
-    "float": primitives_gui.FloatWithGui,
-    "str": primitives_gui.StrWithGui,
-    "bool": primitives_gui.BoolWithGui,
-    "FilePath": primitives_gui.FilePathWithGui,
-    "TextPath": primitives_gui.TextPathWithGui,
-    "ImagePath": primitives_gui.ImagePathWithGui,
-}
+
+class GuiFactories:
+    _factories: Dict[Typename, GuiFactory[Any]]
+
+    def __init__(self) -> None:
+        self._factories = {
+            "int": primitives_gui.IntWithGui,
+            "float": primitives_gui.FloatWithGui,
+            "str": primitives_gui.StrWithGui,
+            "bool": primitives_gui.BoolWithGui,
+            "FilePath": primitives_gui.FilePathWithGui,
+            "TextPath": primitives_gui.TextPathWithGui,
+            "fiatlight.core.fiat_types.ImagePath": primitives_gui.ImagePathWithGui,
+        }
+
+    def can_handle_typename(self, typename: Typename) -> bool:
+        return typename in self._factories
+
+    def get_factory(self, typename: Typename) -> GuiFactory[Any]:
+        if typename not in self._factories:
+            raise ValueError(f"Unknown typename {typename}")
+        return self._factories[typename]
+
+    def add_factory(self, typename: Typename, factory: GuiFactory[Any]) -> None:
+        self._factories[typename] = factory
+
+    def factor(self, typename: Typename) -> AnyDataWithGui[Any]:
+        return self.get_factory(typename)()
+
+
+_GUI_FACTORIES = GuiFactories()
+
+
+def gui_factories() -> GuiFactories:
+    return _GUI_FACTORIES

@@ -428,18 +428,18 @@ class FunctionNodeGui:
                 widgets.osd_widgets.set_tooltip(fn_doc)
 
     def _draw_invoke_options(self) -> None:
-        invoke_changed, self.function_node.function_with_gui.invoke_automatically = imgui.checkbox(
-            "Auto refresh", self.function_node.function_with_gui.invoke_automatically
-        )
-        if invoke_changed and self.function_node.function_with_gui.invoke_automatically:
-            self.function_node.invoke_function()
-
-        if self.function_node.function_with_gui.dirty:
-            imgui.begin_horizontal("refresh")
-            if imgui.button("Refresh"):
+        with imgui_ctx.begin_horizontal("invoke"):
+            invoke_changed, self.function_node.function_with_gui.invoke_automatically = imgui.checkbox(
+                "Auto refresh", self.function_node.function_with_gui.invoke_automatically
+            )
+            if invoke_changed and self.function_node.function_with_gui.invoke_automatically:
                 self.function_node.invoke_function()
-            imgui.text("(refresh needed)")
-            imgui.end_horizontal()
+
+            if self.function_node.function_with_gui.dirty:
+                if imgui.button("Refresh"):
+                    self.function_node.invoke_function()
+                    d = self.function_node.function_with_gui.dirty
+                    print(d)
 
     def _draw_function_outputs(self) -> None:
         for idx_output, output_param in enumerate(self.function_node.function_with_gui.outputs_with_gui):
