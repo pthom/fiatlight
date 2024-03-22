@@ -1,4 +1,4 @@
-from typing import Callable, Any, TypeAlias, TypeVar
+from typing import Callable, Any, TypeAlias, TypeVar, NewType
 
 Function: TypeAlias = Callable[..., Any]
 VoidFunction = Callable[[], None]
@@ -44,3 +44,8 @@ JsonPrimitiveOrDict = JsonPrimitive | JsonDict
 
 GlobalsDict: TypeAlias = dict[str, Any]
 LocalsDict: TypeAlias = dict[str, Any]
+
+
+FilePath = NewType("FilePath", str)
+ImagePath = NewType("ImagePath", str)
+TextPath = NewType("TextPath", str)

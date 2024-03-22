@@ -80,7 +80,7 @@ class OptionalWithGui(AnyDataWithGui[DataType | None]):
 
 class ListWithGui(AnyDataWithGui[List[DataType]]):
     inner_gui: AnyDataWithGui[DataType]
-    MAX_PRESENTED_ELEMENTS = 10
+    max_presented_elements = 10
 
     def __init__(self, inner_gui: AnyDataWithGui[DataType]) -> None:
         super().__init__()
@@ -97,8 +97,8 @@ class ListWithGui(AnyDataWithGui[List[DataType]]):
         for i, element in enumerate(value):
             value_str = self.inner_gui.datatype_value_to_str(element)
             idx_str = str(i).rjust(nb_digits, "0")
-            if i >= self.MAX_PRESENTED_ELEMENTS:
-                strs.append(f"...{nb_elements - self.MAX_PRESENTED_ELEMENTS} more elements")
+            if i >= self.max_presented_elements:
+                strs.append(f"...{nb_elements - self.max_presented_elements} more elements")
                 break
             strs.append(f"{idx_str}: {value_str}")
         return "\n".join(strs)
