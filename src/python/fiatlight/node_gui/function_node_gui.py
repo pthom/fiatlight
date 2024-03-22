@@ -2,7 +2,7 @@ from __future__ import annotations
 from fiatlight.core import FunctionNode, FunctionNodeLink, UnspecifiedValue, BoolFunction, AnyDataWithGui
 from fiatlight.core import Error, Unspecified
 from fiatlight.core.function_with_gui import ParamWithGui
-from fiatlight import widgets
+from fiatlight import widgets, JsonDict
 from imgui_bundle import imgui, imgui_node_editor as ed, ImVec2, imgui_ctx, hello_imgui, imgui_node_editor_ctx as ed_ctx
 from fiatlight.widgets.fontawesome6_ctx import icons_fontawesome_6, fontawesome_6_ctx
 from typing import Dict, List, Any
@@ -94,6 +94,7 @@ class FunctionNodeGui:
 
     _MIN_NODE_WIDTH_EM = 9
 
+    # user settings
     show_input_details: Dict[str, bool] = {}
     show_output_details: Dict[int, bool] = {}
 
@@ -485,6 +486,24 @@ class FunctionNodeGui:
                 self._draw_exception_message()
                 self._draw_function_outputs()
         self.node_size = ed.get_node_size(self.node_id)
+
+    def save_gui_options_to_json(self) -> JsonDict:
+        r = {
+            "show_input_details": self.show_input_details,
+            "show_output_details": self.show_output_details,
+        }
+        return r
+
+    def load_gui_options_from_json(self, json_data: JsonDict) -> None:
+        show_input_details_as_dict_str_bool = json_data.get("show_input_details")
+        if show_input_details_as_dict_str_bool is not None:
+            for k, v in show_input_details_as_dict_str_bool.items():
+                self.show_input_details[k] = v
+
+        show_output_details_as_dict_str_bool = json_data.get("show_output_details")
+        if show_output_details_as_dict_str_bool is not None:
+            for k, v in show_output_details_as_dict_str_bool.items():
+                self.show_output_details[int(k)] = v
 
 
 def sandbox() -> None:

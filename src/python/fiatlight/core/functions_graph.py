@@ -3,7 +3,7 @@ from fiatlight.core.function_node import FunctionNode, FunctionNodeLink
 from fiatlight.core import Function, JsonDict, GlobalsDict, LocalsDict
 from fiatlight.core.to_gui import any_function_to_function_with_gui
 
-from typing import Sequence
+from typing import Sequence, Dict
 
 
 class FunctionsGraph:
@@ -48,6 +48,9 @@ class FunctionsGraph:
                 return fn
         raise ValueError(f"No function with the name {function_name}")
 
+    def all_function_nodes_with_unique_names(self) -> Dict[str, FunctionNode]:
+        return {self.function_node_unique_name(fn): fn for fn in self.functions_nodes}
+
     def _add_function_with_gui(self, f_gui: FunctionWithGui) -> None:
         # Make sure all names are unique (is this useful?)
         f_node = FunctionNode(f_gui, f_gui.name)
@@ -68,7 +71,9 @@ class FunctionsGraph:
         globals_dict: GlobalsDict | None = None,
         locals_dict: LocalsDict | None = None,
     ) -> None:
-        composition = FunctionsGraph.from_function_composition(functions)
+        composition = FunctionsGraph.from_function_composition(
+            functions, globals_dict=globals_dict, locals_dict=locals_dict
+        )
         self.merge_graph(composition)
 
     def merge_graph(self, other: "FunctionsGraph") -> None:
