@@ -1,4 +1,4 @@
-from imgui_bundle import imgui, hello_imgui, imgui_knobs, imgui_toggle, portable_file_dialogs as pfd
+from imgui_bundle import imgui, hello_imgui, imgui_knobs, imgui_toggle, portable_file_dialogs as pfd, ImVec2
 from fiatlight.fiat_core import AnyDataWithGui
 from fiatlight.fiat_types import FilePath
 from typing import Any, Callable, TypeAlias
@@ -359,7 +359,8 @@ class StrWithGui(AnyDataWithGui[str]):
 
             def popup_edit() -> bool:
                 assert isinstance(self.value, str)
-                size = hello_imgui.em_to_vec2(self.params.width_em, self.params.height_em)
+                size = ImVec2(0, 0)
+                size.x = imgui.get_window_width()
                 changed_in_popup, self.value = imgui.input_text_multiline(
                     self.params.label,
                     self.value,
@@ -370,8 +371,7 @@ class StrWithGui(AnyDataWithGui[str]):
                 )
                 return changed_in_popup
 
-            if imgui.button("Edit text"):
-                osd_widgets.add_bool_popup("Edit text", popup_edit)
+            osd_widgets.add_bool_popup_button("Edit text", popup_edit)
             if osd_widgets.get_popup_bool_return("Edit text"):
                 changed = True
 
