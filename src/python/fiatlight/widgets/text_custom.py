@@ -16,16 +16,12 @@ def _truncate_text(
     max_width_pixels: float | None = None,
     max_width_chars: int | None = None,
     max_lines: int | None = None,
-    remove_after_double_hash: bool = True,
 ) -> Tuple[bool, str]:
     assert max_width_pixels is None or max_width_chars is None
 
     if max_width_pixels is not None:
         font_approx_width = imgui.get_font_size() * 0.8
         max_width_chars = int(max_width_pixels / font_approx_width)
-
-    if remove_after_double_hash:
-        msg = msg.split("##", 1)[0]
 
     if len(msg) == 0:
         return False, msg
@@ -63,7 +59,6 @@ def text_maybe_truncated(
     max_width_pixels: float | None = None,
     max_width_chars: int | None = None,
     max_lines: int | None = None,
-    remove_after_double_hash: bool = True,
     show_full_as_tooltip: bool = True,
 ) -> None:
     def output_text(s: str) -> None:
@@ -77,9 +72,8 @@ def text_maybe_truncated(
         max_width_pixels=max_width_pixels,
         max_width_chars=max_width_chars,
         max_lines=max_lines,
-        remove_after_double_hash=remove_after_double_hash,
     )
 
     output_text(msg_truncated)
-    if is_truncated and show_full_as_tooltip and imgui.is_item_hovered():
+    if is_truncated and imgui.is_item_hovered() and show_full_as_tooltip:
         osd_widgets.set_tooltip(msg[:1000])
