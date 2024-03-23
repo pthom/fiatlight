@@ -1,4 +1,4 @@
-from fiatlight.computer_vision import cv_color_type
+from fiatlight.fiat_image import cv_color_type
 
 
 def test_truc() -> None:

@@ -1,9 +1,9 @@
-from fiatlight.core.to_gui import (
+from fiatlight.fiat_core.to_gui import (
     any_typeclass_to_gui,
     any_value_to_data_with_gui,
     any_function_to_function_with_gui,
 )
-from fiatlight.core import UnspecifiedValue, ErrorValue
+from fiatlight.fiat_types import UnspecifiedValue, ErrorValue
 
 from typing import Tuple, Optional
 
@@ -50,12 +50,14 @@ def test_any_function_to_function_with_gui_one_output() -> None:
     # Test after invoke with different default value
     add_gui.inputs_with_gui[0].data_with_gui.value = 1
     add_gui.inputs_with_gui[1].data_with_gui.value = 3
+    add_gui.dirty = True
     add_gui.invoke()
     assert add_gui.outputs_with_gui[0].data_with_gui.value == 4
     assert add_gui.last_exception_message is None
 
     # Test after invoke with exception
     add_gui.inputs_with_gui[0].data_with_gui.value = "a"
+    add_gui.dirty = True
     add_gui.invoke()
     assert add_gui.outputs_with_gui[0].data_with_gui.value is ErrorValue
     assert add_gui.last_exception_message is not None
@@ -89,6 +91,7 @@ def test_any_function_to_function_with_gui_two_outputs() -> None:
     # Test after invoke with different default value
     add_mult_gui.inputs_with_gui[0].data_with_gui.value = 1
     add_mult_gui.inputs_with_gui[1].data_with_gui.value = 3
+    add_mult_gui.dirty = True
     add_mult_gui.invoke()
     assert add_mult_gui.outputs_with_gui[0].data_with_gui.value == 4
     assert add_mult_gui.outputs_with_gui[1].data_with_gui.value == 3
@@ -96,6 +99,7 @@ def test_any_function_to_function_with_gui_two_outputs() -> None:
 
     # Test after invoke with exception
     add_mult_gui.inputs_with_gui[0].data_with_gui.value = "a"
+    add_mult_gui.dirty = True
     add_mult_gui.invoke()
     assert add_mult_gui.outputs_with_gui[0].data_with_gui.value is ErrorValue
     assert add_mult_gui.outputs_with_gui[1].data_with_gui.value is ErrorValue
@@ -111,7 +115,7 @@ def test_any_function_to_function_with_gui_two_outputs_old_style() -> None:
 
 
 def test_function_with_optional_param() -> None:
-    from fiatlight.core.composite_gui import OptionalWithGui
+    from fiatlight.fiat_core.composite_gui import OptionalWithGui
 
     def foo(a: int | None = None) -> int:
         if a is None:
@@ -135,7 +139,7 @@ def test_function_with_optional_param() -> None:
 
 
 def test_enum_gui() -> None:
-    from fiatlight.core.composite_gui import EnumWithGui
+    from fiatlight.fiat_core.composite_gui import EnumWithGui
     from enum import Enum
 
     class MyEnum(Enum):

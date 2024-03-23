@@ -1,3 +1,4 @@
+from fiatlight import fiat_core
 import fiatlight
 
 
@@ -8,8 +9,8 @@ def f(prompt: str) -> int:
 def main() -> None:
     f_gui = fiatlight.any_function_to_function_with_gui(f)
     prompt_input = f_gui.input_of_name("prompt")
-    assert isinstance(prompt_input, fiatlight.core.StrWithGui)
-    prompt_input.params.edit_type = fiatlight.core.StrEditType.multiline
+    assert isinstance(prompt_input, fiat_core.StrWithGui)
+    prompt_input.params.edit_type = fiat_core.StrEditType.multiline
     prompt_input.params.width_em = 60
 
     graph = fiatlight.FunctionsGraph.from_function_composition([f_gui])

@@ -1,10 +1,10 @@
 import fiatlight
-from fiatlight.computer_vision import ImageU8, lut_channels_in_colorspace
-from fiatlight import ImagePath
+from fiatlight.fiat_image import ImageU8, lut_channels_in_colorspace
+from fiatlight import fiat_types
 import cv2
 
 
-def image_source(image_file: ImagePath = fiatlight.demo_assets_dir() + "/images/house.jpg") -> ImageU8:  # type: ignore
+def image_source(image_file: fiat_types.ImagePath = fiatlight.demo_assets_dir() + "/images/house.jpg") -> ImageU8:  # type: ignore
     image = cv2.imread(image_file)
     if image.shape[0] > 1000:
         k = 1000 / image.shape[0]

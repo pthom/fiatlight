@@ -1,11 +1,11 @@
-from fiatlight import UnspecifiedValue, Unspecified
-from fiatlight.core import any_function_to_function_with_gui, AnyDataWithGui
+from fiatlight.fiat_types import UnspecifiedValue, Unspecified
+from fiatlight.fiat_core import any_function_to_function_with_gui, AnyDataWithGui
 from typing import List
 
 
 def test_create_function_with_gui() -> None:
-    from fiatlight.core.to_gui import any_function_to_function_with_gui
-    from fiatlight.core.to_gui import gui_factories
+    from fiatlight.fiat_core.to_gui import any_function_to_function_with_gui
+    from fiatlight.fiat_core.to_gui import gui_factories
 
     class Foo:
         a: int
