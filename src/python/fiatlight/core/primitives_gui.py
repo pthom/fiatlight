@@ -1,4 +1,3 @@
-import fiatlight.core
 from imgui_bundle import imgui, hello_imgui, imgui_knobs, imgui_toggle, portable_file_dialogs as pfd
 from fiatlight.core import AnyDataWithGui, FilePath
 from typing import Any, Callable, TypeAlias
@@ -325,23 +324,18 @@ def _escape_double_quoted_string(s: str) -> str:
 
 class StrWithGui(AnyDataWithGui[str]):
     params: StrWithGuiParams
+    changed_in_popup: bool = False
 
     def __init__(self, params: StrWithGuiParams | None = None) -> None:
         super().__init__()
         self.params = params if params is not None else StrWithGuiParams()
         self.callbacks.edit = self.edit
         self.callbacks.default_value_provider = lambda: ""
-        self.callbacks.present_str = self.present_short_str
+        self.callbacks.present_str = self.present_str
 
     @staticmethod
-    def present_short_str(s: str) -> str:
-        if len(s) <= fiatlight.core.PRESENT_SHORT_STR_MAX_LENGTH:
-            r = s
-        else:
-            extract = s[: fiatlight.core.PRESENT_SHORT_STR_MAX_LENGTH - 4] + "(...)"
-            r = extract
-        r = '"' + _escape_double_quoted_string(r) + '"'
-        return r
+    def present_str(s: str) -> str:
+        return s
 
     def edit(self) -> bool:
         assert isinstance(self.value, str)
@@ -361,15 +355,25 @@ class StrWithGui(AnyDataWithGui[str]):
                 self.params.user_data,
             )
         elif self.params.edit_type == StrEditType.multiline:
-            size = hello_imgui.em_to_vec2(self.params.width_em, self.params.height_em)
-            changed, self.value = imgui.input_text_multiline(
-                self.params.label,
-                self.value,
-                size,
-                self.params.input_flags,
-                self.params.callback,
-                self.params.user_data,
-            )
+            from fiatlight.widgets import osd_widgets
+
+            if self.changed_in_popup:
+                changed = True
+                self.changed_in_popup = False
+
+            def popup_edit():
+                size = hello_imgui.em_to_vec2(self.params.width_em, self.params.height_em)
+                self.changed_in_popup, self.value = imgui.input_text_multiline(
+                    self.params.label,
+                    self.value,
+                    size,
+                    self.params.input_flags,
+                    self.params.callback,
+                    self.params.user_data,
+                )
+
+            if imgui.button("Edit text"):
+                osd_widgets.add_popup("Edit text", popup_edit)
 
         return changed
 

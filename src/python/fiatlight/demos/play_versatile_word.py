@@ -56,9 +56,9 @@ def str_lower(s: str) -> str:
 def remove_non_letters(s: str) -> str:
     r = ""
     for c in s:
-        if c.isalpha() or c == " ":
+        if c.isalpha():
             r += c
-        elif c.isspace():
+        else:
             r += " "
     return r
 
@@ -89,12 +89,6 @@ def run_length_encode(input_list: List[str]) -> List[WordWithCount]:
 
 def sort_word_with_counts(words: List[WordWithCount]) -> List[WordWithCount]:
     r = sorted(words, key=lambda w: w[1], reverse=True)
-    return r
-
-
-def display_word_with_counts(words: List[WordWithCount]) -> str:
-    strs = [w[0] + ": " + str(w[1]) for w in words]
-    r = "\n".join(strs)
     return r
 
 
@@ -168,7 +162,6 @@ def main() -> None:
                 sorted_gui,
                 run_length_encode,
                 sort_word_with_counts,
-                display_word_with_counts,
             ]
         )
     )

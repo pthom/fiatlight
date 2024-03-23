@@ -9,6 +9,8 @@ import numpy as np
 from enum import Enum
 
 import cv2
+
+import fiatlight
 from fiatlight import FunctionsGraph, fiat_run
 from fiatlight import computer_vision
 from fiatlight.computer_vision import ImageUInt8
@@ -63,19 +65,35 @@ class StableDiffusionXLWrapper:
         return as_array  # type: ignore
 
 
+_stable_diffusion_xl_wrapper = StableDiffusionXLWrapper()
+
+
+def stable_diffusion_xl(
+    prompt: str = "A cinematic shot of a baby racoon wearing an intricate italian priest robe.",
+    seed: int = 42,
+    num_inference_steps: int = 1,
+    guidance_scale: float = 0.0,
+) -> ImageUInt8:
+    """Generates an image using the Stable Diffusion XL model."""
+    return _stable_diffusion_xl_wrapper.query(prompt, seed, num_inference_steps, guidance_scale)
+
+
 def oil_paint(image: ImageUInt8, size: int = 1, dynRatio: int = 3) -> ImageUInt8:
     """Applies oil painting effect to an image, using the OpenCV xphoto module."""
     return cv2.xphoto.oilPainting(image, size, dynRatio, cv2.COLOR_BGR2HSV)  # type: ignore
 
 
-xlw = StableDiffusionXLWrapper()
-
-
 def main() -> None:
-    computer_vision.register_gui_factories()
-    from fiatlight.computer_vision import ColorType  # noqa
+    stable_diffusion_xl_gui = fiatlight.any_function_to_function_with_gui(stable_diffusion_xl)
+    stable_diffusion_xl_gui.invoke_automatically = False
+    prompt_input = stable_diffusion_xl_gui.input_of_name("prompt")
+    assert isinstance(prompt_input, fiatlight.core.StrWithGui)
+    prompt_input.params.edit_type = fiatlight.core.StrEditType.multiline
+    prompt_input.params.width_em = 60
 
-    graph = FunctionsGraph.from_function_composition([xlw.query, computer_vision.lut_channels_in_colorspace, oil_paint])
+    graph = FunctionsGraph.from_function_composition(
+        [stable_diffusion_xl_gui, computer_vision.lut_channels_in_colorspace, oil_paint]
+    )
 
     fiat_run(graph)
 

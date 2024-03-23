@@ -2,9 +2,6 @@ from fiatlight.core import DataType, VoidFunction, BoolFunction, JsonDict
 from typing import Callable, Generic
 
 
-PRESENT_SHORT_STR_MAX_LENGTH = 20
-
-
 class AnyDataGuiCallbacks(Generic[DataType]):
     """
     Collection of callbacks for a given type

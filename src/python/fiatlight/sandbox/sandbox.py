@@ -1,23 +1,19 @@
-from imgui_bundle import imgui, hello_imgui, portable_file_dialogs as pfd
+import fiatlight
 
 
-msg: pfd.message | None = None
-notif: pfd.notify | None = None
-
-
-def gui() -> None:
-    global msg, notif
-    if imgui.button("Add Notif"):
-        pfd.notify("Hello", "World", pfd.icon.error)
-    if imgui.button("Add message"):
-        msg = pfd.message("Hello", "World", pfd.choice.yes_no_cancel, pfd.icon.warning)
-    if msg is not None and msg.ready():
-        print("msg ready: " + str(msg.result()))
-        msg = None
+def f(prompt: str) -> int:
+    return len(prompt)
 
 
 def main() -> None:
-    hello_imgui.run(gui)
+    f_gui = fiatlight.any_function_to_function_with_gui(f)
+    prompt_input = f_gui.input_of_name("prompt")
+    assert isinstance(prompt_input, fiatlight.core.StrWithGui)
+    prompt_input.params.edit_type = fiatlight.core.StrEditType.multiline
+    prompt_input.params.width_em = 60
+
+    graph = fiatlight.FunctionsGraph.from_function_composition([f_gui])
+    fiatlight.fiat_run(graph)
 
 
 if __name__ == "__main__":
