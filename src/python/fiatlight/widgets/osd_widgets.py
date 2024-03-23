@@ -15,7 +15,7 @@ class _OsdWidgets:
 
     tooltip: str | None = None
     popups: list[_PopupInfo]
-    popups_to_open: [str]
+    popups_to_open: list[str]
 
     def __init__(self) -> None:
         self.tooltip = None
