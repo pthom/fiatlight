@@ -28,6 +28,84 @@ class FunctionsGraph:
         self.functions_nodes = []
         self.functions_nodes_links = []
 
+    @staticmethod
+    def create_empty() -> "FunctionsGraph":
+        return FunctionsGraph(secret_key=FunctionsGraph._secret_key)
+
+    @staticmethod
+    def from_function_composition(
+        functions: Sequence[Function | FunctionWithGui],
+        globals_dict: GlobalsDict | None = None,
+        locals_dict: LocalsDict | None = None,
+    ) -> "FunctionsGraph":
+        """Create a FunctionsGraph from a list of PureFunctions([InputType] -> OutputType)
+        * They should all be pure functions
+        * The output[0] of one should be the input[0] of the next
+        """
+        return FunctionsGraph._create_from_function_composition(
+            functions, globals_dict=globals_dict, locals_dict=locals_dict
+        )
+
+    def add_function_composition(
+        self,
+        functions: Sequence[Function | FunctionWithGui],
+        globals_dict: GlobalsDict | None = None,
+        locals_dict: LocalsDict | None = None,
+    ) -> None:
+        composition = FunctionsGraph.from_function_composition(
+            functions, globals_dict=globals_dict, locals_dict=locals_dict
+        )
+        self.merge_graph(composition)
+
+    def add_function(
+        self,
+        f: Function | FunctionWithGui,
+        globals_dict: GlobalsDict | None = None,
+        locals_dict: LocalsDict | None = None,
+    ) -> None:
+        if isinstance(f, FunctionWithGui):
+            self._add_function_with_gui(f)
+        else:
+            self._add_function(f, globals_dict=globals_dict, locals_dict=locals_dict)
+
+    def add_link(
+        self, src_function_name: str, dst_function_name: str, dst_input_name: str | None = None, src_output_idx: int = 0
+    ) -> None:
+        """Add a link between two functions"""
+        src_function = self.function_node_with_unique_name(src_function_name)
+        dst_function = self.function_node_with_unique_name(dst_function_name)
+
+        if src_output_idx >= len(src_function.function_with_gui.outputs_with_gui):
+            raise ValueError(
+                f"Output index {src_output_idx} is out of range for function {src_function_name}. "
+                f"Function {src_function_name} has {len(src_function.function_with_gui.outputs_with_gui)} outputs."
+            )
+        if dst_input_name is not None:
+            if not any(
+                dst_input_name == input_with_gui.name
+                for input_with_gui in dst_function.function_with_gui.inputs_with_gui
+            ):
+                raise ValueError(
+                    f"Input {dst_input_name} not found in function {dst_function_name}. "
+                    f"Available inputs: {[input_with_gui.name for input_with_gui in dst_function.function_with_gui.inputs_with_gui]}"
+                )
+        if dst_input_name is None:
+            if len(dst_function.function_with_gui.inputs_with_gui) == 0:
+                raise ValueError(
+                    f"Function {dst_function_name} has no inputs. " f"Please specify the input name to link to."
+                )
+            dst_input_name = dst_function.function_with_gui.inputs_with_gui[0].name
+
+        link = FunctionNodeLink(
+            src_function_node=src_function,
+            src_output_idx=src_output_idx,
+            dst_function_node=dst_function,
+            dst_input_name=dst_input_name,
+        )
+        src_function.add_output_link(link)
+        dst_function.add_input_link(link)
+        self.functions_nodes_links.append(link)
+
     def function_node_unique_name(self, function_node: FunctionNode) -> str:
         """Make sure all names are unique"""
         names = [fn.function_with_gui.name for fn in self.functions_nodes]
@@ -65,23 +143,12 @@ class FunctionsGraph:
         f_gui = any_function_to_function_with_gui(f, globals_dict=globals_dict, locals_dict=locals_dict)
         self._add_function_with_gui(f_gui)
 
-    def add_function_composition(
-        self,
-        functions: Sequence[Function | FunctionWithGui],
-        globals_dict: GlobalsDict | None = None,
-        locals_dict: LocalsDict | None = None,
-    ) -> None:
-        composition = FunctionsGraph.from_function_composition(
-            functions, globals_dict=globals_dict, locals_dict=locals_dict
-        )
-        self.merge_graph(composition)
-
     def merge_graph(self, other: "FunctionsGraph") -> None:
         self.functions_nodes.extend(other.functions_nodes)
         self.functions_nodes_links.extend(other.functions_nodes_links)
 
     @staticmethod
-    def from_function_composition(
+    def _create_from_function_composition(
         functions: Sequence[Function | FunctionWithGui],
         globals_dict: GlobalsDict | None = None,
         locals_dict: LocalsDict | None = None,
