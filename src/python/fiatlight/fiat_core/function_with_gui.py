@@ -142,27 +142,28 @@ class FunctionWithGui:
 
         self.dirty = False
 
-    def save_all_inputs_to_json(self) -> JsonDict:
-        """Save the current values of the inputs to a json dictionary.
-        Not used in a graph, since we only save inputs that are not linked to other functions.
-        """
-        inputs_dicts = [param.save_to_json() for param in self.inputs_with_gui]
-        function_dict = {"inputs": inputs_dicts, "invoke_automatically": self.invoke_automatically}
-        return function_dict
-
-    def load_all_inputs_from_json(self, json_data: JsonDict) -> None:
-        """Load the values of the inputs from a json dictionary.
-        Not used in a graph, since we only save inputs that are not linked to other functions."""
-        inputs_json = json_data["inputs"]
-        if len(inputs_json) != len(self.inputs_with_gui):
-            raise ValueError(f"Expected {len(self.inputs_with_gui)} inputs, got {len(inputs_json)}")
-        for param_json in inputs_json:
-            param_name = param_json["name"]
-            for input_param in self.inputs_with_gui:
-                if input_param.name == param_name:
-                    input_param.load_from_json(param_json)
-                    break
-        self.invoke_automatically = json_data.get("invoke_automatically", True)
+    # def save_all_inputs_to_json(self) -> JsonDict:
+    #     """Save the current values of the inputs to a json dictionary.
+    #     Not used in a graph, since we only save inputs that are not linked to other functions.
+    #     """
+    #     inputs_dicts = [param.save_to_json() for param in self.inputs_with_gui]
+    #     function_dict = {"inputs": inputs_dicts, "invoke_automatically": self.invoke_automatically}
+    #     return function_dict
+    #
+    # def load_all_inputs_from_json(self, json_data: JsonDict) -> None:
+    #     """Load the values of the inputs from a json dictionary.
+    #     Not used in a graph, since we only save inputs that are not linked to other functions."""
+    #     inputs_json = json_data["inputs"]
+    #     if len(inputs_json) != len(self.inputs_with_gui):
+    #         raise ValueError(f"Expected {len(self.inputs_with_gui)} inputs, got {len(inputs_json)}")
+    #     for param_json in inputs_json:
+    #         param_name = param_json["name"]
+    #         for input_param in self.inputs_with_gui:
+    #             if input_param.name == param_name:
+    #                 input_param.load_from_json(param_json)
+    #                 break
+    #     if self.invoke_automatically_can_set:
+    #         self.invoke_automatically = json_data.get("invoke_automatically", False)
 
     def save_gui_options_to_json(self) -> JsonDict:
         input_options = {}
@@ -178,8 +179,9 @@ class FunctionWithGui:
         r = {
             "inputs": input_options,
             "outputs": output_options,
-            "invoke_automatically": self.invoke_automatically,
         }
+        if self.invoke_automatically_can_set:
+            r["invoke_automatically"] = self.invoke_automatically
         return r
 
     def load_gui_options_from_json(self, json_data: JsonDict) -> None:
@@ -199,7 +201,8 @@ class FunctionWithGui:
             if callback_load is not None:
                 callback_load(output_option)
 
-        self.invoke_automatically = json_data.get("invoke_automatically", True)
+        if self.invoke_automatically_can_set:
+            self.invoke_automatically = json_data.get("invoke_automatically", True)
 
     def set_output_gui(self, data_with_gui: AnyDataWithGui[Any], output_idx: int = 0) -> None:
         if output_idx >= len(self.outputs_with_gui):

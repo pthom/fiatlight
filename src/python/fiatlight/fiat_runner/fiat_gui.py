@@ -189,7 +189,7 @@ class FiatGui:
             label_="Image Inspector",
             dock_space_name_=self._main_dock_space_id,
             gui_function_=lambda: immvision.inspector_show(),
-            is_visible_=False,
+            # is_visible_=False,
         )
         r = [main_window, image_inspector]
         return r

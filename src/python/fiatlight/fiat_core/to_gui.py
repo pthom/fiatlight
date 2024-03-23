@@ -244,6 +244,49 @@ class GuiFactories:
             "fiatlight.fiat_types.str_types.ImagePath": primitives_gui.ImagePathWithGui,
         }
 
+        #
+        # Add the float and int types with intervals
+        #
+        from fiatlight.fiat_types import FloatInterval, IntInterval
+
+        float_intervals: dict[str, FloatInterval] = {
+            "Float_0_1": FloatInterval(0.0, 1.0),
+            "Float__1_1": FloatInterval(-1.0, 1.0),
+            "Float_0_10": FloatInterval(0.0, 10.0),
+            "Float_0_100": FloatInterval(0.0, 100.0),
+            "Float_0_1000": FloatInterval(0.0, 1000.0),
+            "Float_0_10000": FloatInterval(0.0, 10000.0),
+        }
+        int_intervals: dict[str, IntInterval] = {
+            "Int_0_10": IntInterval(0, 10),
+            "Int_0_100": IntInterval(0, 100),
+            "Int_0_255": IntInterval(0, 255),
+        }
+
+        def make_float_factory(interval: FloatInterval) -> GuiFactory[float]:
+            def factory() -> primitives_gui.FloatWithGui:
+                r = primitives_gui.FloatWithGui()
+                r.params.v_min = interval.lower_bound
+                r.params.v_max = interval.upper_bound
+                return r
+
+            return factory
+
+        def make_int_factory(interval: IntInterval) -> GuiFactory[int]:
+            def factory() -> primitives_gui.IntWithGui:
+                r = primitives_gui.IntWithGui()
+                r.params.v_min = interval.lower_bound
+                r.params.v_max = interval.upper_bound
+                return r
+
+            return factory
+
+        number_types_prefix = "fiatlight.fiat_types.fiat_number_types."
+        for name, interval_int in float_intervals.items():
+            self._factories[number_types_prefix + name] = make_float_factory(interval_int)
+        for name, interval_float in int_intervals.items():
+            self._factories[number_types_prefix + name] = make_int_factory(interval_float)
+
     def can_handle_typename(self, typename: Typename) -> bool:
         return typename in self._factories
 
