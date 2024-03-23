@@ -77,7 +77,7 @@ class IntWithGuiParams:
     label: str = "##int"
     v_min: int = 0
     v_max: int = 30
-    width_em: float = 6
+    width_em: float = 9
     format: str = "%d"
     # Specific to slider_int and drag_int
     slider_flags: int = imgui.SliderFlags_.none.value
@@ -165,7 +165,7 @@ class FloatWithGuiParams:
     v_min: float = 0.0
     v_max: float = 10.0
     format: str = "%.3f"
-    width_em: float = 6
+    width_em: float = 9
     edit_type: FloatEditType = FloatEditType.slider
     # Specific to slider_float
     slider_flags: int = imgui.SliderFlags_.none.value
@@ -192,7 +192,7 @@ class FloatWithGui(AnyDataWithGui[float]):
         self.callbacks.default_value_provider = lambda: 0.0
 
     def edit(self) -> bool:
-        assert isinstance(self.value, float)
+        assert isinstance(self.value, float) or isinstance(self.value, int)
         changed = False
         imgui.set_next_item_width(hello_imgui.em_size(self.params.width_em))
         if self.params.edit_type == FloatEditType.slider:
