@@ -153,12 +153,12 @@ class FooWithGui(AnyDataWithGui[Foo]):
 
 def test_foo_with_gui() -> None:
     # Register the Foo type with its GUI implementation (do this once at the beginning of your program)
-    from fiatlight.fiat_core.to_gui import any_value_to_data_with_gui, gui_factories
+    from fiatlight.fiat_core.to_gui import to_data_with_gui, gui_factories
 
     gui_factories().add_factory("Foo", FooWithGui)
 
     foo = Foo(1)
-    foo_gui = any_value_to_data_with_gui(foo)
+    foo_gui = to_data_with_gui(foo)
     assert foo_gui.value == foo
 
 

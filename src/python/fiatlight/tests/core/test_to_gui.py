@@ -1,7 +1,7 @@
 from fiatlight.fiat_core.to_gui import (
     any_typeclass_to_gui,
-    any_value_to_data_with_gui,
-    any_function_to_function_with_gui,
+    to_data_with_gui,
+    to_function_with_gui,
 )
 from fiatlight.fiat_types import UnspecifiedValue, ErrorValue
 
@@ -20,7 +20,7 @@ def test_any_typeclass_to_data_with_gui() -> None:
 
 
 def test_any_value_to_data_with_gui() -> None:
-    a = any_value_to_data_with_gui(1)
+    a = to_data_with_gui(1)
     assert a.value == 1
 
 
@@ -28,7 +28,7 @@ def test_any_function_to_function_with_gui_one_output() -> None:
     def add(a: int, b: int = 2) -> int:
         return a + b
 
-    add_gui = any_function_to_function_with_gui(add)
+    add_gui = to_function_with_gui(add)
 
     # Test after construction
     assert add_gui.name == "add"
@@ -67,7 +67,7 @@ def test_any_function_to_function_with_gui_two_outputs() -> None:
     def add_mult(a: int, b: int = 2) -> tuple[int, int]:
         return a + b, a * b
 
-    add_mult_gui = any_function_to_function_with_gui(add_mult)
+    add_mult_gui = to_function_with_gui(add_mult)
 
     # Test after construction
     assert add_mult_gui.name == "add_mult"
@@ -110,7 +110,7 @@ def test_any_function_to_function_with_gui_two_outputs_old_style() -> None:
     def add_mult(a: int, b: int = 2) -> Tuple[int, int]:
         return a + b, a * b
 
-    add_mult_gui = any_function_to_function_with_gui(add_mult)
+    add_mult_gui = to_function_with_gui(add_mult)
     assert len(add_mult_gui.outputs_with_gui) == 2
 
 
@@ -129,10 +129,10 @@ def test_function_with_optional_param() -> None:
         else:
             return a + 2
 
-    foo_gui = any_function_to_function_with_gui(foo)
+    foo_gui = to_function_with_gui(foo)
     assert isinstance(foo_gui.inputs_with_gui[0].data_with_gui, OptionalWithGui)
 
-    foo2_gui = any_function_to_function_with_gui(foo2)
+    foo2_gui = to_function_with_gui(foo2)
     assert isinstance(foo2_gui.inputs_with_gui[0].data_with_gui, OptionalWithGui)
 
     print("a")
@@ -152,5 +152,5 @@ def test_enum_gui() -> None:
     def foo(a: MyEnum) -> int:
         return a.value
 
-    foo_gui = any_function_to_function_with_gui(foo, globals_dict=globals(), locals_dict=locals())
+    foo_gui = to_function_with_gui(foo, globals_dict=globals(), locals_dict=locals())
     assert isinstance(foo_gui.inputs_with_gui[0].data_with_gui, EnumWithGui)

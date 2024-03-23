@@ -1,7 +1,7 @@
 from fiatlight.fiat_core.function_with_gui import FunctionWithGui
 from fiatlight.fiat_core.function_node import FunctionNode, FunctionNodeLink
 from fiatlight.fiat_types import Function, JsonDict, GlobalsDict, LocalsDict
-from fiatlight.fiat_core.to_gui import any_function_to_function_with_gui
+from fiatlight.fiat_core.to_gui import to_function_with_gui
 
 from typing import Sequence, Dict
 
@@ -140,7 +140,7 @@ class FunctionsGraph:
         globals_dict: GlobalsDict | None = None,
         locals_dict: LocalsDict | None = None,
     ) -> None:
-        f_gui = any_function_to_function_with_gui(f, globals_dict=globals_dict, locals_dict=locals_dict)
+        f_gui = to_function_with_gui(f, globals_dict=globals_dict, locals_dict=locals_dict)
         self._add_function_with_gui(f_gui)
 
     def merge_graph(self, other: "FunctionsGraph") -> None:

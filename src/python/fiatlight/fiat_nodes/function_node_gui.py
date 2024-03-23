@@ -541,7 +541,7 @@ class FunctionNodeGui:
 
 
 def sandbox() -> None:
-    from fiatlight.fiat_core import any_function_to_function_with_gui
+    from fiatlight.fiat_core import to_function_with_gui
     from imgui_bundle import immapp
     from enum import Enum
 
@@ -560,7 +560,7 @@ def sandbox() -> None:
         return ["Hello", "World", "!"]
         # return x + y + len(s) + e.value
 
-    function_with_gui = any_function_to_function_with_gui(add, globals_dict=globals(), locals_dict=locals())
+    function_with_gui = to_function_with_gui(add, globals_dict=globals(), locals_dict=locals())
     function_node = FunctionNode(function_with_gui, name="add")
     function_node_gui = FunctionNodeGui(function_node)
 

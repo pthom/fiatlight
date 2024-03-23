@@ -1,5 +1,5 @@
 from fiatlight import fiat_core, fiat_widgets, fiat_types
-from fiatlight.fiat_core import FunctionsGraph, any_function_to_function_with_gui, AnyDataWithGui, FunctionWithGui
+from fiatlight.fiat_core import FunctionsGraph, to_function_with_gui, AnyDataWithGui, FunctionWithGui
 from fiatlight.fiat_runner import fiat_run, FiatGuiParams
 
 
@@ -21,7 +21,7 @@ __all__ = [
     "fiat_widgets",
     # from core
     "FunctionsGraph",
-    "any_function_to_function_with_gui",
+    "to_function_with_gui",
     "AnyDataWithGui",
     "FunctionWithGui",
     # from fiat_runner

@@ -1,6 +1,6 @@
 from fiatlight.fiat_types import UnspecifiedValue
 from fiatlight.fiat_core import ParamKind, ParamWithGui, AnyDataWithGui
-from fiatlight.fiat_core.to_gui import any_value_to_data_with_gui, any_typeclass_to_gui
+from fiatlight.fiat_core.to_gui import to_data_with_gui, any_typeclass_to_gui
 
 
 def test_creation() -> None:
@@ -11,7 +11,7 @@ def test_creation() -> None:
 
 
 def test_primitive_serialization() -> None:
-    a = any_value_to_data_with_gui(1)
+    a = to_data_with_gui(1)
     assert a.value == 1
     assert a.save_to_json() == {"type": "Primitive", "value": 1}
     a.load_from_json({"type": "Primitive", "value": 2})
@@ -19,14 +19,14 @@ def test_primitive_serialization() -> None:
 
 
 def test_named_data_with_gui_creation() -> None:
-    x = any_value_to_data_with_gui(1)
+    x = to_data_with_gui(1)
     n = ParamWithGui("x", x, ParamKind.PositionalOrKeyword, UnspecifiedValue)
     assert n.name == "x"
     assert n.data_with_gui.value == 1
 
 
 def test_named_data_with_gui_serialization() -> None:
-    d = any_value_to_data_with_gui(1)
+    d = to_data_with_gui(1)
     n = ParamWithGui("x", d, ParamKind.PositionalOrKeyword, UnspecifiedValue)
     assert n.save_to_json() == {"name": "x", "data": {"type": "Primitive", "value": 1}}
 
@@ -44,10 +44,10 @@ def test_custom_data_with_gui_serialization() -> None:
     gui_factories().add_factory("Foo", FooWithGui)
 
     # Use the Foo type with its GUI implementation
-    from fiatlight.fiat_core.to_gui import any_value_to_data_with_gui
+    from fiatlight.fiat_core.to_gui import to_data_with_gui
 
     foo = Foo(1)
-    foo_gui = any_value_to_data_with_gui(foo)
+    foo_gui = to_data_with_gui(foo)
     assert foo_gui.value == foo
     assert foo_gui.save_to_json() == {"type": "Dict", "value": {"x": 1}}
 

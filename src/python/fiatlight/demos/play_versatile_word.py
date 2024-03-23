@@ -1,5 +1,5 @@
 from typing import List, Tuple
-from fiatlight import AnyDataWithGui, FunctionsGraph, fiat_run, any_function_to_function_with_gui
+from fiatlight import AnyDataWithGui, FunctionsGraph, fiat_run, to_function_with_gui
 
 
 poem = """
@@ -134,7 +134,7 @@ def main() -> None:
         """
         return text
 
-    get_text_gui = any_function_to_function_with_gui(get_text)
+    get_text_gui = to_function_with_gui(get_text)
     get_text_gui.set_input_gui("text", TextFileWithGui())
 
     # In this example, we will use the standard `sorted` function,
@@ -147,7 +147,7 @@ def main() -> None:
     #  (by default, fiatlight will try to specify all parameters using keywords, hence the need to specify this)
     # - we could also use the following more generic signature_string:
     #      "(iterable: Iterable[T], /, *, key: Optional[Callable[[T], Any]] = None, reverse: bool = False) -> List[T]"
-    sorted_gui = any_function_to_function_with_gui(
+    sorted_gui = to_function_with_gui(
         sorted, signature_string="(words: List[str], /, reverse: bool = False) -> List[str]"
     )
 

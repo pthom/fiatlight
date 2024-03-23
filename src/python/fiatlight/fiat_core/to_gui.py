@@ -99,14 +99,14 @@ def any_typeclass_to_gui(
     return AnyDataWithGui.make_default()
 
 
-def any_value_to_data_with_gui(value: DataType) -> AnyDataWithGui[DataType]:
+def to_data_with_gui(value: DataType) -> AnyDataWithGui[DataType]:
     type_class_name = str(type(value))
     r = any_typeclass_to_gui(type_class_name)
     r.value = value
     return r
 
 
-def any_param_to_param_with_gui(
+def to_param_with_gui(
     name: str,
     param: inspect.Parameter,
     *,
@@ -131,7 +131,7 @@ def any_param_to_param_with_gui(
     return ParamWithGui(name, data_with_gui, param_kind, default_value)
 
 
-def any_function_to_function_with_gui(
+def to_function_with_gui(
     f: Callable[..., Any],
     *,
     globals_dict: GlobalsDict | None = None,
@@ -158,7 +158,7 @@ def any_function_to_function_with_gui(
     params = sig.parameters
     for name, param in params.items():
         function_with_gui.inputs_with_gui.append(
-            any_param_to_param_with_gui(name, param, globals_dict=globals_dict, locals_dict=locals_dict)
+            to_param_with_gui(name, param, globals_dict=globals_dict, locals_dict=locals_dict)
         )
 
     return_annotation = sig.return_annotation
