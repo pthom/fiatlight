@@ -1,7 +1,7 @@
 from typing import Tuple, Optional, TypeAlias
 import math
 from fiatlight import AnyDataWithGui
-from fiatlight.computer_vision import ImageUInt8
+from fiatlight.computer_vision import ImageU8
 from fiatlight.computer_vision.lut import LutParams, LutTable
 from imgui_bundle import immapp, imgui, immvision
 
@@ -10,7 +10,7 @@ Point2d: TypeAlias = Tuple[float, float]
 
 
 class LutParamsWithGui(AnyDataWithGui[LutParams]):
-    _lut_graph: ImageUInt8
+    _lut_graph: ImageU8
     _lut_graph_needs_refresh: bool = True
     _lut_graph_size_em: float = 3.5
 

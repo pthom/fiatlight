@@ -13,7 +13,7 @@ import cv2
 import fiatlight
 from fiatlight import FunctionsGraph, fiat_run
 from fiatlight import computer_vision
-from fiatlight.computer_vision import ImageUInt8
+from fiatlight.computer_vision import ImageU8
 
 
 class DeviceType(Enum):
@@ -51,7 +51,7 @@ class StableDiffusionXLWrapper:
         seed: int = 42,
         num_inference_steps: int = 1,
         guidance_scale: float = 0.0,
-    ) -> ImageUInt8:
+    ) -> ImageU8:
         self.generator.manual_seed(seed)
         r = self.pipe.__call__(
             prompt=prompt,
@@ -73,12 +73,12 @@ def stable_diffusion_xl(
     seed: int = 42,
     num_inference_steps: int = 1,
     guidance_scale: float = 0.0,
-) -> ImageUInt8:
+) -> ImageU8:
     """Generates an image using the Stable Diffusion XL model."""
     return _stable_diffusion_xl_wrapper.query(prompt, seed, num_inference_steps, guidance_scale)
 
 
-def oil_paint(image: ImageUInt8, size: int = 1, dynRatio: int = 3) -> ImageUInt8:
+def oil_paint(image: ImageU8, size: int = 1, dynRatio: int = 3) -> ImageU8:
     """Applies oil painting effect to an image, using the OpenCV xphoto module."""
     return cv2.xphoto.oilPainting(image, size, dynRatio, cv2.COLOR_BGR2HSV)  # type: ignore
 

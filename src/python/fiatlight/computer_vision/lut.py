@@ -2,7 +2,7 @@ from typing import Tuple, TypeAlias
 from numpy.typing import NDArray
 import cv2
 import numpy as np
-from fiatlight.computer_vision import ImageUInt8, ColorType, ColorConversion
+from fiatlight.computer_vision import ImageU8, ColorType, ColorConversion
 
 
 LutTable: TypeAlias = NDArray[np.uint8]  # an array of 256 elements (LUT, aka Look-Up Table values)
@@ -36,18 +36,18 @@ class LutParams:
         )
 
 
-def lut_with_params(image: ImageUInt8, params: LutParams) -> ImageUInt8:
+def lut_with_params(image: ImageU8, params: LutParams) -> ImageU8:
     r = lut(image, params.to_table())
     return r
 
 
 def lut_channels_with_params(
-    image: ImageUInt8,
+    image: ImageU8,
     lut_channel_0: LutParams,
     lut_channel_1: LutParams | None = None,
     lut_channel_2: LutParams | None = None,
     lut_channel_3: LutParams | None = None,
-) -> ImageUInt8:
+) -> ImageU8:
     lut_channel_1 = lut_channel_1 or lut_channel_0
     lut_channel_2 = lut_channel_2 or lut_channel_0
     lut_channel_3 = lut_channel_3 or lut_channel_0
@@ -65,14 +65,14 @@ def lut_channels_with_params(
 
 
 def lut_channels_in_colorspace(
-    image: ImageUInt8,
+    image: ImageU8,
     lut_channel_0: LutParams,
     lut_channel_1: LutParams | None = None,
     lut_channel_2: LutParams | None = None,
     lut_channel_3: LutParams | None = None,
     color_space_src: ColorType = ColorType.BGR,
     color_space_lut: ColorType = ColorType.HSV,
-) -> ImageUInt8:
+) -> ImageU8:
     """Applies a LUT to an image channels (i.e. adjust channels levels), in a given color space.
 
     The image is converted to the target color space (color_space_lut), the LUT is applied,
@@ -92,13 +92,13 @@ def lut_channels_in_colorspace(
     return image_lut
 
 
-def lut(image: ImageUInt8, lut_table: LutTable) -> ImageUInt8:
+def lut(image: ImageU8, lut_table: LutTable) -> ImageU8:
     assert len(lut_table) == 256
     image_with_lut_uint8 = cv2.LUT(image, lut_table)
     return image_with_lut_uint8  # type: ignore
 
 
-def lut_table_graph(lut_table: LutTable, size: int) -> ImageUInt8:
+def lut_table_graph(lut_table: LutTable, size: int) -> ImageU8:
     """A small image representing the LUT table."""
     from imgui_bundle import immvision
 
