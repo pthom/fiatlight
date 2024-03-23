@@ -1,17 +1,10 @@
+from fiatlight.fiat_image import ImageU8, ImageU8_GRAY, ImageU8_3
+from fiatlight.fiat_image import fiat_img_proc
 import fiatlight
-from fiatlight import fiat_core
-from fiatlight.fiat_image import ImageU8_3, ImageU8, ImageU8_GRAY, fiat_img_proc
-from enum import Enum
-import numpy as np
-
 import cv2
-
-image = cv2.imread(fiatlight.demo_assets_dir() + "/images/house.jpg")
-image = cv2.resize(image, (int(image.shape[1] * 0.5), int(image.shape[0] * 0.5)))
-
-
-def make_image() -> ImageU8_3:
-    return image  # type: ignore
+import numpy as np
+from enum import Enum
+from typing import Tuple
 
 
 def canny(
@@ -23,7 +16,6 @@ def canny(
     blur_sigma: float = 0.0,
 ) -> ImageU8_GRAY:
     """
-
     :param image: Image: Input image to which Canny filter will be applied
     :param t_lower: T_lower: Lower threshold value in Hysteresis Thresholding
     :param t_upper: Upper threshold value in Hysteresis Thresholding
@@ -69,7 +61,7 @@ def merge_toon_edges(
 
     # Create a RGBA image that will be overlayed on the original image
     # Its color will be constant (edges_color) and its alpha channel will be the edges_images
-    edges_color = (0, 255, 0)
+    edges_color = (0, 0, 0)
     overlay_rgba = np.zeros((*image.shape[:2], 4), dtype=np.uint8)
     overlay_rgba[:, :, :3] = edges_color
     overlay_rgba[:, :, 3] = (edges_images * edges_intensity).astype(np.uint8)
@@ -80,47 +72,31 @@ def merge_toon_edges(
     return r
 
 
-def canny_with_gui() -> fiatlight.FunctionWithGui:
-    """Convert canny to a function with GUI,
-    then customize min / max values for the input parameters in the GUI of the canny node
-    """
-    canny_gui = fiatlight.to_function_with_gui(canny)
-
-    # t_lower between 0 and 255
-    t_lower_input = canny_gui.input_of_name("t_lower")
-    assert isinstance(t_lower_input, fiat_core.FloatWithGui)
-    t_lower_input.params.v_min = 0.0
-    t_lower_input.params.v_max = 15000
-
-    # t_upper between 0 and 255
-    t_upper_input = canny_gui.input_of_name("t_upper")
-    assert isinstance(t_upper_input, fiat_core.FloatWithGui)
-    t_upper_input.params.v_min = 0.0
-    t_upper_input.params.v_max = 15000
-
-    # aperture_size between 3, 5, 7
-    aperture_size_input = canny_gui.input_of_name("aperture_size")
-    assert isinstance(aperture_size_input, fiat_core.IntWithGui)
-    aperture_size_input.params.edit_type = fiat_core.IntEditType.input
-    aperture_size_input.params.v_min = 3
-    aperture_size_input.params.v_max = 7
-    aperture_size_input.params.input_step = 2
-
-    return canny_gui
+def add_toon_edges(
+    image: ImageU8_3,
+    canny_t_lower: float = 10.0,
+    canny_t_upper: float = 100.0,
+    canny_aperture_size: int = 5,
+    canny_l2_gradient: bool = False,
+    canny_blur_sigma: float = 0.0,
+    dilate_kernel_size: int = 3,
+    dilate_morph_shape: MorphShape = MorphShape.MORPH_ELLIPSE,
+    dilate_iterations: int = 1,
+    blur_edges_sigma: float = 2.0,
+    edges_intensity: float = 1.0,
+) -> Tuple[ImageU8_3, ImageU8_GRAY, ImageU8, ImageU8]:
+    edges = canny(image, canny_t_lower, canny_t_upper, canny_aperture_size, canny_l2_gradient, canny_blur_sigma)
+    dilated_edges = dilate(edges, dilate_kernel_size, dilate_morph_shape, dilate_iterations)
+    image_with_edges = merge_toon_edges(image, dilated_edges, blur_edges_sigma, edges_intensity)
+    return image, edges, dilated_edges, image_with_edges
 
 
-def main() -> None:
-    functions_graph = fiatlight.FunctionsGraph.create_empty()
-    # We need to pass the locals() and globals() to the add_function_composition method
-    # so that the local MorseShape enum type can be analyzed and transformed into a GUI
-    functions_graph.add_function_composition(
-        [make_image, canny_with_gui(), dilate], locals_dict=locals(), globals_dict=globals()
-    )
-    functions_graph.add_function(merge_toon_edges)
-    functions_graph.add_link("dilate", "merge_toon_edges", "edges_images")
-    functions_graph.add_link("make_image", "merge_toon_edges", "image")
+def main():
+    # image = fiatlight.demo_assets_dir() + "/images/house.jpg"
+    # image = cv2.imread(image)
 
-    fiatlight.fiat_run(functions_graph)
+    graph = fiatlight.FunctionsGraph.from_function_composition([add_toon_edges])
+    fiatlight.fiat_run(graph)
 
 
 if __name__ == "__main__":

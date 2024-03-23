@@ -13,6 +13,7 @@ from fiatlight.fiat_image.image_types import (
     ImageU8_3,
     ImageU8_4,
 )
+from fiatlight.fiat_image import fiat_img_proc
 from fiatlight.fiat_image.image_gui import ImageWithGui, ImageChannelsWithGui, ImagePresenterParams
 from fiatlight.fiat_image.cv_color_type import ColorConversion, ColorType
 from fiatlight.fiat_image.cv_color_type_gui import ColorConversionWithGui
@@ -44,6 +45,8 @@ register_gui_factories()
 
 
 __all__ = [
+    # submodules
+    "fiat_img_proc",
     # from image_types
     "ImageU8",
     "ImageFloat",
