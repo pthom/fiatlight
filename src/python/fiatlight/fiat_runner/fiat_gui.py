@@ -30,21 +30,18 @@ def _main_python_module_name() -> str:
 
 
 class FiatGuiParams:
-    show_image_inspector: bool
     runner_params: hello_imgui.RunnerParams
     addons: immapp.AddOnsParams
 
     def __init__(
         self,
-        app_title: str = "fiatlight",
+        app_title: str = "",
         window_size: Tuple[int, int] | None = None,
         initial_value: Any = None,
-        show_image_inspector: bool = False,
         runner_params: hello_imgui.RunnerParams | None = None,
         addons: immapp.AddOnsParams | None = None,
     ) -> None:
         self.initial_value = initial_value
-        self.show_image_inspector = show_image_inspector
 
         if addons is None:
             addons = immapp.AddOnsParams()
@@ -82,6 +79,7 @@ class FiatGui:
     _main_dock_space_id: str
     _info_dock_space_id: str = "info_dock"
     _idx_frame: int = 0
+    _show_inspector: bool = False
 
     save_dialog: pfd.save_file | None = None
     save_dialog_callback: Callable[[str], None] | None = None
@@ -92,7 +90,9 @@ class FiatGui:
         if params is None:
             # params.runner_params.app_window_params.window_title
             params = FiatGuiParams()
-            # Set window_title from the name of the calling module
+
+        # Set window_title from the name of the calling module
+        if params.runner_params.app_window_params.window_title == "":
             params.runner_params.app_window_params.window_title = _main_python_module_name()
 
         self.params = params
@@ -140,16 +140,16 @@ class FiatGui:
                 imgui.spring()
 
                 # Load and save user inputs
-                if imgui.button(icons_fontawesome_6.ICON_FA_FILE_PEN, btn_size):
-                    self.save_dialog = pfd.save_file(title="Save user inputs")
-                    self.save_dialog_callback = lambda filename: self._save_user_inputs(filename)
-                if imgui.is_item_hovered():
-                    imgui.set_tooltip("Save user inputs")
                 if imgui.button(icons_fontawesome_6.ICON_FA_FILE_IMPORT, btn_size):
                     self.load_dialog = pfd.open_file(title="Load user inputs")
                     self.load_dialog_callback = lambda filename: self._load_user_inputs(filename)
                 if imgui.is_item_hovered():
                     imgui.set_tooltip("Load user inputs")
+                if imgui.button(icons_fontawesome_6.ICON_FA_FILE_PEN, btn_size):
+                    self.save_dialog = pfd.save_file(title="Save user inputs")
+                    self.save_dialog_callback = lambda filename: self._save_user_inputs(filename)
+                if imgui.is_item_hovered():
+                    imgui.set_tooltip("Save user inputs")
 
     def _draw_functions_graph(self) -> None:
         self._idx_frame += 1
@@ -185,14 +185,13 @@ class FiatGui:
             dock_space_name_=self._main_dock_space_id,
             gui_function_=lambda: self._draw_functions_graph(),
         )
-        r = [main_window]
-        if self.params.show_image_inspector:
-            image_inspector = hello_imgui.DockableWindow(
-                label_="Image Inspector",
-                dock_space_name_=self._main_dock_space_id,
-                gui_function_=lambda: immvision.inspector_show(),
-            )
-            r.append(image_inspector)
+        image_inspector = hello_imgui.DockableWindow(
+            label_="Image Inspector",
+            dock_space_name_=self._main_dock_space_id,
+            gui_function_=lambda: immvision.inspector_show(),
+            is_visible_=False,
+        )
+        r = [main_window, image_inspector]
         return r
 
     def _docking_splits(self, initial_dock: str = "MainDockSpace") -> List[hello_imgui.DockingSplit]:
