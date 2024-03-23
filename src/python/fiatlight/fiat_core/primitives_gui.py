@@ -399,7 +399,7 @@ class FilePathWithGui(AnyDataWithGui[FilePath]):
     def edit(self) -> bool:
         changed = False
         if imgui.button("Select file"):
-            self._open_file_dialog = pfd.open_file("Select image file", self.default_path, self.filters)
+            self._open_file_dialog = pfd.open_file("Select file", self.default_path, self.filters)
         if self._open_file_dialog is not None and self._open_file_dialog.ready():
             if len(self._open_file_dialog.result()) == 1:
                 selected_file = self._open_file_dialog.result()[0]
