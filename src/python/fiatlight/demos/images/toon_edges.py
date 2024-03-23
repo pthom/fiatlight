@@ -10,8 +10,8 @@ from fiatlight.fiat_types import Float_0_10000, Int_0_10, Float_0_10, Float_0_1,
 
 def canny(
     image: ImageU8,
-    t_lower: Float_0_10000 = Float_0_10000(100.0),
-    t_upper: Float_0_10000 = Float_0_10000(500.0),
+    t_lower: Float_0_10000 = Float_0_10000(1000.0),
+    t_upper: Float_0_10000 = Float_0_10000(5000.0),
     aperture_size: Int_0_10 = Int_0_10(3),
     l2_gradient: bool = True,
     blur_sigma: Float_0_10 = Float_0_10(0.0),
@@ -79,8 +79,8 @@ def merge_toon_edges(
 
 def add_toon_edges(
     image: ImageU8_3,
-    canny_t_lower: Float_0_10000 = 100,  # type: ignore
-    canny_t_upper: Float_0_10000 = 500,  # type: ignore
+    canny_t_lower: Float_0_10000 = 1000,  # type: ignore
+    canny_t_upper: Float_0_10000 = 5000,  # type: ignore
     # canny_aperture_size: Int_0_10 = 5,  # type: ignore
     canny_l2_gradient: bool = True,
     canny_blur_sigma: Float_0_10 = 0.0,  # type: ignore
