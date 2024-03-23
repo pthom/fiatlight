@@ -130,12 +130,16 @@ def canny_with_gui() -> fiatlight.FunctionWithGui:
 
 def main() -> None:
     functions_graph = fiatlight.FunctionsGraph.create_empty()
-    functions_graph.add_function_composition([make_image, canny_with_gui(), dilate])
+    # We need to pass the locals() and globals() to the add_function_composition method
+    # so that the local MorseShape enum type can be analyzed and transformed into a GUI
+    functions_graph.add_function_composition(
+        [make_image, canny_with_gui(), dilate], locals_dict=locals(), globals_dict=globals()
+    )
     functions_graph.add_function(add_toon_edges)
     functions_graph.add_link("dilate", "add_toon_edges", "edges_images")
     functions_graph.add_link("make_image", "add_toon_edges", "image")
 
-    fiatlight.fiat_run(functions_graph, fiatlight.FiatGuiParams(show_image_inspector=True))
+    fiatlight.fiat_run(functions_graph)
 
 
 if __name__ == "__main__":

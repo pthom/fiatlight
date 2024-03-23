@@ -219,6 +219,7 @@ class FunctionsGraph:
         """Invoke all the leaves of the graph"""
         for fn in self.functions_nodes:
             if len(fn.input_links) == 0:
+                fn.function_with_gui.dirty = True
                 fn.invoke_function()
 
 
