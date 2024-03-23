@@ -325,7 +325,6 @@ def _escape_double_quoted_string(s: str) -> str:
 
 class StrWithGui(AnyDataWithGui[str]):
     params: StrWithGuiParams
-    changed_in_popup: bool = False
 
     def __init__(self, params: StrWithGuiParams | None = None) -> None:
         super().__init__()
@@ -358,14 +357,10 @@ class StrWithGui(AnyDataWithGui[str]):
         elif self.params.edit_type == StrEditType.multiline:
             from fiatlight.fiat_widgets import osd_widgets
 
-            if self.changed_in_popup:
-                changed = True
-                self.changed_in_popup = False
-
-            def popup_edit() -> None:
+            def popup_edit() -> bool:
                 assert isinstance(self.value, str)
                 size = hello_imgui.em_to_vec2(self.params.width_em, self.params.height_em)
-                self.changed_in_popup, self.value = imgui.input_text_multiline(
+                changed_in_popup, self.value = imgui.input_text_multiline(
                     self.params.label,
                     self.value,
                     size,
@@ -373,9 +368,12 @@ class StrWithGui(AnyDataWithGui[str]):
                     self.params.callback,
                     self.params.user_data,
                 )
+                return changed_in_popup
 
             if imgui.button("Edit text"):
-                osd_widgets.add_popup("Edit text", popup_edit)
+                osd_widgets.add_bool_popup("Edit text", popup_edit)
+            if osd_widgets.get_popup_bool_return("Edit text"):
+                changed = True
 
         return changed
 
