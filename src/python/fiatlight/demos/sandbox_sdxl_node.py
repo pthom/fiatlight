@@ -11,9 +11,10 @@ from enum import Enum
 import cv2
 
 import fiatlight
+from fiatlight import fiat_core
 from fiatlight import FunctionsGraph, fiat_run
-from fiatlight import computer_vision
-from fiatlight.computer_vision import ImageU8
+from fiatlight import fiat_image
+from fiatlight.fiat_image import ImageU8
 
 
 class DeviceType(Enum):
@@ -87,12 +88,12 @@ def main() -> None:
     stable_diffusion_xl_gui = fiatlight.any_function_to_function_with_gui(stable_diffusion_xl)
     stable_diffusion_xl_gui.invoke_automatically = False
     prompt_input = stable_diffusion_xl_gui.input_of_name("prompt")
-    assert isinstance(prompt_input, fiatlight.core.StrWithGui)
-    prompt_input.params.edit_type = fiatlight.core.StrEditType.multiline
+    assert isinstance(prompt_input, fiat_core.StrWithGui)
+    prompt_input.params.edit_type = fiat_core.StrEditType.multiline
     prompt_input.params.width_em = 60
 
     graph = FunctionsGraph.from_function_composition(
-        [stable_diffusion_xl_gui, computer_vision.lut_channels_in_colorspace, oil_paint]
+        [stable_diffusion_xl_gui, fiat_image.lut_channels_in_colorspace, oil_paint]
     )
 
     fiat_run(graph)

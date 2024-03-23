@@ -1,6 +1,6 @@
-from fiatlight.core import AnyDataWithGui, UnspecifiedValue
-from fiatlight.core import ParamKind, ParamWithGui
-from fiatlight.core.to_gui import any_value_to_data_with_gui, any_typeclass_to_gui
+from fiatlight.fiat_types import UnspecifiedValue
+from fiatlight.fiat_core import ParamKind, ParamWithGui, AnyDataWithGui
+from fiatlight.fiat_core.to_gui import any_value_to_data_with_gui, any_typeclass_to_gui
 
 
 def test_creation() -> None:
@@ -36,15 +36,15 @@ def test_named_data_with_gui_serialization() -> None:
 
 
 def test_custom_data_with_gui_serialization() -> None:
-    from fiatlight.core.any_data_with_gui import Foo, FooWithGui
+    from fiatlight.fiat_core.any_data_with_gui import Foo, FooWithGui
 
     # Register the Foo type with its GUI implementation (do this once at the beginning of your program)
-    from fiatlight.core import gui_factories
+    from fiatlight.fiat_core import gui_factories
 
     gui_factories().add_factory("Foo", FooWithGui)
 
     # Use the Foo type with its GUI implementation
-    from fiatlight.core.to_gui import any_value_to_data_with_gui
+    from fiatlight.fiat_core.to_gui import any_value_to_data_with_gui
 
     foo = Foo(1)
     foo_gui = any_value_to_data_with_gui(foo)

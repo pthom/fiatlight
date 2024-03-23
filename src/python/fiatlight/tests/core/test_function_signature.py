@@ -86,7 +86,7 @@ def test_sorted_signature() -> None:
 
 
 def test_get_function_signature() -> None:
-    from fiatlight.core.function_signature import get_function_signature
+    from fiatlight.fiat_core.function_signature import get_function_signature
 
     signature_string = (
         "(iterable: Iterable[T], /, *, key: Optional[Callable[[T], Any]] = None, reverse: bool = False) -> List[T]"
@@ -110,7 +110,7 @@ def test_get_function_signature() -> None:
 
 
 def test_wrap_signature_to_gui() -> None:
-    from fiatlight.core import any_function_to_function_with_gui
+    from fiatlight.fiat_core import any_function_to_function_with_gui
 
     sorted_gui = any_function_to_function_with_gui(
         sorted, signature_string="(words: List[str], /, reverse: bool = False) -> List[str]"
