@@ -3,7 +3,7 @@ import enum
 import cv2
 from typing import TypeAlias, Any
 from numpy.typing import NDArray
-from fiatlight.computer_vision.image_types import ImageUInt8
+from fiatlight.computer_vision.image_types import ImageU8
 
 
 CvColorConversionCode: TypeAlias = int
@@ -90,7 +90,7 @@ class ColorConversion:
     def conversion_code(self) -> Optional[CvColorConversionCode]:
         return self.src_color.conversion_code(self.dst_color)
 
-    def convert_image(self, image: ImageUInt8) -> ImageUInt8:
+    def convert_image(self, image: ImageU8) -> ImageU8:
         conversion_code = self.conversion_code()
         assert conversion_code is not None
         return cv2.cvtColor(image, conversion_code)  # type: ignore
@@ -99,7 +99,7 @@ class ColorConversion:
         return f"{self.src_color.name}=>{self.dst_color.name}"
 
 
-def color_convert(image: ImageUInt8, color_conversion: ColorConversion) -> ImageUInt8:
+def color_convert(image: ImageU8, color_conversion: ColorConversion) -> ImageU8:
     return color_conversion.convert_image(image)
 
 

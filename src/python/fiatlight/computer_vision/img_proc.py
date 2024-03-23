@@ -1,9 +1,9 @@
-from fiatlight.computer_vision import ImageUInt8
+from fiatlight.computer_vision import ImageU8
 
 import numpy as np
 
 
-def split_channels(image: ImageUInt8) -> ImageUInt8:
+def split_channels(image: ImageU8) -> ImageU8:
     assert len(image.shape) == 3
     depth_first = np.squeeze(np.dsplit(image, image.shape[-1]))
     return depth_first
