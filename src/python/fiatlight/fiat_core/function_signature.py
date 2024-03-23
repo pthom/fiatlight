@@ -1,5 +1,5 @@
 from typing import Callable, Any
-from fiatlight.fiat_types.fiat_types import GlobalsDict, LocalsDict
+from fiatlight.fiat_types.base_types import GlobalsDict, LocalsDict
 import inspect
 
 

@@ -199,7 +199,7 @@ class GuiFactories:
             "bool": primitives_gui.BoolWithGui,
             "FilePath": primitives_gui.FilePathWithGui,
             "TextPath": primitives_gui.TextPathWithGui,
-            "fiatlight.core.fiat_types.ImagePath": primitives_gui.ImagePathWithGui,
+            "fiatlight.fiat_types.str_types.ImagePath": primitives_gui.ImagePathWithGui,
         }
 
     def can_handle_typename(self, typename: Typename) -> bool:
