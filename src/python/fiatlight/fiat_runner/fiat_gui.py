@@ -1,10 +1,10 @@
 from fiatlight.fiat_nodes.function_node_gui import FunctionNodeGui
 from fiatlight.fiat_nodes.functions_graph_gui import FunctionsGraphGui
 from fiatlight.fiat_core import FunctionsGraph
-from fiatlight.fiat_widgets import osd_widgets
+from fiatlight.fiat_widgets import osd_widgets, fontawesome_6_ctx, icons_fontawesome_6
 from fiatlight.fiat_utils import functional_utils
-from imgui_bundle import immapp, imgui, imgui_ctx, ImVec4
-from typing import Any
+from imgui_bundle import immapp, imgui, imgui_ctx, ImVec4, portable_file_dialogs as pfd
+from typing import Any, Callable
 from imgui_bundle import hello_imgui, ImVec2, immvision
 
 import json
@@ -83,6 +83,11 @@ class FiatGui:
     _info_dock_space_id: str = "info_dock"
     _idx_frame: int = 0
 
+    save_dialog: pfd.save_file | None = None
+    save_dialog_callback: Callable[[str], None] | None = None
+    load_dialog: pfd.open_file | None = None
+    load_dialog_callback: Callable[[str], None] | None = None
+
     def __init__(self, functions_graph: FunctionsGraph, params: FiatGuiParams | None = None) -> None:
         if params is None:
             # params.runner_params.app_window_params.window_title
@@ -121,17 +126,30 @@ class FiatGui:
                     text_size = ImVec2(imgui.get_window_width(), immapp.em_size(nb_lines))
                     imgui.input_text_multiline("##error", msg, text_size)
 
-    def _draw_info_panel(self) -> None:
-        with imgui_ctx.push_obj_id(self):
-            if imgui.begin_tab_bar("InfoPanelTabBar"):
-                if imgui.begin_tab_item_simple("Exceptions"):
-                    self._draw_exceptions()
-                    imgui.end_tab_item()
-                imgui.end_tab_bar()
-
     def _top_toolbar(self) -> None:
-        if imgui.button("Reset graph layout"):
-            self._functions_graph_gui.shall_layout_graph = True
+        btn_size = hello_imgui.em_to_vec2(2, 2)
+        layout_width = imgui.get_window_width() - hello_imgui.em_size(0.5)
+        with imgui_ctx.begin_horizontal("TopToolbar", ImVec2(layout_width, 0)):
+            with fontawesome_6_ctx():
+                # Layout graph
+                if imgui.button(icons_fontawesome_6.ICON_FA_SITEMAP, btn_size):
+                    self._functions_graph_gui.shall_layout_graph = True
+                if imgui.is_item_hovered():
+                    imgui.set_tooltip("Layout graph")
+
+                imgui.spring()
+
+                # Load and save user inputs
+                if imgui.button(icons_fontawesome_6.ICON_FA_FILE_PEN, btn_size):
+                    self.save_dialog = pfd.save_file(title="Save user inputs")
+                    self.save_dialog_callback = lambda filename: self._save_user_inputs(filename)
+                if imgui.is_item_hovered():
+                    imgui.set_tooltip("Save user inputs")
+                if imgui.button(icons_fontawesome_6.ICON_FA_FILE_IMPORT, btn_size):
+                    self.load_dialog = pfd.open_file(title="Load user inputs")
+                    self.load_dialog_callback = lambda filename: self._load_user_inputs(filename)
+                if imgui.is_item_hovered():
+                    imgui.set_tooltip("Load user inputs")
 
     def _draw_functions_graph(self) -> None:
         self._idx_frame += 1
@@ -144,6 +162,22 @@ class FiatGui:
             self._functions_graph_gui.draw()
 
         osd_widgets.render()
+        self._handle_file_dialogs()
+
+    def _handle_file_dialogs(self) -> None:
+        if self.save_dialog is not None and self.save_dialog.ready():
+            selected_filename = self.save_dialog.result()
+            if len(selected_filename) > 0:
+                if self.save_dialog_callback is not None:
+                    self.save_dialog_callback(selected_filename)
+            self.save_dialog = None
+
+        if self.load_dialog is not None and self.load_dialog.ready():
+            selected_filenames = self.load_dialog.result()
+            if len(selected_filenames) > 0:
+                if self.load_dialog_callback is not None:
+                    self.load_dialog_callback(selected_filenames[0])
+            self.load_dialog = None
 
     def _dockable_windows(self) -> List[hello_imgui.DockableWindow]:
         main_window = hello_imgui.DockableWindow(
@@ -151,12 +185,7 @@ class FiatGui:
             dock_space_name_=self._main_dock_space_id,
             gui_function_=lambda: self._draw_functions_graph(),
         )
-        info_window = hello_imgui.DockableWindow(
-            label_="Functions Graph Info",
-            dock_space_name_=self._info_dock_space_id,
-            gui_function_=lambda: self._draw_info_panel(),
-        )
-        r = [main_window, info_window]
+        r = [main_window]
         if self.params.show_image_inspector:
             image_inspector = hello_imgui.DockableWindow(
                 label_="Image Inspector",
@@ -179,18 +208,22 @@ class FiatGui:
     def _node_state_filename(self) -> str:
         return hello_imgui.ini_settings_location(self.params.runner_params)[:-4] + ".fiatlight.json"
 
-    def _save_state(self) -> None:
+    def _save_user_inputs(self, filename: str) -> None:
+        has_extension = "." in filename
+        if not has_extension:
+            filename += ".fiatlight.json"
+
         json_data = self._functions_graph_gui.save_user_inputs_to_json()
         try:
-            with open(self._node_state_filename(), "w") as f:
+            with open(filename, "w") as f:
                 json_str = json.dumps(json_data, indent=4)
                 f.write(json_str)
         except Exception as e:
             logging.error(f"FiatGui: Error saving state file {self._node_state_filename()}: {e}")
 
-    def _load_state(self) -> None:
+    def _load_user_inputs(self, filename: str) -> None:
         try:
-            with open(self._node_state_filename(), "r") as f:
+            with open(filename, "r") as f:
                 json_data = json.load(f)
         except (FileNotFoundError, json.JSONDecodeError):
             logging.info(f"FiatGui: state file {self._node_state_filename()} not found, using default state")
@@ -198,25 +231,25 @@ class FiatGui:
 
         try:
             self._functions_graph_gui.load_user_inputs_from_json(json_data)
+            self._functions_graph_gui.functions_graph.invoke_top_leaf_functions()
         except Exception as e:
             logging.error(f"FiatGui: Error loading state file {self._node_state_filename()}: {e}")
 
     def _post_init(self) -> None:
-        self._load_state()
-        self._functions_graph_gui.functions_graph.invoke_top_leaf_functions()
+        self._load_user_inputs(self._node_state_filename())
 
     def run(self) -> None:
         self.params.runner_params.docking_params.docking_splits += self._docking_splits()
         self.params.runner_params.docking_params.dockable_windows += self._dockable_windows()
 
         self.params.runner_params.callbacks.before_exit = functional_utils.sequence_void_functions(
-            self._save_state, self.params.runner_params.callbacks.before_exit
+            lambda: self._save_user_inputs(self._node_state_filename()), self.params.runner_params.callbacks.before_exit
         )
         self.params.runner_params.callbacks.post_init = functional_utils.sequence_void_functions(
             self._post_init, self.params.runner_params.callbacks.post_init
         )
 
-        from fiatlight.fiat_widgets.fontawesome6_ctx import _load_font_awesome_6
+        from fiatlight.fiat_widgets.fontawesome6_ctx_utils import _load_font_awesome_6
 
         self.params.runner_params.callbacks.load_additional_fonts = functional_utils.sequence_void_functions(
             hello_imgui.imgui_default_settings.load_default_font_with_font_awesome_icons, _load_font_awesome_6
