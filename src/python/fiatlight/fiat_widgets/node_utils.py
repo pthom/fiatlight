@@ -1,54 +1,9 @@
 from imgui_bundle import imgui
-from fiatlight.fiat_utils.registry import AutoRegistry
 from imgui_bundle import imgui_node_editor as ed, ImVec2, hello_imgui
 from typing import Callable
-from dataclasses import dataclass
 
 
 GuiFunction = Callable[[], None]
-
-
-@dataclass
-class _RightAlignData:
-    parent_width: float = 0
-    item_width: float = 0
-
-
-class _RightAlign:
-    align_datas: AutoRegistry[_RightAlignData]
-
-    def __init__(self) -> None:
-        self.align_datas = AutoRegistry(_RightAlignData)
-
-    def right_align(self, item_id: int, parent_width: float, gui_function: GuiFunction) -> None:
-        right_align_data = self.align_datas.get(item_id)
-        pos_x = 1000.0
-        right_margin = hello_imgui.em_size(0.8)
-        if parent_width == right_align_data.parent_width and right_align_data.item_width > 0:
-            pos_x = parent_width - right_align_data.item_width - right_margin
-
-        dc = imgui.get_current_context().current_window.dc
-        cursor_max_pos_x = dc.cursor_max_pos.x
-        cursor_pos_prev_line_x = dc.cursor_pos_prev_line.x
-
-        imgui.same_line(pos_x)
-        imgui.begin_group()
-        gui_function()
-        imgui.end_group()
-        dc.cursor_max_pos.x = cursor_max_pos_x
-        dc.cursor_pos_prev_line.x = cursor_pos_prev_line_x
-
-        right_align_data.item_width = imgui.get_item_rect_size().x
-        right_align_data.parent_width = parent_width
-
-
-_RIGHT_ALIGN = _RightAlign()
-
-
-def draw_node_gui_right_align(parent_node: ed.NodeId, gui_function: GuiFunction) -> None:
-    parent_size = ed.get_node_size(parent_node)
-    item_id = imgui.get_id("align_right")  # will be unique for each item, since imgui.push_id is used before
-    _RIGHT_ALIGN.right_align(item_id, parent_size.x, gui_function)
 
 
 def node_separator(parent_node: ed.NodeId, text: str = "") -> None:
@@ -92,29 +47,3 @@ def node_separator(parent_node: ed.NodeId, text: str = "") -> None:
         imgui.text(text)
         imgui.set_cursor_screen_pos(orig_cursor_pos)
     imgui.dummy(ImVec2(0, spacing_y))
-
-
-def sandbox() -> None:
-    from imgui_bundle import immapp
-
-    node_id = ed.NodeId(1)
-
-    def gui() -> None:
-        ed.begin("editor")
-        ed.begin_node(node_id)
-
-        imgui.dummy(ImVec2(100, 10))
-
-        imgui.text("ABCDEFGHUDD")
-        imgui.same_line()
-
-        draw_node_gui_right_align(node_id, lambda: imgui.text("Right Align"))
-
-        ed.end_node()
-        ed.end()
-
-    immapp.run(gui, with_node_editor=True)
-
-
-if __name__ == "__main__":
-    sandbox()
