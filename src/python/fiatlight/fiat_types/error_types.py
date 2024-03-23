@@ -1,10 +1,3 @@
-from typing import Callable, Any, TypeAlias, TypeVar, NewType
-
-Function: TypeAlias = Callable[..., Any]
-VoidFunction = Callable[[], None]
-BoolFunction = Callable[[], bool]
-
-
 class Unspecified:
     """A marker for an unspecified value, used as a default value for AnyDataWithGui.
     It is akin to None, but it is used to signal that the value has not been set yet.
@@ -35,17 +28,3 @@ class Error:
 
 
 ErrorValue = Error(42)
-
-DataType = TypeVar("DataType")
-
-JsonPrimitive = str | int | float | bool | None
-JsonDict = dict[str, Any]
-JsonPrimitiveOrDict = JsonPrimitive | JsonDict
-
-GlobalsDict: TypeAlias = dict[str, Any]
-LocalsDict: TypeAlias = dict[str, Any]
-
-
-FilePath = NewType("FilePath", str)
-ImagePath = NewType("ImagePath", str)
-TextPath = NewType("TextPath", str)
