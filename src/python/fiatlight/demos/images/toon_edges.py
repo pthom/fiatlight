@@ -1,5 +1,6 @@
 from fiatlight.fiat_image import ImageU8, ImageU8_GRAY, ImageU8_3
 from fiatlight.fiat_image import fiat_img_proc
+from fiatlight import fiat_types
 import fiatlight
 import cv2
 import numpy as np
@@ -91,11 +92,19 @@ def add_toon_edges(
     return image, edges, dilated_edges, image_with_edges
 
 
-def main():
+def image_source(image_file: fiat_types.ImagePath = fiatlight.demo_assets_dir() + "/images/house.jpg") -> ImageU8:  # type: ignore
+    image = cv2.imread(image_file)
+    if image.shape[0] > 1000:
+        k = 1000 / image.shape[0]
+        image = cv2.resize(image, (0, 0), fx=k, fy=k)
+    return image  # type: ignore
+
+
+def main() -> None:
     # image = fiatlight.demo_assets_dir() + "/images/house.jpg"
     # image = cv2.imread(image)
 
-    graph = fiatlight.FunctionsGraph.from_function_composition([add_toon_edges])
+    graph = fiatlight.FunctionsGraph.from_function_composition([image_source, add_toon_edges])
     fiatlight.fiat_run(graph)
 
 
