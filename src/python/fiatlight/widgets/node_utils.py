@@ -73,7 +73,7 @@ def node_separator(parent_node: ed.NodeId, text: str = "") -> None:
 
     def draw_line(p1: ImVec2, p2: ImVec2) -> None:
         color32 = get_color32(imgui.Col_.separator)
-        imgui.get_foreground_draw_list().add_line(ed.canvas_to_screen(p1), ed.canvas_to_screen(p2), color32, thickness)
+        imgui.get_window_draw_list().add_line(p1, p2, color32, thickness)
 
     if len(text) == 0:
         draw_line(p1, p2)
