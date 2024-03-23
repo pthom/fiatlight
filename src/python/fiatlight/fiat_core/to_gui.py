@@ -8,7 +8,7 @@ from enum import Enum
 
 import inspect
 import logging
-from typing import TypeAlias, Callable, Any, Dict, Tuple
+from typing import TypeAlias, Callable, Any, Dict, Tuple, List
 
 
 GuiFactory = Callable[[], AnyDataWithGui[DataType]]
@@ -56,6 +56,43 @@ def _extract_list_typeclass(type_class_name: str) -> Tuple[bool, str]:
     return False, type_class_name
 
 
+def _parse_typeclasses_list(type_class_name: str) -> List[str]:
+    """
+    Parse a string representing a list of type classes.
+    :param type_class_name:
+    :return: a list of type classes
+
+    Is able to parse the following formats:
+        int, float, str               -> ['int', 'float', 'str']
+        int, numpy.ndarray[typing.Any, numpy.dtype[numpy.uint8]]    -> ['int', 'numpy.ndarray[typing.Any, numpy.dtype[numpy.uint8]]']
+    """
+    type_classes = []
+    current_type_class = ""
+    current_brackets = 0
+    for c in type_class_name:
+        if c == "," and current_brackets == 0:
+            type_classes.append(current_type_class.strip())
+            current_type_class = ""
+        else:
+            current_type_class += c
+            if c == "[":
+                current_brackets += 1
+            elif c == "]":
+                current_brackets -= 1
+    type_classes.append(current_type_class.strip())
+    return type_classes
+
+
+def _extract_tuple_typeclasses(type_class_name: str) -> Tuple[bool, List[str]]:
+    possible_tuple_names = ["typing.Tuple[", "Tuple[", "tuple["]
+    for tuple_name in possible_tuple_names:
+        if type_class_name.startswith(tuple_name) and type_class_name.endswith("]"):
+            inner_type_str = type_class_name[len(tuple_name) : -1]
+            inner_type_strs = _parse_typeclasses_list(inner_type_str)
+            return True, inner_type_strs
+    return False, []
+
+
 def any_typeclass_to_gui(
     type_class_name: str, *, globals_dict: GlobalsDict | None = None, locals_dict: LocalsDict | None = None
 ) -> AnyDataWithGui[Any]:
@@ -97,6 +134,19 @@ def any_typeclass_to_gui(
         logging.warning(f"Type {type_class_name} not present in ALL_GUI_FACTORIES")
         _COMPLAINTS_MISSING_GUI_FACTORY.append(type_class_name)
     return AnyDataWithGui.make_default()
+
+
+def any_typeclass_to_gui_split_if_tuple(
+    type_class_name: str, *, globals_dict: GlobalsDict | None = None, locals_dict: LocalsDict | None = None
+) -> List[AnyDataWithGui[Any]]:
+    r = []
+    is_tuple, inner_type_classes = _extract_tuple_typeclasses(type_class_name)
+    if is_tuple:
+        for inner_type_class in inner_type_classes:
+            r.append(any_typeclass_to_gui(inner_type_class, globals_dict=globals_dict, locals_dict=locals_dict))
+    else:
+        r.append(any_typeclass_to_gui(type_class_name, globals_dict=globals_dict, locals_dict=locals_dict))
+    return r
 
 
 def to_data_with_gui(value: DataType) -> AnyDataWithGui[DataType]:
@@ -163,21 +213,13 @@ def to_function_with_gui(
 
     return_annotation = sig.return_annotation
     if return_annotation is inspect.Parameter.empty:
-        data_with_gui = AnyDataWithGui.make_default()
-        function_with_gui.outputs_with_gui.append(OutputWithGui(data_with_gui))
+        output_with_gui = AnyDataWithGui.make_default()
+        function_with_gui.outputs_with_gui.append(OutputWithGui(output_with_gui))
     else:
         return_annotation_str = str(return_annotation)
-        is_tuple = return_annotation_str.startswith("typing.Tuple") or return_annotation_str.startswith("tuple")
-        if is_tuple:
-            return_annotation_inner_str = return_annotation_str[return_annotation_str.index("[") + 1 : -1]
-            tuple_type_annotation_strs = return_annotation_inner_str.split(", ")
-            tuple_type_annotations = [eval(annotation_str) for annotation_str in tuple_type_annotation_strs]
-            for i, annotation in enumerate(tuple_type_annotations):
-                data_with_gui = any_typeclass_to_gui(str(annotation))
-                function_with_gui.outputs_with_gui.append(OutputWithGui(data_with_gui))
-        else:
-            data_with_gui = any_typeclass_to_gui(str(sig.return_annotation))
-            function_with_gui.outputs_with_gui.append(OutputWithGui(data_with_gui))
+        outputs_with_guis = any_typeclass_to_gui_split_if_tuple(return_annotation_str)
+        for output_with_gui in outputs_with_guis:
+            function_with_gui.outputs_with_gui.append(OutputWithGui(output_with_gui))
 
     return function_with_gui
 
