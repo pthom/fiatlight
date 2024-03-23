@@ -85,7 +85,7 @@ def oil_paint(image: ImageU8, size: int = 1, dynRatio: int = 3) -> ImageU8:
 
 
 def main() -> None:
-    stable_diffusion_xl_gui = fiatlight.any_function_to_function_with_gui(stable_diffusion_xl)
+    stable_diffusion_xl_gui = fiatlight.to_function_with_gui(stable_diffusion_xl)
     stable_diffusion_xl_gui.invoke_automatically = False
     prompt_input = stable_diffusion_xl_gui.input_of_name("prompt")
     assert isinstance(prompt_input, fiat_core.StrWithGui)

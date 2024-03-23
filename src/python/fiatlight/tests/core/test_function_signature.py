@@ -110,9 +110,9 @@ def test_get_function_signature() -> None:
 
 
 def test_wrap_signature_to_gui() -> None:
-    from fiatlight.fiat_core import any_function_to_function_with_gui
+    from fiatlight.fiat_core import to_function_with_gui
 
-    sorted_gui = any_function_to_function_with_gui(
+    sorted_gui = to_function_with_gui(
         sorted, signature_string="(words: List[str], /, reverse: bool = False) -> List[str]"
     )
 

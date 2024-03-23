@@ -2,7 +2,7 @@ from fiatlight.fiat_core.fiatlight_style_definitions import fiatlight_style, Fia
 from fiatlight.fiat_core.any_data_gui_callbacks import AnyDataGuiCallbacks
 from fiatlight.fiat_core.any_data_with_gui import AnyDataWithGui
 from fiatlight.fiat_core.function_with_gui import ParamKind, ParamWithGui, OutputWithGui, FunctionWithGui
-from fiatlight.fiat_core.to_gui import any_function_to_function_with_gui, gui_factories
+from fiatlight.fiat_core.to_gui import to_function_with_gui, gui_factories
 from fiatlight.fiat_core.function_node import FunctionNode, FunctionNodeLink
 from fiatlight.fiat_core.functions_graph import FunctionsGraph
 from fiatlight.fiat_core.function_signature import get_function_signature
@@ -36,7 +36,7 @@ __all__ = [
     "OutputWithGui",
     "FunctionWithGui",
     # from to_gui
-    "any_function_to_function_with_gui",
+    "to_function_with_gui",
     "gui_factories",
     # from function_node
     "FunctionNode",

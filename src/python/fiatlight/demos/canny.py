@@ -103,7 +103,7 @@ def canny_with_gui() -> fiatlight.FunctionWithGui:
     """Convert canny to a function with GUI,
     then customize min / max values for the input parameters in the GUI of the canny node
     """
-    canny_gui = fiatlight.any_function_to_function_with_gui(canny)
+    canny_gui = fiatlight.to_function_with_gui(canny)
 
     # t_lower between 0 and 255
     t_lower_input = canny_gui.input_of_name("t_lower")

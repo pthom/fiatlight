@@ -1,10 +1,10 @@
 from fiatlight.fiat_types import UnspecifiedValue, Unspecified
-from fiatlight.fiat_core import any_function_to_function_with_gui, AnyDataWithGui
+from fiatlight.fiat_core import to_function_with_gui, AnyDataWithGui
 from typing import List
 
 
 def test_create_function_with_gui() -> None:
-    from fiatlight.fiat_core.to_gui import any_function_to_function_with_gui
+    from fiatlight.fiat_core.to_gui import to_function_with_gui
     from fiatlight.fiat_core.to_gui import gui_factories
 
     class Foo:
@@ -23,7 +23,7 @@ def test_create_function_with_gui() -> None:
     def add(foo: Foo) -> int:
         return foo.a
 
-    add_gui = any_function_to_function_with_gui(add)
+    add_gui = to_function_with_gui(add)
     add_gui.inputs_with_gui[0].data_with_gui.value = Foo(2)
     add_gui.invoke()
     assert add_gui.outputs_with_gui[0].data_with_gui.value == 2
@@ -33,7 +33,7 @@ def test_serialization() -> None:
     def add(a: int, b: int) -> int:
         return a + b
 
-    add_gui = any_function_to_function_with_gui(add)
+    add_gui = to_function_with_gui(add)
     add_gui.invoke()
     assert isinstance(add_gui.outputs_with_gui[0].data_with_gui.value, Unspecified)
 
@@ -66,7 +66,7 @@ def test_with_list() -> None:
     def sum_list(x: List[int]) -> int:
         return sum(x)
 
-    sum_list_gui = any_function_to_function_with_gui(sum_list)
+    sum_list_gui = to_function_with_gui(sum_list)
     sum_list_gui.inputs_with_gui[0].data_with_gui.value = [1, 2, 3]
     sum_list_gui.invoke()
     assert sum_list_gui.outputs_with_gui[0].data_with_gui.value == 6

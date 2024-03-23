@@ -7,7 +7,7 @@ def f(prompt: str) -> int:
 
 
 def main() -> None:
-    f_gui = fiatlight.any_function_to_function_with_gui(f)
+    f_gui = fiatlight.to_function_with_gui(f)
     prompt_input = f_gui.input_of_name("prompt")
     assert isinstance(prompt_input, fiat_core.StrWithGui)
     prompt_input.params.edit_type = fiat_core.StrEditType.multiline
