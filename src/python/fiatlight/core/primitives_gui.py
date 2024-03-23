@@ -361,7 +361,8 @@ class StrWithGui(AnyDataWithGui[str]):
                 changed = True
                 self.changed_in_popup = False
 
-            def popup_edit():
+            def popup_edit() -> None:
+                assert isinstance(self.value, str)
                 size = hello_imgui.em_to_vec2(self.params.width_em, self.params.height_em)
                 self.changed_in_popup, self.value = imgui.input_text_multiline(
                     self.params.label,
