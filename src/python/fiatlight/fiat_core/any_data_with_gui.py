@@ -104,7 +104,7 @@ class AnyDataWithGui(Generic[DataType]):
             self.value.__dict__.update(json_data["value"])
         elif json_data["type"] == "Tuple":
             as_list = json_data["value"]
-            self.value = tuple(as_list)
+            self.value = tuple(as_list)  # type: ignore
         elif json_data["type"] == "List":
             logging.warning("List deserialization not implemented yet")
             return

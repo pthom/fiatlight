@@ -22,6 +22,7 @@ from fiatlight.fiat_types.fiat_number_types import (
     Int_0_100,
     Int_0_255,
 )
+from fiatlight.fiat_types.color_types import ColorRgb, ColorRgba
 
 __all__ = [
     # from error_types
@@ -56,4 +57,7 @@ __all__ = [
     "Int_0_10",
     "Int_0_100",
     "Int_0_255",
+    # from color_types
+    "ColorRgb",
+    "ColorRgba",
 ]

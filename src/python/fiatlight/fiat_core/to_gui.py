@@ -96,6 +96,7 @@ def _extract_tuple_typeclasses(type_class_name: str) -> Tuple[bool, List[str]]:
 def any_typeclass_to_gui(
     type_class_name: str, *, globals_dict: GlobalsDict | None = None, locals_dict: LocalsDict | None = None
 ) -> AnyDataWithGui[Any]:
+    # logging.warning(f"any_typeclass_to_gui: {type_class_name}")
     if type_class_name.startswith("<class '") and type_class_name.endswith("'>"):
         type_class_name = type_class_name[8:-2]
 
@@ -242,6 +243,8 @@ class GuiFactories:
             "FilePath": primitives_gui.FilePathWithGui,
             "TextPath": primitives_gui.TextPathWithGui,
             "fiatlight.fiat_types.str_types.ImagePath": primitives_gui.ImagePathWithGui,
+            "fiatlight.fiat_types.color_types.ColorRgb": primitives_gui.ColorRgbWithGui,
+            "fiatlight.fiat_types.color_types.ColorRgba": primitives_gui.ColorRgbaWithGui,
         }
 
         #
