@@ -215,11 +215,20 @@ class FunctionsGraph:
             fn = self.function_node_with_unique_name(unique_name)
             fn.load_user_inputs_from_json(fn_json)
 
-    def invoke_top_leaf_functions(self) -> None:
-        """Invoke all the leaves of the graph"""
+    def invoke_all_functions(self) -> None:
+        """Invoke all the functions of the graph"""
+
+        # We need to do this in two steps:
+        # 1. Mark all functions as dirty (so that the call to invoke_function will actually call the function)
         for fn in self.functions_nodes:
-            if len(fn.input_links) == 0:
-                fn.function_with_gui.dirty = True
+            fn.function_with_gui.dirty = True
+
+        # 2. Invoke all the functions
+        # This is done in a separate loop because the functions may depend on each other,
+        # and a call to fn.invoke_function() may trigger a call to other functions
+        # (and mark them as not dirty anymore as a side effect)
+        for fn in self.functions_nodes:
+            if fn.function_with_gui.dirty:
                 fn.invoke_function()
 
 
