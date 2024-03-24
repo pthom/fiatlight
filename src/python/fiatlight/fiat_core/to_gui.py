@@ -41,7 +41,7 @@ def _extract_enum_typeclass(
         type_class = eval(type_class_name, globals_dict, locals_dict)
         if issubclass(type_class, Enum):
             return True, type_class_name
-    except (NameError, AttributeError, SyntaxError):
+    except (NameError, AttributeError, SyntaxError, TypeError):
         logging.debug(f"_extract_enum_typeclass: failed to evaluate {type_class_name}")
     return False, type_class_name
 
