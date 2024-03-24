@@ -1,6 +1,7 @@
 from imgui_bundle import imgui, hello_imgui, imgui_knobs, imgui_toggle, portable_file_dialogs as pfd, ImVec2
 from fiatlight.fiat_core import AnyDataWithGui
 from fiatlight.fiat_types import FilePath
+from fiatlight.fiat_types.color_types import ColorRgb, ColorRgba
 from typing import Any, Callable, TypeAlias
 from dataclasses import dataclass
 from enum import Enum
@@ -431,31 +432,74 @@ class TextPathWithGui(FilePathWithGui):
 
 
 ########################################################################################################################
-#                               __all__
+#                               ColorRbg and ColorRgba
 ########################################################################################################################
+class ColorRgbWithGui(AnyDataWithGui[ColorRgb]):
+    def __init__(self) -> None:
+        super().__init__()
+        self.callbacks.edit = self.edit
+        self.callbacks.default_value_provider = lambda: ColorRgb((0, 0, 0))
+        self.callbacks.present_str = self.present_str
 
-__all__ = [
-    # Ints
-    "IntWithGuiParams",
-    "IntEditType",
-    "IntWithGui",
-    # Floats
-    "FloatWithGuiParams",
-    "FloatEditType",
-    "FloatWithGui",
-    "ImGuiKnobVariant_",
-    # Str
-    "StrWithGuiParams",
-    "StrEditType",
-    "StrWithGui",
-    # Bool
-    "ToggleConfig",
-    "BoolWithGuiParams",
-    "BoolEditType",
-    "BoolWithGui",
-]
+    def edit(self) -> bool:
+        assert isinstance(self.value, tuple)
+        assert len(self.value) == 3
+        value = self.value
+        value_as_floats = [value[0] / 255.0, value[1] / 255.0, value[2] / 255.0]
+
+        imgui.text("Edit")
+
+        picker_flags_std = imgui.ColorEditFlags_.no_side_preview.value
+        picker_flags_wheel = imgui.ColorEditFlags_.picker_hue_wheel.value | imgui.ColorEditFlags_.no_inputs.value
+
+        imgui.set_next_item_width(hello_imgui.em_size(8))
+        changed1, value_as_floats = imgui.color_picker3("##color", value_as_floats, picker_flags_std)
+        imgui.same_line()
+        imgui.set_next_item_width(hello_imgui.em_size(8))
+        changed2, value_as_floats = imgui.color_picker3("##color", value_as_floats, picker_flags_wheel)
+        if changed1 or changed2:
+            self.value = ColorRgb(
+                (
+                    int(value_as_floats[0] * 255),
+                    int(value_as_floats[1] * 255),
+                    int(value_as_floats[2] * 255),
+                )
+            )
+            return True
+        else:
+            return False
+
+    @staticmethod
+    def present_str(value: ColorRgb) -> str:
+        return f"R: {value[0]}, G: {value[1]}, B: {value[2]}"
 
 
-########################################################################################################################
-#                              sandbox
-########################################################################################################################
+class ColorRgbaWithGui(AnyDataWithGui[ColorRgba]):
+    def __init__(self) -> None:
+        super().__init__()
+        self.callbacks.edit = self.edit
+        self.callbacks.default_value_provider = lambda: ColorRgba((0, 0, 0, 255))
+        self.callbacks.present_str = self.present_str
+
+    def edit(self) -> bool:
+        assert isinstance(self.value, tuple)
+        assert len(self.value) == 4
+        value = self.value
+        value_as_floats = [value[0] / 255.0, value[1] / 255.0, value[2] / 255.0, value[3] / 255.0]
+        changed, value_as_floats = imgui.color_edit4("##color", value_as_floats)
+        if changed:
+            self.value = ColorRgba(
+                (
+                    int(value_as_floats[0] * 255),
+                    int(value_as_floats[1] * 255),
+                    int(value_as_floats[2] * 255),
+                    int(value_as_floats[3] * 255),
+                )
+            )
+            return True
+        else:
+            return False
+
+    @staticmethod
+    def present_str(value: ColorRgba) -> str:
+        return f"R: {value[0]}, G: {value[1]}, B: {value[2]}, A: {value[3]}"
