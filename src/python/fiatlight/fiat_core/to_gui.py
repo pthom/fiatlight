@@ -150,9 +150,14 @@ def any_typeclass_to_gui_split_if_tuple(
     return r
 
 
-def to_data_with_gui(value: DataType) -> AnyDataWithGui[DataType]:
+def to_data_with_gui(
+    value: DataType,
+    *,
+    globals_dict: GlobalsDict | None = None,
+    locals_dict: LocalsDict | None = None,
+) -> AnyDataWithGui[DataType]:
     type_class_name = str(type(value))
-    r = any_typeclass_to_gui(type_class_name)
+    r = any_typeclass_to_gui(type_class_name, globals_dict=globals_dict, locals_dict=locals_dict)
     r.value = value
     return r
 
