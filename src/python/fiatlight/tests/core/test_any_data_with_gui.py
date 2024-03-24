@@ -62,3 +62,18 @@ def test_custom_data_with_gui_serialization() -> None:
     assert named_data.name == "foo"
     assert isinstance(named_data.data_with_gui.value, Foo)
     assert named_data.data_with_gui.value.x == 3
+
+
+def test_enum_serialization() -> None:
+    from enum import Enum
+
+    class MyEnum(Enum):
+        A = 1
+        B = 2
+
+    a = to_data_with_gui(MyEnum.A, globals_dict=globals(), locals_dict=locals())
+    assert a.value == MyEnum.A
+    as_json = a.save_to_json()
+    assert as_json == {"class": "MyEnum", "type": "Enum", "value_name": "A"}
+    a.load_from_json({"class": "MyEnum", "type": "Enum", "value_name": "B"})
+    assert a.value == MyEnum.B
