@@ -1,3 +1,4 @@
+from fiatlight.fiat_config import get_fiat_config
 from fiatlight.fiat_types import UnspecifiedValue, ErrorValue, Unspecified, Error, JsonDict, DataType
 from fiatlight.fiat_core.any_data_with_gui import AnyDataWithGui
 from typing import Any, List, final, Callable, Optional, Generic
@@ -130,15 +131,18 @@ class FunctionWithGui:
                 for i, output_with_gui in enumerate(self.outputs_with_gui):
                     output_with_gui.data_with_gui.value = fn_output[i]
         except Exception as e:
-            self.last_exception_message = str(e)
-            import traceback
-            import sys
+            if not get_fiat_config().exception_config.catch_function_exceptions:
+                raise e
+            else:
+                self.last_exception_message = str(e)
+                import traceback
+                import sys
 
-            exc_type, exc_value, exc_traceback = sys.exc_info()
-            traceback_details = traceback.format_exception(exc_type, exc_value, exc_traceback)
-            self.last_exception_traceback = "".join(traceback_details)
-            for output_with_gui in self.outputs_with_gui:
-                output_with_gui.data_with_gui.value = ErrorValue
+                exc_type, exc_value, exc_traceback = sys.exc_info()
+                traceback_details = traceback.format_exception(exc_type, exc_value, exc_traceback)
+                self.last_exception_traceback = "".join(traceback_details)
+                for output_with_gui in self.outputs_with_gui:
+                    output_with_gui.data_with_gui.value = ErrorValue
 
         self.dirty = False
 
