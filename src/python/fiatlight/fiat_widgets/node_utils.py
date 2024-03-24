@@ -1,12 +1,15 @@
 from imgui_bundle import imgui
 from imgui_bundle import imgui_node_editor as ed, ImVec2, hello_imgui
-from typing import Callable
+from typing import Callable, Tuple
 
 
 GuiFunction = Callable[[], None]
 
 
-def node_separator(parent_node: ed.NodeId, text: str = "") -> None:
+def _node_separator(parent_node: ed.NodeId, text: str, show_collapse_button: bool, expanded: bool) -> Tuple[bool, bool]:
+    """Create a separator, possibly with a collapse button.
+    :return: tuple(was_expand_state_changed, is_expanded)
+    """
     node_size = ed.get_node_size(parent_node)
     node_pos = ed.get_node_position(parent_node)
 
@@ -19,6 +22,11 @@ def node_separator(parent_node: ed.NodeId, text: str = "") -> None:
     cur_pos = imgui.get_cursor_screen_pos()
     p1 = ImVec2(node_pos.x + spacing_x, cur_pos.y + spacing_y / 2)
     p2 = ImVec2(p1.x + node_size.x - 1.0 - 2 * spacing_x, p1.y)
+
+    btn_pos = ImVec2(p1.x + hello_imgui.em_size(0.1), p1.y - hello_imgui.em_size(0.6))
+
+    if show_collapse_button:
+        p1.x = btn_pos.x + hello_imgui.em_size(2)
 
     thickness = hello_imgui.em_size(0.2)
 
@@ -46,4 +54,46 @@ def node_separator(parent_node: ed.NodeId, text: str = "") -> None:
         imgui.set_cursor_screen_pos(p_text)
         imgui.text(text)
         imgui.set_cursor_screen_pos(orig_cursor_pos)
-    imgui.dummy(ImVec2(0, spacing_y))
+
+    if show_collapse_button:
+        from fiatlight.fiat_widgets import icons_fontawesome_6, fontawesome_6_ctx
+        from fiatlight.fiat_widgets import osd_widgets
+
+        with fontawesome_6_ctx():
+            imgui.set_cursor_pos(btn_pos)
+
+            if expanded:
+                visible = not imgui.button(icons_fontawesome_6.ICON_FA_EYE + "##" + text)
+                if imgui.is_item_hovered():
+                    osd_widgets.set_tooltip("Collapse all")
+                changed = visible != expanded
+                return changed, visible
+            else:
+                visible = imgui.button(icons_fontawesome_6.ICON_FA_EYE_SLASH + "##" + text)
+                if imgui.is_item_hovered():
+                    osd_widgets.set_tooltip("Expand all")
+                changed = visible != expanded
+                return changed, visible
+
+    else:
+        imgui.set_cursor_pos(ImVec2(cur_pos.x, cur_pos.y + spacing_y))
+        return False, True
+
+
+def node_separator(parent_node: ed.NodeId, text: str) -> None:
+    """Create a separator.
+    parent_node: The node that contains the separator.
+    text: The text to display in the separator.
+    """
+    _node_separator(parent_node, text, False, False)
+
+
+def node_collapsing_separator(parent_node: ed.NodeId, text: str, expanded: bool) -> Tuple[bool, bool]:
+    """Create a separator with a collapse button.
+    parent_node: The node that contains the separator.
+    text: The text to display in the separator.
+    collapsed: Whether the separator is collapsed.
+    return: tuple(was_expand_state_changed, is_expanded)
+    """
+    r = _node_separator(parent_node, text, True, expanded)
+    return r

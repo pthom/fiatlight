@@ -4,10 +4,10 @@ import numpy as np
 
 import fiatlight
 from fiatlight import FunctionsGraph, fiat_run
+from fiatlight.demos.ai.stable_diffusion_xl_wrapper import stable_diffusion_xl_gui
 from fiatlight.fiat_image import ImageU8
 
 from fiatlight.fiat_types import Float_0_1, ImagePath, Int_0_100, ColorRgb
-from fiatlight.demos.ai.stable_diffusion_xl_wrapper import stable_diffusion_xl_gui
 
 import cv2
 from PIL import Image, ImageDraw, ImageFont
@@ -78,8 +78,8 @@ def add_meme_text(
 
 def main() -> None:
     graph = FunctionsGraph.from_function_composition(
-        # [stable_diffusion_xl_gui(), fiat_image.lut_channels_in_colorspace, add_toon_edges, oil_paint]
         [stable_diffusion_xl_gui(), add_meme_text],
+        # [image_source, add_meme_text],
         locals_dict=locals(),
         globals_dict=globals(),
     )

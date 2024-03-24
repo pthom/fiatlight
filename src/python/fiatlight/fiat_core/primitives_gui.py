@@ -334,7 +334,7 @@ class StrWithGui(AnyDataWithGui[str]):
         self.callbacks.default_value_provider = lambda: ""
         self.callbacks.present_str = self.present_str
         if self.params.edit_type == StrEditType.multiline:
-            self.callbacks.edit_require_popup = True
+            self.callbacks.edit_popup_required = True
 
     @staticmethod
     def present_str(s: str) -> str:
@@ -358,7 +358,7 @@ class StrWithGui(AnyDataWithGui[str]):
                 self.params.user_data,
             )
         elif self.params.edit_type == StrEditType.multiline:
-            self.callbacks.edit_require_popup = True
+            self.callbacks.edit_popup_required = True
             assert isinstance(self.value, str)
             size = ImVec2(0, 0)
             size.x = imgui.get_window_width()
@@ -370,7 +370,7 @@ class StrWithGui(AnyDataWithGui[str]):
                 self.params.callback,
                 self.params.user_data,
             )
-            return changed
+        return changed
 
 
 ########################################################################################################################

@@ -27,12 +27,29 @@ class AnyDataGuiCallbacks(Generic[DataType]):
     # If not provided, the data will be presented using present_str
     present_custom: VoidFunction | None = None
 
+    # present_custom_popup_required (Optional: leave to False in most cases)
+    # If True, the present_custom function needs to be called in a popup window.
+    # This is due to a limitation of the node editor, which cannot render complex widgets
+    # in the node itself.
+    # By complex widgets, we mean widgets that require a scrollable area, or a child window, such as:
+    #      - imgui.input_text_multiline
+    #      - imgui.combo
+    #      - imgui.begin_child
+    present_custom_popup_required: bool = False
+
+    # present_custom_popup_possible (Optional: leave to False in most cases)
+    # If True, the present_custom function can be called in a popup window.
+    # Only used if you want to allow the user to see the data in a popup window
+    # (for example, to provide more space for a large text input, or for an image viewer)
+    # Note: if present_custom_popup_required is True, this flag is ignored
+    present_custom_popup_possible: bool = False
+
     # edit: (Mandatory if edition is required)
     # Provide a draw function that presents an editable interface for the data, and returns True if changed.
     # If not provided, the data will be presented as read-only
     edit: BoolFunction | None = None
 
-    # edit_require_popup:
+    # edit_popup_required (Optional: leave to False in most cases)
     # If True, the edit function needs to be called in a popup window.
     # This is due to a limitation of the node editor, which cannot render complex widgets
     # in the node itself.
@@ -40,7 +57,14 @@ class AnyDataGuiCallbacks(Generic[DataType]):
     #      - imgui.input_text_multiline
     #      - imgui.combo
     #      - imgui.begin_child
-    edit_require_popup: bool = False
+    edit_popup_required: bool = False
+
+    # edit_popup_possible (Optional: leave to False in most cases)
+    # If True, the edit function can be called in a popup window.
+    # Only used if you want to allow the user to edit the data in a popup window
+    # (for example, to provide more space for a large text input)
+    # Note: if edit_popup_required is True, this flag is ignored
+    edit_popup_possible: bool = False
 
     # default value provider (Mandatory if edition is required)
     # this function will be called to provide a default value if needed

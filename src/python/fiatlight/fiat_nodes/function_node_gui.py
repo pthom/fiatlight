@@ -96,6 +96,8 @@ class FunctionNodeGui:
     # user settings
     show_input_details: Dict[str, bool] = {}
     show_output_details: Dict[int, bool] = {}
+    inputs_expanded: bool = True
+    outputs_expanded: bool = True
 
     def __init__(self, function_node: FunctionNode) -> None:
         self.function_node = function_node
@@ -115,7 +117,7 @@ class FunctionNodeGui:
         }
         self.show_output_details = {i: True for i in range(len(self.function_node.function_with_gui.outputs_with_gui))}
 
-    def _call_gui_present(self, value_with_gui: AnyDataWithGui[Any]) -> None:
+    def _call_gui_present_custom(self, value_with_gui: AnyDataWithGui[Any]) -> None:
         value = value_with_gui.value
         fn_present = value_with_gui.callbacks.present_custom
         if not value_with_gui.can_present_custom():
@@ -449,6 +451,9 @@ class FunctionNodeGui:
             imgui.push_style_color(imgui.Col_.text.value, get_fiat_config().style.colors[FiatColorType.TextDirtyOutput])
         for idx_output, output_param in enumerate(self.function_node.function_with_gui.outputs_with_gui):
             with imgui_ctx.push_obj_id(output_param):
+                has_link = len(self.function_node.output_links_for_idx(idx_output)) > 0
+                if not has_link and not self.outputs_expanded:
+                    continue
                 with imgui_ctx.begin_group():
                     with imgui_ctx.begin_horizontal("outputH"):
                         self._draw_output_header_line(idx_output)
@@ -460,23 +465,77 @@ class FunctionNodeGui:
 
                         def present_output() -> None:
                             # Present output can be called either directly in this window or in a detached window
-                            self._call_gui_present(output_param_captured.data_with_gui)
+                            self._call_gui_present_custom(output_param_captured.data_with_gui)
 
-                        popup_label = f"detached view - {unique_name}: output {idx_output}"
-                        osd_widgets.show_void_popup_button("", popup_label, present_output)
-                        present_output()
+                        callbacks = output_param.data_with_gui.callbacks
+                        can_present_custom_in_node = not callbacks.present_custom_popup_required
+                        can_present_custom_in_popup = (
+                            callbacks.present_custom_popup_required or callbacks.present_custom_popup_possible
+                        )
+
+                        if can_present_custom_in_popup:
+                            popup_label = f"detached view - {unique_name}: output {idx_output}"
+                            osd_widgets.show_void_popup_button("", popup_label, present_output)
+
+                        if can_present_custom_in_node:
+                            present_output()
         if is_dirty:
             imgui.pop_style_color()
+
+    def _can_collapse_inputs(self) -> bool:
+        # We can only collapse inputs that do not have a link
+        # (since otherwise, the user would not be able to see the link status, and we have to display a pin anyway)
+        if len(self.function_node.function_with_gui.inputs_with_gui) == 0:
+            return False
+
+        nb_inputs_with_links = 0
+        for input_param in self.function_node.function_with_gui.inputs_with_gui:
+            if self.function_node.has_input_link(input_param.name):
+                nb_inputs_with_links += 1
+
+        nb_inputs = len(self.function_node.function_with_gui.inputs_with_gui)
+        return nb_inputs_with_links < nb_inputs
+
+    def _can_collapse_outputs(self) -> bool:
+        # We can only collapse outputs that do not have a link
+        # (since otherwise, the user would not be able to see the link status, and we have to display a pin anyway)
+        if len(self.function_node.function_with_gui.outputs_with_gui) <= 1:
+            return False
+
+        nb_outputs_with_links = 0
+        for i, output_param in enumerate(self.function_node.function_with_gui.outputs_with_gui):
+            if len(self.function_node.output_links_for_idx(i)) > 0:
+                nb_outputs_with_links += 1
+
+        nb_outputs = len(self.function_node.function_with_gui.outputs_with_gui)
+        return nb_outputs_with_links < nb_outputs
 
     def _draw_function_inputs(self, unique_name: str) -> bool:
         changed = False
 
         if len(self.function_node.function_with_gui.inputs_with_gui) > 0:
-            fiat_widgets.node_utils.node_separator(self.node_id, text="Params")
+            if self._can_collapse_inputs():
+                changed, self.inputs_expanded = fiat_widgets.node_utils.node_collapsing_separator(
+                    self.node_id, text="Params", expanded=self.inputs_expanded
+                )
+                if changed:
+                    for k, v in self.show_input_details.items():
+                        # We do not change the status of nodes that have a link
+                        # (since they are hidden by default in the inputs, visible by default in the outputs)
+                        has_link = self.function_node.has_input_link(k)
+                        if not has_link:
+                            self.show_input_details[k] = self.inputs_expanded
+            else:
+                self.inputs_expanded = True
+                fiat_widgets.node_utils.node_separator(self.node_id, "Params")
 
         for input_param in self.function_node.function_with_gui.inputs_with_gui:
             with imgui_ctx.push_obj_id(input_param):
                 input_name = input_param.name
+
+                has_link = self.function_node.has_input_link(input_name)
+                if not has_link and not self.inputs_expanded:
+                    continue
 
                 self._draw_input_header_line(input_param)
 
@@ -491,17 +550,21 @@ class FunctionNodeGui:
                             # Edit input can be called either directly in this window or in a detached window
                             return self._call_gui_edit(input_param_captured)
 
-                        can_edit_in_node = not input_param.data_with_gui.callbacks.edit_require_popup
+                        callbacks = input_param.data_with_gui.callbacks
+                        can_edit_in_node = not callbacks.edit_popup_required
+                        can_edit_in_popup = callbacks.edit_popup_required or callbacks.edit_popup_possible
                         popup_label = f"detached view - {unique_name}(): edit input '{input_param.name}'"
                         btn_label = "" if can_edit_in_node else "edit"
-                        osd_widgets.show_bool_popup_button(btn_label, popup_label, edit_input)
+
+                        if can_edit_in_popup:
+                            osd_widgets.show_bool_popup_button(btn_label, popup_label, edit_input)
 
                         # Now that we can have a detached view, there are two ways
                         # that can change the input value:
                         if can_edit_in_node and edit_input():
                             # 1. The user edits the input value in this window
                             changed = True
-                        if osd_widgets.get_popup_bool_return(btn_label):
+                        if can_edit_in_popup and osd_widgets.get_popup_bool_return(btn_label):
                             # 2. The user edits the input value in a detached window
                             changed = True
                     else:
@@ -513,47 +576,75 @@ class FunctionNodeGui:
 
                             def present_input() -> None:
                                 # Present input can be called either directly in this window or in a detached window
-                                self._call_gui_present(input_param_captured_2.data_with_gui)
+                                self._call_gui_present_custom(input_param_captured_2.data_with_gui)
 
-                            popup_label = f"detached view - {unique_name}() - input '{input_param.name}'"
-                            osd_widgets.show_void_popup_button("", popup_label, present_input)
-                            present_input()
+                            callbacks = input_param.data_with_gui.callbacks
+                            can_present_custom_in_node = not callbacks.present_custom_popup_required
+                            can_present_custom_in_popup = (
+                                callbacks.present_custom_popup_required or callbacks.present_custom_popup_possible
+                            )
+
+                            if can_present_custom_in_popup:
+                                popup_label = f"detached view - {unique_name}() - input '{input_param.name}'"
+                                osd_widgets.show_void_popup_button("", popup_label, present_input)
+
+                            if can_present_custom_in_node:
+                                present_input()
         return changed
 
     def draw_node(self, unique_name: str) -> None:
-        with ed_ctx.begin_node(self.node_id):
-            with imgui_ctx.begin_vertical("node_content"):
-                # Title and doc
-                with imgui_ctx.begin_horizontal("Title"):
-                    self._draw_title(unique_name)
-                imgui.dummy(ImVec2(hello_imgui.em_size(get_fiat_config().style.node_minimum_width_em), 1))
+        with imgui_ctx.push_obj_id(self.function_node):
+            with ed_ctx.begin_node(self.node_id):
+                with imgui_ctx.begin_vertical("node_content"):
+                    # Title and doc
+                    with imgui_ctx.begin_horizontal("Title"):
+                        self._draw_title(unique_name)
+                    imgui.dummy(ImVec2(hello_imgui.em_size(get_fiat_config().style.node_minimum_width_em), 1))
 
-                # Inputs
-                inputs_changed = self._draw_function_inputs(unique_name)
-                if inputs_changed:
-                    self.function_node.function_with_gui.dirty = True
-                    if self.function_node.function_with_gui.invoke_automatically:
-                        self.function_node.invoke_function()
+                    # Inputs
+                    inputs_changed = self._draw_function_inputs(unique_name)
+                    if inputs_changed:
+                        self.function_node.function_with_gui.dirty = True
+                        if self.function_node.function_with_gui.invoke_automatically:
+                            self.function_node.invoke_function()
 
-                # Outputs
-                output_separator_str = (
-                    "Outputs" if len(self.function_node.function_with_gui.outputs_with_gui) > 1 else "Output"
-                )
+                    #
+                    # Outputs
+                    #
 
-                fiat_widgets.node_utils.node_separator(self.node_id, text=output_separator_str)
-                with imgui_ctx.begin_horizontal("invoke_options"):
-                    imgui.spring()
-                    self._draw_invoke_options()
+                    # Outputs separator
+                    output_separator_str = (
+                        "Outputs" if len(self.function_node.function_with_gui.outputs_with_gui) > 1 else "Output"
+                    )
+                    if self._can_collapse_outputs():
+                        changed, self.outputs_expanded = fiat_widgets.node_utils.node_collapsing_separator(
+                            self.node_id, text=output_separator_str, expanded=self.outputs_expanded
+                        )
+                        if changed:
+                            for i, v in self.show_output_details.items():
+                                self.show_output_details[i] = self.outputs_expanded
+                    else:
+                        self.outputs_expanded = True
+                        fiat_widgets.node_utils.node_separator(self.node_id, output_separator_str)
 
-                # Exceptions, if any
-                self._draw_exception_message()
-                self._draw_function_outputs(unique_name)
-        self.node_size = ed.get_node_size(self.node_id)
+                    # Invoke options
+                    with imgui_ctx.begin_horizontal("invoke_options"):
+                        imgui.spring()
+                        self._draw_invoke_options()
+
+                    # Exceptions, if any
+                    self._draw_exception_message()
+
+                    # Outputs
+                    self._draw_function_outputs(unique_name)
+            self.node_size = ed.get_node_size(self.node_id)
 
     def save_gui_options_to_json(self) -> JsonDict:
         r = {
             "show_input_details": self.show_input_details,
             "show_output_details": self.show_output_details,
+            "inputs_expanded": self.inputs_expanded,
+            "outputs_expanded": self.outputs_expanded,
         }
         return r
 
@@ -567,6 +658,9 @@ class FunctionNodeGui:
         if show_output_details_as_dict_str_bool is not None:
             for k, v in show_output_details_as_dict_str_bool.items():
                 self.show_output_details[int(k)] = v
+
+        self.inputs_expanded = json_data.get("inputs_expanded", True)
+        self.outputs_expanded = json_data.get("outputs_expanded", True)
 
 
 def sandbox() -> None:
