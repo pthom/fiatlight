@@ -55,7 +55,7 @@ class _OsdWidgets:
         for popup_info in self.popups:
             window_flags = imgui.WindowFlags_.no_collapse.value
             imgui.set_next_window_pos(popup_info.location, imgui.Cond_.appearing.value)
-            imgui.set_next_window_size(hello_imgui.em_to_vec2(40, 15), imgui.Cond_.appearing.value)
+            imgui.set_next_window_size(hello_imgui.em_to_vec2(40, 30), imgui.Cond_.appearing.value)
             show, flag_open = imgui.begin(popup_info.popup_label, True, window_flags)
             if show and flag_open:
                 popup_info.bool_returned = popup_info.gui_function()
