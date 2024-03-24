@@ -1,6 +1,6 @@
 from typing import Tuple, Optional, TypeAlias
 import math
-from fiatlight import AnyDataWithGui
+from fiatlight.fiat_core import AnyDataWithGui
 from fiatlight.fiat_image import ImageU8
 from fiatlight.fiat_image.lut import LutParams, LutTable
 from imgui_bundle import immapp, imgui, immvision

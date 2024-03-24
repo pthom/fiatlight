@@ -137,8 +137,7 @@ class ListWithGui(AnyDataWithGui[List[DataType]]):
         max_elements = fiatlight_style().list_maximum_elements_in_node
         actual_value = self.get_actual_value()
 
-        if imgui.button("details"):
-            osd_widgets.add_popup("Details", self.popup_details)
+        osd_widgets.add_void_popup_button("Details", self.popup_details)
 
         txt = self._elements_str(actual_value, max_elements)
         imgui.text(txt)
