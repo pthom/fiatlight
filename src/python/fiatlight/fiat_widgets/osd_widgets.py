@@ -15,18 +15,18 @@ class _PopupInfo:
 class _OsdWidgets:
     """Private data for OSD widgets."""
 
-    tooltip: str | None = None
+    tooltip_str: str | None = None
     popups: list[_PopupInfo]
 
     def __init__(self) -> None:
-        self.tooltip = None
+        self.tooltip_str = None
         self.detail_gui = None
         self.popups = []
 
     def _render_tooltip(self) -> None:
-        if self.tooltip is not None:
-            imgui.set_tooltip(self.tooltip)
-            self.tooltip = None
+        if self.tooltip_str is not None:
+            imgui.set_tooltip(self.tooltip_str)
+            self.tooltip_str = None
 
     def _popup_render(self) -> None:
         alive_popups = []  # remove popups that are closed
@@ -99,13 +99,13 @@ class _OsdWidgets:
                 if imgui.button(icons_fontawesome_6.ICON_FA_CIRCLE_XMARK + " " + btn_label):
                     self._remove_popup(btn_label)
                 if imgui.is_item_hovered():
-                    self.tooltip = "Hide " + btn_label + " - " + popup_label
+                    self.tooltip_str = "Hide " + btn_label + " - " + popup_label
             else:
                 # if imgui.button(icons_fontawesome_6.ICON_FA_EYE + " " + btn_label):
                 if imgui.button(icons_fontawesome_6.ICON_FA_MAGNIFYING_GLASS_ARROW_RIGHT + " " + btn_label):
                     self._add_popup(btn_label, popup_label, gui_function, bool_returned)
                 if imgui.is_item_hovered():
-                    self.tooltip = "Show " + btn_label + " - " + popup_label
+                    self.tooltip_str = "Show " + btn_label + " - " + popup_label
 
     def show_bool_popup_button(self, btn_label: str, popup_label: str, gui_function: BoolFunction) -> None:
         self._add_popup_button(btn_label, popup_label, gui_function, False)
@@ -118,7 +118,7 @@ _OSD_WIDGETS = _OsdWidgets()
 
 
 def set_tooltip(tooltip: str) -> None:
-    _OSD_WIDGETS.tooltip = tooltip
+    _OSD_WIDGETS.tooltip_str = tooltip
 
 
 def show_bool_popup_button(btn_label: str, popup_label: str, gui_function: BoolFunction) -> None:
