@@ -124,22 +124,27 @@ class FunctionNodeGui:
         assert fn_present is not None
         fn_present()
 
-    def _call_gui_edit(self, input_param: ParamWithGui[Any]) -> bool:
+    @staticmethod
+    def _input_param_set_unset_gui(input_param: ParamWithGui[Any]) -> BoolFunction:
+        """Return a gui function that sets or unsets the value of an input parameter."""
         value = input_param.data_with_gui.value
         default_param_value = input_param.default_value
         data_callbacks = input_param.data_with_gui.callbacks
 
-        @dataclass
-        class EditElements:
-            fn_set_unset: BoolFunction | None = None
-            fn_edit: BoolFunction | None = None
+        if not isinstance(value, (Error, Unspecified)):
+            # For specified values
+            def fn_set_unset_specified_value() -> bool:
+                with fontawesome_6_ctx():
+                    set_changed = False
+                    if imgui.button(icons_fontawesome_6.ICON_FA_SQUARE_MINUS):
+                        input_param.data_with_gui.value = UnspecifiedValue
+                        set_changed = True
+                    if imgui.is_item_hovered():
+                        osd_widgets.set_tooltip("Unset this parameter.")
+                    return set_changed
 
-        edit_elements = EditElements()
-
-        #
-        # Set / unset button: fill edit_elements.fn_set_unset
-        #
-        if isinstance(value, (Error, Unspecified)):
+            return fn_set_unset_specified_value
+        else:
             # For Error or Unspecified values
             value_to_create: Unspecified | Any = UnspecifiedValue
             value_to_create_tooltip = ""
@@ -153,7 +158,7 @@ class FunctionNodeGui:
 
             if not isinstance(value_to_create, Unspecified):
                 # For Error or Unspecified values, when a default value is available
-                def fn_set_unset() -> bool:
+                def fn_set_unset_with_default_value() -> bool:
                     with fontawesome_6_ctx():
                         set_changed = False
                         if imgui.button(icons_fontawesome_6.ICON_FA_SQUARE_PLUS):
@@ -163,43 +168,30 @@ class FunctionNodeGui:
                             osd_widgets.set_tooltip(value_to_create_tooltip)
                     return set_changed
 
-                edit_elements.fn_set_unset = fn_set_unset
+                return fn_set_unset_with_default_value
 
             else:
                 # For Error or Unspecified values, when no default value is available
-                def fn_set_unset() -> bool:
+                def fn_set_unset_with_no_provider() -> bool:
                     with fontawesome_6_ctx():
                         imgui.button(icons_fontawesome_6.ICON_FA_TRIANGLE_EXCLAMATION)
                         if imgui.is_item_hovered():
                             osd_widgets.set_tooltip("No default value provider!")
                         return False
 
-                edit_elements.fn_set_unset = fn_set_unset
+                return fn_set_unset_with_no_provider
 
-        else:
-            # For specified values
-            def fn_set_unset() -> bool:
-                with fontawesome_6_ctx():
-                    set_changed = False
-                    if imgui.button(icons_fontawesome_6.ICON_FA_SQUARE_MINUS):
-                        input_param.data_with_gui.value = UnspecifiedValue
-                        set_changed = True
-                    if imgui.is_item_hovered():
-                        osd_widgets.set_tooltip("Unset this parameter.")
-                    return set_changed
-
-            edit_elements.fn_set_unset = fn_set_unset
-
-        #
-        # fill edit_elements.fn_edit
-        #
+    @staticmethod
+    def _input_param_edit_gui(input_param: ParamWithGui[Any]) -> BoolFunction:
+        value = input_param.data_with_gui.value
+        data_callbacks = input_param.data_with_gui.callbacks
         if isinstance(value, (Error, Unspecified)):
 
-            def fn_edit() -> bool:
+            def fn_display_error() -> bool:
                 imgui.text(str(value))
                 return False
 
-            edit_elements.fn_edit = fn_edit
+            return fn_display_error
         else:
 
             def fn_edit() -> bool:
@@ -210,21 +202,18 @@ class FunctionNodeGui:
                     imgui.text("No editor")
                 return changed
 
-            edit_elements.fn_edit = fn_edit
+            return fn_edit
 
-        #
-        # Call the functions
-        #
+    def _call_gui_edit(self, input_param: ParamWithGui[Any]) -> bool:
+        fn_set_unset = self._input_param_set_unset_gui(input_param)
+        fn_edit = self._input_param_edit_gui(input_param)
+
         changed = False
-        imgui.begin_horizontal("edit")
-        if edit_elements.fn_edit is not None:
-            imgui.begin_vertical("edit")
-            changed = changed or edit_elements.fn_edit()
-            imgui.end_vertical()
-        imgui.spring()
-        if edit_elements.fn_set_unset is not None:
-            changed = changed or edit_elements.fn_set_unset()
-        imgui.end_horizontal()
+        with imgui_ctx.begin_horizontal("editH"):
+            with imgui_ctx.begin_vertical("editV"):
+                changed = changed or fn_edit()
+            imgui.spring()
+            changed = changed or fn_set_unset()
         return changed
 
     def _output_header_elements(self, output_idx: int) -> OutputHeaderLineElements:
