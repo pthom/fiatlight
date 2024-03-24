@@ -104,6 +104,9 @@ class _OsdWidgets:
     def add_bool_popup_button(self, name: str, gui_function: BoolFunction) -> None:
         self._add_popup_button(name, gui_function, False)
 
+    def add_void_popup_button(self, name: str, gui_function: VoidFunction) -> None:
+        self._add_popup_button(name, gui_function, None)
+
 
 _OSD_WIDGETS = _OsdWidgets()
 
@@ -114,6 +117,10 @@ def set_tooltip(tooltip: str) -> None:
 
 def add_bool_popup_button(name: str, gui_function: BoolFunction) -> None:
     _OSD_WIDGETS.add_bool_popup_button(name, gui_function)
+
+
+def add_void_popup_button(name: str, gui_function: VoidFunction) -> None:
+    _OSD_WIDGETS.add_void_popup_button(name, gui_function)
 
 
 def get_popup_bool_return(name: str) -> bool | None:
