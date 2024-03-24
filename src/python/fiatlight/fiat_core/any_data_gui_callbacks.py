@@ -32,6 +32,16 @@ class AnyDataGuiCallbacks(Generic[DataType]):
     # If not provided, the data will be presented as read-only
     edit: BoolFunction | None = None
 
+    # edit_require_popup:
+    # If True, the edit function needs to be called in a popup window.
+    # This is due to a limitation of the node editor, which cannot render complex widgets
+    # in the node itself.
+    # By complex widgets, we mean widgets that require a scrollable area, or a child window, such as:
+    #      - imgui.input_text_multiline
+    #      - imgui.combo
+    #      - imgui.begin_child
+    edit_require_popup: bool = False
+
     # default value provider (Mandatory if edition is required)
     # this function will be called to provide a default value if needed
     default_value_provider: Callable[[], DataType] | None = None

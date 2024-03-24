@@ -76,4 +76,4 @@ def test_enum_serialization() -> None:
     as_json = a.save_to_json()
     assert as_json == {"class": "MyEnum", "type": "Enum", "value_name": "A"}
     a.load_from_json({"class": "MyEnum", "type": "Enum", "value_name": "B"})
-    assert a.value == MyEnum.B
+    assert a.value == MyEnum.B  # type: ignore

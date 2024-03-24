@@ -118,7 +118,7 @@ class FunctionNodeGui:
     def _call_gui_present(self, value_with_gui: AnyDataWithGui[Any]) -> None:
         value = value_with_gui.value
         fn_present = value_with_gui.callbacks.present_custom
-        if not value_with_gui.can_present_value():
+        if not value_with_gui.can_present_custom():
             return
         assert not isinstance(value, (Error, Unspecified))
         assert fn_present is not None
@@ -248,7 +248,7 @@ class FunctionNodeGui:
             r.status_icon_tooltips = ["Unlinked output!"]
 
         # fill r.show_details_button and r.details_button_tooltip
-        can_present = output_with_gui.data_with_gui.can_present_value()
+        can_present = output_with_gui.data_with_gui.can_present_custom()
         if can_present:
             r.show_details_button = True
             r.details_button_tooltip = "output details"
@@ -299,7 +299,7 @@ class FunctionNodeGui:
         # fill show_details_button and details_button_tooltip
         has_link = self.function_node.has_input_link(input_param.name)
         if has_link:
-            can_present = input_param.data_with_gui.can_present_value()
+            can_present = input_param.data_with_gui.can_present_custom()
             if can_present:
                 r.show_details_button = True
                 r.details_button_tooltip = "linked input details"
@@ -443,7 +443,7 @@ class FunctionNodeGui:
                     if imgui.is_item_hovered():
                         osd_widgets.set_tooltip("Refresh needed!")
 
-    def _draw_function_outputs(self) -> None:
+    def _draw_function_outputs(self, unique_name: str) -> None:
         is_dirty = self.function_node.function_with_gui.dirty
         if is_dirty:
             imgui.push_style_color(imgui.Col_.text.value, get_fiat_config().style.colors[FiatColorType.TextDirtyOutput])
@@ -452,13 +452,23 @@ class FunctionNodeGui:
                 with imgui_ctx.begin_group():
                     with imgui_ctx.begin_horizontal("outputH"):
                         self._draw_output_header_line(idx_output)
-                    can_present = output_param.data_with_gui.can_present_value()
+                    can_present = output_param.data_with_gui.can_present_custom()
                     if can_present and self.show_output_details[idx_output]:
-                        self._call_gui_present(output_param.data_with_gui)
+                        # capture the output_param for the lambda
+                        # (otherwise, the lambda would capture the last output_param in the loop)
+                        output_param_captured = output_param
+
+                        def present_output() -> None:
+                            # Present output can be called either directly in this window or in a detached window
+                            self._call_gui_present(output_param_captured.data_with_gui)
+
+                        popup_label = f"detached view - {unique_name}: output {idx_output}"
+                        osd_widgets.show_void_popup_button("", popup_label, present_output)
+                        present_output()
         if is_dirty:
             imgui.pop_style_color()
 
-    def _draw_function_inputs(self) -> bool:
+    def _draw_function_inputs(self, unique_name: str) -> bool:
         changed = False
 
         if len(self.function_node.function_with_gui.inputs_with_gui) > 0:
@@ -473,11 +483,41 @@ class FunctionNodeGui:
                 if self.show_input_details[input_name]:
                     shall_show_edit = not self.function_node.has_input_link(input_name)
                     if shall_show_edit:
-                        if self._call_gui_edit(input_param):
+                        # capture the input_param for the lambda
+                        # (otherwise, the lambda would capture the last input_param in the loop)
+                        input_param_captured = input_param
+
+                        def edit_input() -> bool:
+                            # Edit input can be called either directly in this window or in a detached window
+                            return self._call_gui_edit(input_param_captured)
+
+                        can_edit_in_node = not input_param.data_with_gui.callbacks.edit_require_popup
+                        popup_label = f"detached view - {unique_name}(): edit input '{input_param.name}'"
+                        btn_label = "" if can_edit_in_node else "edit"
+                        osd_widgets.show_bool_popup_button(btn_label, popup_label, edit_input)
+
+                        # Now that we can have a detached view, there are two ways
+                        # that can change the input value:
+                        if can_edit_in_node and edit_input():
+                            # 1. The user edits the input value in this window
+                            changed = True
+                        if osd_widgets.get_popup_bool_return(btn_label):
+                            # 2. The user edits the input value in a detached window
                             changed = True
                     else:
-                        self._call_gui_present(input_param.data_with_gui)
+                        if input_param.data_with_gui.can_present_custom():
+                            # capture the input_param for the lambda
+                            # with a different name for the captured variable, because of
+                            # python weird scoping rules
+                            input_param_captured_2 = input_param
 
+                            def present_input() -> None:
+                                # Present input can be called either directly in this window or in a detached window
+                                self._call_gui_present(input_param_captured_2.data_with_gui)
+
+                            popup_label = f"detached view - {unique_name}() - input '{input_param.name}'"
+                            osd_widgets.show_void_popup_button("", popup_label, present_input)
+                            present_input()
         return changed
 
     def draw_node(self, unique_name: str) -> None:
@@ -489,7 +529,7 @@ class FunctionNodeGui:
                 imgui.dummy(ImVec2(hello_imgui.em_size(get_fiat_config().style.node_minimum_width_em), 1))
 
                 # Inputs
-                inputs_changed = self._draw_function_inputs()
+                inputs_changed = self._draw_function_inputs(unique_name)
                 if inputs_changed:
                     self.function_node.function_with_gui.dirty = True
                     if self.function_node.function_with_gui.invoke_automatically:
@@ -507,7 +547,7 @@ class FunctionNodeGui:
 
                 # Exceptions, if any
                 self._draw_exception_message()
-                self._draw_function_outputs()
+                self._draw_function_outputs(unique_name)
         self.node_size = ed.get_node_size(self.node_id)
 
     def save_gui_options_to_json(self) -> JsonDict:
