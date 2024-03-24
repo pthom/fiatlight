@@ -128,7 +128,7 @@ class ImageWithGui(AnyDataWithGui[Image]):
         self.image_presenter = ImagePresenter(image_params, show_channels)
         self.open_file_dialog = None
         self.callbacks.edit = self.edit
-        self.callbacks.present_custom = self.present
+        self.callbacks.present_custom = self.present_custom
         self.callbacks.on_change = self.on_change
         self.callbacks.default_value_provider = lambda: np.zeros((1, 1, 3), dtype=np.uint8)
         self.callbacks.present_str = self.present_str
@@ -153,13 +153,13 @@ class ImageWithGui(AnyDataWithGui[Image]):
             self.open_file_dialog = None
         return changed
 
-    def present(self) -> None:
+    def present_custom(self) -> None:
         self.image_presenter.gui()
 
     @staticmethod
     def present_str(image: Image) -> str:
         r = f"Image {image.shape} {image.dtype}"
-        r += f"\n{image}"
+        # r += f"\n{image}"
         return r
 
     def on_change(self) -> None:
