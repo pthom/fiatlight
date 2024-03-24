@@ -407,13 +407,23 @@ class FunctionNodeGui:
             if imgui.is_item_hovered():
                 osd_widgets.set_tooltip(f" (id: {unique_name})")
 
-        fn_doc = self.function_node.function_with_gui.doc()
-        if fn_doc is not None:
-            imgui.spring()
+        if self.function_node.function_with_gui.has_doc():
+            fn_doc = self.function_node.function_with_gui.get_function_doc()
+            first_line = fn_doc.split("\n")[0]
+            title_line = self.function_node.function_with_gui.name + "(): " + first_line
+            remaining_text = fn_doc[len(first_line) :]
+
+            def show_doc() -> None:
+                from imgui_bundle import imgui_md
+
+                imgui_md.render("## " + title_line)
+                imgui.text_wrapped(remaining_text)
+
             with fontawesome_6_ctx():
-                imgui.text(icons_fontawesome_6.ICON_FA_CIRCLE_QUESTION)
-            if imgui.is_item_hovered():
-                osd_widgets.set_tooltip(fn_doc)
+                imgui.spring()
+                popup_label = f"{unique_name}(): function documentation"
+                btn_text = icons_fontawesome_6.ICON_FA_BOOK
+                osd_widgets.show_void_popup_button(btn_text, popup_label, show_doc)
 
     def _draw_invoke_options(self) -> None:
         fn_with_gui = self.function_node.function_with_gui

@@ -88,11 +88,6 @@ class FunctionWithGui:
                 return param.data_with_gui
         assert False, f"input {name} not found"
 
-    def doc(self) -> Optional[str]:
-        if self.f_impl is None:
-            return None
-        return self.f_impl.__doc__
-
     @final
     def invoke(self) -> None:
         assert self.f_impl is not None
@@ -207,3 +202,101 @@ class FunctionWithGui:
         if output_idx >= len(self.outputs_with_gui):
             raise ValueError(f"output_idx {output_idx} out of range")
         return self.outputs_with_gui[output_idx].data_with_gui
+
+    def has_doc(self) -> bool:
+        return self.get_function_doc() is not None
+
+    def get_function_doc(self) -> str | None:
+        if self.f_impl is None:
+            return None
+        if hasattr(self.f_impl, "__doc__"):
+            return self.f_impl.__doc__
+        return None
+
+    def get_function_doc_as_markdown(self) -> str | None:
+        raise NotImplementedError("This method is not implemented yet")
+        # Here be dragons...
+        #
+        # * PEP 257:
+        #     is quite short and specifies that docstring should look like this:
+        #     """Return a foobang (short one-liner info)
+        #
+        #     Optional plotz says to frobnicate the bizbaz first.
+        #     (More details here)
+        #
+        #     Args:
+        #     ...
+        #     """
+        #
+        # Google style guide (https://google.github.io/styleguide/pyguide.html):
+        #     specifies that docstring should look like this:
+        #
+        #    """Connects to the next available port.
+        #
+        #        Args:
+        #          minimum: A port value greater or equal to 1024.
+        #
+        #       Returns:
+        #         The new minimum port.
+        #     """
+        #
+        # Sphinx (https://sphinx-rtd-tutorial.readthedocs.io/en/latest/docstrings.html)
+        #    specifies that docstring should look like this:
+        #
+        #    """[Summary]
+        #
+        #       :param [ParamName]: [ParamDescription], defaults to [DefaultParamVal]
+        #       :type [ParamName]: [ParamType](, optional)
+        #       ...
+        #       :raises [ErrorType]: [ErrorDescription]
+        #       ...
+        #       :return: [ReturnDescription]
+        #       :rtype: [ReturnType]
+        # """
+
+        doc = self.get_function_doc()
+        if doc is None:
+            return None
+
+        # remove leading and trailing whitespace
+        doc = doc.strip()
+
+        has_multiple_lines = "\n" in doc
+        if not has_multiple_lines:
+            return doc
+
+        lines = doc.split("\n")
+        first_line = lines[0]
+
+        remaining_lines = lines[1:]
+        remaining_lines = [line.strip() for line in remaining_lines]
+        remaining_text = "\n".join(remaining_lines)
+
+        # Search for first occurrence of "Args:" or "Returns:" or "Raises:" or ":params:"
+        # and split the docstring at that point into
+        #     detailed description
+        #     parameters_description
+        params_markers = ["Args:", "Returns:", "Raises:", ":param"]
+        detailed_description = ""
+        parameters_description = ""
+        could_split = False
+        for marker in params_markers:
+            if marker in remaining_text:
+                pos = remaining_text.index(marker)
+                detailed_description = remaining_text[:pos]
+                parameters_description = remaining_text[pos:]
+                could_split = True
+                break
+        if not could_split:
+            parameters_description = remaining_text
+
+        # create markdown docstring
+        markdown_doc = ""
+        markdown_doc += f"## {first_line}\n\n"
+        markdown_doc += f"{detailed_description}\n\n"
+        markdown_doc += "### Parameters\n\n"
+        markdown_doc += "```"
+        markdown_doc += f"{parameters_description}\n\n"
+        markdown_doc += "```"
+
+        return markdown_doc

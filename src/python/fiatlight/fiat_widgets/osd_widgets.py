@@ -16,6 +16,7 @@ class _OsdWidgets:
     """Private data for OSD widgets."""
 
     tooltip_str: str | None = None
+    tooltip_gui_function: VoidFunction | None = None
     popups: list[_PopupInfo]
 
     def __init__(self) -> None:
@@ -24,9 +25,30 @@ class _OsdWidgets:
         self.popups = []
 
     def _render_tooltip(self) -> None:
-        if self.tooltip_str is not None:
+        if self.tooltip_gui_function is not None:
+            window_pos = imgui.get_mouse_pos()
+            window_pos.x += hello_imgui.em_size(1)
+            window_pos.y += hello_imgui.em_size(1)
+            imgui.set_next_window_pos(window_pos, imgui.Cond_.always.value)
+            window_flags = (
+                imgui.WindowFlags_.no_collapse.value
+                | imgui.WindowFlags_.no_title_bar.value
+                | imgui.WindowFlags_.always_auto_resize.value
+                | imgui.WindowFlags_.no_move.value
+            )
+            imgui.begin("Tooltip", True, window_flags)
+            self.tooltip_gui_function()
+            self.tooltip_gui_function = None
+            imgui.end()
+        elif self.tooltip_str is not None:
             imgui.set_tooltip(self.tooltip_str)
             self.tooltip_str = None
+
+    def set_tooltip_str(self, tooltip_str: str) -> None:
+        self.tooltip_str = tooltip_str
+
+    def set_tooltip_gui(self, gui_function: VoidFunction) -> None:
+        self.tooltip_gui_function = gui_function
 
     def _popup_render(self) -> None:
         alive_popups = []  # remove popups that are closed
@@ -118,7 +140,11 @@ _OSD_WIDGETS = _OsdWidgets()
 
 
 def set_tooltip(tooltip: str) -> None:
-    _OSD_WIDGETS.tooltip_str = tooltip
+    _OSD_WIDGETS.set_tooltip_str(tooltip)
+
+
+def set_tooltip_gui(gui_function: VoidFunction) -> None:
+    _OSD_WIDGETS.set_tooltip_gui(gui_function)
 
 
 def show_bool_popup_button(btn_label: str, popup_label: str, gui_function: BoolFunction) -> None:

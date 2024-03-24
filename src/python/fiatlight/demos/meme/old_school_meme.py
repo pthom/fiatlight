@@ -4,7 +4,6 @@ import numpy as np
 
 import fiatlight
 from fiatlight import FunctionsGraph, fiat_run
-from fiatlight.demos.ai.stable_diffusion_xl_wrapper import stable_diffusion_xl_gui
 from fiatlight.fiat_image import ImageU8
 
 from fiatlight.fiat_types import Float_0_1, ImagePath, Int_0_100, ColorRgb
@@ -21,6 +20,7 @@ class MemeFont(Enum):
 
 
 def image_source(image_file: ImagePath = fiatlight.demo_assets_dir() + "/images/house.jpg") -> ImageU8:  # type: ignore
+    """A simple function that reads an image from a file and returns it as a numpy array."""
     image = cv2.imread(image_file)
     if image.shape[0] > 1000:
         k = 1000 / image.shape[0]
@@ -43,6 +43,19 @@ def add_meme_text(
     text_color: ColorRgb = (255, 255, 255),  # type: ignore
     outline_color: ColorRgb = (0, 0, 0),  # type: ignore
 ) -> ImageU8:
+    """Add text to an image, with a look that is reminiscent of old-school memes.
+
+    :param image: The image to which the text will be added.
+    :param text: The text to add to the image.
+    :param font_size: The size of the font.
+    :param font_type: The font to use for the text. You can choose between "Stadium", "Anton" and "SaoTorpes".
+    :param x: The x position of the text, as a fraction of the image width.
+    :param y: The y position of the text, as a fraction of the image height.
+    :param text_color: The color of the text.
+    :param outline_color: The color of the text outline.
+
+    :return: The image with the text added.
+    """
     image_pil = Image.fromarray(image)
 
     this_dir = os.path.dirname(os.path.abspath(__file__))
@@ -77,12 +90,22 @@ def add_meme_text(
 
 
 def main() -> None:
-    graph = FunctionsGraph.from_function_composition(
-        [stable_diffusion_xl_gui(), add_meme_text],
-        # [image_source, add_meme_text],
-        locals_dict=locals(),
-        globals_dict=globals(),
-    )
+    debug = False
+    if not debug:
+        from fiatlight.demos.ai.stable_diffusion_xl_wrapper import stable_diffusion_xl_gui
+
+        graph = FunctionsGraph.from_function_composition(
+            [stable_diffusion_xl_gui(), add_meme_text],
+            # [image_source, add_meme_text],
+            locals_dict=locals(),
+            globals_dict=globals(),
+        )
+    else:
+        graph = FunctionsGraph.from_function_composition(
+            [image_source, add_meme_text],
+            locals_dict=locals(),
+            globals_dict=globals(),
+        )
 
     fiat_run(graph)
 
