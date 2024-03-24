@@ -69,14 +69,21 @@ _stable_diffusion_xl_wrapper: _StableDiffusionXLWrapper | None = None
 def stable_diffusion_xl(
     prompt: str,
     seed: int = 42,
-    num_inference_steps: int = 1,
-    guidance_scale: float = 0.0,
+    # num_inference_steps: int = 1,
+    # guidance_scale: float = 0.0,
 ) -> ImageU8:
-    """Generates an image using the Stable Diffusion XL model."""
+    """Generates an image using the Stable Diffusion XL model.
+
+    If you are looking for inspiration with your prompts, look at Lexica: https://lexica.art
+
+    :param prompt: Prompt for the image generation. You can use a prompt like "A beautiful sunset over the ocean."
+    :param seed: Seed for the random number generator. Each seed will generate a different image, for the same prompt.
+    """
     global _stable_diffusion_xl_wrapper
     if _stable_diffusion_xl_wrapper is None:
         _stable_diffusion_xl_wrapper = _StableDiffusionXLWrapper()
-    return _stable_diffusion_xl_wrapper.query(prompt, seed, num_inference_steps, guidance_scale)
+    return _stable_diffusion_xl_wrapper.query(prompt, seed)
+    # return _stable_diffusion_xl_wrapper.query(prompt, seed, num_inference_steps, guidance_scale)
 
 
 def stable_diffusion_xl_gui() -> fiatlight.FunctionWithGui:
