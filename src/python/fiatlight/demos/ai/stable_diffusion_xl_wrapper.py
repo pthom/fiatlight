@@ -1,3 +1,4 @@
+import fiatlight
 from fiatlight.fiat_image import ImageU8
 
 # mypy: disable-error-code="no-untyped-call"
@@ -76,3 +77,20 @@ def stable_diffusion_xl(
     if _stable_diffusion_xl_wrapper is None:
         _stable_diffusion_xl_wrapper = _StableDiffusionXLWrapper()
     return _stable_diffusion_xl_wrapper.query(prompt, seed, num_inference_steps, guidance_scale)
+
+
+def stable_diffusion_xl_gui() -> fiatlight.FunctionWithGui:
+    """Convert stable_diffusion_xl to a function with GUI,
+    then customize min / max values for the input parameters in the GUI of the stable_diffusion_xl node
+    """
+    stable_diffusion_xl_gui = fiatlight.to_function_with_gui(stable_diffusion_xl)
+    # Do not invoke automatically, since the image creation can be slow (about 1 second)
+    stable_diffusion_xl_gui.invoke_automatically = False
+    stable_diffusion_xl_gui.invoke_automatically_can_set = False
+
+    prompt_input = stable_diffusion_xl_gui.input_of_name("prompt")
+    assert isinstance(prompt_input, fiatlight.fiat_core.StrWithGui)
+    prompt_input.params.edit_type = fiatlight.fiat_core.StrEditType.multiline
+    prompt_input.params.width_em = 60
+
+    return stable_diffusion_xl_gui
