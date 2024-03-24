@@ -2,6 +2,8 @@
 This module provides a class to wrap any data with a GUI (AnyDataWithGui), and a class to wrap a named data with a GUI.
 See example implementation for a custom type at the bottom of this file.
 """
+from enum import Enum
+
 from fiatlight.fiat_types import (
     Error,
     ErrorValue,
@@ -71,6 +73,8 @@ class AnyDataWithGui(Generic[DataType]):
         # elif self.callbacks.to_dict_impl is not None:
         #     as_dict = self.callbacks.to_dict_impl(self.value)
         #     return {"type": "Custom", "value": as_dict}
+        elif isinstance(self.value, Enum):
+            return {"type": "Enum", "value_name": self.value.name, "class": self.value.__class__.__name__}
         elif hasattr(self.value, "__dict__"):
             as_dict = self.value.__dict__
             return {"type": "Dict", "value": as_dict}
@@ -96,6 +100,11 @@ class AnyDataWithGui(Generic[DataType]):
         # elif json_data["type"] == "Custom":
         #     assert self.callbacks.from_dict_impl is not None
         #     self.value = self.callbacks.from_dict_impl(json_data["value"])
+        elif json_data["type"] == "Enum":
+            if self.callbacks.create_from_value is None:
+                raise ValueError("Cannot deserialize an Enum without a create_from_value callback")
+            self.value = self.callbacks.create_from_value(json_data["value_name"])
+
         elif json_data["type"] == "Dict":
             if self.value is UnspecifiedValue:
                 if self.callbacks.default_value_provider is None:

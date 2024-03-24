@@ -156,6 +156,7 @@ class EnumWithGui(AnyDataWithGui[Enum]):
 
         self.callbacks.edit = self.edit
         self.callbacks.default_value_provider = lambda: list(self.enum_type)[0]
+        self.callbacks.create_from_value = self.create_from_name
 
     def edit(self) -> bool:
         assert not isinstance(self.value, (Unspecified, Error))
@@ -166,6 +167,9 @@ class EnumWithGui(AnyDataWithGui[Enum]):
                 self.value = enum_value
                 changed = True
         return changed
+
+    def create_from_name(self, name: str) -> Enum:
+        return self.enum_type[name]
 
 
 # ---------------------------- Sandbox ----------------------------
