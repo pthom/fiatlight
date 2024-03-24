@@ -6,8 +6,8 @@ import fiatlight
 from fiatlight import FunctionsGraph, fiat_run
 from fiatlight.fiat_image import ImageU8
 
-from fiatlight.fiat_types import Float_0_1, ImagePath, Int_0_255
-from typing import Tuple
+from fiatlight.fiat_types import Float_0_1, ImagePath, Int_0_100, ColorRgb
+from fiatlight.demos.ai.stable_diffusion_xl_wrapper import stable_diffusion_xl_gui
 
 import cv2
 from PIL import Image, ImageDraw, ImageFont
@@ -15,9 +15,9 @@ from enum import Enum
 
 
 class MemeFont(Enum):
-    SaoTorpes = "fonts/sao_torpes/SaoTorpes.otf"
-    WallShaker = "fonts/wall_shaker/WallShaker.ttf"
     Stadium = "fonts/stadium/Stadium.ttf"
+    Anton = "fonts/anton/Anton-Regular.ttf"
+    SaoTorpes = "fonts/sao_torpes/SaoTorpes.otf"
 
 
 def image_source(image_file: ImagePath = fiatlight.demo_assets_dir() + "/images/house.jpg") -> ImageU8:  # type: ignore
@@ -35,38 +35,41 @@ def oil_paint(image: ImageU8, size: int = 1, dynRatio: int = 3) -> ImageU8:
 
 def add_meme_text(
     image: ImageU8,
-    text: str = "Hello, World!",
-    font_size: Int_0_255 = 120,
-    font: MemeFont = MemeFont.Stadium,
-    x: Float_0_1 = Float_0_1(0.5),
-    y: Float_0_1 = Float_0_1(0.5),
-    color: Tuple[int, int, int] = (255, 255, 255),
+    text: str = "Fiat What?",
+    font_size: Int_0_100 = 40,  # type: ignore
+    font_type: MemeFont = MemeFont.Anton,
+    x: Float_0_1 = Float_0_1(0.05),
+    y: Float_0_1 = Float_0_1(0.7),
+    text_color: ColorRgb = (255, 255, 255),  # type: ignore
+    outline_color: ColorRgb = (0, 0, 0),  # type: ignore
 ) -> ImageU8:
-    # text_size = cv2.getTextSize(text, cv2.FONT_HERSHEY_SIMPLEX, font_size, 2)[0]
-    # text_x = int((image.shape[1] - text_size[0]) * x)
-    # text_y = int((image.shape[0] + text_size[1]) * y)
-    # image_copy = image.copy()
-    # cv2.putText(image_copy, text, (text_x, text_y), cv2.FONT_HERSHEY_SIMPLEX, font_size, color, 2)
-    # return image_copy
-    return image
-
     image_pil = Image.fromarray(image)
 
     this_dir = os.path.dirname(os.path.abspath(__file__))
-    font_dir = this_dir + "/fonts"
-    font_path = font_dir + "/" + font.value
-    font = ImageFont.truetype(font_path, font_size)
+    font_path = this_dir + "/" + font_type.value
+    font = ImageFont.truetype(font_path, font_size * 4)
 
     draw = ImageDraw.Draw(image_pil)
 
     position = (10, 10)  # Change this to where you want the text to be on the image
 
-    # Optional: Text color and outline
-    text_color = "white"
-    outline_color = "black"
+    # Argh, OpenCV uses BGR and our color is RGB
+    text_color_bgr = (text_color[2], text_color[1], text_color[0])
+    outline_color_bgr = (outline_color[2], outline_color[1], outline_color[0])
 
     # Draw text on image
-    draw.text(position, text, fill=text_color, font=font, stroke_width=2, stroke_fill=outline_color)
+    # Center it around x, y
+    text_size = draw.textbbox(position, text, font=font)
+    position = (int(x * image_pil.width - text_size[0] / 2), int(y * image_pil.height - text_size[1] / 2))
+    draw.text(
+        position,
+        text,
+        font=font,
+        fill=text_color_bgr,
+        stroke_width=2,
+        stroke_fill=outline_color_bgr,
+        align="center",
+    )
 
     # Convert PIL image to numpy array
     image_with_text = np.array(image_pil)
@@ -76,7 +79,9 @@ def add_meme_text(
 def main() -> None:
     graph = FunctionsGraph.from_function_composition(
         # [stable_diffusion_xl_gui(), fiat_image.lut_channels_in_colorspace, add_toon_edges, oil_paint]
-        [image_source, add_meme_text]
+        [stable_diffusion_xl_gui(), add_meme_text],
+        locals_dict=locals(),
+        globals_dict=globals(),
     )
 
     fiat_run(graph)
