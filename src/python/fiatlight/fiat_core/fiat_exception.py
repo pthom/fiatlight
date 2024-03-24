@@ -42,3 +42,4 @@ class FiatDisplayedException(FiatException):
                         (this is an internal error of fiatlight that needs to be fixed)
             """
             )
+            self.was_dismissed = True
