@@ -197,7 +197,8 @@ class FunctionNodeGui:
             def fn_edit() -> bool:
                 changed = False
                 if data_callbacks.edit is not None:
-                    changed = changed or data_callbacks.edit()
+                    if data_callbacks.edit():
+                        changed = True
                 else:
                     imgui.text("No editor")
                 return changed
@@ -211,9 +212,11 @@ class FunctionNodeGui:
         changed = False
         with imgui_ctx.begin_horizontal("editH"):
             with imgui_ctx.begin_vertical("editV"):
-                changed = changed or fn_edit()
+                if fn_edit():
+                    changed = True
             imgui.spring()
-            changed = changed or fn_set_unset()
+            if fn_set_unset():
+                changed = True
         return changed
 
     def _output_header_elements(self, output_idx: int) -> OutputHeaderLineElements:
@@ -470,7 +473,8 @@ class FunctionNodeGui:
                 if self.show_input_details[input_name]:
                     shall_show_edit = not self.function_node.has_input_link(input_name)
                     if shall_show_edit:
-                        changed = changed or self._call_gui_edit(input_param)
+                        if self._call_gui_edit(input_param):
+                            changed = True
                     else:
                         self._call_gui_present(input_param.data_with_gui)
 
