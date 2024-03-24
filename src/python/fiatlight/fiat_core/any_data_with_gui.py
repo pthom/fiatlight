@@ -78,6 +78,8 @@ class AnyDataWithGui(Generic[DataType]):
             # return {"type": "List", "value": [AnyDataWithGui(x, self.callbacks).to_json() for x in self.value]}
             logging.warning("List serialization not implemented yet")
             return {"type": "List"}
+        elif isinstance(self.value, tuple):
+            return {"type": "Tuple", "value": self.value}
         else:
             logging.warning(f"Cannot serialize {self.value}, it has no __dict__ attribute.")
             return {"type": "Error"}
@@ -100,6 +102,9 @@ class AnyDataWithGui(Generic[DataType]):
                     raise ValueError("Cannot deserialize a None value without a default_value_provider")
                 self.value = self.callbacks.default_value_provider()
             self.value.__dict__.update(json_data["value"])
+        elif json_data["type"] == "Tuple":
+            as_list = json_data["value"]
+            self.value = tuple(as_list)
         elif json_data["type"] == "List":
             logging.warning("List deserialization not implemented yet")
             return
