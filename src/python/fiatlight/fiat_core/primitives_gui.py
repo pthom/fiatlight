@@ -333,6 +333,8 @@ class StrWithGui(AnyDataWithGui[str]):
         self.callbacks.edit = self.edit
         self.callbacks.default_value_provider = lambda: ""
         self.callbacks.present_str = self.present_str
+        if self.params.edit_type == StrEditType.multiline:
+            self.callbacks.edit_require_popup = True
 
     @staticmethod
     def present_str(s: str) -> str:
@@ -356,27 +358,19 @@ class StrWithGui(AnyDataWithGui[str]):
                 self.params.user_data,
             )
         elif self.params.edit_type == StrEditType.multiline:
-            from fiatlight.fiat_widgets import osd_widgets
-
-            def popup_edit() -> bool:
-                assert isinstance(self.value, str)
-                size = ImVec2(0, 0)
-                size.x = imgui.get_window_width()
-                changed_in_popup, self.value = imgui.input_text_multiline(
-                    self.params.label,
-                    self.value,
-                    size,
-                    self.params.input_flags,
-                    self.params.callback,
-                    self.params.user_data,
-                )
-                return changed_in_popup
-
-            osd_widgets.add_bool_popup_button("Edit text", popup_edit)
-            if osd_widgets.get_popup_bool_return("Edit text"):
-                changed = True
-
-        return changed
+            self.callbacks.edit_require_popup = True
+            assert isinstance(self.value, str)
+            size = ImVec2(0, 0)
+            size.x = imgui.get_window_width()
+            changed, self.value = imgui.input_text_multiline(
+                self.params.label,
+                self.value,
+                size,
+                self.params.input_flags,
+                self.params.callback,
+                self.params.user_data,
+            )
+            return changed
 
 
 ########################################################################################################################

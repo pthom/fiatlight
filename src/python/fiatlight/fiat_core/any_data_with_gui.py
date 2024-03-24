@@ -131,7 +131,7 @@ class AnyDataWithGui(Generic[DataType]):
                 default_str = "???"
         return default_str
 
-    def can_present_value(self) -> bool:
+    def can_present_custom(self) -> bool:
         if isinstance(self.value, (Error, Unspecified)):
             return False
         return self.callbacks.present_custom is not None
