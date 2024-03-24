@@ -3,6 +3,7 @@ from fiatlight.fiat_nodes.functions_graph_gui import FunctionsGraphGui
 from fiatlight.fiat_core import FunctionsGraph
 from fiatlight.fiat_widgets import osd_widgets, fontawesome_6_ctx, icons_fontawesome_6
 from fiatlight.fiat_utils import functional_utils
+from fiatlight.fiat_core.fiat_exception import FiatDisplayedException
 from imgui_bundle import immapp, imgui, imgui_ctx, ImVec4, portable_file_dialogs as pfd
 from typing import Any, Callable
 from imgui_bundle import hello_imgui, ImVec2, immvision
@@ -80,6 +81,7 @@ class FiatGui:
     _info_dock_space_id: str = "info_dock"
     _idx_frame: int = 0
     _show_inspector: bool = False
+    _exception_to_display: FiatDisplayedException | None = None
 
     save_dialog: pfd.save_file | None = None
     save_dialog_callback: Callable[[str], None] | None = None
@@ -142,7 +144,7 @@ class FiatGui:
                 # Load and save user inputs
                 if imgui.button(icons_fontawesome_6.ICON_FA_FILE_IMPORT, btn_size):
                     self.load_dialog = pfd.open_file(title="Load user inputs")
-                    self.load_dialog_callback = lambda filename: self._load_user_inputs(filename)
+                    self.load_dialog_callback = lambda filename: self._load_user_inputs_during_execution(filename)
                 if imgui.is_item_hovered():
                     imgui.set_tooltip("Load user inputs")
                 if imgui.button(icons_fontawesome_6.ICON_FA_FILE_PEN, btn_size):
@@ -150,6 +152,14 @@ class FiatGui:
                     self.save_dialog_callback = lambda filename: self._save_user_inputs(filename)
                 if imgui.is_item_hovered():
                     imgui.set_tooltip("Save user inputs")
+
+    def _heartbeat(self) -> None:
+        osd_widgets.render()
+        self._handle_file_dialogs()
+        if self._exception_to_display is not None:
+            self._exception_to_display.gui_display()
+            if self._exception_to_display.was_dismissed:
+                self._exception_to_display = None
 
     def _draw_functions_graph(self) -> None:
         self._idx_frame += 1
@@ -160,9 +170,6 @@ class FiatGui:
             # and the node editor uses it to compute the initial position of the nodes
             # window_size = imgui.get_window_size()
             self._functions_graph_gui.draw()
-
-        osd_widgets.render()
-        self._handle_file_dialogs()
 
     def _handle_file_dialogs(self) -> None:
         if self.save_dialog is not None and self.save_dialog.ready():
@@ -220,22 +227,51 @@ class FiatGui:
         except Exception as e:
             logging.error(f"FiatGui: Error saving state file {self._node_state_filename()}: {e}")
 
-    def _load_user_inputs(self, filename: str) -> None:
+    def _load_user_inputs_at_startup(self) -> None:
+        self._load_user_inputs(self._node_state_filename(), whine_if_not_found=False)
+
+    def _load_user_inputs_during_execution(self, filename: str) -> None:
+        success = self._load_user_inputs(filename, whine_if_not_found=True)
+        if success:
+            self._functions_graph_gui.functions_graph.invoke_all_functions()
+
+    def _load_user_inputs(self, filename: str, whine_if_not_found: bool) -> bool:
         try:
             with open(filename, "r") as f:
                 json_data = json.load(f)
-        except (FileNotFoundError, json.JSONDecodeError):
-            logging.info(f"FiatGui: state file {self._node_state_filename()} not found, using default state")
-            return
-
+        except json.JSONDecodeError as e:
+            self._exception_to_display = FiatDisplayedException(
+                f"""
+                Error loading state file {self._node_state_filename()}:
+                (json.JSONDecodeError)
+                ========================================
+                {e}
+                """
+            )
+        except FileNotFoundError:
+            if whine_if_not_found:
+                self._exception_to_display = FiatDisplayedException(
+                    f"Could not find state file {self._node_state_filename()}"
+                )
+            return False
         try:
             self._functions_graph_gui.load_user_inputs_from_json(json_data)
-            self._functions_graph_gui.functions_graph.invoke_top_leaf_functions()
         except Exception as e:
-            logging.error(f"FiatGui: Error loading state file {self._node_state_filename()}: {e}")
+            self._exception_to_display = FiatDisplayedException(
+                f"""
+                Error loading state file {self._node_state_filename()}:
+                (while invoking load_user_inputs_from_json: the nodes may have changed)
+                ========================================
+                {e}
+                """
+            )
+            return False
+
+        return True
 
     def _post_init(self) -> None:
-        self._load_user_inputs(self._node_state_filename())
+        self._load_user_inputs_at_startup()
+        self._functions_graph_gui.functions_graph.invoke_all_functions()
 
     def run(self) -> None:
         self.params.runner_params.docking_params.docking_splits += self._docking_splits()
@@ -260,6 +296,8 @@ class FiatGui:
             gui_function=lambda: self._top_toolbar(),
             options=top_toolbar_options,
         )
+
+        self.params.runner_params.callbacks.show_gui = self._heartbeat
 
         immapp.run(self.params.runner_params, self.params.addons)
 
