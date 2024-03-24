@@ -54,7 +54,7 @@ class ImagePresenter:
             self.image_channels = cv2.split(image)  # type: ignore
 
     def _gui_size(self) -> None:
-        ratio = 1.2
+        ratio = 1.1
         imgui.push_button_repeat(True)
         imgui.text("Thumbnail size")
         imgui.same_line()
@@ -134,6 +134,7 @@ class ImageWithGui(AnyDataWithGui[Image]):
         self.callbacks.present_str = self.present_str
         self.callbacks.save_gui_options_to_json = self.save_gui_options_to_json
         self.callbacks.load_gui_options_from_json = self.load_gui_options_from_json
+        self.callbacks.present_custom_popup_possible = True
 
     def edit(self) -> bool:
         changed = False

@@ -98,11 +98,14 @@ class _OsdWidgets:
             if self._popup_exists(btn_label):
                 if imgui.button(icons_fontawesome_6.ICON_FA_CIRCLE_XMARK + " " + btn_label):
                     self._remove_popup(btn_label)
+                if imgui.is_item_hovered():
+                    self.tooltip = "Hide " + btn_label + " - " + popup_label
             else:
-                if imgui.button(icons_fontawesome_6.ICON_FA_EYE + " " + btn_label):
+                # if imgui.button(icons_fontawesome_6.ICON_FA_EYE + " " + btn_label):
+                if imgui.button(icons_fontawesome_6.ICON_FA_MAGNIFYING_GLASS_ARROW_RIGHT + " " + btn_label):
                     self._add_popup(btn_label, popup_label, gui_function, bool_returned)
                 if imgui.is_item_hovered():
-                    self.tooltip = btn_label + " - " + popup_label
+                    self.tooltip = "Show " + btn_label + " - " + popup_label
 
     def show_bool_popup_button(self, btn_label: str, popup_label: str, gui_function: BoolFunction) -> None:
         self._add_popup_button(btn_label, popup_label, gui_function, False)
