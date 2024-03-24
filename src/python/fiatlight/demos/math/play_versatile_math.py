@@ -21,10 +21,17 @@ def main() -> None:
         """An example of a function that returns multiple values."""
         return a + b, a * b
 
-    functions_graph = FunctionsGraph.from_function_composition([float_source, sin, add_mul, log, sin])
-    functions_graph.add_function_composition([float_source, sin, log, sin, add_mul])
+    # functions_graph.add_function_composition([float_source, sin, log, sin, add_mul])
 
+    functions_graph = FunctionsGraph.from_function_composition([float_source, sin, log, sin, add_mul])
     fiat_run(functions_graph)
+
+    # x = 0
+    # y = sin(x)
+    # z = log(y)
+    # w = sin(z)
+    # a, b = add_mul(y, w)
+    # print(f"x={x}, y={y}, z={z}, w={w}, a={a}, b={b}")
 
 
 if __name__ == "__main__":
