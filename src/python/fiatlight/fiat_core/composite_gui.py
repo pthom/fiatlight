@@ -1,5 +1,6 @@
+from fiatlight.fiat_config import get_fiat_config
 from fiatlight.fiat_types import DataType, Unspecified, Error
-from fiatlight.fiat_core import AnyDataWithGui, fiatlight_style
+from fiatlight.fiat_core import AnyDataWithGui
 from fiatlight.fiat_widgets import osd_widgets
 from imgui_bundle import hello_imgui, imgui, imgui_node_editor as ed  # noqa
 from enum import Enum
@@ -114,7 +115,7 @@ class ListWithGui(AnyDataWithGui[List[DataType]]):
         if nb_elements == 0:
             return "Empty list"
         r = f"List of {nb_elements} elements\n" + self._elements_str(
-            value, fiatlight_style().list_maximum_elements_in_node
+            value, get_fiat_config().style.list_maximum_elements_in_node
         )
         return r
 
@@ -134,7 +135,7 @@ class ListWithGui(AnyDataWithGui[List[DataType]]):
                 self.popup_max_elements += 300
 
     def present_custom(self) -> None:
-        max_elements = fiatlight_style().list_maximum_elements_in_node
+        max_elements = get_fiat_config().style.list_maximum_elements_in_node
         actual_value = self.get_actual_value()
 
         osd_widgets.add_void_popup_button("Details", self.popup_details)

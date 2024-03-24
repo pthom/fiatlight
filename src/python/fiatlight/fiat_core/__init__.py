@@ -1,4 +1,3 @@
-from fiatlight.fiat_core.fiatlight_style_definitions import fiatlight_style, FiatlightStyle, GuiColorType
 from fiatlight.fiat_core.any_data_gui_callbacks import AnyDataGuiCallbacks
 from fiatlight.fiat_core.any_data_with_gui import AnyDataWithGui
 from fiatlight.fiat_core.function_with_gui import ParamKind, ParamWithGui, OutputWithGui, FunctionWithGui
@@ -59,8 +58,4 @@ __all__ = [
     "StrWithGui",
     "StrWithGuiParams",
     "StrEditType",
-    # from fiatlight_style_definitions
-    "fiatlight_style",
-    "FiatlightStyle",
-    "GuiColorType",
 ]

@@ -1,12 +1,7 @@
 from __future__ import annotations
 from fiatlight.fiat_types import Error, Unspecified, UnspecifiedValue, BoolFunction, JsonDict
-from fiatlight.fiat_core import (
-    FunctionNode,
-    FunctionNodeLink,
-    AnyDataWithGui,
-    GuiColorType,
-    fiatlight_style,
-)
+from fiatlight.fiat_core import FunctionNode, FunctionNodeLink, AnyDataWithGui
+from fiatlight.fiat_config import FiatColorType, get_fiat_config
 from fiatlight.fiat_core.function_with_gui import ParamWithGui
 from imgui_bundle import imgui, imgui_node_editor as ed, ImVec2, imgui_ctx, hello_imgui, imgui_node_editor_ctx as ed_ctx
 from fiatlight.fiat_widgets import icons_fontawesome_6, fontawesome_6_ctx, osd_widgets
@@ -19,7 +14,7 @@ from dataclasses import dataclass
 class InputParamHeaderLineElements:
     """Data to be presented in a header line"""
 
-    input_pin_color: GuiColorType = GuiColorType.InputPin
+    input_pin_color: FiatColorType = FiatColorType.InputPin
 
     status_icon: str | None = None
     status_icon_tooltips: List[str] | None = None
@@ -36,7 +31,7 @@ class InputParamHeaderLineElements:
 class OutputHeaderLineElements:
     """Data to be presented in a header line"""
 
-    output_pin_color: GuiColorType = GuiColorType.OutputPin
+    output_pin_color: FiatColorType = FiatColorType.OutputPin
 
     status_icon: str | None = None
     status_icon_tooltips: List[str] | None = None
@@ -243,13 +238,13 @@ class FunctionNodeGui:
         value = output_with_gui.data_with_gui.value
         if isinstance(value, Unspecified):
             r.value_as_str = "Unspecified!"
-            r.output_pin_color = GuiColorType.OutputPinUnspecified
+            r.output_pin_color = FiatColorType.OutputPinUnspecified
         elif isinstance(value, Error):
             r.value_as_str = "Error!"
-            r.output_pin_color = GuiColorType.OutputPinWithError
+            r.output_pin_color = FiatColorType.OutputPinWithError
         else:
             r.value_as_str = output_with_gui.data_with_gui.datatype_value_to_str(value)
-            r.output_pin_color = GuiColorType.OutputPin
+            r.output_pin_color = FiatColorType.OutputPin
 
         # fill r.status_icon and r.status_icon_tooltips
         has_output_links = len(self.function_node.output_links_for_idx(output_idx)) > 0
@@ -288,13 +283,13 @@ class FunctionNodeGui:
 
         # fill value_as_str and input_pin_color (may set status_icon and status_icon_tooltips on error/unspecified)
         if isinstance(input_param.data_with_gui.value, Error):
-            r.input_pin_color = GuiColorType.InputPinWithError
+            r.input_pin_color = FiatColorType.InputPinWithError
             r.status_icon = icons_fontawesome_6.ICON_FA_BOMB
             r.status_icon_tooltips.append("Error!")
             r.value_as_str = "Error!"
         elif isinstance(input_param.data_with_gui.value, Unspecified):
             if isinstance(input_param.default_value, Unspecified):
-                r.input_pin_color = GuiColorType.InputPinUnspecified
+                r.input_pin_color = FiatColorType.InputPinUnspecified
                 r.status_icon = icons_fontawesome_6.ICON_FA_CIRCLE_EXCLAMATION
                 r.status_icon_tooltips.append("Unspecified!")
                 r.value_as_str = "Unspecified!"
@@ -344,7 +339,8 @@ class FunctionNodeGui:
 
         # Show colored pin with possible tooltip
         with imgui_ctx.push_style_color(
-            imgui.Col_.text.value, fiatlight_style().colors[header_elements.output_pin_color]
+            imgui.Col_.text.value,
+            get_fiat_config().style.colors[header_elements.output_pin_color],
         ):
             with ed_ctx.begin_pin(self.pins_output[idx_output], ed.PinKind.output):
                 ed.pin_pivot_alignment(ImVec2(1, 0.5))
@@ -360,7 +356,7 @@ class FunctionNodeGui:
         imgui.begin_horizontal("input")
         header_elements = self._input_param_header_elements(input_param)
         with imgui_ctx.push_style_color(
-            imgui.Col_.text.value, fiatlight_style().colors[header_elements.input_pin_color]
+            imgui.Col_.text.value, get_fiat_config().style.colors[header_elements.input_pin_color]
         ):
             input_name = input_param.name
             with ed_ctx.begin_pin(self.pins_input[input_name], ed.PinKind.input):
@@ -458,7 +454,7 @@ class FunctionNodeGui:
     def _draw_function_outputs(self) -> None:
         is_dirty = self.function_node.function_with_gui.dirty
         if is_dirty:
-            imgui.push_style_color(imgui.Col_.text.value, fiatlight_style().colors[GuiColorType.TextDirtyOutput])
+            imgui.push_style_color(imgui.Col_.text.value, get_fiat_config().style.colors[FiatColorType.TextDirtyOutput])
         for idx_output, output_param in enumerate(self.function_node.function_with_gui.outputs_with_gui):
             with imgui_ctx.push_obj_id(output_param):
                 with imgui_ctx.begin_group():
@@ -497,7 +493,7 @@ class FunctionNodeGui:
                 # Title and doc
                 with imgui_ctx.begin_horizontal("Title"):
                     self._draw_title(unique_name)
-                imgui.dummy(ImVec2(hello_imgui.em_size(fiatlight_style().node_minimum_width_em), 1))
+                imgui.dummy(ImVec2(hello_imgui.em_size(get_fiat_config().style.node_minimum_width_em), 1))
 
                 # Inputs
                 inputs_changed = self._draw_function_inputs()
