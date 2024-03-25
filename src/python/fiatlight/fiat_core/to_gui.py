@@ -118,7 +118,7 @@ def any_typeclass_to_gui(
             return r
         except NameError:
             logging.warning(f"Enum {type_class_name}: enum not found in globals and locals")
-            return AnyDataWithGui.make_default()
+            return AnyDataWithGui.make_for_any()
 
     if is_optional:
         inner_gui = any_typeclass_to_gui(type_class_name, globals_dict=globals_dict, locals_dict=locals_dict)
@@ -134,7 +134,7 @@ def any_typeclass_to_gui(
     if type_class_name not in _COMPLAINTS_MISSING_GUI_FACTORY:
         logging.warning(f"Type {type_class_name} not present in ALL_GUI_FACTORIES")
         _COMPLAINTS_MISSING_GUI_FACTORY.append(type_class_name)
-    return AnyDataWithGui.make_default()
+    return AnyDataWithGui.make_for_any()
 
 
 def any_typeclass_to_gui_split_if_tuple(
@@ -173,7 +173,7 @@ def to_param_with_gui(
 
     data_with_gui: AnyDataWithGui[Any]
     if annotation is None or annotation is inspect.Parameter.empty:
-        data_with_gui = AnyDataWithGui.make_default()
+        data_with_gui = AnyDataWithGui.make_for_any()
     else:
         data_with_gui = any_typeclass_to_gui(str(annotation), globals_dict=globals_dict, locals_dict=locals_dict)
 
@@ -219,7 +219,7 @@ def to_function_with_gui(
 
     return_annotation = sig.return_annotation
     if return_annotation is inspect.Parameter.empty:
-        output_with_gui = AnyDataWithGui.make_default()
+        output_with_gui = AnyDataWithGui.make_for_any()
         function_with_gui.outputs_with_gui.append(OutputWithGui(output_with_gui))
     else:
         return_annotation_str = str(return_annotation)
