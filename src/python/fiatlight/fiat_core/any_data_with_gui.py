@@ -20,11 +20,12 @@ import logging
 
 class AnyDataWithGui(Generic[DataType]):
     """
-    Instantiate this class with your types, and provide draw functions that presents it content.
+    Instantiate this class with your types, and provide custom functions.
     See example implementation for a custom type at the bottom of this file.
     """
 
     # The value of the data - can be a DataType, Unspecified, or Error
+    # It is accessed through the value property, which triggers the on_change callback (if set)
     _value: DataType | Unspecified | Error = UnspecifiedValue
 
     # Handlers
@@ -32,12 +33,6 @@ class AnyDataWithGui(Generic[DataType]):
 
     def __init__(self) -> None:
         self.callbacks = AnyDataGuiCallbacks.no_handlers()
-
-    @staticmethod
-    def from_handlers(handlers: AnyDataGuiCallbacks[DataType]) -> "AnyDataWithGui[DataType]":
-        r: AnyDataWithGui[DataType] = AnyDataWithGui()
-        r.callbacks = handlers
-        return r
 
     @staticmethod
     def make_default() -> "AnyDataWithGui[Any]":
@@ -54,6 +49,10 @@ class AnyDataWithGui(Generic[DataType]):
             self.callbacks.on_change()
 
     def get_actual_value(self) -> DataType:
+        """Returns the actual value of the data, or raises an exception if the value is Unspecified or Error.
+        When we are inside a callback, we can be sure that the value is of the correct type, so we can call this method
+        instead of accessing the value directly and checking for Unspecified or Error.
+        """
         if isinstance(self.value, Unspecified):
             raise ValueError("Cannot get value of Unspecified")
         elif isinstance(self.value, Error):
@@ -156,8 +155,12 @@ class FooWithGui(AnyDataWithGui[Foo]):
 
     # Edit and present functions
     def edit(self) -> bool:
-        assert isinstance(self.value, Foo)
-        changed, self.value.x = imgui.input_int("x", self.value.x)
+        # When edit is called, self.value is guaranteed to be a Foo, so that we can call self.get_actual_value()
+        # in order to get the actual value with the correct type.
+        value = self.get_actual_value()
+        changed, value.x = imgui.input_int("x", value.x)
+        if changed:
+            self.value = value
         return changed
 
     @staticmethod

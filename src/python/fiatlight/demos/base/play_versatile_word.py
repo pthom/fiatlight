@@ -49,6 +49,15 @@ Yours is the Earth and everything that's in it,
 WordWithCount = Tuple[str, int]
 
 
+def get_text(text: str = poem) -> str:
+    """This is our source of text.
+    By default, it uses the poem variable defined above.
+    It will be associated with a GUI that allows the user to select a text file
+    (see the TextFileWithGui class above).
+    """
+    return text
+
+
 def str_lower(s: str) -> str:
     return s.lower()
 
@@ -126,27 +135,9 @@ class TextFileWithGui(AnyDataWithGui[str]):
 
 
 def main() -> None:
-    def get_text(text: str = poem) -> str:
-        """This is our source of text.
-        By default, it uses the poem variable defined above.
-        It will be associated with a GUI that allows the user to select a text file
-        (see the TextFileWithGui class above).
-        """
-        return text
-
     get_text_gui = to_function_with_gui(get_text)
     get_text_gui.set_input_gui("text", TextFileWithGui())
 
-    # In this example, we will use the standard `sorted` function,
-    # but we create a FunctionWithGui around it, by adding a signature_string,
-    # so that the `reverse` parameter can be displayed as a checkbox in the GUI.
-    # Notes:
-    # - in Python, the sorted signature is untyped (and reverse is also untyped):
-    #      def sorted(iterable, /, *, key=None, reverse=False)
-    # - the "/" in the signature means that the parameters before it are positional-only
-    #  (by default, fiatlight will try to specify all parameters using keywords, hence the need to specify this)
-    # - we could also use the following more generic signature_string:
-    #      "(iterable: Iterable[T], /, *, key: Optional[Callable[[T], Any]] = None, reverse: bool = False) -> List[T]"
     sorted_gui = to_function_with_gui(
         sorted, signature_string="(words: List[str], /, reverse: bool = False) -> List[str]"
     )

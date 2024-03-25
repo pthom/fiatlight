@@ -1,6 +1,4 @@
-from typing import Any, TypeAlias, TypeVar
-
-DataType = TypeVar("DataType")
+from typing import Any, TypeAlias
 
 JsonPrimitive = str | int | float | bool | None
 JsonDict = dict[str, Any]

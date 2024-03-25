@@ -101,3 +101,8 @@ def stable_diffusion_xl_gui() -> fiatlight.FunctionWithGui:
     prompt_input.params.width_em = 60
 
     return stable_diffusion_xl_gui
+
+
+if __name__ == "__main__":
+    graph = fiatlight.FunctionsGraph.from_function_composition([stable_diffusion_xl_gui()])
+    fiatlight.fiat_run(graph)
