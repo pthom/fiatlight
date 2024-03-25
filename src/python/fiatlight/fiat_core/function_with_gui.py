@@ -1,5 +1,5 @@
 from fiatlight.fiat_config import get_fiat_config
-from fiatlight.fiat_types import UnspecifiedValue, ErrorValue, Unspecified, Error, JsonDict, DataType
+from fiatlight.fiat_types import UnspecifiedValue, ErrorValue, Unspecified, Error, JsonDict, DataType, GuiType
 from fiatlight.fiat_core.any_data_with_gui import AnyDataWithGui
 from typing import Any, List, final, Callable, Optional, Generic, Type
 from dataclasses import dataclass
@@ -53,13 +53,16 @@ class FunctionWithGui:
     - the inputs and outputs of the function, as a list of ParamWithGui
     """
 
-    # set this with the actual function implementation at construction time
+    # --------------------------------------------------------------------------------------------
+    #        Members
+    # --------------------------------------------------------------------------------------------
+    # This is the implementation of the function, i.e. the function that will be called
     f_impl: Callable[..., Any] | None = None
 
     # the name of the function
     name: str
 
-    # input_gui and output_gui should be filled during construction
+    # inputs_with_gui and outputs_with_gui should be filled soon after construction
     inputs_with_gui: List[ParamWithGui[Any]]
     outputs_with_gui: List[OutputWithGui[Any]]
 
@@ -75,20 +78,24 @@ class FunctionWithGui:
     # if True, this indicates that the inputs have changed since the last call, and the function needs to be called
     dirty: bool = True
 
+    # --------------------------------------------------------------------------------------------
+    #        Construction
+    #  input_with_gui and output_with_gui should be filled soon after construction
+    # --------------------------------------------------------------------------------------------
     def __init__(self) -> None:
         self.inputs_with_gui = []
         self.outputs_with_gui = []
 
-    def all_inputs_ids(self) -> List[str]:
-        return [param.name for param in self.inputs_with_gui]
-
+    # --------------------------------------------------------------------------------------------
+    #        Inputs, aka parameters
+    # --------------------------------------------------------------------------------------------
     def input_of_name(self, name: str) -> AnyDataWithGui[Any]:
         for param in self.inputs_with_gui:
             if param.name == name:
                 return param.data_with_gui
         assert False, f"input {name} not found"
 
-    def input_as(self, name: str, gui_type: Type[DataType]) -> DataType:
+    def input_as(self, name: str, gui_type: Type[GuiType]) -> GuiType:
         for param in self.inputs_with_gui:
             if param.name == name:
                 r = param.data_with_gui
@@ -97,6 +104,28 @@ class FunctionWithGui:
                 return r
         raise ValueError(f"Parameter {name} not found")
 
+    def all_inputs_names(self) -> List[str]:
+        return [param.name for param in self.inputs_with_gui]
+
+    # --------------------------------------------------------------------------------------------
+    #        Outputs
+    # --------------------------------------------------------------------------------------------
+    def output_of_idx(self, output_idx: int = 0) -> AnyDataWithGui[Any]:
+        if output_idx >= len(self.outputs_with_gui):
+            raise ValueError(f"output_idx {output_idx} out of range")
+        return self.outputs_with_gui[output_idx].data_with_gui
+
+    def output_as(self, output_idx: int, gui_type: Type[GuiType]) -> GuiType:
+        r = self.outputs_with_gui[output_idx].data_with_gui
+        if not isinstance(r, gui_type):
+            raise TypeError(f"Expected type {gui_type.__name__}, got {type(r).__name__} instead.")
+        return r
+
+    # --------------------------------------------------------------------------------------------
+    #        Invoke the function
+    # This is the heart of fiatlight: it calls the function with the current inputs
+    # and stores the result in the outputs, stores the exception if any, etc.
+    # --------------------------------------------------------------------------------------------
     @final
     def invoke(self) -> None:
         assert self.f_impl is not None
@@ -150,6 +179,13 @@ class FunctionWithGui:
 
         self.dirty = False
 
+    # --------------------------------------------------------------------------------------------
+    #        Save and load to json
+    # Here, we only save the options that the user entered manually in the GUI:
+    #   - the options of the inputs
+    #   - the options of the outputs
+    #   - the options of this FunctionWithGui (invoke_automatically, etc.)
+    # --------------------------------------------------------------------------------------------
     def save_gui_options_to_json(self) -> JsonDict:
         input_options = {}
         for input_with_gui in self.inputs_with_gui:
@@ -189,29 +225,9 @@ class FunctionWithGui:
         if self.invoke_automatically_can_set:
             self.invoke_automatically = json_data.get("invoke_automatically", True)
 
-    def set_output_gui(self, data_with_gui: AnyDataWithGui[Any], output_idx: int = 0) -> None:
-        if output_idx >= len(self.outputs_with_gui):
-            raise ValueError(f"output_idx {output_idx} out of range")
-        self.outputs_with_gui[output_idx].data_with_gui = data_with_gui
-
-    def set_input_gui(self, input_name: str, data_with_gui: AnyDataWithGui[Any]) -> None:
-        for param in self.inputs_with_gui:
-            if param.name == input_name:
-                param.data_with_gui = data_with_gui
-                return
-        raise ValueError(f"input_name {input_name} not found")
-
-    def get_input_gui(self, input_name: str) -> AnyDataWithGui[Any]:
-        for param in self.inputs_with_gui:
-            if param.name == input_name:
-                return param.data_with_gui
-        raise ValueError(f"input_name {input_name} not found")
-
-    def get_output_gui(self, output_idx: int = 0) -> AnyDataWithGui[Any]:
-        if output_idx >= len(self.outputs_with_gui):
-            raise ValueError(f"output_idx {output_idx} out of range")
-        return self.outputs_with_gui[output_idx].data_with_gui
-
+    # --------------------------------------------------------------------------------------------
+    #       Function documentation
+    # --------------------------------------------------------------------------------------------
     def has_doc(self) -> bool:
         return self.get_function_doc() is not None
 

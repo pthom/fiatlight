@@ -24,7 +24,7 @@ class FunctionNodeLink:
         self.dst_input_name = dst_input_name
 
         assert src_output_idx < len(src_function_node.function_with_gui.outputs_with_gui)
-        assert dst_input_name in dst_function_node.function_with_gui.all_inputs_ids()
+        assert dst_input_name in dst_function_node.function_with_gui.all_inputs_names()
 
 
 class FunctionNode:
