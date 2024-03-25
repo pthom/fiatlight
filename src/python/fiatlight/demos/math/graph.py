@@ -34,11 +34,11 @@ def main() -> None:
     random_binomial_gui = functions_graph.get_function_with_gui()
     random_binomial_gui.get_output_gui().set_present_custom_callback(present_histogram)
 
-    n_gui = random_binomial_gui.param_as("n", IntWithGui)
+    n_gui = random_binomial_gui.input_as("n", IntWithGui)
     n_gui.params.v_min = 1
     n_gui.params.v_max = 100
 
-    p_gui = random_binomial_gui.param_as("p", FloatWithGui)
+    p_gui = random_binomial_gui.input_as("p", FloatWithGui)
     p_gui.params.v_min = 0.0
     p_gui.params.v_max = 1.0
 

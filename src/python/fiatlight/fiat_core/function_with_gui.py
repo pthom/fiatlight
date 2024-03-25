@@ -88,7 +88,7 @@ class FunctionWithGui:
                 return param.data_with_gui
         assert False, f"input {name} not found"
 
-    def param_as(self, name: str, gui_type: Type[DataType]) -> DataType:
+    def input_as(self, name: str, gui_type: Type[DataType]) -> DataType:
         for param in self.inputs_with_gui:
             if param.name == name:
                 r = param.data_with_gui
