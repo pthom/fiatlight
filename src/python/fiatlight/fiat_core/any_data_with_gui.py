@@ -35,7 +35,9 @@ class AnyDataWithGui(Generic[DataType]):
         self.callbacks = AnyDataGuiCallbacks.no_handlers()
 
     @staticmethod
-    def make_default() -> "AnyDataWithGui[Any]":
+    def make_for_any() -> "AnyDataWithGui[Any]":
+        """Creates an AnyDataWithGui with no type specified.
+        This is useful when we don't know the type of the data."""
         return AnyDataWithGui()
 
     @property
