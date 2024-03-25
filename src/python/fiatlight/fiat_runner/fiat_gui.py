@@ -107,18 +107,18 @@ class FiatGui:
 
     def _has_one_exception(self) -> bool:
         return any(
-            fn.function_node.function_with_gui.last_exception_message is not None for fn in self._function_nodes()
+            fn._function_node.function_with_gui.last_exception_message is not None for fn in self._function_nodes()
         )
 
     def _draw_exceptions(self) -> None:
         for function_node_gui in self._function_nodes():
             from fiatlight.fiat_runner import FIATLIGHT_GUI_CONFIG
 
-            last_exception_message = function_node_gui.function_node.function_with_gui.last_exception_message
-            last_exception_traceback = function_node_gui.function_node.function_with_gui.last_exception_traceback
+            last_exception_message = function_node_gui._function_node.function_with_gui.last_exception_message
+            last_exception_traceback = function_node_gui._function_node.function_with_gui.last_exception_traceback
             if last_exception_message is not None:
                 function_unique_name = self._functions_graph_gui.functions_graph.function_node_unique_name(
-                    function_node_gui.function_node
+                    function_node_gui._function_node
                 )
                 imgui.text_colored(
                     FIATLIGHT_GUI_CONFIG.colors.error,

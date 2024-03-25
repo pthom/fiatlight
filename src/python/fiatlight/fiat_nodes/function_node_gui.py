@@ -11,7 +11,7 @@ from dataclasses import dataclass
 
 
 @dataclass
-class InputParamHeaderLineElements:
+class _InputParamHeaderLineElements:
     """Data to be presented in a header line"""
 
     input_pin_color: FiatColorType = FiatColorType.InputPin
@@ -28,7 +28,7 @@ class InputParamHeaderLineElements:
     details_button_tooltip: str = ""
 
 
-class OutputHeaderLineElements:
+class _OutputHeaderLineElements:
     """Data to be presented in a header line"""
 
     output_pin_color: FiatColorType = FiatColorType.OutputPin
@@ -54,10 +54,10 @@ class FunctionNodeLinkGui:
         self.function_node_link = function_node_link
         self.link_id = ed.LinkId.create()
         for f in function_nodes:
-            if f.function_node.function_with_gui == function_node_link.src_function_node.function_with_gui:
-                self.start_id = f.pins_output[function_node_link.src_output_idx]
-            if f.function_node.function_with_gui == function_node_link.dst_function_node.function_with_gui:
-                self.end_id = f.pins_input[function_node_link.dst_input_name]
+            if f._function_node.function_with_gui == function_node_link.src_function_node.function_with_gui:
+                self.start_id = f._pins_output[function_node_link.src_output_idx]
+            if f._function_node.function_with_gui == function_node_link.dst_function_node.function_with_gui:
+                self.end_id = f._pins_input[function_node_link.dst_input_name]
         assert hasattr(self, "start_id")
         assert hasattr(self, "end_id")
 
@@ -85,38 +85,59 @@ def _my_collapsible_button(expanded: bool, tooltip_part: str) -> bool:
 class FunctionNodeGui:
     """The GUI representation as a visual node for a FunctionNode"""
 
-    function_node: FunctionNode
+    # ------------------------------------------------------------------------------------------------------------------
+    # Members
+    # All are private
+    # ------------------------------------------------------------------------------------------------------------------
 
-    node_id: ed.NodeId
-    pins_input: Dict[str, ed.PinId]
-    pins_output: Dict[int, ed.PinId]
+    # A reference to the FunctionNode
+    # (which references the FunctionWithGui, which references the function)
+    _function_node: FunctionNode
 
-    node_size: ImVec2 | None = None  # will be set after the node is drawn once
+    # The node Ids for imgui_node_editor
+    _node_id: ed.NodeId
+    _pins_input: Dict[str, ed.PinId]
+    _pins_output: Dict[int, ed.PinId]
 
-    # user settings
-    show_input_details: Dict[str, bool] = {}
-    show_output_details: Dict[int, bool] = {}
-    inputs_expanded: bool = True
-    outputs_expanded: bool = True
+    # The current size of the node
+    # (it varies depending on the content)
+    _node_size: ImVec2 | None = None  # will be set after the node is drawn once
 
+    # user settings:
+    # Shall we show the details of the inputs/outputs?
+    # Those settings are saved in the user settings file
+    _show_input_details: Dict[str, bool] = {}
+    _show_output_details: Dict[int, bool] = {}
+    _inputs_expanded: bool = True
+    _outputs_expanded: bool = True
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # Constructor
+    # ------------------------------------------------------------------------------------------------------------------
     def __init__(self, function_node: FunctionNode) -> None:
-        self.function_node = function_node
+        self._function_node = function_node
 
-        self.node_id = ed.NodeId.create()
+        self._node_id = ed.NodeId.create()
 
-        self.pins_input = {}
-        for input_with_gui in self.function_node.function_with_gui.inputs_with_gui:
-            self.pins_input[input_with_gui.name] = ed.PinId.create()
+        self._pins_input = {}
+        for input_with_gui in self._function_node.function_with_gui.inputs_with_gui:
+            self._pins_input[input_with_gui.name] = ed.PinId.create()
 
-        self.pins_output = {}
-        for i, output_with_gui in enumerate(self.function_node.function_with_gui.outputs_with_gui):
-            self.pins_output[i] = ed.PinId.create()
+        self._pins_output = {}
+        for i, output_with_gui in enumerate(self._function_node.function_with_gui.outputs_with_gui):
+            self._pins_output[i] = ed.PinId.create()
 
-        self.show_input_details = {
-            input_with_gui.name: False for input_with_gui in self.function_node.function_with_gui.inputs_with_gui
+        self._show_input_details = {
+            input_with_gui.name: False for input_with_gui in self._function_node.function_with_gui.inputs_with_gui
         }
-        self.show_output_details = {i: True for i in range(len(self.function_node.function_with_gui.outputs_with_gui))}
+        self._show_output_details = {
+            i: True for i in range(len(self._function_node.function_with_gui.outputs_with_gui))
+        }
 
+    # ------------------------------------------------------------------------------------------------------------------
+    # Draw the node
+    # This is the heart of the fiatlight, with `draw_node` being the main function
+    # ------------------------------------------------------------------------------------------------------------------
     def _call_gui_present_custom(self, value_with_gui: AnyDataWithGui[Any]) -> None:
         value = value_with_gui.value
         fn_present = value_with_gui.callbacks.present_custom
@@ -221,12 +242,12 @@ class FunctionNodeGui:
                 changed = True
         return changed
 
-    def _output_header_elements(self, output_idx: int) -> OutputHeaderLineElements:
+    def _output_header_elements(self, output_idx: int) -> _OutputHeaderLineElements:
         """Return the elements to be presented in a header line"""
-        assert 0 <= output_idx < len(self.function_node.function_with_gui.outputs_with_gui)
+        assert 0 <= output_idx < len(self._function_node.function_with_gui.outputs_with_gui)
 
-        output_with_gui = self.function_node.function_with_gui.outputs_with_gui[output_idx]
-        r = OutputHeaderLineElements()
+        output_with_gui = self._function_node.function_with_gui.outputs_with_gui[output_idx]
+        r = _OutputHeaderLineElements()
 
         # fill r.value_as_str and color
         value = output_with_gui.data_with_gui.value
@@ -241,10 +262,10 @@ class FunctionNodeGui:
             r.output_pin_color = FiatColorType.OutputPin
 
         # fill r.status_icon and r.status_icon_tooltips
-        has_output_links = len(self.function_node.output_links_for_idx(output_idx)) > 0
+        has_output_links = len(self._function_node.output_links_for_idx(output_idx)) > 0
         if has_output_links:
             r.status_icon = icons_fontawesome_6.ICON_FA_LINK
-            r.status_icon_tooltips = self.function_node.output_node_links_info(output_idx)
+            r.status_icon_tooltips = self._function_node.output_node_links_info(output_idx)
         else:
             r.status_icon = icons_fontawesome_6.ICON_FA_PLUG_CIRCLE_XMARK
             r.status_icon_tooltips = ["Unlinked output!"]
@@ -257,16 +278,16 @@ class FunctionNodeGui:
 
         return r
 
-    def _input_param_header_elements(self, input_param: ParamWithGui[Any]) -> InputParamHeaderLineElements:
+    def _input_param_header_elements(self, input_param: ParamWithGui[Any]) -> _InputParamHeaderLineElements:
         """Return the elements to be presented in a header line"""
-        r = InputParamHeaderLineElements()
-        has_link = self.function_node.has_input_link(input_param.name)
+        r = _InputParamHeaderLineElements()
+        has_link = self._function_node.has_input_link(input_param.name)
         r.status_icon_tooltips = []
 
         # fill status_icon and status_icon_tooltips if there is a link
         if has_link:
             r.status_icon = icons_fontawesome_6.ICON_FA_LINK
-            node_link_info = self.function_node.input_node_link_info(input_param.name)
+            node_link_info = self._function_node.input_node_link_info(input_param.name)
             if node_link_info is not None:
                 r.status_icon_tooltips.append(node_link_info)
 
@@ -299,7 +320,7 @@ class FunctionNodeGui:
         r.param_name_tooltip = "This is an example param doc"
 
         # fill show_details_button and details_button_tooltip
-        has_link = self.function_node.has_input_link(input_param.name)
+        has_link = self._function_node.has_input_link(input_param.name)
         if has_link:
             can_present = input_param.data_with_gui.can_present_custom()
             if can_present:
@@ -315,7 +336,7 @@ class FunctionNodeGui:
         header_elements = self._output_header_elements(idx_output)
 
         # If multiple outputs, show "Output X:"
-        if len(self.function_node.function_with_gui.outputs_with_gui) > 1:
+        if len(self._function_node.function_with_gui.outputs_with_gui) > 1:
             imgui.text(f"Output {idx_output}:")
 
         # Show one line value
@@ -327,8 +348,8 @@ class FunctionNodeGui:
 
         # Show present button, if a custom present callback is available
         if header_elements.show_details_button:
-            self.show_output_details[idx_output] = _my_collapsible_button(
-                self.show_output_details[idx_output], header_elements.details_button_tooltip
+            self._show_output_details[idx_output] = _my_collapsible_button(
+                self._show_output_details[idx_output], header_elements.details_button_tooltip
             )
 
         # Show colored pin with possible tooltip
@@ -336,7 +357,7 @@ class FunctionNodeGui:
             imgui.Col_.text.value,
             get_fiat_config().style.colors[header_elements.output_pin_color],
         ):
-            with ed_ctx.begin_pin(self.pins_output[idx_output], ed.PinKind.output):
+            with ed_ctx.begin_pin(self._pins_output[idx_output], ed.PinKind.output):
                 ed.pin_pivot_alignment(ImVec2(1, 0.5))
                 with fontawesome_6_ctx():
                     if header_elements.status_icon is not None:
@@ -353,7 +374,7 @@ class FunctionNodeGui:
             imgui.Col_.text.value, get_fiat_config().style.colors[header_elements.input_pin_color]
         ):
             input_name = input_param.name
-            with ed_ctx.begin_pin(self.pins_input[input_name], ed.PinKind.input):
+            with ed_ctx.begin_pin(self._pins_input[input_name], ed.PinKind.input):
                 ed.pin_pivot_alignment(ImVec2(0, 0.5))
                 with fontawesome_6_ctx():
                     # Pin status icon
@@ -375,8 +396,8 @@ class FunctionNodeGui:
 
         if header_elements.show_details_button:
             imgui.spring()
-            self.show_input_details[input_name] = _my_collapsible_button(
-                self.show_input_details[input_name], header_elements.details_button_tooltip
+            self._show_input_details[input_name] = _my_collapsible_button(
+                self._show_input_details[input_name], header_elements.details_button_tooltip
             )
 
         imgui.end_horizontal()
@@ -384,14 +405,14 @@ class FunctionNodeGui:
     def _draw_exception_message(self) -> None:
         from fiatlight.fiat_runner import FIATLIGHT_GUI_CONFIG
 
-        last_exception_message = self.function_node.function_with_gui.last_exception_message
+        last_exception_message = self._function_node.function_with_gui.last_exception_message
         if last_exception_message is None:
             return
 
         min_exception_width = hello_imgui.em_size(16)
         exception_width = min_exception_width
-        if self.node_size is not None:
-            exception_width = self.node_size.x - hello_imgui.em_size(2)
+        if self._node_size is not None:
+            exception_width = self._node_size.x - hello_imgui.em_size(2)
             if exception_width < min_exception_width:
                 exception_width = min_exception_width
         fiat_widgets.text_maybe_truncated(
@@ -401,17 +422,16 @@ class FunctionNodeGui:
         )
 
     def _draw_title(self, unique_name: str) -> None:
-        fn_name = self.function_node.function_with_gui.name
-        fiat_widgets.text_maybe_truncated(fn_name)
+        fn_name = self._function_node.function_with_gui.name
+        imgui.text(fn_name)
         if unique_name != fn_name:
-            if imgui.is_item_hovered():
-                osd_widgets.set_tooltip(f" (id: {unique_name})")
+            imgui.text(f" (id: {unique_name})")
 
-        if self.function_node.function_with_gui.has_doc():
-            fn_doc = self.function_node.function_with_gui.get_function_doc()
+        if self._function_node.function_with_gui.has_doc():
+            fn_doc = self._function_node.function_with_gui.get_function_doc()
             assert fn_doc is not None
             first_line = fn_doc.split("\n")[0]
-            title_line = self.function_node.function_with_gui.name + "(): " + first_line
+            title_line = self._function_node.function_with_gui.name + "(): " + first_line
             remaining_text = fn_doc[len(first_line) :]
 
             def show_doc() -> None:
@@ -427,22 +447,22 @@ class FunctionNodeGui:
                 osd_widgets.show_void_popup_button(btn_text, popup_label, show_doc)
 
     def _draw_invoke_options(self) -> None:
-        fn_with_gui = self.function_node.function_with_gui
+        fn_with_gui = self._function_node.function_with_gui
         btn_size = hello_imgui.em_to_vec2(4, 0)
 
         with fontawesome_6_ctx():
             if fn_with_gui.invoke_automatically_can_set:
                 invoke_changed, fn_with_gui.invoke_automatically = imgui.checkbox(
-                    "##Auto refresh", self.function_node.function_with_gui.invoke_automatically
+                    "##Auto refresh", self._function_node.function_with_gui.invoke_automatically
                 )
                 if imgui.is_item_hovered():
                     osd_widgets.set_tooltip("Tick to invoke automatically.")
                 if invoke_changed and fn_with_gui.invoke_automatically:
-                    self.function_node.invoke_function()
+                    self._function_node.invoke_function()
 
             if fn_with_gui.dirty:
                 if imgui.button(icons_fontawesome_6.ICON_FA_ROTATE, btn_size):
-                    self.function_node.invoke_function()
+                    self._function_node.invoke_function()
                 if imgui.is_item_hovered():
                     osd_widgets.set_tooltip("Refresh needed! Click to refresh.")
 
@@ -457,19 +477,19 @@ class FunctionNodeGui:
                         osd_widgets.set_tooltip("Refresh needed!")
 
     def _draw_function_outputs(self, unique_name: str) -> None:
-        is_dirty = self.function_node.function_with_gui.dirty
+        is_dirty = self._function_node.function_with_gui.dirty
         if is_dirty:
             imgui.push_style_color(imgui.Col_.text.value, get_fiat_config().style.colors[FiatColorType.TextDirtyOutput])
-        for idx_output, output_param in enumerate(self.function_node.function_with_gui.outputs_with_gui):
+        for idx_output, output_param in enumerate(self._function_node.function_with_gui.outputs_with_gui):
             with imgui_ctx.push_obj_id(output_param):
-                has_link = len(self.function_node.output_links_for_idx(idx_output)) > 0
-                if not has_link and not self.outputs_expanded:
+                has_link = len(self._function_node.output_links_for_idx(idx_output)) > 0
+                if not has_link and not self._outputs_expanded:
                     continue
                 with imgui_ctx.begin_group():
                     with imgui_ctx.begin_horizontal("outputH"):
                         self._draw_output_header_line(idx_output)
                     can_present = output_param.data_with_gui.can_present_custom()
-                    if can_present and self.show_output_details[idx_output]:
+                    if can_present and self._show_output_details[idx_output]:
                         # capture the output_param for the lambda
                         # (otherwise, the lambda would capture the last output_param in the loop)
                         output_param_captured = output_param
@@ -496,62 +516,62 @@ class FunctionNodeGui:
     def _can_collapse_inputs(self) -> bool:
         # We can only collapse inputs that do not have a link
         # (since otherwise, the user would not be able to see the link status, and we have to display a pin anyway)
-        if len(self.function_node.function_with_gui.inputs_with_gui) == 0:
+        if len(self._function_node.function_with_gui.inputs_with_gui) == 0:
             return False
 
         nb_inputs_with_links = 0
-        for input_param in self.function_node.function_with_gui.inputs_with_gui:
-            if self.function_node.has_input_link(input_param.name):
+        for input_param in self._function_node.function_with_gui.inputs_with_gui:
+            if self._function_node.has_input_link(input_param.name):
                 nb_inputs_with_links += 1
 
-        nb_inputs = len(self.function_node.function_with_gui.inputs_with_gui)
+        nb_inputs = len(self._function_node.function_with_gui.inputs_with_gui)
         return nb_inputs_with_links < nb_inputs
 
     def _can_collapse_outputs(self) -> bool:
         # We can only collapse outputs that do not have a link
         # (since otherwise, the user would not be able to see the link status, and we have to display a pin anyway)
-        if len(self.function_node.function_with_gui.outputs_with_gui) <= 1:
+        if len(self._function_node.function_with_gui.outputs_with_gui) <= 1:
             return False
 
         nb_outputs_with_links = 0
-        for i, output_param in enumerate(self.function_node.function_with_gui.outputs_with_gui):
-            if len(self.function_node.output_links_for_idx(i)) > 0:
+        for i, output_param in enumerate(self._function_node.function_with_gui.outputs_with_gui):
+            if len(self._function_node.output_links_for_idx(i)) > 0:
                 nb_outputs_with_links += 1
 
-        nb_outputs = len(self.function_node.function_with_gui.outputs_with_gui)
+        nb_outputs = len(self._function_node.function_with_gui.outputs_with_gui)
         return nb_outputs_with_links < nb_outputs
 
     def _draw_function_inputs(self, unique_name: str) -> bool:
         changed = False
 
-        if len(self.function_node.function_with_gui.inputs_with_gui) > 0:
+        if len(self._function_node.function_with_gui.inputs_with_gui) > 0:
             if self._can_collapse_inputs():
-                changed, self.inputs_expanded = fiat_widgets.node_utils.node_collapsing_separator(
-                    self.node_id, text="Params", expanded=self.inputs_expanded
+                changed, self._inputs_expanded = fiat_widgets.node_utils.node_collapsing_separator(
+                    self._node_id, text="Params", expanded=self._inputs_expanded
                 )
                 if changed:
-                    for k, v in self.show_input_details.items():
+                    for k, v in self._show_input_details.items():
                         # We do not change the status of nodes that have a link
                         # (since they are hidden by default in the inputs, visible by default in the outputs)
-                        has_link = self.function_node.has_input_link(k)
+                        has_link = self._function_node.has_input_link(k)
                         if not has_link:
-                            self.show_input_details[k] = self.inputs_expanded
+                            self._show_input_details[k] = self._inputs_expanded
             else:
-                self.inputs_expanded = True
-                fiat_widgets.node_utils.node_separator(self.node_id, "Params")
+                self._inputs_expanded = True
+                fiat_widgets.node_utils.node_separator(self._node_id, "Params")
 
-        for input_param in self.function_node.function_with_gui.inputs_with_gui:
+        for input_param in self._function_node.function_with_gui.inputs_with_gui:
             with imgui_ctx.push_obj_id(input_param):
                 input_name = input_param.name
 
-                has_link = self.function_node.has_input_link(input_name)
-                if not has_link and not self.inputs_expanded:
+                has_link = self._function_node.has_input_link(input_name)
+                if not has_link and not self._inputs_expanded:
                     continue
 
                 self._draw_input_header_line(input_param)
 
-                if self.show_input_details[input_name]:
-                    shall_show_edit = not self.function_node.has_input_link(input_name)
+                if self._show_input_details[input_name]:
+                    shall_show_edit = not self._function_node.has_input_link(input_name)
                     if shall_show_edit:
                         # capture the input_param for the lambda
                         # (otherwise, the lambda would capture the last input_param in the loop)
@@ -604,8 +624,8 @@ class FunctionNodeGui:
         return changed
 
     def draw_node(self, unique_name: str) -> None:
-        with imgui_ctx.push_obj_id(self.function_node):
-            with ed_ctx.begin_node(self.node_id):
+        with imgui_ctx.push_obj_id(self._function_node):
+            with ed_ctx.begin_node(self._node_id):
                 with imgui_ctx.begin_vertical("node_content"):
                     # Title and doc
                     with imgui_ctx.begin_horizontal("Title"):
@@ -615,9 +635,9 @@ class FunctionNodeGui:
                     # Inputs
                     inputs_changed = self._draw_function_inputs(unique_name)
                     if inputs_changed:
-                        self.function_node.function_with_gui.dirty = True
-                        if self.function_node.function_with_gui.invoke_automatically:
-                            self.function_node.invoke_function()
+                        self._function_node.function_with_gui.dirty = True
+                        if self._function_node.function_with_gui.invoke_automatically:
+                            self._function_node.invoke_function()
 
                     #
                     # Outputs
@@ -625,18 +645,18 @@ class FunctionNodeGui:
 
                     # Outputs separator
                     output_separator_str = (
-                        "Outputs" if len(self.function_node.function_with_gui.outputs_with_gui) > 1 else "Output"
+                        "Outputs" if len(self._function_node.function_with_gui.outputs_with_gui) > 1 else "Output"
                     )
                     if self._can_collapse_outputs():
-                        changed, self.outputs_expanded = fiat_widgets.node_utils.node_collapsing_separator(
-                            self.node_id, text=output_separator_str, expanded=self.outputs_expanded
+                        changed, self._outputs_expanded = fiat_widgets.node_utils.node_collapsing_separator(
+                            self._node_id, text=output_separator_str, expanded=self._outputs_expanded
                         )
                         if changed:
-                            for i, v in self.show_output_details.items():
-                                self.show_output_details[i] = self.outputs_expanded
+                            for i, v in self._show_output_details.items():
+                                self._show_output_details[i] = self._outputs_expanded
                     else:
-                        self.outputs_expanded = True
-                        fiat_widgets.node_utils.node_separator(self.node_id, output_separator_str)
+                        self._outputs_expanded = True
+                        fiat_widgets.node_utils.node_separator(self._node_id, output_separator_str)
 
                     # Invoke options
                     with imgui_ctx.begin_horizontal("invoke_options"):
@@ -648,32 +668,38 @@ class FunctionNodeGui:
 
                     # Outputs
                     self._draw_function_outputs(unique_name)
-            self.node_size = ed.get_node_size(self.node_id)
+            self._node_size = ed.get_node_size(self._node_id)
 
+    # ------------------------------------------------------------------------------------------------------------------
+    # Save and load user settings
+    # ------------------------------------------------------------------------------------------------------------------
     def save_gui_options_to_json(self) -> JsonDict:
         r = {
-            "show_input_details": self.show_input_details,
-            "show_output_details": self.show_output_details,
-            "inputs_expanded": self.inputs_expanded,
-            "outputs_expanded": self.outputs_expanded,
+            "_show_input_details": self._show_input_details,
+            "_show_output_details": self._show_output_details,
+            "_inputs_expanded": self._inputs_expanded,
+            "_outputs_expanded": self._outputs_expanded,
         }
         return r
 
     def load_gui_options_from_json(self, json_data: JsonDict) -> None:
-        show_input_details_as_dict_str_bool = json_data.get("show_input_details")
+        show_input_details_as_dict_str_bool = json_data.get("_show_input_details")
         if show_input_details_as_dict_str_bool is not None:
             for k, v in show_input_details_as_dict_str_bool.items():
-                self.show_input_details[k] = v
+                self._show_input_details[k] = v
 
-        show_output_details_as_dict_str_bool = json_data.get("show_output_details")
+        show_output_details_as_dict_str_bool = json_data.get("_show_output_details")
         if show_output_details_as_dict_str_bool is not None:
             for k, v in show_output_details_as_dict_str_bool.items():
-                self.show_output_details[int(k)] = v
+                self._show_output_details[int(k)] = v
 
-        self.inputs_expanded = json_data.get("inputs_expanded", True)
-        self.outputs_expanded = json_data.get("outputs_expanded", True)
+        self._inputs_expanded = json_data.get("_inputs_expanded", True)
+        self._outputs_expanded = json_data.get("_outputs_expanded", True)
 
 
+# ------------------------------------------------------------------------------------------------------------------
+# Sandbox
+# ------------------------------------------------------------------------------------------------------------------
 def sandbox() -> None:
     from fiatlight.fiat_core import to_function_with_gui
     from imgui_bundle import immapp
