@@ -1,3 +1,5 @@
+import typing
+
 from fiatlight.fiat_image import ImageU8, ImageU8_GRAY, ImageU8_3
 from fiatlight.fiat_image import fiat_img_proc
 import fiatlight
@@ -28,7 +30,8 @@ def canny(
     """
     if blur_sigma > 0:
         image = cv2.GaussianBlur(image, (0, 0), sigmaX=blur_sigma, sigmaY=blur_sigma)  # type: ignore
-    return cv2.Canny(image, t_lower, t_upper, apertureSize=aperture_size, L2gradient=l2_gradient)  # type: ignore
+    r = cv2.Canny(image, t_lower, t_upper, apertureSize=aperture_size, L2gradient=l2_gradient)
+    return typing.cast(ImageU8_GRAY, r)
 
 
 class MorphShape(Enum):
@@ -38,12 +41,12 @@ class MorphShape(Enum):
 
 
 def dilate(
-    image: ImageU8,
+    image: ImageU8_GRAY,
     kernel_size: int = 3,
     morph_shape: MorphShape = MorphShape.MORPH_ELLIPSE,
     iterations: int = 1,
     blur_edges_sigma: float = 2.0,
-) -> ImageU8:
+) -> ImageU8_GRAY:
     kernel = cv2.getStructuringElement(morph_shape.value, (kernel_size, kernel_size))
     r = cv2.dilate(image, kernel, iterations=iterations)
     if blur_edges_sigma > 0:
@@ -78,9 +81,6 @@ def merge_toon_edges(
     return r
 
 
-# ToonEdgesOutput = namedtuple("ToonEdgesOutput", ["image_with_edges", "image", "edges", "dilated_edges"])
-
-
 def add_toon_edges(
     image: ImageU8_3,
     canny_t_lower: Float_0_10000 = 1000,  # type: ignore
@@ -99,14 +99,22 @@ def add_toon_edges(
     edges = canny(image, canny_t_lower, canny_t_upper, canny_aperture_size, canny_l2_gradient, canny_blur_sigma)
     dilated_edges = dilate(edges, dilate_kernel_size, dilate_morph_shape, dilate_iterations, blur_edges_sigma)
     image_with_edges = merge_toon_edges(image, dilated_edges, edges_intensity)
-    # return ToonEdgesOutput(image_with_edges, image, edges, dilated_edges)
 
-    add_toon_edges.fiat_internals = {  # type: ignore
-        "image_with_edges": image_with_edges,
-        "image": image,
-        "edges": edges,
-        "dilated_edges": dilated_edges,
-    }
+    # Add internals for debugging
+    from fiatlight.fiat_image import ImageWithGui
+    from fiatlight import AnyDataWithGui
+
+    if not hasattr(add_toon_edges, "fiat_internals"):
+        add_toon_edges.fiat_internals: dict[str, AnyDataWithGui] = {  # type: ignore
+            "edges": ImageWithGui(),
+            "dilated_edges": ImageWithGui(),
+            "image_with_edges": ImageWithGui(),
+        }
+    add_toon_edges.fiat_internals["edges"].value = edges  # type: ignore
+    add_toon_edges.fiat_internals["dilated_edges"].value = dilated_edges  # type: ignore
+    add_toon_edges.fiat_internals["image_with_edges"].value = image_with_edges  # type: ignore
+
+    # return
     return image_with_edges
 
 

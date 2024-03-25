@@ -35,6 +35,7 @@ def register_gui_factories() -> None:
     gui_factories().add_factory("ImageU8", ImageWithGui)
     gui_factories().add_factory("ImageU8Channels", ImageChannelsWithGui)
     gui_factories().add_factory("numpy.ndarray[typing.Any, numpy.dtype[numpy.uint8]]", ImageWithGui)
+    gui_factories().add_factory("numpy.ndarray", ImageWithGui)
 
     gui_factories().add_factory("ColorConversion", ColorConversionWithGui)
     gui_factories().add_factory("ColorType", lambda: composite_gui.EnumWithGui(ColorType))
