@@ -113,15 +113,20 @@ class FunctionNodeGui:
     # (it varies depending on the content)
     _node_size: ImVec2 | None = None  # will be set after the node is drawn once
 
+    _function_doc: _FunctionDoc
+
+    # internals of the function
+    _fiat_internals_with_gui: Dict[str, AnyDataWithGui[Any]]
+
     # user settings:
     # Shall we show the details of the inputs/outputs?
     # Those settings are saved in the user settings file
     _show_input_details: Dict[str, bool] = {}
-    _show_output_details: Dict[int, bool] = {}
     _inputs_expanded: bool = True
+    _show_output_details: Dict[int, bool] = {}
     _outputs_expanded: bool = True
-
-    _function_doc: _FunctionDoc
+    _show_internals_details: Dict[str, bool] = {}
+    _internals_expanded: bool = True
 
     # ------------------------------------------------------------------------------------------------------------------
     # Constructor
@@ -147,6 +152,7 @@ class FunctionNodeGui:
         }
 
         self._fill_function_doc()
+        self._fiat_internals_with_gui = {}
 
     # ------------------------------------------------------------------------------------------------------------------
     # Doc
@@ -696,6 +702,52 @@ class FunctionNodeGui:
                                 present_input()
         return changed
 
+    def _draw_fiat_internals(self) -> None:
+        fn = self._function_node.function_with_gui.f_impl
+        if fn is None:
+            self._fiat_internals_with_gui = {}
+            return
+
+        has_fiat_internals = hasattr(fn, "fiat_internals")
+        if not has_fiat_internals:
+            self._fiat_internals_with_gui = {}
+            return
+        fn_fiat_internals: Dict[str, Any] = fn.fiat_internals  # type: ignore
+        assert isinstance(fn_fiat_internals, dict)
+
+        expand_changed, self._internals_expanded = fiat_widgets.node_utils.node_collapsing_separator(
+            self._node_id, "Internals", self._internals_expanded
+        )
+
+        if not self._internals_expanded:
+            return
+
+        # remove old internals
+        new_fiat_internals_with_gui = {}
+        for name in self._fiat_internals_with_gui:
+            if name in fn_fiat_internals:
+                new_fiat_internals_with_gui[name] = self._fiat_internals_with_gui[name]
+        self._fiat_internals_with_gui = new_fiat_internals_with_gui
+
+        # display the internals
+        for name, data_with_gui in fn_fiat_internals.items():
+            if name not in self._fiat_internals_with_gui:
+                self._fiat_internals_with_gui[name] = data_with_gui
+            with imgui_ctx.push_obj_id(data_with_gui):
+                with imgui_ctx.begin_horizontal("internal_header"):
+                    imgui.text(name)
+                    imgui.spring()
+                    self._show_internals_details[name] = _my_collapsible_button(
+                        self._show_internals_details.get(name, False), "internal details"
+                    )
+                if self._show_internals_details[name]:
+                    if data_with_gui.can_present_custom():
+                        assert data_with_gui.callbacks.present_custom is not None
+                        data_with_gui.callbacks.present_custom()
+                    else:
+                        as_str = data_with_gui.datatype_value_to_str(data_with_gui.value)
+                        imgui.text(as_str)
+
     def draw_node(self, unique_name: str) -> None:
         with imgui_ctx.push_obj_id(self._function_node):
             with ed_ctx.begin_node(self._node_id):
@@ -711,6 +763,9 @@ class FunctionNodeGui:
                         self._function_node.function_with_gui.dirty = True
                         if self._function_node.function_with_gui.invoke_automatically:
                             self._function_node.invoke_function()
+
+                    # Internals
+                    self._draw_fiat_internals()
 
                     #
                     # Outputs
@@ -749,9 +804,11 @@ class FunctionNodeGui:
     def save_gui_options_to_json(self) -> JsonDict:
         r = {
             "_show_input_details": self._show_input_details,
-            "_show_output_details": self._show_output_details,
             "_inputs_expanded": self._inputs_expanded,
+            "_show_output_details": self._show_output_details,
             "_outputs_expanded": self._outputs_expanded,
+            "_show_internals_details": self._show_internals_details,
+            "_internals_expanded": self._internals_expanded,
         }
         return r
 
@@ -766,8 +823,14 @@ class FunctionNodeGui:
             for k, v in show_output_details_as_dict_str_bool.items():
                 self._show_output_details[int(k)] = v
 
+        show_internals_details_as_dict_str_bool = json_data.get("_show_internals_details")
+        if show_internals_details_as_dict_str_bool is not None:
+            for k, v in show_internals_details_as_dict_str_bool.items():
+                self._show_internals_details[k] = v
+
         self._inputs_expanded = json_data.get("_inputs_expanded", True)
         self._outputs_expanded = json_data.get("_outputs_expanded", True)
+        self._internals_expanded = json_data.get("_internals_expanded", True)
 
 
 # ------------------------------------------------------------------------------------------------------------------
