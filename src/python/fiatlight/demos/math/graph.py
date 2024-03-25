@@ -27,13 +27,13 @@ def present_histogram(values: OneDimIntArray) -> None:
         implot.end_plot()
 
 
-def edit_probability(p: float) -> [bool, float]:
+def edit_probability(p: float) -> Tuple[bool, float]:
     changed, p = imgui_knobs.knob("Probability", p, 0.0, 1.0)
     return changed, p
 
 
-def edit_n(n: int) -> [bool, int]:
-    changed, n = imgui_knobs.knob("Number of trials", n, 1, 100)
+def edit_n(n: int) -> Tuple[bool, int]:
+    changed, n = imgui_knobs.knob_int("Number of trials", n, 1, 100)
     return changed, n
 
 

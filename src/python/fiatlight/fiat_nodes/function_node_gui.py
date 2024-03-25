@@ -71,7 +71,7 @@ class _FunctionDoc:
     doc: str | None = None
     source_code: str | None = None
 
-    def has_info(self):
+    def has_info(self) -> bool:
         return self.title is not None or self.doc is not None or self.source_code is not None
 
 
@@ -463,7 +463,7 @@ class FunctionNodeGui:
             btn_label = icons_fontawesome_6.ICON_FA_BOMB + " Debug this exception"
             popup_label = "Confirm Raise exception"
 
-            def confirmation_gui():
+            def confirmation_gui() -> None:
                 msg = """
                 Are you sure you want to raise this exception?
 
@@ -476,7 +476,7 @@ class FunctionNodeGui:
                 """
                 # align the text to the left
                 lines = msg.split("\n")
-                lines = map(str.strip, lines)
+                lines = list(map(str.strip, lines))
                 msg = "\n".join(lines)
 
                 imgui.text(msg)
