@@ -65,6 +65,16 @@ class FunctionNodeLinkGui:
         ed.link(self.link_id, self.start_id, self.end_id)
 
 
+@dataclass
+class _FunctionDoc:
+    title: str | None = None
+    doc: str | None = None
+    source_code: str | None = None
+
+    def has_info(self):
+        return self.title is not None or self.doc is not None or self.source_code is not None
+
+
 def _my_collapsible_button(expanded: bool, tooltip_part: str) -> bool:
     """A button that toggles between expanded and collapsed states.
     Returns true if expanded, false if collapsed.
@@ -111,6 +121,8 @@ class FunctionNodeGui:
     _inputs_expanded: bool = True
     _outputs_expanded: bool = True
 
+    _function_doc: _FunctionDoc
+
     # ------------------------------------------------------------------------------------------------------------------
     # Constructor
     # ------------------------------------------------------------------------------------------------------------------
@@ -133,6 +145,26 @@ class FunctionNodeGui:
         self._show_output_details = {
             i: True for i in range(len(self._function_node.function_with_gui.outputs_with_gui))
         }
+
+        self._fill_function_doc()
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # Doc
+    # ------------------------------------------------------------------------------------------------------------------
+    def _fill_function_doc(self) -> None:
+        self._function_doc = _FunctionDoc()
+        fn_doc = self._function_node.function_with_gui.get_function_doc()
+        if fn_doc is not None:
+            first_line = fn_doc.split("\n")[0]
+            title_line = self._function_node.function_with_gui.name + "(): " + first_line
+            remaining_text = fn_doc[len(first_line) :]
+            self._function_doc.title = title_line
+            self._function_doc.doc = remaining_text
+
+        self._function_doc.source_code = self._function_node.function_with_gui.get_function_source_code()
+
+    def _has_doc(self) -> bool:
+        return self._function_doc.has_info()
 
     # ------------------------------------------------------------------------------------------------------------------
     # Draw the node
@@ -421,30 +453,35 @@ class FunctionNodeGui:
             color=FIATLIGHT_GUI_CONFIG.colors.error,
         )
 
+    def _render_function_doc(self, unique_name: str) -> None:
+        if not self._has_doc():
+            return
+
+        def show_doc() -> None:
+            from imgui_bundle import imgui_md
+
+            if self._function_doc.title is not None:
+                imgui_md.render("## " + self._function_doc.title)
+            if self._function_doc.doc is not None:
+                imgui.text_wrapped(self._function_doc.doc)
+            if self._function_doc.source_code is not None:
+                md = "### Source code\n\n"
+                md += f"```python\n{self._function_doc.source_code}\n```"
+                imgui_md.render(md)
+
+        with fontawesome_6_ctx():
+            imgui.spring()
+            popup_label = f"{unique_name}(): function documentation"
+            btn_text = icons_fontawesome_6.ICON_FA_BOOK
+            osd_widgets.show_void_popup_button(btn_text, popup_label, show_doc)
+
     def _draw_title(self, unique_name: str) -> None:
         fn_name = self._function_node.function_with_gui.name
         imgui.text(fn_name)
         if unique_name != fn_name:
             imgui.text(f" (id: {unique_name})")
 
-        if self._function_node.function_with_gui.has_doc():
-            fn_doc = self._function_node.function_with_gui.get_function_doc()
-            assert fn_doc is not None
-            first_line = fn_doc.split("\n")[0]
-            title_line = self._function_node.function_with_gui.name + "(): " + first_line
-            remaining_text = fn_doc[len(first_line) :]
-
-            def show_doc() -> None:
-                from imgui_bundle import imgui_md
-
-                imgui_md.render("## " + title_line)
-                imgui.text_wrapped(remaining_text)
-
-            with fontawesome_6_ctx():
-                imgui.spring()
-                popup_label = f"{unique_name}(): function documentation"
-                btn_text = icons_fontawesome_6.ICON_FA_BOOK
-                osd_widgets.show_void_popup_button(btn_text, popup_label, show_doc)
+        self._render_function_doc(unique_name)
 
     def _draw_invoke_options(self) -> None:
         fn_with_gui = self._function_node.function_with_gui

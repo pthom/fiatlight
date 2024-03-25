@@ -252,7 +252,7 @@ class FunctionWithGui:
             self.invoke_automatically = json_data.get("invoke_automatically", True)
 
     # --------------------------------------------------------------------------------------------
-    #       Function documentation
+    #       Function documentation & source code
     # --------------------------------------------------------------------------------------------
     def has_doc(self) -> bool:
         return self.get_function_doc() is not None
@@ -351,3 +351,14 @@ class FunctionWithGui:
         markdown_doc += "```"
 
         return markdown_doc
+
+    def get_function_source_code(self) -> str | None:
+        if self.f_impl is None:
+            return None
+        import inspect
+
+        try:
+            r = inspect.getsource(self.f_impl)
+            return r
+        except OSError:
+            return None

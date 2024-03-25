@@ -30,6 +30,7 @@ def add_mul(a: float, b: float) -> tuple[float, float]:
 
 
 def main() -> None:
+    # fiatlight.fiat_config.get_fiat_config().exception_config.catch_function_exceptions = False
     functions_graph = FunctionsGraph.from_function_composition([float_source, sin, log, sin, add_mul])
 
     # Optional: add more nodes, where some functions output to several nodes
