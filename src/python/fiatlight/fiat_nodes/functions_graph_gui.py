@@ -37,7 +37,7 @@ class FunctionsGraphGui:
                 return False
 
             for node in self.function_nodes_gui:
-                pos = ed.get_node_position(node.node_id)
+                pos = ed.get_node_position(node._node_id)
                 if pos.x != 0 or pos.y != 0:
                     return False
             return True
@@ -51,8 +51,8 @@ class FunctionsGraphGui:
             current_position = ImVec2(0, 0)
 
             for i, fn in enumerate(self.function_nodes_gui):
-                ed.set_node_position(fn.node_id, current_position)
-                node_size = ed.get_node_size(fn.node_id)
+                ed.set_node_position(fn._node_id, current_position)
+                node_size = ed.get_node_size(fn._node_id)
                 current_position.x += node_size.x + width_between_nodes
                 current_row_height = max(current_row_height, node_size.y)
                 if current_position.x + node_size.x > w:
@@ -64,7 +64,7 @@ class FunctionsGraphGui:
         def draw_nodes() -> None:
             for fn in self.function_nodes_gui:
                 imgui.push_id(str(id(fn)))
-                fn.draw_node(self.functions_graph.function_node_unique_name(fn.function_node))
+                fn.draw_node(self.functions_graph.function_node_unique_name(fn._function_node))
                 imgui.pop_id()
 
         def draw_links() -> None:
@@ -81,7 +81,7 @@ class FunctionsGraphGui:
         self._idx_frame += 1
 
     def function_node_unique_name(self, function_node_gui: FunctionNodeGui) -> str:
-        return self.functions_graph.function_node_unique_name(function_node_gui.function_node)
+        return self.functions_graph.function_node_unique_name(function_node_gui._function_node)
 
     def function_node_with_unique_name(self, function_name: str) -> FunctionNodeGui:
         return next(fn for fn in self.function_nodes_gui if self.function_node_unique_name(fn) == function_name)
