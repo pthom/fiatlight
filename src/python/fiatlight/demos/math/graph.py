@@ -32,7 +32,7 @@ def main() -> None:
     functions_graph = FunctionsGraph.from_function(random_binomial)
 
     random_binomial_gui = functions_graph.get_function_with_gui()
-    random_binomial_gui.get_output_gui().set_present_custom_callback(present_histogram)
+    random_binomial_gui.output_of_idx().set_present_custom_callback(present_histogram)
 
     n_gui = random_binomial_gui.input_as("n", IntWithGui)
     n_gui.params.v_min = 1

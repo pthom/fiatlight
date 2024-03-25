@@ -1,61 +1,16 @@
 from typing import List, Tuple
-from fiatlight import AnyDataWithGui, FunctionsGraph, fiat_run, to_function_with_gui
-
-
-poem = """
-                 If
-
-By Rudyard Kipling
-_______________________________________________________
-
-If you can keep your head when all about you
-    Are losing theirs and blaming it on you,
-If you can trust yourself when all men doubt you,
-    But make allowance for their doubting too;
-If you can wait and not be tired by waiting,
-    Or being lied about, don't deal in lies,
-Or being hated, don't give way to hating,
-    And yet don't look too good, nor talk too wise:
-
-If you can dream and not make dreams your master;
-    If you can think and not make thoughts your aim;
-If you can meet with Triumph and Disaster
-    And treat those two impostors just the same;
-If you can bear to hear the truth you've spoken
-    Twisted by knaves to make a trap for fools,
-Or watch the things you gave your life to, broken,
-    And stoop and build 'em up with worn-out tools:
-
-If you can make one heap of all your winnings
-    And risk it on one turn of pitch-and-toss,
-And lose, and start again at your beginnings
-    And never breathe a word about your loss;
-If you can force your heart and nerve and sinew
-    To serve your turn long after they are gone,
-And so hold on when there is nothing in you
-    Except the Will which says to them: "Hold on!"
-
-If you can talk with crowds and keep your virtue,
-    Or walk with Kings nor lose the common touch,
-If neither foes nor loving friends can hurt you,
-    If all men count with you, but none too much;
-If you can fill the unforgiving minute
-    With sixty seconds' worth of distance run,
-Yours is the Earth and everything that's in it,
-    And - which is more - you'll be a Man, my son!
-"""
+from fiatlight import FunctionsGraph, fiat_run, to_function_with_gui
+from fiatlight.fiat_types import TextPath
 
 
 WordWithCount = Tuple[str, int]
 
 
-def get_text(text: str = poem) -> str:
-    """This is our source of text.
-    By default, it uses the poem variable defined above.
-    It will be associated with a GUI that allows the user to select a text file
-    (see the TextFileWithGui class above).
-    """
-    return text
+def get_text(text_file: TextPath) -> str:
+    """This is our source of text."""
+    with open(text_file, "r") as f:
+        r = f.read()
+    return r
 
 
 def str_lower(s: str) -> str:
@@ -101,43 +56,7 @@ def sort_word_with_counts(words: List[WordWithCount]) -> List[WordWithCount]:
     return r
 
 
-class TextFileWithGui(AnyDataWithGui[str]):
-    """An example of a custom GUI for a string.
-    It allows the user to select a text file and use its content."""
-
-    from imgui_bundle import portable_file_dialogs as pfd
-
-    open_file_dialog: pfd.open_file | None = None
-
-    def __init__(self) -> None:
-        super().__init__()
-        self.callbacks.edit = self.edit
-        self.callbacks.present_str = self.present_str
-        self.callbacks.default_value_provider = lambda: poem
-
-    def edit(self) -> bool:
-        changed = False
-        from imgui_bundle import imgui
-
-        if imgui.button("Get from file"):
-            self.open_file_dialog = self.pfd.open_file("Select text file")
-        if self.open_file_dialog is not None and not self.open_file_dialog.ready():
-            if len(self.open_file_dialog.result()) > 0:
-                filename = self.open_file_dialog.result()[0]
-                with open(filename, "r") as f:
-                    self.value = f.read()
-                changed = True
-            self.open_file_dialog = None
-        return changed
-
-    def present_str(self, value: str) -> str:
-        return value
-
-
 def main() -> None:
-    get_text_gui = to_function_with_gui(get_text)
-    get_text_gui.set_input_gui("text", TextFileWithGui())
-
     sorted_gui = to_function_with_gui(
         sorted, signature_string="(words: List[str], /, reverse: bool = False) -> List[str]"
     )
@@ -145,7 +64,7 @@ def main() -> None:
     fiat_run(
         FunctionsGraph.from_function_composition(
             [
-                get_text_gui,
+                get_text,
                 str_lower,
                 remove_non_letters,
                 split_words,
