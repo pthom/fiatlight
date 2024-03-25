@@ -12,7 +12,8 @@ from fiatlight.fiat_types import (
     JsonDict,
     DataType,
 )
-from fiatlight.fiat_core.any_data_gui_callbacks import AnyDataGuiCallbacks  # noqa
+from fiatlight.fiat_types.function_types import DataPresentFunction, DataEditFunction  # noqa
+from fiatlight.fiat_core.any_data_gui_callbacks import AnyDataGuiCallbacks
 from typing import Generic, Any
 from imgui_bundle import imgui
 import logging
@@ -24,13 +25,21 @@ class AnyDataWithGui(Generic[DataType]):
     See example implementation for a custom type at the bottom of this file.
     """
 
+    # ------------------------------------------------------------------------------------------------------------------
+    #            Members
+    # ------------------------------------------------------------------------------------------------------------------
     # The value of the data - can be a DataType, Unspecified, or Error
     # It is accessed through the value property, which triggers the on_change callback (if set)
     _value: DataType | Unspecified | Error = UnspecifiedValue
 
-    # Handlers
+    # Callbacks for the GUI
+    # This is the heart of FiatLight: the GUI is defined by the callbacks.
+    # Think of them as __dunder__ methods for the GUI.
     callbacks: AnyDataGuiCallbacks[DataType]
 
+    # ------------------------------------------------------------------------------------------------------------------
+    #            Initialization
+    # ------------------------------------------------------------------------------------------------------------------
     def __init__(self) -> None:
         self.callbacks = AnyDataGuiCallbacks.no_handlers()
 
@@ -40,6 +49,9 @@ class AnyDataWithGui(Generic[DataType]):
         This is useful when we don't know the type of the data."""
         return AnyDataWithGui()
 
+    # ------------------------------------------------------------------------------------------------------------------
+    #            Value getter and setter + get_actual_value (which returns a DataType or raises an exception)
+    # ------------------------------------------------------------------------------------------------------------------
     @property
     def value(self) -> DataType | Unspecified | Error:
         return self._value
@@ -62,6 +74,27 @@ class AnyDataWithGui(Generic[DataType]):
         else:
             return self.value
 
+    # ------------------------------------------------------------------------------------------------------------------
+    #            Callback utility functions: add callbacks from free functions
+    # ------------------------------------------------------------------------------------------------------------------
+    def set_edit_callback(self, edit_callback: DataEditFunction[DataType]) -> None:
+        def edit_callback_wrapper() -> bool:
+            changed, new_value = edit_callback(self.get_actual_value())
+            if changed:
+                self.value = new_value
+            return changed
+
+        self.callbacks.edit = edit_callback_wrapper
+
+    def set_present_custom_callback(self, present_callback: DataPresentFunction[DataType]) -> None:
+        def present_callback_wrapper() -> None:
+            present_callback(self.get_actual_value())
+
+        self.callbacks.present_custom = present_callback_wrapper
+
+    # ------------------------------------------------------------------------------------------------------------------
+    #            Serialization and deserialization
+    # ------------------------------------------------------------------------------------------------------------------
     def save_to_json(self) -> JsonDict:
         if isinstance(self.value, Unspecified):
             return {"type": "Unspecified"}
@@ -121,6 +154,9 @@ class AnyDataWithGui(Generic[DataType]):
         else:
             raise ValueError(f"Cannot deserialize {json_data}")
 
+    # ------------------------------------------------------------------------------------------------------------------
+    #            Utilities
+    # ------------------------------------------------------------------------------------------------------------------
     def datatype_value_to_str(self, value: DataType) -> str:
         default_str: str
         if self.callbacks.present_str is not None:
