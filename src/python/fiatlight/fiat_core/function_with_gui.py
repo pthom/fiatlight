@@ -90,12 +90,25 @@ class FunctionWithGui:
     #        Inputs, aka parameters
     # --------------------------------------------------------------------------------------------
     def input_of_name(self, name: str) -> AnyDataWithGui[Any]:
+        """Return the input with the given name as a AnyDataWithGui[Any]
+        The inner type of the returned value is Any in this case.
+        You may have to cast it to the correct type, if you rely on type hints.
+
+        Use input_as() if you want to get the input with the correct type.
+        """
         for param in self.inputs_with_gui:
             if param.name == name:
                 return param.data_with_gui
         assert False, f"input {name} not found"
 
     def input_as(self, name: str, gui_type: Type[GuiType]) -> GuiType:
+        """Return the input with the given name as a GuiType
+
+        GuiType can be any descendant of AnyDataWithGui, like
+            fiatlight.fiat_core.IntWithGui, fiatlight.fiat_core.FloatWithGui, etc.
+
+        Raises a ValueError if the input is not found, and a TypeError if the input is not of the correct type.
+        """
         for param in self.inputs_with_gui:
             if param.name == name:
                 r = param.data_with_gui
@@ -111,11 +124,24 @@ class FunctionWithGui:
     #        Outputs
     # --------------------------------------------------------------------------------------------
     def output_of_idx(self, output_idx: int = 0) -> AnyDataWithGui[Any]:
+        """Return the output with the given index as a AnyDataWithGui[Any]
+        The inner type of the returned value is Any in this case.
+        You may have to cast it to the correct type, if you rely on type hints.
+
+        Use output_as() if you want to get the output with the correct type.
+        """
         if output_idx >= len(self.outputs_with_gui):
             raise ValueError(f"output_idx {output_idx} out of range")
         return self.outputs_with_gui[output_idx].data_with_gui
 
     def output_as(self, output_idx: int, gui_type: Type[GuiType]) -> GuiType:
+        """Return the output with the given index as a GuiType
+
+        GuiType can be any descendant of AnyDataWithGui, like
+            fiatlight.fiat_core.IntWithGui, fiatlight.fiat_core.FloatWithGui, etc.
+
+        Raises a ValueError if the output is not found, and a TypeError if the output is not of the correct type.
+        """
         r = self.outputs_with_gui[output_idx].data_with_gui
         if not isinstance(r, gui_type):
             raise TypeError(f"Expected type {gui_type.__name__}, got {type(r).__name__} instead.")
