@@ -7,7 +7,6 @@ from enum import Enum
 from fiatlight.fiat_types import Float_0_10000, Int_0_10, Float_0_10, Float_0_1, ImagePath
 
 # from collections import namedtuple
-from typing import Tuple
 
 
 def canny(
@@ -94,14 +93,21 @@ def add_toon_edges(
     dilate_iterations: Int_0_10 = 1,  # type: ignore
     blur_edges_sigma: Float_0_10 = 2.0,  # type: ignore
     edges_intensity: Float_0_1 = 1.0,  # type: ignore
-) -> Tuple[ImageU8, ImageU8, ImageU8_GRAY, ImageU8]:
+) -> ImageU8:
     # ) -> ToonEdgesOutput:
     canny_aperture_size = Int_0_10(5)
     edges = canny(image, canny_t_lower, canny_t_upper, canny_aperture_size, canny_l2_gradient, canny_blur_sigma)
     dilated_edges = dilate(edges, dilate_kernel_size, dilate_morph_shape, dilate_iterations, blur_edges_sigma)
     image_with_edges = merge_toon_edges(image, dilated_edges, edges_intensity)
     # return ToonEdgesOutput(image_with_edges, image, edges, dilated_edges)
-    return image_with_edges, image, edges, dilated_edges
+
+    add_toon_edges.fiat_internals = {  # type: ignore
+        "image_with_edges": image_with_edges,
+        "image": image,
+        "edges": edges,
+        "dilated_edges": dilated_edges,
+    }
+    return image_with_edges
 
 
 def image_source(image_file: ImagePath = fiatlight.demo_assets_dir() + "/images/house.jpg") -> ImageU8:  # type: ignore
