@@ -453,6 +453,42 @@ class FunctionNodeGui:
             color=FIATLIGHT_GUI_CONFIG.colors.error,
         )
 
+        # Raise the exception so that the user can debug it
+        with fontawesome_6_ctx():
+            # if imgui.button(icons_fontawesome_6.ICON_FA_BOMB):
+            #     imgui.open_popup("Confirm Raise exception")
+            # if imgui.is_item_hovered():
+            #     osd_widgets.set_tooltip("Raise this exception to debug it.")
+
+            btn_label = icons_fontawesome_6.ICON_FA_BOMB + " Debug this exception"
+            popup_label = "Confirm Raise exception"
+
+            def confirmation_gui():
+                msg = """
+                Are you sure you want to raise this exception?
+
+                The function will be re-invoked,
+                and the exception will be raised again.
+
+                This application will crash (!!!),
+                and you will be able to debug
+                the exception in your debugger.
+                """
+                # align the text to the left
+                lines = msg.split("\n")
+                lines = map(str.strip, lines)
+                msg = "\n".join(lines)
+
+                imgui.text(msg)
+                if imgui.button("Yes, raise the exception"):
+                    get_fiat_config().exception_config.catch_function_exceptions = False
+                    self._function_node.function_with_gui.dirty = True
+                    self._function_node.function_with_gui.invoke()
+                    imgui.close_current_popup()  # close the popup (which will never happen, we will crash)
+                imgui.same_line()
+
+            osd_widgets.show_void_popup_button(btn_label, popup_label, confirmation_gui)
+
     def _render_function_doc(self, unique_name: str) -> None:
         if not self._has_doc():
             return
