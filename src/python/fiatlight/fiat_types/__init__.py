@@ -1,8 +1,7 @@
 from fiatlight.fiat_types.error_types import Error, ErrorValue, Unspecified, UnspecifiedValue
-from fiatlight.fiat_types.function_types import Function, VoidFunction, BoolFunction
+from fiatlight.fiat_types.function_types import Function, VoidFunction, BoolFunction, DataType
 from fiatlight.fiat_types.str_types import FilePath, ImagePath, TextPath
 from fiatlight.fiat_types.base_types import (
-    DataType,
     JsonDict,
     JsonPrimitive,
     JsonPrimitiveOrDict,
@@ -34,12 +33,12 @@ __all__ = [
     "Function",
     "VoidFunction",
     "BoolFunction",
+    "DataType",
     # from str_types
     "FilePath",
     "ImagePath",
     "TextPath",
     # from base_types
-    "DataType",
     "JsonDict",
     "JsonPrimitive",
     "JsonPrimitiveOrDict",

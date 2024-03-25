@@ -49,6 +49,7 @@ class FiatGuiParams:
         self.addons = addons
         addons.with_node_editor = True
         addons.with_markdown = True
+        addons.with_implot = True
 
         created_runner_params = runner_params is None
         if runner_params is None:

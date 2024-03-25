@@ -33,8 +33,8 @@ def main() -> None:
     functions_graph = FunctionsGraph.from_function_composition([float_source, sin, log, sin, add_mul])
 
     # Optional: add more nodes, where some functions output to several nodes
-    # functions_graph.add_function_composition([square, sin])
-    # functions_graph.add_link("sin_2", "square", "x")
+    functions_graph.add_function_composition([square, sin])
+    functions_graph.add_link("sin_2", "square", "x")
 
     fiat_run(functions_graph)
 

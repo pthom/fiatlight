@@ -409,6 +409,7 @@ class FunctionNodeGui:
 
         if self.function_node.function_with_gui.has_doc():
             fn_doc = self.function_node.function_with_gui.get_function_doc()
+            assert fn_doc is not None
             first_line = fn_doc.split("\n")[0]
             title_line = self.function_node.function_with_gui.name + "(): " + first_line
             remaining_text = fn_doc[len(first_line) :]
