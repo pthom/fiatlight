@@ -33,6 +33,21 @@ class FunctionsGraph:
         return FunctionsGraph(secret_key=FunctionsGraph._secret_key)
 
     @staticmethod
+    def from_function(
+        f: Function | FunctionWithGui, globals_dict: GlobalsDict | None = None, locals_dict: LocalsDict | None = None
+    ) -> "FunctionsGraph":
+        return FunctionsGraph.from_function_composition([f], globals_dict=globals_dict, locals_dict=locals_dict)
+
+    def get_function_with_gui(self, name: str | None = None) -> FunctionWithGui:
+        if name is None:
+            assert len(self.functions_nodes) == 1
+            return self.functions_nodes[0].function_with_gui
+        for fn in self.functions_nodes:
+            if fn.function_with_gui.name == name:
+                return fn.function_with_gui
+        raise ValueError(f"No function with the name {name}")
+
+    @staticmethod
     def from_function_composition(
         functions: Sequence[Function | FunctionWithGui],
         globals_dict: GlobalsDict | None = None,

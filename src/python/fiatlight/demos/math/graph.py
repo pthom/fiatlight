@@ -1,13 +1,16 @@
-import numpy as np
-
-import fiatlight
+from fiatlight import FunctionsGraph, fiat_run
+from fiatlight.fiat_core import IntWithGui, FloatWithGui
 from imgui_bundle import implot, hello_imgui
+
+import numpy as np
 from typing import Any, Tuple
 
+# Type aliases for numpy arrays
 OneDim = Tuple[Any]  # Synonym for a 1D numpy array
+OneDimIntArray = np.ndarray[OneDim, np.dtype[np.int64]]  # Synonym for a 1D numpy array of integers
 
 
-def random_binomial(n: int = 50, p: float = 0.1) -> np.ndarray[OneDim, np.dtype[np.int64]]:
+def random_binomial(n: int = 50, p: float = 0.1) -> OneDimIntArray:
     """
     Make a binomial distribution.
 
@@ -19,43 +22,28 @@ def random_binomial(n: int = 50, p: float = 0.1) -> np.ndarray[OneDim, np.dtype[
     return r
 
 
-def manual_debug() -> None:
-    n = 10
-    p = 0.5
-    r = random_binomial(n, p)
-    print(r)
+def present_histogram(values: OneDimIntArray) -> None:
+    if implot.begin_plot("Binomial distribution", hello_imgui.em_to_vec2(40, 25)):
+        implot.plot_histogram("Binomial", values, bins=50)
+        implot.end_plot()
 
 
-def with_gui() -> None:
-    from fiatlight import FunctionsGraph, fiat_run
+def main() -> None:
+    functions_graph = FunctionsGraph.from_function(random_binomial)
 
-    random_binomial_gui = fiatlight.to_function_with_gui(random_binomial)
+    random_binomial_gui = functions_graph.get_function_with_gui()
+    random_binomial_gui.get_output_gui().set_present_custom_callback(present_histogram)
 
-    binomial_output = random_binomial_gui.outputs_with_gui[0]
-
-    def present_custom() -> None:
-        value = binomial_output.data_with_gui.get_actual_value()
-        if implot.begin_plot("Binomial distribution", hello_imgui.em_to_vec2(40, 25)):
-            implot.plot_histogram("Binomial", value, bins=50)
-            implot.end_plot()
-
-    random_binomial_gui.outputs_with_gui[0].data_with_gui.callbacks.present_custom = present_custom
-
-    n_gui = random_binomial_gui.input_of_name("n")
-    assert isinstance(n_gui, fiatlight.fiat_core.IntWithGui)
+    n_gui = random_binomial_gui.param_as("n", IntWithGui)
     n_gui.params.v_min = 1
     n_gui.params.v_max = 100
 
-    p_gui = random_binomial_gui.input_of_name("p")
-    assert isinstance(p_gui, fiatlight.fiat_core.FloatWithGui)
+    p_gui = random_binomial_gui.param_as("p", FloatWithGui)
     p_gui.params.v_min = 0.0
     p_gui.params.v_max = 1.0
-
-    functions_graph = FunctionsGraph.from_function_composition([random_binomial_gui])
 
     fiat_run(functions_graph)
 
 
 if __name__ == "__main__":
-    with_gui()
-    # manual_debug()
+    main()

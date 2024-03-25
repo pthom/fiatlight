@@ -1,7 +1,7 @@
 from fiatlight.fiat_config import get_fiat_config
 from fiatlight.fiat_types import UnspecifiedValue, ErrorValue, Unspecified, Error, JsonDict, DataType
 from fiatlight.fiat_core.any_data_with_gui import AnyDataWithGui
-from typing import Any, List, final, Callable, Optional, Generic
+from typing import Any, List, final, Callable, Optional, Generic, Type
 from dataclasses import dataclass
 from enum import Enum
 
@@ -87,6 +87,15 @@ class FunctionWithGui:
             if param.name == name:
                 return param.data_with_gui
         assert False, f"input {name} not found"
+
+    def param_as(self, name: str, gui_type: Type[DataType]) -> DataType:
+        for param in self.inputs_with_gui:
+            if param.name == name:
+                r = param.data_with_gui
+                if not isinstance(r, gui_type):
+                    raise TypeError(f"Expected type {gui_type.__name__}, got {type(r).__name__} instead.")
+                return r
+        raise ValueError(f"Parameter {name} not found")
 
     @final
     def invoke(self) -> None:
