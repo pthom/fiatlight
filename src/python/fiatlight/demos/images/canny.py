@@ -87,20 +87,17 @@ def canny_with_gui() -> fiatlight.FunctionWithGui:
     canny_gui = fiatlight.to_function_with_gui(canny)
 
     # t_lower between 0 and 255
-    t_lower_input = canny_gui.input_of_name("t_lower")
-    assert isinstance(t_lower_input, fiat_core.FloatWithGui)
+    t_lower_input = canny_gui.input_as("t_lower", fiat_core.FloatWithGui)
     t_lower_input.params.v_min = 0.0
     t_lower_input.params.v_max = 15000
 
     # t_upper between 0 and 255
-    t_upper_input = canny_gui.input_of_name("t_upper")
-    assert isinstance(t_upper_input, fiat_core.FloatWithGui)
+    t_upper_input = canny_gui.input_as("t_upper", fiat_core.FloatWithGui)
     t_upper_input.params.v_min = 0.0
     t_upper_input.params.v_max = 15000
 
     # aperture_size between 3, 5, 7
-    aperture_size_input = canny_gui.input_of_name("aperture_size")
-    assert isinstance(aperture_size_input, fiat_core.IntWithGui)
+    aperture_size_input = canny_gui.input_as("aperture_size", fiat_core.IntWithGui)
     aperture_size_input.params.edit_type = fiat_core.IntEditType.input
     aperture_size_input.params.v_min = 3
     aperture_size_input.params.v_max = 7
