@@ -263,20 +263,6 @@ class StrWithGuiParams:
     height_em: int = 5
 
 
-def _escape_double_quoted_string(s: str) -> str:
-    replacements = {
-        "\\": "\\\\",
-        "\n": "\\n",
-        "\t": "\\t",
-        "\r": "\\r",
-        "\b": "\\b",
-        '"': '\\"',
-    }
-    for k, v in replacements.items():
-        s = s.replace(k, v)
-    return s
-
-
 class StrWithGui(AnyDataWithGui[str]):
     params: StrWithGuiParams
 
@@ -289,9 +275,18 @@ class StrWithGui(AnyDataWithGui[str]):
         if self.params.edit_type == StrEditType.multiline:
             self.callbacks.edit_popup_required = True
 
+        self.callbacks.present_custom = self.present_custom
+        self.callbacks.present_custom_popup_required = True
+
     @staticmethod
     def present_str(s: str) -> str:
         return s
+
+    def present_custom(self) -> None:
+        text_edit_size = ImVec2(
+            imgui.get_window_width() - hello_imgui.em_size(1), imgui.get_window_height() - hello_imgui.em_size(5)
+        )
+        imgui.input_text_multiline("##str", self.value, text_edit_size, imgui.InputTextFlags_.read_only.value)
 
     def edit(self) -> bool:
         assert isinstance(self.value, str)

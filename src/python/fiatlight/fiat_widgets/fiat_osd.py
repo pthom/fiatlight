@@ -144,18 +144,22 @@ class _OsdWidgets:
     ) -> None:
         from fiatlight.fiat_widgets import fontawesome_6_ctx, icons_fontawesome_6
 
+        tooltip_btn_label = btn_label
+        if "##" in btn_label:
+            tooltip_btn_label = btn_label.split("##")[0]
+
         with fontawesome_6_ctx():
             if self.popup_exists(btn_label):
                 if imgui.button(icons_fontawesome_6.ICON_FA_CIRCLE_XMARK + " " + btn_label):
                     self._remove_popup(btn_label)
                 if imgui.is_item_hovered():
-                    self.tooltip_str = "Hide " + btn_label + " - " + popup_label
+                    self.tooltip_str = "Hide " + tooltip_btn_label + " - " + popup_label
             else:
                 # if imgui.button(icons_fontawesome_6.ICON_FA_EYE + " " + btn_label):
                 if imgui.button(icons_fontawesome_6.ICON_FA_MAGNIFYING_GLASS_ARROW_RIGHT + " " + btn_label):
                     self._add_popup(btn_label, popup_label, gui_function, bool_returned, window_flags, window_size)
                 if imgui.is_item_hovered():
-                    self.tooltip_str = "Show " + btn_label + " - " + popup_label
+                    self.tooltip_str = "Show " + tooltip_btn_label + " - " + popup_label
 
     def update_popup_callback(self, btn_label: str, gui_function: BoolFunction | VoidFunction) -> None:
         unique_name = self._popup_unique_name(btn_label)
