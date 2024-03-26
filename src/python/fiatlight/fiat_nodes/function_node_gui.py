@@ -580,6 +580,27 @@ class FunctionNodeGui:
                     present_output()
 
     def _draw_function_outputs(self, unique_name: str) -> None:
+        # Outputs separator
+        output_separator_str = (
+            "Outputs" if len(self._function_node.function_with_gui.outputs_with_gui) > 1 else "Output"
+        )
+        if self._can_collapse_outputs():
+            changed, self._outputs_expanded = fiat_widgets.node_collapsing_separator(
+                self._node_id, text=output_separator_str, expanded=self._outputs_expanded
+            )
+            if changed:
+                for i, v in self._show_output_details.items():
+                    self._show_output_details[i] = self._outputs_expanded
+        else:
+            self._outputs_expanded = True
+            fiat_widgets.node_separator(self._node_id, output_separator_str)
+
+        # Invoke options
+        with imgui_ctx.begin_horizontal("invoke_options"):
+            imgui.spring()
+            self._draw_invoke_options()
+
+        # Outputs
         is_dirty = self._function_node.function_with_gui.dirty
         if is_dirty:
             imgui.push_style_color(imgui.Col_.text.value, get_fiat_config().style.colors[FiatColorType.TextDirtyOutput])
@@ -782,32 +803,12 @@ class FunctionNodeGui:
                     # Internals
                     self._draw_fiat_internals()
 
+                    # Exceptions, if any
+                    self._draw_exception_message()
+
                     #
                     # Outputs
                     #
-
-                    # Outputs separator
-                    output_separator_str = (
-                        "Outputs" if len(self._function_node.function_with_gui.outputs_with_gui) > 1 else "Output"
-                    )
-                    if self._can_collapse_outputs():
-                        changed, self._outputs_expanded = fiat_widgets.node_collapsing_separator(
-                            self._node_id, text=output_separator_str, expanded=self._outputs_expanded
-                        )
-                        if changed:
-                            for i, v in self._show_output_details.items():
-                                self._show_output_details[i] = self._outputs_expanded
-                    else:
-                        self._outputs_expanded = True
-                        fiat_widgets.node_separator(self._node_id, output_separator_str)
-
-                    # Invoke options
-                    with imgui_ctx.begin_horizontal("invoke_options"):
-                        imgui.spring()
-                        self._draw_invoke_options()
-
-                    # Exceptions, if any
-                    self._draw_exception_message()
 
                     # Outputs
                     self._draw_function_outputs(unique_name)
