@@ -584,7 +584,10 @@ class FunctionNodeGui:
         output_separator_str = (
             "Outputs" if len(self._function_node.function_with_gui.outputs_with_gui) > 1 else "Output"
         )
-        if self._can_collapse_outputs():
+        nb_collapsible_outputs = self._nb_collapsible_outputs()
+        if nb_collapsible_outputs > 0:
+            if not self._outputs_expanded:
+                output_separator_str += f" ({nb_collapsible_outputs} hidden)"
             changed, self._outputs_expanded = fiat_widgets.node_collapsing_separator(
                 self._node_id, text=output_separator_str, expanded=self._outputs_expanded
             )
@@ -613,7 +616,7 @@ class FunctionNodeGui:
         if is_dirty:
             imgui.pop_style_color()
 
-    def _can_collapse_inputs(self) -> bool:
+    def _nb_collapsible_inputs(self) -> int:
         # We can only collapse inputs that do not have a link
         # (since otherwise, the user would not be able to see the link status, and we have to display a pin anyway)
         if len(self._function_node.function_with_gui.inputs_with_gui) == 0:
@@ -625,12 +628,12 @@ class FunctionNodeGui:
                 nb_inputs_with_links += 1
 
         nb_inputs = len(self._function_node.function_with_gui.inputs_with_gui)
-        return nb_inputs_with_links < nb_inputs
+        return nb_inputs - nb_inputs_with_links
 
-    def _can_collapse_outputs(self) -> bool:
+    def _nb_collapsible_outputs(self) -> int:
         # We can only collapse outputs that do not have a link
         # (since otherwise, the user would not be able to see the link status, and we have to display a pin anyway)
-        if len(self._function_node.function_with_gui.outputs_with_gui) <= 1:
+        if len(self._function_node.function_with_gui.outputs_with_gui) == 0:
             return False
 
         nb_outputs_with_links = 0
@@ -639,7 +642,7 @@ class FunctionNodeGui:
                 nb_outputs_with_links += 1
 
         nb_outputs = len(self._function_node.function_with_gui.outputs_with_gui)
-        return nb_outputs_with_links < nb_outputs
+        return nb_outputs - nb_outputs_with_links
 
     def _draw_one_input_edit(self, input_param: ParamWithGui[Any], unique_name: str) -> bool:
         changed = False
@@ -717,9 +720,13 @@ class FunctionNodeGui:
         changed = False
 
         if len(self._function_node.function_with_gui.inputs_with_gui) > 0:
-            if self._can_collapse_inputs():
+            nb_collapsible_inputs = self._nb_collapsible_inputs()
+            if nb_collapsible_inputs > 0:
+                separator_header = "Params"
+                if not self._inputs_expanded:
+                    separator_header += f" ({nb_collapsible_inputs} hidden)"
                 changed, self._inputs_expanded = fiat_widgets.node_collapsing_separator(
-                    self._node_id, text="Params", expanded=self._inputs_expanded
+                    self._node_id, text=separator_header, expanded=self._inputs_expanded
                 )
                 if changed:
                     for k, v in self._show_input_details.items():
@@ -751,8 +758,11 @@ class FunctionNodeGui:
         fn_fiat_internals: Dict[str, Any] = fn.fiat_internals  # type: ignore
         assert isinstance(fn_fiat_internals, dict)
 
+        separator_header = "Internals"
+        if not self._internals_expanded:
+            separator_header += f" ({len(fn_fiat_internals)} hidden)"
         expand_changed, self._internals_expanded = fiat_widgets.node_collapsing_separator(
-            self._node_id, "Internals", self._internals_expanded
+            self._node_id, separator_header, self._internals_expanded
         )
 
         if not self._internals_expanded:
