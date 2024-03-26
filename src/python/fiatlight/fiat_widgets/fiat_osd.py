@@ -17,6 +17,8 @@ class _PopupInfo:
     location: ImVec2
     gui_function: VoidFunction | BoolFunction
     bool_returned: bool | None = None
+    window_flags: int | None = None  # imgui.WindowFlags_
+    window_size: ImVec2 | None = None
 
 
 class _OsdWidgets:
@@ -61,8 +63,15 @@ class _OsdWidgets:
         alive_popups = []  # remove popups that are closed
         for popup_info in self.popups:
             window_flags = imgui.WindowFlags_.no_collapse.value
+            if popup_info.window_flags is not None:
+                window_flags |= popup_info.window_flags
+
+            window_size = hello_imgui.em_to_vec2(40, 30)
+            if popup_info.window_size is not None:
+                window_size = popup_info.window_size
+
             imgui.set_next_window_pos(popup_info.location, imgui.Cond_.appearing.value)
-            imgui.set_next_window_size(hello_imgui.em_to_vec2(40, 30), imgui.Cond_.appearing.value)
+            imgui.set_next_window_size(window_size, imgui.Cond_.appearing.value)
             show, flag_open = imgui.begin(popup_info.popup_label, True, window_flags)
             if show and flag_open:
                 popup_info.bool_returned = popup_info.gui_function()
@@ -112,15 +121,26 @@ class _OsdWidgets:
         popup_label: str,
         gui_function: VoidFunction | BoolFunction,
         bool_returned: bool | None,
+        window_flags: int | None,  # imgui.WindowFlags_
+        window_size: ImVec2 | None,
     ) -> None:
         if self._popup_exists(btn_label):
             return
         unique_name = self._popup_unique_name(btn_label)
         location = imgui_node_editor.canvas_to_screen(imgui.get_cursor_pos())
-        self.popups.append(_PopupInfo(unique_name, popup_label, location, gui_function, bool_returned))
+        new_popup = _PopupInfo(
+            unique_name, popup_label, location, gui_function, bool_returned, window_flags, window_size
+        )
+        self.popups.append(new_popup)
 
     def _add_popup_button(
-        self, btn_label: str, popup_label: str, gui_function: VoidFunction | BoolFunction, bool_returned: bool | None
+        self,
+        btn_label: str,
+        popup_label: str,
+        gui_function: VoidFunction | BoolFunction,
+        bool_returned: bool | None,
+        window_flags: int | None,  # imgui.WindowFlags_
+        window_size: ImVec2 | None,
     ) -> None:
         from fiatlight.fiat_widgets import fontawesome_6_ctx, icons_fontawesome_6
 
@@ -133,15 +153,29 @@ class _OsdWidgets:
             else:
                 # if imgui.button(icons_fontawesome_6.ICON_FA_EYE + " " + btn_label):
                 if imgui.button(icons_fontawesome_6.ICON_FA_MAGNIFYING_GLASS_ARROW_RIGHT + " " + btn_label):
-                    self._add_popup(btn_label, popup_label, gui_function, bool_returned)
+                    self._add_popup(btn_label, popup_label, gui_function, bool_returned, window_flags, window_size)
                 if imgui.is_item_hovered():
                     self.tooltip_str = "Show " + btn_label + " - " + popup_label
 
-    def show_bool_popup_button(self, btn_label: str, popup_label: str, gui_function: BoolFunction) -> None:
-        self._add_popup_button(btn_label, popup_label, gui_function, False)
+    def show_bool_popup_button(
+        self,
+        btn_label: str,
+        popup_label: str,
+        gui_function: BoolFunction,
+        window_flags: int | None = None,  # imgui.WindowFlags_
+        window_size: ImVec2 | None = None,
+    ) -> None:
+        self._add_popup_button(btn_label, popup_label, gui_function, False, window_flags, window_size)
 
-    def show_void_popup_button(self, btn_label: str, popup_label: str, gui_function: VoidFunction) -> None:
-        self._add_popup_button(btn_label, popup_label, gui_function, None)
+    def show_void_popup_button(
+        self,
+        btn_label: str,
+        popup_label: str,
+        gui_function: VoidFunction,
+        window_flags: int | None = None,  # imgui.WindowFlags_
+        window_size: ImVec2 | None = None,
+    ) -> None:
+        self._add_popup_button(btn_label, popup_label, gui_function, None, window_flags, window_size)
 
 
 _fiat_osd = _OsdWidgets()
@@ -155,20 +189,32 @@ def set_tooltip_gui(gui_function: VoidFunction) -> None:
     _fiat_osd.set_tooltip_gui(gui_function)
 
 
-def show_bool_popup_button(btn_label: str, popup_label: str, gui_function: BoolFunction) -> None:
+def show_bool_popup_button(
+    btn_label: str,
+    popup_label: str,
+    gui_function: BoolFunction,
+    window_flags: int | None = None,  # imgui.WindowFlags_
+    window_size: ImVec2 | None = None,
+) -> None:
     """Show a button that opens a popup when clicked. The popup contains a boolean function that returns a bool.
     btn_label: The label of the button.
     popup_label: The label of the popup window
     """
-    _fiat_osd.show_bool_popup_button(btn_label, popup_label, gui_function)
+    _fiat_osd.show_bool_popup_button(btn_label, popup_label, gui_function, window_flags, window_size)
 
 
-def show_void_popup_button(btn_label: str, popup_label: str, gui_function: VoidFunction) -> None:
+def show_void_popup_button(
+    btn_label: str,
+    popup_label: str,
+    gui_function: VoidFunction,
+    window_flags: int | None = None,  # imgui.WindowFlags_
+    window_size: ImVec2 | None = None,
+) -> None:
     """Show a button that opens a popup when clicked. The popup contains a void function.
     btn_label: The label of the button.
     popup_label: The label of the popup window
     """
-    _fiat_osd.show_void_popup_button(btn_label, popup_label, gui_function)
+    _fiat_osd.show_void_popup_button(btn_label, popup_label, gui_function, window_flags, window_size)
 
 
 def get_popup_bool_return(btn_label: str) -> bool | None:
