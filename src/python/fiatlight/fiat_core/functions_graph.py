@@ -38,7 +38,7 @@ class FunctionsGraph:
     ) -> "FunctionsGraph":
         return FunctionsGraph.from_function_composition([f], globals_dict=globals_dict, locals_dict=locals_dict)
 
-    def get_function_with_gui(self, name: str | None = None) -> FunctionWithGui:
+    def function_with_gui(self, name: str | None = None) -> FunctionWithGui:
         if name is None:
             assert len(self.functions_nodes) == 1
             return self.functions_nodes[0].function_with_gui
