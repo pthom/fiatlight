@@ -1,5 +1,4 @@
 from typing import Callable, Any
-from fiatlight.fiat_types.base_types import GlobalsDict, LocalsDict
 import inspect
 
 
@@ -7,8 +6,6 @@ def get_function_signature(
     f: Callable[..., Any],
     *,
     signature_string: str | None = None,
-    globals_dict: GlobalsDict | None = None,
-    locals_dict: LocalsDict | None = None,
 ) -> inspect.Signature:
     """get_function_signature is an improved version of inspect.signature.
     By default, it uses inspect.signature() to get the signature of a function.

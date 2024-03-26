@@ -119,12 +119,14 @@ class LutParamsWithGui(AnyDataWithGui[LutParams]):
         imgui.begin_group()
         idx_slider = 0
 
-        def show_slider(label: str, v: float, min: float, max: float, logarithmic: bool) -> float:
+        def show_slider(label: str, v: float, min_value: float, max_value: float, logarithmic: bool) -> float:
             nonlocal idx_slider, changed
             imgui.set_next_item_width(70)
             idx_slider += 1
             flags = imgui.SliderFlags_.logarithmic.value if logarithmic else 0
-            edited_this_slider, v = imgui.slider_float(f"{label}##slider{idx_slider}", v, min, max, flags=flags)
+            edited_this_slider, v = imgui.slider_float(
+                f"{label}##slider{idx_slider}", v, min_value, max_value, flags=flags
+            )
             if edited_this_slider:
                 changed = True
             return v
@@ -152,47 +154,3 @@ class LutParamsWithGui(AnyDataWithGui[LutParams]):
             self._lut_graph_needs_refresh = True
         imgui.end_group()
         return changed
-
-
-#
-#
-# class LutChannelsWithGui(FunctionWithGui[Image, Image]):
-#     color_type: ColorType = ColorType.BGR
-#     channel_adjust_params: List[LutImage]
-#
-#     def __init__(self) -> None:
-#         self.input_gui = ImageChannelsWithGui()
-#         self.output_gui = ImageChannelsWithGui()
-#         self.name = "LUT channels"
-#
-#         def f(x: Any) -> Any:
-#             assert type(x) == np.ndarray
-#
-#             original_channels = x
-#             self.add_params_on_demand(len(original_channels))
-#
-#             adjusted_channels = np.zeros_like(original_channels)
-#             for i in range(len(original_channels)):
-#                 adjusted_channels[i] = self.channel_adjust_params[i].apply(original_channels[i])
-#
-#             return adjusted_channels
-#         self.f_impl = f
-#
-#     def output_gui_channels(self) -> ImageChannelsWithGui:
-#         return cast(ImageChannelsWithGui, self.output_gui)
-#
-#     def add_params_on_demand(self, nb_channels: int) -> None:
-#         if not hasattr(self, "channel_adjust_params"):
-#             self.channel_adjust_params = []
-#         while len(self.channel_adjust_params) < nb_channels:
-#             self.channel_adjust_params.append(LutImage())
-#
-#     # def old_gui_params(self) -> bool:
-#     #     changed = False
-#     #     for i, channel_adjust_param in enumerate(self.channel_adjust_params):
-#     #         channel_name = self.color_type.channels_names()[i]
-#     #         imgui.push_id(str(i))
-#     #         changed |= channel_adjust_param.old_gui_params(channel_name)
-#     #         imgui.pop_id()
-#     #     return changed
-#

@@ -97,18 +97,18 @@ class ListWithGui(AnyDataWithGui[List[DataType]]):
     def _elements_str(self, value: List[DataType], max_presented_elements: int) -> str:
         nb_elements = len(value)
         nb_digits = len(str(nb_elements))
-        strs = []
+        strings = []
         for i, element in enumerate(value):
             value_str = self.inner_gui.datatype_value_to_str(element)
             idx_str = str(i).rjust(nb_digits, "0")
             if i >= max_presented_elements:
-                strs.append(f"...{nb_elements - max_presented_elements} more elements")
+                strings.append(f"...{nb_elements - max_presented_elements} more elements")
                 break
             if self.show_idx:
-                strs.append(f"{idx_str}: {value_str}")
+                strings.append(f"{idx_str}: {value_str}")
             else:
-                strs.append(value_str)
-        return "\n".join(strs)
+                strings.append(value_str)
+        return "\n".join(strings)
 
     def present_str(self, value: List[DataType]) -> str:
         nb_elements = len(value)
@@ -119,7 +119,7 @@ class ListWithGui(AnyDataWithGui[List[DataType]]):
         )
         return r
 
-    def edit(self) -> bool:
+    def edit(self) -> bool:  # noqa
         imgui.text("Edit not implemented for ListWithGui")
         return False
 

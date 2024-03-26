@@ -23,7 +23,7 @@ class FunctionNodeLink:
         self.dst_function_node = dst_function_node
         self.dst_input_name = dst_input_name
 
-        assert src_output_idx < len(src_function_node.function_with_gui.outputs_with_gui)
+        assert src_output_idx < src_function_node.function_with_gui.nb_outputs()
         assert dst_input_name in dst_function_node.function_with_gui.all_inputs_names()
 
 
@@ -38,7 +38,7 @@ class FunctionNode:
     output_links: list[FunctionNodeLink]
     input_links: list[FunctionNodeLink]
 
-    def __init__(self, function_with_gui: FunctionWithGui, name: str) -> None:
+    def __init__(self, function_with_gui: FunctionWithGui) -> None:
         self.function_with_gui = function_with_gui
         self.output_links = []
         self.input_links = []
@@ -67,7 +67,7 @@ class FunctionNode:
             return None
         fn_name = link.src_function_node.function_with_gui.name
         r = "linked to " + fn_name
-        if len(link.src_function_node.function_with_gui.outputs_with_gui) > 1:
+        if link.src_function_node.function_with_gui.nb_outputs() > 1:
             r += f" (output {link.src_output_idx})"
         return r
 
@@ -84,16 +84,16 @@ class FunctionNode:
         return r
 
     def user_editable_params(self) -> list[ParamWithGui[Any]]:
-        r = [param for param in self.function_with_gui.inputs_with_gui if not self.has_input_link(param.name)]
+        r = [param for param in self.function_with_gui._inputs_with_gui if not self.has_input_link(param.name)]  # noqa
         return r
 
     def invoke_function(self) -> None:
         self.function_with_gui.invoke()
         for link in self.output_links:
-            src_output = self.function_with_gui.outputs_with_gui[link.src_output_idx]
+            src_output = self.function_with_gui.output(link.src_output_idx)
             dst_input = link.dst_function_node.function_with_gui.input(link.dst_input_name)
-            dst_input.value = src_output.data_with_gui.value
-            link.dst_function_node.function_with_gui.dirty = True
+            dst_input.value = src_output.value
+            link.dst_function_node.function_with_gui._dirty = True
             link.dst_function_node.invoke_function()
 
     def save_user_inputs_to_json(self) -> JsonDict:

@@ -105,31 +105,6 @@ class FiatGui:
     def _function_nodes(self) -> List[FunctionNodeGui]:
         return self._functions_graph_gui.function_nodes_gui
 
-    def _has_one_exception(self) -> bool:
-        return any(
-            fn._function_node.function_with_gui.last_exception_message is not None for fn in self._function_nodes()
-        )
-
-    def _draw_exceptions(self) -> None:
-        for function_node_gui in self._function_nodes():
-            from fiatlight.fiat_runner import FIATLIGHT_GUI_CONFIG
-
-            last_exception_message = function_node_gui._function_node.function_with_gui.last_exception_message
-            last_exception_traceback = function_node_gui._function_node.function_with_gui.last_exception_traceback
-            if last_exception_message is not None:
-                function_unique_name = self._functions_graph_gui.functions_graph.function_node_unique_name(
-                    function_node_gui._function_node
-                )
-                imgui.text_colored(
-                    FIATLIGHT_GUI_CONFIG.colors.error,
-                    f"Exception in {function_unique_name}: {last_exception_message}",
-                )
-                if last_exception_traceback is not None:
-                    msg = last_exception_traceback
-                    nb_lines = msg.count("\n") + 1
-                    text_size = ImVec2(imgui.get_window_width(), immapp.em_size(nb_lines))
-                    imgui.input_text_multiline("##error", msg, text_size)
-
     def _top_toolbar(self) -> None:
         btn_size = hello_imgui.em_to_vec2(2, 2)
         layout_width = imgui.get_window_width() - hello_imgui.em_size(0.5)
@@ -286,7 +261,7 @@ class FiatGui:
             self._post_init, self.params.runner_params.callbacks.post_init
         )
 
-        from fiatlight.fiat_widgets.fontawesome6_ctx_utils import _load_font_awesome_6
+        from fiatlight.fiat_widgets.fontawesome6_ctx_utils import _load_font_awesome_6  # noqa
 
         self.params.runner_params.callbacks.load_additional_fonts = functional_utils.sequence_void_functions(
             hello_imgui.imgui_default_settings.load_default_font_with_font_awesome_icons, _load_font_awesome_6

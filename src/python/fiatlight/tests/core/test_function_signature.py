@@ -119,5 +119,5 @@ def test_wrap_signature_to_gui() -> None:
     sorted_gui.input("words").value = ["hello", "world"]
     sorted_gui.input("reverse").value = True
     sorted_gui.invoke()
-    obtained = sorted_gui.outputs_with_gui[0].data_with_gui.value
+    obtained = sorted_gui._outputs_with_gui[0].data_with_gui.value
     assert obtained == ["world", "hello"]

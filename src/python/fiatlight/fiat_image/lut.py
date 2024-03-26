@@ -108,13 +108,13 @@ def lut_table_graph(lut_table: LutTable, size: int) -> ImageU8:
     def to_point(x: float, y: float) -> Tuple[float, float]:
         return 1.0 + x * (size - 3), 1.0 + (1.0 - y) * (size - 3)
 
-    y = lut_table.astype(np.float_) / 255.0
-    x = np.arange(0.0, 1.0, 1.0 / 256.0)
+    y_table = lut_table.astype(np.float_) / 255.0
+    x_table = np.arange(0.0, 1.0, 1.0 / 256.0)
 
     image[:, :, :] = (200, 200, 200, 0)
     color = (0, 255, 255, 255)
     for i in range(255):
-        x0, y0 = float(x[i]), float(y[i])
-        x1, y1 = float(x[i + 1]), float(y[i + 1])
+        x0, y0 = float(x_table[i]), float(y_table[i])
+        x1, y1 = float(x_table[i + 1]), float(y_table[i + 1])
         immvision.cv_drawing_utils.line(image, to_point(x0, y0), to_point(x1, y1), color)
     return image

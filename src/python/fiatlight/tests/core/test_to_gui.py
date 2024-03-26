@@ -1,6 +1,6 @@
 from fiatlight.fiat_core.to_gui import (
-    any_typeclass_to_gui,
-    to_data_with_gui,
+    _any_typeclass_to_gui,
+    _to_data_with_gui,
     to_function_with_gui,
 )
 from fiatlight.fiat_types import UnspecifiedValue, ErrorValue
@@ -13,14 +13,14 @@ class Dummy:
 
 
 def test_any_typeclass_to_data_with_gui() -> None:
-    d = any_typeclass_to_gui("Dummy")
+    d = _any_typeclass_to_gui("Dummy")
     assert d.callbacks.edit is None
     assert d.callbacks.default_value_provider is None
     assert d.callbacks.default_value_provider is None
 
 
 def test_any_value_to_data_with_gui() -> None:
-    a = to_data_with_gui(1)
+    a = _to_data_with_gui(1)
     assert a.value == 1
 
 
@@ -32,35 +32,35 @@ def test_any_function_to_function_with_gui_one_output() -> None:
 
     # Test after construction
     assert add_gui.name == "add"
-    assert add_gui.f_impl == add
-    assert len(add_gui.inputs_with_gui) == 2
-    assert len(add_gui.outputs_with_gui) == 1
-    assert add_gui.inputs_with_gui[0].name == "a"
-    assert add_gui.inputs_with_gui[1].name == "b"
-    assert add_gui.inputs_with_gui[0].data_with_gui.value is UnspecifiedValue
-    assert add_gui.inputs_with_gui[1].default_value == 2
-    assert add_gui.outputs_with_gui[0].data_with_gui.value is UnspecifiedValue
+    assert add_gui._f_impl == add
+    assert len(add_gui._inputs_with_gui) == 2
+    assert len(add_gui._outputs_with_gui) == 1
+    assert add_gui._inputs_with_gui[0].name == "a"
+    assert add_gui._inputs_with_gui[1].name == "b"
+    assert add_gui._inputs_with_gui[0].data_with_gui.value is UnspecifiedValue
+    assert add_gui._inputs_with_gui[1].default_value == 2
+    assert add_gui._outputs_with_gui[0].data_with_gui.value is UnspecifiedValue
 
     # Test after invoke
-    add_gui.inputs_with_gui[0].data_with_gui.value = 1
+    add_gui._inputs_with_gui[0].data_with_gui.value = 1
     add_gui.invoke()
-    assert add_gui.outputs_with_gui[0].data_with_gui.value == 3
-    assert add_gui.last_exception_message is None
+    assert add_gui._outputs_with_gui[0].data_with_gui.value == 3
+    assert add_gui._last_exception_message is None
 
     # Test after invoke with different default value
-    add_gui.inputs_with_gui[0].data_with_gui.value = 1
-    add_gui.inputs_with_gui[1].data_with_gui.value = 3
-    add_gui.dirty = True
+    add_gui._inputs_with_gui[0].data_with_gui.value = 1
+    add_gui._inputs_with_gui[1].data_with_gui.value = 3
+    add_gui._dirty = True
     add_gui.invoke()
-    assert add_gui.outputs_with_gui[0].data_with_gui.value == 4
-    assert add_gui.last_exception_message is None
+    assert add_gui._outputs_with_gui[0].data_with_gui.value == 4
+    assert add_gui._last_exception_message is None
 
     # Test after invoke with exception
-    add_gui.inputs_with_gui[0].data_with_gui.value = "a"
-    add_gui.dirty = True
+    add_gui._inputs_with_gui[0].data_with_gui.value = "a"
+    add_gui._dirty = True
     add_gui.invoke()
-    assert add_gui.outputs_with_gui[0].data_with_gui.value is ErrorValue
-    assert add_gui.last_exception_message is not None
+    assert add_gui._outputs_with_gui[0].data_with_gui.value is ErrorValue
+    assert add_gui._last_exception_message is not None
 
 
 def test_any_function_to_function_with_gui_two_outputs() -> None:
@@ -71,39 +71,39 @@ def test_any_function_to_function_with_gui_two_outputs() -> None:
 
     # Test after construction
     assert add_mult_gui.name == "add_mult"
-    assert add_mult_gui.f_impl == add_mult
-    assert len(add_mult_gui.inputs_with_gui) == 2
-    assert len(add_mult_gui.outputs_with_gui) == 2
-    assert add_mult_gui.inputs_with_gui[0].name == "a"
-    assert add_mult_gui.inputs_with_gui[1].name == "b"
-    assert add_mult_gui.inputs_with_gui[0].data_with_gui.value is UnspecifiedValue
-    assert add_mult_gui.inputs_with_gui[1].default_value == 2
-    assert add_mult_gui.outputs_with_gui[0].data_with_gui.value is UnspecifiedValue
-    assert add_mult_gui.outputs_with_gui[1].data_with_gui.value is UnspecifiedValue
+    assert add_mult_gui._f_impl == add_mult
+    assert len(add_mult_gui._inputs_with_gui) == 2
+    assert len(add_mult_gui._outputs_with_gui) == 2
+    assert add_mult_gui._inputs_with_gui[0].name == "a"
+    assert add_mult_gui._inputs_with_gui[1].name == "b"
+    assert add_mult_gui._inputs_with_gui[0].data_with_gui.value is UnspecifiedValue
+    assert add_mult_gui._inputs_with_gui[1].default_value == 2
+    assert add_mult_gui._outputs_with_gui[0].data_with_gui.value is UnspecifiedValue
+    assert add_mult_gui._outputs_with_gui[1].data_with_gui.value is UnspecifiedValue
 
     # Test after invoke
-    add_mult_gui.inputs_with_gui[0].data_with_gui.value = 1
+    add_mult_gui._inputs_with_gui[0].data_with_gui.value = 1
     add_mult_gui.invoke()
-    assert add_mult_gui.outputs_with_gui[0].data_with_gui.value == 3
-    assert add_mult_gui.outputs_with_gui[1].data_with_gui.value == 2
-    assert add_mult_gui.last_exception_message is None
+    assert add_mult_gui._outputs_with_gui[0].data_with_gui.value == 3
+    assert add_mult_gui._outputs_with_gui[1].data_with_gui.value == 2
+    assert add_mult_gui._last_exception_message is None
 
     # Test after invoke with different default value
-    add_mult_gui.inputs_with_gui[0].data_with_gui.value = 1
-    add_mult_gui.inputs_with_gui[1].data_with_gui.value = 3
-    add_mult_gui.dirty = True
+    add_mult_gui._inputs_with_gui[0].data_with_gui.value = 1
+    add_mult_gui._inputs_with_gui[1].data_with_gui.value = 3
+    add_mult_gui._dirty = True
     add_mult_gui.invoke()
-    assert add_mult_gui.outputs_with_gui[0].data_with_gui.value == 4
-    assert add_mult_gui.outputs_with_gui[1].data_with_gui.value == 3
-    assert add_mult_gui.last_exception_message is None
+    assert add_mult_gui._outputs_with_gui[0].data_with_gui.value == 4
+    assert add_mult_gui._outputs_with_gui[1].data_with_gui.value == 3
+    assert add_mult_gui._last_exception_message is None
 
     # Test after invoke with exception
-    add_mult_gui.inputs_with_gui[0].data_with_gui.value = "a"
-    add_mult_gui.dirty = True
+    add_mult_gui._inputs_with_gui[0].data_with_gui.value = "a"
+    add_mult_gui._dirty = True
     add_mult_gui.invoke()
-    assert add_mult_gui.outputs_with_gui[0].data_with_gui.value is ErrorValue
-    assert add_mult_gui.outputs_with_gui[1].data_with_gui.value is ErrorValue
-    assert add_mult_gui.last_exception_message is not None
+    assert add_mult_gui._outputs_with_gui[0].data_with_gui.value is ErrorValue
+    assert add_mult_gui._outputs_with_gui[1].data_with_gui.value is ErrorValue
+    assert add_mult_gui._last_exception_message is not None
 
 
 def test_any_function_to_function_with_gui_two_outputs_old_style() -> None:
@@ -111,7 +111,7 @@ def test_any_function_to_function_with_gui_two_outputs_old_style() -> None:
         return a + b, a * b
 
     add_mult_gui = to_function_with_gui(add_mult)
-    assert len(add_mult_gui.outputs_with_gui) == 2
+    assert len(add_mult_gui._outputs_with_gui) == 2
 
 
 def test_function_with_optional_param() -> None:
@@ -130,10 +130,10 @@ def test_function_with_optional_param() -> None:
             return a + 2
 
     foo_gui = to_function_with_gui(foo)
-    assert isinstance(foo_gui.inputs_with_gui[0].data_with_gui, OptionalWithGui)
+    assert isinstance(foo_gui._inputs_with_gui[0].data_with_gui, OptionalWithGui)
 
     foo2_gui = to_function_with_gui(foo2)
-    assert isinstance(foo2_gui.inputs_with_gui[0].data_with_gui, OptionalWithGui)
+    assert isinstance(foo2_gui._inputs_with_gui[0].data_with_gui, OptionalWithGui)
 
     print("a")
 
@@ -146,11 +146,11 @@ def test_enum_gui() -> None:
         A = 1
         B = 2
 
-    my_enum_gui = any_typeclass_to_gui("<enum 'MyEnum'>", globals_dict=globals(), locals_dict=locals())
+    my_enum_gui = _any_typeclass_to_gui("<enum 'MyEnum'>", globals_dict=globals(), locals_dict=locals())
     assert isinstance(my_enum_gui, EnumWithGui)
 
     def foo(a: MyEnum) -> int:
         return a.value
 
     foo_gui = to_function_with_gui(foo, globals_dict=globals(), locals_dict=locals())
-    assert isinstance(foo_gui.inputs_with_gui[0].data_with_gui, EnumWithGui)
+    assert isinstance(foo_gui._inputs_with_gui[0].data_with_gui, EnumWithGui)
