@@ -17,6 +17,7 @@ class OptionalWithGui(AnyDataWithGui[DataType | None]):
         self.callbacks.edit = self.edit
         self.callbacks.on_change = self.on_change
         self.callbacks.default_value_provider = self.default_provider
+        self.callbacks.clipboard_copy_possible = inner_gui.callbacks.clipboard_copy_possible
 
     def default_provider(self) -> DataType | None:
         if self.inner_gui.callbacks.default_value_provider is None:
@@ -93,6 +94,12 @@ class ListWithGui(AnyDataWithGui[List[DataType]]):
         self.callbacks.edit = self.edit
         self.callbacks.default_value_provider = lambda: []
         self.callbacks.present_custom = self.present_custom
+        self.callbacks.clipboard_copy_str = self.clipboard_copy_str
+        self.callbacks.clipboard_copy_possible = inner_gui.callbacks.clipboard_copy_possible
+
+    @staticmethod
+    def clipboard_copy_str(v: List[DataType]) -> str:
+        return str(v)
 
     def _elements_str(self, value: List[DataType], max_presented_elements: int) -> str:
         nb_elements = len(value)
@@ -161,6 +168,7 @@ class EnumWithGui(AnyDataWithGui[Enum]):
         self.callbacks.edit = self.edit
         self.callbacks.default_value_provider = lambda: list(self.enum_type)[0]
         self.callbacks.create_from_value = self.create_from_name
+        self.callbacks.clipboard_copy_possible = True
 
     def edit(self) -> bool:
         assert not isinstance(self.value, (Unspecified, Error))

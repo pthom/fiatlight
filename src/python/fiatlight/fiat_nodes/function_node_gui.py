@@ -1,5 +1,5 @@
 from __future__ import annotations
-from fiatlight.fiat_types import Error, Unspecified, UnspecifiedValue, BoolFunction, JsonDict
+from fiatlight.fiat_types import Error, Unspecified, UnspecifiedValue, BoolFunction, JsonDict, ErrorValue
 from fiatlight.fiat_core import FunctionNode, FunctionNodeLink, AnyDataWithGui
 from fiatlight.fiat_config import FiatColorType, get_fiat_config
 from fiatlight.fiat_core.function_with_gui import ParamWithGui
@@ -181,6 +181,19 @@ class FunctionNodeGui:
 
         self._render_function_doc(unique_name)
 
+    @staticmethod
+    def _show_copy_to_clipboard_button(data_with_gui: AnyDataWithGui[Any]) -> None:
+        if not data_with_gui.callbacks.clipboard_copy_possible:
+            return
+        if data_with_gui.value is UnspecifiedValue or data_with_gui.value is ErrorValue:
+            return
+        with fontawesome_6_ctx():
+            if imgui.button(icons_fontawesome_6.ICON_FA_COPY):
+                clipboard_str = data_with_gui.datatype_value_to_clipboard_str()
+                imgui.set_clipboard_text(clipboard_str)
+            if imgui.is_item_hovered():
+                fiat_osd.set_tooltip("Copy value to clipboard")
+
     def _draw_output_header_line(self, idx_output: int) -> None:
         header_elements = self._output_header_elements(idx_output)
 
@@ -194,6 +207,9 @@ class FunctionNodeGui:
 
         # Align to the right
         imgui.spring()
+
+        # Copy to clipboard button
+        self._show_copy_to_clipboard_button(self._function_node.function_with_gui.output(idx_output))
 
         # Show present button, if a custom present callback is available
         if header_elements.show_details_button:
@@ -241,8 +257,12 @@ class FunctionNodeGui:
         if header_elements.value_as_str is not None:
             fiat_widgets.text_maybe_truncated(header_elements.value_as_str, max_width_chars=40, max_lines=1)
 
+        imgui.spring()
+
+        # Copy to clipboard button
+        self._show_copy_to_clipboard_button(input_param.data_with_gui)
+
         if header_elements.show_details_button:
-            imgui.spring()
             self._show_input_details[input_name] = collapsible_button(
                 self._show_input_details[input_name], header_elements.details_button_tooltip
             )

@@ -75,6 +75,16 @@ class AnyDataGuiCallbacks(Generic[DataType]):
     # Used in more advanced cases, when `present_custom` has an internal cache that needs to be updated.
     on_change: VoidFunction | None = None
 
+    # clipboard_copy_str (Optional)
+    # if provided, this function will be called when the value is copied to the clipboard.
+    # Used in more advanced cases, when the data is not a simple string, or when present_str or str() is not enough.
+    clipboard_copy_str: Callable[[DataType], str] | None = None
+
+    # clipboard_copy_possible (Optional)
+    # True by default
+    # If False, the user can not copy the data to the clipboard
+    clipboard_copy_possible: bool = False
+
     # save/load_gui_options_from_json (Optional)
     # Optional serialization and deserialization of the GUI presentation options
     # (i.e. anything that deals with how the data is presented in the GUI, not the data itself)

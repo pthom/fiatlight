@@ -56,6 +56,7 @@ class IntWithGui(AnyDataWithGui[int]):
         self.params = params if params is not None else IntWithGuiParams()
         self.callbacks.edit = self.edit
         self.callbacks.default_value_provider = lambda: 0
+        self.callbacks.clipboard_copy_possible = True
 
     def edit(self) -> bool:
         assert isinstance(self.value, int)
@@ -144,6 +145,7 @@ class FloatWithGui(AnyDataWithGui[float]):
         self.params = params if params is not None else FloatWithGuiParams()
         self.callbacks.edit = self.edit
         self.callbacks.default_value_provider = lambda: 0.0
+        self.callbacks.clipboard_copy_possible = True
 
     def edit(self) -> bool:
         assert isinstance(self.value, float) or isinstance(self.value, int)
@@ -219,6 +221,7 @@ class BoolWithGui(AnyDataWithGui[bool]):
         self.params = params if params is not None else BoolWithGuiParams()
         self.callbacks.edit = self.edit
         self.callbacks.default_value_provider = lambda: False
+        self.callbacks.clipboard_copy_possible = True
 
     def edit(self) -> bool:
         assert isinstance(self.value, bool)
@@ -277,16 +280,18 @@ class StrWithGui(AnyDataWithGui[str]):
 
         self.callbacks.present_custom = self.present_custom
         self.callbacks.present_custom_popup_required = True
+        self.callbacks.clipboard_copy_possible = True
 
     @staticmethod
     def present_str(s: str) -> str:
         return s
 
     def present_custom(self) -> None:
+        text_value = self.get_actual_value()
         text_edit_size = ImVec2(
             imgui.get_window_width() - hello_imgui.em_size(1), imgui.get_window_height() - hello_imgui.em_size(5)
         )
-        imgui.input_text_multiline("##str", self.value, text_edit_size, imgui.InputTextFlags_.read_only.value)
+        imgui.input_text_multiline("##str", text_value, text_edit_size, imgui.InputTextFlags_.read_only.value)
 
     def edit(self) -> bool:
         assert isinstance(self.value, str)
@@ -335,6 +340,8 @@ class FilePathWithGui(AnyDataWithGui[FilePath]):
         self.callbacks.edit = self.edit
         self.callbacks.default_value_provider = lambda: FilePath("")
         self.callbacks.present_str = self.present_str
+        self.callbacks.clipboard_copy_str = lambda x: str(x)
+        self.callbacks.clipboard_copy_possible = True
         self.filters = []
 
     def edit(self) -> bool:
@@ -382,6 +389,7 @@ class ColorRgbWithGui(AnyDataWithGui[ColorRgb]):
         self.callbacks.edit = self.edit
         self.callbacks.default_value_provider = lambda: ColorRgb((0, 0, 0))
         self.callbacks.present_str = self.present_str
+        self.callbacks.clipboard_copy_possible = True
 
     def edit(self) -> bool:
         assert isinstance(self.value, tuple)
@@ -422,6 +430,7 @@ class ColorRgbaWithGui(AnyDataWithGui[ColorRgba]):
         self.callbacks.edit = self.edit
         self.callbacks.default_value_provider = lambda: ColorRgba((0, 0, 0, 255))
         self.callbacks.present_str = self.present_str
+        self.callbacks.clipboard_copy_possible = True
 
     def edit(self) -> bool:
         assert isinstance(self.value, tuple)
