@@ -620,6 +620,78 @@ class FunctionNodeGui:
         nb_outputs = len(self._function_node.function_with_gui.outputs_with_gui)
         return nb_outputs_with_links < nb_outputs
 
+    def _draw_one_input_edit(self, input_param: ParamWithGui[Any], unique_name: str) -> bool:
+        changed = False
+        # capture the input_param for the lambda
+        # (otherwise, the lambda would capture the last input_param in the loop)
+        input_param_captured = input_param
+
+        def edit_input() -> bool:
+            # Edit input can be called either directly in this window or in a detached window
+            return self._call_gui_edit(input_param_captured)
+
+        callbacks = input_param.data_with_gui.callbacks
+        can_edit_in_node = not callbacks.edit_popup_required
+        can_edit_in_popup = callbacks.edit_popup_required or callbacks.edit_popup_possible
+        popup_label = f"detached view - {unique_name}(): edit input '{input_param.name}'"
+        btn_label = "" if can_edit_in_node else "edit"
+
+        if can_edit_in_popup:
+            fiat_osd.show_bool_popup_button(btn_label, popup_label, edit_input)
+
+        # Now that we can have a detached view, there are two ways
+        # that can change the input value:
+        if can_edit_in_node and edit_input():
+            # 1. The user edits the input value in this window
+            changed = True
+        if can_edit_in_popup and fiat_osd.get_popup_bool_return(btn_label):
+            # 2. The user edits the input value in a detached window
+            changed = True
+
+        return changed
+
+    def _draw_one_input_present_custom(self, input_param: ParamWithGui[Any], unique_name: str) -> None:
+        # capture the input_param for the lambda
+        # with a different name for the captured variable, because of
+        # python weird scoping rules
+        input_param_captured_2 = input_param
+
+        def present_input() -> None:
+            # Present input can be called either directly in this window or in a detached window
+            self._call_gui_present_custom(input_param_captured_2.data_with_gui)
+
+        callbacks = input_param.data_with_gui.callbacks
+        can_present_custom_in_node = not callbacks.present_custom_popup_required
+        can_present_custom_in_popup = callbacks.present_custom_popup_required or callbacks.present_custom_popup_possible
+
+        if can_present_custom_in_popup:
+            popup_label = f"detached view - {unique_name}() - input '{input_param.name}'"
+            fiat_osd.show_void_popup_button("", popup_label, present_input)
+
+        if can_present_custom_in_node:
+            present_input()
+
+    def _draw_one_input(self, input_param: ParamWithGui[Any], unique_name: str) -> bool:
+        with imgui_ctx.push_obj_id(input_param):
+            input_name = input_param.name
+
+            has_link = self._function_node.has_input_link(input_name)
+            if not has_link and not self._inputs_expanded:
+                return False
+
+            self._draw_input_header_line(input_param)
+
+            if not self._show_input_details[input_name]:
+                return False
+
+            shall_show_edit = not self._function_node.has_input_link(input_name)
+            if shall_show_edit:
+                return self._draw_one_input_edit(input_param, unique_name)
+            else:
+                if input_param.data_with_gui.can_present_custom():
+                    self._draw_one_input_present_custom(input_param, unique_name)
+                return False
+
     def _draw_function_inputs(self, unique_name: str) -> bool:
         changed = False
 
@@ -640,66 +712,9 @@ class FunctionNodeGui:
                 fiat_widgets.node_separator(self._node_id, "Params")
 
         for input_param in self._function_node.function_with_gui.inputs_with_gui:
-            with imgui_ctx.push_obj_id(input_param):
-                input_name = input_param.name
+            if self._draw_one_input(input_param, unique_name):
+                changed = True
 
-                has_link = self._function_node.has_input_link(input_name)
-                if not has_link and not self._inputs_expanded:
-                    continue
-
-                self._draw_input_header_line(input_param)
-
-                if self._show_input_details[input_name]:
-                    shall_show_edit = not self._function_node.has_input_link(input_name)
-                    if shall_show_edit:
-                        # capture the input_param for the lambda
-                        # (otherwise, the lambda would capture the last input_param in the loop)
-                        input_param_captured = input_param
-
-                        def edit_input() -> bool:
-                            # Edit input can be called either directly in this window or in a detached window
-                            return self._call_gui_edit(input_param_captured)
-
-                        callbacks = input_param.data_with_gui.callbacks
-                        can_edit_in_node = not callbacks.edit_popup_required
-                        can_edit_in_popup = callbacks.edit_popup_required or callbacks.edit_popup_possible
-                        popup_label = f"detached view - {unique_name}(): edit input '{input_param.name}'"
-                        btn_label = "" if can_edit_in_node else "edit"
-
-                        if can_edit_in_popup:
-                            fiat_osd.show_bool_popup_button(btn_label, popup_label, edit_input)
-
-                        # Now that we can have a detached view, there are two ways
-                        # that can change the input value:
-                        if can_edit_in_node and edit_input():
-                            # 1. The user edits the input value in this window
-                            changed = True
-                        if can_edit_in_popup and fiat_osd.get_popup_bool_return(btn_label):
-                            # 2. The user edits the input value in a detached window
-                            changed = True
-                    else:
-                        if input_param.data_with_gui.can_present_custom():
-                            # capture the input_param for the lambda
-                            # with a different name for the captured variable, because of
-                            # python weird scoping rules
-                            input_param_captured_2 = input_param
-
-                            def present_input() -> None:
-                                # Present input can be called either directly in this window or in a detached window
-                                self._call_gui_present_custom(input_param_captured_2.data_with_gui)
-
-                            callbacks = input_param.data_with_gui.callbacks
-                            can_present_custom_in_node = not callbacks.present_custom_popup_required
-                            can_present_custom_in_popup = (
-                                callbacks.present_custom_popup_required or callbacks.present_custom_popup_possible
-                            )
-
-                            if can_present_custom_in_popup:
-                                popup_label = f"detached view - {unique_name}() - input '{input_param.name}'"
-                                fiat_osd.show_void_popup_button("", popup_label, present_input)
-
-                            if can_present_custom_in_node:
-                                present_input()
         return changed
 
     def _draw_fiat_internals(self) -> None:
