@@ -168,6 +168,18 @@ class AnyDataWithGui(Generic[DataType]):
                 default_str = "???"
         return default_str
 
+    def datatype_value_to_clipboard_str(self) -> str:
+        if isinstance(self.value, Unspecified):
+            return "Unspecified"
+        elif isinstance(self.value, Error):
+            return "Error"
+        else:
+            actual_value = self.get_actual_value()
+            if self.callbacks.clipboard_copy_str is not None:
+                return self.callbacks.clipboard_copy_str(actual_value)
+            else:
+                return self.datatype_value_to_str(actual_value)
+
     def can_present_custom(self) -> bool:
         if isinstance(self.value, (Error, Unspecified)):
             return False
