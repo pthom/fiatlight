@@ -598,8 +598,9 @@ class FunctionNodeGui:
                 )
 
                 if can_present_custom_in_popup:
+                    btn_label = "##present_custom_in_popup"  # This will be our popup id (with the imgui id context)
                     popup_label = f"detached view - {unique_name}: output {idx_output}"
-                    fiat_osd.show_void_popup_button("", popup_label, present_output)
+                    fiat_osd.show_void_popup_button(btn_label, popup_label, present_output)
 
                 if can_present_custom_in_node:
                     present_output()

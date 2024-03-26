@@ -70,8 +70,8 @@ class _OsdWidgets:
             if popup_info.window_size is not None:
                 window_size = popup_info.window_size
 
-            imgui.set_next_window_pos(popup_info.location, imgui.Cond_.appearing.value)
-            imgui.set_next_window_size(window_size, imgui.Cond_.appearing.value)
+            imgui.set_next_window_pos(popup_info.location, imgui.Cond_.once.value)
+            imgui.set_next_window_size(window_size, imgui.Cond_.once.value)
             show, flag_open = imgui.begin(popup_info.popup_label, True, window_flags)
             if show and flag_open:
                 popup_info.bool_returned = popup_info.gui_function()
@@ -97,15 +97,15 @@ class _OsdWidgets:
                 new_popups.append(popup_info)
         self.popups = new_popups
 
-    def _popup_exists(self, popup_label: str) -> bool:
-        unique_name = self._popup_unique_name(popup_label)
+    def popup_exists(self, btn_label: str) -> bool:
+        unique_name = self._popup_unique_name(btn_label)
         for popup_info in self.popups:
             if popup_info.btn_label == unique_name:
                 return True
         return False
 
     def get_popup_bool_return(self, btn_label: str) -> bool | None:
-        if not self._popup_exists(btn_label):
+        if not self.popup_exists(btn_label):
             return False
         unique_name = self._popup_unique_name(btn_label)
         for popup_info in self.popups:
@@ -124,7 +124,7 @@ class _OsdWidgets:
         window_flags: int | None,  # imgui.WindowFlags_
         window_size: ImVec2 | None,
     ) -> None:
-        if self._popup_exists(btn_label):
+        if self.popup_exists(btn_label):
             return
         unique_name = self._popup_unique_name(btn_label)
         location = imgui_node_editor.canvas_to_screen(imgui.get_cursor_pos())
@@ -145,7 +145,7 @@ class _OsdWidgets:
         from fiatlight.fiat_widgets import fontawesome_6_ctx, icons_fontawesome_6
 
         with fontawesome_6_ctx():
-            if self._popup_exists(btn_label):
+            if self.popup_exists(btn_label):
                 if imgui.button(icons_fontawesome_6.ICON_FA_CIRCLE_XMARK + " " + btn_label):
                     self._remove_popup(btn_label)
                 if imgui.is_item_hovered():
@@ -156,6 +156,12 @@ class _OsdWidgets:
                     self._add_popup(btn_label, popup_label, gui_function, bool_returned, window_flags, window_size)
                 if imgui.is_item_hovered():
                     self.tooltip_str = "Show " + btn_label + " - " + popup_label
+
+    def update_popup_callback(self, btn_label: str, gui_function: BoolFunction | VoidFunction) -> None:
+        unique_name = self._popup_unique_name(btn_label)
+        for popup_info in self.popups:
+            if popup_info.btn_label == unique_name:
+                popup_info.gui_function = gui_function
 
     def show_bool_popup_button(
         self,
@@ -221,6 +227,15 @@ def get_popup_bool_return(btn_label: str) -> bool | None:
     """Get the return value of the boolean function in the popup window opened by the button."""
     r = _fiat_osd.get_popup_bool_return(btn_label)
     return r
+
+
+def is_popup_opened(btn_label: str) -> bool:
+    """Check if a popup window is open."""
+    return _fiat_osd.popup_exists(btn_label)
+
+
+def update_popup_callback(btn_label: str, gui_function: BoolFunction | VoidFunction) -> None:
+    _fiat_osd.update_popup_callback(btn_label, gui_function)
 
 
 def render() -> None:
