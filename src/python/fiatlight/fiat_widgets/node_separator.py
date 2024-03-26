@@ -34,9 +34,9 @@ def _node_separator(parent_node: ed.NodeId, text: str, show_collapse_button: boo
         color = imgui.get_style().color_(col.value)
         return imgui.color_convert_float4_to_u32(color)
 
-    def draw_line(p1: ImVec2, p2: ImVec2) -> None:
+    def draw_line(a: ImVec2, b: ImVec2) -> None:
         color32 = get_color32(imgui.Col_.separator)
-        imgui.get_window_draw_list().add_line(p1, p2, color32, thickness)
+        imgui.get_window_draw_list().add_line(a, b, color32, thickness)
 
     if len(text) == 0:
         draw_line(p1, p2)

@@ -46,7 +46,7 @@ def sandbox() -> None:
 
     registry = AutoRegistry(Foo)
     # print(registry[0].a)
-    f = registry._create_new()
+    f = registry._create_new()  # noqa
     print(f)
 
 

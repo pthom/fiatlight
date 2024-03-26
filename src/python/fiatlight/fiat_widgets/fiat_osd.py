@@ -76,7 +76,8 @@ class _OsdWidgets:
         self._render_tooltip()
         self._popup_render()
 
-    def _popup_unique_name(self, popup_label: str) -> str:
+    @staticmethod
+    def _popup_unique_name(popup_label: str) -> str:
         return popup_label + "##" + str(imgui.get_id("BLAH"))
 
     def _remove_popup(self, popup_label: str) -> None:

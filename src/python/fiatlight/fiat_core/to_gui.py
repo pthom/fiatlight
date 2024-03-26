@@ -93,7 +93,7 @@ def _extract_tuple_typeclasses(type_class_name: str) -> Tuple[bool, List[str]]:
     return False, []
 
 
-def any_typeclass_to_gui(
+def _any_typeclass_to_gui(
     type_class_name: str, *, globals_dict: GlobalsDict | None = None, locals_dict: LocalsDict | None = None
 ) -> AnyDataWithGui[Any]:
     # logging.warning(f"any_typeclass_to_gui: {type_class_name}")
@@ -121,10 +121,10 @@ def any_typeclass_to_gui(
             return AnyDataWithGui.make_for_any()
 
     if is_optional:
-        inner_gui = any_typeclass_to_gui(type_class_name, globals_dict=globals_dict, locals_dict=locals_dict)
+        inner_gui = _any_typeclass_to_gui(type_class_name, globals_dict=globals_dict, locals_dict=locals_dict)
         return OptionalWithGui(inner_gui)
     elif is_list:
-        inner_gui = any_typeclass_to_gui(type_class_name, globals_dict=globals_dict, locals_dict=locals_dict)
+        inner_gui = _any_typeclass_to_gui(type_class_name, globals_dict=globals_dict, locals_dict=locals_dict)
         return ListWithGui(inner_gui)
 
     if gui_factories().can_handle_typename(type_class_name):
@@ -137,32 +137,32 @@ def any_typeclass_to_gui(
     return AnyDataWithGui.make_for_any()
 
 
-def any_typeclass_to_gui_split_if_tuple(
+def _any_typeclass_to_gui_split_if_tuple(
     type_class_name: str, *, globals_dict: GlobalsDict | None = None, locals_dict: LocalsDict | None = None
 ) -> List[AnyDataWithGui[Any]]:
     r = []
     is_tuple, inner_type_classes = _extract_tuple_typeclasses(type_class_name)
     if is_tuple:
         for inner_type_class in inner_type_classes:
-            r.append(any_typeclass_to_gui(inner_type_class, globals_dict=globals_dict, locals_dict=locals_dict))
+            r.append(_any_typeclass_to_gui(inner_type_class, globals_dict=globals_dict, locals_dict=locals_dict))
     else:
-        r.append(any_typeclass_to_gui(type_class_name, globals_dict=globals_dict, locals_dict=locals_dict))
+        r.append(_any_typeclass_to_gui(type_class_name, globals_dict=globals_dict, locals_dict=locals_dict))
     return r
 
 
-def to_data_with_gui(
+def _to_data_with_gui(
     value: DataType,
     *,
     globals_dict: GlobalsDict | None = None,
     locals_dict: LocalsDict | None = None,
 ) -> AnyDataWithGui[DataType]:
     type_class_name = str(type(value))
-    r = any_typeclass_to_gui(type_class_name, globals_dict=globals_dict, locals_dict=locals_dict)
+    r = _any_typeclass_to_gui(type_class_name, globals_dict=globals_dict, locals_dict=locals_dict)
     r.value = value
     return r
 
 
-def to_param_with_gui(
+def _to_param_with_gui(
     name: str,
     param: inspect.Parameter,
     *,
@@ -175,7 +175,7 @@ def to_param_with_gui(
     if annotation is None or annotation is inspect.Parameter.empty:
         data_with_gui = AnyDataWithGui.make_for_any()
     else:
-        data_with_gui = any_typeclass_to_gui(str(annotation), globals_dict=globals_dict, locals_dict=locals_dict)
+        data_with_gui = _any_typeclass_to_gui(str(annotation), globals_dict=globals_dict, locals_dict=locals_dict)
 
     param_kind = ParamKind.PositionalOrKeyword
     if param.kind is inspect.Parameter.POSITIONAL_ONLY:
@@ -204,7 +204,7 @@ def to_function_with_gui(
     """
     function_with_gui = FunctionWithGui()
     function_with_gui.name = f.__name__
-    function_with_gui.f_impl = f
+    function_with_gui._f_impl = f
 
     try:
         sig = get_function_signature(f, signature_string=signature_string)
@@ -213,19 +213,19 @@ def to_function_with_gui(
 
     params = sig.parameters
     for name, param in params.items():
-        function_with_gui.inputs_with_gui.append(
-            to_param_with_gui(name, param, globals_dict=globals_dict, locals_dict=locals_dict)
+        function_with_gui._inputs_with_gui.append(
+            _to_param_with_gui(name, param, globals_dict=globals_dict, locals_dict=locals_dict)
         )
 
     return_annotation = sig.return_annotation
     if return_annotation is inspect.Parameter.empty:
         output_with_gui = AnyDataWithGui.make_for_any()
-        function_with_gui.outputs_with_gui.append(OutputWithGui(output_with_gui))
+        function_with_gui._outputs_with_gui.append(OutputWithGui(output_with_gui))
     else:
         return_annotation_str = str(return_annotation)
-        outputs_with_guis = any_typeclass_to_gui_split_if_tuple(return_annotation_str)
+        outputs_with_guis = _any_typeclass_to_gui_split_if_tuple(return_annotation_str)
         for output_with_gui in outputs_with_guis:
-            function_with_gui.outputs_with_gui.append(OutputWithGui(output_with_gui))
+            function_with_gui._outputs_with_gui.append(OutputWithGui(output_with_gui))
 
     return function_with_gui
 

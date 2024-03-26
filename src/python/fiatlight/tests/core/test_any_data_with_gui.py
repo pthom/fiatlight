@@ -1,17 +1,17 @@
 from fiatlight.fiat_types import UnspecifiedValue
 from fiatlight.fiat_core import ParamKind, ParamWithGui, AnyDataWithGui
-from fiatlight.fiat_core.to_gui import to_data_with_gui, any_typeclass_to_gui
+from fiatlight.fiat_core.to_gui import _to_data_with_gui, _any_typeclass_to_gui
 
 
 def test_creation() -> None:
-    a: AnyDataWithGui[int] = any_typeclass_to_gui("int")
+    a: AnyDataWithGui[int] = _any_typeclass_to_gui("int")
     assert a.callbacks.edit is not None
     assert a.callbacks.default_value_provider is not None
     assert a.callbacks.default_value_provider() == 0
 
 
 def test_primitive_serialization() -> None:
-    a = to_data_with_gui(1)
+    a = _to_data_with_gui(1)
     assert a.value == 1
     assert a.save_to_json() == {"type": "Primitive", "value": 1}
     a.load_from_json({"type": "Primitive", "value": 2})
@@ -19,14 +19,14 @@ def test_primitive_serialization() -> None:
 
 
 def test_named_data_with_gui_creation() -> None:
-    x = to_data_with_gui(1)
+    x = _to_data_with_gui(1)
     n = ParamWithGui("x", x, ParamKind.PositionalOrKeyword, UnspecifiedValue)
     assert n.name == "x"
     assert n.data_with_gui.value == 1
 
 
 def test_named_data_with_gui_serialization() -> None:
-    d = to_data_with_gui(1)
+    d = _to_data_with_gui(1)
     n = ParamWithGui("x", d, ParamKind.PositionalOrKeyword, UnspecifiedValue)
     assert n.save_to_json() == {"name": "x", "data": {"type": "Primitive", "value": 1}}
 
@@ -44,10 +44,10 @@ def test_custom_data_with_gui_serialization() -> None:
     gui_factories().add_factory("Foo", FooWithGui)
 
     # Use the Foo type with its GUI implementation
-    from fiatlight.fiat_core.to_gui import to_data_with_gui
+    from fiatlight.fiat_core.to_gui import _to_data_with_gui
 
     foo = Foo(1)
-    foo_gui = to_data_with_gui(foo)
+    foo_gui = _to_data_with_gui(foo)
     assert foo_gui.value == foo
     assert foo_gui.save_to_json() == {"type": "Dict", "value": {"x": 1}}
 
@@ -71,7 +71,7 @@ def test_enum_serialization() -> None:
         A = 1
         B = 2
 
-    a = to_data_with_gui(MyEnum.A, globals_dict=globals(), locals_dict=locals())
+    a = _to_data_with_gui(MyEnum.A, globals_dict=globals(), locals_dict=locals())
     assert a.value == MyEnum.A
     as_json = a.save_to_json()
     assert as_json == {"class": "MyEnum", "type": "Enum", "value_name": "A"}

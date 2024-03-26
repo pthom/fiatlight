@@ -84,7 +84,7 @@ class AnyDataGuiCallbacks(Generic[DataType]):
     load_gui_options_from_json: Callable[[JsonDict], None] | None = None
 
     # create_from_value (Optional)
-    # Only used in more advanced cases, when the data type is not directly constructible from a value.
+    # Only used in more advanced cases, when the data type can not directly be constructed from a value.
     # (example: Enum when serialized as a string, when we need to convert the string back to the Enum class)
     create_from_value: Callable[[Any], DataType] | None = None
 

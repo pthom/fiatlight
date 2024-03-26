@@ -23,9 +23,9 @@ def test_create_function_with_gui() -> None:
         return foo.a
 
     add_gui = to_function_with_gui(add)
-    add_gui.inputs_with_gui[0].data_with_gui.value = Foo(2)
+    add_gui._inputs_with_gui[0].data_with_gui.value = Foo(2)
     add_gui.invoke()
-    assert add_gui.outputs_with_gui[0].data_with_gui.value == 2
+    assert add_gui._outputs_with_gui[0].data_with_gui.value == 2
 
 
 def test_with_list() -> None:
@@ -33,6 +33,6 @@ def test_with_list() -> None:
         return sum(x)
 
     sum_list_gui = to_function_with_gui(sum_list)
-    sum_list_gui.inputs_with_gui[0].data_with_gui.value = [1, 2, 3]
+    sum_list_gui._inputs_with_gui[0].data_with_gui.value = [1, 2, 3]
     sum_list_gui.invoke()
-    assert sum_list_gui.outputs_with_gui[0].data_with_gui.value == 6
+    assert sum_list_gui._outputs_with_gui[0].data_with_gui.value == 6

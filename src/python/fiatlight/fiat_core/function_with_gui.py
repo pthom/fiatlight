@@ -49,46 +49,60 @@ class FunctionWithGui:
     """Instantiate this class with your functions, to make them available in a graph
     You need to provide:
     - the name of the function
-    - the implementation of the function (f_impl)
+    - the implementation of the function (_f_impl)
     - the inputs and outputs of the function, as a list of ParamWithGui
     """
 
     # --------------------------------------------------------------------------------------------
     #        Members
     # --------------------------------------------------------------------------------------------
-    # This is the implementation of the function, i.e. the function that will be called
-    f_impl: Callable[..., Any] | None = None
 
-    # the name of the function
-    name: str
-
-    # inputs_with_gui and outputs_with_gui should be filled soon after construction
-    inputs_with_gui: List[ParamWithGui[Any]]
-    outputs_with_gui: List[OutputWithGui[Any]]
-
-    # if the last call raised an exception, the message is stored here
-    last_exception_message: Optional[str] = None
-    last_exception_traceback: Optional[str] = None
+    #
+    # Public members
+    #
 
     # if this is True, the function will be called automatically when any of the inputs change
     invoke_automatically: bool = True
     # if this is True, the user can set the invoke_automatically flag
     invoke_automatically_can_set: bool = False
+    # the name of the function
+    name: str
+
+    #
+    # Private members
+    #
 
     # if True, this indicates that the inputs have changed since the last call, and the function needs to be called
-    dirty: bool = True
+    _dirty: bool = True
+
+    # This is the implementation of the function, i.e. the function that will be called
+    _f_impl: Callable[..., Any] | None = None
+
+    # _inputs_with_gui and _outputs_with_gui should be filled soon after construction
+    _inputs_with_gui: List[ParamWithGui[Any]]
+    _outputs_with_gui: List[OutputWithGui[Any]]
+
+    # if the last call raised an exception, the message is stored here
+    _last_exception_message: Optional[str] = None
+    _last_exception_traceback: Optional[str] = None
 
     # --------------------------------------------------------------------------------------------
     #        Construction
     #  input_with_gui and output_with_gui should be filled soon after construction
     # --------------------------------------------------------------------------------------------
     def __init__(self) -> None:
-        self.inputs_with_gui = []
-        self.outputs_with_gui = []
+        self._inputs_with_gui = []
+        self._outputs_with_gui = []
 
     # --------------------------------------------------------------------------------------------
     #        Inputs, aka parameters
     # --------------------------------------------------------------------------------------------
+    def nb_inputs(self) -> int:
+        return len(self._inputs_with_gui)
+
+    def all_inputs_names(self) -> List[str]:
+        return [param.name for param in self._inputs_with_gui]
+
     def input(self, name: str) -> AnyDataWithGui[Any]:
         """Return the input with the given name as a AnyDataWithGui[Any]
         The inner type of the returned value is Any in this case.
@@ -96,7 +110,7 @@ class FunctionWithGui:
 
         Use input_as() if you want to get the input with the correct type.
         """
-        for param in self.inputs_with_gui:
+        for param in self._inputs_with_gui:
             if param.name == name:
                 return param.data_with_gui
         assert False, f"input {name} not found"
@@ -109,7 +123,7 @@ class FunctionWithGui:
 
         Raises a ValueError if the input is not found, and a TypeError if the input is not of the correct type.
         """
-        for param in self.inputs_with_gui:
+        for param in self._inputs_with_gui:
             if param.name == name:
                 r = param.data_with_gui
                 if not isinstance(r, gui_type):
@@ -117,12 +131,27 @@ class FunctionWithGui:
                 return r
         raise ValueError(f"Parameter {name} not found")
 
-    def all_inputs_names(self) -> List[str]:
-        return [param.name for param in self.inputs_with_gui]
+    def input_of_idx(self, idx: int) -> ParamWithGui[Any]:
+        return self._inputs_with_gui[idx]
+
+    def input_of_idx_as(self, idx: int, gui_type: Type[GuiType]) -> GuiType:
+        r = self._inputs_with_gui[idx].data_with_gui
+        if not isinstance(r, gui_type):
+            raise TypeError(f"Expected type {gui_type.__name__}, got {type(r).__name__} instead.")
+        return r
+
+    def param(self, name: str) -> ParamWithGui[Any]:
+        for param in self._inputs_with_gui:
+            if param.name == name:
+                return param
+        raise ValueError(f"Parameter {name} not found")
 
     # --------------------------------------------------------------------------------------------
     #        Outputs
     # --------------------------------------------------------------------------------------------
+    def nb_outputs(self) -> int:
+        return len(self._outputs_with_gui)
+
     def output(self, output_idx: int = 0) -> AnyDataWithGui[Any]:
         """Return the output with the given index as a AnyDataWithGui[Any]
         The inner type of the returned value is Any in this case.
@@ -130,9 +159,9 @@ class FunctionWithGui:
 
         Use output_as() if you want to get the output with the correct type.
         """
-        if output_idx >= len(self.outputs_with_gui):
+        if output_idx >= len(self._outputs_with_gui):
             raise ValueError(f"output_idx {output_idx} out of range")
-        return self.outputs_with_gui[output_idx].data_with_gui
+        return self._outputs_with_gui[output_idx].data_with_gui
 
     def output_as(self, output_idx: int, gui_type: Type[GuiType]) -> GuiType:
         """Return the output with the given index as a GuiType
@@ -142,7 +171,7 @@ class FunctionWithGui:
 
         Raises a ValueError if the output is not found, and a TypeError if the output is not of the correct type.
         """
-        r = self.outputs_with_gui[output_idx].data_with_gui
+        r = self._outputs_with_gui[output_idx].data_with_gui
         if not isinstance(r, gui_type):
             raise TypeError(f"Expected type {gui_type.__name__}, got {type(r).__name__} instead.")
         return r
@@ -154,56 +183,62 @@ class FunctionWithGui:
     # --------------------------------------------------------------------------------------------
     @final
     def invoke(self) -> None:
-        assert self.f_impl is not None
+        assert self._f_impl is not None
 
-        if not self.dirty:
+        if not self._dirty:
             return
 
-        self.last_exception_message = None
-        self.last_exception_traceback = None
+        self._last_exception_message = None
+        self._last_exception_traceback = None
 
         positional_only_values = []
-        for param in self.inputs_with_gui:
+        for param in self._inputs_with_gui:
             if param.param_kind == ParamKind.PositionalOnly:
                 positional_only_values.append(param.get_value_or_default())
 
         keyword_values = {}
-        for param in self.inputs_with_gui:
+        for param in self._inputs_with_gui:
             if param.param_kind != ParamKind.PositionalOnly:
                 keyword_values[param.name] = param.get_value_or_default()
 
         # if any of the inputs is an error or unspecified, we do not call the function
         all_params = positional_only_values + list(keyword_values.values())
         if any(value is ErrorValue or value is UnspecifiedValue for value in all_params):
-            for output_with_gui in self.outputs_with_gui:
+            for output_with_gui in self._outputs_with_gui:
                 output_with_gui.data_with_gui.value = UnspecifiedValue
-            self.dirty = False
+            self._dirty = False
             return
 
         try:
-            fn_output = self.f_impl(*positional_only_values, **keyword_values)
+            fn_output = self._f_impl(*positional_only_values, **keyword_values)
             if not isinstance(fn_output, tuple):
-                assert len(self.outputs_with_gui) == 1
-                self.outputs_with_gui[0].data_with_gui.value = fn_output
+                assert len(self._outputs_with_gui) == 1
+                self._outputs_with_gui[0].data_with_gui.value = fn_output
             else:
-                assert len(fn_output) == len(self.outputs_with_gui)
-                for i, output_with_gui in enumerate(self.outputs_with_gui):
+                assert len(fn_output) == len(self._outputs_with_gui)
+                for i, output_with_gui in enumerate(self._outputs_with_gui):
                     output_with_gui.data_with_gui.value = fn_output[i]
         except Exception as e:
             if not get_fiat_config().exception_config.catch_function_exceptions:
                 raise e
             else:
-                self.last_exception_message = str(e)
+                self._last_exception_message = str(e)
                 import traceback
                 import sys
 
                 exc_type, exc_value, exc_traceback = sys.exc_info()
                 traceback_details = traceback.format_exception(exc_type, exc_value, exc_traceback)
-                self.last_exception_traceback = "".join(traceback_details)
-                for output_with_gui in self.outputs_with_gui:
+                self._last_exception_traceback = "".join(traceback_details)
+                for output_with_gui in self._outputs_with_gui:
                     output_with_gui.data_with_gui.value = ErrorValue
 
-        self.dirty = False
+        self._dirty = False
+
+    def is_dirty(self) -> bool:
+        return self._dirty
+
+    def get_last_exception_message(self) -> str | None:
+        return self._last_exception_message
 
     # --------------------------------------------------------------------------------------------
     #        Save and load to json
@@ -214,12 +249,12 @@ class FunctionWithGui:
     # --------------------------------------------------------------------------------------------
     def save_gui_options_to_json(self) -> JsonDict:
         input_options = {}
-        for input_with_gui in self.inputs_with_gui:
+        for input_with_gui in self._inputs_with_gui:
             if input_with_gui.data_with_gui.callbacks.save_gui_options_to_json is not None:
                 input_options[input_with_gui.name] = input_with_gui.data_with_gui.callbacks.save_gui_options_to_json()
 
         output_options = {}
-        for i, output_with_gui in enumerate(self.outputs_with_gui):
+        for i, output_with_gui in enumerate(self._outputs_with_gui):
             if output_with_gui.data_with_gui.callbacks.save_gui_options_to_json is not None:
                 output_options[i] = output_with_gui.data_with_gui.callbacks.save_gui_options_to_json()
 
@@ -234,7 +269,7 @@ class FunctionWithGui:
     def load_gui_options_from_json(self, json_data: JsonDict) -> None:
         input_options = json_data.get("inputs", {})
         for input_name, input_option in input_options.items():
-            for input_with_gui in self.inputs_with_gui:
+            for input_with_gui in self._inputs_with_gui:
                 callback_load = input_with_gui.data_with_gui.callbacks.load_gui_options_from_json
                 if input_with_gui.name == input_name and callback_load is not None:
                     callback_load(input_option)
@@ -243,7 +278,7 @@ class FunctionWithGui:
         output_options = json_data.get("outputs", {})
         for output_idx, output_option in output_options.items():
             output_idx = int(output_idx)
-            output_with_gui = self.outputs_with_gui[output_idx]
+            output_with_gui = self._outputs_with_gui[output_idx]
             callback_load = output_with_gui.data_with_gui.callbacks.load_gui_options_from_json
             if callback_load is not None:
                 callback_load(output_option)
@@ -258,10 +293,10 @@ class FunctionWithGui:
         return self.get_function_doc() is not None
 
     def get_function_doc(self) -> str | None:
-        if self.f_impl is None:
+        if self._f_impl is None:
             return None
-        if hasattr(self.f_impl, "__doc__"):
-            return self.f_impl.__doc__
+        if hasattr(self._f_impl, "__doc__"):
+            return self._f_impl.__doc__
         return None
 
     def get_function_doc_as_markdown(self) -> str | None:
@@ -270,10 +305,10 @@ class FunctionWithGui:
         #
         # * PEP 257:
         #     is quite short and specifies that docstring should look like this:
-        #     """Return a foobang (short one-liner info)
+        #     """Return an int (short one-liner info)
         #
-        #     Optional plotz says to frobnicate the bizbaz first.
-        #     (More details here)
+        #     Optional additional description or example
+        #     (More details in several lines)
         #
         #     Args:
         #     ...
@@ -353,12 +388,12 @@ class FunctionWithGui:
         return markdown_doc
 
     def get_function_source_code(self) -> str | None:
-        if self.f_impl is None:
+        if self._f_impl is None:
             return None
         import inspect
 
         try:
-            r = inspect.getsource(self.f_impl)
+            r = inspect.getsource(self._f_impl)
             return r
         except OSError:
             return None

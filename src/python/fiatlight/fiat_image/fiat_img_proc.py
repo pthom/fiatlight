@@ -14,7 +14,7 @@ def overlay_alpha_image_precise(
 ) -> ImageU8_3:
     """
     cf minute physics brilliant clip "Computer color is broken" : https://www.youtube.com/watch?v=LKnqECcg6Gw
-    the RGB values are gamma-corrected by the sensor (in order to keep accuracy for lower luminancy),
+    the RGB values are gamma-corrected by the sensor (in order to keep accuracy for lower luminance),
     we need to undo this before averaging.
     """
     overlay_alpha = overlay_rgba[:, :, 3].astype(float) / 255.0 * alpha

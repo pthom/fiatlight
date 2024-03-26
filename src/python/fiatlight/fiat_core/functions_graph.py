@@ -90,26 +90,21 @@ class FunctionsGraph:
         src_function = self.function_node_with_unique_name(src_function_name)
         dst_function = self.function_node_with_unique_name(dst_function_name)
 
-        if src_output_idx >= len(src_function.function_with_gui.outputs_with_gui):
+        if src_output_idx >= src_function.function_with_gui.nb_outputs():
             raise ValueError(
                 f"Output index {src_output_idx} is out of range for function {src_function_name}. "
-                f"Function {src_function_name} has {len(src_function.function_with_gui.outputs_with_gui)} outputs."
+                f"Function {src_function_name} has {src_function.function_with_gui.nb_outputs()} outputs."
             )
         if dst_input_name is not None:
-            if not any(
-                dst_input_name == input_with_gui.name
-                for input_with_gui in dst_function.function_with_gui.inputs_with_gui
-            ):
+            if dst_input_name not in dst_function.function_with_gui.all_inputs_names():
                 raise ValueError(
                     f"Input {dst_input_name} not found in function {dst_function_name}. "
-                    f"Available inputs: {[input_with_gui.name for input_with_gui in dst_function.function_with_gui.inputs_with_gui]}"
+                    f"Available inputs: {[dst_function.function_with_gui.all_inputs_names()]}"
                 )
         if dst_input_name is None:
-            if len(dst_function.function_with_gui.inputs_with_gui) == 0:
-                raise ValueError(
-                    f"Function {dst_function_name} has no inputs. " f"Please specify the input name to link to."
-                )
-            dst_input_name = dst_function.function_with_gui.inputs_with_gui[0].name
+            if dst_function.function_with_gui.nb_inputs() == 0:
+                raise ValueError(f"Function {dst_function_name} has no inputs!")
+            dst_input_name = dst_function.function_with_gui.input_of_idx(0).name
 
         link = FunctionNodeLink(
             src_function_node=src_function,
@@ -145,8 +140,7 @@ class FunctionsGraph:
         return {self.function_node_unique_name(fn): fn for fn in self.functions_nodes}
 
     def _add_function_with_gui(self, f_gui: FunctionWithGui) -> None:
-        # Make sure all names are unique (is this useful?)
-        f_node = FunctionNode(f_gui, f_gui.name)
+        f_node = FunctionNode(f_gui)
         self.functions_nodes.append(f_node)
 
     def _add_function(
@@ -194,15 +188,12 @@ class FunctionsGraph:
             for i in range(len(r.functions_nodes) - 1):
                 fn = r.functions_nodes[i]
                 fn_next = r.functions_nodes[i + 1]
-                if (
-                    len(fn.function_with_gui.outputs_with_gui) >= 1
-                    and len(fn_next.function_with_gui.inputs_with_gui) >= 1
-                ):
+                if fn.function_with_gui.nb_outputs() >= 1 and fn_next.function_with_gui.nb_inputs() >= 1:
                     link = FunctionNodeLink(
                         src_function_node=fn,
                         src_output_idx=0,
                         dst_function_node=fn_next,
-                        dst_input_name=fn_next.function_with_gui.inputs_with_gui[0].name,
+                        dst_input_name=fn_next.function_with_gui.input_of_idx(0).name,
                     )
                     fn.add_output_link(link)
                     fn_next.add_input_link(link)
@@ -236,14 +227,14 @@ class FunctionsGraph:
         # We need to do this in two steps:
         # 1. Mark all functions as dirty (so that the call to invoke_function will actually call the function)
         for fn in self.functions_nodes:
-            fn.function_with_gui.dirty = True
+            fn.function_with_gui._dirty = True
 
         # 2. Invoke all the functions
         # This is done in a separate loop because the functions may depend on each other,
         # and a call to fn.invoke_function() may trigger a call to other functions
         # (and mark them as not dirty anymore as a side effect)
         for fn in self.functions_nodes:
-            if fn.function_with_gui.dirty:
+            if fn.function_with_gui.is_dirty():
                 fn.invoke_function()
 
 

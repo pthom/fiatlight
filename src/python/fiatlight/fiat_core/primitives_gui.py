@@ -9,53 +9,6 @@ from enum import Enum
 
 GuiFunction = Callable[[], None]
 
-########################################################################################################################
-#                               _versatile_gui_present
-########################################################################################################################
-
-
-# def versatile_gui_present(value: Any) -> None:
-#     from fiatlight import widgets
-#
-#     def show_text(s: str) -> None:
-#         widgets.text_maybe_truncated(
-#             s,
-#             max_width_chars=30,
-#             max_lines=10,
-#             show_full_as_tooltip=False,
-#             show_copy_button=True,
-#             show_details_button=True,
-#             show_expand_checkbox=True,
-#         )
-#
-#     if value is None:
-#         imgui.text("None")
-#     elif value is UnspecifiedValue:
-#         imgui.text("Unspecified")
-#     elif value is ErrorValue:
-#         imgui.text("Error")
-#     elif isinstance(value, int):
-#         imgui.text(f"{value}")
-#     elif isinstance(value, float):
-#         imgui.text(f"{value:.4f}")
-#         if imgui.is_item_hovered():
-#             widgets.fiat_osd.set_tooltip(f"{value}")
-#     elif isinstance(value, str):
-#         imgui.text(f"str len={len(value)}")
-#         show_text(value)
-#     # elif isinstance(value, list):
-#     #     value_full_str = "\n".join(str(item) for item in value)
-#     #     imgui.text(f"list len={len(value)}")
-#     #     show_text(value_full_str)
-#     # elif isinstance(value, tuple):
-#     #     imgui.text(f"Tuple len={len(value)}")
-#     #     strs = [str(v) for v in value]
-#     #     tuple_str = "(" + ", ".join(strs) + ")"
-#     #     imgui.text(tuple_str)
-#
-#     else:
-#         raise Exception(f"versatile_gui_data Unsupported type: {type(value)}")
-
 
 ########################################################################################################################
 #                               Ints
