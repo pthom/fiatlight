@@ -708,8 +708,6 @@ class FunctionNodeGui:
                         imgui.text(as_str)
 
     def _draw_exception_message(self) -> None:
-        from fiatlight.fiat_runner import FIATLIGHT_GUI_CONFIG
-
         last_exception_message = self._function_node.function_with_gui.get_last_exception_message()
         if last_exception_message is None:
             return
@@ -723,7 +721,7 @@ class FunctionNodeGui:
         fiat_widgets.text_maybe_truncated(
             "Exception:\n" + last_exception_message,
             max_width_pixels=exception_width,
-            color=FIATLIGHT_GUI_CONFIG.colors.error,
+            color=get_fiat_config().style.colors[FiatColorType.ExceptionError],
         )
 
         # Raise the exception so that the user can debug it

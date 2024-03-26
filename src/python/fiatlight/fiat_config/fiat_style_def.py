@@ -13,6 +13,8 @@ class FiatColorType(Enum):
     OutputPinWithError = 5
     #
     TextDirtyOutput = 6
+    #
+    ExceptionError = 7
 
 
 class FiatStyle:
@@ -31,4 +33,5 @@ class FiatStyle:
             FiatColorType.OutputPinUnspecified: ImVec4(0.8, 0.4, 1.0, 1.0),
             FiatColorType.OutputPinWithError: ImVec4(1.0, 0.4, 0.4, 1.0),
             FiatColorType.TextDirtyOutput: ImVec4(0.8, 0.8, 0.8, 0.4),
+            FiatColorType.ExceptionError: ImVec4(1.0, 0.0, 0.0, 1.0),
         }
