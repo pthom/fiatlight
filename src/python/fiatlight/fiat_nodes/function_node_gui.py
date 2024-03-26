@@ -551,40 +551,44 @@ class FunctionNodeGui:
                     if imgui.is_item_hovered():
                         fiat_osd.set_tooltip("Refresh needed!")
 
+    def _draw_one_output(self, idx_output: int, unique_name: str) -> None:
+        output_param = self._function_node.function_with_gui.outputs_with_gui[idx_output]
+        with imgui_ctx.push_obj_id(output_param):
+            with imgui_ctx.begin_horizontal("outputH"):
+                self._draw_output_header_line(idx_output)
+            can_present = output_param.data_with_gui.can_present_custom()
+            if can_present and self._show_output_details[idx_output]:
+                # capture the output_param for the lambda
+                # (otherwise, the lambda would capture the last output_param in the loop)
+                output_param_captured = output_param
+
+                def present_output() -> None:
+                    # Present output can be called either directly in this window or in a detached window
+                    self._call_gui_present_custom(output_param_captured.data_with_gui)
+
+                callbacks = output_param.data_with_gui.callbacks
+                can_present_custom_in_node = not callbacks.present_custom_popup_required
+                can_present_custom_in_popup = (
+                    callbacks.present_custom_popup_required or callbacks.present_custom_popup_possible
+                )
+
+                if can_present_custom_in_popup:
+                    popup_label = f"detached view - {unique_name}: output {idx_output}"
+                    fiat_osd.show_void_popup_button("", popup_label, present_output)
+
+                if can_present_custom_in_node:
+                    present_output()
+
     def _draw_function_outputs(self, unique_name: str) -> None:
         is_dirty = self._function_node.function_with_gui.dirty
         if is_dirty:
             imgui.push_style_color(imgui.Col_.text.value, get_fiat_config().style.colors[FiatColorType.TextDirtyOutput])
         for idx_output, output_param in enumerate(self._function_node.function_with_gui.outputs_with_gui):
-            with imgui_ctx.push_obj_id(output_param):
-                has_link = len(self._function_node.output_links_for_idx(idx_output)) > 0
-                if not has_link and not self._outputs_expanded:
-                    continue
-                with imgui_ctx.begin_group():
-                    with imgui_ctx.begin_horizontal("outputH"):
-                        self._draw_output_header_line(idx_output)
-                    can_present = output_param.data_with_gui.can_present_custom()
-                    if can_present and self._show_output_details[idx_output]:
-                        # capture the output_param for the lambda
-                        # (otherwise, the lambda would capture the last output_param in the loop)
-                        output_param_captured = output_param
-
-                        def present_output() -> None:
-                            # Present output can be called either directly in this window or in a detached window
-                            self._call_gui_present_custom(output_param_captured.data_with_gui)
-
-                        callbacks = output_param.data_with_gui.callbacks
-                        can_present_custom_in_node = not callbacks.present_custom_popup_required
-                        can_present_custom_in_popup = (
-                            callbacks.present_custom_popup_required or callbacks.present_custom_popup_possible
-                        )
-
-                        if can_present_custom_in_popup:
-                            popup_label = f"detached view - {unique_name}: output {idx_output}"
-                            fiat_osd.show_void_popup_button("", popup_label, present_output)
-
-                        if can_present_custom_in_node:
-                            present_output()
+            has_link = len(self._function_node.output_links_for_idx(idx_output)) > 0
+            if not has_link and not self._outputs_expanded:
+                continue
+            with imgui_ctx.begin_group():
+                self._draw_one_output(idx_output, unique_name)
         if is_dirty:
             imgui.pop_style_color()
 
