@@ -4,7 +4,7 @@ from fiatlight.fiat_core import FunctionNode, FunctionNodeLink, AnyDataWithGui
 from fiatlight.fiat_config import FiatColorType, get_fiat_config
 from fiatlight.fiat_core.function_with_gui import ParamWithGui
 from imgui_bundle import imgui, imgui_node_editor as ed, ImVec2, imgui_ctx, hello_imgui, imgui_node_editor_ctx as ed_ctx
-from fiatlight.fiat_widgets import icons_fontawesome_6, fontawesome_6_ctx, osd_widgets
+from fiatlight.fiat_widgets import icons_fontawesome_6, fontawesome_6_ctx, fiat_osd
 from fiatlight import fiat_widgets
 from typing import Dict, List, Any
 from dataclasses import dataclass
@@ -84,7 +84,7 @@ def _my_collapsible_button(expanded: bool, tooltip_part: str) -> bool:
     with fontawesome_6_ctx():
         clicked = imgui.button(icon)
         if imgui.is_item_hovered():
-            osd_widgets.set_tooltip(tooltip)
+            fiat_osd.set_tooltip(tooltip)
         if not clicked:
             return expanded
         else:
@@ -200,7 +200,7 @@ class FunctionNodeGui:
                         input_param.data_with_gui.value = UnspecifiedValue
                         set_changed = True
                     if imgui.is_item_hovered():
-                        osd_widgets.set_tooltip("Unset this parameter.")
+                        fiat_osd.set_tooltip("Unset this parameter.")
                     return set_changed
 
             return fn_set_unset_specified_value
@@ -225,7 +225,7 @@ class FunctionNodeGui:
                             input_param.data_with_gui.value = value_to_create
                             set_changed = True
                         if imgui.is_item_hovered():
-                            osd_widgets.set_tooltip(value_to_create_tooltip)
+                            fiat_osd.set_tooltip(value_to_create_tooltip)
                     return set_changed
 
                 return fn_set_unset_with_default_value
@@ -236,7 +236,7 @@ class FunctionNodeGui:
                     with fontawesome_6_ctx():
                         imgui.button(icons_fontawesome_6.ICON_FA_TRIANGLE_EXCLAMATION)
                         if imgui.is_item_hovered():
-                            osd_widgets.set_tooltip("No default value provider!")
+                            fiat_osd.set_tooltip("No default value provider!")
                         return False
 
                 return fn_set_unset_with_no_provider
@@ -401,7 +401,7 @@ class FunctionNodeGui:
                         if header_elements.status_icon_tooltips is not None:
                             tooltip_str = "\n".join(header_elements.status_icon_tooltips)
                             if tooltip_str != "" and imgui.is_item_hovered():
-                                osd_widgets.set_tooltip(tooltip_str)
+                                fiat_osd.set_tooltip(tooltip_str)
 
     def _draw_input_header_line(self, input_param: ParamWithGui[Any]) -> None:
         imgui.begin_horizontal("input")
@@ -419,7 +419,7 @@ class FunctionNodeGui:
                         if header_elements.status_icon_tooltips is not None:
                             tooltip_str = "\n".join(header_elements.status_icon_tooltips)
                             if tooltip_str != "" and imgui.is_item_hovered():
-                                osd_widgets.set_tooltip(tooltip_str)
+                                fiat_osd.set_tooltip(tooltip_str)
 
                     # Param name
                     if header_elements.param_name is not None:
@@ -460,7 +460,7 @@ class FunctionNodeGui:
             # if imgui.button(icons_fontawesome_6.ICON_FA_BOMB):
             #     imgui.open_popup("Confirm Raise exception")
             # if imgui.is_item_hovered():
-            #     osd_widgets.set_tooltip("Raise this exception to debug it.")
+            #     fiat_osd.set_tooltip("Raise this exception to debug it.")
 
             btn_label = icons_fontawesome_6.ICON_FA_BOMB + " Debug this exception"
             popup_label = "Confirm Raise exception"
@@ -489,7 +489,7 @@ class FunctionNodeGui:
                     imgui.close_current_popup()  # close the popup (which will never happen, we will crash)
                 imgui.same_line()
 
-            osd_widgets.show_void_popup_button(btn_label, popup_label, confirmation_gui)
+            fiat_osd.show_void_popup_button(btn_label, popup_label, confirmation_gui)
 
     def _render_function_doc(self, unique_name: str) -> None:
         if not self._has_doc():
@@ -511,7 +511,7 @@ class FunctionNodeGui:
             imgui.spring()
             popup_label = f"{unique_name}(): function documentation"
             btn_text = icons_fontawesome_6.ICON_FA_BOOK
-            osd_widgets.show_void_popup_button(btn_text, popup_label, show_doc)
+            fiat_osd.show_void_popup_button(btn_text, popup_label, show_doc)
 
     def _draw_title(self, unique_name: str) -> None:
         fn_name = self._function_node.function_with_gui.name
@@ -531,7 +531,7 @@ class FunctionNodeGui:
                     "##Auto refresh", self._function_node.function_with_gui.invoke_automatically
                 )
                 if imgui.is_item_hovered():
-                    osd_widgets.set_tooltip("Tick to invoke automatically.")
+                    fiat_osd.set_tooltip("Tick to invoke automatically.")
                 if invoke_changed and fn_with_gui.invoke_automatically:
                     self._function_node.invoke_function()
 
@@ -539,17 +539,17 @@ class FunctionNodeGui:
                 if imgui.button(icons_fontawesome_6.ICON_FA_ROTATE, btn_size):
                     self._function_node.invoke_function()
                 if imgui.is_item_hovered():
-                    osd_widgets.set_tooltip("Refresh needed! Click to refresh.")
+                    fiat_osd.set_tooltip("Refresh needed! Click to refresh.")
 
             if not fn_with_gui.invoke_automatically:
                 if not fn_with_gui.dirty:
                     imgui.text(icons_fontawesome_6.ICON_FA_CHECK)
                     if imgui.is_item_hovered():
-                        osd_widgets.set_tooltip("Up to date!")
+                        fiat_osd.set_tooltip("Up to date!")
                 else:
                     imgui.text(icons_fontawesome_6.ICON_FA_TRIANGLE_EXCLAMATION)
                     if imgui.is_item_hovered():
-                        osd_widgets.set_tooltip("Refresh needed!")
+                        fiat_osd.set_tooltip("Refresh needed!")
 
     def _draw_function_outputs(self, unique_name: str) -> None:
         is_dirty = self._function_node.function_with_gui.dirty
@@ -581,7 +581,7 @@ class FunctionNodeGui:
 
                         if can_present_custom_in_popup:
                             popup_label = f"detached view - {unique_name}: output {idx_output}"
-                            osd_widgets.show_void_popup_button("", popup_label, present_output)
+                            fiat_osd.show_void_popup_button("", popup_label, present_output)
 
                         if can_present_custom_in_node:
                             present_output()
@@ -663,14 +663,14 @@ class FunctionNodeGui:
                         btn_label = "" if can_edit_in_node else "edit"
 
                         if can_edit_in_popup:
-                            osd_widgets.show_bool_popup_button(btn_label, popup_label, edit_input)
+                            fiat_osd.show_bool_popup_button(btn_label, popup_label, edit_input)
 
                         # Now that we can have a detached view, there are two ways
                         # that can change the input value:
                         if can_edit_in_node and edit_input():
                             # 1. The user edits the input value in this window
                             changed = True
-                        if can_edit_in_popup and osd_widgets.get_popup_bool_return(btn_label):
+                        if can_edit_in_popup and fiat_osd.get_popup_bool_return(btn_label):
                             # 2. The user edits the input value in a detached window
                             changed = True
                     else:
@@ -692,7 +692,7 @@ class FunctionNodeGui:
 
                             if can_present_custom_in_popup:
                                 popup_label = f"detached view - {unique_name}() - input '{input_param.name}'"
-                                osd_widgets.show_void_popup_button("", popup_label, present_input)
+                                fiat_osd.show_void_popup_button("", popup_label, present_input)
 
                             if can_present_custom_in_node:
                                 present_input()
@@ -859,7 +859,7 @@ def sandbox() -> None:
     def gui() -> None:
         with ed_ctx.begin("Functions Graph"):
             function_node_gui.draw_node("add")
-        osd_widgets._OSD_WIDGETS.render()
+        fiat_osd._fiat_osd.render()
 
     immapp.run(gui, with_node_editor=True, window_title="function_node_gui_sandbox")
 

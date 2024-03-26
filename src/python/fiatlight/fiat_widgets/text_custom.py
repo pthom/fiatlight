@@ -1,5 +1,5 @@
 from imgui_bundle import imgui, ImVec4
-from fiatlight.fiat_widgets import osd_widgets
+from fiatlight.fiat_widgets import fiat_osd
 from fiatlight.fiat_utils.registry import AutoRegistry
 from typing import Callable, Tuple
 
@@ -76,4 +76,4 @@ def text_maybe_truncated(
 
     output_text(msg_truncated)
     if is_truncated and imgui.is_item_hovered() and show_full_as_tooltip:
-        osd_widgets.set_tooltip(msg[:1000])
+        fiat_osd.set_tooltip(msg[:1000])
