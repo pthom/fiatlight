@@ -739,7 +739,8 @@ class FunctionNodeGui:
                     imgui.close_current_popup()  # close the popup (which will never happen, we will crash)
                 imgui.same_line()
 
-            fiat_osd.show_void_popup_button(btn_label, popup_label, confirmation_gui)
+            popup_flags = imgui.WindowFlags_.always_auto_resize.value
+            fiat_osd.show_void_popup_button(btn_label, popup_label, confirmation_gui, window_flags=popup_flags)
 
     def _render_function_doc(self, unique_name: str) -> None:
         if not self._has_doc():
