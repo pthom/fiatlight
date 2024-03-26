@@ -20,7 +20,6 @@ class _InputParamHeaderLineElements:
     status_icon_tooltips: List[str] | None = None
 
     param_name: str | None = None
-    param_name_tooltip: str | None = None
 
     value_as_str: str | None = None
 
@@ -355,7 +354,6 @@ class FunctionNodeGui:
 
         # fill param_name and param_name_tooltip
         r.param_name = input_param.name
-        r.param_name_tooltip = "This is an example param doc"
 
         # fill show_details_button and details_button_tooltip
         has_link = self._function_node.has_input_link(input_param.name)
@@ -426,8 +424,6 @@ class FunctionNodeGui:
                     # Param name
                     if header_elements.param_name is not None:
                         imgui.text(header_elements.param_name)
-                        if header_elements.param_name_tooltip is not None and imgui.is_item_hovered():
-                            osd_widgets.set_tooltip(header_elements.param_name_tooltip)
 
         if header_elements.value_as_str is not None:
             fiat_widgets.text_maybe_truncated(header_elements.value_as_str, max_width_chars=40, max_lines=1)
