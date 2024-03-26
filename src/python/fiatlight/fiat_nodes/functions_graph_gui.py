@@ -1,9 +1,11 @@
 from __future__ import annotations
 
+import logging
+
 from fiatlight.fiat_types import JsonDict
-from fiatlight.fiat_core import FunctionsGraph
+from fiatlight.fiat_core import FunctionsGraph, FunctionWithGui, FunctionNode
 from fiatlight.fiat_nodes.function_node_gui import FunctionNodeGui, FunctionNodeLinkGui
-from imgui_bundle import imgui, imgui_node_editor as ed, hello_imgui, ImVec2
+from imgui_bundle import imgui, imgui_node_editor as ed, hello_imgui, ImVec2, imgui_ctx
 from typing import List, Dict
 
 
@@ -28,6 +30,11 @@ class FunctionsGraphGui:
         for link in self.functions_graph.functions_nodes_links:
             link_gui = FunctionNodeLinkGui(link, self.function_nodes_gui)
             self.functions_links_gui.append(link_gui)
+
+    def add_function_with_gui(self, function: FunctionWithGui) -> None:
+        function_node = FunctionNode(function)
+        function_node_gui = FunctionNodeGui(function_node)
+        self.function_nodes_gui.append(function_node_gui)
 
     def _layout_graph_if_required(self) -> None:
         def are_all_nodes_on_zero() -> bool:
@@ -72,13 +79,43 @@ class FunctionsGraphGui:
                 link.draw()
 
         self._layout_graph_if_required()
-        imgui.push_id(str(id(self)))
-        ed.begin("FunctionsGraphGui")
-        draw_nodes()
-        draw_links()
-        ed.end()
-        imgui.pop_id()
+        with imgui_ctx.push_obj_id(self):
+            ed.begin("FunctionsGraphGui")
+            draw_nodes()
+            draw_links()
+            self._handle_links_edit()
+            ed.end()
         self._idx_frame += 1
+
+    def _handle_links_edit(self) -> None:
+        # Handle creation action, returns true if editor want to create new object (node or link)
+        if ed.begin_create():
+            input_pin_id = ed.PinId()
+            output_pin_id = ed.PinId()
+
+            # QueryNewLink returns true if editor want to create new link between pins.
+            if ed.query_new_link(input_pin_id, output_pin_id):
+                # Link can be created only for two valid pins, it is up to you to
+                # validate if connection make sense. Editor is happy to make any.
+                #
+                # Link always goes from input to output. User may choose to drag
+                # link from output pin or input pin. This determines which pin ids
+                # are valid and which are not:
+                #   * input valid, output invalid - user started to drag new link from input pin
+                #   * input invalid, output valid - user started to drag new link from output pin
+                #   * input valid, output valid   - user dragged link over other pin, can be validated
+
+                if input_pin_id and output_pin_id:  # both are valid, let's accept link
+                    # ed.AcceptNewItem(): return true when user release mouse button.
+                    if ed.accept_new_item():
+                        self._try_add_link(input_pin_id, output_pin_id)
+            ed.end_create()
+
+    def _try_add_link(self, input_pin_id: ed.PinId, output_pin_id: ed.PinId) -> None:
+        # We need to add
+        # - a link to self.functions_graph.functions_nodes_links
+        # - and a link to self.functions_links_gui
+        logging.warning("Work in progress")
 
     def function_node_unique_name(self, function_node_gui: FunctionNodeGui) -> str:
         return self.functions_graph.function_node_unique_name(function_node_gui._function_node)  # noqa

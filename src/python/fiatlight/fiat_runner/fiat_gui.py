@@ -4,6 +4,7 @@ from fiatlight.fiat_core import FunctionsGraph
 from fiatlight.fiat_widgets import fiat_osd, fontawesome_6_ctx, icons_fontawesome_6
 from fiatlight.fiat_utils import functional_utils
 from fiatlight.fiat_core.fiat_exception import FiatDisplayedException
+from fiatlight.fiat_runner.functions_collection import FunctionCollectionGui
 from imgui_bundle import immapp, imgui, imgui_ctx, ImVec4, portable_file_dialogs as pfd
 from typing import Any, Callable
 from imgui_bundle import hello_imgui, ImVec2, immvision
@@ -33,6 +34,7 @@ def _main_python_module_name() -> str:
 class FiatGuiParams:
     runner_params: hello_imgui.RunnerParams
     addons: immapp.AddOnsParams
+    customizable_graph: bool = False
 
     def __init__(
         self,
@@ -90,6 +92,8 @@ class FiatGui:
     load_dialog: pfd.open_file | None = None
     load_dialog_callback: Callable[[str], None] | None = None
 
+    _functions_collection_gui: FunctionCollectionGui
+
     def __init__(self, functions_graph: FunctionsGraph, params: FiatGuiParams | None = None) -> None:
         if params is None:
             # params.runner_params.app_window_params.window_title
@@ -101,6 +105,10 @@ class FiatGui:
 
         self.params = params
         self._functions_graph_gui = FunctionsGraphGui(functions_graph)
+
+        self._functions_collection_gui = FunctionCollectionGui()
+
+        self._functions_collection_gui.on_add_function = lambda fn: self._functions_graph_gui.add_function_with_gui(fn)
 
     def _function_nodes(self) -> List[FunctionNodeGui]:
         return self._functions_graph_gui.function_nodes_gui
@@ -133,6 +141,8 @@ class FiatGui:
     def _heartbeat(self) -> None:
         fiat_osd.render()
         self._handle_file_dialogs()
+        if self.params.customizable_graph:
+            self._functions_collection_gui.gui()
         if self._exception_to_display is not None:
             self._exception_to_display.gui_display()
             if self._exception_to_display.was_dismissed:
