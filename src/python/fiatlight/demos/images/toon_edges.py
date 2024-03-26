@@ -130,7 +130,9 @@ def main() -> None:
     # image = fiatlight.demo_assets_dir() + "/images/house.jpg"
     # image = cv2.imread(image)
 
-    graph = fiatlight.FunctionsGraph.from_function_composition([image_source, add_toon_edges])
+    graph = fiatlight.FunctionsGraph.from_function_composition(
+        [image_source, add_toon_edges], globals_dict=globals(), locals_dict=locals()
+    )
     fiatlight.fiat_run(graph)
 
 
