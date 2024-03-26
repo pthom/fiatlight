@@ -1,7 +1,7 @@
 from fiatlight.fiat_nodes.function_node_gui import FunctionNodeGui
 from fiatlight.fiat_nodes.functions_graph_gui import FunctionsGraphGui
 from fiatlight.fiat_core import FunctionsGraph
-from fiatlight.fiat_widgets import osd_widgets, fontawesome_6_ctx, icons_fontawesome_6
+from fiatlight.fiat_widgets import fiat_osd, fontawesome_6_ctx, icons_fontawesome_6
 from fiatlight.fiat_utils import functional_utils
 from fiatlight.fiat_core.fiat_exception import FiatDisplayedException
 from imgui_bundle import immapp, imgui, imgui_ctx, ImVec4, portable_file_dialogs as pfd
@@ -156,7 +156,7 @@ class FiatGui:
                     imgui.set_tooltip("Save user inputs")
 
     def _heartbeat(self) -> None:
-        osd_widgets.render()
+        fiat_osd.render()
         self._handle_file_dialogs()
         if self._exception_to_display is not None:
             self._exception_to_display.gui_display()

@@ -39,7 +39,7 @@ GuiFunction = Callable[[], None]
 #     elif isinstance(value, float):
 #         imgui.text(f"{value:.4f}")
 #         if imgui.is_item_hovered():
-#             widgets.osd_widgets.set_tooltip(f"{value}")
+#             widgets.fiat_osd.set_tooltip(f"{value}")
 #     elif isinstance(value, str):
 #         imgui.text(f"str len={len(value)}")
 #         show_text(value)

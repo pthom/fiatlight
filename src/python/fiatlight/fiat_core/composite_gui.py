@@ -1,7 +1,7 @@
 from fiatlight.fiat_config import get_fiat_config
 from fiatlight.fiat_types import DataType, Unspecified, Error
 from fiatlight.fiat_core import AnyDataWithGui
-from fiatlight.fiat_widgets import osd_widgets
+from fiatlight.fiat_widgets import fiat_osd
 from imgui_bundle import hello_imgui, imgui, imgui_node_editor as ed  # noqa
 from enum import Enum
 from typing import Type, List
@@ -49,7 +49,7 @@ class OptionalWithGui(AnyDataWithGui[DataType | None]):
                 self.value = default_value_provider()
                 changed = True
             if imgui.is_item_hovered():
-                osd_widgets.set_tooltip("Set Optional to default value for this type.")
+                fiat_osd.set_tooltip("Set Optional to default value for this type.")
             imgui.end_horizontal()
         else:
             imgui.begin_vertical("##OptionalV")
@@ -59,7 +59,7 @@ class OptionalWithGui(AnyDataWithGui[DataType | None]):
                 self.value = None
                 changed = True
             if imgui.is_item_hovered():
-                osd_widgets.set_tooltip("Unset Optional.")
+                fiat_osd.set_tooltip("Unset Optional.")
             imgui.end_horizontal()
             fn_edit = self.inner_gui.callbacks.edit
             if fn_edit is not None:
@@ -138,7 +138,7 @@ class ListWithGui(AnyDataWithGui[List[DataType]]):
         max_elements = get_fiat_config().style.list_maximum_elements_in_node
         actual_value = self.get_actual_value()
 
-        osd_widgets.show_void_popup_button(
+        fiat_osd.show_void_popup_button(
             "Details",
             "List details",
             self.popup_details,

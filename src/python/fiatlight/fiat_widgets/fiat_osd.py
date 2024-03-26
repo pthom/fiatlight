@@ -136,15 +136,15 @@ class _OsdWidgets:
         self._add_popup_button(btn_label, popup_label, gui_function, None)
 
 
-_OSD_WIDGETS = _OsdWidgets()
+_fiat_osd = _OsdWidgets()
 
 
 def set_tooltip(tooltip: str) -> None:
-    _OSD_WIDGETS.set_tooltip_str(tooltip)
+    _fiat_osd.set_tooltip_str(tooltip)
 
 
 def set_tooltip_gui(gui_function: VoidFunction) -> None:
-    _OSD_WIDGETS.set_tooltip_gui(gui_function)
+    _fiat_osd.set_tooltip_gui(gui_function)
 
 
 def show_bool_popup_button(btn_label: str, popup_label: str, gui_function: BoolFunction) -> None:
@@ -152,7 +152,7 @@ def show_bool_popup_button(btn_label: str, popup_label: str, gui_function: BoolF
     btn_label: The label of the button.
     popup_label: The label of the popup window
     """
-    _OSD_WIDGETS.show_bool_popup_button(btn_label, popup_label, gui_function)
+    _fiat_osd.show_bool_popup_button(btn_label, popup_label, gui_function)
 
 
 def show_void_popup_button(btn_label: str, popup_label: str, gui_function: VoidFunction) -> None:
@@ -160,15 +160,15 @@ def show_void_popup_button(btn_label: str, popup_label: str, gui_function: VoidF
     btn_label: The label of the button.
     popup_label: The label of the popup window
     """
-    _OSD_WIDGETS.show_void_popup_button(btn_label, popup_label, gui_function)
+    _fiat_osd.show_void_popup_button(btn_label, popup_label, gui_function)
 
 
 def get_popup_bool_return(btn_label: str) -> bool | None:
     """Get the return value of the boolean function in the popup window opened by the button."""
-    r = _OSD_WIDGETS.get_popup_bool_return(btn_label)
+    r = _fiat_osd.get_popup_bool_return(btn_label)
     return r
 
 
 def render() -> None:
     """Render OSD widgets. Call this once per frame, outside the node editor & nodes."""
-    _OSD_WIDGETS.render()
+    _fiat_osd.render()
