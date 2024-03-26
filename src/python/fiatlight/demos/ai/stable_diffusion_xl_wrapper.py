@@ -95,7 +95,7 @@ def stable_diffusion_xl_gui() -> fiatlight.FunctionWithGui:
     stable_diffusion_xl_gui.invoke_automatically = False
     stable_diffusion_xl_gui.invoke_automatically_can_set = False
 
-    prompt_input = stable_diffusion_xl_gui.input_of_name("prompt")
+    prompt_input = stable_diffusion_xl_gui.input("prompt")
     assert isinstance(prompt_input, fiatlight.fiat_core.StrWithGui)
     prompt_input.params.edit_type = fiatlight.fiat_core.StrEditType.multiline
     prompt_input.params.width_em = 60

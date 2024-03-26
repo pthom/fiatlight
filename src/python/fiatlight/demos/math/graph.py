@@ -41,10 +41,10 @@ def main() -> None:
     functions_graph = FunctionsGraph.from_function(random_binomial)
 
     random_binomial_gui = functions_graph.get_function_with_gui()
-    random_binomial_gui.output_of_idx().set_present_custom_callback(present_histogram)
+    random_binomial_gui.output().set_present_custom_callback(present_histogram)
 
-    random_binomial_gui.input_of_name("p").set_edit_callback(edit_probability)
-    random_binomial_gui.input_of_name("n").set_edit_callback(edit_n)
+    random_binomial_gui.input("p").set_edit_callback(edit_probability)
+    random_binomial_gui.input("n").set_edit_callback(edit_n)
 
     fiat_run(functions_graph)
 

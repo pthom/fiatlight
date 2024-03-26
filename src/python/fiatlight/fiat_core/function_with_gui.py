@@ -89,7 +89,7 @@ class FunctionWithGui:
     # --------------------------------------------------------------------------------------------
     #        Inputs, aka parameters
     # --------------------------------------------------------------------------------------------
-    def input_of_name(self, name: str) -> AnyDataWithGui[Any]:
+    def input(self, name: str) -> AnyDataWithGui[Any]:
         """Return the input with the given name as a AnyDataWithGui[Any]
         The inner type of the returned value is Any in this case.
         You may have to cast it to the correct type, if you rely on type hints.
@@ -123,7 +123,7 @@ class FunctionWithGui:
     # --------------------------------------------------------------------------------------------
     #        Outputs
     # --------------------------------------------------------------------------------------------
-    def output_of_idx(self, output_idx: int = 0) -> AnyDataWithGui[Any]:
+    def output(self, output_idx: int = 0) -> AnyDataWithGui[Any]:
         """Return the output with the given index as a AnyDataWithGui[Any]
         The inner type of the returned value is Any in this case.
         You may have to cast it to the correct type, if you rely on type hints.
