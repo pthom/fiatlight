@@ -26,7 +26,7 @@ def _extract_optional_typeclass(type_class_name: str) -> Tuple[bool, str]:
 
 
 def _extract_enum_typeclass(
-    type_class_name: str, globals_dict: GlobalsDict | None, locals_dict: LocalsDict | None
+    type_class_name: str, globals_dict: GlobalsDict, locals_dict: LocalsDict
 ) -> Tuple[bool, str]:
     # An enum type will be displayed as
     #     <enum 'EnumName'>
@@ -93,12 +93,15 @@ def _extract_tuple_typeclasses(type_class_name: str) -> Tuple[bool, List[str]]:
     return False, []
 
 
-def _any_typeclass_to_gui(
-    type_class_name: str, *, globals_dict: GlobalsDict | None = None, locals_dict: LocalsDict | None = None
+def _any_type_class_name_to_gui(
+    type_class_name: str, *, globals_dict: GlobalsDict, locals_dict: LocalsDict
 ) -> AnyDataWithGui[Any]:
     # logging.warning(f"any_typeclass_to_gui: {type_class_name}")
     if type_class_name.startswith("<class '") and type_class_name.endswith("'>"):
         type_class_name = type_class_name[8:-2]
+
+    if gui_factories().can_handle_typename(type_class_name):
+        return gui_factories().factor(type_class_name)
 
     is_optional, type_class_name = _extract_optional_typeclass(type_class_name)
     is_enum, type_class_name = _extract_enum_typeclass(type_class_name, globals_dict, locals_dict)
@@ -121,14 +124,11 @@ def _any_typeclass_to_gui(
             return AnyDataWithGui.make_for_any()
 
     if is_optional:
-        inner_gui = _any_typeclass_to_gui(type_class_name, globals_dict=globals_dict, locals_dict=locals_dict)
+        inner_gui = _any_type_class_name_to_gui(type_class_name, globals_dict=globals_dict, locals_dict=locals_dict)
         return OptionalWithGui(inner_gui)
     elif is_list:
-        inner_gui = _any_typeclass_to_gui(type_class_name, globals_dict=globals_dict, locals_dict=locals_dict)
+        inner_gui = _any_type_class_name_to_gui(type_class_name, globals_dict=globals_dict, locals_dict=locals_dict)
         return ListWithGui(inner_gui)
-
-    if gui_factories().can_handle_typename(type_class_name):
-        return gui_factories().factor(type_class_name)
 
     # if we reach this point, we have no GUI implementation for the type
     if type_class_name not in _COMPLAINTS_MISSING_GUI_FACTORY:
@@ -138,26 +138,26 @@ def _any_typeclass_to_gui(
 
 
 def _any_typeclass_to_gui_split_if_tuple(
-    type_class_name: str, *, globals_dict: GlobalsDict | None = None, locals_dict: LocalsDict | None = None
+    type_class_name: str, *, globals_dict: GlobalsDict, locals_dict: LocalsDict
 ) -> List[AnyDataWithGui[Any]]:
     r = []
     is_tuple, inner_type_classes = _extract_tuple_typeclasses(type_class_name)
     if is_tuple:
         for inner_type_class in inner_type_classes:
-            r.append(_any_typeclass_to_gui(inner_type_class, globals_dict=globals_dict, locals_dict=locals_dict))
+            r.append(_any_type_class_name_to_gui(inner_type_class, globals_dict=globals_dict, locals_dict=locals_dict))
     else:
-        r.append(_any_typeclass_to_gui(type_class_name, globals_dict=globals_dict, locals_dict=locals_dict))
+        r.append(_any_type_class_name_to_gui(type_class_name, globals_dict=globals_dict, locals_dict=locals_dict))
     return r
 
 
 def _to_data_with_gui(
     value: DataType,
     *,
-    globals_dict: GlobalsDict | None = None,
-    locals_dict: LocalsDict | None = None,
+    globals_dict: GlobalsDict,
+    locals_dict: LocalsDict,
 ) -> AnyDataWithGui[DataType]:
     type_class_name = str(type(value))
-    r = _any_typeclass_to_gui(type_class_name, globals_dict=globals_dict, locals_dict=locals_dict)
+    r = _any_type_class_name_to_gui(type_class_name, globals_dict=globals_dict, locals_dict=locals_dict)
     r.value = value
     return r
 
@@ -166,8 +166,8 @@ def _to_param_with_gui(
     name: str,
     param: inspect.Parameter,
     *,
-    globals_dict: GlobalsDict | None = None,
-    locals_dict: LocalsDict | None = None,
+    globals_dict: GlobalsDict,
+    locals_dict: LocalsDict,
 ) -> ParamWithGui[Any]:
     annotation = param.annotation
 
@@ -175,7 +175,7 @@ def _to_param_with_gui(
     if annotation is None or annotation is inspect.Parameter.empty:
         data_with_gui = AnyDataWithGui.make_for_any()
     else:
-        data_with_gui = _any_typeclass_to_gui(str(annotation), globals_dict=globals_dict, locals_dict=locals_dict)
+        data_with_gui = _any_type_class_name_to_gui(str(annotation), globals_dict=globals_dict, locals_dict=locals_dict)
 
     param_kind = ParamKind.PositionalOrKeyword
     if param.kind is inspect.Parameter.POSITIONAL_ONLY:
@@ -187,11 +187,61 @@ def _to_param_with_gui(
     return ParamWithGui(name, data_with_gui, param_kind, default_value)
 
 
-def to_function_with_gui(
+def _capture_caller_globals_locals() -> tuple[GlobalsDict, LocalsDict]:
+    """Advanced: when a function is added, capture the locals and globals of the caller.
+
+    This is required to be able to "eval" the types in the function signature
+    (if they were defined locally at the caller scope)
+
+    Since this method is private, we need to go up the call stack twice to get the caller's locals and globals
+    :return:
+    """
+    import inspect
+
+    current_frame = inspect.currentframe()
+    if current_frame is None:
+        raise ValueError("No current frame")
+
+    # We need to go up the call stack twice to get the caller's locals and globals
+
+    frame_back_1 = current_frame.f_back
+    if frame_back_1 is None:
+        raise ValueError("No frame back")
+
+    frame_back_2 = frame_back_1.f_back
+    if frame_back_2 is None:
+        raise ValueError("No frame back")
+
+    # Make sure we don't modify the user namespace
+    globals_dict = frame_back_2.f_globals.copy()
+    locals_dict = frame_back_2.f_locals.copy()
+
+    return globals_dict, locals_dict
+
+
+def to_function_with_gui(f: Callable[..., Any], signature_string: str | None = None) -> FunctionWithGui:
+    """Create a FunctionWithGui from a function.
+
+    :param f: the function for which we want to create a FunctionWithGui
+    :param signature_string: (advanced) a string representing the signature of the function
+                             used when the function signature cannot be retrieved automatically
+    :return: a FunctionWithGui instance that wraps the function.
+
+    Note: This function will capture the locals and globals of the caller to be able to evaluate the types.
+          Make sure to call this function *from the module where the function and its input/output types are defined*
+    """
+    globals_dict, locals_dict = _capture_caller_globals_locals()
+    r = to_function_with_gui_globals_local_captured(
+        f, globals_dict=globals_dict, locals_dict=locals_dict, signature_string=signature_string
+    )
+    return r
+
+
+def to_function_with_gui_globals_local_captured(
     f: Callable[..., Any],
     *,
-    globals_dict: GlobalsDict | None = None,
-    locals_dict: LocalsDict | None = None,
+    globals_dict: GlobalsDict,
+    locals_dict: LocalsDict,
     signature_string: str | None = None,
 ) -> FunctionWithGui:
     """Create a FunctionWithGui from a function.
@@ -199,9 +249,10 @@ def to_function_with_gui(
     :param f: the function for which we want to create a FunctionWithGui
     :param globals_dict: the globals dictionary of the module where the function is defined
     :param locals_dict: the locals dictionary of the module where the function is defined
-    :param signature_string: a string representing the signature of the function
+    :param signature_string: (advanced) a string representing the signature of the function
     :return: a FunctionWithGui instance that wraps the function.
     """
+
     function_with_gui = FunctionWithGui()
     function_with_gui.name = f.__name__
     function_with_gui._f_impl = f
@@ -223,7 +274,9 @@ def to_function_with_gui(
         function_with_gui._outputs_with_gui.append(OutputWithGui(output_with_gui))
     else:
         return_annotation_str = str(return_annotation)
-        outputs_with_guis = _any_typeclass_to_gui_split_if_tuple(return_annotation_str)
+        outputs_with_guis = _any_typeclass_to_gui_split_if_tuple(
+            return_annotation_str, globals_dict=globals_dict, locals_dict=locals_dict
+        )
         for output_with_gui in outputs_with_guis:
             function_with_gui._outputs_with_gui.append(OutputWithGui(output_with_gui))
 
@@ -305,6 +358,14 @@ class GuiFactories:
 
     def add_factory(self, typename: Typename, factory: GuiFactory[Any]) -> None:
         self._factories[typename] = factory
+
+    def register_enum(self, enum_class: type[Enum]) -> None:
+        enum_class_name = str(enum_class)
+
+        def enum_gui_factory() -> EnumWithGui:
+            return EnumWithGui(enum_class)
+
+        self.add_factory(enum_class_name, enum_gui_factory)
 
     def factor(self, typename: Typename) -> AnyDataWithGui[Any]:
         return self.get_factory(typename)()

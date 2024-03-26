@@ -1,3 +1,5 @@
+import logging
+
 from fiatlight.fiat_config import get_fiat_config
 from fiatlight.fiat_types import UnspecifiedValue, ErrorValue, Unspecified, Error, JsonDict, DataType, GuiType
 from fiatlight.fiat_core.any_data_with_gui import AnyDataWithGui
@@ -278,6 +280,9 @@ class FunctionWithGui:
         output_options = json_data.get("outputs", {})
         for output_idx, output_option in output_options.items():
             output_idx = int(output_idx)
+            if output_idx >= len(self._outputs_with_gui):
+                logging.warn(f"Output index {output_idx} out of range")
+                continue
             output_with_gui = self._outputs_with_gui[output_idx]
             callback_load = output_with_gui.data_with_gui.callbacks.load_gui_options_from_json
             if callback_load is not None:
@@ -395,5 +400,5 @@ class FunctionWithGui:
         try:
             r = inspect.getsource(self._f_impl)
             return r
-        except OSError:
+        except (OSError, TypeError):
             return None
