@@ -4,91 +4,10 @@ from fiatlight.fiat_core import FunctionNode, FunctionNodeLink, AnyDataWithGui
 from fiatlight.fiat_config import FiatColorType, get_fiat_config
 from fiatlight.fiat_core.function_with_gui import ParamWithGui
 from imgui_bundle import imgui, imgui_node_editor as ed, ImVec2, imgui_ctx, hello_imgui, imgui_node_editor_ctx as ed_ctx
-from fiatlight.fiat_widgets import icons_fontawesome_6, fontawesome_6_ctx, fiat_osd
+from fiatlight.fiat_widgets import icons_fontawesome_6, fontawesome_6_ctx, fiat_osd, collapsible_button
 from fiatlight import fiat_widgets
 from typing import Dict, List, Any
 from dataclasses import dataclass
-
-
-@dataclass
-class _InputParamHeaderLineElements:
-    """Data to be presented in a header line"""
-
-    input_pin_color: FiatColorType = FiatColorType.InputPin
-
-    status_icon: str | None = None
-    status_icon_tooltips: List[str] | None = None
-
-    param_name: str | None = None
-
-    value_as_str: str | None = None
-
-    show_details_button: bool = False
-    details_button_tooltip: str = ""
-
-
-class _OutputHeaderLineElements:
-    """Data to be presented in a header line"""
-
-    output_pin_color: FiatColorType = FiatColorType.OutputPin
-
-    status_icon: str | None = None
-    status_icon_tooltips: List[str] | None = None
-
-    value_as_str: str | None = None
-
-    show_details_button: bool = False
-    details_button_tooltip: str = ""
-
-
-class FunctionNodeLinkGui:
-    """The GUI representation as a visual link for a FunctionNodeLink"""
-
-    function_node_link: FunctionNodeLink
-    link_id: ed.LinkId
-    start_id: ed.PinId
-    end_id: ed.PinId
-
-    def __init__(self, function_node_link: FunctionNodeLink, function_nodes: List[FunctionNodeGui]) -> None:
-        self.function_node_link = function_node_link
-        self.link_id = ed.LinkId.create()
-        for f in function_nodes:
-            if f._function_node.function_with_gui == function_node_link.src_function_node.function_with_gui:
-                self.start_id = f._pins_output[function_node_link.src_output_idx]
-            if f._function_node.function_with_gui == function_node_link.dst_function_node.function_with_gui:
-                self.end_id = f._pins_input[function_node_link.dst_input_name]
-        assert hasattr(self, "start_id")
-        assert hasattr(self, "end_id")
-
-    def draw(self) -> None:
-        ed.link(self.link_id, self.start_id, self.end_id)
-
-
-@dataclass
-class _FunctionDoc:
-    title: str | None = None
-    doc: str | None = None
-    source_code: str | None = None
-
-    def has_info(self) -> bool:
-        return self.title is not None or self.doc is not None or self.source_code is not None
-
-
-def _my_collapsible_button(expanded: bool, tooltip_part: str) -> bool:
-    """A button that toggles between expanded and collapsed states.
-    Returns true if expanded, false if collapsed.
-    Displays as a caret pointing down if expanded, and right if collapsed, as imgui.collapsing_header() does.
-    """
-    icon = icons_fontawesome_6.ICON_FA_CARET_DOWN if expanded else icons_fontawesome_6.ICON_FA_CARET_RIGHT
-    tooltip = "Hide " + tooltip_part if expanded else "Show " + tooltip_part
-    with fontawesome_6_ctx():
-        clicked = imgui.button(icon)
-        if imgui.is_item_hovered():
-            fiat_osd.set_tooltip(tooltip)
-        if not clicked:
-            return expanded
-        else:
-            return not expanded
 
 
 class FunctionNodeGui:
@@ -112,7 +31,7 @@ class FunctionNodeGui:
     # (it varies depending on the content)
     _node_size: ImVec2 | None = None  # will be set after the node is drawn once
 
-    _function_doc: _FunctionDoc
+    _function_doc: _FunctionDocElements
 
     # internals of the function
     _fiat_internals_with_gui: Dict[str, AnyDataWithGui[Any]]
@@ -157,7 +76,7 @@ class FunctionNodeGui:
     # Doc
     # ------------------------------------------------------------------------------------------------------------------
     def _fill_function_doc(self) -> None:
-        self._function_doc = _FunctionDoc()
+        self._function_doc = _FunctionDocElements()
         fn_doc = self._function_node.function_with_gui.get_function_doc()
         if fn_doc is not None:
             first_line = fn_doc.split("\n")[0]
@@ -384,7 +303,7 @@ class FunctionNodeGui:
 
         # Show present button, if a custom present callback is available
         if header_elements.show_details_button:
-            self._show_output_details[idx_output] = _my_collapsible_button(
+            self._show_output_details[idx_output] = collapsible_button(
                 self._show_output_details[idx_output], header_elements.details_button_tooltip
             )
 
@@ -430,7 +349,7 @@ class FunctionNodeGui:
 
         if header_elements.show_details_button:
             imgui.spring()
-            self._show_input_details[input_name] = _my_collapsible_button(
+            self._show_input_details[input_name] = collapsible_button(
                 self._show_input_details[input_name], header_elements.details_button_tooltip
             )
 
@@ -783,7 +702,7 @@ class FunctionNodeGui:
                 with imgui_ctx.begin_horizontal("internal_header"):
                     imgui.text(name)
                     imgui.spring()
-                    self._show_internals_details[name] = _my_collapsible_button(
+                    self._show_internals_details[name] = collapsible_button(
                         self._show_internals_details.get(name, False), "internal details"
                     )
                 if self._show_internals_details[name]:
@@ -857,6 +776,70 @@ class FunctionNodeGui:
         self._inputs_expanded = json_data.get("_inputs_expanded", True)
         self._outputs_expanded = json_data.get("_outputs_expanded", True)
         self._internals_expanded = json_data.get("_internals_expanded", True)
+
+
+class FunctionNodeLinkGui:
+    """The GUI representation as a visual link for a FunctionNodeLink"""
+
+    function_node_link: FunctionNodeLink
+    link_id: ed.LinkId
+    start_id: ed.PinId
+    end_id: ed.PinId
+
+    def __init__(self, function_node_link: FunctionNodeLink, function_nodes: List[FunctionNodeGui]) -> None:
+        self.function_node_link = function_node_link
+        self.link_id = ed.LinkId.create()
+        for f in function_nodes:
+            if f._function_node.function_with_gui == function_node_link.src_function_node.function_with_gui:
+                self.start_id = f._pins_output[function_node_link.src_output_idx]
+            if f._function_node.function_with_gui == function_node_link.dst_function_node.function_with_gui:
+                self.end_id = f._pins_input[function_node_link.dst_input_name]
+        assert hasattr(self, "start_id")
+        assert hasattr(self, "end_id")
+
+    def draw(self) -> None:
+        ed.link(self.link_id, self.start_id, self.end_id)
+
+
+@dataclass
+class _InputParamHeaderLineElements:
+    """Data to be presented in a header line"""
+
+    input_pin_color: FiatColorType = FiatColorType.InputPin
+
+    status_icon: str | None = None
+    status_icon_tooltips: List[str] | None = None
+
+    param_name: str | None = None
+
+    value_as_str: str | None = None
+
+    show_details_button: bool = False
+    details_button_tooltip: str = ""
+
+
+class _OutputHeaderLineElements:
+    """Data to be presented in a header line"""
+
+    output_pin_color: FiatColorType = FiatColorType.OutputPin
+
+    status_icon: str | None = None
+    status_icon_tooltips: List[str] | None = None
+
+    value_as_str: str | None = None
+
+    show_details_button: bool = False
+    details_button_tooltip: str = ""
+
+
+@dataclass
+class _FunctionDocElements:
+    title: str | None = None
+    doc: str | None = None
+    source_code: str | None = None
+
+    def has_info(self) -> bool:
+        return self.title is not None or self.doc is not None or self.source_code is not None
 
 
 # ------------------------------------------------------------------------------------------------------------------
