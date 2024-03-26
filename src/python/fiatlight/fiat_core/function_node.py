@@ -91,7 +91,7 @@ class FunctionNode:
         self.function_with_gui.invoke()
         for link in self.output_links:
             src_output = self.function_with_gui.outputs_with_gui[link.src_output_idx]
-            dst_input = link.dst_function_node.function_with_gui.input_of_name(link.dst_input_name)
+            dst_input = link.dst_function_node.function_with_gui.input(link.dst_input_name)
             dst_input.value = src_output.data_with_gui.value
             link.dst_function_node.function_with_gui.dirty = True
             link.dst_function_node.invoke_function()
