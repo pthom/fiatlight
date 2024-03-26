@@ -206,16 +206,19 @@ class FooWithGui(AnyDataWithGui[Foo]):
         return f"Foo: x={value.x}"
 
 
-def test_foo_with_gui() -> None:
+def sandbox() -> None:
     # Register the Foo type with its GUI implementation (do this once at the beginning of your program)
-    from fiatlight.fiat_core.to_gui import to_data_with_gui, gui_factories
+    from fiatlight.fiat_core.to_gui import to_function_with_gui, gui_factories
 
-    gui_factories().add_factory("Foo", FooWithGui)
+    gui_factories().add_factory("__main__.Foo", FooWithGui)
 
-    foo = Foo(1)
-    foo_gui = to_data_with_gui(foo)
-    assert foo_gui.value == foo
+    def fn_using_foo(foo: Foo) -> int:
+        return foo.x
+
+    fn_using_foo_with_gui = to_function_with_gui(fn_using_foo)
+    fn_input_gui = fn_using_foo_with_gui.input("foo")
+    assert isinstance(fn_input_gui, FooWithGui)
 
 
 if __name__ == "__main__":
-    test_foo_with_gui()
+    sandbox()
