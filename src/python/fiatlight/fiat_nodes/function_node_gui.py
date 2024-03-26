@@ -621,7 +621,7 @@ class FunctionNodeGui:
 
         if len(self._function_node.function_with_gui.inputs_with_gui) > 0:
             if self._can_collapse_inputs():
-                changed, self._inputs_expanded = fiat_widgets.node_utils.node_collapsing_separator(
+                changed, self._inputs_expanded = fiat_widgets.node_collapsing_separator(
                     self._node_id, text="Params", expanded=self._inputs_expanded
                 )
                 if changed:
@@ -633,7 +633,7 @@ class FunctionNodeGui:
                             self._show_input_details[k] = self._inputs_expanded
             else:
                 self._inputs_expanded = True
-                fiat_widgets.node_utils.node_separator(self._node_id, "Params")
+                fiat_widgets.node_separator(self._node_id, "Params")
 
         for input_param in self._function_node.function_with_gui.inputs_with_gui:
             with imgui_ctx.push_obj_id(input_param):
@@ -711,7 +711,7 @@ class FunctionNodeGui:
         fn_fiat_internals: Dict[str, Any] = fn.fiat_internals  # type: ignore
         assert isinstance(fn_fiat_internals, dict)
 
-        expand_changed, self._internals_expanded = fiat_widgets.node_utils.node_collapsing_separator(
+        expand_changed, self._internals_expanded = fiat_widgets.node_collapsing_separator(
             self._node_id, "Internals", self._internals_expanded
         )
 
@@ -772,7 +772,7 @@ class FunctionNodeGui:
                         "Outputs" if len(self._function_node.function_with_gui.outputs_with_gui) > 1 else "Output"
                     )
                     if self._can_collapse_outputs():
-                        changed, self._outputs_expanded = fiat_widgets.node_utils.node_collapsing_separator(
+                        changed, self._outputs_expanded = fiat_widgets.node_collapsing_separator(
                             self._node_id, text=output_separator_str, expanded=self._outputs_expanded
                         )
                         if changed:
@@ -780,7 +780,7 @@ class FunctionNodeGui:
                                 self._show_output_details[i] = self._outputs_expanded
                     else:
                         self._outputs_expanded = True
-                        fiat_widgets.node_utils.node_separator(self._node_id, output_separator_str)
+                        fiat_widgets.node_separator(self._node_id, output_separator_str)
 
                     # Invoke options
                     with imgui_ctx.begin_horizontal("invoke_options"):
