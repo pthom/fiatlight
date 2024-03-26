@@ -97,7 +97,6 @@ class FunctionNodeGui:
             remaining_text = fn_doc[len(first_line) :]  # noqa
             self._function_doc.title = title_line
             self._function_doc.doc = remaining_text
-
         self._function_doc.source_code = self._function_node.function_with_gui.get_function_source_code()
 
     def _has_doc(self) -> bool:
@@ -886,7 +885,7 @@ def sandbox() -> None:
         return ["Hello", "World", "!"]
         # return x + y + len(s) + e.value
 
-    function_with_gui = to_function_with_gui(add, globals_dict=globals(), locals_dict=locals())
+    function_with_gui = to_function_with_gui(add)
     function_node = FunctionNode(function_with_gui)
     function_node_gui = FunctionNodeGui(function_node)
 

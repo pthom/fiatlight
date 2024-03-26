@@ -1,5 +1,5 @@
 from fiatlight.fiat_core.to_gui import (
-    _any_typeclass_to_gui,
+    _any_type_class_name_to_gui,
     _to_data_with_gui,
     to_function_with_gui,
 )
@@ -13,14 +13,14 @@ class Dummy:
 
 
 def test_any_typeclass_to_data_with_gui() -> None:
-    d = _any_typeclass_to_gui("Dummy")
+    d = _any_type_class_name_to_gui("Dummy", globals_dict=globals(), locals_dict=locals())
     assert d.callbacks.edit is None
     assert d.callbacks.default_value_provider is None
     assert d.callbacks.default_value_provider is None
 
 
 def test_any_value_to_data_with_gui() -> None:
-    a = _to_data_with_gui(1)
+    a = _to_data_with_gui(1, globals_dict=globals(), locals_dict=locals())
     assert a.value == 1
 
 
@@ -146,11 +146,11 @@ def test_enum_gui() -> None:
         A = 1
         B = 2
 
-    my_enum_gui = _any_typeclass_to_gui("<enum 'MyEnum'>", globals_dict=globals(), locals_dict=locals())
+    my_enum_gui = _any_type_class_name_to_gui("<enum 'MyEnum'>", globals_dict=globals(), locals_dict=locals())
     assert isinstance(my_enum_gui, EnumWithGui)
 
     def foo(a: MyEnum) -> int:
         return a.value
 
-    foo_gui = to_function_with_gui(foo, globals_dict=globals(), locals_dict=locals())
+    foo_gui = to_function_with_gui(foo)
     assert isinstance(foo_gui._inputs_with_gui[0].data_with_gui, EnumWithGui)

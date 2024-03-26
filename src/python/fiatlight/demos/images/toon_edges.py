@@ -8,8 +8,6 @@ import numpy as np
 from enum import Enum
 from fiatlight.fiat_types import Float_0_10000, Int_0_10, Float_0_10, Float_0_1, ImagePath
 
-# from collections import namedtuple
-
 
 def canny(
     image: ImageU8,
@@ -38,6 +36,9 @@ class MorphShape(Enum):
     MORPH_RECT = cv2.MORPH_RECT
     MORPH_CROSS = cv2.MORPH_CROSS
     MORPH_ELLIPSE = cv2.MORPH_ELLIPSE
+
+
+fiatlight.fiat_core.gui_factories().register_enum(MorphShape)
 
 
 def dilate(
@@ -127,12 +128,7 @@ def image_source(image_file: ImagePath = fiatlight.demo_assets_dir() + "/images/
 
 
 def main() -> None:
-    # image = fiatlight.demo_assets_dir() + "/images/house.jpg"
-    # image = cv2.imread(image)
-
-    graph = fiatlight.FunctionsGraph.from_function_composition(
-        [image_source, add_toon_edges], globals_dict=globals(), locals_dict=locals()
-    )
+    graph = fiatlight.FunctionsGraph.from_function_composition([image_source, add_toon_edges])
     fiatlight.fiat_run(graph)
 
 

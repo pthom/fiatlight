@@ -201,7 +201,7 @@ def sandbox_enum() -> None:
     def foo(x: MyEnum) -> int:
         return x.value
 
-    graph = FunctionsGraph.from_function_composition([foo], globals(), locals())
+    graph = FunctionsGraph.from_function_composition([foo])
     fiat_run(graph)
 
 

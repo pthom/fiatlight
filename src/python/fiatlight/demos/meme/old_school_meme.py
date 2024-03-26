@@ -97,15 +97,9 @@ def main() -> None:
         graph = FunctionsGraph.from_function_composition(
             [stable_diffusion_xl_gui(), add_meme_text],
             # [image_source, add_meme_text],
-            locals_dict=locals(),
-            globals_dict=globals(),
         )
     else:
-        graph = FunctionsGraph.from_function_composition(
-            [image_source, add_meme_text],
-            locals_dict=locals(),
-            globals_dict=globals(),
-        )
+        graph = FunctionsGraph.from_function_composition([image_source, add_meme_text])
 
     fiat_run(graph)
 

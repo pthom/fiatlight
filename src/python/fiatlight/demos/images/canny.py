@@ -110,9 +110,7 @@ def main() -> None:
     functions_graph = fiatlight.FunctionsGraph.create_empty()
     # We need to pass the locals() and globals() to the add_function_composition method
     # so that the local MorseShape enum type can be analyzed and transformed into a GUI
-    functions_graph.add_function_composition(
-        [make_image, canny_with_gui(), dilate], locals_dict=locals(), globals_dict=globals()
-    )
+    functions_graph.add_function_composition([make_image, canny_with_gui(), dilate])
     functions_graph.add_function(merge_toon_edges)
     functions_graph.add_link("dilate", "merge_toon_edges", "edges_images")
     functions_graph.add_link("make_image", "merge_toon_edges", "image")
