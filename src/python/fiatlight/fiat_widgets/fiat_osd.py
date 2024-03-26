@@ -1,3 +1,10 @@
+"""fiat_osd: On-screen display widgets for Fiat.
+
+This module provides functions to display on-screen widgets, such as tooltips and popups.
+They are rendered after the node editor canvas (with its nodes) was drawn.
+This avoids issues with the canvas's zooming feature, which is incompatible with ImGui windows and child windows.
+"""
+
 from fiatlight.fiat_types import VoidFunction, BoolFunction
 from imgui_bundle import imgui, ImVec2, imgui_node_editor, hello_imgui
 from dataclasses import dataclass

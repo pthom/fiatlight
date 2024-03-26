@@ -77,3 +77,22 @@ def text_maybe_truncated(
     output_text(msg_truncated)
     if is_truncated and imgui.is_item_hovered() and show_full_as_tooltip:
         fiat_osd.set_tooltip(msg[:1000])
+
+
+def collapsible_button(expanded: bool, tooltip_part: str) -> bool:
+    """A button that toggles between expanded and collapsed states.
+    Returns true if expanded, false if collapsed.
+    Displays as a caret pointing down if expanded, and right if collapsed, as imgui.collapsing_header() does.
+    """
+    from fiatlight.fiat_widgets.fontawesome6_ctx_utils import fontawesome_6_ctx, icons_fontawesome_6
+
+    icon = icons_fontawesome_6.ICON_FA_CARET_DOWN if expanded else icons_fontawesome_6.ICON_FA_CARET_RIGHT
+    tooltip = "Hide " + tooltip_part if expanded else "Show " + tooltip_part
+    with fontawesome_6_ctx():
+        clicked = imgui.button(icon)
+        if imgui.is_item_hovered():
+            fiat_osd.set_tooltip(tooltip)
+        if not clicked:
+            return expanded
+        else:
+            return not expanded
