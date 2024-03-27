@@ -1,12 +1,6 @@
-from fiatlight.fiat_image.image_types import ImageU8, ImageU8_3, ImageU8_4
+from fiatlight.fiat_image.image_types import ImageU8_3, ImageU8_4
 
 import numpy as np
-
-
-def split_channels(image: ImageU8) -> ImageU8:
-    assert len(image.shape) == 3
-    depth_first = np.squeeze(np.dsplit(image, image.shape[-1]))
-    return depth_first
 
 
 def overlay_alpha_image_precise(

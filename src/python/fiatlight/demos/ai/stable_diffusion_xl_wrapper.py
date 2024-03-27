@@ -1,13 +1,31 @@
 import fiatlight
 from fiatlight.fiat_image import ImageU8
+from fiatlight.fiat_utils import LazyModule
 
-# mypy: disable-error-code="no-untyped-call"
-from diffusers import AutoPipelineForText2Image  # noqa
-from diffusers.pipelines.stable_diffusion_xl.pipeline_stable_diffusion_xl import StableDiffusionXLPipeline  # noqa
-import torch  # noqa
 import numpy as np
 from enum import Enum
 import cv2
+
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    # We do not want to import these modules at startup, since these imports are slow
+    import torch  # noqa
+    import diffusers  # import   # noqa
+    import diffusers.pipelines.stable_diffusion_xl.pipeline_stable_diffusion_xl as pipeline_stable_diffusion_xl  # import StableDiffusionXLPipeline  # noqa
+else:
+    torch = LazyModule("torch")
+    diffusers = LazyModule("diffusers")
+    pipeline_stable_diffusion_xl = LazyModule("diffusers.pipelines.stable_diffusion_xl.pipeline_stable_diffusion_xl")
+
+
+#
+# def _late_imports() -> None:
+#     # mypy: disable-error-code="no-untyped-call"
+#     from diffusers import AutoPipelineForText2Image  # noqa
+#     from diffusers.pipelines.stable_diffusion_xl.pipeline_stable_diffusion_xl import StableDiffusionXLPipeline  # noqa
+#     import torch  # noqa
 
 
 class InferenceDeviceType(Enum):
@@ -24,18 +42,18 @@ def inference_device_type() -> str:
 
 
 class _StableDiffusionXLWrapper:
-    pipe: StableDiffusionXLPipeline
-    generator: torch.Generator
+    pipe: "diffusers.AutoPipelineForText2Image"
+    generator: "torch.Generator"
 
     def __init__(self) -> None:
         self._init_from_pretrained()
 
     def _init_from_pretrained(self) -> None:
         # Will download to ~/.cache/huggingface/transformers
-        self.pipe = AutoPipelineForText2Image.from_pretrained(
+        self.pipe = diffusers.AutoPipelineForText2Image.from_pretrained(  # type: ignore
             "stabilityai/sdxl-turbo", torch_dtype=torch.float16, variant="fp16"
         )
-        self.pipe = self.pipe.to(inference_device_type())
+        self.pipe = self.pipe.to(inference_device_type())  # type: ignore
         self.generator = torch.Generator(device=inference_device_type())
         self.generator.manual_seed(42)
 
@@ -51,7 +69,7 @@ class _StableDiffusionXLWrapper:
         guidance_scale: float = 0.0,
     ) -> ImageU8:
         self.generator.manual_seed(seed)
-        r = self.pipe.__call__(
+        r = self.pipe.__call__(  # type: ignore
             prompt=prompt,
             num_inference_steps=num_inference_steps,
             guidance_scale=guidance_scale,
