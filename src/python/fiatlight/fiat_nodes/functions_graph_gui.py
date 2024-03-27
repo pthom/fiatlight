@@ -1,12 +1,12 @@
 from __future__ import annotations
 
-import logging
 
 from fiatlight.fiat_types import JsonDict
-from fiatlight.fiat_core import FunctionsGraph, FunctionWithGui, FunctionNode
+from fiatlight.fiat_core import FunctionsGraph, FunctionWithGui
 from fiatlight.fiat_nodes.function_node_gui import FunctionNodeGui, FunctionNodeLinkGui
+from fiatlight.fiat_widgets import fiat_osd
 from imgui_bundle import imgui, imgui_node_editor as ed, hello_imgui, ImVec2, imgui_ctx
-from typing import List, Dict
+from typing import List, Dict, Tuple
 
 
 class FunctionsGraphGui:
@@ -16,6 +16,7 @@ class FunctionsGraphGui:
     functions_links_gui: List[FunctionNodeLinkGui]
 
     shall_layout_graph: bool = False
+    can_edit_graph: bool = True
 
     _idx_frame: int = 0
 
@@ -32,7 +33,7 @@ class FunctionsGraphGui:
             self.functions_links_gui.append(link_gui)
 
     def add_function_with_gui(self, function: FunctionWithGui) -> None:
-        function_node = FunctionNode(function)
+        function_node = self.functions_graph.add_function(function)
         function_node_gui = FunctionNodeGui(function_node)
         self.function_nodes_gui.append(function_node_gui)
 
@@ -83,9 +84,39 @@ class FunctionsGraphGui:
             ed.begin("FunctionsGraphGui")
             draw_nodes()
             draw_links()
-            self._handle_links_edit()
+            if self.can_edit_graph:
+                self._handle_links_edit()
             ed.end()
         self._idx_frame += 1
+
+    def _function_node_gui_from_id(self, node_id: ed.NodeId) -> FunctionNodeGui:
+        matching_nodes = [fn for fn in self.function_nodes_gui if fn.node_id() == node_id]
+        if len(matching_nodes) == 0:
+            raise ValueError(f"Node with id {node_id} not found")
+        assert len(matching_nodes) == 1
+        return matching_nodes[0]
+
+    def _function_node_gui_from_input_pin_id(self, pin_id: ed.PinId) -> Tuple[FunctionNodeGui | None, str]:
+        matching_nodes = []
+        for fn in self.function_nodes_gui:
+            param_name = fn.input_pin_to_param_name(pin_id)
+            if param_name is not None:
+                matching_nodes.append((fn, param_name))
+        if len(matching_nodes) == 0:
+            return None, ""
+        assert len(matching_nodes) == 1
+        return matching_nodes[0]
+
+    def _function_node_gui_from_output_pin_id(self, pin_id: ed.PinId) -> Tuple[FunctionNodeGui | None, int]:
+        matching_nodes = []
+        for fn in self.function_nodes_gui:
+            output_idx = fn.output_pin_to_output_idx(pin_id)
+            if output_idx is not None:
+                matching_nodes.append((fn, output_idx))
+        if len(matching_nodes) == 0:
+            return None, -1
+        assert len(matching_nodes) == 1
+        return matching_nodes[0]
 
     def _handle_links_edit(self) -> None:
         # Handle creation action, returns true if editor want to create new object (node or link)
@@ -105,17 +136,104 @@ class FunctionsGraphGui:
                 #   * input invalid, output valid - user started to drag new link from output pin
                 #   * input valid, output valid   - user dragged link over other pin, can be validated
 
-                if input_pin_id and output_pin_id:  # both are valid, let's accept link
-                    # ed.AcceptNewItem(): return true when user release mouse button.
-                    if ed.accept_new_item():
-                        self._try_add_link(input_pin_id, output_pin_id)
+                if input_pin_id and output_pin_id and input_pin_id != output_pin_id:
+                    can_add_link, fail_reason = self._can_add_link(input_pin_id, output_pin_id)
+                    if not can_add_link:
+                        ed.reject_new_item()
+                        fiat_osd.set_tooltip(fail_reason)
+                    else:
+                        if ed.accept_new_item():
+                            self._try_add_link(input_pin_id, output_pin_id)
+
             ed.end_create()
 
-    def _try_add_link(self, input_pin_id: ed.PinId, output_pin_id: ed.PinId) -> None:
+        if ed.begin_delete():
+            link_id = ed.LinkId()
+            if ed.query_deleted_link(link_id):
+                print("Delete link with id", link_id)
+                # imgui.set_tooltip("Delete link with id " + str(link_id))
+            #     if ed.accept_deleted_item():
+            #         link = next(link for link in self.functions_links_gui if link.link_id() == link_id)
+            #         self.functions_graph.remove_link(link.function_node_link)
+            #         self.functions_links_gui.remove(link)
+            ed.end_delete()
+
+        # Handle hovered link
+        hovered_link = ed.get_hovered_link()
+        if hovered_link.id() > 0:
+            fiat_osd.set_tooltip(f"Link hovered: {hovered_link.id()}")
+
+        # Handle link context menu
+        link_context_menu_id = ed.LinkId()
+        if ed.show_link_context_menu(link_context_menu_id):
+
+            def show_link_context_menu() -> None:
+                imgui.text(f"Link context menu: {link_context_menu_id}")
+                if imgui.menu_item_simple("Delete pin"):
+                    print("Delete link", link_context_menu_id)
+                # imgui.open_popup("Link context menu")
+
+            fiat_osd.set_tooltip_gui(show_link_context_menu)
+            print("Show link context menu", link_context_menu_id)
+            # imgui.open_popup("Link context menu")
+
+        # ed.suspend()
+        # if imgui.begin_popup("Link context menu"):
+        #     print("Link context menu", link_context_menu_id)
+        #     imgui.text("Link context menu")
+        #     if imgui.menu_item("Inspect pin"):
+        #         print("Inspect Link", link_context_menu_id)
+        #     imgui.end_popup()
+        # ed.resume()
+
+    def _can_add_link(self, input_pin_id: ed.PinId, output_pin_id: ed.PinId) -> Tuple[bool, str]:
+        # 1. Look for the function node GUIs that correspond to the input and output pins
+        fn_input, dst_param_name = self._function_node_gui_from_input_pin_id(input_pin_id)
+        fn_output, src_output_idx = self._function_node_gui_from_output_pin_id(output_pin_id)
+        if fn_input is None or fn_output is None:
+            fn_input, dst_param_name = self._function_node_gui_from_input_pin_id(output_pin_id)
+            fn_output, src_output_idx = self._function_node_gui_from_output_pin_id(input_pin_id)
+        if fn_input is None or fn_output is None:
+            return (
+                False,
+                "Can not add link! Please link an output pin (Right) to an input pin (Left) of another function",
+            )
+
+        ok, failure_reason = self.functions_graph.can_add_link(
+            fn_output.get_function_node(), fn_input.get_function_node(), dst_param_name, src_output_idx
+        )
+        if not ok:
+            return False, failure_reason
+        else:
+            return True, ""
+
+    def _try_add_link(self, input_pin_id: ed.PinId, output_pin_id: ed.PinId) -> bool:
+        # 1. Look for the function node GUIs that correspond to the input and output pins
+        fn_input, dst_param_name = self._function_node_gui_from_input_pin_id(input_pin_id)
+        fn_output, src_output_idx = self._function_node_gui_from_output_pin_id(output_pin_id)
+        if fn_input is None or fn_output is None:
+            fn_input, dst_param_name = self._function_node_gui_from_input_pin_id(output_pin_id)
+            fn_output, src_output_idx = self._function_node_gui_from_output_pin_id(input_pin_id)
+        if fn_input is None or fn_output is None:
+            return False
+
+        ok, _failure_reason = self.functions_graph.can_add_link(
+            fn_output.get_function_node(), fn_input.get_function_node(), dst_param_name, src_output_idx
+        )
+        if not ok:
+            return False
+
+        # 2. Create and add the links to the lists
         # We need to add
         # - a link to self.functions_graph.functions_nodes_links
         # - and a link to self.functions_links_gui
-        logging.warning("Work in progress")
+        function_node_link = self.functions_graph.add_link_from_function_nodes(
+            fn_output.get_function_node(), fn_input.get_function_node(), dst_param_name, src_output_idx
+        )
+        function_node_link_gui = FunctionNodeLinkGui(function_node_link, self.function_nodes_gui)
+        self.functions_links_gui.append(function_node_link_gui)
+
+        return True
 
     def function_node_unique_name(self, function_node_gui: FunctionNodeGui) -> str:
         return self.functions_graph.function_node_unique_name(function_node_gui._function_node)  # noqa

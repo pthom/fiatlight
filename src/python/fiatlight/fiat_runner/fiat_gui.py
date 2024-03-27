@@ -106,6 +106,9 @@ class FiatGui:
         self.params = params
         self._functions_graph_gui = FunctionsGraphGui(functions_graph)
 
+        if self.params.customizable_graph:
+            self._functions_graph_gui.can_edit_graph = True
+
         self._functions_collection_gui = FunctionCollectionGui()
 
         self._functions_collection_gui.on_add_function = lambda fn: self._functions_graph_gui.add_function_with_gui(fn)

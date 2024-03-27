@@ -26,6 +26,14 @@ class FunctionNodeLink:
         assert src_output_idx < src_function_node.function_with_gui.nb_outputs()
         assert dst_input_name in dst_function_node.function_with_gui.all_inputs_names()
 
+    def is_equal(self, other: "FunctionNodeLink") -> bool:
+        return (
+            self.src_function_node == other.src_function_node
+            and self.src_output_idx == other.src_output_idx
+            and self.dst_function_node == other.dst_function_node
+            and self.dst_input_name == other.dst_input_name
+        )
+
 
 class FunctionNode:
     """A FunctionWithGui that is included in a FunctionGraph

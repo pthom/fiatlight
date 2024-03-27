@@ -143,6 +143,21 @@ class FunctionNodeGui:
         assert fn_present is not None
         fn_present()
 
+    def input_pin_to_param_name(self, pin_id: ed.PinId) -> str | None:
+        for k, v in self._pins_input.items():
+            if v == pin_id:
+                return k
+        return None
+
+    def output_pin_to_output_idx(self, pin_id: ed.PinId) -> int | None:
+        for k, v in self._pins_output.items():
+            if v == pin_id:
+                return k
+        return None
+
+    def get_function_node(self) -> FunctionNode:
+        return self._function_node
+
     # ==================================================================================================================
     #                                            Draw the node
     #         This is the heart of the class, with `draw_node` being the main function
