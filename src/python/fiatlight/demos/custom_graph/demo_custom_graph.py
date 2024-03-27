@@ -1,21 +1,26 @@
 import fiatlight
 from typing import List
+from fiatlight.fiat_core import FunctionWithGuiFactory
+from fiatlight.fiat_runner.functions_collection import FunctionsCollection
 
 
-def add(a: int, b: int) -> int:
-    return a + b
+def add_functions_to_collection(collection: FunctionsCollection) -> None:
+    # Add some functions to the collection
+    from fiatlight.demos.custom_graph.float_functions import all_functions as all_float_functions
+    from fiatlight.demos.custom_graph.image_toy_functions import all_functions as all_image_functions
+    from fiatlight.demos.custom_graph.opencv_image_functions import all_functions as all_opencv_image_functions
 
+    def add_one_function(fn_factory: FunctionWithGuiFactory, tags: List[str]) -> None:
+        collection.add_function(fn_factory, tags)
 
-def mul(a: int, b: int) -> int:
-    return a * b
+    for f in all_float_functions():
+        add_one_function(f, ["math"])
 
+    for f in all_image_functions():
+        add_one_function(f, ["images"])
 
-def sub(a: int, b: int) -> int:
-    return a - b
-
-
-def int_source(x: int) -> int:
-    return x
+    for f in all_opencv_image_functions():
+        add_one_function(f, ["images", "opencv"])
 
 
 def main() -> None:
@@ -25,36 +30,8 @@ def main() -> None:
 
     gui = fiatlight.fiat_runner.FiatGui(graph, params)
 
-    # Add some functions to the collection
-    from fiatlight.fiat_core import to_function_with_gui
-    from fiatlight.fiat_core import FunctionWithGuiFactory
-    from fiatlight.fiat_types import Function
-    from fiatlight.demos.images.toon_edges import add_toon_edges, image_source
-    from fiatlight.demos.images.canny import canny
-    from fiatlight.demos.images.oil_paint import oil_paint
-    from fiatlight.demos.ai.stable_diffusion_xl_wrapper import stable_diffusion_xl_gui
-
     functions_collection = gui._functions_collection_gui.functions_collection
-
-    def add_one_function_factory(f: FunctionWithGuiFactory, tags: List[str]) -> None:
-        functions_collection.add_function(f, tags)
-
-    def add_one_function(f: Function, tags: List[str]) -> None:
-        def fn_factory() -> fiatlight.FunctionWithGui:
-            return to_function_with_gui(f)
-
-        functions_collection.add_function(fn_factory, tags)
-
-    add_one_function(add, ["math"])
-    add_one_function(mul, ["math"])
-    add_one_function(sub, ["math"])
-    add_one_function(int_source, ["math"])
-
-    add_one_function(image_source, ["image"])
-    add_one_function(add_toon_edges, ["image"])
-    add_one_function(canny, ["image"])
-    add_one_function(oil_paint, ["image"])
-    add_one_function_factory(stable_diffusion_xl_gui, ["image"])
+    add_functions_to_collection(functions_collection)
 
     gui.run()
 
