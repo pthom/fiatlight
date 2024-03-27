@@ -29,6 +29,10 @@ def main() -> None:
     from fiatlight.fiat_core import to_function_with_gui
     from fiatlight.fiat_core import FunctionWithGuiFactory
     from fiatlight.fiat_types import Function
+    from fiatlight.demos.images.toon_edges import add_toon_edges, image_source
+    from fiatlight.demos.images.canny import canny
+    from fiatlight.demos.images.oil_paint import oil_paint
+    from fiatlight.demos.ai.stable_diffusion_xl_wrapper import stable_diffusion_xl_gui
 
     functions_collection = gui._functions_collection_gui.functions_collection
 
@@ -46,20 +50,11 @@ def main() -> None:
     add_one_function(sub, ["math"])
     add_one_function(int_source, ["math"])
 
-    from fiatlight.fiat_image.fiat_img_proc import split_channels, overlay_alpha_image_precise
-
-    add_one_function(split_channels, ["image"])
-    add_one_function(overlay_alpha_image_precise, ["image"])
-
-    # functions_collection.add_function(to_function_with_gui(add), ["math"])
-    # functions_collection.add_function(to_function_with_gui(mul), ["math"])
-    # functions_collection.add_function(to_function_with_gui(sub), ["math"])
-    # functions_collection.add_function(to_function_with_gui(int_source), ["math"])
-
-    # from fiatlight.fiat_image.fiat_img_proc import split_channels, overlay_alpha_image_precise
-    #
-    # functions_collection.add_function(to_function_with_gui(split_channels), ["image"])
-    # functions_collection.add_function(to_function_with_gui(overlay_alpha_image_precise), ["image"])
+    add_one_function(image_source, ["image"])
+    add_one_function(add_toon_edges, ["image"])
+    add_one_function(canny, ["image"])
+    add_one_function(oil_paint, ["image"])
+    add_one_function_factory(stable_diffusion_xl_gui, ["image"])
 
     gui.run()
 
