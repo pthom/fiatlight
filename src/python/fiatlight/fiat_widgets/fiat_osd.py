@@ -261,6 +261,38 @@ def update_detached_window_callback(trigger_btn_label: str, gui_function: BoolFu
 
 
 # ======================================================================================================================
+# OSD Popup
+# ======================================================================================================================
+class _OsdPopup:
+    popup_gui_function: VoidFunction | None = None
+
+    _popup_id = "This is our own unique id!"
+    _needs_open = False
+
+    def set_popup_gui(self, gui_function: VoidFunction) -> None:
+        self.popup_gui_function = gui_function
+        self._needs_open = True
+
+    def render(self) -> None:
+        if self._needs_open:
+            imgui.open_popup(self._popup_id)
+            self._needs_open = False
+        if self.popup_gui_function is not None:
+            if imgui.begin_popup(self._popup_id):
+                self.popup_gui_function()
+                imgui.end_popup()
+            else:
+                self.popup_gui_function = None
+
+
+_OSD_POPUP = _OsdPopup()
+
+
+def set_popup_gui(gui_function: VoidFunction) -> None:
+    _OSD_POPUP.set_popup_gui(gui_function)
+
+
+# ======================================================================================================================
 # Global render
 # ======================================================================================================================
 
@@ -269,3 +301,4 @@ def _render_all_osd() -> None:
     """Render OSD widgets. Call this once per frame, outside the node editor & nodes."""
     _OSD_TOOLTIP.render()
     _OSD_DETACHED_WINDOWS.render()
+    _OSD_POPUP.render()

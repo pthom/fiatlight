@@ -173,7 +173,7 @@ class FunctionsGraphGui:
                     print("Delete link", link_context_menu_id)
                 # imgui.open_popup("Link context menu")
 
-            fiat_osd.set_tooltip_gui(show_link_context_menu)
+            fiat_osd.set_popup_gui(show_link_context_menu)
             print("Show link context menu", link_context_menu_id)
             # imgui.open_popup("Link context menu")
 
