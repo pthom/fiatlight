@@ -91,6 +91,10 @@ class ImagePresenter:
 
     def gui(self) -> None:
         assert self.image is not None
+        assert len(self.image.shape) > 0
+        if len(self.image.shape) == 1:
+            imgui.text("Image is 1D, cannot display")
+            return
         nb_channels = 1 if len(self.image.shape) == 2 else self.image.shape[2]
         if nb_channels > 1:
             _, self.show_channels = imgui.checkbox("Show channels", self.show_channels)

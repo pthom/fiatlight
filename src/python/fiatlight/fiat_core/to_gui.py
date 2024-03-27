@@ -12,6 +12,7 @@ from typing import TypeAlias, Callable, Any, Dict, Tuple, List
 
 
 GuiFactory = Callable[[], AnyDataWithGui[DataType]]
+FunctionWithGuiFactory = Callable[[], FunctionWithGui]
 
 
 _COMPLAINTS_MISSING_GUI_FACTORY = []

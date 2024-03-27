@@ -2,15 +2,16 @@ from dataclasses import dataclass
 
 from imgui_bundle import hello_imgui, imgui, imgui_ctx
 
-from fiatlight.fiat_core import FunctionWithGui
+from fiatlight.fiat_core import FunctionWithGui, FunctionWithGuiFactory
 
 from typing import List, Callable
 
 
 @dataclass
 class FunctionInfo:
+    name: str
+    function_factory: FunctionWithGuiFactory
     tags: List[str]
-    function: FunctionWithGui
 
 
 class FunctionsCollection:
@@ -19,8 +20,14 @@ class FunctionsCollection:
     def __init__(self) -> None:
         self._functions = []
 
-    def add_function(self, function: FunctionWithGui, tags: List[str] | None) -> None:
-        self._functions.append(FunctionInfo(tags or [], function))
+    def add_function(self, function_factory: FunctionWithGuiFactory, tags: List[str] | None) -> None:
+        if tags is None:
+            tags = []
+
+        name = function_factory().name
+
+        function_info = FunctionInfo(name, function_factory, tags)
+        self._functions.append(function_info)
 
     def tags_set(self) -> List[str]:
         tags = set()
@@ -30,16 +37,16 @@ class FunctionsCollection:
         tags_sorted = list(sorted(tags))
         return tags_sorted
 
-    def get_functions(self, tags: List[str] | None) -> List[FunctionWithGui]:
+    def get_function_factories(self, tags: List[str] | None) -> List[FunctionInfo]:
         if tags is None:
-            return [function_info.function for function_info in self._functions]
+            return self._functions
 
-        functions = []
+        fn_factories = []
         for function_info in self._functions:
             if all(tag in function_info.tags for tag in tags):
-                functions.append(function_info.function)
+                fn_factories.append(function_info)
 
-        return functions
+        return fn_factories
 
 
 class FunctionCollectionGui:
@@ -69,14 +76,15 @@ class FunctionCollectionGui:
         imgui.new_line()
 
     def _gui_functions(self) -> None:
-        functions = self.functions_collection.get_functions(self._selected_tags)
-        for function in functions:
-            with imgui_ctx.push_obj_id(function):
-                imgui.text(function.name)
+        fn_infos = self.functions_collection.get_function_factories(self._selected_tags)
+        for fn_info in fn_infos:
+            with imgui_ctx.push_obj_id(fn_info):
+                imgui.text(fn_info.name)
                 imgui.same_line()
                 if imgui.button("Add"):
                     if self.on_add_function is not None:
-                        self.on_add_function(function)
+                        new_fn = fn_info.function_factory()
+                        self.on_add_function(new_fn)
 
     def gui(self) -> None:
         imgui.begin("Functions collection")

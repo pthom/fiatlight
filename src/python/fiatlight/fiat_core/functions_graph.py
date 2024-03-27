@@ -1,9 +1,11 @@
+import copy
+
 from fiatlight.fiat_core.function_with_gui import FunctionWithGui
 from fiatlight.fiat_core.function_node import FunctionNode, FunctionNodeLink
 from fiatlight.fiat_types import Function, JsonDict, GlobalsDict, LocalsDict
 from fiatlight.fiat_core.to_gui import _capture_caller_globals_locals, to_function_with_gui_globals_local_captured
 
-from typing import Sequence, Dict
+from typing import Sequence, Dict, Tuple, Set
 
 
 class FunctionsGraph:
@@ -70,28 +72,29 @@ class FunctionsGraph:
         )
         self.merge_graph(composition)
 
-    def add_function(self, f: Function | FunctionWithGui) -> None:
+    def add_function(self, f: Function | FunctionWithGui) -> FunctionNode:
         if isinstance(f, FunctionWithGui):
-            self._add_function_with_gui(f)
+            return self._add_function_with_gui(f)
         else:
             globals_dict, locals_dict = _capture_caller_globals_locals()
-            self._add_function(f, globals_dict=globals_dict, locals_dict=locals_dict)
+            return self._add_function(f, globals_dict=globals_dict, locals_dict=locals_dict)
 
     # ================================================================================================================
     #                                            Private API / Add functions
     # ================================================================================================================
-    def _add_function_with_gui(self, f_gui: FunctionWithGui) -> None:
+    def _add_function_with_gui(self, f_gui: FunctionWithGui) -> FunctionNode:
         f_node = FunctionNode(f_gui)
         self.functions_nodes.append(f_node)
+        return f_node
 
     def _add_function(
         self,
         f: Function,
         globals_dict: GlobalsDict,
         locals_dict: LocalsDict,
-    ) -> None:
+    ) -> FunctionNode:
         f_gui = to_function_with_gui_globals_local_captured(f, globals_dict=globals_dict, locals_dict=locals_dict)
-        self._add_function_with_gui(f_gui)
+        return self._add_function_with_gui(f_gui)
 
     @staticmethod
     def _create_from_function_composition(
@@ -138,38 +141,108 @@ class FunctionsGraph:
     # ================================================================================================================
     #                                            Graph manipulation
     # ================================================================================================================
+    def can_add_link(
+        self, src_function_node: FunctionNode, dst_function_node: FunctionNode, dst_input_name: str, src_output_idx: int
+    ) -> Tuple[bool, str]:
+        # 1. Check that the function nodes are in the graph
+        if src_function_node not in self.functions_nodes:
+            return False, f"Function {src_function_node.function_with_gui.name} not found in the graph"
+        if dst_function_node not in self.functions_nodes:
+            return False, f"Function {dst_function_node.function_with_gui.name} not found in the graph"
+
+        # 2. Check that the output index and input name are valid
+        if src_output_idx >= src_function_node.function_with_gui.nb_outputs():
+            return (
+                False,
+                f"Output index {src_output_idx} is out of range for function {src_function_node.function_with_gui.name}",
+            )
+        if dst_input_name not in dst_function_node.function_with_gui.all_inputs_names():
+            return False, f"Input {dst_input_name} not found in function {dst_function_node.function_with_gui.name}"
+
+        # 3. Check that src_function_node and dst_function_node are not the same
+        if src_function_node == dst_function_node:
+            return False, "Cannot link a function to itself"
+
+        new_link = FunctionNodeLink(
+            src_function_node=src_function_node,
+            src_output_idx=src_output_idx,
+            dst_function_node=dst_function_node,
+            dst_input_name=dst_input_name,
+        )
+
+        # 4. Check that the link does not already exist
+        for link in self.functions_nodes_links:
+            if new_link.is_equal(link):
+                return False, "Link already exists"
+
+        # 5. Check that this input is not already linked
+        if dst_function_node.has_input_link(dst_input_name):
+            return (
+                False,
+                f"Input {dst_input_name} of function {dst_function_node.function_with_gui.name} is already linked",
+            )
+
+        # 6. Check that the link does not create a cycle
+        if self._would_add_cycle(new_link):
+            return False, "Link would create a cycle"
+
+        return True, ""
+
+    def add_link_from_function_nodes(
+        self,
+        src_function_node: FunctionNode,
+        dst_function_node: FunctionNode,
+        dst_input_name: str | None = None,
+        src_output_idx: int = 0,
+    ) -> FunctionNodeLink:
+        src_function_name = src_function_node.function_with_gui.name
+        dst_function_name = dst_function_node.function_with_gui.name
+
+        if src_output_idx >= src_function_node.function_with_gui.nb_outputs():
+            raise ValueError(
+                f"Output index {src_output_idx} is out of range for function {src_function_name}. "
+                f"Function {src_function_name} has {src_function_node.function_with_gui.nb_outputs()} outputs."
+            )
+        if dst_input_name is not None:
+            if dst_input_name not in dst_function_node.function_with_gui.all_inputs_names():
+                raise ValueError(
+                    f"Input {dst_input_name} not found in function {dst_function_name}. "
+                    f"Available inputs: {[dst_function_node.function_with_gui.all_inputs_names()]}"
+                )
+        if dst_input_name is None:
+            if dst_function_node.function_with_gui.nb_inputs() == 0:
+                raise ValueError(f"Function {dst_function_name} has no inputs!")
+            dst_input_name = dst_function_node.function_with_gui.input_of_idx(0).name
+
+        can_add, fail_reason = self.can_add_link(
+            src_function_node, dst_function_node, dst_input_name=dst_input_name, src_output_idx=src_output_idx
+        )
+        if not can_add:
+            raise ValueError(f"Cannot add link from {src_function_name} to {dst_function_name}: {fail_reason}")
+
+        link = FunctionNodeLink(
+            src_function_node=src_function_node,
+            src_output_idx=src_output_idx,
+            dst_function_node=dst_function_node,
+            dst_input_name=dst_input_name,
+        )
+        src_function_node.add_output_link(link)
+        dst_function_node.add_input_link(link)
+        self.functions_nodes_links.append(link)
+
+        return link
+
     def add_link(
         self, src_function_name: str, dst_function_name: str, dst_input_name: str | None = None, src_output_idx: int = 0
     ) -> None:
-        """Add a link between two functions"""
+        """Add a link between two functions
+        Returns the link that was created
+        """
         src_function = self._function_node_with_unique_name(src_function_name)
         dst_function = self._function_node_with_unique_name(dst_function_name)
-
-        if src_output_idx >= src_function.function_with_gui.nb_outputs():
-            raise ValueError(
-                f"Output index {src_output_idx} is out of range for function {src_function_name}. "
-                f"Function {src_function_name} has {src_function.function_with_gui.nb_outputs()} outputs."
-            )
-        if dst_input_name is not None:
-            if dst_input_name not in dst_function.function_with_gui.all_inputs_names():
-                raise ValueError(
-                    f"Input {dst_input_name} not found in function {dst_function_name}. "
-                    f"Available inputs: {[dst_function.function_with_gui.all_inputs_names()]}"
-                )
-        if dst_input_name is None:
-            if dst_function.function_with_gui.nb_inputs() == 0:
-                raise ValueError(f"Function {dst_function_name} has no inputs!")
-            dst_input_name = dst_function.function_with_gui.input_of_idx(0).name
-
-        link = FunctionNodeLink(
-            src_function_node=src_function,
-            src_output_idx=src_output_idx,
-            dst_function_node=dst_function,
-            dst_input_name=dst_input_name,
+        self.add_link_from_function_nodes(
+            src_function, dst_function, dst_input_name=dst_input_name, src_output_idx=src_output_idx
         )
-        src_function.add_output_link(link)
-        dst_function.add_input_link(link)
-        self.functions_nodes_links.append(link)
 
     def merge_graph(self, other: "FunctionsGraph") -> None:
         self.functions_nodes.extend(other.functions_nodes)
@@ -183,6 +256,37 @@ class FunctionsGraph:
             if fn.function_with_gui.name == name:
                 return fn.function_with_gui
         raise ValueError(f"No function with the name {name}")
+
+    def _would_add_cycle(self, new_link: FunctionNodeLink) -> bool:
+        new_graph = FunctionsGraph.create_empty()
+        new_graph.functions_nodes = copy.copy(self.functions_nodes)
+        new_graph.functions_nodes_links = copy.copy(self.functions_nodes_links)
+        new_graph.functions_nodes_links.append(new_link)
+
+        return new_graph.has_cycle()
+
+    def has_cycle(self, visited: Set[FunctionNode] | None = None) -> bool:
+        """Returns True if the graph has a cycle"""
+        for fn in self.functions_nodes:
+            if self._has_cycle_from_node(fn):
+                return True
+        return False
+
+    def _has_cycle_from_node(self, fn: FunctionNode, path: Set[FunctionNode] | None = None) -> bool:
+        if path is None:
+            path = set()
+        path.add(fn)
+        for link in self.functions_nodes_links:
+            if link.src_function_node != fn:
+                continue
+            next_fn = link.dst_function_node
+            if next_fn in path:
+                return True  # A cycle is found if next_fn is already in the path
+            path_copy = copy.copy(path)
+            if self._has_cycle_from_node(next_fn, path_copy):
+                return True
+        path.remove(fn)  # Remove fn from path as we backtrack
+        return False
 
     # ================================================================================================================
     #                                            Node unique names
