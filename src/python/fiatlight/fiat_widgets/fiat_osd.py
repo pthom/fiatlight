@@ -295,8 +295,6 @@ def set_popup_gui(gui_function: VoidFunction) -> None:
 # ======================================================================================================================
 # Global render
 # ======================================================================================================================
-
-
 def _render_all_osd() -> None:
     """Render OSD widgets. Call this once per frame, outside the node editor & nodes."""
     _OSD_TOOLTIP.render()
