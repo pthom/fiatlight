@@ -20,6 +20,9 @@ class FunctionsGraphGui:
 
     _idx_frame: int = 0
 
+    # ======================================================================================================================
+    # Constructor
+    # ======================================================================================================================
     def __init__(self, functions_graph: FunctionsGraph) -> None:
         self.functions_graph = functions_graph
 
@@ -32,42 +35,9 @@ class FunctionsGraphGui:
             link_gui = FunctionNodeLinkGui(link, self.function_nodes_gui)
             self.functions_links_gui.append(link_gui)
 
-    def add_function_with_gui(self, function: FunctionWithGui) -> None:
-        function_node = self.functions_graph.add_function(function)
-        function_node_gui = FunctionNodeGui(function_node)
-        self.function_nodes_gui.append(function_node_gui)
-
-    def _layout_graph_if_required(self) -> None:
-        def are_all_nodes_on_zero() -> bool:
-            # the node sizes are not set yet in the first frame
-            # we need to wait until we know them
-            if self._idx_frame == 0:
-                return False
-
-            for node in self.function_nodes_gui:
-                pos = ed.get_node_position(node.node_id())
-                if pos.x != 0 or pos.y != 0:
-                    return False
-            return True
-
-        if self.shall_layout_graph or are_all_nodes_on_zero():
-            self.shall_layout_graph = False
-            width_between_nodes = hello_imgui.em_size(4)
-            height_between_nodes = hello_imgui.em_size(4)
-            current_row_height = 0.0
-            w = imgui.get_window_width()
-            current_position = ImVec2(0, 0)
-
-            for i, fn in enumerate(self.function_nodes_gui):
-                ed.set_node_position(fn.node_id(), current_position)
-                node_size = ed.get_node_size(fn.node_id())
-                current_position.x += node_size.x + width_between_nodes
-                current_row_height = max(current_row_height, node_size.y)
-                if current_position.x + node_size.x > w:
-                    current_position.x = 0
-                    current_position.y += current_row_height + height_between_nodes
-                    current_row_height = 0
-
+    # ======================================================================================================================
+    # Drawing
+    # ======================================================================================================================
     def draw(self) -> None:
         def draw_nodes() -> None:
             for fn in self.function_nodes_gui:
@@ -88,35 +58,6 @@ class FunctionsGraphGui:
                 self._handle_links_edit()
             ed.end()
         self._idx_frame += 1
-
-    def _function_node_gui_from_id(self, node_id: ed.NodeId) -> FunctionNodeGui:
-        matching_nodes = [fn for fn in self.function_nodes_gui if fn.node_id() == node_id]
-        if len(matching_nodes) == 0:
-            raise ValueError(f"Node with id {node_id} not found")
-        assert len(matching_nodes) == 1
-        return matching_nodes[0]
-
-    def _function_node_gui_from_input_pin_id(self, pin_id: ed.PinId) -> Tuple[FunctionNodeGui | None, str]:
-        matching_nodes = []
-        for fn in self.function_nodes_gui:
-            param_name = fn.input_pin_to_param_name(pin_id)
-            if param_name is not None:
-                matching_nodes.append((fn, param_name))
-        if len(matching_nodes) == 0:
-            return None, ""
-        assert len(matching_nodes) == 1
-        return matching_nodes[0]
-
-    def _function_node_gui_from_output_pin_id(self, pin_id: ed.PinId) -> Tuple[FunctionNodeGui | None, int]:
-        matching_nodes = []
-        for fn in self.function_nodes_gui:
-            output_idx = fn.output_pin_to_output_idx(pin_id)
-            if output_idx is not None:
-                matching_nodes.append((fn, output_idx))
-        if len(matching_nodes) == 0:
-            return None, -1
-        assert len(matching_nodes) == 1
-        return matching_nodes[0]
 
     def _handle_links_edit(self) -> None:
         # Handle creation action, returns true if editor want to create new object (node or link)
@@ -186,6 +127,18 @@ class FunctionsGraphGui:
         #     imgui.end_popup()
         # ed.resume()
 
+    # ======================================================================================================================
+    # Graph manipulation
+    # ======================================================================================================================
+    @staticmethod
+    def _GraphManipulation_Section() -> None:  # Dummy function to create a section in the IDE # noqa
+        pass
+
+    def add_function_with_gui(self, function: FunctionWithGui) -> None:
+        function_node = self.functions_graph.add_function(function)
+        function_node_gui = FunctionNodeGui(function_node)
+        self.function_nodes_gui.append(function_node_gui)
+
     def _can_add_link(self, input_pin_id: ed.PinId, output_pin_id: ed.PinId) -> Tuple[bool, str]:
         # 1. Look for the function node GUIs that correspond to the input and output pins
         fn_input, dst_param_name = self._function_node_gui_from_input_pin_id(input_pin_id)
@@ -235,6 +188,47 @@ class FunctionsGraphGui:
 
         return True
 
+    # ======================================================================================================================
+    # Graph layout
+    # ======================================================================================================================
+    def _layout_graph_if_required(self) -> None:
+        def are_all_nodes_on_zero() -> bool:
+            # the node sizes are not set yet in the first frame
+            # we need to wait until we know them
+            if self._idx_frame == 0:
+                return False
+
+            for node in self.function_nodes_gui:
+                pos = ed.get_node_position(node.node_id())
+                if pos.x != 0 or pos.y != 0:
+                    return False
+            return True
+
+        if self.shall_layout_graph or are_all_nodes_on_zero():
+            self.shall_layout_graph = False
+            width_between_nodes = hello_imgui.em_size(4)
+            height_between_nodes = hello_imgui.em_size(4)
+            current_row_height = 0.0
+            w = imgui.get_window_width()
+            current_position = ImVec2(0, 0)
+
+            for i, fn in enumerate(self.function_nodes_gui):
+                ed.set_node_position(fn.node_id(), current_position)
+                node_size = ed.get_node_size(fn.node_id())
+                current_position.x += node_size.x + width_between_nodes
+                current_row_height = max(current_row_height, node_size.y)
+                if current_position.x + node_size.x > w:
+                    current_position.x = 0
+                    current_position.y += current_row_height + height_between_nodes
+                    current_row_height = 0
+
+    # ======================================================================================================================
+    # Utilities
+    # ======================================================================================================================
+    @staticmethod
+    def _Utilities_Section() -> None:  # Dummy function to create a section in the IDE # noqa
+        pass
+
     def function_node_unique_name(self, function_node_gui: FunctionNodeGui) -> str:
         return self.functions_graph.function_node_unique_name(function_node_gui._function_node)  # noqa
 
@@ -243,6 +237,42 @@ class FunctionsGraphGui:
 
     def all_function_nodes_with_unique_names(self) -> Dict[str, FunctionNodeGui]:
         return {self.function_node_unique_name(fn): fn for fn in self.function_nodes_gui}
+
+    def _function_node_gui_from_input_pin_id(self, pin_id: ed.PinId) -> Tuple[FunctionNodeGui | None, str]:
+        matching_nodes = []
+        for fn in self.function_nodes_gui:
+            param_name = fn.input_pin_to_param_name(pin_id)
+            if param_name is not None:
+                matching_nodes.append((fn, param_name))
+        if len(matching_nodes) == 0:
+            return None, ""
+        assert len(matching_nodes) == 1
+        return matching_nodes[0]
+
+    def _function_node_gui_from_output_pin_id(self, pin_id: ed.PinId) -> Tuple[FunctionNodeGui | None, int]:
+        matching_nodes = []
+        for fn in self.function_nodes_gui:
+            output_idx = fn.output_pin_to_output_idx(pin_id)
+            if output_idx is not None:
+                matching_nodes.append((fn, output_idx))
+        if len(matching_nodes) == 0:
+            return None, -1
+        assert len(matching_nodes) == 1
+        return matching_nodes[0]
+
+    def _function_node_gui_from_id(self, node_id: ed.NodeId) -> FunctionNodeGui:
+        matching_nodes = [fn for fn in self.function_nodes_gui if fn.node_id() == node_id]
+        if len(matching_nodes) == 0:
+            raise ValueError(f"Node with id {node_id} not found")
+        assert len(matching_nodes) == 1
+        return matching_nodes[0]
+
+    # ======================================================================================================================
+    # Serialization
+    # ======================================================================================================================
+    @staticmethod
+    def _Serialization_Section() -> None:  # Dummy function to create a section in the IDE # noqa
+        pass
 
     def save_user_inputs_to_json(self) -> JsonDict:
         function_graph_dict = self.functions_graph.save_user_inputs_to_json()
