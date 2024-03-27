@@ -444,14 +444,14 @@ class FunctionNodeGui:
         btn_label = "" if can_edit_in_node else "edit"
 
         if can_edit_in_popup:
-            fiat_osd.show_bool_popup_button(btn_label, popup_label, edit_input)
+            fiat_osd.show_bool_detached_window_button(btn_label, popup_label, edit_input)
 
         # Now that we can have a detached view, there are two ways
         # that can change the input value:
         if can_edit_in_node and edit_input():
             # 1. The user edits the input value in this window
             changed = True
-        if can_edit_in_popup and fiat_osd.get_popup_bool_return(btn_label):
+        if can_edit_in_popup and fiat_osd.get_detached_window_bool_return(btn_label):
             # 2. The user edits the input value in a detached window
             changed = True
 
@@ -473,7 +473,7 @@ class FunctionNodeGui:
 
         if can_present_custom_in_popup:
             popup_label = f"detached view - {unique_name}() - input '{input_param.name}'"
-            fiat_osd.show_void_popup_button("", popup_label, present_input)
+            fiat_osd.show_void_detached_window_button("", popup_label, present_input)
 
         if can_present_custom_in_node:
             present_input()
@@ -635,7 +635,7 @@ class FunctionNodeGui:
                 if can_present_custom_in_popup:
                     btn_label = "##present_custom_in_popup"  # This will be our popup id (with the imgui id context)
                     popup_label = f"detached view - {unique_name}: output {idx_output}"
-                    fiat_osd.show_void_popup_button(btn_label, popup_label, present_output)
+                    fiat_osd.show_void_detached_window_button(btn_label, popup_label, present_output)
 
                 if can_present_custom_in_node:
                     present_output()
@@ -774,7 +774,9 @@ class FunctionNodeGui:
                 imgui.same_line()
 
             popup_flags = imgui.WindowFlags_.always_auto_resize.value
-            fiat_osd.show_void_popup_button(btn_label, popup_label, confirmation_gui, window_flags=popup_flags)
+            fiat_osd.show_void_detached_window_button(
+                btn_label, popup_label, confirmation_gui, window_flags=popup_flags
+            )
 
     def _render_function_doc(self, unique_name: str) -> None:
         if not self._has_doc():
@@ -796,7 +798,7 @@ class FunctionNodeGui:
             imgui.spring()
             popup_label = f"{unique_name}(): function documentation"
             btn_text = icons_fontawesome_6.ICON_FA_BOOK
-            fiat_osd.show_void_popup_button(btn_text, popup_label, show_doc)
+            fiat_osd.show_void_detached_window_button(btn_text, popup_label, show_doc)
 
     # ==================================================================================================================
     # Save and load user settings
@@ -927,7 +929,7 @@ def sandbox() -> None:
     def gui() -> None:
         with ed_ctx.begin("Functions Graph"):
             function_node_gui.draw_node("add")
-        fiat_osd._fiat_osd.render()  # noqa
+        fiat_osd._render_all_osd()  # noqa
 
     immapp.run(gui, with_node_editor=True, window_title="function_node_gui_sandbox")
 

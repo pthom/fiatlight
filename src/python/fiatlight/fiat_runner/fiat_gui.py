@@ -142,7 +142,7 @@ class FiatGui:
                     imgui.set_tooltip("Save user inputs")
 
     def _heartbeat(self) -> None:
-        fiat_osd.render()
+        fiat_osd._render_all_osd()  # noqa
         self._handle_file_dialogs()
         if self.params.customizable_graph:
             self._functions_collection_gui.gui()
