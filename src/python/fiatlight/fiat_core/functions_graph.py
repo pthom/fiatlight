@@ -27,6 +27,10 @@ class FunctionsGraph:
     # ================================================================================================================
     #                                            Construction (Empty)
     # ================================================================================================================
+    @staticmethod
+    def _Construction_Section() -> None:  # Dummy function to create a section in the IDE # noqa
+        pass
+
     def __init__(self, secret_key: str = "FunctionsGraph") -> None:
         if secret_key != self._secret_key:
             raise ValueError("This class should not be instantiated directly. Use the factory method instead.")
@@ -44,6 +48,10 @@ class FunctionsGraph:
     # IMPORTANT: All user facing that add functions (not FunctionWithGui) should capture the locals and globals
     # of the caller, before passing them to the private _add_function method.
     # This should be done right after being called!
+    @staticmethod
+    def _Public_API_Add_Function_Section() -> None:  # Dummy function to create a section in the IDE # noqa
+        pass
+
     @staticmethod
     def from_function(f: Function | FunctionWithGui) -> "FunctionsGraph":
         r = FunctionsGraph.create_empty()
@@ -82,6 +90,10 @@ class FunctionsGraph:
     # ================================================================================================================
     #                                            Private API / Add functions
     # ================================================================================================================
+    @staticmethod
+    def _Private_API_Add_Function_Section() -> None:  # Dummy function to create a section in the IDE # noqa
+        pass
+
     def _add_function_with_gui(self, f_gui: FunctionWithGui) -> FunctionNode:
         f_node = FunctionNode(f_gui)
         self.functions_nodes.append(f_node)
@@ -141,6 +153,10 @@ class FunctionsGraph:
     # ================================================================================================================
     #                                            Graph manipulation
     # ================================================================================================================
+    @staticmethod
+    def _Graph_Manipulation_Section() -> None:  # Dummy function to create a section in the IDE # noqa
+        pass
+
     def can_add_link(
         self, src_function_node: FunctionNode, dst_function_node: FunctionNode, dst_input_name: str, src_output_idx: int
     ) -> Tuple[bool, str]:
@@ -230,6 +246,10 @@ class FunctionsGraph:
         dst_function_node.add_input_link(link)
         self.functions_nodes_links.append(link)
 
+        # invoke the src function so that the dst function is updated
+        src_function_node.function_with_gui._dirty = True
+        src_function_node.invoke_function()
+
         return link
 
     def add_link(
@@ -288,9 +308,32 @@ class FunctionsGraph:
         path.remove(fn)  # Remove fn from path as we backtrack
         return False
 
+    def remove_link(self, link: FunctionNodeLink) -> None:
+        self.functions_nodes_links.remove(link)
+        link.src_function_node.output_links.remove(link)
+        link.dst_function_node.input_links.remove(link)
+
+    def remove_function_node(self, function_node: FunctionNode) -> None:
+        for link in function_node.output_links:
+            self.remove_link(link)
+            # for fn_node in self.functions_nodes:
+            #     for link2 in fn_node.input_links:
+            #         if link2 == link:
+            #             fn_node.input_links.remove(link2)
+            #     for link3 in fn_node.output_links:
+            #         if link3 == link:
+            #             fn_node.output_links.remove(link3)
+        for link in function_node.input_links:
+            self.remove_link(link)
+        self.functions_nodes.remove(function_node)
+
     # ================================================================================================================
-    #                                            Node unique names
+    #                                            Utilities
     # ================================================================================================================
+    @staticmethod
+    def _Utilities_Section() -> None:  # Dummy function to create a section in the IDE # noqa
+        pass
+
     def function_node_unique_name(self, function_node: FunctionNode) -> str:
         """Make sure all names are unique"""
         names = [fn.function_with_gui.name for fn in self.functions_nodes]
@@ -314,9 +357,6 @@ class FunctionsGraph:
     def _all_function_nodes_with_unique_names(self) -> Dict[str, FunctionNode]:
         return {self.function_node_unique_name(fn): fn for fn in self.functions_nodes}
 
-    # ================================================================================================================
-    #                                            Invoke all functions
-    # ================================================================================================================
     def invoke_all_functions(self) -> None:
         """Invoke all the functions of the graph"""
 
@@ -334,8 +374,12 @@ class FunctionsGraph:
                 fn.invoke_function()
 
     # ================================================================================================================
-    #                                            Save user inputs
+    #                                            Serialization
     # ================================================================================================================
+    @staticmethod
+    def _Serialization_Section() -> None:  # Dummy function to create a section in the IDE # noqa
+        pass
+
     def save_user_inputs_to_json(self) -> JsonDict:
         """Saves the user inputs, i.e. the functions params that are editable in the GUI
         (this excludes the params that are set by the links between the functions)"""
