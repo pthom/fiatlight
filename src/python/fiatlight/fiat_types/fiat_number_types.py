@@ -26,3 +26,5 @@ Float_0_10000 = NewType("Float_0_10000", float)  # 0 to 10000
 Int_0_10 = NewType("Int_0_10", int)  # 0 to 10
 Int_0_255 = NewType("Int_0_255", int)  # 0 to 255
 Int_0_100 = NewType("Int_0_100", int)  # 0 to 100
+
+OddInt = NewType("OddInt", int)  # Odd integers

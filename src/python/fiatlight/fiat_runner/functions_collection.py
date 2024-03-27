@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from imgui_bundle import hello_imgui, imgui, imgui_ctx
 
 from fiatlight.fiat_core import FunctionWithGui, FunctionWithGuiFactory
+from fiatlight.fiat_widgets import fontawesome_6_ctx, icons_fontawesome_6
 
 from typing import List, Callable
 
@@ -79,15 +80,18 @@ class FunctionCollectionGui:
         fn_infos = self.functions_collection.get_function_factories(self._selected_tags)
         for fn_info in fn_infos:
             with imgui_ctx.push_obj_id(fn_info):
-                imgui.text(fn_info.name)
-                imgui.same_line()
-                if imgui.button("Add"):
-                    if self.on_add_function is not None:
-                        new_fn = fn_info.function_factory()
-                        self.on_add_function(new_fn)
+                with imgui_ctx.begin_horizontal("H"):
+                    with fontawesome_6_ctx():
+                        imgui.text(fn_info.name)
+                        # if imgui.is_item_hovered():  fn_info.function_factory().get_function_doc()
+                        imgui.spring()
+                        if imgui.button(icons_fontawesome_6.ICON_FA_SQUARE_PLUS):
+                            if self.on_add_function is not None:
+                                new_fn = fn_info.function_factory()
+                                self.on_add_function(new_fn)
 
     def gui(self) -> None:
-        imgui.begin("Functions collection")
-        self._gui_tags()
-        self._gui_functions()
-        imgui.end()
+        with imgui_ctx.begin("Functions collection"):
+            with imgui_ctx.begin_vertical("V"):
+                self._gui_tags()
+                self._gui_functions()

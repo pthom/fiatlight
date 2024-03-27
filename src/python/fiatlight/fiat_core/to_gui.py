@@ -238,6 +238,13 @@ def to_function_with_gui(f: Callable[..., Any], signature_string: str | None = N
     return r
 
 
+def to_function_with_gui_factory(f: Callable[..., Any], signature_string: str | None = None) -> FunctionWithGuiFactory:
+    def factory() -> FunctionWithGui:
+        return to_function_with_gui(f, signature_string=signature_string)
+
+    return factory
+
+
 def to_function_with_gui_globals_local_captured(
     f: Callable[..., Any],
     *,

@@ -362,10 +362,13 @@ class FilePathWithGui(AnyDataWithGui[FilePath]):
 
         # Returns two lines: the file name and the full path
         # (which will be presented as a tooltip)
-        as_path = Path(value)
-        r = str(as_path.name) + "\n"
-        r += str(as_path.absolute())
-        return r
+        try:
+            as_path = Path(value)
+            r = str(as_path.name) + "\n"
+            r += str(as_path.absolute())
+            return r
+        except TypeError:
+            return "???"
 
 
 class ImagePathWithGui(FilePathWithGui):
