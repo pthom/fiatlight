@@ -38,6 +38,10 @@ class FunctionsGraphGui:
     # ======================================================================================================================
     # Drawing
     # ======================================================================================================================
+    @staticmethod
+    def _Drawing_Section() -> None:  # Dummy function to create a section in the IDE # noqa
+        pass
+
     def draw(self) -> None:
         def draw_nodes() -> None:
             for fn in self.function_nodes_gui:
@@ -55,28 +59,20 @@ class FunctionsGraphGui:
             draw_nodes()
             draw_links()
             if self.can_edit_graph:
-                self._handle_links_edit()
+                self._handle_graph_edition()
             ed.end()
         self._idx_frame += 1
 
-    def _handle_links_edit(self) -> None:
+    def _handle_graph_edition(self) -> None:
+        #
         # Handle creation action, returns true if editor want to create new object (node or link)
+        #
         if ed.begin_create():
             input_pin_id = ed.PinId()
             output_pin_id = ed.PinId()
 
             # QueryNewLink returns true if editor want to create new link between pins.
             if ed.query_new_link(input_pin_id, output_pin_id):
-                # Link can be created only for two valid pins, it is up to you to
-                # validate if connection make sense. Editor is happy to make any.
-                #
-                # Link always goes from input to output. User may choose to drag
-                # link from output pin or input pin. This determines which pin ids
-                # are valid and which are not:
-                #   * input valid, output invalid - user started to drag new link from input pin
-                #   * input invalid, output valid - user started to drag new link from output pin
-                #   * input valid, output valid   - user dragged link over other pin, can be validated
-
                 if input_pin_id and output_pin_id and input_pin_id != output_pin_id:
                     can_add_link, fail_reason = self._can_add_link(input_pin_id, output_pin_id)
                     if not can_add_link:
@@ -85,18 +81,22 @@ class FunctionsGraphGui:
                     else:
                         if ed.accept_new_item():
                             self._try_add_link(input_pin_id, output_pin_id)
-
             ed.end_create()
 
+        # Handle deletion action
         if ed.begin_delete():
             link_id = ed.LinkId()
-            if ed.query_deleted_link(link_id):
-                print("Delete link with id", link_id)
-                # imgui.set_tooltip("Delete link with id " + str(link_id))
-            #     if ed.accept_deleted_item():
-            #         link = next(link for link in self.functions_links_gui if link.link_id() == link_id)
-            #         self.functions_graph.remove_link(link.function_node_link)
-            #         self.functions_links_gui.remove(link)
+            # Handle link deletion
+            while ed.query_deleted_link(link_id):
+                if ed.accept_deleted_item():
+                    self._remove_link(link_id)
+
+            # Handle node deletion
+            node_id = ed.NodeId()
+            while ed.query_deleted_node(node_id):
+                if ed.accept_deleted_item():
+                    self._remove_function_node(node_id)
+
             ed.end_delete()
 
         # Handle hovered link
@@ -111,21 +111,20 @@ class FunctionsGraphGui:
             def show_link_context_menu() -> None:
                 imgui.text(f"Link context menu: {link_context_menu_id}")
                 if imgui.menu_item_simple("Delete pin"):
-                    print("Delete link", link_context_menu_id)
-                # imgui.open_popup("Link context menu")
+                    self._remove_link(link_context_menu_id)
 
             fiat_osd.set_popup_gui(show_link_context_menu)
-            print("Show link context menu", link_context_menu_id)
-            # imgui.open_popup("Link context menu")
 
-        # ed.suspend()
-        # if imgui.begin_popup("Link context menu"):
-        #     print("Link context menu", link_context_menu_id)
-        #     imgui.text("Link context menu")
-        #     if imgui.menu_item("Inspect pin"):
-        #         print("Inspect Link", link_context_menu_id)
-        #     imgui.end_popup()
-        # ed.resume()
+        # Handle node context menu
+        node_context_menu_id = ed.NodeId()
+        if ed.show_node_context_menu(node_context_menu_id):
+
+            def show_node_context_menu() -> None:
+                imgui.text(f"Node context menu: {node_context_menu_id}")
+                if imgui.menu_item_simple("Delete node"):
+                    self._remove_function_node(node_context_menu_id)
+
+            fiat_osd.set_popup_gui(show_node_context_menu)
 
     # ======================================================================================================================
     # Graph manipulation
@@ -187,6 +186,35 @@ class FunctionsGraphGui:
         self.functions_links_gui.append(function_node_link_gui)
 
         return True
+
+    def _remove_link(self, link_id: ed.LinkId) -> None:
+        # 1. Find the link in the list of links
+        link_gui = next(link for link in self.functions_links_gui if link.link_id == link_id)
+        link = link_gui.function_node_link
+
+        # 2. Remove the link from the lists
+        self.functions_graph.remove_link(link)
+        self.functions_links_gui.remove(link_gui)
+
+    def _remove_function_node(self, node_id: ed.NodeId) -> None:
+        # 1. Find the node in the list of nodes
+        fn_gui = self._function_node_gui_from_id(node_id)
+        fn = fn_gui.get_function_node()
+
+        # 2. Remove the node from the lists
+        self.functions_graph.remove_function_node(fn)
+        self.function_nodes_gui.remove(fn_gui)
+
+        # 3. Remove all links that are connected to this node
+        links_to_remove = []
+        for link_gui in self.functions_links_gui:
+            if (
+                link_gui.function_node_link.src_function_node == fn
+                or link_gui.function_node_link.dst_function_node == fn
+            ):
+                links_to_remove.append(link_gui)
+        for link_gui in links_to_remove:
+            self.functions_links_gui.remove(link_gui)
 
     # ======================================================================================================================
     # Graph layout
