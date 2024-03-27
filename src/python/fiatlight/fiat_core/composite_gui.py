@@ -145,7 +145,7 @@ class ListWithGui(AnyDataWithGui[List[DataType]]):
         max_elements = get_fiat_config().style.list_maximum_elements_in_node
         actual_value = self.get_actual_value()
 
-        fiat_osd.show_void_popup_button(
+        fiat_osd.show_void_detached_window_button(
             "Details",
             "List details",
             self.popup_details,
