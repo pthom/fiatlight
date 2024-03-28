@@ -15,7 +15,7 @@ from enum import Enum
 
 class MemeFont(Enum):
     Stadium = "fonts/stadium/Stadium.ttf"
-    Anton = "fonts/anton/Anton-Regular.ttf"
+    Anton = "fonts/Anton/Anton-Regular.ttf"
     SaoTorpes = "fonts/sao_torpes/SaoTorpes.otf"
 
 
