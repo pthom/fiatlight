@@ -5,6 +5,7 @@ from fiatlight.fiat_utils import LazyModule
 import numpy as np
 from enum import Enum
 import cv2
+import sys
 
 
 from typing import TYPE_CHECKING
@@ -20,21 +21,18 @@ else:
     pipeline_stable_diffusion_xl = LazyModule("diffusers.pipelines.stable_diffusion_xl.pipeline_stable_diffusion_xl")
 
 
-#
-# def _late_imports() -> None:
-#     # mypy: disable-error-code="no-untyped-call"
-#     from diffusers import AutoPipelineForText2Image  # noqa
-#     from diffusers.pipelines.stable_diffusion_xl.pipeline_stable_diffusion_xl import StableDiffusionXLPipeline  # noqa
-#     import torch  # noqa
-
-
 class InferenceDeviceType(Enum):
     CPU = "cpu"
     CUDA = "cuda"
     MPS = "mps"
 
 
-_INFERENCE_DEVICE_TYPE = InferenceDeviceType.MPS
+# Set the inference device type: By default, MPS on Mac
+# SDXL cannot run on a CPU! (RuntimeError: "LayerNormKernelImpl" not implemented for 'Half')
+if sys.platform == "darwin":
+    _INFERENCE_DEVICE_TYPE = InferenceDeviceType.MPS
+else:
+    _INFERENCE_DEVICE_TYPE = InferenceDeviceType.CUDA
 
 
 def inference_device_type() -> str:
@@ -121,6 +119,10 @@ def stable_diffusion_xl_gui() -> fiatlight.FunctionWithGui:
     return stable_diffusion_xl_gui
 
 
-if __name__ == "__main__":
+def main_test_sdxl():
     graph = fiatlight.FunctionsGraph.from_function_composition([stable_diffusion_xl_gui()])
     fiatlight.fiat_run(graph)
+
+
+if __name__ == "__main__":
+    main_test_sdxl()
