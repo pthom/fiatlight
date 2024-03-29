@@ -19,8 +19,8 @@ gui_factories().register_enum(ApertureSize)
 
 def canny(
     image: ImageU8,
-    t_lower: Float_0_1000 = 10.0,
-    t_upper: Float_0_1000 = 100.0,
+    t_lower: Float_0_1000 = 10.0,  # type: ignore
+    t_upper: Float_0_1000 = 100.0,  # type: ignore
     aperture_size: ApertureSize = ApertureSize.Aperture_5,
     l2_gradient: bool = False,
 ) -> ImageU8_GRAY:
@@ -38,7 +38,7 @@ def canny(
 
 def blur(
     image: ImageU8,
-    blur_sigma: Float_0_1000 = 0.0,
+    blur_sigma: Float_0_1000 = 0.0,  # type: ignore
 ) -> ImageU8:
     """
     :param image: Image: Input image to which Gaussian Blur will be applied

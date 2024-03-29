@@ -119,7 +119,7 @@ def stable_diffusion_xl_gui() -> fiatlight.FunctionWithGui:
     return stable_diffusion_xl_gui
 
 
-def main_test_sdxl():
+def main_test_sdxl() -> None:
     graph = fiatlight.FunctionsGraph.from_function_composition([stable_diffusion_xl_gui()])
     fiatlight.fiat_run(graph)
 
