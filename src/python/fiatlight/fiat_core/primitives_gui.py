@@ -112,6 +112,7 @@ class FloatEditType(Enum):
     input = 2
     drag = 3
     knob = 4
+    positive_float_slider = 5
 
 
 @dataclass
@@ -135,6 +136,8 @@ class FloatWithGuiParams:
     knob_variant: int = imgui_knobs.ImGuiKnobVariant_.tick.value
     knob_size_em: float = 2.5
     knob_steps: int = 0
+    # Specific to positive_float_slider
+    nb_significant_digits: int = -1
 
 
 class FloatWithGui(AnyDataWithGui[float]):
@@ -146,6 +149,13 @@ class FloatWithGui(AnyDataWithGui[float]):
         self.callbacks.edit = self.edit
         self.callbacks.default_value_provider = lambda: 0.0
         self.callbacks.clipboard_copy_possible = True
+        self.callbacks.present_str = self.present_str
+
+    def present_str(self, value: float) -> str:
+        if self.params.nb_significant_digits >= 0:
+            return f"{value:.{self.params.nb_significant_digits}g}"
+        else:
+            return str(value)
 
     def edit(self) -> bool:
         assert isinstance(self.value, float) or isinstance(self.value, int)
@@ -191,8 +201,22 @@ class FloatWithGui(AnyDataWithGui[float]):
                 hello_imgui.em_size(self.params.knob_size_em),
                 self.params.knob_steps,
             )
+        elif self.params.edit_type == FloatEditType.positive_float_slider:
+            from fiatlight.fiat_widgets.float_widgets import slider_any_positive_float
+
+            changed, self.value = slider_any_positive_float(
+                self.params.label,
+                self.value,
+                self.params.nb_significant_digits,
+            )
 
         return changed
+
+
+def make_positive_float_with_gui() -> AnyDataWithGui[float]:
+    params = FloatWithGuiParams(edit_type=FloatEditType.positive_float_slider, nb_significant_digits=4)
+    r = FloatWithGui(params)
+    return r
 
 
 ########################################################################################################################

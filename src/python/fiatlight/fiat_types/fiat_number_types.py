@@ -21,6 +21,7 @@ Float_0_10 = NewType("Float_0_10", float)  # 0 to 10
 Float_0_100 = NewType("Float_0_100", float)  # 0 to 100
 Float_0_1000 = NewType("Float_0_1000", float)  # 0 to 1000
 Float_0_10000 = NewType("Float_0_10000", float)  # 0 to 10000
+PositiveFloat = NewType("PositiveFloat", float)  # Any positive float ( strictly greater than 0)
 
 # Int types with specific ranges (bounds included)
 Int_0_10 = NewType("Int_0_10", int)  # 0 to 10
