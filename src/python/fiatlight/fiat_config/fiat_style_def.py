@@ -1,20 +1,30 @@
 from imgui_bundle import ImVec4
-from enum import Enum
+from enum import Enum, auto
 from typing import Dict
 
 
 class FiatColorType(Enum):
-    InputPin = 0
-    InputPinUnspecified = 1
-    InputPinWithError = 2
-    #
-    OutputPin = 3
-    OutputPinUnspecified = 4
-    OutputPinWithError = 5
-    #
-    TextDirtyOutput = 6
-    #
-    ExceptionError = 7
+    # Input Pins
+    InputPinNotLinked = auto()
+    InputPinLinked = auto()
+
+    # Parameters
+    ParameterWithError = auto()
+    ParameterLinked = auto()
+    ParameterUsingDefault = auto()
+    ParameterUserSpecified = auto()
+    ParameterUnspecified = auto()
+
+    # Output Pins
+    OutputPin = auto()
+    OutputPinUnspecified = auto()
+    OutputPinWithError = auto()
+
+    # When the output is dirty
+    TextDirtyOutput = auto
+
+    # Exception color
+    ExceptionError = auto()
 
 
 class FiatStyle:
@@ -26,12 +36,21 @@ class FiatStyle:
 
     def __init__(self) -> None:
         self.colors = {
-            FiatColorType.InputPin: ImVec4(0.4, 1.0, 0.4, 1.0),
-            FiatColorType.InputPinUnspecified: ImVec4(1.0, 0.8, 0.4, 1.0),
-            FiatColorType.InputPinWithError: ImVec4(1.0, 0.5, 0.4, 1.0),
+            # Input Pins
+            FiatColorType.InputPinLinked: ImVec4(0.3, 0.6, 1.0, 1.0),
+            FiatColorType.InputPinNotLinked: ImVec4(0.4, 0.8, 0.4, 1.0),
+            # Parameters
+            FiatColorType.ParameterWithError: ImVec4(1.0, 0.4, 0.4, 1.0),
+            FiatColorType.ParameterLinked: ImVec4(0.3, 0.6, 1.0, 1.0),
+            FiatColorType.ParameterUserSpecified: ImVec4(0.4, 1.0, 0.4, 1.0),
+            FiatColorType.ParameterUnspecified: ImVec4(1.0, 0.8, 0.4, 1.0),
+            FiatColorType.ParameterUsingDefault: ImVec4(0.5, 0.5, 0.5, 1.0),
+            # Output Pins
             FiatColorType.OutputPin: ImVec4(0.4, 0.4, 1.0, 1.0),
-            FiatColorType.OutputPinUnspecified: ImVec4(0.8, 0.4, 1.0, 1.0),
+            FiatColorType.OutputPinUnspecified: ImVec4(1.0, 0.8, 0.4, 1.0),
             FiatColorType.OutputPinWithError: ImVec4(1.0, 0.4, 0.4, 1.0),
+            # When the output is dirty
             FiatColorType.TextDirtyOutput: ImVec4(0.8, 0.8, 0.8, 0.4),
-            FiatColorType.ExceptionError: ImVec4(1.0, 0.0, 0.0, 1.0),
+            # Exception color
+            FiatColorType.ExceptionError: ImVec4(1.0, 0.4, 0.4, 1.0),
         }
