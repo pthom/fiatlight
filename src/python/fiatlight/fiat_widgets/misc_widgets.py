@@ -59,7 +59,7 @@ def text_maybe_truncated(
     max_width_pixels: float | None = None,
     max_width_chars: int | None = None,
     max_lines: int | None = None,
-    show_full_as_tooltip: bool = True,
+    info_tooltip: str | None = None,
 ) -> None:
     def output_text(s: str) -> None:
         if color is not None:
@@ -75,8 +75,16 @@ def text_maybe_truncated(
     )
 
     output_text(msg_truncated)
-    if is_truncated and show_full_as_tooltip:
-        fiat_osd.set_widget_tooltip(msg[:1000])
+
+    # Tooltip
+    tooltip_str = None
+    if info_tooltip is not None:
+        tooltip_str = info_tooltip
+    if is_truncated:
+        if tooltip_str is not None:
+            tooltip_str += "\n\n" + msg
+    if tooltip_str is not None:
+        fiat_osd.set_widget_tooltip(tooltip_str[:1000])
 
 
 def collapsible_button(expanded: bool, tooltip_part: str) -> bool:

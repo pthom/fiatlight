@@ -3,7 +3,14 @@ from fiatlight.fiat_types import Error, Unspecified, UnspecifiedValue, BoolFunct
 from fiatlight.fiat_core import FunctionNode, FunctionNodeLink, AnyDataWithGui
 from fiatlight.fiat_config import FiatColorType, get_fiat_config
 from fiatlight.fiat_core.function_with_gui import ParamWithGui
-from imgui_bundle import imgui, imgui_node_editor as ed, ImVec2, imgui_ctx, hello_imgui, imgui_node_editor_ctx as ed_ctx
+from imgui_bundle import (
+    imgui,
+    imgui_node_editor as ed,
+    ImVec2,
+    imgui_ctx,
+    hello_imgui,
+    imgui_node_editor_ctx as ed_ctx,
+)
 from fiatlight.fiat_widgets import icons_fontawesome_6, fontawesome_6_ctx, fiat_osd, collapsible_button
 from fiatlight import fiat_widgets
 from typing import Dict, List, Any
@@ -53,6 +60,10 @@ class FunctionNodeGui:
     # ==================================================================================================================
     #                                            Constructor
     # ==================================================================================================================
+    @staticmethod
+    def _Constructor_Section() -> None:  # Dummy function to create a section in the IDE # noqa
+        pass
+
     def __init__(self, function_node: FunctionNode) -> None:
         self._function_node = function_node
 
@@ -78,6 +89,10 @@ class FunctionNodeGui:
     #                                            Node info
     #                           (i.e. imgui-node-editor node id, size, etc.)
     # ==================================================================================================================
+    @staticmethod
+    def _Node_Info_Section() -> None:  # Dummy function to create a section in the IDE # noqa
+        pass
+
     def node_id(self) -> ed.NodeId:
         return self._node_id
 
@@ -88,6 +103,10 @@ class FunctionNodeGui:
     # ==================================================================================================================
     #                                            Doc
     # ==================================================================================================================
+    @staticmethod
+    def _Doc_Section() -> None:  # Dummy function to create a section in the IDE # noqa
+        pass
+
     def _fill_function_doc(self) -> None:
         self._function_doc = _FunctionDocElements()
         fn_doc = self._function_node.function_with_gui.get_function_doc()
@@ -105,6 +124,10 @@ class FunctionNodeGui:
     # ------------------------------------------------------------------------------------------------------------------
     #  Utilities
     # ------------------------------------------------------------------------------------------------------------------
+    @staticmethod
+    def _Utilities_Section() -> None:  # Dummy function to create a section in the IDE # noqa
+        pass
+
     def _nb_collapsible_inputs(self) -> int:
         # We can only collapse inputs that do not have a link
         # (since otherwise, the user would not be able to see the link status, and we have to display a pin anyway)
@@ -162,6 +185,10 @@ class FunctionNodeGui:
     #                                            Draw the node
     #         This is the heart of the class, with `draw_node` being the main function
     # ==================================================================================================================
+    @staticmethod
+    def _Draw_Node_Section() -> None:  # Dummy function to create a section in the IDE # noqa
+        pass
+
     def draw_node(self, unique_name: str) -> None:
         with imgui_ctx.push_obj_id(self._function_node):
             with ed_ctx.begin_node(self._node_id):
@@ -188,6 +215,10 @@ class FunctionNodeGui:
     # ------------------------------------------------------------------------------------------------------------------
     #  Draw title and header lines
     # ------------------------------------------------------------------------------------------------------------------
+    @staticmethod
+    def _Draw_Title_Section() -> None:  # Dummy function to create a section in the IDE # noqa
+        pass
+
     def _draw_title(self, unique_name: str) -> None:
         fn_name = self._function_node.function_with_gui.name
         imgui.text(fn_name)
@@ -269,7 +300,15 @@ class FunctionNodeGui:
                         imgui.text(header_elements.param_name)
 
         if header_elements.value_as_str is not None:
-            fiat_widgets.text_maybe_truncated(header_elements.value_as_str, max_width_chars=40, max_lines=1)
+            with imgui_ctx.push_style_color(
+                imgui.Col_.text.value, get_fiat_config().style.colors[header_elements.param_value_color]
+            ):
+                fiat_widgets.text_maybe_truncated(
+                    header_elements.value_as_str,
+                    max_width_chars=40,
+                    max_lines=1,
+                    info_tooltip=header_elements.param_value_tooltip,
+                )
 
         imgui.spring()
 
@@ -337,15 +376,13 @@ class FunctionNodeGui:
             r.status_icon = icons_fontawesome_6.ICON_FA_PENCIL
             r.status_icon_tooltips.append("User edited")
 
-        # fill value_as_str and input_pin_color (may set status_icon and status_icon_tooltips on error/unspecified)
+        # fill value_as_str, status_icon, status_icon_tooltips
         if isinstance(input_param.data_with_gui.value, Error):
-            r.input_pin_color = FiatColorType.InputPinWithError
             r.status_icon = icons_fontawesome_6.ICON_FA_BOMB
             r.status_icon_tooltips.append("Error!")
             r.value_as_str = "Error!"
         elif isinstance(input_param.data_with_gui.value, Unspecified):
             if isinstance(input_param.default_value, Unspecified):
-                r.input_pin_color = FiatColorType.InputPinUnspecified
                 r.status_icon = icons_fontawesome_6.ICON_FA_CIRCLE_EXCLAMATION
                 r.status_icon_tooltips.append("Unspecified!")
                 r.value_as_str = "Unspecified!"
@@ -355,6 +392,35 @@ class FunctionNodeGui:
                 r.value_as_str = input_param.data_with_gui.datatype_value_to_str(input_param.default_value)
         else:
             r.value_as_str = input_param.data_with_gui.datatype_value_to_str(input_param.data_with_gui.value)
+
+        # fill r.input_pin_color
+        if has_link:
+            r.input_pin_color = FiatColorType.InputPinLinked
+        else:
+            r.input_pin_color = FiatColorType.InputPinNotLinked
+
+        # fill r.param_value_color and param_value_tooltip
+        if isinstance(input_param.data_with_gui.value, Error):
+            r.param_value_color = FiatColorType.ParameterWithError
+            if has_link:
+                r.param_value_tooltip = "Caller transmitted an error!"
+            else:
+                r.param_value_tooltip = "Error!"
+        elif has_link:
+            if isinstance(input_param.data_with_gui.value, Unspecified):
+                r.param_value_color = FiatColorType.ParameterUnspecified
+                r.param_value_tooltip = "Caller transmitted an unspecified value!"
+            else:
+                r.param_value_color = FiatColorType.ParameterLinked
+        elif isinstance(input_param.data_with_gui.value, Unspecified):
+            if input_param.default_value is not UnspecifiedValue:
+                r.param_value_color = FiatColorType.ParameterUsingDefault
+                r.param_value_tooltip = "Using default value!"
+            else:
+                r.param_value_color = FiatColorType.ParameterUnspecified
+                r.param_value_tooltip = "This parameter needs to be specified!"
+        else:
+            r.param_value_color = FiatColorType.ParameterUserSpecified
 
         # fill param_name and param_name_tooltip
         r.param_name = input_param.name
@@ -375,6 +441,10 @@ class FunctionNodeGui:
     # ------------------------------------------------------------------------------------------------------------------
     #       Draw inputs
     # ------------------------------------------------------------------------------------------------------------------
+    @staticmethod
+    def _Draw_Inputs_Section() -> None:  # Dummy function to create a section in the IDE # noqa
+        pass
+
     def _draw_function_inputs(self, unique_name: str) -> bool:
         changed = False
 
@@ -572,6 +642,10 @@ class FunctionNodeGui:
     # ------------------------------------------------------------------------------------------------------------------
     #       Draw outputs
     # ------------------------------------------------------------------------------------------------------------------
+    @staticmethod
+    def _Draw_Outputs_Section() -> None:  # Dummy function to create a section in the IDE # noqa
+        pass
+
     def _draw_function_outputs(self, unique_name: str) -> None:
         # Outputs separator
         output_separator_str = "Outputs" if self._function_node.function_with_gui.nb_outputs() > 1 else "Output"
@@ -665,6 +739,10 @@ class FunctionNodeGui:
     # ------------------------------------------------------------------------------------------------------------------
     #      Draw misc elements
     # ------------------------------------------------------------------------------------------------------------------
+    @staticmethod
+    def _Draw_Misc_Section() -> None:  # Dummy function to create a section in the IDE # noqa
+        pass
+
     def _draw_fiat_internals(self) -> None:
         fn = self._function_node.function_with_gui._f_impl  # noqa
         if fn is None:
@@ -795,6 +873,10 @@ class FunctionNodeGui:
     # ==================================================================================================================
     # Save and load user settings
     # ==================================================================================================================
+    @staticmethod
+    def _Save_Load_User_Settings_Section() -> None:  # Dummy function to create a section in the IDE # noqa
+        pass
+
     def save_gui_options_to_json(self) -> JsonDict:
         r = {
             "_show_input_details": self._show_input_details,
@@ -854,12 +936,14 @@ class FunctionNodeLinkGui:
 class _InputParamHeaderLineElements:
     """Data to be presented in a header line"""
 
-    input_pin_color: FiatColorType = FiatColorType.InputPin
+    input_pin_color: FiatColorType = FiatColorType.InputPinNotLinked
 
     status_icon: str | None = None
     status_icon_tooltips: List[str] | None = None
 
     param_name: str | None = None
+    param_value_color: FiatColorType = FiatColorType.ParameterUsingDefault
+    param_value_tooltip: str | None = None
 
     value_as_str: str | None = None
 
