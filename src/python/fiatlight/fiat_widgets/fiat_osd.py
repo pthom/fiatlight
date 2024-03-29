@@ -47,8 +47,18 @@ class _OsdTooltip:
 _OSD_TOOLTIP = _OsdTooltip()
 
 
+def set_widget_tooltip(tooltip: str) -> None:
+    if imgui.is_item_hovered(imgui.HoveredFlags_.delay_normal.value):
+        _OSD_TOOLTIP.set_tooltip_str(tooltip)
+
+
 def set_tooltip(tooltip: str) -> None:
     _OSD_TOOLTIP.set_tooltip_str(tooltip)
+
+
+def set_widget_tooltip_gui(gui_function: VoidFunction) -> None:
+    if imgui.is_item_hovered(imgui.HoveredFlags_.delay_normal.value):
+        _OSD_TOOLTIP.set_tooltip_gui(gui_function)
 
 
 def set_tooltip_gui(gui_function: VoidFunction) -> None:
@@ -171,15 +181,13 @@ class _OsdDetachedWindows:
             if self.detached_window_exists(trigger_btn_label):
                 if imgui.button(icons_fontawesome_6.ICON_FA_CIRCLE_XMARK + " " + trigger_btn_label):
                     self._remove_detached_window(trigger_btn_label)
-                if imgui.is_item_hovered():
-                    set_tooltip("Hide " + tooltip_btn_label + " - " + window_label)
+                set_widget_tooltip("Hide " + tooltip_btn_label + " - " + window_label)
             else:
                 if imgui.button(icons_fontawesome_6.ICON_FA_MAGNIFYING_GLASS_ARROW_RIGHT + " " + trigger_btn_label):
                     self._add_detached_window(
                         trigger_btn_label, window_label, gui_function, bool_returned, window_flags, window_size
                     )
-                if imgui.is_item_hovered():
-                    set_tooltip("Show " + tooltip_btn_label + " - " + window_label)
+                set_widget_tooltip("Show " + tooltip_btn_label + " - " + window_label)
 
     def update_detached_window_callback(
         self, trigger_btn_label: str, gui_function: BoolFunction | VoidFunction

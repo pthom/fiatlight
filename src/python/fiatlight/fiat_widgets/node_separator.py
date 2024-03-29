@@ -64,14 +64,12 @@ def _node_separator(parent_node: ed.NodeId, text: str, show_collapse_button: boo
 
             if expanded:
                 visible = not imgui.button(icons_fontawesome_6.ICON_FA_EYE + "##" + text)
-                if imgui.is_item_hovered():
-                    fiat_osd.set_tooltip("Collapse all")
+                fiat_osd.set_widget_tooltip("Collapse all")
                 changed = visible != expanded
                 return changed, visible
             else:
                 visible = imgui.button(icons_fontawesome_6.ICON_FA_EYE_SLASH + "##" + text)
-                if imgui.is_item_hovered():
-                    fiat_osd.set_tooltip("Expand all")
+                fiat_osd.set_widget_tooltip("Expand all")
                 changed = visible != expanded
                 return changed, visible
 

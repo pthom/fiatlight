@@ -49,8 +49,7 @@ class OptionalWithGui(AnyDataWithGui[DataType | None]):
                 assert default_value_provider is not None
                 self.value = default_value_provider()
                 changed = True
-            if imgui.is_item_hovered():
-                fiat_osd.set_tooltip("Set Optional to default value for this type.")
+            fiat_osd.set_widget_tooltip("Set Optional to default value for this type.")
             imgui.end_horizontal()
         else:
             imgui.begin_vertical("##OptionalV")
@@ -59,8 +58,7 @@ class OptionalWithGui(AnyDataWithGui[DataType | None]):
             if imgui.button("Unset"):
                 self.value = None
                 changed = True
-            if imgui.is_item_hovered():
-                fiat_osd.set_tooltip("Unset Optional.")
+            fiat_osd.set_widget_tooltip("Unset Optional.")
             imgui.end_horizontal()
             fn_edit = self.inner_gui.callbacks.edit
             if fn_edit is not None:

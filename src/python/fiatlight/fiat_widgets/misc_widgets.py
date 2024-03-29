@@ -75,8 +75,8 @@ def text_maybe_truncated(
     )
 
     output_text(msg_truncated)
-    if is_truncated and imgui.is_item_hovered() and show_full_as_tooltip:
-        fiat_osd.set_tooltip(msg[:1000])
+    if is_truncated and show_full_as_tooltip:
+        fiat_osd.set_widget_tooltip(msg[:1000])
 
 
 def collapsible_button(expanded: bool, tooltip_part: str) -> bool:
@@ -90,8 +90,7 @@ def collapsible_button(expanded: bool, tooltip_part: str) -> bool:
     tooltip = "Hide " + tooltip_part if expanded else "Show " + tooltip_part
     with fontawesome_6_ctx():
         clicked = imgui.button(icon)
-        if imgui.is_item_hovered():
-            fiat_osd.set_tooltip(tooltip)
+        fiat_osd.set_widget_tooltip(tooltip)
         if not clicked:
             return expanded
         else:

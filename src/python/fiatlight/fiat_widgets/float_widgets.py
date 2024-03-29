@@ -96,15 +96,13 @@ def slider_any_positive_float(label: str, v: float, nb_significant_digits: int =
                 if imgui.button("##+", btn_size):
                     changed = True
                     new_value *= 10
-                if imgui.is_item_hovered(imgui.HoveredFlags_.delay_short.value):
-                    fiat_osd.set_tooltip("Multiply by 10")
+                fiat_osd.set_widget_tooltip("Multiply by 10")
                 cur_pos.y += hello_imgui.em_size(0.7)
                 imgui.set_cursor_pos(cur_pos)
                 if imgui.button("##-", btn_size):
                     changed = True
                     new_value /= 10
-                if imgui.is_item_hovered(imgui.HoveredFlags_.delay_short.value):
-                    fiat_osd.set_tooltip("Divide by 10")
+                fiat_osd.set_widget_tooltip("Divide by 10")
 
                 final_cursor_pos = orig_cursor_pos
                 final_cursor_pos.x += hello_imgui.em_size(3.0)
