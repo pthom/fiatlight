@@ -206,8 +206,7 @@ class FunctionNodeGui:
             if imgui.button(icons_fontawesome_6.ICON_FA_COPY):
                 clipboard_str = data_with_gui.datatype_value_to_clipboard_str()
                 imgui.set_clipboard_text(clipboard_str)
-            if imgui.is_item_hovered():
-                fiat_osd.set_tooltip("Copy value to clipboard")
+            fiat_osd.set_widget_tooltip("Copy value to clipboard")
 
     def _draw_output_header_line(self, idx_output: int) -> None:
         header_elements = self._output_header_elements(idx_output)
@@ -244,8 +243,8 @@ class FunctionNodeGui:
                         imgui.text(header_elements.status_icon)
                         if header_elements.status_icon_tooltips is not None:
                             tooltip_str = "\n".join(header_elements.status_icon_tooltips)
-                            if tooltip_str != "" and imgui.is_item_hovered():
-                                fiat_osd.set_tooltip(tooltip_str)
+                            if tooltip_str != "":
+                                fiat_osd.set_widget_tooltip(tooltip_str)
 
     def _draw_input_header_line(self, input_param: ParamWithGui[Any]) -> None:
         imgui.begin_horizontal("input")
@@ -262,8 +261,8 @@ class FunctionNodeGui:
                         imgui.text(header_elements.status_icon)
                         if header_elements.status_icon_tooltips is not None:
                             tooltip_str = "\n".join(header_elements.status_icon_tooltips)
-                            if tooltip_str != "" and imgui.is_item_hovered():
-                                fiat_osd.set_tooltip(tooltip_str)
+                            if tooltip_str != "":
+                                fiat_osd.set_widget_tooltip(tooltip_str)
 
                     # Param name
                     if header_elements.param_name is not None:
@@ -493,8 +492,7 @@ class FunctionNodeGui:
                     if imgui.button(icons_fontawesome_6.ICON_FA_SQUARE_MINUS):
                         input_param.data_with_gui.value = UnspecifiedValue
                         set_changed = True
-                    if imgui.is_item_hovered():
-                        fiat_osd.set_tooltip("Unset this parameter.")
+                    fiat_osd.set_widget_tooltip("Unset this parameter.")
                     return set_changed
 
             return fn_set_unset_specified_value
@@ -518,8 +516,7 @@ class FunctionNodeGui:
                         if imgui.button(icons_fontawesome_6.ICON_FA_SQUARE_PLUS):
                             input_param.data_with_gui.value = value_to_create
                             set_changed = True
-                        if imgui.is_item_hovered():
-                            fiat_osd.set_tooltip(value_to_create_tooltip)
+                        fiat_osd.set_widget_tooltip(value_to_create_tooltip)
                     return set_changed
 
                 return fn_set_unset_with_default_value
@@ -529,8 +526,7 @@ class FunctionNodeGui:
                 def fn_set_unset_with_no_provider() -> bool:
                     with fontawesome_6_ctx():
                         imgui.button(icons_fontawesome_6.ICON_FA_TRIANGLE_EXCLAMATION)
-                        if imgui.is_item_hovered():
-                            fiat_osd.set_tooltip("No default value provider!")
+                        fiat_osd.set_widget_tooltip("No default value provider!")
                         return False
 
                 return fn_set_unset_with_no_provider
@@ -649,26 +645,22 @@ class FunctionNodeGui:
                 invoke_changed, fn_with_gui.invoke_automatically = imgui.checkbox(
                     "##Auto refresh", self._function_node.function_with_gui.invoke_automatically
                 )
-                if imgui.is_item_hovered():
-                    fiat_osd.set_tooltip("Tick to invoke automatically.")
+                fiat_osd.set_widget_tooltip("Tick to invoke automatically.")
                 if invoke_changed and fn_with_gui.invoke_automatically:
                     self._function_node.invoke_function()
 
             if fn_with_gui.is_dirty():
                 if imgui.button(icons_fontawesome_6.ICON_FA_ROTATE, btn_size):
                     self._function_node.invoke_function()
-                if imgui.is_item_hovered():
-                    fiat_osd.set_tooltip("Refresh needed! Click to refresh.")
+                fiat_osd.set_widget_tooltip("Refresh needed! Click to refresh.")
 
             if not fn_with_gui.invoke_automatically:
                 if not fn_with_gui.is_dirty():
                     imgui.text(icons_fontawesome_6.ICON_FA_CHECK)
-                    if imgui.is_item_hovered():
-                        fiat_osd.set_tooltip("Up to date!")
+                    fiat_osd.set_widget_tooltip("Up to date!")
                 else:
                     imgui.text(icons_fontawesome_6.ICON_FA_TRIANGLE_EXCLAMATION)
-                    if imgui.is_item_hovered():
-                        fiat_osd.set_tooltip("Refresh needed!")
+                    fiat_osd.set_widget_tooltip("Refresh needed!")
 
     # ------------------------------------------------------------------------------------------------------------------
     #      Draw misc elements
