@@ -804,7 +804,7 @@ class FunctionNodeGui:
         node_separator_params.expanded = self._internals_expanded
         node_separator_params.text = "Internals"
         node_separator_params.show_collapse_button = True
-        node_separator_params.show_toggle_collapse_all_button = True
+        node_separator_params.show_toggle_collapse_all_button = self._internals_expanded
         if not self._internals_expanded:
             node_separator_params.text += f" ({len(fn_fiat_internals)} hidden)"
 

@@ -1,11 +1,11 @@
 import copy
 
-from fiatlight.fiat_core.function_with_gui import FunctionWithGui
+from fiatlight.fiat_core.function_with_gui import FunctionWithGui, FunctionWithGuiFactoryFromName
 from fiatlight.fiat_core.function_node import FunctionNode, FunctionNodeLink
 from fiatlight.fiat_types import Function, JsonDict, GlobalsDict, LocalsDict
 from fiatlight.fiat_core.to_gui import _capture_caller_globals_locals, to_function_with_gui_globals_local_captured
 
-from typing import Sequence, Dict, Tuple, Set
+from typing import Sequence, Dict, Tuple, Set, List
 
 
 class FunctionsGraph:
@@ -285,7 +285,7 @@ class FunctionsGraph:
 
         return new_graph.has_cycle()
 
-    def has_cycle(self, visited: Set[FunctionNode] | None = None) -> bool:
+    def has_cycle(self) -> bool:
         """Returns True if the graph has a cycle"""
         for fn in self.functions_nodes:
             if self._has_cycle_from_node(fn):
@@ -396,6 +396,50 @@ class FunctionsGraph:
         for unique_name, fn_json in fn_data.items():
             fn = self._function_node_with_unique_name(unique_name)
             fn.load_user_inputs_from_json(fn_json)
+
+    def save_graph_composition_to_json(self) -> JsonDict:
+        """Saves the graph composition to a json dict"""
+
+        all_function_names: List[str]
+        all_function_names = [fn.function_with_gui.name for fn in self.functions_nodes]
+
+        links_data = []
+        for link in self.functions_nodes_links:
+            src_function_node = link.src_function_node
+            dst_function_node = link.dst_function_node
+            src_function_name = self.function_node_unique_name(src_function_node)
+            dst_function_name = self.function_node_unique_name(dst_function_node)
+            links_data.append(
+                {
+                    "src_function_name": src_function_name,
+                    "dst_function_name": dst_function_name,
+                    "dst_input_name": link.dst_input_name,
+                    "src_output_idx": link.src_output_idx,
+                }
+            )
+        r = {"functions_names": all_function_names, "functions_nodes_links": links_data}
+        return r
+
+    def load_graph_composition_from_json(
+        self, json_data: JsonDict, function_factory: FunctionWithGuiFactoryFromName
+    ) -> None:
+        self.functions_nodes = []
+        self.functions_nodes_links = []
+
+        all_function_names = json_data["functions_names"]
+        for function_name in all_function_names:
+            fn = function_factory(function_name)
+            self._add_function_with_gui(fn)
+
+        links_data = json_data["functions_nodes_links"]
+        for link_data in links_data:
+            src_function_name = link_data["src_function_name"]
+            dst_function_name = link_data["dst_function_name"]
+            dst_input_name = link_data["dst_input_name"]
+            src_output_idx = link_data["src_output_idx"]
+            self.add_link(
+                src_function_name, dst_function_name, dst_input_name=dst_input_name, src_output_idx=src_output_idx
+            )
 
 
 def sandbox() -> None:
