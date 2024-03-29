@@ -3,6 +3,7 @@ import logging
 from fiatlight.fiat_config import get_fiat_config
 from fiatlight.fiat_types import UnspecifiedValue, ErrorValue, Unspecified, Error, JsonDict, DataType, GuiType
 from fiatlight.fiat_core.any_data_with_gui import AnyDataWithGui
+from fiatlight.fiat_core.primitives_gui import IntWithGui, FloatWithGui, BoolWithGui, StrWithGui
 from typing import Any, List, final, Callable, Optional, Generic, Type, TypeAlias
 from dataclasses import dataclass
 from enum import Enum
@@ -132,6 +133,18 @@ class FunctionWithGui:
                     raise TypeError(f"Expected type {gui_type.__name__}, got {type(r).__name__} instead.")
                 return r
         raise ValueError(f"Parameter {name} not found")
+
+    def input_as_float(self, name: str) -> FloatWithGui:
+        return self.input_as(name, FloatWithGui)
+
+    def input_as_int(self, name: str) -> IntWithGui:
+        return self.input_as(name, IntWithGui)
+
+    def input_as_bool(self, name: str) -> BoolWithGui:
+        return self.input_as(name, BoolWithGui)
+
+    def input_as_str(self, name: str) -> StrWithGui:
+        return self.input_as(name, StrWithGui)
 
     def input_of_idx(self, idx: int) -> ParamWithGui[Any]:
         return self._inputs_with_gui[idx]
