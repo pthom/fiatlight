@@ -69,6 +69,28 @@ class FunctionNode:
         r = self.input_node_link(parameter_name) is not None
         return r
 
+    def unlinked_input_names(self) -> List[str]:
+        r = [
+            param_name
+            for param_name in self.function_with_gui.all_inputs_names()
+            if not self.has_input_link(param_name)
+        ]
+        return r
+
+    def unlinked_output_idxs(self) -> List[int]:
+        r = [
+            output_idx
+            for output_idx in range(self.function_with_gui.nb_outputs())
+            if not any(link.src_output_idx == output_idx for link in self.output_links)
+        ]
+        return r
+
+    def nb_unlinked_outputs(self) -> int:
+        return len(self.unlinked_output_idxs())
+
+    def nb_unlinked_inputs(self) -> int:
+        return len(self.unlinked_input_names())
+
     def input_node_link_info(self, parameter_name: str) -> str | None:
         link = self.input_node_link(parameter_name)
         if link is None:
