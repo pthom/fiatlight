@@ -248,7 +248,15 @@ class FunctionNodeGui:
 
         # Show one line value
         if header_elements.value_as_str is not None:
-            fiat_widgets.text_maybe_truncated(header_elements.value_as_str, max_width_chars=40, max_lines=1)
+            with imgui_ctx.push_style_color(
+                imgui.Col_.text.value, get_fiat_config().style.colors[header_elements.value_color]
+            ):
+                fiat_widgets.text_maybe_truncated(
+                    header_elements.value_as_str,
+                    max_width_chars=40,
+                    max_lines=1,
+                    info_tooltip=header_elements.value_tooltip,
+                )
 
         # Align to the right
         imgui.spring()
@@ -329,17 +337,14 @@ class FunctionNodeGui:
         output_with_gui = self._function_node.function_with_gui.output(output_idx)
         r = _OutputHeaderLineElements()
 
-        # fill r.value_as_str and color
+        # fill r.value_as_str and output_pin_color
         value = output_with_gui.value
         if isinstance(value, Unspecified):
             r.value_as_str = "Unspecified!"
-            r.output_pin_color = FiatColorType.OutputPinUnspecified
         elif isinstance(value, Error):
             r.value_as_str = "Error!"
-            r.output_pin_color = FiatColorType.OutputPinWithError
         else:
             r.value_as_str = output_with_gui.datatype_value_to_str(value)
-            r.output_pin_color = FiatColorType.OutputPin
 
         # fill r.status_icon and r.status_icon_tooltips
         has_output_links = len(self._function_node.output_links_for_idx(output_idx)) > 0
@@ -349,6 +354,27 @@ class FunctionNodeGui:
         else:
             r.status_icon = icons_fontawesome_6.ICON_FA_PLUG_CIRCLE_XMARK
             r.status_icon_tooltips = ["Unlinked output!"]
+
+        # fill r.output_pin_color
+        if has_output_links:
+            r.output_pin_color = FiatColorType.OutputPinLinked
+        else:
+            r.output_pin_color = FiatColorType.OutputPinNotLinked
+
+        # fill r.value_color, and r.value_tooltip
+        is_dirty = self._function_node.function_with_gui.is_dirty()
+        if isinstance(value, Error):
+            r.value_color = FiatColorType.OutputValueWithError
+            r.value_tooltip = "Error!"
+        elif is_dirty:
+            r.value_color = FiatColorType.OutputValueDirty
+            r.value_tooltip = "This output is outdated! Please refresh the function."
+        elif isinstance(value, Unspecified):
+            r.value_color = FiatColorType.OutputValueUnspecified
+            r.value_tooltip = "Unspecified!"
+        else:
+            r.value_color = FiatColorType.OutputValueOk
+            r.value_tooltip = "This output is up-to-date"
 
         # fill r.show_details_button and r.details_button_tooltip
         can_present = output_with_gui.can_present_custom()
@@ -401,26 +427,28 @@ class FunctionNodeGui:
 
         # fill r.param_value_color and param_value_tooltip
         if isinstance(input_param.data_with_gui.value, Error):
-            r.param_value_color = FiatColorType.ParameterWithError
+            r.param_value_color = FiatColorType.ParameterValueWithError
             if has_link:
                 r.param_value_tooltip = "Caller transmitted an error!"
             else:
                 r.param_value_tooltip = "Error!"
         elif has_link:
             if isinstance(input_param.data_with_gui.value, Unspecified):
-                r.param_value_color = FiatColorType.ParameterUnspecified
+                r.param_value_color = FiatColorType.ParameterValueUnspecified
                 r.param_value_tooltip = "Caller transmitted an unspecified value!"
             else:
-                r.param_value_color = FiatColorType.ParameterLinked
+                r.param_value_color = FiatColorType.ParameterValueLinked
+                r.param_value_tooltip = "Received from link"
         elif isinstance(input_param.data_with_gui.value, Unspecified):
             if input_param.default_value is not UnspecifiedValue:
-                r.param_value_color = FiatColorType.ParameterUsingDefault
-                r.param_value_tooltip = "Using default value!"
+                r.param_value_color = FiatColorType.ParameterValueUsingDefault
+                r.param_value_tooltip = "Using default value"
             else:
-                r.param_value_color = FiatColorType.ParameterUnspecified
+                r.param_value_color = FiatColorType.ParameterValueUnspecified
                 r.param_value_tooltip = "This parameter needs to be specified!"
         else:
-            r.param_value_color = FiatColorType.ParameterUserSpecified
+            r.param_value_color = FiatColorType.ParameterValueUserSpecified
+            r.param_value_tooltip = "User specified value"
 
         # fill param_name and param_name_tooltip
         r.param_name = input_param.name
@@ -669,17 +697,12 @@ class FunctionNodeGui:
             self._draw_invoke_options()
 
         # Outputs
-        is_dirty = self._function_node.function_with_gui.is_dirty()
-        if is_dirty:
-            imgui.push_style_color(imgui.Col_.text.value, get_fiat_config().style.colors[FiatColorType.TextDirtyOutput])
         for idx_output in range(self._function_node.function_with_gui.nb_outputs()):
             has_link = len(self._function_node.output_links_for_idx(idx_output)) > 0
             if not has_link and not self._outputs_expanded:
                 continue
             with imgui_ctx.begin_group():
                 self._draw_one_output(idx_output, unique_name)
-        if is_dirty:
-            imgui.pop_style_color()
 
     def _draw_one_output(self, idx_output: int, unique_name: str) -> None:
         output_param = self._function_node.function_with_gui.output(idx_output)
@@ -942,7 +965,7 @@ class _InputParamHeaderLineElements:
     status_icon_tooltips: List[str] | None = None
 
     param_name: str | None = None
-    param_value_color: FiatColorType = FiatColorType.ParameterUsingDefault
+    param_value_color: FiatColorType = FiatColorType.ParameterValueUsingDefault
     param_value_tooltip: str | None = None
 
     value_as_str: str | None = None
@@ -954,12 +977,14 @@ class _InputParamHeaderLineElements:
 class _OutputHeaderLineElements:
     """Data to be presented in a header line"""
 
-    output_pin_color: FiatColorType = FiatColorType.OutputPin
+    output_pin_color: FiatColorType = FiatColorType.OutputPinLinked
 
     status_icon: str | None = None
     status_icon_tooltips: List[str] | None = None
 
     value_as_str: str | None = None
+    value_color: FiatColorType = FiatColorType.OutputValueOk
+    value_tooltip: str | None = None
 
     show_details_button: bool = False
     details_button_tooltip: str = ""
