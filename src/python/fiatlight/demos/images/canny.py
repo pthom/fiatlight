@@ -1,6 +1,7 @@
 import fiatlight
 from fiatlight import fiat_core
 from fiatlight.fiat_image import ImageU8_3, ImageU8, ImageU8_GRAY, fiat_img_proc
+from fiatlight.fiat_types import PositiveFloat
 from enum import Enum
 import numpy as np
 
@@ -16,8 +17,8 @@ def make_image() -> ImageU8_3:
 
 def canny(
     image: ImageU8,
-    t_lower: float = 10.0,
-    t_upper: float = 100.0,
+    t_lower: PositiveFloat = 10.0,  # type: ignore
+    t_upper: PositiveFloat = 100.0,  # type: ignore
     aperture_size: int = 5,
     l2_gradient: bool = False,
     blur_sigma: float = 0.0,
@@ -86,16 +87,6 @@ def canny_with_gui() -> fiatlight.FunctionWithGui:
     """
     canny_gui = fiatlight.to_function_with_gui(canny)
 
-    # t_lower between 0 and 255
-    t_lower_input = canny_gui.input_as("t_lower", fiat_core.FloatWithGui)
-    t_lower_input.params.v_min = 0.0
-    t_lower_input.params.v_max = 15000
-
-    # t_upper between 0 and 255
-    t_upper_input = canny_gui.input_as("t_upper", fiat_core.FloatWithGui)
-    t_upper_input.params.v_min = 0.0
-    t_upper_input.params.v_max = 15000
-
     # aperture_size between 3, 5, 7
     aperture_size_input = canny_gui.input_as("aperture_size", fiat_core.IntWithGui)
     aperture_size_input.params.edit_type = fiat_core.IntEditType.input
@@ -108,8 +99,6 @@ def canny_with_gui() -> fiatlight.FunctionWithGui:
 
 def main() -> None:
     functions_graph = fiatlight.FunctionsGraph.create_empty()
-    # We need to pass the locals() and globals() to the add_function_composition method
-    # so that the local MorseShape enum type can be analyzed and transformed into a GUI
     functions_graph.add_function_composition([make_image, canny_with_gui(), dilate])
     functions_graph.add_function(merge_toon_edges)
     functions_graph.add_link("dilate", "merge_toon_edges", "edges_images")

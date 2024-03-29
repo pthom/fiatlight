@@ -306,6 +306,7 @@ class GuiFactories:
             "float": primitives_gui.FloatWithGui,
             "str": primitives_gui.StrWithGui,
             "bool": primitives_gui.BoolWithGui,
+            "fiatlight.fiat_types.fiat_number_types.PositiveFloat": primitives_gui.make_positive_float_with_gui,
             "fiatlight.fiat_types.str_types.FilePath": primitives_gui.FilePathWithGui,
             "fiatlight.fiat_types.str_types.TextPath": primitives_gui.TextPathWithGui,
             "fiatlight.fiat_types.str_types.ImagePath": primitives_gui.ImagePathWithGui,
