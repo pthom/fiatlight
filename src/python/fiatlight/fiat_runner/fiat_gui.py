@@ -161,7 +161,7 @@ class FiatGui:
             hello_imgui.imgui_default_settings.load_default_font_with_font_awesome_icons, _load_font_awesome_6
         )
 
-        top_toolbar_options = hello_imgui.EdgeToolbarOptions(size_em=2.4, window_bg=ImVec4(0.3, 0.3, 0.3, 1.0))
+        top_toolbar_options = hello_imgui.EdgeToolbarOptions(size_em=3.5, window_bg=ImVec4(0.3, 0.3, 0.3, 1.0))
         self.params.runner_params.callbacks.add_edge_toolbar(
             edge_toolbar_type=hello_imgui.EdgeToolbarType.top,
             gui_function=lambda: self._top_toolbar(),
@@ -189,58 +189,70 @@ class FiatGui:
     def _Gui_Section() -> None:  # Dummy function to create a section in the IDE # noqa
         pass
 
+    def _top_toolbar_btn_size(self) -> ImVec2:
+        return hello_imgui.em_to_vec2(2, 2)
+
+    def _panel_save_load_user_inputs(self) -> None:
+        btn_size = self._top_toolbar_btn_size()
+        with imgui_ctx.begin_horizontal("UserInputs"):
+            if imgui.button(icons_fontawesome_6.ICON_FA_FILE_IMPORT, btn_size):
+                self.load_dialog = pfd.open_file(title="Load user inputs")
+                self.load_dialog_callback = self._load_user_inputs_during_execution
+            if imgui.is_item_hovered():
+                imgui.set_tooltip("Load user inputs")
+
+            if imgui.button(icons_fontawesome_6.ICON_FA_FILE_PEN, btn_size):
+                self.save_dialog = pfd.save_file(title="Save user inputs")
+                self.save_dialog_callback = self._save_user_inputs
+            if imgui.is_item_hovered():
+                imgui.set_tooltip("Save user inputs")
+
+    def _panel_save_load_graph_composition(self) -> None:
+        btn_size = self._top_toolbar_btn_size()
+        with imgui_ctx.begin_horizontal("GraphComposition"):
+            if imgui.button(icons_fontawesome_6.ICON_FA_FILE_IMPORT, btn_size):
+                self.load_dialog = pfd.open_file(title="Load graph definition")
+                self.load_dialog_callback = self._load_graph_composition_during_execution
+            if imgui.is_item_hovered():
+                imgui.set_tooltip("Load graph definition")
+
+            if imgui.button(icons_fontawesome_6.ICON_FA_FILE_PEN, btn_size):
+                self.save_dialog = pfd.save_file(title="Save graph definition")
+                self.save_dialog_callback = self._save_graph_composition
+            if imgui.is_item_hovered():
+                imgui.set_tooltip("Save graph definition")
+
+    def _panel_layout_graph(self) -> None:
+        btn_size = self._top_toolbar_btn_size()
+        with imgui_ctx.begin_horizontal("LayoutGraph"):
+            if imgui.button(icons_fontawesome_6.ICON_FA_SITEMAP, btn_size):
+                self._functions_graph_gui.shall_layout_graph = True
+            if imgui.is_item_hovered():
+                imgui.set_tooltip("Layout graph")
+
     def _top_toolbar(self) -> None:
-        btn_size = hello_imgui.em_to_vec2(2, 2)
+        from fiatlight.fiat_widgets.ribbon_panel import ribbon_panel, vertical_separator  # noqa
+
+        btn_size = self._top_toolbar_btn_size()
+
         layout_width = imgui.get_window_width() - hello_imgui.em_size(0.5)
         with imgui_ctx.begin_horizontal("TopToolbar", ImVec2(layout_width, 0)):
             with fontawesome_6_ctx():
                 # Layout graph
-                if imgui.button(icons_fontawesome_6.ICON_FA_SITEMAP, btn_size):
-                    self._functions_graph_gui.shall_layout_graph = True
-                if imgui.is_item_hovered():
-                    imgui.set_tooltip("Layout graph")
+                ribbon_panel("Layout", self._panel_layout_graph)
+                vertical_separator()
 
                 imgui.spring()
+                vertical_separator()
 
                 # Load and save user inputs
-                imgui.begin_vertical("blah")
-                imgui.text("User")
-                imgui.text("Inputs")
-                imgui.end_vertical()
-
-                if imgui.button(icons_fontawesome_6.ICON_FA_FILE_IMPORT, btn_size):
-                    self.load_dialog = pfd.open_file(title="Load user inputs")
-                    self.load_dialog_callback = lambda filename: self._load_user_inputs_during_execution(filename)
-                if imgui.is_item_hovered():
-                    imgui.set_tooltip("Load user inputs")
-
-                if imgui.button(icons_fontawesome_6.ICON_FA_FILE_PEN, btn_size):
-                    self.save_dialog = pfd.save_file(title="Save user inputs")
-                    self.save_dialog_callback = self._save_user_inputs
-                if imgui.is_item_hovered():
-                    imgui.set_tooltip("Save user inputs")
-
-                imgui.dummy(hello_imgui.em_to_vec2(4, 0))
+                ribbon_panel("User Inputs", self._panel_save_load_user_inputs)
+                vertical_separator()
 
                 if self.params.customizable_graph:
-                    imgui.begin_vertical("blah2")
-                    imgui.text("Graph")
-                    imgui.text("Definition")
-                    imgui.end_vertical()
-                    with imgui_ctx.push_id("save_load_graph"):
-                        if imgui.button(icons_fontawesome_6.ICON_FA_FILE_IMPORT, btn_size):
-                            self.load_dialog = pfd.open_file(title="Load graph definition")
-                            self.load_dialog_callback = self._load_graph_composition_during_execution
-                        if imgui.is_item_hovered():
-                            imgui.set_tooltip("Load graph definition")
-
-                        if imgui.button(icons_fontawesome_6.ICON_FA_FILE_PEN, btn_size):
-                            self.save_dialog = pfd.save_file(title="Save graph definition")
-                            self.save_dialog_callback = self._save_graph_composition
-                        if imgui.is_item_hovered():
-                            imgui.set_tooltip("Save graph definition")
-
-                    imgui.dummy(hello_imgui.em_to_vec2(4, 0))
+                    with imgui_ctx.push_id("GraphComposition"):
+                        ribbon_panel("Graph", self._panel_save_load_graph_composition)
+                        vertical_separator()
 
                 if imgui.button(icons_fontawesome_6.ICON_FA_POWER_OFF, btn_size):
                     hello_imgui.get_runner_params().app_shall_exit = True
