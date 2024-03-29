@@ -3,7 +3,7 @@ import logging
 from fiatlight.fiat_config import get_fiat_config
 from fiatlight.fiat_types import UnspecifiedValue, ErrorValue, Unspecified, Error, JsonDict, DataType, GuiType
 from fiatlight.fiat_core.any_data_with_gui import AnyDataWithGui
-from typing import Any, List, final, Callable, Optional, Generic, Type
+from typing import Any, List, final, Callable, Optional, Generic, Type, TypeAlias
 from dataclasses import dataclass
 from enum import Enum
 
@@ -402,3 +402,6 @@ class FunctionWithGui:
             return r
         except (OSError, TypeError):
             return None
+
+
+FunctionWithGuiFactoryFromName: TypeAlias = Callable[[str], FunctionWithGui]

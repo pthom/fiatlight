@@ -1,6 +1,12 @@
 from fiatlight.fiat_core.any_data_gui_callbacks import AnyDataGuiCallbacks
 from fiatlight.fiat_core.any_data_with_gui import AnyDataWithGui
-from fiatlight.fiat_core.function_with_gui import ParamKind, ParamWithGui, OutputWithGui, FunctionWithGui
+from fiatlight.fiat_core.function_with_gui import (
+    ParamKind,
+    ParamWithGui,
+    OutputWithGui,
+    FunctionWithGui,
+    FunctionWithGuiFactoryFromName,
+)
 from fiatlight.fiat_core.to_gui import (
     to_function_with_gui,
     gui_factories,
@@ -47,6 +53,7 @@ __all__ = [
     "gui_factories",
     "GuiFactory",
     "FunctionWithGuiFactory",
+    "FunctionWithGuiFactoryFromName",
     # from function_node
     "FunctionNode",
     "FunctionNodeLink",

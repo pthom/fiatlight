@@ -49,6 +49,12 @@ class FunctionsCollection:
 
         return fn_factories
 
+    def factor_function_from_name(self, name: str) -> FunctionWithGui:
+        for function_info in self._functions:
+            if function_info.name == name:
+                return function_info.function_factory()
+        raise ValueError(f"Function with name {name} not found in collection")
+
 
 class FunctionCollectionGui:
     functions_collection: FunctionsCollection

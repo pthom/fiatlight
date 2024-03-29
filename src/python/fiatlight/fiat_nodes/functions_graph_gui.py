@@ -2,7 +2,7 @@ from __future__ import annotations
 
 
 from fiatlight.fiat_types import JsonDict
-from fiatlight.fiat_core import FunctionsGraph, FunctionWithGui
+from fiatlight.fiat_core import FunctionsGraph, FunctionWithGui, FunctionWithGuiFactoryFromName
 from fiatlight.fiat_nodes.function_node_gui import FunctionNodeGui, FunctionNodeLinkGui
 from fiatlight.fiat_widgets import fiat_osd
 from imgui_bundle import imgui, imgui_node_editor as ed, hello_imgui, ImVec2, imgui_ctx
@@ -16,7 +16,7 @@ class FunctionsGraphGui:
     functions_links_gui: List[FunctionNodeLinkGui]
 
     shall_layout_graph: bool = False
-    can_edit_graph: bool = True
+    can_edit_graph: bool = False
 
     _idx_frame: int = 0
 
@@ -25,7 +25,9 @@ class FunctionsGraphGui:
     # ======================================================================================================================
     def __init__(self, functions_graph: FunctionsGraph) -> None:
         self.functions_graph = functions_graph
+        self._create_function_nodes_and_links_gui()
 
+    def _create_function_nodes_and_links_gui(self) -> None:
         self.function_nodes_gui = []
         for f in self.functions_graph.functions_nodes:
             self.function_nodes_gui.append(FunctionNodeGui(f))
@@ -323,6 +325,15 @@ class FunctionsGraphGui:
             for name, fn in self.all_function_nodes_with_unique_names().items():
                 if name in function_gui_settings_dict:
                     fn.load_gui_options_from_json(function_gui_settings_dict[name])
+
+    def save_graph_composition_to_json(self) -> JsonDict:
+        return self.functions_graph.save_graph_composition_to_json()
+
+    def load_graph_composition_from_json(
+        self, json_data: JsonDict, function_factory: FunctionWithGuiFactoryFromName
+    ) -> None:
+        self.functions_graph.load_graph_composition_from_json(json_data, function_factory)
+        self._create_function_nodes_and_links_gui()
 
 
 def sandbox() -> None:
