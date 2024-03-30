@@ -186,7 +186,8 @@ class ImageChannelsWithGui(ImageWithGui):
 def image_source(image_file: ImagePath, max_image_size: int | None = 600) -> ImageU8:
     """A simple function that reads an image from a file and optionally resizes it if it is too large.
 
-    Since image_file is of type ImagePath, it will be displayed as a file picker in the GUI.
+    Since image_file is of type ImagePath, it will be displayed as a file picker in the GUI
+    (if not linked to another function).
     """
     image = cv2.imread(image_file)
 
