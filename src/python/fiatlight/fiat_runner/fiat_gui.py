@@ -5,6 +5,7 @@ from fiatlight.fiat_widgets import fontawesome_6_ctx, icons_fontawesome_6, fiat_
 from fiatlight.fiat_utils import functional_utils
 from fiatlight.fiat_core.fiat_exception import FiatDisplayedException
 from fiatlight.fiat_runner.functions_collection import FunctionCollectionGui
+from fiatlight.fiat_image.image_types import ImageU8_3
 from imgui_bundle import immapp, imgui, imgui_ctx, ImVec4, portable_file_dialogs as pfd
 from typing import Any, Callable
 from imgui_bundle import hello_imgui, ImVec2, immvision
@@ -146,6 +147,8 @@ class FiatGui:
 
     _functions_collection_gui: FunctionCollectionGui
 
+    _logo_image: ImageU8_3
+
     # ==================================================================================================================
     #                                  Constructor
     # ==================================================================================================================
@@ -167,6 +170,13 @@ class FiatGui:
         self._functions_collection_gui = FunctionCollectionGui()
 
         self._functions_collection_gui.on_add_function = lambda fn: self._functions_graph_gui.add_function_with_gui(fn)
+
+        # Read the logo image
+        import cv2
+        from fiatlight import demo_assets_dir
+
+        logo_path = demo_assets_dir() + "/logo/logo1.jpg"
+        self._logo_image = cv2.imread(logo_path)  # type: ignore
 
     # ==================================================================================================================
     #                                  Run
@@ -297,6 +307,14 @@ class FiatGui:
         ribbon_panel("Refresh!", ribbon_fn)
         vertical_separator()
 
+    def _display_logo(self) -> None:
+        logo_display_size = int(hello_imgui.em_size(3.0))
+        immvision.image_display("##logo", self._logo_image, (logo_display_size, logo_display_size))
+        if imgui.begin_item_tooltip():
+            logo_display_size_big = int(hello_imgui.em_size(40))
+            immvision.image_display("##logo_big", self._logo_image, (logo_display_size_big, logo_display_size_big))
+            imgui.end_tooltip()
+
     def _top_toolbar(self) -> None:
         from fiatlight.fiat_widgets.ribbon_panel import ribbon_panel, vertical_separator  # noqa
 
@@ -305,6 +323,9 @@ class FiatGui:
         layout_width = imgui.get_window_width() - hello_imgui.em_size(0.5)
         with imgui_ctx.begin_horizontal("TopToolbar", ImVec2(layout_width, 0)):
             with fontawesome_6_ctx():
+                self._display_logo()
+                imgui.dummy(ImVec2(hello_imgui.em_size(3), 0))
+
                 # Layout graph
                 ribbon_panel("Graph", self._panel_graph)
                 vertical_separator()
