@@ -423,6 +423,6 @@ def fiat_run(functions_graph: FunctionsGraph, params: FiatGuiParams | None = Non
     fiat_gui.run()
 
 
-def fiat_run_composition(composition: List[Callable], params: FiatGuiParams | None = None) -> None:
+def fiat_run_composition(composition: List[Callable[..., Any]], params: FiatGuiParams | None = None) -> None:
     functions_graph = FunctionsGraph.from_function_composition(composition)
     fiat_run(functions_graph, params)

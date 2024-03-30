@@ -2,7 +2,7 @@ from __future__ import annotations
 from fiatlight.fiat_types import Error, Unspecified, UnspecifiedValue, BoolFunction, JsonDict, ErrorValue
 from fiatlight.fiat_core import FunctionNode, FunctionNodeLink, AnyDataWithGui
 from fiatlight.fiat_config import FiatColorType, get_fiat_config
-from fiatlight.fiat_core.function_with_gui import ParamWithGui
+from fiatlight.fiat_core.param_with_gui import ParamWithGui
 from imgui_bundle import (
     imgui,
     imgui_node_editor as ed,

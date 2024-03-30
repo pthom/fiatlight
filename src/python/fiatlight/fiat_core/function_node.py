@@ -1,4 +1,5 @@
-from fiatlight.fiat_core.function_with_gui import FunctionWithGui, ParamWithGui
+from fiatlight.fiat_core.function_with_gui import FunctionWithGui
+from fiatlight.fiat_core.param_with_gui import ParamWithGui
 from fiatlight.fiat_types import JsonDict
 from typing import Any, List
 
