@@ -26,7 +26,7 @@ def present_plot(values: OneDimFloatArray) -> None:
 
 
 def main() -> None:
-    from fiatlight import FunctionsGraph, fiat_run
+    from fiatlight import FunctionsGraph, fiat_run_graph
 
     graph = FunctionsGraph.from_function_composition([make_range, make_sin])
 
@@ -35,7 +35,7 @@ def main() -> None:
     # set the range of the stop parameter of make_range to 100
     graph.function_with_gui("make_range").input_as_float("stop").params.v_max = 100
 
-    fiat_run(graph)
+    fiat_run_graph(graph)
 
 
 if __name__ == "__main__":

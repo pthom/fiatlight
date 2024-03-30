@@ -1,4 +1,4 @@
-from fiatlight.demos.ai.stable_diffusion_xl_wrapper import stable_diffusion_xl
+from fiatlight.demos.ai.stable_diffusion_xl_wrapper import invoke_stable_diffusion_xl
 import cv2
 
 """This script will download the model weights to ~/.cache/huggingface/transformers on the first run.
@@ -8,5 +8,5 @@ Apart from this, it is useless.
 """
 
 
-image = stable_diffusion_xl("A cinematic shot of a baby racoon wearing an intricate italian priest robe.")
+image = invoke_stable_diffusion_xl("A cinematic shot of a baby racoon wearing an intricate italian priest robe.")  # type: ignore
 cv2.imwrite("image.jpg", image)

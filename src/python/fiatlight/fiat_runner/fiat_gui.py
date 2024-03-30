@@ -1,6 +1,6 @@
 from fiatlight.fiat_nodes.function_node_gui import FunctionNodeGui
 from fiatlight.fiat_nodes.functions_graph_gui import FunctionsGraphGui
-from fiatlight.fiat_core import FunctionsGraph
+from fiatlight.fiat_core import FunctionsGraph, FunctionWithGui
 from fiatlight.fiat_widgets import fontawesome_6_ctx, icons_fontawesome_6, fiat_osd
 from fiatlight.fiat_utils import functional_utils
 from fiatlight.fiat_core.fiat_exception import FiatDisplayedException
@@ -418,11 +418,16 @@ class FiatGui:
         self._save_data(filename, _SaveType.GraphComposition)
 
 
-def fiat_run(functions_graph: FunctionsGraph, params: FiatGuiParams | None = None) -> None:
+def fiat_run_graph(functions_graph: FunctionsGraph, params: FiatGuiParams | None = None) -> None:
     fiat_gui = FiatGui(functions_graph, params)
     fiat_gui.run()
 
 
+def fiat_run(fn: Callable[..., Any] | FunctionWithGui, params: FiatGuiParams | None = None) -> None:
+    functions_graph = FunctionsGraph.from_function(fn)
+    fiat_run_graph(functions_graph, params)
+
+
 def fiat_run_composition(composition: List[Callable[..., Any]], params: FiatGuiParams | None = None) -> None:
     functions_graph = FunctionsGraph.from_function_composition(composition)
-    fiat_run(functions_graph, params)
+    fiat_run_graph(functions_graph, params)

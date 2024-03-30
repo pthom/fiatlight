@@ -184,7 +184,7 @@ class EnumWithGui(AnyDataWithGui[Enum]):
 
 # ---------------------------- Sandbox ----------------------------
 def sandbox_optional() -> None:
-    from fiatlight import fiat_run, FunctionsGraph
+    from fiatlight import fiat_run_graph, FunctionsGraph
 
     def foo(x: int | None) -> int:
         if x is None:
@@ -193,11 +193,11 @@ def sandbox_optional() -> None:
             return x + 2
 
     graph = FunctionsGraph.from_function_composition([foo])
-    fiat_run(graph)
+    fiat_run_graph(graph)
 
 
 def sandbox_enum() -> None:
-    from fiatlight import fiat_run, FunctionsGraph
+    from fiatlight import fiat_run_graph, FunctionsGraph
 
     class MyEnum(Enum):
         A = 1
@@ -208,7 +208,7 @@ def sandbox_enum() -> None:
         return x.value
 
     graph = FunctionsGraph.from_function_composition([foo])
-    fiat_run(graph)
+    fiat_run_graph(graph)
 
 
 if __name__ == "__main__":

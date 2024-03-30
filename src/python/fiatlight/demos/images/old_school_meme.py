@@ -1,16 +1,19 @@
-import os
-
-import numpy as np
-
 import fiatlight
-from fiatlight import FunctionsGraph, fiat_run
 from fiatlight.fiat_image import ImageU8
+from fiatlight.fiat_types import Float_0_1, ColorRgb
+from typing import NewType
 
-from fiatlight.fiat_types import Float_0_1, ImagePath, Int_0_100, ColorRgb
-
-import cv2
 from PIL import Image, ImageDraw, ImageFont
 from enum import Enum
+
+import numpy as np
+import os
+
+
+# A synonym for int, but with a font size, between 20 and 100
+# (this will create a slider in the GUI)
+FontSize = NewType("FontSize", int)
+fiatlight.gui_factories().register_bound_int((5, 100), "FontSize")
 
 
 class MemeFont(Enum):
@@ -19,27 +22,16 @@ class MemeFont(Enum):
     SaoTorpes = "fonts/sao_torpes/SaoTorpes.otf"
 
 
-def image_source(image_file: ImagePath = fiatlight.demo_assets_dir() + "/images/house.jpg") -> ImageU8:  # type: ignore
-    """A simple function that reads an image from a file and returns it as a numpy array."""
-    image = cv2.imread(image_file)
-    if image.shape[0] > 1000:
-        k = 1000 / image.shape[0]
-        image = cv2.resize(image, (0, 0), fx=k, fy=k)
-    return image  # type: ignore
-
-
-def oil_paint(image: ImageU8, size: int = 1, dynRatio: int = 3) -> ImageU8:
-    """Applies oil painting effect to an image, using the OpenCV xphoto module."""
-    return cv2.xphoto.oilPainting(image, size, dynRatio, cv2.COLOR_BGR2HSV)  # type: ignore
+fiatlight.gui_factories().register_enum(MemeFont)
 
 
 def add_meme_text(
     image: ImageU8,
-    text: str = "Fiat What?",
-    font_size: Int_0_100 = 40,  # type: ignore
+    text: str = "Hello!",
+    font_size: FontSize = FontSize(20),
     font_type: MemeFont = MemeFont.Anton,
-    x: Float_0_1 = Float_0_1(0.05),
-    y: Float_0_1 = Float_0_1(0.7),
+    x: Float_0_1 = Float_0_1(0.35),
+    y: Float_0_1 = Float_0_1(0.75),
     text_color: ColorRgb = (255, 255, 255),  # type: ignore
     outline_color: ColorRgb = (0, 0, 0),  # type: ignore
 ) -> ImageU8:
@@ -90,16 +82,16 @@ def add_meme_text(
     return image_with_text
 
 
-def main() -> None:
-    from fiatlight.demos.ai.stable_diffusion_xl_wrapper import stable_diffusion_xl_gui
+def sandbox() -> None:
+    from fiatlight.demos.ai.stable_diffusion_xl_wrapper import invoke_stable_diffusion_xl
     from fiatlight.fiat_image import image_source
 
-    debug = False
-    if not debug:
-        fiatlight.fiat_run_composition([stable_diffusion_xl_gui(), add_meme_text])  # type: ignore
+    use_stable_diffusion = False
+    if use_stable_diffusion:
+        fiatlight.fiat_run_composition([invoke_stable_diffusion_xl, add_meme_text])
     else:
         fiatlight.fiat_run_composition([image_source, add_meme_text])
 
 
 if __name__ == "__main__":
-    main()
+    sandbox()

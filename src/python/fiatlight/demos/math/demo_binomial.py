@@ -1,4 +1,3 @@
-from fiatlight import FunctionsGraph, fiat_run
 from imgui_bundle import implot, hello_imgui, imgui_knobs
 
 import numpy as np
@@ -38,15 +37,15 @@ def edit_n(n: int) -> Tuple[bool, int]:
 
 
 def main() -> None:
-    functions_graph = FunctionsGraph.from_function(random_binomial)
+    import fiatlight
 
-    random_binomial_gui = functions_graph.function_with_gui()
+    random_binomial_gui = fiatlight.to_function_with_gui(random_binomial)
     random_binomial_gui.output().set_present_custom_callback(present_histogram)
 
     random_binomial_gui.input("p").set_edit_callback(edit_probability)
     random_binomial_gui.input("n").set_edit_callback(edit_n)
 
-    fiat_run(functions_graph)
+    fiatlight.fiat_run(random_binomial_gui)
 
 
 if __name__ == "__main__":

@@ -1,6 +1,9 @@
-import fiatlight
+# https://huggingface.co/stabilityai/sdxl-turbo
+# SDXL-Turbo is a distilled version of SDXL 1.0, trained for real-time synthesis
+
 from fiatlight.fiat_image import ImageU8
 from fiatlight.fiat_utils import LazyModule
+from fiatlight import fiat_types
 
 import numpy as np
 from enum import Enum
@@ -82,9 +85,9 @@ class _StableDiffusionXLWrapper:
 _stable_diffusion_xl_wrapper: _StableDiffusionXLWrapper | None = None
 
 
-def stable_diffusion_xl(
-    prompt: str,
-    seed: int = 42,
+def invoke_stable_diffusion_xl(
+    prompt: fiat_types.Prompt,
+    seed: fiat_types.Int_0_1000 = 0,  # type: ignore
     # num_inference_steps: int = 1,
     # guidance_scale: float = 0.0,
 ) -> ImageU8:
@@ -99,29 +102,15 @@ def stable_diffusion_xl(
     if _stable_diffusion_xl_wrapper is None:
         _stable_diffusion_xl_wrapper = _StableDiffusionXLWrapper()
     return _stable_diffusion_xl_wrapper.query(prompt, seed)
-    # return _stable_diffusion_xl_wrapper.query(prompt, seed, num_inference_steps, guidance_scale)
 
 
-def stable_diffusion_xl_gui() -> fiatlight.FunctionWithGui:
-    """Convert stable_diffusion_xl to a function with GUI,
-    then customize min / max values for the input parameters in the GUI of the stable_diffusion_xl node
-    """
-    stable_diffusion_xl_gui = fiatlight.to_function_with_gui(stable_diffusion_xl)
-    # Do not invoke automatically, since the image creation can be slow (about 1 second)
-    stable_diffusion_xl_gui.invoke_automatically = False
-    # stable_diffusion_xl_gui.invoke_automatically_can_set = False
-
-    prompt_input = stable_diffusion_xl_gui.input("prompt")
-    assert isinstance(prompt_input, fiatlight.fiat_core.StrWithGui)
-    prompt_input.params.edit_type = fiatlight.fiat_core.StrEditType.multiline
-    prompt_input.params.width_em = 60
-
-    return stable_diffusion_xl_gui
+invoke_stable_diffusion_xl.invoke_automatically = False  # type: ignore
 
 
 def main_test_sdxl() -> None:
-    graph = fiatlight.FunctionsGraph.from_function_composition([stable_diffusion_xl_gui()])
-    fiatlight.fiat_run(graph)
+    import fiatlight
+
+    fiatlight.fiat_run(invoke_stable_diffusion_xl)
 
 
 if __name__ == "__main__":

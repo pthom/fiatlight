@@ -14,7 +14,7 @@ def main() -> None:
     # prompt_input.params.width_em = 60
 
     graph = fiatlight.FunctionsGraph.from_function_composition([f_gui])
-    fiatlight.fiat_run(graph)
+    fiatlight.fiat_run_graph(graph)
 
 
 if __name__ == "__main__":
