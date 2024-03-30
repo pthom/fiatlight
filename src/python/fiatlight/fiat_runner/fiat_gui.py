@@ -16,11 +16,43 @@ from typing import List, Tuple
 from enum import Enum, auto
 
 
-class _SaveType(Enum):
-    UserInputs = auto()
-    GraphComposition = auto()
+# ==================================================================================================================
+#                                  Logging
+# ==================================================================================================================
+class HelloImGuiLogHandler(logging.Handler):
+    def emit(self, record: Any) -> None:
+        # Map the logging level to the LogLevel enum
+        level = hello_imgui.LogLevel.info
+        if record.levelno == logging.DEBUG:
+            level = hello_imgui.LogLevel.debug
+        elif record.levelno == logging.WARNING:
+            level = hello_imgui.LogLevel.warning
+        elif record.levelno == logging.ERROR:
+            level = hello_imgui.LogLevel.error
+        # Call the log function
+        msg = self.format(record)
+        hello_imgui.log(level, msg)
 
 
+# Create a logger
+root_logger = logging.getLogger()
+root_logger.setLevel(logging.INFO)  # Or whatever level you want
+
+# Create the HelloImGuiLogHandler
+hello_imgui_log_handler = HelloImGuiLogHandler()
+hello_imgui_log_handler.setFormatter(logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s"))
+root_logger.addHandler(hello_imgui_log_handler)
+
+# Create a console handler
+console_handler = logging.StreamHandler()
+console_handler.setFormatter(logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s"))
+root_logger.addHandler(console_handler)
+
+
+# ==================================================================================================================
+#                                  _main_python_module_name
+#                      (used to set the window title and settings file name)
+# ==================================================================================================================
 def _main_python_module_name() -> str:
     import inspect
 
@@ -37,6 +69,9 @@ def _main_python_module_name() -> str:
     return "fiatlight"
 
 
+# ==================================================================================================================
+#                                  FiatGuiParams
+# ==================================================================================================================
 class FiatGuiParams:
     runner_params: hello_imgui.RunnerParams
     addons: immapp.AddOnsParams
@@ -82,6 +117,14 @@ class FiatGuiParams:
             runner_params.imgui_window_params.show_menu_view = True
 
         self._runner_params = runner_params
+
+
+# ==================================================================================================================
+#                                  FiatGui
+# ==================================================================================================================
+class _SaveType(Enum):
+    UserInputs = auto()
+    GraphComposition = auto()
 
 
 class FiatGui:
@@ -323,7 +366,10 @@ class FiatGui:
             gui_function_=lambda: immvision.inspector_show(),
             # is_visible_=False,
         )
-        r = [main_window, image_inspector]
+        logger_window = hello_imgui.DockableWindow(
+            label_="Log", dock_space_name_=self._info_dock_space_id, gui_function_=lambda: hello_imgui.log_gui()
+        )
+        r = [main_window, image_inspector, logger_window]
         return r
 
     def _docking_splits(self, initial_dock: str = "MainDockSpace") -> List[hello_imgui.DockingSplit]:
@@ -332,7 +378,7 @@ class FiatGui:
             initial_dock_=self._main_dock_space_id,
             new_dock_=self._info_dock_space_id,
             direction_=imgui.Dir_.down,
-            ratio_=0.25,
+            ratio_=0.15,
         )
         return [split_main_info]
 
