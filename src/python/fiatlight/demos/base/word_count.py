@@ -1,12 +1,39 @@
+"""The word count problem.
+
+This is a simple example that provides a solution to a famous computer challenge:
+    > Read a file of text, determine the n most frequently used words,
+    > and print out a sorted list of those words along with their frequencies.
+
+References:
+* https://rosettacode.org/wiki/Word_frequency#C.2B.2B
+
+    Doug McIlroy's solution is a classic example of the Unix philosophy:
+
+    ```bash
+    tr -cs A-Za-z '\n' |     # Replace non-alphabetic characters with newlines
+    tr A-Z a-z |             # Convert to lowercase
+    sort |                   # Sort the words
+    uniq -c |                # Count the number of times each word appears
+    sort -rn |               # Sort by frequency
+    sed ${1}q                # Print the first n lines
+    ```
+
+Here, the solution is implemented as a composition of functions, each of which is a step in the solution.
+With fiatlight, we can easily examine the intermediate results of each step.
+"""
 from typing import List, Tuple
 from fiatlight.fiat_types import TextPath
 
 
+# WordWithCount is a tuple of a word and the number of times it appears.
 WordWithCount = Tuple[str, int]
 
 
 def get_text(text_file: TextPath) -> str:
-    """This is our source of text."""
+    """This is our source of text.
+    Since text_file is a TextPath (a type alias for str), it will be displayed
+    as a widget in the UI, allowing the user to select a text file.
+    """
     with open(text_file, "r") as f:
         r = f.read()
     return r
@@ -37,6 +64,11 @@ def remove_empty_words(words: List[str]) -> List[str]:
 
 
 def run_length_encode(input_list: List[str]) -> List[WordWithCount]:
+    """Run-length encode a list of words:
+
+    Count the number of times each word appears in the list. The input list must be sorted.
+    Returns a list of tuples, where each tuple contains a word and the number of times it appears.
+    """
     r: List[WordWithCount] = []
 
     for i in range(len(input_list)):
@@ -51,6 +83,8 @@ def run_length_encode(input_list: List[str]) -> List[WordWithCount]:
 
 
 def sort_word_with_counts(words: List[WordWithCount]) -> List[WordWithCount]:
+    """Sort a list of words by frequency, in descending order,
+    so that the most frequent words come first."""
     r = sorted(words, key=lambda w: w[1], reverse=True)
     return r
 
