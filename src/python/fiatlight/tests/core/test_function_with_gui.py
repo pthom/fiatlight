@@ -17,7 +17,7 @@ def test_create_function_with_gui() -> None:
             super().__init__()
             self.callbacks.edit = lambda: False
 
-    gui_factories().add_factory("Foo", FooWithGui)
+    gui_factories().register_factory("Foo", FooWithGui)
 
     def add(foo: Foo) -> int:
         return foo.a

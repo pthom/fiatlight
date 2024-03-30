@@ -56,6 +56,7 @@ def add_meme_text(
 
     :return: The image with the text added.
     """
+
     image_pil = Image.fromarray(image)
 
     this_dir = os.path.dirname(os.path.abspath(__file__))
@@ -90,18 +91,14 @@ def add_meme_text(
 
 
 def main() -> None:
+    from fiatlight.demos.ai.stable_diffusion_xl_wrapper import stable_diffusion_xl_gui
+    from fiatlight.fiat_image import image_source
+
     debug = False
     if not debug:
-        from fiatlight.demos.ai.stable_diffusion_xl_wrapper import stable_diffusion_xl_gui
-
-        graph = FunctionsGraph.from_function_composition(
-            [stable_diffusion_xl_gui(), add_meme_text],
-            # [image_source, add_meme_text],
-        )
+        fiatlight.fiat_run_composition([stable_diffusion_xl_gui(), add_meme_text])  # type: ignore
     else:
-        graph = FunctionsGraph.from_function_composition([image_source, add_meme_text])
-
-    fiat_run(graph)
+        fiatlight.fiat_run_composition([image_source, add_meme_text])
 
 
 if __name__ == "__main__":

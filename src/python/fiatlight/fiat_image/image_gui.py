@@ -1,6 +1,6 @@
-from fiatlight.fiat_types import JsonDict
+from fiatlight.fiat_types import JsonDict, ImagePath
 from fiatlight.fiat_core import AnyDataWithGui
-from fiatlight.fiat_image.image_types import Image
+from fiatlight.fiat_image.image_types import Image, ImageU8
 from imgui_bundle import immvision, imgui
 from imgui_bundle import portable_file_dialogs as pfd
 
@@ -181,3 +181,18 @@ class ImageChannelsWithGui(ImageWithGui):
 
     def __init__(self) -> None:
         super().__init__(show_channels=True)
+
+
+def image_source(image_file: ImagePath, max_image_size: int | None = 600) -> ImageU8:
+    """A simple function that reads an image from a file and optionally resizes it if it is too large.
+
+    Since image_file is of type ImagePath, it will be displayed as a file picker in the GUI.
+    """
+    image = cv2.imread(image_file)
+
+    if max_image_size is not None:
+        if image.shape[0] > max_image_size or image.shape[1] > max_image_size:
+            k = max_image_size / max(image.shape[0], image.shape[1])
+            assert k > 0.0
+            image = cv2.resize(image, None, fx=k, fy=k)
+    return image  # type: ignore
