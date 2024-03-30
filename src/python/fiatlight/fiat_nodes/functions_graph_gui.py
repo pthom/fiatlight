@@ -44,26 +44,32 @@ class FunctionsGraphGui:
     def _Drawing_Section() -> None:  # Dummy function to create a section in the IDE # noqa
         pass
 
-    def draw(self) -> None:
-        def draw_nodes() -> None:
+    def draw(self) -> bool:
+        def draw_nodes() -> bool:
+            changed = False
             for fn in self.function_nodes_gui:
                 imgui.push_id(str(id(fn)))
-                fn.draw_node(self.functions_graph.function_node_unique_name(fn._function_node))  # noqa
+                if fn.draw_node(self.functions_graph.function_node_unique_name(fn._function_node)):
+                    changed = True
                 imgui.pop_id()
+            return changed
 
         def draw_links() -> None:
             for link in self.functions_links_gui:
                 link.draw()
 
         self._layout_graph_if_required()
+        nodes_changed = False
         with imgui_ctx.push_obj_id(self):
             ed.begin("FunctionsGraphGui")
-            draw_nodes()
+            if draw_nodes():
+                nodes_changed = True
             draw_links()
             if self.can_edit_graph:
                 self._handle_graph_edition()
             ed.end()
         self._idx_frame += 1
+        return nodes_changed
 
     def _handle_graph_edition(self) -> None:
         #

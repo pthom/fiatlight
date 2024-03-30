@@ -6,7 +6,7 @@ This avoids issues with the canvas's zooming feature, which is incompatible with
 """
 
 from fiatlight.fiat_types import VoidFunction, BoolFunction
-from imgui_bundle import imgui, ImVec2, imgui_node_editor, hello_imgui
+from imgui_bundle import imgui, ImVec2, imgui_node_editor, hello_imgui, imgui_ctx, ImVec4
 from dataclasses import dataclass
 
 
@@ -301,6 +301,127 @@ def set_popup_gui(gui_function: VoidFunction) -> None:
 
 
 # ======================================================================================================================
+# OSD Notifications
+# ======================================================================================================================
+_NOTIF_DURATION = 5.0
+_NOTIF_SIZE_EM = ImVec2(22, 4)
+
+
+class _OsdNotificationData:
+    gui: VoidFunction
+    start_time: float
+    identifier: str
+
+    def __init__(self, gui: VoidFunction, identifier: str) -> None:
+        self.gui = gui
+        self.identifier = identifier
+        self.start_time = imgui.get_time()
+
+    def _alpha_transparency(self) -> float:
+        ttl_ratio = self._ttl() / _NOTIF_DURATION
+        k = 0.2
+        if ttl_ratio > k:
+            return 1.0
+        return ttl_ratio / k
+
+    def _ttl(self) -> float:
+        return _NOTIF_DURATION - (imgui.get_time() - self.start_time)
+
+    def render(self, position: ImVec2) -> None:
+        transparency = self._alpha_transparency()
+        imgui.set_next_window_pos(position, imgui.Cond_.always.value)
+        imgui.set_next_window_bg_alpha(0.5 * transparency)
+        size_pixels = hello_imgui.em_to_vec2(_NOTIF_SIZE_EM.x, _NOTIF_SIZE_EM.y)
+        imgui.set_next_window_size(size_pixels, imgui.Cond_.always.value)
+        flags = (
+            imgui.WindowFlags_.no_collapse.value
+            | imgui.WindowFlags_.no_title_bar.value
+            | imgui.WindowFlags_.no_move.value
+            | imgui.WindowFlags_.no_resize.value
+            | imgui.WindowFlags_.no_scrollbar.value
+            | imgui.WindowFlags_.no_saved_settings.value
+            | imgui.WindowFlags_.no_focus_on_appearing.value
+        )
+        window_label = "##Notification" + self.identifier + str(id(self))
+        with imgui_ctx.begin(window_label, False, flags):
+            # change text color
+            txt_color = imgui.get_style().color_(imgui.Col_.text.value)
+            txt_transparent_color = ImVec4(txt_color.x, txt_color.y, txt_color.z, txt_color.w * transparency)
+            with imgui_ctx.push_style_color(imgui.Col_.text.value, txt_transparent_color):
+                self.gui()
+
+    def shall_close(self) -> bool:
+        return imgui.get_time() - self.start_time > _NOTIF_DURATION
+
+
+class _OsdNotifications:
+    """Private data for OSD widgets."""
+
+    notifications: list[_OsdNotificationData]
+
+    def __init__(self) -> None:
+        self.notifications = []
+
+    def _render_notifications(self) -> None:
+        self._remove_old_notifs()
+
+        # Render notifications
+        num_notifications = len(self.notifications)
+        if num_notifications == 0:
+            return
+        window_br_corner = ImVec2(
+            imgui.get_window_pos().x + imgui.get_window_size().x, imgui.get_window_pos().y + imgui.get_window_size().y
+        )
+        notification_width = hello_imgui.em_size(_NOTIF_SIZE_EM.x)
+        notification_height = hello_imgui.em_size(_NOTIF_SIZE_EM.y)
+        current_window_position = ImVec2(window_br_corner.x - notification_width, window_br_corner.y)
+        for notification in self.notifications:
+            current_window_position.y -= notification_height
+            notification.render(current_window_position)
+
+    def _remove_old_notifs(self) -> None:
+        new_notifications = []
+        for notification in self.notifications:
+            if not notification.shall_close():
+                new_notifications.append(notification)
+        self.notifications = new_notifications
+
+    def render(self) -> None:
+        self._render_notifications()
+
+    def _already_has_notification(self, identifier: str) -> bool:
+        for notification in self.notifications:
+            if notification.identifier == identifier:
+                return True
+        return False
+
+    def add_notification_str(self, identifier: str, notification: str) -> None:
+        if self._already_has_notification(identifier):
+            return
+
+        def gui() -> None:
+            imgui.text(notification)
+
+        self.notifications.append(_OsdNotificationData(gui, identifier))
+
+    def add_notification_gui(self, identifier: str, gui_function: VoidFunction) -> None:
+        if self._already_has_notification(identifier):
+            return
+        self.notifications.append(_OsdNotificationData(gui_function, identifier))
+
+
+_OSD_NOTIFICATIONS = _OsdNotifications()
+
+
+def add_notification_str(identifier: str, notification: str) -> None:
+    _OSD_NOTIFICATIONS.add_notification_str(identifier, notification)
+
+
+def add_notification_gui(identifier: str, gui_function: VoidFunction) -> None:
+    _OSD_NOTIFICATIONS.add_notification_gui(identifier, gui_function)
+
+
+# ======================================================================================================================
 # Global render
 # ======================================================================================================================
 def _render_all_osd() -> None:
@@ -308,3 +429,4 @@ def _render_all_osd() -> None:
     _OSD_TOOLTIP.render()
     _OSD_DETACHED_WINDOWS.render()
     _OSD_POPUP.render()
+    _OSD_NOTIFICATIONS.render()

@@ -169,7 +169,8 @@ class FunctionNodeGui:
     def _Draw_Node_Section() -> None:  # Dummy function to create a section in the IDE # noqa
         pass
 
-    def draw_node(self, unique_name: str) -> None:
+    def draw_node(self, unique_name: str) -> bool:
+        inputs_changed: bool = False
         with imgui_ctx.push_obj_id(self._function_node):
             with ed_ctx.begin_node(self._node_id):
                 with imgui_ctx.begin_vertical("node_content"):
@@ -191,6 +192,7 @@ class FunctionNodeGui:
                     # Outputs
                     self._draw_function_outputs(unique_name)
             self._node_size = ed.get_node_size(self._node_id)
+        return inputs_changed
 
     # ------------------------------------------------------------------------------------------------------------------
     #  Draw title and header lines

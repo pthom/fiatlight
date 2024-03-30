@@ -136,7 +136,8 @@ class FiatGui:
         if self.params.customizable_graph:
             self._load_graph_composition_at_startup()
         self._load_user_inputs_at_startup()
-        self._functions_graph_gui.functions_graph.invoke_all_functions()
+        self._functions_graph_gui.functions_graph.invoke_all_functions(also_invoke_not_automatic_functions=False)
+        self._notify_if_dirty_functions()
 
     def _before_exit(self) -> None:
         if self.params.customizable_graph:
@@ -189,7 +190,8 @@ class FiatGui:
     def _Gui_Section() -> None:  # Dummy function to create a section in the IDE # noqa
         pass
 
-    def _top_toolbar_btn_size(self) -> ImVec2:
+    @staticmethod
+    def _top_toolbar_btn_size() -> ImVec2:
         return hello_imgui.em_to_vec2(2, 2)
 
     def _panel_save_load_user_inputs(self) -> None:
@@ -222,13 +224,35 @@ class FiatGui:
             if imgui.is_item_hovered():
                 imgui.set_tooltip("Save graph definition")
 
-    def _panel_layout_graph(self) -> None:
+    def _panel_graph(self) -> None:
         btn_size = self._top_toolbar_btn_size()
-        with imgui_ctx.begin_horizontal("LayoutGraph"):
+        with imgui_ctx.begin_horizontal("_panel_graph"):
             if imgui.button(icons_fontawesome_6.ICON_FA_SITEMAP, btn_size):
                 self._functions_graph_gui.shall_layout_graph = True
             if imgui.is_item_hovered():
                 imgui.set_tooltip("Layout graph")
+
+    def _show_ribbon_dirty_if_needed(self) -> None:
+        has_dirty_functions = self._functions_graph_gui.functions_graph.has_dirty_functions()
+        if not has_dirty_functions:
+            return
+
+        from fiatlight.fiat_widgets.ribbon_panel import ribbon_panel, vertical_separator  # noqa
+        from fiatlight.fiat_config import FiatColorType, get_fiat_config
+
+        def ribbon_fn() -> None:
+            btn_size = self._top_toolbar_btn_size()
+            dirty_color = get_fiat_config().style.colors[FiatColorType.OutputValueDirty]
+            with imgui_ctx.push_style_color(imgui.Col_.text.value, dirty_color):
+                if imgui.button(icons_fontawesome_6.ICON_FA_ROTATE, btn_size):
+                    self._functions_graph_gui.functions_graph.invoke_all_functions(
+                        also_invoke_not_automatic_functions=True
+                    )
+            if imgui.is_item_hovered():
+                imgui.set_tooltip("Some functions needs to be refreshed! Click to recompute them.")
+
+        ribbon_panel("Refresh!", ribbon_fn)
+        vertical_separator()
 
     def _top_toolbar(self) -> None:
         from fiatlight.fiat_widgets.ribbon_panel import ribbon_panel, vertical_separator  # noqa
@@ -239,11 +263,12 @@ class FiatGui:
         with imgui_ctx.begin_horizontal("TopToolbar", ImVec2(layout_width, 0)):
             with fontawesome_6_ctx():
                 # Layout graph
-                ribbon_panel("Layout", self._panel_layout_graph)
+                ribbon_panel("Graph", self._panel_graph)
                 vertical_separator()
 
                 imgui.spring()
                 vertical_separator()
+                self._show_ribbon_dirty_if_needed()
 
                 # Load and save user inputs
                 ribbon_panel("User Inputs", self._panel_save_load_user_inputs)
@@ -267,7 +292,9 @@ class FiatGui:
             # the window size is not available on the first frames,
             # and the node editor uses it to compute the initial position of the nodes
             # window_size = imgui.get_window_size()
-            self._functions_graph_gui.draw()
+            any_change = self._functions_graph_gui.draw()
+            if any_change:
+                self._notify_if_dirty_functions()
 
     def _handle_file_dialogs(self) -> None:
         if self.save_dialog is not None and self.save_dialog.ready():
@@ -318,6 +345,19 @@ class FiatGui:
 
     def _function_nodes(self) -> List[FunctionNodeGui]:
         return self._functions_graph_gui.function_nodes_gui
+
+    def _has_dirty_functions(self) -> bool:
+        return self._functions_graph_gui.functions_graph.has_dirty_functions()
+
+    def _notify_if_dirty_functions(self) -> None:
+        if not self._has_dirty_functions():
+            return
+
+        def gui() -> None:
+            imgui.text("Some functions need to be refreshed!")
+            imgui.text("Click on the refresh button to recompute them.")
+
+        fiat_osd.add_notification_gui("dirty", gui)
 
     # ==================================================================================================================
     #                                  Serialization
@@ -399,7 +439,8 @@ class FiatGui:
     def _load_user_inputs_during_execution(self, filename: str) -> None:
         success = self._load_data(filename, whine_if_not_found=True, save_type=_SaveType.UserInputs)
         if success:
-            self._functions_graph_gui.functions_graph.invoke_all_functions()
+            self._functions_graph_gui.functions_graph.invoke_all_functions(also_invoke_not_automatic_functions=False)
+            self._notify_if_dirty_functions()
 
     def _load_graph_composition_at_startup(self) -> None:
         self._load_data(
@@ -409,7 +450,7 @@ class FiatGui:
     def _load_graph_composition_during_execution(self, filename: str) -> None:
         success = self._load_data(filename, whine_if_not_found=True, save_type=_SaveType.GraphComposition)
         if success:
-            self._functions_graph_gui.functions_graph.invoke_all_functions()
+            self._functions_graph_gui.functions_graph.invoke_all_functions(also_invoke_not_automatic_functions=False)
 
     def _save_user_inputs(self, filename: str) -> None:
         self._save_data(filename, _SaveType.UserInputs)
