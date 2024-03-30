@@ -356,6 +356,7 @@ class StrWithGui(AnyDataWithGui[str]):
 class StrMultilineWithGui(StrWithGui):
     def __init__(self, params: StrWithGuiParams | None = None) -> None:
         super().__init__(params)
+        self.callbacks.edit_popup_required = True
         self.params.edit_type = StrEditType.multiline
 
 

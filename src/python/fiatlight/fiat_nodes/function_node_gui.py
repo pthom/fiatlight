@@ -522,6 +522,26 @@ class FunctionNodeGui:
                     self._draw_one_input_present_custom(input_param, unique_name)
                 return False
 
+    def _edit_input_in_popup_set_if_unspecified(
+        self,
+        input_param: ParamWithGui[Any],
+        edit_input: BoolFunction,
+    ) -> BoolFunction:
+        def edit_input_set_if_unspecified() -> bool:
+            is_unspecified = isinstance(input_param.data_with_gui.value, Unspecified)
+            if is_unspecified:
+                default_provider = input_param.data_with_gui.callbacks.default_value_provider
+                if default_provider is not None:
+                    input_param.data_with_gui.value = default_provider()
+                    return True
+                else:
+                    imgui.text("No default value provider!")
+                    return False
+            else:
+                return edit_input()
+
+        return edit_input_set_if_unspecified
+
     def _draw_one_input_edit(self, input_param: ParamWithGui[Any], unique_name: str) -> bool:
         changed = False
         # capture the input_param for the lambda
@@ -535,19 +555,26 @@ class FunctionNodeGui:
         callbacks = input_param.data_with_gui.callbacks
         can_edit_in_node = not callbacks.edit_popup_required
         can_edit_in_popup = callbacks.edit_popup_required or callbacks.edit_popup_possible
-        popup_label = f"detached view - {unique_name}(): edit input '{input_param.name}'"
         btn_label = "" if can_edit_in_node else "edit"
 
         if can_edit_in_popup:
-            fiat_osd.show_bool_detached_window_button(btn_label, popup_label, edit_input)
+            with imgui_ctx.begin_horizontal("editH2"):
+                popup_label = f"detached view - {unique_name}(): edit input '{input_param.name}'"
+                popup_callback = self._edit_input_in_popup_set_if_unspecified(input_param, edit_input)
+                fiat_osd.show_bool_detached_window_button(btn_label, popup_label, popup_callback)
+                imgui.spring()
+                is_unspecified = isinstance(input_param.data_with_gui.value, Unspecified)
+                if not can_edit_in_node and not is_unspecified:
+                    fn_set_unset = self._input_param_set_unset_gui(input_param)
+                    if fn_set_unset():
+                        changed = True
 
-        # Now that we can have a detached view, there are two ways
-        # that can change the input value:
+                if fiat_osd.get_detached_window_bool_return(btn_label):
+                    # If the user edits the input value in a detached window
+                    changed = True
+
         if can_edit_in_node and edit_input():
-            # 1. The user edits the input value in this window
-            changed = True
-        if can_edit_in_popup and fiat_osd.get_detached_window_bool_return(btn_label):
-            # 2. The user edits the input value in a detached window
+            # If the user edits the input value in this window
             changed = True
 
         return changed
