@@ -357,7 +357,13 @@ class FunctionsGraph:
     def _all_function_nodes_with_unique_names(self) -> Dict[str, FunctionNode]:
         return {self.function_node_unique_name(fn): fn for fn in self.functions_nodes}
 
-    def invoke_all_functions(self) -> None:
+    def has_dirty_functions(self) -> bool:
+        for fn in self.functions_nodes:
+            if fn.function_with_gui.is_dirty():
+                return True
+        return False
+
+    def invoke_all_functions(self, also_invoke_not_automatic_functions: bool) -> None:
         """Invoke all the functions of the graph"""
 
         # We need to do this in two steps:
@@ -370,7 +376,8 @@ class FunctionsGraph:
         # and a call to fn.invoke_function() may trigger a call to other functions
         # (and mark them as not dirty anymore as a side effect)
         for fn in self.functions_nodes:
-            if fn.function_with_gui.is_dirty():
+            shall_invoke = also_invoke_not_automatic_functions or fn.function_with_gui.invoke_automatically
+            if fn.function_with_gui.is_dirty() and shall_invoke:
                 fn.invoke_function()
 
     # ================================================================================================================
