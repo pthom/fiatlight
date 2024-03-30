@@ -104,6 +104,8 @@ class IntWithGui(AnyDataWithGui[int]):
         return changed
 
 
+# Register the IntWithGui class as a GUI factory for the "int" type
+register_gui_factory("int", IntWithGui)
 ########################################################################################################################
 #                               Floats
 ########################################################################################################################

@@ -8,7 +8,7 @@ def add_functions_to_collection(collection: FunctionsCollection) -> None:
     # Add some functions to the collection
     from fiatlight.demos.custom_graph.float_functions import all_functions as all_float_functions
     from fiatlight.demos.custom_graph.image_toy_functions import all_functions as all_image_functions
-    from fiatlight.demos.custom_graph.opencv_image_functions import all_functions as all_opencv_image_functions
+    from fiatlight.demos.images.opencv_wrappers import all_functions as all_opencv_image_functions
 
     def add_one_function(fn_factory: FunctionWithGuiFactory, tags: List[str]) -> None:
         collection.add_function(fn_factory, tags)

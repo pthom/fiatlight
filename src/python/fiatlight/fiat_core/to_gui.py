@@ -376,7 +376,7 @@ class GuiFactories:
         def enum_gui_factory() -> EnumWithGui:
             return EnumWithGui(enum_class)
 
-        self.add_factory(enum_class_name, enum_gui_factory)
+        self.register_factory(enum_class_name, enum_gui_factory)
 
     def factor(self, typename: Typename) -> AnyDataWithGui[Any]:
         return self.get_factory(typename)()
@@ -387,3 +387,12 @@ _GUI_FACTORIES = GuiFactories()
 
 def gui_factories() -> GuiFactories:
     return _GUI_FACTORIES
+
+
+def register_enum(enum_class: type[Enum]) -> None:
+    gui_factories().register_enum(enum_class)
+
+
+def register_gui_factory(typename: Typename, factory: GuiFactory[Any]) -> None:
+    gui_factories().register_factory(typename, factory)
+

@@ -1,15 +1,7 @@
 from fiatlight import fiat_run_composition
 from fiatlight.fiat_image import ImageU8, lut_channels_in_colorspace
-from fiatlight.fiat_types import ImagePath
+from fiatlight.fiat_image import image_source
 import cv2
-
-
-def image_source(image_file: ImagePath) -> ImageU8:
-    image = cv2.imread(image_file)
-    if image.shape[0] > 1000:
-        k = 1000 / image.shape[0]
-        image = cv2.resize(image, (0, 0), fx=k, fy=k)
-    return image  # type: ignore
 
 
 def oil_paint(image: ImageU8, size: int = 1, dyn_ratio: int = 3) -> ImageU8:

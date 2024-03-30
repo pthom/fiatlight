@@ -15,6 +15,8 @@ from fiatlight.fiat_core.to_gui import (
     GuiFactory,
     FunctionWithGuiFactory,
     to_function_with_gui_factory,
+    register_gui_factory,
+    register_enum,
 )
 from fiatlight.fiat_core.function_node import FunctionNode, FunctionNodeLink
 from fiatlight.fiat_core.functions_graph import FunctionsGraph
@@ -59,6 +61,8 @@ __all__ = [
     "GuiFactory",
     "FunctionWithGuiFactory",
     "FunctionWithGuiFactoryFromName",
+    "register_gui_factory",
+    "register_enum",
     # from function_node
     "FunctionNode",
     "FunctionNodeLink",
