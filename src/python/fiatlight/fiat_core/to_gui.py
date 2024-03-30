@@ -6,6 +6,7 @@ from fiatlight.fiat_core.function_with_gui import FunctionWithGui
 from fiatlight.fiat_core.output_with_gui import OutputWithGui
 from fiatlight.fiat_core.composite_gui import OptionalWithGui, EnumWithGui, ListWithGui
 from fiatlight.fiat_core.function_signature import get_function_signature
+from fiatlight.fiat_types.fiat_number_types import FloatInterval, IntInterval
 from enum import Enum
 
 import inspect
@@ -267,6 +268,11 @@ def to_function_with_gui_globals_local_captured(
     function_with_gui.name = f.__name__
     function_with_gui._f_impl = f
 
+    if hasattr(f, "invoke_automatically"):
+        function_with_gui.invoke_automatically = f.invoke_automatically
+    if hasattr(f, "invoke_automatically_can_set"):
+        function_with_gui.invoke_automatically_can_set = f.invoke_automatically_can_set
+
     try:
         sig = get_function_signature(f, signature_string=signature_string)
     except ValueError as e:
@@ -303,61 +309,7 @@ class GuiFactories:
     _factories: Dict[Typename, GuiFactory[Any]]
 
     def __init__(self) -> None:
-        self._factories = {
-            "int": primitives_gui.IntWithGui,
-            "float": primitives_gui.FloatWithGui,
-            "str": primitives_gui.StrWithGui,
-            "bool": primitives_gui.BoolWithGui,
-            "fiatlight.fiat_types.fiat_number_types.PositiveFloat": primitives_gui.make_positive_float_with_gui,
-            "fiatlight.fiat_types.str_types.FilePath": primitives_gui.FilePathWithGui,
-            "fiatlight.fiat_types.str_types.TextPath": primitives_gui.TextPathWithGui,
-            "fiatlight.fiat_types.str_types.ImagePath": primitives_gui.ImagePathWithGui,
-            "fiatlight.fiat_types.color_types.ColorRgb": primitives_gui.ColorRgbWithGui,
-            "fiatlight.fiat_types.color_types.ColorRgba": primitives_gui.ColorRgbaWithGui,
-        }
-
-        #
-        # Add the float and int types with intervals
-        #
-        from fiatlight.fiat_types import FloatInterval, IntInterval
-
-        float_intervals: dict[str, FloatInterval] = {
-            "Float_0_1": FloatInterval(0.0, 1.0),
-            "Float__1_1": FloatInterval(-1.0, 1.0),
-            "Float_0_10": FloatInterval(0.0, 10.0),
-            "Float_0_100": FloatInterval(0.0, 100.0),
-            "Float_0_1000": FloatInterval(0.0, 1000.0),
-            "Float_0_10000": FloatInterval(0.0, 10000.0),
-        }
-        int_intervals: dict[str, IntInterval] = {
-            "Int_0_10": IntInterval(0, 10),
-            "Int_0_100": IntInterval(0, 100),
-            "Int_0_255": IntInterval(0, 255),
-        }
-
-        def make_float_factory(interval: FloatInterval) -> GuiFactory[float]:
-            def factory() -> primitives_gui.FloatWithGui:
-                r = primitives_gui.FloatWithGui()
-                r.params.v_min = interval.lower_bound
-                r.params.v_max = interval.upper_bound
-                return r
-
-            return factory
-
-        def make_int_factory(interval: IntInterval) -> GuiFactory[int]:
-            def factory() -> primitives_gui.IntWithGui:
-                r = primitives_gui.IntWithGui()
-                r.params.v_min = interval.lower_bound
-                r.params.v_max = interval.upper_bound
-                return r
-
-            return factory
-
-        number_types_prefix = "fiatlight.fiat_types.fiat_number_types."
-        for name, interval_int in float_intervals.items():
-            self._factories[number_types_prefix + name] = make_float_factory(interval_int)
-        for name, interval_float in int_intervals.items():
-            self._factories[number_types_prefix + name] = make_int_factory(interval_float)
+        self._factories = {}
 
     def can_handle_typename(self, typename: Typename) -> bool:
         return typename in self._factories
@@ -367,7 +319,7 @@ class GuiFactories:
             raise ValueError(f"Unknown typename {typename}")
         return self._factories[typename]
 
-    def add_factory(self, typename: Typename, factory: GuiFactory[Any]) -> None:
+    def register_factory(self, typename: Typename, factory: GuiFactory[Any]) -> None:
         self._factories[typename] = factory
 
     def register_enum(self, enum_class: type[Enum]) -> None:
@@ -377,6 +329,46 @@ class GuiFactories:
             return EnumWithGui(enum_class)
 
         self.register_factory(enum_class_name, enum_gui_factory)
+
+    def _get_calling_module_name(self) -> str:
+        frame = inspect.currentframe()
+        if frame is None:
+            raise ValueError("No current frame")
+        f_back = frame.f_back
+        if f_back is None:
+            raise ValueError("No frame back")
+        f_back_2 = f_back.f_back
+        if f_back_2 is None:
+            raise ValueError("No frame back")
+
+        calling_module: str = f_back_2.f_globals["__name__"]
+        return calling_module
+
+    def register_bound_float(
+        self, interval: FloatInterval, typename: Typename, use_calling_module_name: bool = True
+    ) -> None:
+        def factory() -> primitives_gui.FloatWithGui:
+            r = primitives_gui.FloatWithGui()
+            r.params.v_min = interval[0]
+            r.params.v_max = interval[1]
+            return r
+
+        if use_calling_module_name:
+            typename = self._get_calling_module_name() + "." + typename
+        self.register_factory(typename, factory)
+
+    def register_bound_int(
+        self, interval: IntInterval, typename: Typename, use_calling_module_name: bool = True
+    ) -> None:
+        def factory() -> primitives_gui.IntWithGui:
+            r = primitives_gui.IntWithGui()
+            r.params.v_min = interval[0]
+            r.params.v_max = interval[1]
+            return r
+
+        if use_calling_module_name:
+            typename = self._get_calling_module_name() + "." + typename
+        self.register_factory(typename, factory)
 
     def factor(self, typename: Typename) -> AnyDataWithGui[Any]:
         return self.get_factory(typename)()
@@ -389,10 +381,15 @@ def gui_factories() -> GuiFactories:
     return _GUI_FACTORIES
 
 
-def register_enum(enum_class: type[Enum]) -> None:
-    gui_factories().register_enum(enum_class)
+# ----------------------------------------------------------------------------------------------------------------------
+#       register primitive types
+# ----------------------------------------------------------------------------------------------------------------------
+def _register_base_types() -> None:
+    from fiatlight.fiat_types import fiat_number_types
+    from fiatlight.fiat_core import primitives_gui
+
+    fiat_number_types._register_bound_numbers()
+    primitives_gui._register_all_primitive_types()
 
 
-def register_gui_factory(typename: Typename, factory: GuiFactory[Any]) -> None:
-    gui_factories().register_factory(typename, factory)
-
+_register_base_types()

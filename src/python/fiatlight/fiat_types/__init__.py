@@ -1,6 +1,7 @@
 from fiatlight.fiat_types.error_types import Error, ErrorValue, Unspecified, UnspecifiedValue
 from fiatlight.fiat_types.function_types import (
     Function,
+    FunctionList,
     VoidFunction,
     BoolFunction,
     DataType,
@@ -8,7 +9,7 @@ from fiatlight.fiat_types.function_types import (
     DataEditFunction,
     DataPresentFunction,
 )
-from fiatlight.fiat_types.str_types import FilePath, ImagePath, TextPath
+from fiatlight.fiat_types.str_types import FilePath, ImagePath, TextPath, StrMultiline, Prompt
 from fiatlight.fiat_types.base_types import (
     JsonDict,
     JsonPrimitive,
@@ -20,6 +21,8 @@ from fiatlight.fiat_types.fiat_number_types import (
     FloatInterval,
     IntInterval,
     Float_0_1,
+    Float_0_2,
+    Float_0_3,
     Float__1_1,
     Float_0_10,
     Float_0_100,
@@ -29,6 +32,8 @@ from fiatlight.fiat_types.fiat_number_types import (
     Int_0_10,
     Int_0_100,
     Int_0_255,
+    Int_0_1000,
+    Int_0_10000,
 )
 from fiatlight.fiat_types.color_types import ColorRgb, ColorRgba
 
@@ -40,6 +45,7 @@ __all__ = [
     "UnspecifiedValue",
     # from function_types
     "Function",
+    "FunctionList",
     "VoidFunction",
     "BoolFunction",
     "DataType",
@@ -50,6 +56,8 @@ __all__ = [
     "FilePath",
     "ImagePath",
     "TextPath",
+    "StrMultiline",
+    "Prompt",
     # from base_types
     "JsonDict",
     "JsonPrimitive",
@@ -60,6 +68,8 @@ __all__ = [
     "FloatInterval",
     "IntInterval",
     "Float_0_1",
+    "Float_0_2",
+    "Float_0_3",
     "Float__1_1",
     "Float_0_10",
     "Float_0_100",
@@ -69,6 +79,8 @@ __all__ = [
     "Int_0_10",
     "Int_0_100",
     "Int_0_255",
+    "Int_0_1000",
+    "Int_0_10000",
     # from color_types
     "ColorRgb",
     "ColorRgba",

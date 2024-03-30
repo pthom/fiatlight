@@ -13,7 +13,6 @@ from fiatlight.fiat_image.image_types import (
     ImageU8_3,
     ImageU8_4,
 )
-from fiatlight.fiat_image import fiat_img_proc
 from fiatlight.fiat_image.image_gui import ImageWithGui, ImageChannelsWithGui, ImagePresenterParams, image_source
 from fiatlight.fiat_image.cv_color_type import ColorType, ColorConversion
 from fiatlight.fiat_image.cv_color_type_gui import ColorConversionWithGui
@@ -32,8 +31,6 @@ from fiatlight.fiat_core import composite_gui
 def register_gui_factories() -> None:
     from fiatlight.fiat_core import gui_factories
 
-    gui_factories().register_factory("ImageU8", ImageWithGui)
-    gui_factories().register_factory("ImageU8Channels", ImageChannelsWithGui)
     gui_factories().register_factory("numpy.ndarray[typing.Any, numpy.dtype[numpy.uint8]]", ImageWithGui)
     gui_factories().register_factory("numpy.ndarray", ImageWithGui)
 
@@ -46,8 +43,6 @@ register_gui_factories()
 
 
 __all__ = [
-    # submodules
-    "fiat_img_proc",
     # from image_types
     "ImageU8",
     "ImageFloat",

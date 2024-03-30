@@ -104,8 +104,6 @@ class IntWithGui(AnyDataWithGui[int]):
         return changed
 
 
-# Register the IntWithGui class as a GUI factory for the "int" type
-register_gui_factory("int", IntWithGui)
 ########################################################################################################################
 #                               Floats
 ########################################################################################################################
@@ -353,6 +351,23 @@ class StrWithGui(AnyDataWithGui[str]):
 
 
 ########################################################################################################################
+#                               Specialized strings
+########################################################################################################################
+class StrMultilineWithGui(StrWithGui):
+    def __init__(self, params: StrWithGuiParams | None = None) -> None:
+        super().__init__(params)
+        self.params.edit_type = StrEditType.multiline
+
+
+class PromptWithGui(StrMultilineWithGui):
+    def __init__(self) -> None:
+        super().__init__()
+        self.params.hint = "Enter a prompt here"
+        self.params.width_em = 60
+        self.params.height_em = 5
+
+
+########################################################################################################################
 #                               File selector
 ########################################################################################################################
 class FilePathWithGui(AnyDataWithGui[FilePath]):
@@ -483,3 +498,57 @@ class ColorRgbaWithGui(AnyDataWithGui[ColorRgba]):
     @staticmethod
     def present_str(value: ColorRgba) -> str:
         return f"R: {value[0]}, G: {value[1]}, B: {value[2]}, A: {value[3]}"
+
+
+########################################################################################################################
+#                               Register all types
+########################################################################################################################
+def __register_file_paths_types() -> None:
+    from fiatlight.fiat_core.to_gui import gui_factories
+
+    def register_file_path_type(type_name: str, gui_class: Any) -> None:
+        types_modules = "fiatlight.fiat_types.str_types."
+        gui_factories().register_factory(types_modules + type_name, gui_class)
+
+    register_file_path_type("FilePath", FilePathWithGui)
+    register_file_path_type("TextPath", TextPathWithGui)
+    register_file_path_type("ImagePath", ImagePathWithGui)
+
+
+def __register_python_types() -> None:
+    from fiatlight.fiat_core.to_gui import gui_factories
+
+    gui_factories().register_factory("int", IntWithGui)
+    gui_factories().register_factory("float", FloatWithGui)
+    gui_factories().register_factory("str", StrWithGui)
+    gui_factories().register_factory("bool", BoolWithGui)
+
+
+def __register_color_types() -> None:
+    from fiatlight.fiat_core.to_gui import gui_factories
+
+    gui_factories().register_factory("fiatlight.fiat_types.color_types.ColorRgb", ColorRgbWithGui)
+    gui_factories().register_factory("fiatlight.fiat_types.color_types.ColorRgba", ColorRgbaWithGui)
+
+
+def __register_custom_float_types() -> None:
+    from fiatlight.fiat_core.to_gui import gui_factories
+
+    gui_factories().register_factory(
+        "fiatlight.fiat_types.fiat_number_types.PositiveFloat", make_positive_float_with_gui
+    )
+
+
+def _register_custom_str_types() -> None:
+    from fiatlight.fiat_core.to_gui import gui_factories
+
+    gui_factories().register_factory("fiatlight.fiat_types.str_types.Prompt", PromptWithGui)
+    gui_factories().register_factory("fiatlight.fiat_types.str_types.StrMultiline", StrMultilineWithGui)
+
+
+def _register_all_primitive_types() -> None:
+    __register_file_paths_types()
+    __register_python_types()
+    __register_color_types()
+    __register_custom_float_types()
+    _register_custom_str_types()

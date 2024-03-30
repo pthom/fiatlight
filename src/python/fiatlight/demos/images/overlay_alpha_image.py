@@ -1,10 +1,14 @@
 from fiatlight.fiat_image.image_types import ImageU8_3, ImageU8_4
+from fiatlight.fiat_types import Float_0_1, Float_0_3
 
 import numpy as np
 
 
-def overlay_alpha_image_precise(
-    background_rgb: ImageU8_3, overlay_rgba: ImageU8_4, alpha: float = 1.0, gamma_factor: float = 2.2
+def overlay_alpha_image(
+    background_rgb: ImageU8_3,
+    overlay_rgba: ImageU8_4,
+    alpha: Float_0_1 = Float_0_1(1.0),
+    gamma_factor: Float_0_3 = Float_0_3(2.2),
 ) -> ImageU8_3:
     """
     cf minute physics brilliant clip "Computer color is broken" : https://www.youtube.com/watch?v=LKnqECcg6Gw

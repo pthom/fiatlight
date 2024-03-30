@@ -23,18 +23,45 @@ def square(x: float) -> float:
     return x * x
 
 
-def add_mul(a: float, b: float) -> tuple[float, float]:
-    """An example of a function that returns multiple values:
-    the sum and the product of its inputs.
-    """
-    return a + b, a * b
+def add(a: float, b: float) -> float:
+    return a + b
 
 
-def main() -> None:
+def mul(a: float, b: float) -> float:
+    return a * b
+
+
+def sub(a: float, b: float) -> float:
+    return a - b
+
+
+def div(a: float, b: float) -> float:
+    return a / b
+
+
+all_functions = [
+    float_source,
+    sin,
+    log,
+    square,
+    add,
+    mul,
+    sub,
+    div,
+]
+
+
+def sandbox() -> None:
     from fiatlight import fiat_run_composition
+
+    def add_mul(a: float, b: float) -> tuple[float, float]:
+        """An example of a function that returns multiple values:
+        the sum and the product of its inputs.
+        """
+        return a + b, a * b
 
     fiat_run_composition([float_source, sin, log, sin, add_mul])
 
 
 if __name__ == "__main__":
-    main()
+    sandbox()

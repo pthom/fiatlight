@@ -1,26 +1,18 @@
 import fiatlight
-from typing import List
-from fiatlight.fiat_core import FunctionWithGuiFactory
 from fiatlight.fiat_runner.functions_collection import FunctionsCollection
 
 
 def add_functions_to_collection(collection: FunctionsCollection) -> None:
     # Add some functions to the collection
-    from fiatlight.demos.custom_graph.float_functions import all_functions as all_float_functions
-    from fiatlight.demos.custom_graph.image_toy_functions import all_functions as all_image_functions
-    from fiatlight.demos.images.opencv_wrappers import all_functions as all_opencv_image_functions
+    from fiatlight.demos.math import all_functions as all_math_functions
+    from fiatlight.demos.images import all_functions as all_image_functions
+    from fiatlight.demos.string import all_functions as all_string_functions
+    from fiatlight.demos.ai import invoke_stable_diffusion_xl
 
-    def add_one_function(fn_factory: FunctionWithGuiFactory, tags: List[str]) -> None:
-        collection.add_function(fn_factory, tags)
-
-    for f in all_float_functions():
-        add_one_function(f, ["math"])
-
-    for f in all_image_functions():
-        add_one_function(f, ["images"])
-
-    for f in all_opencv_image_functions():
-        add_one_function(f, ["images", "opencv"])
+    collection.add_function_list(all_math_functions(), ["math"])
+    collection.add_function_list(all_image_functions(), ["images"])
+    collection.add_function_list(all_string_functions(), ["string"])
+    collection.add_function(invoke_stable_diffusion_xl, ["ai", "images"])
 
 
 def main() -> None:

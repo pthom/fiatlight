@@ -22,45 +22,18 @@ Here, the solution is implemented as a composition of functions, each of which i
 With fiatlight, we can easily examine the intermediate results of each step.
 """
 from typing import List, Tuple
-from fiatlight.fiat_types import TextPath
+from fiatlight.demos.string.str_functions import (
+    text_from_file,
+    str_lower,
+    remove_non_letters,
+    split_words,
+    remove_empty_words,
+    sort_words,
+)
 
 
 # WordWithCount is a tuple of a word and the number of times it appears.
 WordWithCount = Tuple[str, int]
-
-
-def get_text(text_file: TextPath) -> str:
-    """This is our source of text.
-    Since text_file is a TextPath (a type alias for str), it will be displayed
-    as a widget in the UI, allowing the user to select a text file.
-    """
-    with open(text_file, "r") as f:
-        r = f.read()
-    return r
-
-
-def str_lower(s: str) -> str:
-    return s.lower()
-
-
-def remove_non_letters(s: str) -> str:
-    r = ""
-    for c in s:
-        if c.isalpha():
-            r += c
-        else:
-            r += " "
-    return r
-
-
-def split_words(s: str) -> List[str]:
-    r = s.split(" ")
-    return r
-
-
-def remove_empty_words(words: List[str]) -> List[str]:
-    r = [word for word in words if len(word) > 0]
-    return r
 
 
 def run_length_encode(input_list: List[str]) -> List[WordWithCount]:
@@ -89,17 +62,12 @@ def sort_word_with_counts(words: List[WordWithCount]) -> List[WordWithCount]:
     return r
 
 
-def sort_words(words: List[str]) -> List[str]:
-    r = sorted(words)
-    return r
-
-
 def main() -> None:
     from fiatlight import fiat_run_composition
 
     fiat_run_composition(
         [
-            get_text,
+            text_from_file,
             str_lower,
             remove_non_letters,
             split_words,

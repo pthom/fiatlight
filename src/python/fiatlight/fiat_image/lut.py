@@ -43,14 +43,15 @@ def lut_with_params(image: ImageU8, params: LutParams) -> ImageU8:
 
 def lut_channels_with_params(
     image: ImageU8,
-    lut_channel_0: LutParams,
+    lut_channel_0: LutParams | None = None,
     lut_channel_1: LutParams | None = None,
     lut_channel_2: LutParams | None = None,
     lut_channel_3: LutParams | None = None,
 ) -> ImageU8:
-    lut_channel_1 = lut_channel_1 or lut_channel_0
-    lut_channel_2 = lut_channel_2 or lut_channel_0
-    lut_channel_3 = lut_channel_3 or lut_channel_0
+    lut_channel_0 = lut_channel_0 or LutParams()
+    lut_channel_1 = lut_channel_1 or LutParams()
+    lut_channel_2 = lut_channel_2 or LutParams()
+    lut_channel_3 = lut_channel_3 or LutParams()
     lut_params = [lut_channel_0, lut_channel_1, lut_channel_2, lut_channel_3]
 
     if len(image.shape) == 2:
@@ -66,7 +67,7 @@ def lut_channels_with_params(
 
 def lut_channels_in_colorspace(
     image: ImageU8,
-    lut_channel_0: LutParams,
+    lut_channel_0: LutParams | None = None,
     lut_channel_1: LutParams | None = None,
     lut_channel_2: LutParams | None = None,
     lut_channel_3: LutParams | None = None,

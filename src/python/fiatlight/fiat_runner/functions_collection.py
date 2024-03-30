@@ -4,8 +4,10 @@ from imgui_bundle import hello_imgui, imgui, imgui_ctx
 
 from fiatlight.fiat_core import FunctionWithGui, FunctionWithGuiFactory
 from fiatlight.fiat_widgets import fontawesome_6_ctx, icons_fontawesome_6
+from fiatlight.fiat_core.to_gui import to_function_with_gui
+from fiatlight.fiat_types import Function
 
-from typing import List, Callable
+from typing import List, Callable, Any
 
 
 @dataclass
@@ -21,7 +23,20 @@ class FunctionsCollection:
     def __init__(self) -> None:
         self._functions = []
 
-    def add_function(self, function_factory: FunctionWithGuiFactory, tags: List[str] | None) -> None:
+    def add_function_list(self, fn_list: List[Any], tags: List[str]) -> None:
+        import copy
+
+        for f in fn_list:
+            f_copy = copy.copy(f)
+            self.add_function(f_copy, tags)
+
+    def add_function(self, fn: Function, tags: List[str]) -> None:
+        def factory() -> FunctionWithGui:
+            return to_function_with_gui(fn)
+
+        self._add_function_factory(factory, tags)
+
+    def _add_function_factory(self, function_factory: FunctionWithGuiFactory, tags: List[str] | None) -> None:
         if tags is None:
             tags = []
 

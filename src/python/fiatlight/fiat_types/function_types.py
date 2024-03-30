@@ -1,4 +1,4 @@
-from typing import Any, Callable, TypeAlias, TypeVar, Tuple
+from typing import Any, Callable, TypeAlias, TypeVar, Tuple, List
 
 
 # A type variable that represents a data type, included in a AnyDataWithGui object.
@@ -9,6 +9,7 @@ GuiType = TypeVar("GuiType")
 
 
 Function: TypeAlias = Callable[..., Any]
+FunctionList: TypeAlias = List[Function]
 
 # A function that takes no arguments and returns nothing. Used mainly for "present" callbacks.
 VoidFunction = Callable[[], None]
