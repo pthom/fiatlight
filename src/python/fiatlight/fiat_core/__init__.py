@@ -1,9 +1,11 @@
 from fiatlight.fiat_core.any_data_gui_callbacks import AnyDataGuiCallbacks
 from fiatlight.fiat_core.any_data_with_gui import AnyDataWithGui
-from fiatlight.fiat_core.function_with_gui import (
+from fiatlight.fiat_core.param_with_gui import (
     ParamKind,
     ParamWithGui,
-    OutputWithGui,
+)
+from fiatlight.fiat_core.output_with_gui import OutputWithGui
+from fiatlight.fiat_core.function_with_gui import (
     FunctionWithGui,
     FunctionWithGuiFactoryFromName,
 )
@@ -43,10 +45,13 @@ __all__ = [
     # from any_data_with_gui
     "AnyDataWithGui",
     # from function_with_gui
-    "ParamKind",
-    "ParamWithGui",
     "OutputWithGui",
     "FunctionWithGui",
+    # from param_with_gui
+    "ParamKind",
+    "ParamWithGui",
+    # from output_with_gui
+    "OutputWithGui",
     # from to_gui
     "to_function_with_gui",
     "to_function_with_gui_factory",

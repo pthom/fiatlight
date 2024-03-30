@@ -1,7 +1,9 @@
 from fiatlight.fiat_types import UnspecifiedValue, DataType, GlobalsDict, LocalsDict
 from fiatlight.fiat_core import primitives_gui
 from fiatlight.fiat_core.any_data_with_gui import AnyDataWithGui
-from fiatlight.fiat_core.function_with_gui import FunctionWithGui, ParamKind, ParamWithGui, OutputWithGui
+from fiatlight.fiat_core.param_with_gui import ParamKind, ParamWithGui
+from fiatlight.fiat_core.function_with_gui import FunctionWithGui
+from fiatlight.fiat_core.output_with_gui import OutputWithGui
 from fiatlight.fiat_core.composite_gui import OptionalWithGui, EnumWithGui, ListWithGui
 from fiatlight.fiat_core.function_signature import get_function_signature
 from enum import Enum
