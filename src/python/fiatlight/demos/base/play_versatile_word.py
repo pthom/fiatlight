@@ -1,5 +1,4 @@
 from typing import List, Tuple
-from fiatlight import FunctionsGraph, fiat_run, to_function_with_gui
 from fiatlight.fiat_types import TextPath
 
 
@@ -56,24 +55,25 @@ def sort_word_with_counts(words: List[WordWithCount]) -> List[WordWithCount]:
     return r
 
 
-def main() -> None:
-    sorted_gui = to_function_with_gui(
-        sorted, signature_string="(words: List[str], /, reverse: bool = False) -> List[str]"
-    )
+def sort_words(words: List[str]) -> List[str]:
+    r = sorted(words)
+    return r
 
-    fiat_run(
-        FunctionsGraph.from_function_composition(
-            [
-                get_text,
-                str_lower,
-                remove_non_letters,
-                split_words,
-                remove_empty_words,
-                sorted_gui,
-                run_length_encode,
-                sort_word_with_counts,
-            ]
-        )
+
+def main() -> None:
+    from fiatlight import fiat_run_composition
+
+    fiat_run_composition(
+        [
+            get_text,
+            str_lower,
+            remove_non_letters,
+            split_words,
+            remove_empty_words,
+            sort_words,
+            run_length_encode,
+            sort_word_with_counts,
+        ]
     )
 
 

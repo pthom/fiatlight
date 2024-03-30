@@ -1,4 +1,3 @@
-from fiatlight import FunctionsGraph, fiat_run
 import math
 
 
@@ -25,30 +24,17 @@ def square(x: float) -> float:
 
 
 def add_mul(a: float, b: float) -> tuple[float, float]:
-    """An example of a function that returns multiple values."""
+    """An example of a function that returns multiple values:
+    the sum and the product of its inputs.
+    """
     return a + b, a * b
 
 
 def main() -> None:
-    # fiatlight.fiat_config.get_fiat_config().exception_config.catch_function_exceptions = False
-    functions_graph = FunctionsGraph.from_function_composition([float_source, sin, log, sin, add_mul])
+    from fiatlight import fiat_run_composition
 
-    # Optional: add more nodes, where some functions output to several nodes
-    functions_graph.add_function_composition([square, sin])
-    functions_graph.add_link("sin_2", "square", "x")
-
-    fiat_run(functions_graph)
-
-
-def main_manual_debug() -> None:
-    x = 0
-    y = sin(x)
-    z = log(y)
-    w = sin(z)
-    a, b = add_mul(y, w)
-    print(f"x={x}, y={y}, z={z}, w={w}, a={a}, b={b}")
+    fiat_run_composition([float_source, sin, log, sin, add_mul])
 
 
 if __name__ == "__main__":
     main()
-    # main_manual_debug()

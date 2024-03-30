@@ -1,4 +1,4 @@
-from fiatlight.fiat_runner.fiat_gui import FiatGui, FiatGuiParams, fiat_run
+from fiatlight.fiat_runner.fiat_gui import FiatGui, FiatGuiParams, fiat_run, fiat_run_composition
 
 
 __all__ = [
@@ -6,4 +6,5 @@ __all__ = [
     "FiatGui",
     "FiatGuiParams",
     "fiat_run",
+    "fiat_run_composition",
 ]
