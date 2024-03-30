@@ -109,7 +109,7 @@ def stable_diffusion_xl_gui() -> fiatlight.FunctionWithGui:
     stable_diffusion_xl_gui = fiatlight.to_function_with_gui(stable_diffusion_xl)
     # Do not invoke automatically, since the image creation can be slow (about 1 second)
     stable_diffusion_xl_gui.invoke_automatically = False
-    stable_diffusion_xl_gui.invoke_automatically_can_set = False
+    # stable_diffusion_xl_gui.invoke_automatically_can_set = False
 
     prompt_input = stable_diffusion_xl_gui.input("prompt")
     assert isinstance(prompt_input, fiatlight.fiat_core.StrWithGui)

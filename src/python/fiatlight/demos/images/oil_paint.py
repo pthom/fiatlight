@@ -1,10 +1,10 @@
-import fiatlight
+from fiatlight import fiat_run_composition
 from fiatlight.fiat_image import ImageU8, lut_channels_in_colorspace
-from fiatlight import fiat_types
+from fiatlight.fiat_types import ImagePath
 import cv2
 
 
-def image_source(image_file: fiat_types.ImagePath = fiatlight.demo_assets_dir() + "/images/house.jpg") -> ImageU8:  # type: ignore
+def image_source(image_file: ImagePath) -> ImageU8:
     image = cv2.imread(image_file)
     if image.shape[0] > 1000:
         k = 1000 / image.shape[0]
@@ -17,9 +17,7 @@ def oil_paint(image: ImageU8, size: int = 1, dyn_ratio: int = 3) -> ImageU8:
 
 
 def main() -> None:
-    functions = [image_source, lut_channels_in_colorspace, oil_paint]
-    functions_graph = fiatlight.FunctionsGraph.from_function_composition(functions)  # type: ignore
-    fiatlight.fiat_run(functions_graph)
+    fiat_run_composition([image_source, lut_channels_in_colorspace, oil_paint])
 
 
 if __name__ == "__main__":

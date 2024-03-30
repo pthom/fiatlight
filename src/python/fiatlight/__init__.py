@@ -1,6 +1,6 @@
 from fiatlight import fiat_core, fiat_widgets, fiat_types, fiat_image, fiat_runner, fiat_config
 from fiatlight.fiat_core import to_function_with_gui, AnyDataWithGui, FunctionWithGui, FunctionsGraph
-from fiatlight.fiat_runner import fiat_run, FiatGuiParams
+from fiatlight.fiat_runner import fiat_run, FiatGuiParams, fiat_run_composition
 
 
 def demo_assets_dir() -> str:
@@ -28,6 +28,7 @@ __all__ = [
     # from fiat_runner
     "fiat_run",
     "FiatGuiParams",
+    "fiat_run_composition",
     # from here
     "demo_assets_dir",
 ]
