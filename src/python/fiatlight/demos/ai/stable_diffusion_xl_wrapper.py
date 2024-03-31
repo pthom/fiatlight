@@ -105,6 +105,7 @@ def invoke_stable_diffusion_xl(
 
 
 invoke_stable_diffusion_xl.invoke_automatically = False  # type: ignore
+invoke_stable_diffusion_xl.invoke_automatically_can_set = True  # type: ignore
 
 
 def main_test_sdxl() -> None:

@@ -784,7 +784,7 @@ class FunctionNodeGui:
         with fontawesome_6_ctx():
             if fn_with_gui.invoke_automatically_can_set:
                 invoke_changed, fn_with_gui.invoke_automatically = imgui.checkbox(
-                    "##Auto refresh", self._function_node.function_with_gui.invoke_automatically
+                    "Auto refresh", self._function_node.function_with_gui.invoke_automatically
                 )
                 fiat_osd.set_widget_tooltip("Tick to invoke automatically.")
                 if invoke_changed and fn_with_gui.invoke_automatically:
