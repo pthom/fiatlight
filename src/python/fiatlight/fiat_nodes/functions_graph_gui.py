@@ -303,6 +303,24 @@ class FunctionsGraphGui:
         assert len(matching_nodes) == 1
         return matching_nodes[0]
 
+    def invoke_all_functions(self, also_invoke_not_automatic_functions: bool) -> None:
+        """Invoke all the functions of the graph"""
+
+        # We need to do this in two steps:
+        # 1. Mark all functions as dirty (so that the call to invoke_function will actually call the function)
+        for fn in self.functions_graph.functions_nodes:
+            fn.function_with_gui._dirty = True
+
+        # 2. Invoke all the functions
+        # This is done in a separate loop because the functions may depend on each other,
+        # and a call to fn.invoke_function() may trigger a call to other functions
+        # (and mark them as not dirty anymore as a side effect)
+        for fn_node_gui in self.function_nodes_gui:
+            fn_invoke_automatically = fn_node_gui.get_function_node().function_with_gui.invoke_automatically
+            shall_invoke = also_invoke_not_automatic_functions or fn_invoke_automatically
+            if fn_node_gui.get_function_node().function_with_gui.is_dirty() and shall_invoke:
+                fn_node_gui.call_invoke_async_or_not()
+
     # ======================================================================================================================
     # Serialization
     # ======================================================================================================================

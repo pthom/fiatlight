@@ -189,7 +189,7 @@ class FiatGui:
         if self.params.customizable_graph:
             self._load_graph_composition_at_startup()
         self._load_user_inputs_at_startup()
-        self._functions_graph_gui.functions_graph.invoke_all_functions(also_invoke_not_automatic_functions=False)
+        self._functions_graph_gui.invoke_all_functions(also_invoke_not_automatic_functions=True)
         self._notify_if_dirty_functions()
 
     def _before_exit(self) -> None:
@@ -298,9 +298,7 @@ class FiatGui:
             dirty_color = get_fiat_config().style.colors[FiatColorType.OutputValueDirty]
             with imgui_ctx.push_style_color(imgui.Col_.text.value, dirty_color):
                 if imgui.button(icons_fontawesome_6.ICON_FA_ROTATE, btn_size):
-                    self._functions_graph_gui.functions_graph.invoke_all_functions(
-                        also_invoke_not_automatic_functions=True
-                    )
+                    self._functions_graph_gui.invoke_all_functions(also_invoke_not_automatic_functions=True)
             if imgui.is_item_hovered():
                 imgui.set_tooltip("Some functions needs to be refreshed! Click to recompute them.")
 
@@ -506,7 +504,7 @@ class FiatGui:
     def _load_user_inputs_during_execution(self, filename: str) -> None:
         success = self._load_data(filename, whine_if_not_found=True, save_type=_SaveType.UserInputs)
         if success:
-            self._functions_graph_gui.functions_graph.invoke_all_functions(also_invoke_not_automatic_functions=False)
+            self._functions_graph_gui.invoke_all_functions(also_invoke_not_automatic_functions=True)
             self._notify_if_dirty_functions()
 
     def _load_graph_composition_at_startup(self) -> None:
@@ -517,7 +515,7 @@ class FiatGui:
     def _load_graph_composition_during_execution(self, filename: str) -> None:
         success = self._load_data(filename, whine_if_not_found=True, save_type=_SaveType.GraphComposition)
         if success:
-            self._functions_graph_gui.functions_graph.invoke_all_functions(also_invoke_not_automatic_functions=False)
+            self._functions_graph_gui.invoke_all_functions(also_invoke_not_automatic_functions=True)
 
     def _save_user_inputs(self, filename: str) -> None:
         self._save_data(filename, _SaveType.UserInputs)

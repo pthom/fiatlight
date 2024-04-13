@@ -10,11 +10,14 @@ from imgui_bundle import (
     imgui_ctx,
     hello_imgui,
     imgui_node_editor_ctx as ed_ctx,
+    imspinner,
+    ImVec4,
 )
 from fiatlight.fiat_widgets import icons_fontawesome_6, fontawesome_6_ctx, fiat_osd, collapsible_button
 from fiatlight import fiat_widgets
 from typing import Dict, List, Any
 from dataclasses import dataclass
+import threading
 
 
 class FunctionNodeGui:
@@ -43,6 +46,8 @@ class FunctionNodeGui:
     _node_size: ImVec2 | None = None  # will be set after the node is drawn once
 
     _function_doc: _FunctionDocElements
+
+    _async_invoke_thread: threading.Thread | None = None
 
     # internals of the function
     _fiat_internals_with_gui: Dict[str, AnyDataWithGui[Any]]
@@ -161,6 +166,34 @@ class FunctionNodeGui:
                 r += 1
         return r
 
+    def call_invoke_async_or_not(self) -> None:
+        def _invoke_impl() -> None:
+            self._function_node.invoke_function()
+
+        def _invoke_async() -> None:
+            if self._async_invoke_thread is not None and self._async_invoke_thread.is_alive():
+                return
+
+            self._async_invoke_thread = threading.Thread(target=_invoke_impl)
+            self._async_invoke_thread.start()
+
+        def _invoke() -> None:
+            invoke_async = self._function_node.function_with_gui.invoke_async
+            if invoke_async:
+                _invoke_async()
+            else:
+                _invoke_impl()
+
+        _invoke()
+
+    def _is_running_async(self) -> bool:
+        if self._async_invoke_thread is None:
+            return False
+        if not self._async_invoke_thread.is_alive():
+            self._async_invoke_thread = None
+            return False
+        return True
+
     # ==================================================================================================================
     #                                            Draw the node
     #         This is the heart of the class, with `draw_node` being the main function
@@ -170,7 +203,7 @@ class FunctionNodeGui:
         pass
 
     def draw_node(self, unique_name: str) -> bool:
-        inputs_changed: bool = False
+        inputs_changed: bool
         with imgui_ctx.push_obj_id(self._function_node):
             with ed_ctx.begin_node(self._node_id):
                 with imgui_ctx.begin_vertical("node_content"):
@@ -180,11 +213,16 @@ class FunctionNodeGui:
                     # Set minimum width
                     imgui.dummy(ImVec2(hello_imgui.em_size(get_fiat_config().style.node_minimum_width_em), 1))
                     # Inputs
+                    is_running_async = self._is_running_async()
+                    if is_running_async:
+                        imgui.begin_disabled()
                     inputs_changed = self._draw_function_inputs(unique_name)
+                    if is_running_async:
+                        imgui.end_disabled()
                     if inputs_changed:
                         self._function_node.function_with_gui._dirty = True
                         if self._function_node.function_with_gui.invoke_automatically:
-                            self._function_node.invoke_function()
+                            self.call_invoke_async_or_not()
                     # Internals
                     self._draw_fiat_internals()
                     # Exceptions, if any
@@ -207,7 +245,27 @@ class FunctionNodeGui:
         if unique_name != fn_name:
             imgui.text(f" (id: {unique_name})")
 
+        self._draw_async_status()
         self._render_function_doc(unique_name)
+
+    def _draw_async_status(self) -> None:
+        if self._is_running_async():
+            color = ImVec4(1.0, 1.0, 0.0, 1.0)
+            with imgui_ctx.push_style_color(imgui.Col_.text.value, color):
+                # imgui.text("Running...")
+                radius1 = imgui.get_font_size() / 3.5
+                imgui.spring()
+                imspinner.spinner_ang_triple(
+                    "spinner_ang_triple",
+                    radius1,
+                    radius1 * 1.2,
+                    radius1 * 2.0,
+                    2.9,
+                    color,
+                    color,
+                    color,
+                )
+                fiat_osd.set_widget_tooltip("Running...")
 
     @staticmethod
     def _show_copy_to_clipboard_button(data_with_gui: AnyDataWithGui[Any]) -> None:
@@ -524,8 +582,8 @@ class FunctionNodeGui:
                     self._draw_one_input_present_custom(input_param, unique_name)
                 return False
 
+    @staticmethod
     def _edit_input_in_popup_set_if_unspecified(
-        self,
         input_param: ParamWithGui[Any],
         edit_input: BoolFunction,
     ) -> BoolFunction:
@@ -788,12 +846,17 @@ class FunctionNodeGui:
                 )
                 fiat_osd.set_widget_tooltip("Tick to invoke automatically.")
                 if invoke_changed and fn_with_gui.invoke_automatically:
-                    self._function_node.invoke_function()
+                    self.call_invoke_async_or_not()
 
             if fn_with_gui.is_dirty():
+                is_running_async = self._is_running_async()
+                if is_running_async:
+                    imgui.begin_disabled()
                 if imgui.button(icons_fontawesome_6.ICON_FA_ROTATE, btn_size):
-                    self._function_node.invoke_function()
+                    self.call_invoke_async_or_not()
                 fiat_osd.set_widget_tooltip("Refresh needed! Click to refresh.")
+                if is_running_async:
+                    imgui.end_disabled()
 
             if not fn_with_gui.invoke_automatically:
                 if not fn_with_gui.is_dirty():
@@ -1075,7 +1138,7 @@ def sandbox() -> None:
     from imgui_bundle import immapp
     from enum import Enum
 
-    class MyEnum(Enum):
+    class MyEnum(Enum):  # noqa
         ONE = 1
         TWO = 2
         THREE = 3
