@@ -1,4 +1,4 @@
-from imgui_bundle import imgui, hello_imgui, imgui_knobs, imgui_toggle, portable_file_dialogs as pfd, ImVec2
+from imgui_bundle import imgui, hello_imgui, imgui_knobs, imgui_toggle, portable_file_dialogs as pfd, ImVec2, imgui_ctx
 from fiatlight.fiat_core import AnyDataWithGui
 from fiatlight.fiat_types import FilePath
 from fiatlight.fiat_types.color_types import ColorRgb, ColorRgba
@@ -22,11 +22,12 @@ class IntEditType(Enum):
     input = 2
     drag = 3
     knob = 4
+    slider_and_minus_plus = 5
 
 
 @dataclass
 class IntWithGuiParams:
-    edit_type: IntEditType = IntEditType.slider
+    edit_type: IntEditType = IntEditType.slider_and_minus_plus
     # Common
     label: str = "##int"
     v_min: int = 0
@@ -101,6 +102,30 @@ class IntWithGui(AnyDataWithGui[int]):
                 hello_imgui.em_size(self.params.knob_size_em),
                 self.params.knob_steps,
             )
+        if self.params.edit_type == IntEditType.slider_and_minus_plus:
+            buttons_width = hello_imgui.em_size(2)
+            item_width = hello_imgui.em_size(self.params.width_em) - buttons_width
+            spacing = hello_imgui.em_to_vec2(0.1, 0)
+            with imgui_ctx.begin_horizontal("##int", ImVec2(item_width + buttons_width, 0)):
+                with imgui_ctx.push_style_var(imgui.StyleVar_.item_spacing.value, spacing):
+                    imgui.set_next_item_width(item_width)
+                    changed, self.value = imgui.slider_int(
+                        self.params.label,
+                        self.value,
+                        self.params.v_min,
+                        self.params.v_max,
+                        self.params.format,
+                        self.params.slider_flags,
+                    )
+                    if imgui.button("-"):
+                        if self.value > self.params.v_min:
+                            self.value -= 1
+                            changed = True
+                    if imgui.button("+"):
+                        if self.value < self.params.v_max:
+                            self.value += 1
+                        changed = True
+
         return changed
 
 
