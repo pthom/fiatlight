@@ -63,7 +63,7 @@ def sandbox() -> None:
     fiat_run_composition([float_source, sin, log])
 
 
-def manual_sandbox():
+def manual_sandbox() -> None:
     x = 0
     z = sin(x)
     w = log(z)

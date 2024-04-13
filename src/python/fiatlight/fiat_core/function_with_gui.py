@@ -29,6 +29,8 @@ class FunctionWithGui:
     invoke_automatically: bool = True
     # if this is True, the user can set the invoke_automatically flag
     invoke_automatically_can_set: bool = False
+    # if this is True, the function will be called asynchronously
+    invoke_async: bool = False
     # the name of the function
     name: str
 
