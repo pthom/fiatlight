@@ -60,8 +60,16 @@ def sandbox() -> None:
         """
         return a + b, a * b
 
-    fiat_run_composition([float_source, sin, log, sin, add_mul])
+    fiat_run_composition([float_source, sin, log])
+
+
+def manual_sandbox():
+    x = 0
+    z = sin(x)
+    w = log(z)
+    print(w)
 
 
 if __name__ == "__main__":
     sandbox()
+    # manual_sandbox()
