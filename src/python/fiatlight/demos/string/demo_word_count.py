@@ -62,6 +62,10 @@ def sort_word_with_counts(words: List[WordWithCount]) -> List[WordWithCount]:
     return r
 
 
+def filter_out_short_words(words: List[str], min_length: int = 4) -> List[str]:
+    return list(filter(lambda word: len(word) >= min_length, words))
+
+
 def main() -> None:
     from fiatlight import fiat_run_composition
 
@@ -71,6 +75,7 @@ def main() -> None:
             str_lower,
             remove_non_letters,
             split_words,
+            filter_out_short_words,
             remove_empty_words,
             sort_words,
             run_length_encode,
