@@ -5,6 +5,7 @@ from fiatlight.fiat_config.fiat_exception_config_def import FiatExceptionConfig
 class FiatConfig:
     style: FiatStyle = FiatStyle()
     exception_config: FiatExceptionConfig = FiatExceptionConfig()
+    disable_input_during_execution: bool = False
 
     def __init__(self) -> None:
         self.style = FiatStyle()

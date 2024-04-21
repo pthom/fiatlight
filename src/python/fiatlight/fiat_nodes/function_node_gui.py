@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-
 from fiatlight.fiat_types import Error, Unspecified, UnspecifiedValue, BoolFunction, JsonDict, ErrorValue
 from fiatlight.fiat_core import FunctionNode, FunctionNodeLink, AnyDataWithGui
 from fiatlight.fiat_config import FiatColorType, get_fiat_config
@@ -20,6 +19,7 @@ from fiatlight import fiat_widgets
 from typing import Dict, List, Any
 from dataclasses import dataclass
 import threading
+import logging
 
 
 class FunctionNodeGui:
@@ -50,6 +50,7 @@ class FunctionNodeGui:
     _function_doc: _FunctionDocElements
 
     _async_invoke_thread: threading.Thread | None = None
+    _inputs_changed_again_during_async: bool = False
 
     # internals of the function
     _fiat_internals_with_gui: Dict[str, AnyDataWithGui[Any]]
@@ -135,6 +136,16 @@ class FunctionNodeGui:
     def _Utilities_Section() -> None:  # Dummy function to create a section in the IDE # noqa
         pass
 
+    def _heartbeat(self) -> None:
+        # delete _async_invoke_thread if it is not alive anymore
+        if self._async_invoke_thread is not None:
+            if not self._async_invoke_thread.is_alive():
+                self._async_invoke_thread = None
+                return False
+
+        # Reinvoke the async call if needed (inputs changed during async)
+        self._reinvoke_async_if_needed()
+
     @staticmethod
     def _call_gui_present_custom(value_with_gui: AnyDataWithGui[Any]) -> None:
         value = value_with_gui.value
@@ -168,31 +179,47 @@ class FunctionNodeGui:
                 r += 1
         return r
 
-    def call_invoke_async_or_not(self) -> None:
-        def _invoke_impl() -> None:
-            self._function_node.invoke_function()
+    _nb_inputs_changes = 0
+    _input_changes_during_async = False
 
+    def _on_inputs_changed(self) -> None:
+        self._nb_inputs_changes += 1
+        msg = f"_on_inputs_changed: {self._nb_inputs_changes=}"
+        if self._is_running_async():
+            self._input_changes_during_async = True
+            msg += " (changed while function is running)"
+        logging.info(msg)
+        self._function_node.function_with_gui._dirty = True
+        if self._function_node.function_with_gui.invoke_automatically:
+            self.call_invoke_async_or_not()
+
+    def call_invoke_async_or_not(self) -> None:
         def _invoke_async() -> None:
             if self._async_invoke_thread is not None and self._async_invoke_thread.is_alive():
                 return
 
-            self._async_invoke_thread = threading.Thread(target=_invoke_impl)
+            def async_target() -> None:
+                logging.info(f"Async invoke with {self._nb_inputs_changes=}")
+                self._function_node.invoke_function()
+
+            self._async_invoke_thread = threading.Thread(target=async_target)
             self._async_invoke_thread.start()
 
-        def _invoke() -> None:
-            invoke_async = self._function_node.function_with_gui.invoke_async
-            if invoke_async:
-                _invoke_async()
-            else:
-                _invoke_impl()
+        shall_invoke_async = self._function_node.function_with_gui.invoke_async
+        if shall_invoke_async:
+            _invoke_async()
+        else:
+            self._function_node.invoke_function()
 
-        _invoke()
+    def _reinvoke_async_if_needed(self) -> None:
+        if self._input_changes_during_async and not self._is_running_async():
+            logging.info(f"Dirty after invoke: rerun {self._nb_inputs_changes=}")
+            self._function_node.function_with_gui._dirty = True
+            self._input_changes_during_async = False
+            self.call_invoke_async_or_not()
 
     def _is_running_async(self) -> bool:
         if self._async_invoke_thread is None:
-            return False
-        if not self._async_invoke_thread.is_alive():
-            self._async_invoke_thread = None
             return False
         return True
 
@@ -206,6 +233,7 @@ class FunctionNodeGui:
 
     def draw_node(self, unique_name: str) -> bool:
         inputs_changed: bool
+        self._heartbeat()
         with imgui_ctx.push_obj_id(self._function_node):
             with ed_ctx.begin_node(self._node_id):
                 with imgui_ctx.begin_vertical("node_content"):
@@ -215,16 +243,9 @@ class FunctionNodeGui:
                     # Set minimum width
                     imgui.dummy(ImVec2(hello_imgui.em_size(get_fiat_config().style.node_minimum_width_em), 1))
                     # Inputs
-                    is_running_async = self._is_running_async()
-                    if is_running_async:
-                        imgui.begin_disabled()
                     inputs_changed = self._draw_function_inputs(unique_name)
-                    if is_running_async:
-                        imgui.end_disabled()
                     if inputs_changed:
-                        self._function_node.function_with_gui._dirty = True
-                        if self._function_node.function_with_gui.invoke_automatically:
-                            self.call_invoke_async_or_not()
+                        self._on_inputs_changed()
                     # Internals
                     self._draw_fiat_internals()
                     # Exceptions, if any
@@ -514,6 +535,10 @@ class FunctionNodeGui:
         pass
 
     def _draw_function_inputs(self, unique_name: str) -> bool:
+        shall_disable_input = self._is_running_async() and get_fiat_config().disable_input_during_execution
+        if shall_disable_input:
+            imgui.begin_disabled()
+
         changed = False
 
         nb_inputs = self._function_node.function_with_gui.nb_inputs()
@@ -558,6 +583,9 @@ class FunctionNodeGui:
             input_param = self._function_node.function_with_gui.param(param_name)
             if self._draw_one_input(input_param, unique_name):
                 changed = True
+
+        if shall_disable_input:
+            imgui.end_disabled()
 
         return changed
 
