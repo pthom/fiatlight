@@ -18,8 +18,6 @@ from fiatlight.fiat_widgets import icons_fontawesome_6, fontawesome_6_ctx, fiat_
 from fiatlight import fiat_widgets
 from typing import Dict, List, Any
 from dataclasses import dataclass
-import threading
-import logging
 
 
 class FunctionNodeGui:
@@ -48,9 +46,6 @@ class FunctionNodeGui:
     _node_size: ImVec2 | None = None  # will be set after the node is drawn once
 
     _function_doc: _FunctionDocElements
-
-    _async_invoke_thread: threading.Thread | None = None
-    _inputs_changed_again_during_async: bool = False
 
     # internals of the function
     _fiat_internals_with_gui: Dict[str, AnyDataWithGui[Any]]
@@ -137,14 +132,7 @@ class FunctionNodeGui:
         pass
 
     def _heartbeat(self) -> None:
-        # delete _async_invoke_thread if it is not alive anymore
-        if self._async_invoke_thread is not None:
-            if not self._async_invoke_thread.is_alive():
-                self._async_invoke_thread = None
-                return False
-
-        # Reinvoke the async call if needed (inputs changed during async)
-        self._reinvoke_async_if_needed()
+        self._function_node.heartbeat()
 
     @staticmethod
     def _call_gui_present_custom(value_with_gui: AnyDataWithGui[Any]) -> None:
@@ -179,49 +167,8 @@ class FunctionNodeGui:
                 r += 1
         return r
 
-    _nb_inputs_changes = 0
-    _input_changes_during_async = False
-
-    def _on_inputs_changed(self) -> None:
-        self._nb_inputs_changes += 1
-        msg = f"_on_inputs_changed: {self._nb_inputs_changes=}"
-        if self._is_running_async():
-            self._input_changes_during_async = True
-            msg += " (changed while function is running)"
-        logging.info(msg)
-        self._function_node.function_with_gui._dirty = True
-        if self._function_node.function_with_gui.invoke_automatically:
-            self.call_invoke_async_or_not()
-
-    def call_invoke_async_or_not(self) -> None:
-        def _invoke_async() -> None:
-            if self._async_invoke_thread is not None and self._async_invoke_thread.is_alive():
-                return
-
-            def async_target() -> None:
-                logging.info(f"Async invoke with {self._nb_inputs_changes=}")
-                self._function_node.invoke_function()
-
-            self._async_invoke_thread = threading.Thread(target=async_target)
-            self._async_invoke_thread.start()
-
-        shall_invoke_async = self._function_node.function_with_gui.invoke_async
-        if shall_invoke_async:
-            _invoke_async()
-        else:
-            self._function_node.invoke_function()
-
-    def _reinvoke_async_if_needed(self) -> None:
-        if self._input_changes_during_async and not self._is_running_async():
-            logging.info(f"Dirty after invoke: rerun {self._nb_inputs_changes=}")
-            self._function_node.function_with_gui._dirty = True
-            self._input_changes_during_async = False
-            self.call_invoke_async_or_not()
-
-    def _is_running_async(self) -> bool:
-        if self._async_invoke_thread is None:
-            return False
-        return True
+    def invoke(self) -> None:
+        self._function_node.call_invoke_async_or_not()
 
     # ==================================================================================================================
     #                                            Draw the node
@@ -245,7 +192,7 @@ class FunctionNodeGui:
                     # Inputs
                     inputs_changed = self._draw_function_inputs(unique_name)
                     if inputs_changed:
-                        self._on_inputs_changed()
+                        self._function_node.on_inputs_changed()
                     # Internals
                     self._draw_fiat_internals()
                     # Exceptions, if any
@@ -272,7 +219,7 @@ class FunctionNodeGui:
         self._render_function_doc(unique_name)
 
     def _draw_async_status(self) -> None:
-        if self._is_running_async():
+        if self._function_node.is_running_async():
             color = ImColor(1.0, 1.0, 0.0, 1.0)
             radius1 = imgui.get_font_size() / 3.5
             imgui.spring()
@@ -535,7 +482,9 @@ class FunctionNodeGui:
         pass
 
     def _draw_function_inputs(self, unique_name: str) -> bool:
-        shall_disable_input = self._is_running_async() and get_fiat_config().disable_input_during_execution
+        shall_disable_input = (
+            self._function_node.is_running_async() and get_fiat_config().disable_input_during_execution
+        )
         if shall_disable_input:
             imgui.begin_disabled()
 
@@ -874,14 +823,14 @@ class FunctionNodeGui:
                 )
                 fiat_osd.set_widget_tooltip("Tick to invoke automatically.")
                 if invoke_changed and fn_with_gui.invoke_automatically:
-                    self.call_invoke_async_or_not()
+                    self.invoke()
 
             if fn_with_gui.is_dirty():
-                is_running_async = self._is_running_async()
+                is_running_async = self._function_node.is_running_async()
                 if is_running_async:
                     imgui.begin_disabled()
                 if imgui.button(icons_fontawesome_6.ICON_FA_ROTATE, btn_size):
-                    self.call_invoke_async_or_not()
+                    self.invoke()
                 fiat_osd.set_widget_tooltip("Refresh needed! Click to refresh.")
                 if is_running_async:
                     imgui.end_disabled()
