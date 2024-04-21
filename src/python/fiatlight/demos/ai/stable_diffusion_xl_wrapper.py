@@ -1,6 +1,5 @@
 # https://huggingface.co/stabilityai/sdxl-turbo
 # SDXL-Turbo is a distilled version of SDXL 1.0, trained for real-time synthesis
-
 from fiatlight.fiat_image import ImageU8
 from fiatlight.fiat_utils import LazyModule
 from fiatlight import fiat_types
@@ -10,11 +9,26 @@ from enum import Enum
 import cv2
 import sys
 
+# To run this, you will need to install the following packages:
+#   pip install -r requirements_ai.txt
 
-from typing import TYPE_CHECKING
+#
+# Options
+#
+# SDXL cannot run on a CPU!
+INFERENCE_DEVICE_TYPE = "cuda"  # "cpu" or "cuda" or "mps" (Mac only)
+# reduce memory usage
+ENABLE_CPU_OFFLOAD = True
+
+
+#
+# Delayed imports
+# (We do not want to import these modules at startup, since these imports are slow)
+#
+from typing import TYPE_CHECKING  # noqa
 
 if TYPE_CHECKING:
-    # We do not want to import these modules at startup, since these imports are slow
+    #
     import torch  # noqa
     import diffusers  # import   # noqa
     import diffusers.pipelines.stable_diffusion_xl.pipeline_stable_diffusion_xl as pipeline_stable_diffusion_xl  # import StableDiffusionXLPipeline  # noqa
@@ -22,24 +36,6 @@ else:
     torch = LazyModule("torch")
     diffusers = LazyModule("diffusers")
     pipeline_stable_diffusion_xl = LazyModule("diffusers.pipelines.stable_diffusion_xl.pipeline_stable_diffusion_xl")
-
-
-class InferenceDeviceType(Enum):
-    CPU = "cpu"
-    CUDA = "cuda"
-    MPS = "mps"
-
-
-# Set the inference device type: By default, MPS on Mac
-# SDXL cannot run on a CPU! (RuntimeError: "LayerNormKernelImpl" not implemented for 'Half')
-if sys.platform == "darwin":
-    _INFERENCE_DEVICE_TYPE = InferenceDeviceType.MPS
-else:
-    _INFERENCE_DEVICE_TYPE = InferenceDeviceType.CUDA
-
-
-def inference_device_type() -> str:
-    return _INFERENCE_DEVICE_TYPE.value
 
 
 class _StableDiffusionXLWrapper:
@@ -54,13 +50,11 @@ class _StableDiffusionXLWrapper:
         self.pipe = diffusers.AutoPipelineForText2Image.from_pretrained(  # type: ignore
             "stabilityai/sdxl-turbo", torch_dtype=torch.float16, variant="fp16"
         )
-        self.pipe = self.pipe.to(inference_device_type())  # type: ignore
-        self.generator = torch.Generator(device=inference_device_type())
+        self.pipe = self.pipe.to(INFERENCE_DEVICE_TYPE)  # type: ignore
+        if ENABLE_CPU_OFFLOAD:
+            self.pipe.enable_model_cpu_offload()
+        self.generator = torch.Generator(device=INFERENCE_DEVICE_TYPE)
         self.generator.manual_seed(42)
-
-        # if cpu:
-        # pipe = AutoPipelineForText2Image.from_pretrained("stabilityai/sdxl-turbo", variant="fp16")
-        # pipe = pipe.to("cpu")
 
     def query(
         self,
