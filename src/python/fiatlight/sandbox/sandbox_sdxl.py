@@ -1,39 +1,22 @@
-# https://huggingface.co/stabilityai/sdxl-turbo
-# SDXL-Turbo is a distilled version of SDXL 1.0, trained for real-time synthesis
-
-from diffusers import AutoPipelineForText2Image
+from diffusers import DiffusionPipeline
 import torch
-import cv2
+import PIL.Image
 import numpy as np
-import time
-
-# device = "cpu"
-# device = "cuda"
-device = "mps"
-
-# Will download to ~/.cache/huggingface/transformers
-pipe = AutoPipelineForText2Image.from_pretrained("stabilityai/sdxl-turbo", torch_dtype=torch.float16, variant="fp16")  # type: ignore
-pipe = pipe.to(device)
-
-generator = torch.Generator(device=device)
-generator.manual_seed(42)
-
-# pipe = AutoPipelineForText2Image.from_pretrained("stabilityai/sdxl-turbo", variant="fp16")
-# pipe = pipe.to("cpu")
-
-prompt = "A cinematic shot of a baby racoon wearing an intricate italian priest robe."
+import cv2
 
 
-start = time.time()
-r = pipe.__call__(prompt=prompt, num_inference_steps=1, guidance_scale=0.0, generator=generator)
-image = r.images[0]
-print("Time taken: ", time.time() - start)
+pipe = DiffusionPipeline.from_pretrained("stabilityai/stable-diffusion-xl-base-1.0", torch_dtype=torch.float16, use_safetensors=True, variant="fp16")
+pipe.to("cuda")
+pipe.enable_model_cpu_offload()
 
-# image = pipe(prompt=prompt, num_inference_steps=1, guidance_scale=0.0).images[0]
-# image_array= image.to("cpu").numpy()
+# if using torch < 2.0
+# pipe.enable_xformers_memory_efficient_attention()
+
+prompt = "An astronaut riding a green horse"
+
+image: PIL.Image = pipe(prompt=prompt).images[0]
 image_array = np.array(image)
 
-cv2.imshow("SDXL-Turbo", image_array)
+cv2.imshow("SDXL", image_array)
 while cv2.waitKey(1) != ord("q"):
     pass
-cv2.destroyAllWindows()
