@@ -1,4 +1,6 @@
 from __future__ import annotations
+
+
 from fiatlight.fiat_types import Error, Unspecified, UnspecifiedValue, BoolFunction, JsonDict, ErrorValue
 from fiatlight.fiat_core import FunctionNode, FunctionNodeLink, AnyDataWithGui
 from fiatlight.fiat_config import FiatColorType, get_fiat_config
@@ -11,8 +13,8 @@ from imgui_bundle import (
     hello_imgui,
     imgui_node_editor_ctx as ed_ctx,
     imspinner,
-    ImVec4,
 )
+from imgui_bundle import ImColor
 from fiatlight.fiat_widgets import icons_fontawesome_6, fontawesome_6_ctx, fiat_osd, collapsible_button
 from fiatlight import fiat_widgets
 from typing import Dict, List, Any
@@ -250,22 +252,20 @@ class FunctionNodeGui:
 
     def _draw_async_status(self) -> None:
         if self._is_running_async():
-            color = ImVec4(1.0, 1.0, 0.0, 1.0)
-            with imgui_ctx.push_style_color(imgui.Col_.text.value, color):
-                # imgui.text("Running...")
-                radius1 = imgui.get_font_size() / 3.5
-                imgui.spring()
-                imspinner.spinner_ang_triple(
-                    "spinner_ang_triple",
-                    radius1,
-                    radius1 * 1.2,
-                    radius1 * 2.0,
-                    2.9,
-                    color,
-                    color,
-                    color,
-                )
-                fiat_osd.set_widget_tooltip("Running...")
+            color = ImColor(1.0, 1.0, 0.0, 1.0)
+            radius1 = imgui.get_font_size() / 3.5
+            imgui.spring()
+            imspinner.spinner_ang_triple(
+                "spinner_ang_triple",
+                radius1,
+                radius1 * 1.2,
+                radius1 * 2.0,
+                2.9,
+                color,
+                color,
+                color,
+            )
+            fiat_osd.set_widget_tooltip("Running...")
 
     @staticmethod
     def _show_copy_to_clipboard_button(data_with_gui: AnyDataWithGui[Any]) -> None:

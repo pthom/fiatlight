@@ -1,7 +1,7 @@
 from imgui_bundle import immapp, imgui_node_editor as ed, imgui_node_editor_ctx as edctx, imgui, ImVec2, ImVec4  # noqa
 
 
-def gui():
+def gui() -> None:
     ed.begin("Node Editor")
 
     pin_input_id = ed.PinId(200)
@@ -32,7 +32,7 @@ def gui():
     ed.end()
 
 
-def main():
+def main() -> None:
     immapp.run(gui, with_node_editor=True)
 
 

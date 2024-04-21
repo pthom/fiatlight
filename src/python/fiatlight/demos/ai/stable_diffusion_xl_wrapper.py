@@ -1,16 +1,13 @@
 # https://huggingface.co/stabilityai/sdxl-turbo
 # SDXL-Turbo is a distilled version of SDXL 1.0, trained for real-time synthesis
+# To run this, you will need to install the following packages:
+#   pip install -r requirements_ai.txt
 from fiatlight.fiat_image import ImageU8
 from fiatlight.fiat_utils import LazyModule
 from fiatlight import fiat_types
-
 import numpy as np
-from enum import Enum
 import cv2
-import sys
 
-# To run this, you will need to install the following packages:
-#   pip install -r requirements_ai.txt
 
 #
 # Options
@@ -52,7 +49,7 @@ class _StableDiffusionXLWrapper:
         )
         self.pipe = self.pipe.to(INFERENCE_DEVICE_TYPE)  # type: ignore
         if ENABLE_CPU_OFFLOAD:
-            self.pipe.enable_model_cpu_offload()
+            self.pipe.enable_model_cpu_offload()  # type: ignore
         self.generator = torch.Generator(device=INFERENCE_DEVICE_TYPE)
         self.generator.manual_seed(42)
 
@@ -98,6 +95,7 @@ def invoke_stable_diffusion_xl(
     return _stable_diffusion_xl_wrapper.query(prompt, seed)
 
 
+# Options that will control how the function is invoked in fiatlight
 invoke_stable_diffusion_xl.invoke_automatically = False  # type: ignore
 invoke_stable_diffusion_xl.invoke_automatically_can_set = True  # type: ignore
 invoke_stable_diffusion_xl.invoke_async = True  # type: ignore
