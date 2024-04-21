@@ -5,3 +5,4 @@ numpy
 makefun
 Pillow
 types-Pillow
+brotli
