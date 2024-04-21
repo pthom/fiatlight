@@ -7,14 +7,17 @@ from fiatlight.fiat_utils import LazyModule
 from fiatlight import fiat_types
 import numpy as np
 import cv2
-
+import sys
 
 #
 # Options
 #
-# SDXL cannot run on a CPU!
-INFERENCE_DEVICE_TYPE = "cuda"  # "cpu" or "cuda" or "mps" (Mac only)
-# reduce memory usage
+# SDXL cannot run on a CPU. INFERENCE_DEVICE_TYPE must be "cuda" or "mps" (Mac)
+if sys.platform == "darwin":
+    INFERENCE_DEVICE_TYPE = "mps"
+else:
+    INFERENCE_DEVICE_TYPE = "cuda"
+# reduce memory usage (cuda only)
 ENABLE_CPU_OFFLOAD = True
 
 
@@ -48,7 +51,7 @@ class _StableDiffusionXLWrapper:
             "stabilityai/sdxl-turbo", torch_dtype=torch.float16, variant="fp16"
         )
         self.pipe = self.pipe.to(INFERENCE_DEVICE_TYPE)  # type: ignore
-        if ENABLE_CPU_OFFLOAD:
+        if ENABLE_CPU_OFFLOAD and INFERENCE_DEVICE_TYPE == "cuda":
             self.pipe.enable_model_cpu_offload()  # type: ignore
         self.generator = torch.Generator(device=INFERENCE_DEVICE_TYPE)
         self.generator.manual_seed(42)

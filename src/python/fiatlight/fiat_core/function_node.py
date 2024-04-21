@@ -2,6 +2,8 @@ from fiatlight.fiat_core.function_with_gui import FunctionWithGui
 from fiatlight.fiat_core.param_with_gui import ParamWithGui
 from fiatlight.fiat_types import JsonDict
 from typing import Any, List
+import logging
+import threading
 
 
 class FunctionNodeLink:
@@ -46,6 +48,12 @@ class FunctionNode:
     function_with_gui: FunctionWithGui
     output_links: list[FunctionNodeLink]
     input_links: list[FunctionNodeLink]
+
+    # Invoke related members
+    _nb_inputs_changes = 0
+    _input_changes_during_async = False
+    _async_invoke_thread: threading.Thread | None = None
+    _inputs_changed_again_during_async: bool = False
 
     def __init__(self, function_with_gui: FunctionWithGui) -> None:
         self.function_with_gui = function_with_gui
@@ -124,8 +132,7 @@ class FunctionNode:
             src_output = self.function_with_gui.output(link.src_output_idx)
             dst_input = link.dst_function_node.function_with_gui.input(link.dst_input_name)
             dst_input.value = src_output.value
-            link.dst_function_node.function_with_gui._dirty = True
-            link.dst_function_node.invoke_function()
+            link.dst_function_node.on_inputs_changed()
 
     def save_user_inputs_to_json(self) -> JsonDict:
         input_params = {}
@@ -142,3 +149,60 @@ class FunctionNode:
             input_param.load_from_json(input_params[input_param.name])
 
         self.function_with_gui.load_gui_options_from_json(json_data["gui_options"])
+
+    # ------------------------------------------------------------------------------------------------------------------
+    #  Invoke
+    # ------------------------------------------------------------------------------------------------------------------
+    @staticmethod
+    def _Invoke_Section() -> None:  # Dummy function to create a section in the IDE # noqa
+        pass
+
+    def is_running_async(self) -> bool:
+        if self._async_invoke_thread is None:
+            return False
+        return True
+
+    def heartbeat(self) -> None:
+        # delete _async_invoke_thread if it is not alive anymore
+        if self._async_invoke_thread is not None:
+            if not self._async_invoke_thread.is_alive():
+                self._async_invoke_thread = None
+
+        # Reinvoke the async call if needed (inputs changed during async)
+        self._reinvoke_async_if_needed()
+
+    def on_inputs_changed(self) -> None:
+        self._nb_inputs_changes += 1
+        msg = f"_on_inputs_changed: {self._nb_inputs_changes=}"
+        if self.is_running_async():
+            self._input_changes_during_async = True
+            msg += " (changed while function is running)"
+        logging.debug(msg)
+        self.function_with_gui._dirty = True
+        if self.function_with_gui.invoke_automatically:
+            self.call_invoke_async_or_not()
+
+    def call_invoke_async_or_not(self) -> None:
+        def _invoke_async() -> None:
+            if self._async_invoke_thread is not None and self._async_invoke_thread.is_alive():
+                return
+
+            def async_target() -> None:
+                logging.debug(f"Async invoke with {self._nb_inputs_changes=}")
+                self.invoke_function()
+
+            self._async_invoke_thread = threading.Thread(target=async_target)
+            self._async_invoke_thread.start()
+
+        shall_invoke_async = self.function_with_gui.invoke_async
+        if shall_invoke_async:
+            _invoke_async()
+        else:
+            self.invoke_function()
+
+    def _reinvoke_async_if_needed(self) -> None:
+        if self._input_changes_during_async and not self.is_running_async():
+            logging.debug(f"Dirty after invoke: rerun {self._nb_inputs_changes=}")
+            self.function_with_gui._dirty = True
+            self._input_changes_during_async = False
+            self.call_invoke_async_or_not()
