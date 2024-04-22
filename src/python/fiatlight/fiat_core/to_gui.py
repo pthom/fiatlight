@@ -1,3 +1,5 @@
+from dataclasses import dataclass
+
 from fiatlight.fiat_types import UnspecifiedValue, DataType, GlobalsDict, LocalsDict
 from fiatlight.fiat_core import primitives_gui
 from fiatlight.fiat_core.any_data_with_gui import AnyDataWithGui
@@ -11,7 +13,7 @@ from enum import Enum
 
 import inspect
 import logging
-from typing import TypeAlias, Callable, Any, Dict, Tuple, List
+from typing import TypeAlias, Callable, Any, Tuple, List
 
 
 GuiFactory = Callable[[], AnyDataWithGui[DataType]]
@@ -46,7 +48,9 @@ def _extract_enum_typeclass(
         if issubclass(type_class, Enum):
             return True, type_class_name
     except (NameError, AttributeError, SyntaxError, TypeError):
-        logging.debug(f"_extract_enum_typeclass: failed to evaluate {type_class_name}")
+        # We might end up here if the type is not an enum at all and thus we do not warn
+        pass
+        # logging.debug(f"_extract_enum_typeclass: failed to evaluate {type_class_name}")
     return False, type_class_name
 
 
@@ -136,7 +140,7 @@ def _any_type_class_name_to_gui(
 
     # if we reach this point, we have no GUI implementation for the type
     if type_class_name not in _COMPLAINTS_MISSING_GUI_FACTORY:
-        logging.warning(f"Type {type_class_name} not present in ALL_GUI_FACTORIES")
+        logging.warning(f"Type {type_class_name} not registered in gui_factories()")
         _COMPLAINTS_MISSING_GUI_FACTORY.append(type_class_name)
     return AnyDataWithGui.make_for_any()
 
@@ -305,24 +309,40 @@ def to_function_with_gui_globals_local_captured(
 #       all to gui
 # ----------------------------------------------------------------------------------------------------------------------
 Typename: TypeAlias = str
+FnTypenameMatcher = Callable[[Typename], bool]
 
 
 class GuiFactories:
-    _factories: Dict[Typename, GuiFactory[Any]]
+    @dataclass
+    class _GuiFactoryWithMatcher:
+        fn_matcher: FnTypenameMatcher
+        gui_factory: GuiFactory[Any]
+
+    _factories: List[_GuiFactoryWithMatcher]
 
     def __init__(self) -> None:
-        self._factories = {}
+        self._factories = []
 
     def can_handle_typename(self, typename: Typename) -> bool:
-        return typename in self._factories
+        for matcher in self._factories:
+            if matcher.fn_matcher(typename):
+                return True
+        return False
 
     def get_factory(self, typename: Typename) -> GuiFactory[Any]:
-        if typename not in self._factories:
-            raise ValueError(f"Unknown typename {typename}")
-        return self._factories[typename]
+        for factory in self._factories:
+            if factory.fn_matcher(typename):
+                return factory.gui_factory
+        raise ValueError(f"No factory found for typename {typename}")
 
     def register_factory(self, typename: Typename, factory: GuiFactory[Any]) -> None:
-        self._factories[typename] = factory
+        def matcher_function(tested_typename: Typename) -> bool:
+            return typename == tested_typename
+
+        self._factories.append(self._GuiFactoryWithMatcher(matcher_function, factory))
+
+    def register_matcher_factory(self, matcher: FnTypenameMatcher, factory: GuiFactory[Any]) -> None:
+        self._factories.append(self._GuiFactoryWithMatcher(matcher, factory))
 
     def register_enum(self, enum_class: type[Enum]) -> None:
         enum_class_name = str(enum_class)

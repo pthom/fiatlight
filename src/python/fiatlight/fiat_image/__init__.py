@@ -25,21 +25,19 @@ from fiatlight.fiat_image.lut import (
     lut_channels_in_colorspace,
 )
 from fiatlight.fiat_image.lut_gui import LutParamsWithGui
-from fiatlight.fiat_core import composite_gui
 
 
-def register_gui_factories() -> None:
-    from fiatlight.fiat_core import gui_factories
+def _register_factories() -> None:
+    from fiatlight.fiat_image.image_types import _register_image_type_factories
+    from fiatlight.fiat_core import gui_factories, composite_gui
 
-    gui_factories().register_factory("numpy.ndarray[typing.Any, numpy.dtype[numpy.uint8]]", ImageWithGui)
-    gui_factories().register_factory("numpy.ndarray", ImageWithGui)
-
+    _register_image_type_factories()
     gui_factories().register_factory("ColorConversion", ColorConversionWithGui)
     gui_factories().register_factory("ColorType", lambda: composite_gui.EnumWithGui(ColorType))
     gui_factories().register_factory("fiatlight.fiat_image.lut.LutParams", LutParamsWithGui)
 
 
-register_gui_factories()
+_register_factories()
 
 
 __all__ = [

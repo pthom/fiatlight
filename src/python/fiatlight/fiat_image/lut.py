@@ -118,4 +118,4 @@ def lut_table_graph(lut_table: LutTable, size: int) -> ImageU8:
         x0, y0 = float(x_table[i]), float(y_table[i])
         x1, y1 = float(x_table[i + 1]), float(y_table[i + 1])
         immvision.cv_drawing_utils.line(image, to_point(x0, y0), to_point(x1, y1), color)
-    return image
+    return image  # type: ignore

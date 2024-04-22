@@ -1,36 +1,117 @@
-from typing import TypeAlias, Any, NewType
+"""This module defines several types you can use to annotate your functions.
+The image types are defined as NewType instances, which are just aliases for numpy arrays.
+
+All those types will be displayed in the GUI as images, using the ImmVision image viewer
+(https://github.com/pthom/immvision)
+
+Notes:
+    - The easiest way to display an image is to use the `Image` type, which is a union of all image types,
+      or to use the `ImageU8` type, which is a union of all UInt8 image types.
+    - any numpy array can be used to create an `Image`, and the viewer will try to display it
+"""
+
+from typing import Any, NewType
 import numpy as np
-from numpy.typing import NDArray
+from typing import Tuple, Union
+
+# Define shape types for clarity
+ShapeHeightWidth = Tuple[int, int]
+ShapeHeightWidthChannels = Tuple[int, int, int]
+
+# Define UInt8 as a dtype for numpy arrays
+UInt8 = np.dtype[np.uint8]
+AnyFloat = np.dtype[np.floating[Any]]
 
 
-# Type aliases for image types:
-Image: TypeAlias = NDArray[np.uint8 | np.floating[Any]]
+#
+# UInt8 Images
+#
+# ImageU8 = NewType("ImageU8", np.ndarray[ShapeHeightWidthChannels | ShapeHeightWidth, UInt8])
+# Type definitions for UInt8 images based on channel count
+ImageU8_1 = NewType("ImageU8_1", np.ndarray[ShapeHeightWidth, UInt8])
+ImageU8_2 = NewType("ImageU8_2", np.ndarray[ShapeHeightWidthChannels, UInt8])
+ImageU8_3 = NewType("ImageU8_3", np.ndarray[ShapeHeightWidthChannels, UInt8])
+ImageU8_4 = NewType("ImageU8_4", np.ndarray[ShapeHeightWidthChannels, UInt8])
+ImageU8_WithNbChannels = Union[ImageU8_1, ImageU8_2, ImageU8_3, ImageU8_4]
+# Type definitions based on the roles of the channels
+ImageU8_RGB = NewType("ImageU8_RGB", ImageU8_3)
+ImageU8_RGBA = NewType("ImageU8_RGBA", ImageU8_4)
+ImageU8_BGRA = NewType("ImageU8_BGRA", ImageU8_4)
+ImageU8_BGR = NewType("ImageU8_BGR", ImageU8_3)
+ImageU8_GRAY = NewType("ImageU8_GRAY", ImageU8_1)
+ImageU8_WithChannelsRoles = Union[ImageU8_RGB, ImageU8_RGBA, ImageU8_BGRA, ImageU8_BGR, ImageU8_GRAY]
 
-# ImageU8 is the most common image type, with 8-bit unsigned integer values.
-# It can have any number of channels.
-ImageU8: TypeAlias = NDArray[np.uint8]
-
-# ImageFloat is an image type with floating point values.
-# It can have any number of channels.
-ImageFloat: TypeAlias = NDArray[np.floating[Any]]
-
-
-# ImageU8_RGB, ImageU8_RGBA, ImageU8_BGRA, ImageU8_BGR, ImageU8_GRAY are used to
-# help understand the number and roles of channels in the image.
-ImageU8_RGB: TypeAlias = NDArray[np.uint8]
-ImageU8_RGBA: TypeAlias = NDArray[np.uint8]
-ImageU8_BGRA: TypeAlias = NDArray[np.uint8]
-ImageU8_BGR: TypeAlias = NDArray[np.uint8]
-ImageU8_GRAY: TypeAlias = NDArray[np.uint8]
-
-# ImageU8_1, ImageU8_2, ImageU8_3, ImageU8_4 are used to help understand the number of channels in the image.
-ImageU8_1: TypeAlias = NDArray[np.uint8]  # 1 channel
-ImageU8_2: TypeAlias = NDArray[np.uint8]  # 2 channels
-ImageU8_3: TypeAlias = NDArray[np.uint8]  # 3 channels
-ImageU8_4: TypeAlias = NDArray[np.uint8]  # 4 channels
-
+# Generic type for any 8-bit image
+ImageU8 = Union[ImageU8_WithNbChannels, ImageU8_WithChannelsRoles]
 
 # ImageU8Channels is a synonym for ImageU8, used when we want to
 # display the channels of an image as separate images (in the GUI).
 # (beside the difference in the name, the two types are identical)
-ImageU8Channels = NewType("ImageU8Channels", ImageU8)
+ImageU8Channels = NewType("ImageU8Channels", np.ndarray[ShapeHeightWidthChannels, UInt8])
+
+
+#
+# Float Images
+#
+# Type definitions for float images based on channel count
+ImageFloat_1 = NewType("ImageFloat_1", np.ndarray[ShapeHeightWidth, AnyFloat])
+ImageFloat_2 = NewType("ImageFloat_2", np.ndarray[ShapeHeightWidthChannels, AnyFloat])
+ImageFloat_3 = NewType("ImageFloat_3", np.ndarray[ShapeHeightWidthChannels, AnyFloat])
+ImageFloat_4 = NewType("ImageFloat_4", np.ndarray[ShapeHeightWidthChannels, AnyFloat])
+
+# Generic type for any float image
+ImageFloat = Union[ImageFloat_1, ImageFloat_2, ImageFloat_3, ImageFloat_4]
+
+
+#
+# Generic Image Type
+#
+# Image is a union of all image types
+Image = Union[ImageU8, ImageFloat]
+
+
+# ---------------------------- Register image type factories ----------------------------
+def _register_image_type_factories() -> None:
+    from fiatlight.fiat_core import gui_factories
+    from fiatlight.fiat_image.image_gui import ImageWithGui, ImageChannelsWithGui
+
+    all_image_types = [
+        "ImageU8",
+        "ImageU8_1",
+        "ImageU8_2",
+        "ImageU8_3",
+        "ImageU8_4",
+        "ImageU8_RGB",
+        "ImageU8_RGBA",
+        "ImageU8_BGRA",
+        "ImageU8_BGR",
+        "ImageU8_GRAY",
+        "ImageFloat_1",
+        "ImageFloat_2",
+        "ImageFloat_3",
+        "ImageFloat_4",
+    ]
+    prefix = "fiatlight.fiat_image.image_types."
+    for image_type in all_image_types:
+        gui_factories().register_factory(prefix + image_type, ImageWithGui)
+
+    # Image and ImageFloat are unions, we need to register a specific matcher for them
+
+    def image_union_matcher(typename: str) -> bool:
+        # ImageU8 or Image will be seen as:
+        #     typing.Union[fiatlight.fiat_image.image_types.ImageU8_1, fiatlight.fiat_image.image_types.ImageU8_2, ...]
+        if not typename.startswith("typing.Union[") or not typename.endswith("]"):
+            return False
+        nb_open_brackets = typename.count("[")
+        nb_close_brackets = typename.count("]")
+        if nb_open_brackets != 1 or nb_close_brackets != 1:
+            return False
+        # Extract the inner type
+        inner_type = typename[len("typing.Union[") : -1]
+        inner_types = inner_type.split(", ")
+        image_prefix = prefix + "Image"
+        are_all_inner_types_image_types = all([t.startswith(image_prefix) for t in inner_types])
+        return are_all_inner_types_image_types
+
+    gui_factories().register_factory("fiatlight.fiat_image.image_types.ImageU8Channels", ImageChannelsWithGui)
+    gui_factories().register_matcher_factory(image_union_matcher, ImageWithGui)
