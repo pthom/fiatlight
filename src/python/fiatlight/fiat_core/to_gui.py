@@ -296,12 +296,12 @@ def to_function_with_gui_globals_local_captured(
         function_with_gui._outputs_with_gui.append(OutputWithGui(output_with_gui))
     else:
         return_annotation_str = str(return_annotation)
-        outputs_with_guis = _any_typeclass_to_gui_split_if_tuple(
-            return_annotation_str, globals_dict=globals_dict, locals_dict=locals_dict
-        )
-        for output_with_gui in outputs_with_guis:
-            function_with_gui._outputs_with_gui.append(OutputWithGui(output_with_gui))
-
+        if return_annotation_str != "None":
+            outputs_with_guis = _any_typeclass_to_gui_split_if_tuple(
+                return_annotation_str, globals_dict=globals_dict, locals_dict=locals_dict
+            )
+            for output_with_gui in outputs_with_guis:
+                function_with_gui._outputs_with_gui.append(OutputWithGui(output_with_gui))
     return function_with_gui
 
 

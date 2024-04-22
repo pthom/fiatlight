@@ -740,6 +740,9 @@ class FunctionNodeGui:
         nb_outputs = self._function_node.function_with_gui.nb_outputs()
         nb_unlinked_outputs = self._function_node.nb_unlinked_outputs()
 
+        if nb_outputs == 0:
+            return
+
         #
         # Instantiate the node separator parameters
         #
