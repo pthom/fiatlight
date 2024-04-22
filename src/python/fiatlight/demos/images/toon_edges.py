@@ -1,5 +1,5 @@
 import fiatlight
-from fiatlight.fiat_image import ImageU8, ImageU8_GRAY, ImageU8_3, image_source
+from fiatlight.fiat_image import ImageU8_GRAY, ImageU8_3, image_source
 from fiatlight.fiat_types import Float_0_1, PositiveFloat, Float_0_10, Int_0_10
 from fiatlight.demos.images.opencv_wrappers import canny, dilate, MorphShape, CannyApertureSize
 from fiatlight.demos.images.overlay_alpha_image import overlay_alpha_image
@@ -11,7 +11,7 @@ def merge_toon_edges(
     image: ImageU8_3,
     edges_images: ImageU8_GRAY,
     edges_intensity: Float_0_1 = Float_0_1(0.7),
-) -> ImageU8:
+) -> ImageU8_3:
     """Add toon edges to the image.
     :param image: Image: Input image
     :param edges_images: binary image with edges detected using Canny filter
@@ -27,7 +27,7 @@ def merge_toon_edges(
     overlay_rgba[:, :, 3] = (edges_images * edges_intensity).astype(np.uint8)
 
     # Overlay the RGBA image on the original image
-    r = overlay_alpha_image(image, overlay_rgba)
+    r = overlay_alpha_image(image, overlay_rgba)  # type: ignore
 
     return r
 
@@ -43,7 +43,7 @@ def add_toon_edges(
     dilate_iterations: Int_0_10 = Int_0_10(2),
     blur_edges_sigma: Float_0_10 = Float_0_10(0.0),
     edges_intensity: Float_0_1 = Float_0_1(0.8),
-) -> ImageU8:
+) -> ImageU8_3:
     # ) -> ToonEdgesOutput:
     canny_aperture_size = CannyApertureSize.APERTURE_5
     edges = canny(image, canny_t_lower, canny_t_upper, canny_aperture_size, canny_l2_gradient, canny_blur_sigma)

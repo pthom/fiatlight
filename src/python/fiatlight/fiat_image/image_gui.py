@@ -134,7 +134,7 @@ class ImageWithGui(AnyDataWithGui[Image]):
         self.callbacks.edit = self.edit
         self.callbacks.present_custom = self.present_custom
         self.callbacks.on_change = self.on_change
-        self.callbacks.default_value_provider = lambda: np.zeros((1, 1, 3), dtype=np.uint8)
+        self.callbacks.default_value_provider = lambda: np.zeros((1, 1, 3), dtype=np.uint8)  # type: ignore
         self.callbacks.present_str = self.present_str
         self.callbacks.save_gui_options_to_json = self.save_gui_options_to_json
         self.callbacks.load_gui_options_from_json = self.load_gui_options_from_json

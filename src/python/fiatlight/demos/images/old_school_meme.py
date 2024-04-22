@@ -13,7 +13,7 @@ import os
 # A synonym for int, but with a font size, between 20 and 100
 # (this will create a slider in the GUI)
 FontSize = NewType("FontSize", int)
-fiatlight.gui_factories().register_bound_int((5, 100), "FontSize")
+fiatlight.gui_factories().register_bound_int((5, 200), "FontSize")
 
 
 class MemeFont(Enum):
@@ -72,14 +72,14 @@ def add_meme_text(
         text,
         font=font,
         fill=text_color_bgr,
-        stroke_width=2,
+        stroke_width=font_size // 10,
         stroke_fill=outline_color_bgr,
         align="center",
     )
 
     # Convert PIL image to numpy array
     image_with_text = np.array(image_pil)
-    return image_with_text
+    return image_with_text  # type: ignore
 
 
 def sandbox() -> None:
