@@ -53,20 +53,6 @@ class ImagePresenter:
         if len(image.shape) == 3:
             self.image_channels = cv2.split(image)  # type: ignore
 
-    def _gui_size(self) -> None:
-        ratio = 1.1
-        imgui.push_button_repeat(True)
-        imgui.text("Thumbnail size")
-        imgui.same_line()
-        if imgui.small_button(" smaller "):
-            w, h = self.image_params.image_display_size
-            self.image_params.image_display_size = (int(w / ratio), int(h / ratio))
-        imgui.same_line()
-        if imgui.small_button(" bigger "):
-            w, h = self.image_params.image_display_size
-            self.image_params.image_display_size = (int(w * ratio), int(h * ratio))
-        imgui.pop_button_repeat()
-
     def _gui_channels(self) -> None:
         for i, image_channel in enumerate(self.image_channels):
             label = f"channel {i}"
@@ -100,7 +86,6 @@ class ImagePresenter:
             _, self.show_channels = imgui.checkbox("Show channels", self.show_channels)
             if self.show_channels:
                 _, self.channel_layout_vertically = imgui.checkbox("Vertical layout", self.channel_layout_vertically)
-        self._gui_size()
         if self.show_channels and nb_channels > 1:
             self._gui_channels()
         else:
