@@ -207,8 +207,9 @@ class FunctionWithGui:
         try:
             fn_output = self._f_impl(*positional_only_values, **keyword_values)
             if not isinstance(fn_output, tuple):
-                assert len(self._outputs_with_gui) == 1
-                self._outputs_with_gui[0].data_with_gui.value = fn_output
+                assert len(self._outputs_with_gui) <= 1
+                if len(self._outputs_with_gui) == 1:
+                    self._outputs_with_gui[0].data_with_gui.value = fn_output
             else:
                 assert len(fn_output) == len(self._outputs_with_gui)
                 for i, output_with_gui in enumerate(self._outputs_with_gui):
