@@ -173,7 +173,7 @@ class FunctionNode:
 
     def on_inputs_changed(self) -> None:
         """Called when one of the inputs of the function has changed.
-        May or may not call the function depending on the invoke_automatically flag."""
+        May or may not call the function depending on the invoke_manually flag."""
         self._nb_inputs_changes += 1
         msg = f"_on_inputs_changed: {self._nb_inputs_changes=}"
         if self.is_running_async():
@@ -181,7 +181,7 @@ class FunctionNode:
             msg += " (changed while function is running)"
         logging.debug(msg)
         self.function_with_gui._dirty = True
-        if self.function_with_gui.invoke_automatically:
+        if not self.function_with_gui.invoke_manually:
             self.call_invoke_async_or_not()
 
     def call_invoke_async_or_not(self) -> None:

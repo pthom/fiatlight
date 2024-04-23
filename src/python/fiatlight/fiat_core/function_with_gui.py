@@ -25,10 +25,8 @@ class FunctionWithGui:
     # Public members
     #
 
-    # if this is True, the function will be called automatically when any of the inputs change
-    invoke_automatically: bool = True
-    # if this is True, the user can set the invoke_automatically flag
-    invoke_automatically_can_set: bool = False
+    # if this is True, the function will be called only if the user clicks on the "invoke" button
+    invoke_manually: bool = False
     # if this is True, the function will be called asynchronously
     invoke_async: bool = False
     # if this is True, the user can call the function manually
@@ -246,7 +244,6 @@ class FunctionWithGui:
     # Here, we only save the options that the user entered manually in the GUI:
     #   - the options of the inputs
     #   - the options of the outputs
-    #   - the options of this FunctionWithGui (invoke_automatically, etc.)
     # --------------------------------------------------------------------------------------------
     def save_gui_options_to_json(self) -> JsonDict:
         input_options = {}
@@ -263,8 +260,6 @@ class FunctionWithGui:
             "inputs": input_options,
             "outputs": output_options,
         }
-        if self.invoke_automatically_can_set:
-            r["invoke_automatically"] = self.invoke_automatically
         return r
 
     def load_gui_options_from_json(self, json_data: JsonDict) -> None:
@@ -286,9 +281,6 @@ class FunctionWithGui:
             callback_load = output_with_gui.data_with_gui.callbacks.load_gui_options_from_json
             if callback_load is not None:
                 callback_load(output_option)
-
-        if self.invoke_automatically_can_set:
-            self.invoke_automatically = json_data.get("invoke_automatically", True)
 
     # --------------------------------------------------------------------------------------------
     #       Function documentation & source code

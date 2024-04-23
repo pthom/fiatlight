@@ -99,8 +99,6 @@ def invoke_stable_diffusion_xl(
 
 
 # Options that will control how the function is invoked in fiatlight
-invoke_stable_diffusion_xl.invoke_automatically = False  # type: ignore
-invoke_stable_diffusion_xl.invoke_automatically_can_set = True  # type: ignore
 invoke_stable_diffusion_xl.invoke_async = True  # type: ignore
 
 
