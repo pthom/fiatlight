@@ -319,7 +319,7 @@ class FunctionsGraphGui:
             fn_invoke_automatically = fn_node_gui.get_function_node().function_with_gui.invoke_automatically
             shall_invoke = also_invoke_not_automatic_functions or fn_invoke_automatically
             if fn_node_gui.get_function_node().function_with_gui.is_dirty() and shall_invoke:
-                fn_node_gui.invoke()
+                fn_node_gui.invoke(even_if_not_dirty=False)
 
     # ======================================================================================================================
     # Serialization

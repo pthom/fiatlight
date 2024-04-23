@@ -167,7 +167,9 @@ class FunctionNodeGui:
                 r += 1
         return r
 
-    def invoke(self) -> None:
+    def invoke(self, even_if_not_dirty: bool = False) -> None:
+        if even_if_not_dirty:
+            self._function_node.function_with_gui.set_dirty()
         self._function_node.call_invoke_async_or_not()
 
     # ==================================================================================================================
@@ -193,6 +195,11 @@ class FunctionNodeGui:
                     inputs_changed = self._draw_function_inputs(unique_name)
                     if inputs_changed:
                         self._function_node.on_inputs_changed()
+                    # Manual call
+                    if self._function_node.function_with_gui.can_call_manually:
+                        if imgui.button("Call manually"):
+                            self._function_node.function_with_gui.dirty = True
+                            self.invoke(even_if_not_dirty=True)
                     # Internals
                     self._draw_fiat_internals()
                     # Exceptions, if any
@@ -826,14 +833,14 @@ class FunctionNodeGui:
                 )
                 fiat_osd.set_widget_tooltip("Tick to invoke automatically.")
                 if invoke_changed and fn_with_gui.invoke_automatically:
-                    self.invoke()
+                    self.invoke(even_if_not_dirty=False)
 
             if fn_with_gui.is_dirty():
                 is_running_async = self._function_node.is_running_async()
                 if is_running_async:
                     imgui.begin_disabled()
                 if imgui.button(icons_fontawesome_6.ICON_FA_ROTATE, btn_size):
-                    self.invoke()
+                    self.invoke(even_if_not_dirty=False)
                 fiat_osd.set_widget_tooltip("Refresh needed! Click to refresh.")
                 if is_running_async:
                     imgui.end_disabled()

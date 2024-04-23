@@ -172,6 +172,8 @@ class FunctionNode:
         self._reinvoke_async_if_needed()
 
     def on_inputs_changed(self) -> None:
+        """Called when one of the inputs of the function has changed.
+        May or may not call the function depending on the invoke_automatically flag."""
         self._nb_inputs_changes += 1
         msg = f"_on_inputs_changed: {self._nb_inputs_changes=}"
         if self.is_running_async():
@@ -183,6 +185,8 @@ class FunctionNode:
             self.call_invoke_async_or_not()
 
     def call_invoke_async_or_not(self) -> None:
+        """Call the function (maybe async)"""
+
         def _invoke_async() -> None:
             if self._async_invoke_thread is not None and self._async_invoke_thread.is_alive():
                 return
