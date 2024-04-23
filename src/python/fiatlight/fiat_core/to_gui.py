@@ -312,6 +312,27 @@ Typename: TypeAlias = str
 FnTypenameMatcher = Callable[[Typename], bool]
 
 
+def _make_union_matcher(typenames_prefix: str) -> FnTypenameMatcher:
+    """Create a matcher for union of types whose name start with the given prefix."""
+
+    # e.g. for typenames_prefix="fiatlight.fiat_image.image_types.Image" the matcher will match types like
+    #     typing.Union[fiatlight.fiat_image.image_types.ImageU8_1, fiatlight.fiat_image.image_types.ImageU8_2, ...]
+    def union_matcher(typename: str) -> bool:
+        if not typename.startswith("typing.Union[") or not typename.endswith("]"):
+            return False
+        nb_open_brackets = typename.count("[")
+        nb_close_brackets = typename.count("]")
+        if nb_open_brackets != 1 or nb_close_brackets != 1:
+            return False
+        # Extract the inner type
+        inner_type = typename[len("typing.Union[") : -1]
+        inner_types = inner_type.split(", ")
+        are_all_inner_types_image_types = all([t.startswith(typenames_prefix) for t in inner_types])
+        return are_all_inner_types_image_types
+
+    return union_matcher
+
+
 class GuiFactories:
     @dataclass
     class _GuiFactoryWithMatcher:
@@ -340,6 +361,15 @@ class GuiFactories:
             return typename == tested_typename
 
         self._factories.append(self._GuiFactoryWithMatcher(matcher_function, factory))
+
+    def register_factory_name_start_with(self, typename_prefix: Typename, factory: GuiFactory[Any]) -> None:
+        def matcher_function(tested_typename: Typename) -> bool:
+            return tested_typename.startswith(typename_prefix)
+
+        self._factories.append(self._GuiFactoryWithMatcher(matcher_function, factory))
+
+    def register_factory_union(self, typename_prefix: Typename, factory: GuiFactory[Any]) -> None:
+        self.register_matcher_factory(_make_union_matcher(typename_prefix), factory)
 
     def register_matcher_factory(self, matcher: FnTypenameMatcher, factory: GuiFactory[Any]) -> None:
         self._factories.append(self._GuiFactoryWithMatcher(matcher, factory))

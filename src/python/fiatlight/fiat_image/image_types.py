@@ -44,10 +44,10 @@ ImageU8_WithChannelsRoles = Union[ImageU8_RGB, ImageU8_RGBA, ImageU8_BGRA, Image
 # Generic type for any 8-bit image
 ImageU8 = Union[ImageU8_WithNbChannels, ImageU8_WithChannelsRoles]
 
-# ImageU8Channels is a synonym for ImageU8, used when we want to
+# ChannelsImageU8 is a synonym for ImageU8, used when we want to
 # display the channels of an image as separate images (in the GUI).
 # (beside the difference in the name, the two types are identical)
-ImageU8Channels = NewType("ImageU8Channels", np.ndarray[ShapeHeightWidthChannels, UInt8])
+ChannelsImageU8 = NewType("ChannelsImageU8", np.ndarray[ShapeHeightWidthChannels, UInt8])
 
 
 #
@@ -71,47 +71,14 @@ Image = Union[ImageU8, ImageFloat]
 
 
 # ---------------------------- Register image type factories ----------------------------
+
+
 def _register_image_type_factories() -> None:
     from fiatlight.fiat_core import gui_factories
-    from fiatlight.fiat_image.image_gui import ImageWithGui, ImageChannelsWithGui
+    from fiatlight.fiat_image.image_gui import ImageChannelsWithGui, ImageWithGui
 
-    all_image_types = [
-        "ImageU8",
-        "ImageU8_1",
-        "ImageU8_2",
-        "ImageU8_3",
-        "ImageU8_4",
-        "ImageU8_RGB",
-        "ImageU8_RGBA",
-        "ImageU8_BGRA",
-        "ImageU8_BGR",
-        "ImageU8_GRAY",
-        "ImageFloat_1",
-        "ImageFloat_2",
-        "ImageFloat_3",
-        "ImageFloat_4",
-    ]
-    prefix = "fiatlight.fiat_image.image_types."
-    for image_type in all_image_types:
-        gui_factories().register_factory(prefix + image_type, ImageWithGui)
+    prefix = "fiatlight.fiat_image.image_types.Image"
+    gui_factories().register_factory_name_start_with(prefix, ImageWithGui)
+    gui_factories().register_factory_union(prefix, ImageWithGui)
 
-    # Image and ImageFloat are unions, we need to register a specific matcher for them
-
-    def image_union_matcher(typename: str) -> bool:
-        # ImageU8 or Image will be seen as:
-        #     typing.Union[fiatlight.fiat_image.image_types.ImageU8_1, fiatlight.fiat_image.image_types.ImageU8_2, ...]
-        if not typename.startswith("typing.Union[") or not typename.endswith("]"):
-            return False
-        nb_open_brackets = typename.count("[")
-        nb_close_brackets = typename.count("]")
-        if nb_open_brackets != 1 or nb_close_brackets != 1:
-            return False
-        # Extract the inner type
-        inner_type = typename[len("typing.Union[") : -1]
-        inner_types = inner_type.split(", ")
-        image_prefix = prefix + "Image"
-        are_all_inner_types_image_types = all([t.startswith(image_prefix) for t in inner_types])
-        return are_all_inner_types_image_types
-
-    gui_factories().register_factory("fiatlight.fiat_image.image_types.ImageU8Channels", ImageChannelsWithGui)
-    gui_factories().register_matcher_factory(image_union_matcher, ImageWithGui)
+    gui_factories().register_factory("fiatlight.fiat_image.image_types.ChannelsImageU8", ImageChannelsWithGui)
