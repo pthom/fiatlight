@@ -31,6 +31,8 @@ class FunctionWithGui:
     invoke_automatically_can_set: bool = False
     # if this is True, the function will be called asynchronously
     invoke_async: bool = False
+    # if this is True, the user can call the function manually
+    can_call_manually: bool = False
     # the name of the function
     name: str
 
@@ -232,6 +234,9 @@ class FunctionWithGui:
 
     def is_dirty(self) -> bool:
         return self._dirty
+
+    def set_dirty(self) -> None:
+        self._dirty = True
 
     def get_last_exception_message(self) -> str | None:
         return self._last_exception_message

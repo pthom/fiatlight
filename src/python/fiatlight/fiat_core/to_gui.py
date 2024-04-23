@@ -272,12 +272,17 @@ def to_function_with_gui_globals_local_captured(
     function_with_gui.name = f.__name__
     function_with_gui._f_impl = f
 
+    #
+    # Customization by adding attributes to the function
+    #
     if hasattr(f, "invoke_automatically"):
         function_with_gui.invoke_automatically = f.invoke_automatically
     if hasattr(f, "invoke_automatically_can_set"):
         function_with_gui.invoke_automatically_can_set = f.invoke_automatically_can_set
     if hasattr(f, "invoke_async"):
         function_with_gui.invoke_async = f.invoke_async
+    if hasattr(f, "can_call_manually"):
+        function_with_gui.can_call_manually = f.can_call_manually
 
     try:
         sig = get_function_signature(f, signature_string=signature_string)
