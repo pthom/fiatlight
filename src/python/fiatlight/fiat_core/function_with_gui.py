@@ -25,14 +25,25 @@ class FunctionWithGui:
     # Public members
     #
 
-    # if this is True, the function will be called only if the user clicks on the "invoke" button
-    invoke_manually: bool = False
-    # if this is True, the function will be called asynchronously
-    invoke_async: bool = False
-    # if this is True, the user can call the function manually
-    can_call_manually: bool = False
     # the name of the function
     name: str
+
+    #
+    # Behavioral Flags
+    #
+
+    # invoke_async: if true, the function shall be called asynchronously
+    invoke_async: bool = False
+
+    # invoke_manually: if true, the function will be called only if the user clicks on the "invoke" button
+    # (if inputs were changed, a "Refresh needed" label will be displayed)
+    invoke_manually: bool = False
+
+    # invoke_always_dirty: if true, the function output will always be considered out of date, and
+    #   - if invoke_manually is true, the "Refresh needed" label will be displayed
+    #   - if invoke_manually is false, the function will be called at each frame
+    # Note: a "live" function is thus a function with invoke_manually=False and invoke_always_dirty=True
+    invoke_always_dirty: bool = False
 
     #
     # Private members
@@ -76,6 +87,49 @@ class FunctionWithGui:
         if data_with_gui is None:
             data_with_gui = AnyDataWithGui()
         self._outputs_with_gui.append(OutputWithGui(data_with_gui))
+
+    def set_invoke_live(self) -> None:
+        """Set flags to make this a live function (called automatically at each frame)"""
+        self.invoke_manually = False
+        self.invoke_always_dirty = True
+
+    def set_invoke_manually(self) -> None:
+        """Set flags to make this a function that needs to be called manually"""
+        self.invoke_manually = True
+
+    def set_invoke_manually_io(self) -> None:
+        """Set flags to make this a IO function that needs to be called manually
+        and that is always considered dirty, because it depends on an external device
+        or state (and likely has no input)"""
+        self.invoke_manually = True
+        self.invoke_always_dirty = True
+
+    def is_invoke_manually_io(self) -> bool:
+        """Return True if the function is an IO function that needs to be called manually"""
+        return self.invoke_manually and self.invoke_always_dirty
+
+    def set_invoke_async(self) -> None:
+        """Set flags to make this a function that is called asynchronously"""
+        self.invoke_async = True
+
+    def is_live(self) -> bool:
+        """Return True if the function is live"""
+        return not self.invoke_manually and self.invoke_always_dirty
+
+    # --------------------------------------------------------------------------------------------
+    #        Utilities
+    # --------------------------------------------------------------------------------------------
+    def is_dirty(self) -> bool:
+        return self._dirty
+
+    def set_dirty(self) -> None:
+        self._dirty = True
+
+    def get_last_exception_message(self) -> str | None:
+        return self._last_exception_message
+
+    def shall_display_refresh_needed_label(self) -> bool:
+        return self.invoke_manually and self._dirty and not self.is_invoke_manually_io()
 
     # --------------------------------------------------------------------------------------------
     #        Inputs, aka parameters
@@ -229,15 +283,6 @@ class FunctionWithGui:
                     output_with_gui.data_with_gui.value = ErrorValue
 
         self._dirty = False
-
-    def is_dirty(self) -> bool:
-        return self._dirty
-
-    def set_dirty(self) -> None:
-        self._dirty = True
-
-    def get_last_exception_message(self) -> str | None:
-        return self._last_exception_message
 
     # --------------------------------------------------------------------------------------------
     #        Save and load to json

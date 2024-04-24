@@ -126,14 +126,6 @@ class FunctionNode:
         r = [param for param in self.function_with_gui._inputs_with_gui if not self.has_input_link(param.name)]  # noqa
         return r
 
-    def invoke_function(self) -> None:
-        self.function_with_gui.invoke()
-        for link in self.output_links:
-            src_output = self.function_with_gui.output(link.src_output_idx)
-            dst_input = link.dst_function_node.function_with_gui.input(link.dst_input_name)
-            dst_input.value = src_output.value
-            link.dst_function_node.on_inputs_changed()
-
     def save_user_inputs_to_json(self) -> JsonDict:
         input_params = {}
         for input_param in self.user_editable_params():
@@ -163,13 +155,22 @@ class FunctionNode:
         return True
 
     def heartbeat(self) -> None:
+        # Handle async invoke
+        # -------------------
         # delete _async_invoke_thread if it is not alive anymore
         if self._async_invoke_thread is not None:
             if not self._async_invoke_thread.is_alive():
                 self._async_invoke_thread = None
-
         # Reinvoke the async call if needed (inputs changed during async)
         self._reinvoke_async_if_needed()
+
+        # Handle function behavioral flags
+        # --------------------------------
+        if self.function_with_gui.invoke_always_dirty:
+            self.function_with_gui.set_dirty()
+        if self.function_with_gui.is_live():
+            # self.function_with_gui.set_dirty()  # done already
+            self.call_invoke_async_or_not()
 
     def on_inputs_changed(self) -> None:
         """Called when one of the inputs of the function has changed.
@@ -184,6 +185,17 @@ class FunctionNode:
         if not self.function_with_gui.invoke_manually:
             self.call_invoke_async_or_not()
 
+    def _invoke_function_sync(self) -> None:
+        """Invoke the function and propagate the outputs to the linked inputs of the other functions.
+        *not part of the API, but called by call_invoke_async_or_not()*
+        """
+        self.function_with_gui.invoke()
+        for link in self.output_links:
+            src_output = self.function_with_gui.output(link.src_output_idx)
+            dst_input = link.dst_function_node.function_with_gui.input(link.dst_input_name)
+            dst_input.value = src_output.value
+            link.dst_function_node.on_inputs_changed()
+
     def call_invoke_async_or_not(self) -> None:
         """Call the function (maybe async)"""
 
@@ -193,7 +205,7 @@ class FunctionNode:
 
             def async_target() -> None:
                 logging.debug(f"Async invoke with {self._nb_inputs_changes=}")
-                self.invoke_function()
+                self._invoke_function_sync()
 
             self._async_invoke_thread = threading.Thread(target=async_target)
             self._async_invoke_thread.start()
@@ -202,7 +214,7 @@ class FunctionNode:
         if shall_invoke_async:
             _invoke_async()
         else:
-            self.invoke_function()
+            self._invoke_function_sync()
 
     def _reinvoke_async_if_needed(self) -> None:
         if self._input_changes_during_async and not self.is_running_async():

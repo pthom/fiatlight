@@ -248,7 +248,7 @@ class FunctionsGraph:
 
         # invoke the src function so that the dst function is updated
         src_function_node.function_with_gui._dirty = True
-        src_function_node.invoke_function()
+        src_function_node.call_invoke_async_or_not()
 
         return link
 
@@ -357,11 +357,9 @@ class FunctionsGraph:
     def _all_function_nodes_with_unique_names(self) -> Dict[str, FunctionNode]:
         return {self.function_node_unique_name(fn): fn for fn in self.functions_nodes}
 
-    def has_dirty_functions(self) -> bool:
-        for fn in self.functions_nodes:
-            if fn.function_with_gui.is_dirty():
-                return True
-        return False
+    def shall_display_refresh_needed_label(self) -> bool:
+        r = any(fn.function_with_gui.shall_display_refresh_needed_label() for fn in self.functions_nodes)
+        return r
 
     # ================================================================================================================
     #                                            Serialization
