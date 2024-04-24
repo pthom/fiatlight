@@ -26,7 +26,7 @@ class FunctionWithGui:
     #
 
     # the name of the function
-    name: str
+    name: str = ""
 
     #
     # Behavioral Flags
