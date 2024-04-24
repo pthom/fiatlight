@@ -167,9 +167,7 @@ class FunctionNodeGui:
                 r += 1
         return r
 
-    def invoke(self, even_if_not_dirty: bool = False) -> None:
-        if even_if_not_dirty:
-            self._function_node.function_with_gui.set_dirty()
+    def invoke(self) -> None:
         self._function_node.call_invoke_async_or_not()
 
     # ==================================================================================================================
@@ -195,10 +193,6 @@ class FunctionNodeGui:
                     inputs_changed = self._draw_function_inputs(unique_name)
                     if inputs_changed:
                         self._function_node.on_inputs_changed()
-                    # Manual call
-                    if self._function_node.function_with_gui.can_call_manually:
-                        if imgui.button("Call manually"):
-                            self.invoke(even_if_not_dirty=True)
                     # Internals
                     self._draw_fiat_internals()
                     # Exceptions, if any
@@ -826,12 +820,18 @@ class FunctionNodeGui:
         with fontawesome_6_ctx():
             with imgui_ctx.begin_horizontal("invoke_options"):
                 btn_size = hello_imgui.em_to_vec2(4, 0)
-                if fn_with_gui.is_dirty():
+                # Manual call
+                if fn_with_gui.is_invoke_manually_io():
+                    imgui.spring()
+                    if imgui.button("Call IO manually"):
+                        self.invoke()
+                    imgui.spring()
+                elif fn_with_gui.is_dirty():
                     imgui.spring()
                     is_running_async = self._function_node.is_running_async()
                     imgui.begin_disabled(is_running_async)
                     if imgui.button(icons_fontawesome_6.ICON_FA_ROTATE, btn_size):
-                        self.invoke(even_if_not_dirty=False)
+                        self.invoke()
                     fiat_osd.set_widget_tooltip("Refresh needed! Click to refresh.")
                     imgui.end_disabled()
 

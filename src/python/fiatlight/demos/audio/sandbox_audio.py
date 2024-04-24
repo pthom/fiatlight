@@ -66,11 +66,11 @@ def main_fiat():
 
     fiatlight.fiat_array.register_simple_plot_factory()
 
-    record_audio.can_call_manually = True
-    record_audio.invoke_automatically = False
-    record_audio.invoke_async = True
+    record_audio_gui = fiatlight.to_function_with_gui(record_audio)
+    record_audio_gui.set_invoke_manually_io()
+    record_audio_gui.set_invoke_async()
 
-    fiatlight.fiat_run(record_audio)
+    fiatlight.fiat_run(record_audio_gui)
 
 
 if __name__ == "__main__":

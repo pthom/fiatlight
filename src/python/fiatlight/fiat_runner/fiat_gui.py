@@ -286,7 +286,7 @@ class FiatGui:
                 imgui.set_tooltip("Layout graph")
 
     def _show_ribbon_dirty_if_needed(self) -> None:
-        has_dirty_functions = self._functions_graph_gui.functions_graph.has_dirty_functions()
+        has_dirty_functions = self._functions_graph_gui.functions_graph.shall_display_refresh_needed_label()
         if not has_dirty_functions:
             return
 
@@ -411,11 +411,11 @@ class FiatGui:
     def _function_nodes(self) -> List[FunctionNodeGui]:
         return self._functions_graph_gui.function_nodes_gui
 
-    def _has_dirty_functions(self) -> bool:
-        return self._functions_graph_gui.functions_graph.has_dirty_functions()
+    def _shall_display_refresh_needed_label(self) -> bool:
+        return self._functions_graph_gui.functions_graph.shall_display_refresh_needed_label()
 
     def _notify_if_dirty_functions(self) -> None:
-        if not self._has_dirty_functions():
+        if not self._shall_display_refresh_needed_label():
             return
 
         def gui() -> None:
