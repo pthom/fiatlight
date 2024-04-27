@@ -181,7 +181,7 @@ class SoundWavePlayer:
             if 0 <= position <= self.sound_wave.duration():
                 self.position = int(position * self.sound_wave.sample_rate)
             else:
-                raise ValueError("Seek position out of bounds")
+                logging.error(f"Seek position out of bounds: {position}, duration: {self.sound_wave.duration()}")
         except ValueError as e:
             logging.error(f"Seek error: {str(e)}")
             raise e
@@ -206,25 +206,24 @@ def create_demo_sound_wave() -> SoundWave:
 
 def sandbox() -> None:
     import time
-    from fiatlight.demos.audio.sound_wave import sound_wave_from_file
 
-    # sound_wave = create_demo_sound_wave()
-    sound_wave = sound_wave_from_file(
-        "/Users/pascal/dvp/OpenSource/ImGuiWork/_Bundle/fiatlight/priv_assets/audio/3 - Sanctus.mp3"  # type: ignore
-    )
+    sound_wave = create_demo_sound_wave()
+    # sound_wave = sound_wave_from_file(
+    #     "/Users/pascal/dvp/OpenSource/ImGuiWork/_Bundle/fiatlight/priv_assets/audio/3 - Sanctus.mp3"  # type: ignore
+    # )
 
     player = SoundWavePlayer(sound_wave)
     # Play "do - re"
     player.play()
-    time.sleep(3)  # Wait for 2 notes of 0.5 seconds each to play
+    time.sleep(1)  # Wait for 2 notes of 0.5 seconds each to play
 
     player.pause()
-    time.sleep(2)  # Pause for 1 second
+    time.sleep(1)  # Pause for 1 second
 
     # Seek to "sol" (the fifth note, which starts at 2 seconds into the audio)
     player.seek(TimeSeconds(4 * 0.5))  # 4 notes skipped, each 0.5 seconds long
     player.play()  # Resume playback from "sol"
-    time.sleep(3)  # Play "sol - la - si - do", 4 notes of 0.5 seconds each
+    time.sleep(2)  # Play "sol - la - si - do", 4 notes of 0.5 seconds each
     player.stop()
 
 

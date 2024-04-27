@@ -113,6 +113,15 @@ class SoundWaveGui(AnyDataWithGui[SoundWave]):
             implot.setup_axes(
                 "Time [s]", "Amplitude", implot.AxisFlags_.auto_fit.value, implot.AxisFlags_.auto_fit.value
             )
+
+            # Add line / position
+            if self._sound_wave_player is not None:
+                x = self._sound_wave_player.position_seconds()
+                line_color = imgui.ImVec4(1.0, 0.0, 0.0, 1.0)
+                changed, new_x, clicked, hovered, held = implot.drag_line_x(0, x, line_color)
+                if changed:
+                    self._sound_wave_player.seek(TimeSeconds(new_x))
+
             implot.plot_line("##Waveform", sound_wave.time_array(), sound_wave.wave)
             implot.end_plot()
 
