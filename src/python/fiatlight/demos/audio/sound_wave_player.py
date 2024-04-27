@@ -210,8 +210,8 @@ def sandbox() -> None:
 
     # sound_wave = create_demo_sound_wave()
     sound_wave = sound_wave_from_file(
-        "/Users/pascal/dvp/OpenSource/ImGuiWork/_Bundle/fiatlight/priv_assets/audio/3 - Sanctus.mp3"
-    )  # type: ignore
+        "/Users/pascal/dvp/OpenSource/ImGuiWork/_Bundle/fiatlight/priv_assets/audio/3 - Sanctus.mp3"  # type: ignore
+    )
 
     player = SoundWavePlayer(sound_wave)
     # Play "do - re"
