@@ -1,7 +1,9 @@
 """SoundWave: a simple dataclass for storing audio waveforms, along with their sample rate."""
 import numpy as np
+import soundfile  # type: ignore
 
 from fiatlight.fiat_array import FloatMatrix_Dim1
+from fiatlight.fiat_types import AudioPath
 from dataclasses import dataclass
 
 
@@ -27,3 +29,12 @@ class SoundWave:
 
     def __str__(self) -> str:
         return f"{self.duration():.2f}s at {self.sample_rate / 1000:.1f} kHz"
+
+
+def sound_wave_from_file(file_path: AudioPath) -> SoundWave:
+    """Load a sound wave from a file."""
+    wave, sample_rate = soundfile.read(file_path)
+    # Convert to mono if necessary
+    if wave.ndim == 2:
+        wave = wave.mean(axis=1)
+    return SoundWave(wave, sample_rate)

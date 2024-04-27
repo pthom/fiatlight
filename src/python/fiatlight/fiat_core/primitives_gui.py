@@ -450,6 +450,18 @@ class TextPathWithGui(FilePathWithGui):
         self.filters = ["*.txt"]
 
 
+class AudioPathWithGui(FilePathWithGui):
+    def __init__(self) -> None:
+        super().__init__()
+        self.filters = ["*.wav", "*.mp3", "*.ogg", "*.flac"]
+
+
+class VideoPathWithGui(FilePathWithGui):
+    def __init__(self) -> None:
+        super().__init__()
+        self.filters = ["*.mp4", "*.avi", "*.mkv"]
+
+
 ########################################################################################################################
 #                               ColorRbg and ColorRgba
 ########################################################################################################################
@@ -539,6 +551,8 @@ def __register_file_paths_types() -> None:
     register_file_path_type("FilePath", FilePathWithGui)
     register_file_path_type("TextPath", TextPathWithGui)
     register_file_path_type("ImagePath", ImagePathWithGui)
+    register_file_path_type("AudioPath", AudioPathWithGui)
+    register_file_path_type("VideoPath", VideoPathWithGui)
 
 
 def __register_python_types() -> None:

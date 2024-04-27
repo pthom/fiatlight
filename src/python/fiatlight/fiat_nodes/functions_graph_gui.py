@@ -321,6 +321,10 @@ class FunctionsGraphGui:
             if fn_node_gui.get_function_node().function_with_gui.is_dirty() and shall_invoke:
                 fn_node_gui.invoke()
 
+    def on_exit(self) -> None:
+        for fn in self.functions_graph.functions_nodes:
+            fn.function_with_gui.on_exit()
+
     # ======================================================================================================================
     # Serialization
     # ======================================================================================================================

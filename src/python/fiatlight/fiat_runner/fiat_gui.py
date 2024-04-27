@@ -193,6 +193,7 @@ class FiatGui:
         self._notify_if_dirty_functions()
 
     def _before_exit(self) -> None:
+        self._functions_graph_gui.on_exit()
         if self.params.customizable_graph:
             self._save_graph_composition(self._graph_composition_filename())
         self._save_user_inputs(self._user_settings_filename())
