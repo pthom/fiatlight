@@ -6,29 +6,9 @@ from fiatlight.fiat_core.any_data_with_gui import AnyDataWithGui
 from fiatlight.demos.audio.sound_wave import SoundWave
 from fiatlight.demos.audio.sound_wave_player import SoundWavePlayer
 from imgui_bundle import implot, imgui, hello_imgui, imgui_ctx, ImVec2
-from fiatlight.fiat_widgets import icons_fontawesome_6, fontawesome_6_ctx, fiat_osd
+from fiatlight.fiat_widgets import icons_fontawesome_6, fontawesome_6_ctx, fiat_osd, button_with_disable_flag
 from fiatlight.fiat_types import TimeSeconds, JsonDict
-
-
-def button_with_disable_flag(label: str, is_disabled: bool) -> bool:
-    if is_disabled:
-        imgui.begin_disabled()
-    clicked = imgui.button(label)
-    if is_disabled:
-        imgui.end_disabled()
-    return clicked
-
-
-def _clamp(value: float, lower_bound: float, upper_bound: float) -> float:
-    return max(min(value, upper_bound), lower_bound)
-
-
-def _lerp(a: float, b: float, t: float) -> float:
-    return a + t * (b - a)
-
-
-def _unlerp(a: float, b: float, value: float) -> float:
-    return (value - a) / (b - a)
+from fiatlight.fiat_utils import fiat_math
 
 
 @dataclass(frozen=True)
@@ -205,10 +185,10 @@ class SoundWaveGui(AnyDataWithGui[SoundWave]):
             size = implot.get_plot_size()
             y1 = pos.y
             y2 = pos.y + size.y
-            k1 = _unlerp(0, sound_wave.duration(), self.params.selection.start)
-            k2 = _unlerp(0, sound_wave.duration(), self.params.selection.end)
-            x1 = _lerp(pos.x, pos.x + size.x, k1)
-            x2 = _lerp(pos.x, pos.x + size.x, k2)
+            k1 = fiat_math.unlerp(0, sound_wave.duration(), self.params.selection.start)
+            k2 = fiat_math.unlerp(0, sound_wave.duration(), self.params.selection.end)
+            x1 = fiat_math.lerp(pos.x, pos.x + size.x, k1)
+            x2 = fiat_math.lerp(pos.x, pos.x + size.x, k2)
             tl = ImVec2(x1, y1)
             br = ImVec2(x2, y2)
             implot.get_plot_draw_list().add_rect_filled(tl, br, selection_bg_color2)
@@ -227,8 +207,8 @@ class SoundWaveGui(AnyDataWithGui[SoundWave]):
         if changed_1 or changed_2:
             if new_sel_end < new_sel_start:
                 new_sel_end, new_sel_start = new_sel_start, new_sel_end
-            new_sel_start = _clamp(new_sel_start, 0, sound_wave.duration())
-            new_sel_end = _clamp(new_sel_end, 0, sound_wave.duration())
+            new_sel_start = fiat_math.clamp(new_sel_start, 0, sound_wave.duration())
+            new_sel_end = fiat_math.clamp(new_sel_end, 0, sound_wave.duration())
             self.params.selection = SoundWaveSelection(new_sel_start, new_sel_end)  # type: ignore
 
     def _plot_waveform(self) -> None:
