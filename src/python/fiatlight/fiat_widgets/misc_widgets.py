@@ -103,3 +103,12 @@ def collapsible_button(expanded: bool, tooltip_part: str) -> bool:
             return expanded
         else:
             return not expanded
+
+
+def button_with_disable_flag(label: str, is_disabled: bool) -> bool:
+    if is_disabled:
+        imgui.begin_disabled()
+    clicked = imgui.button(label)
+    if is_disabled:
+        imgui.end_disabled()
+    return clicked
