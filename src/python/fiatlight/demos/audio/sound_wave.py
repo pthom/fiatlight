@@ -11,7 +11,7 @@ import scipy  # type: ignore
 @dataclass
 class SoundWave:
     wave: FloatMatrix_Dim1
-    sample_rate: int
+    sample_rate: float
     _time_array: FloatMatrix_Dim1 | None = None  # cache for time array
 
     def __post_init__(self) -> None:
@@ -33,7 +33,7 @@ class SoundWave:
 
         num_samples = max_samples
         wave_resampled = scipy.signal.resample(self.wave, max_samples)
-        new_sample_rate = int(self.sample_rate * num_samples / len(self.wave))
+        new_sample_rate = self.sample_rate * num_samples / len(self.wave)
         return SoundWave(wave_resampled, new_sample_rate)
 
     def time_array(self) -> FloatMatrix_Dim1:
