@@ -3,7 +3,7 @@ import numpy as np
 import soundfile  # type: ignore
 
 from fiatlight.fiat_array import FloatMatrix_Dim1
-from fiatlight.fiat_types import AudioPath
+from fiatlight.fiat_types import AudioPath, TimeSeconds
 from dataclasses import dataclass
 import scipy  # type: ignore
 
@@ -13,13 +13,16 @@ class SoundWave:
     wave: FloatMatrix_Dim1
     sample_rate: float
     _time_array: FloatMatrix_Dim1 | None = None  # cache for time array
+    _max_intensity, _min_intensity = 1.0, -1.0
 
     def __post_init__(self) -> None:
         r = np.arange(0, self.duration(), 1 / self.sample_rate, self.wave.dtype)
         self._time_array = r  # type: ignore
+        self._min_intensity = self.wave.min()
+        self._max_intensity = self.wave.max()
 
-    def duration(self) -> float:
-        return len(self.wave) / self.sample_rate
+    def duration(self) -> TimeSeconds:
+        return len(self.wave) / self.sample_rate  # type: ignore
 
     def nb_samples(self) -> int:
         return len(self.wave)
