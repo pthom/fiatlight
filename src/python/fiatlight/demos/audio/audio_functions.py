@@ -1,6 +1,6 @@
 from fiatlight.demos.audio.sound_wave import SoundWave
 from fiatlight.fiat_array import FloatMatrix_Dim1
-import sounddevice
+import sounddevice  # type: ignore
 import logging
 
 
