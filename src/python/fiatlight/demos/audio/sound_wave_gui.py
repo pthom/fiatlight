@@ -20,6 +20,8 @@ def button_with_disable_flag(label: str, is_disabled: bool) -> bool:
 
 class SoundWaveGui(AnyDataWithGui[SoundWave]):
     _sound_wave_player: SoundWavePlayer | None = None
+    # A sound wave with fewer samples, for faster plotting
+    _sound_wave_gui_resampled: SoundWave | None = None
 
     def __init__(self) -> None:
         super().__init__()
@@ -32,6 +34,7 @@ class SoundWaveGui(AnyDataWithGui[SoundWave]):
             self._sound_wave_player.stop()
             self._sound_wave_player = None
         sound_wave = self.get_actual_value()
+        self._sound_wave_gui_resampled = sound_wave._rough_resample_to_max_samples(max_samples=1000)
         self._sound_wave_player = SoundWavePlayer(sound_wave)
 
     def _on_exit(self) -> None:
@@ -102,7 +105,9 @@ class SoundWaveGui(AnyDataWithGui[SoundWave]):
             imgui.spring()
 
     def _plot_waveform(self) -> None:
-        sound_wave = self.get_actual_value()
+        sound_wave = self._sound_wave_gui_resampled
+        if sound_wave is None:
+            return
         plot_size = hello_imgui.em_to_vec2(20, 10)
         if implot.begin_plot("##Audio Waveform", plot_size):
             implot.setup_axes(
@@ -114,7 +119,7 @@ class SoundWaveGui(AnyDataWithGui[SoundWave]):
     def present_custom(self) -> None:
         sound_wave = self.get_actual_value()
         imgui.text(f"Duration: {sound_wave.duration():.2f} s, Sample Rate: {sound_wave.sample_rate} Hz")
-        # self._plot_waveform()
+        self._plot_waveform()
 
         if self._sound_wave_player is not None:
             with imgui_ctx.begin_vertical("ControlsAndPosition"):

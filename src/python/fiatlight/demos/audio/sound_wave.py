@@ -5,6 +5,7 @@ import soundfile  # type: ignore
 from fiatlight.fiat_array import FloatMatrix_Dim1
 from fiatlight.fiat_types import AudioPath
 from dataclasses import dataclass
+import scipy  # type: ignore
 
 
 @dataclass
@@ -22,6 +23,18 @@ class SoundWave:
 
     def nb_samples(self) -> int:
         return len(self.wave)
+
+    def _rough_resample_to_max_samples(self, max_samples: int) -> "SoundWave":
+        """Resample the sound wave to have at most max_samples.
+        Do not trust this for sound. This is only used for plotting, for performance reasons.
+        """
+        if len(self.wave) <= max_samples:
+            return self
+
+        num_samples = max_samples
+        wave_resampled = scipy.signal.resample(self.wave, max_samples)
+        new_sample_rate = int(self.sample_rate * num_samples / len(self.wave))
+        return SoundWave(wave_resampled, new_sample_rate)
 
     def time_array(self) -> FloatMatrix_Dim1:
         assert self._time_array is not None
