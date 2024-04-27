@@ -35,6 +35,9 @@ from fiatlight.fiat_types.fiat_number_types import (
     Int_0_1000,
     Int_0_10000,
     TimeSeconds,
+    format_time_seconds_as_hh_mm_ss_cc,
+    format_time_seconds_as_hh_mm_ss,
+    format_time_seconds_as_mm_ss_cc,
 )
 from fiatlight.fiat_types.color_types import ColorRgb, ColorRgba
 
@@ -85,6 +88,9 @@ __all__ = [
     "Int_0_255",
     "Int_0_1000",
     "Int_0_10000",
+    "format_time_seconds_as_hh_mm_ss_cc",
+    "format_time_seconds_as_hh_mm_ss",
+    "format_time_seconds_as_mm_ss_cc",
     # from color_types
     "ColorRgb",
     "ColorRgba",
