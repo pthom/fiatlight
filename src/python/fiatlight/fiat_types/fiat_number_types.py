@@ -23,6 +23,9 @@ Int_0_100 = NewType("Int_0_100", int)  # 0 to 100
 Int_0_1000 = NewType("Int_0_1000", int)  # 0 to 100
 Int_0_10000 = NewType("Int_0_10000", int)  # 0 to 100
 
+# Time
+TimeSeconds = NewType("TimeSeconds", float)  # Time in seconds
+
 
 def _register_bound_floats() -> None:
     from fiatlight.fiat_core.to_gui import gui_factories

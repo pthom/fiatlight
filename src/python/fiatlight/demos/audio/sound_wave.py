@@ -25,5 +25,5 @@ class SoundWave:
         assert self._time_array is not None
         return self._time_array
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.duration():.2f}s at {self.sample_rate / 1000:.1f} kHz"

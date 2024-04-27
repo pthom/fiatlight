@@ -34,6 +34,7 @@ from fiatlight.fiat_types.fiat_number_types import (
     Int_0_255,
     Int_0_1000,
     Int_0_10000,
+    TimeSeconds,
 )
 from fiatlight.fiat_types.color_types import ColorRgb, ColorRgba
 
@@ -75,6 +76,7 @@ __all__ = [
     "Float_0_100",
     "Float_0_1000",
     "Float_0_10000",
+    "TimeSeconds",
     "PositiveFloat",
     "Int_0_10",
     "Int_0_100",
