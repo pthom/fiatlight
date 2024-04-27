@@ -6,7 +6,13 @@ from fiatlight.fiat_core.any_data_with_gui import AnyDataWithGui
 from fiatlight.demos.audio.sound_wave import SoundWave
 from fiatlight.demos.audio.sound_wave_player import SoundWavePlayer
 from imgui_bundle import implot, imgui, hello_imgui, imgui_ctx, ImVec2
-from fiatlight.fiat_widgets import icons_fontawesome_6, fontawesome_6_ctx, fiat_osd, button_with_disable_flag
+from fiatlight.fiat_widgets import (
+    icons_fontawesome_6,
+    fontawesome_6_ctx,
+    fiat_osd,
+    button_with_disable_flag,
+    widget_with_resize_handle,
+)
 from fiatlight.fiat_types import TimeSeconds, JsonDict
 from fiatlight.fiat_utils import fiat_math
 
@@ -36,20 +42,23 @@ class SoundWaveSelection:
 class SoundWaveGuiParams:
     show_time_as_seconds: bool = False
     can_select: bool = False
+    plot_size_em: ImVec2 = ImVec2(20, 10)
     selection: SoundWaveSelection = SoundWaveSelection()
 
     def to_dict(self) -> JsonDict:
         return {
             "show_time_as_seconds": self.show_time_as_seconds,
             "can_select": self.can_select,
+            "plot_size_em": [self.plot_size_em.x, self.plot_size_em.y],
             "selection": self.selection.to_dict() if self.selection is not None else None,
         }
 
     def fill_from_dict(self, data: JsonDict) -> None:
         self.show_time_as_seconds = data.get("show_time_as_seconds", True)
         self.can_select = data.get("can_select", False)
-        selection_data = data["selection"]
-        self.selection = SoundWaveSelection.from_dict(selection_data)
+        plot_size_array = data.get("plot_size_em", [20, 10])
+        self.plot_size_em = ImVec2(plot_size_array[0], plot_size_array[1])
+        self.selection = SoundWaveSelection.from_dict(data["selection"])
 
 
 class SoundWaveGui(AnyDataWithGui[SoundWave]):
@@ -218,8 +227,7 @@ class SoundWaveGui(AnyDataWithGui[SoundWave]):
 
         select_change, self.params.can_select = imgui.checkbox("Select", self.params.can_select)
 
-        plot_size = hello_imgui.em_to_vec2(20, 10)
-        if implot.begin_plot("##Audio Waveform", plot_size):
+        if implot.begin_plot("##Audio Waveform", hello_imgui.em_to_vec2(self.params.plot_size_em)):
             implot.setup_axes(
                 "Time [s]", "Amplitude", implot.AxisFlags_.auto_fit.value, implot.AxisFlags_.auto_fit.value
             )
@@ -242,7 +250,14 @@ class SoundWaveGui(AnyDataWithGui[SoundWave]):
     def present_custom(self) -> None:
         sound_wave = self.get_actual_value()
         imgui.text(f"Duration: {sound_wave.duration():.2f} s, Sample Rate: {sound_wave.sample_rate} Hz")
-        self._plot_waveform()
+
+        # self._plot_waveform()
+        if imgui.button("reset size"):
+            self.params.plot_size_em = ImVec2(20, 10)
+        new_plot_size_pixels = widget_with_resize_handle(self._plot_waveform)
+        self.params.plot_size_em = ImVec2(
+            new_plot_size_pixels.x / imgui.get_font_size(), new_plot_size_pixels.y / imgui.get_font_size()
+        )
 
         if self._sound_wave_player is not None:
             with imgui_ctx.begin_vertical("ControlsAndPosition"):
