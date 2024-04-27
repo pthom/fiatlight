@@ -10,6 +10,12 @@ ImagePath = NewType("ImagePath", str)
 # With TextPath, you can select a text file.
 TextPath = NewType("TextPath", str)
 
+# With AudioPath, you can select an audio file.
+AudioPath = NewType("AudioPath", str)
+
+# With VideoPath, you can select a video file.
+VideoPath = NewType("VideoPath", str)
+
 # A string that can be multiline (displayed as a textarea in the GUI)
 StrMultiline = NewType("StrMultiline", str)
 
