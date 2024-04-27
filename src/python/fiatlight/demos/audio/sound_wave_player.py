@@ -12,12 +12,13 @@ Usage:
     player.stop()
 """
 import sounddevice as sd  # type: ignore
-from threading import Thread
+from threading import Thread, current_thread
 from typing import Optional
 from fiatlight.demos.audio.sound_wave import SoundWave
 from fiatlight.fiat_array import FloatMatrix_Dim1
 from fiatlight.fiat_types import TimeSeconds
 from typing import Any
+import time
 import numpy as np
 import logging
 
@@ -58,10 +59,10 @@ class SoundWavePlayer:
     def pause(self) -> None:
         self._pause_impl()
 
-    def play_from_start(self) -> None:
+    def reset_player(self) -> None:
         self.stop()
         self.position = 0
-        self.paused = False
+        self.paused = True
         self._init_stream()
 
     def can_advance(self, seconds: float) -> bool:
@@ -96,9 +97,23 @@ class SoundWavePlayer:
         if self.paused:
             outdata.fill(0)
             return
-        chunksize: int = min(len(self.sound_wave.wave) - self.position, frames)
-        outdata[:chunksize] = self.sound_wave.wave[self.position : self.position + chunksize].reshape(-1, 1)
-        outdata[chunksize:] = 0
+
+        remaining_frames = len(self.sound_wave.wave) - self.position
+        chunksize = min(remaining_frames, frames)
+
+        # Safeguard to ensure we don't exceed the buffer size
+        if outdata.shape[0] < chunksize:
+            chunksize = outdata.shape[0]
+
+        # Take into account if the wave is stereo
+        if len(self.sound_wave.wave.shape) > 1 and self.sound_wave.wave.shape[1] == 2:
+            # Assuming the outdata buffer is also set up for stereo playback
+            outdata[:chunksize] = self.sound_wave.wave[self.position : self.position + chunksize]
+        else:
+            # Mono playback
+            outdata[:chunksize] = self.sound_wave.wave[self.position : self.position + chunksize].reshape(chunksize, -1)
+        outdata[chunksize:] = 0  # Fill the rest of the buffer with zeros
+
         self.position += chunksize
 
     def _play_impl(self) -> None:
@@ -120,10 +135,12 @@ class SoundWavePlayer:
                 logging.error(f"Error starting the monitor thread: {str(e)}")
 
     def _stream_monitor(self) -> None:
-        assert self._stream is not None
-        while self._stream.active:
+        """Monitor the stream and trigger a reset when the end is reached."""
+        while self._stream is not None and self._stream.active:
             if self._stop_flag:
-                self._stream.stop()
+                break
+            if self.position >= len(self.sound_wave.wave):
+                self.reset_player()  # Reset the player when end of wave is reached
                 break
             sd.sleep(100)
 
@@ -134,23 +151,31 @@ class SoundWavePlayer:
             self._stream = None
 
     def _stop_impl(self) -> None:
+        if self._stop_flag:
+            return
         self._stop_flag = True
+        time.sleep(0.1)  # Wait for the callback to finish
         try:
             if self._stream is not None:
                 self._stream.stop()
         except Exception as e:
             logging.error(f"Error stopping the stream: {str(e)}")
-        try:
-            if self._thread and self._thread.is_alive():
-                self._thread.join()
-        except Exception as e:
-            logging.error(f"Error joining the thread: {str(e)}")
+        # Only join the thread if it's not the current thread
+        if self._thread is not None and self._thread.is_alive():
+            if self._thread.ident != current_thread().ident:
+                try:
+                    self._thread.join()
+                except Exception as e:
+                    logging.error(f"Error joining the thread: {str(e)}")
+            else:
+                pass
+                # logging.debug("Attempted to join the current thread; skipping join call.")
         self._stream = None
         self._thread = None
 
     def _seek_impl(self, position: TimeSeconds) -> None:
         try:
-            if 0 <= position < self.sound_wave.duration():
+            if 0 <= position <= self.sound_wave.duration():
                 self.position = int(position * self.sound_wave.sample_rate)
             else:
                 raise ValueError("Seek position out of bounds")
@@ -166,32 +191,37 @@ def create_demo_sound_wave() -> SoundWave:
     freqs = [261.63, 293.66, 329.63, 349.23, 392.00, 440.00, 493.88, 523.25]
 
     full_wave = np.array([], dtype=np.float32)
-    for freq in freqs:
-        samples_per_note = int(sample_rate * duration_per_note)
-        time = np.linspace(0, duration_per_note, samples_per_note, endpoint=False)
-        wave = np.sin(2 * np.pi * freq * time)
-        full_wave = np.concatenate([full_wave, wave])
+    for i in range(50):
+        for freq in freqs:
+            samples_per_note = int(sample_rate * duration_per_note)
+            time = np.linspace(0, duration_per_note, samples_per_note, endpoint=False)
+            wave = np.sin(2 * np.pi * freq * time)
+            full_wave = np.concatenate([full_wave, wave])
 
     return SoundWave(full_wave, sample_rate)  # type: ignore
 
 
 def sandbox() -> None:
     import time
+    from fiatlight.demos.audio.sound_wave import sound_wave_from_file
 
-    sound_wave = create_demo_sound_wave()
+    # sound_wave = create_demo_sound_wave()
+    sound_wave = sound_wave_from_file(
+        "/Users/pascal/dvp/OpenSource/ImGuiWork/_Bundle/fiatlight/priv_assets/audio/3 - Sanctus.mp3"
+    )  # type: ignore
 
     player = SoundWavePlayer(sound_wave)
     # Play "do - re"
     player.play()
-    time.sleep(1)  # Wait for 2 notes of 0.5 seconds each to play
+    time.sleep(3)  # Wait for 2 notes of 0.5 seconds each to play
 
     player.pause()
-    time.sleep(1)  # Pause for 1 second
+    time.sleep(2)  # Pause for 1 second
 
     # Seek to "sol" (the fifth note, which starts at 2 seconds into the audio)
     player.seek(TimeSeconds(4 * 0.5))  # 4 notes skipped, each 0.5 seconds long
     player.play()  # Resume playback from "sol"
-    time.sleep(2)  # Play "sol - la - si - do", 4 notes of 0.5 seconds each
+    time.sleep(3)  # Play "sol - la - si - do", 4 notes of 0.5 seconds each
     player.stop()
 
 

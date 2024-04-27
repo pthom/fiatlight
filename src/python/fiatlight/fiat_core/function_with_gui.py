@@ -284,6 +284,14 @@ class FunctionWithGui:
 
         self._dirty = False
 
+    def on_exit(self):
+        for output_with_gui in self._outputs_with_gui:
+            if output_with_gui.data_with_gui.callbacks.on_exit is not None:
+                output_with_gui.data_with_gui.callbacks.on_exit()
+        for input_with_gui in self._inputs_with_gui:
+            if input_with_gui.data_with_gui.callbacks.on_exit is not None:
+                input_with_gui.data_with_gui.callbacks.on_exit()
+
     # --------------------------------------------------------------------------------------------
     #        Save and load to json
     # Here, we only save the options that the user entered manually in the GUI:

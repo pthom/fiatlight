@@ -1,4 +1,6 @@
 """SoundWaveGui class for displaying SoundWave data in a GUI."""
+import logging
+
 from fiatlight.fiat_core.any_data_with_gui import AnyDataWithGui
 from fiatlight.demos.audio.sound_wave import SoundWave
 from fiatlight.demos.audio.sound_wave_player import SoundWavePlayer
@@ -22,23 +24,31 @@ class SoundWaveGui(AnyDataWithGui[SoundWave]):
     def __init__(self) -> None:
         super().__init__()
         self.callbacks.present_custom = self.present_custom
-        self.callbacks.on_change = self.on_change
+        self.callbacks.on_change = self._on_change
+        self.callbacks.on_exit = self._on_exit
 
-    def on_change(self) -> None:
+    def _on_change(self) -> None:
         if self._sound_wave_player is not None:
             self._sound_wave_player.stop()
             self._sound_wave_player = None
         sound_wave = self.get_actual_value()
         self._sound_wave_player = SoundWavePlayer(sound_wave)
 
+    def _on_exit(self) -> None:
+        if self._sound_wave_player is not None:
+            logging.warning("SoundWaveGui: stopping player on exit")
+            self._sound_wave_player.stop()
+            self._sound_wave_player = None
+
     def _show_controls(self) -> None:
+        assert self._sound_wave_player is not None
         with imgui_ctx.begin_horizontal("Controls"):
             with fontawesome_6_ctx():
                 small_step = TimeSeconds(0.5)
                 large_step = TimeSeconds(1.0)
 
                 if imgui.button(icons_fontawesome_6.ICON_FA_BACKWARD_FAST):
-                    self._sound_wave_player.seek(0)
+                    self._sound_wave_player.seek(TimeSeconds(0))
                 fiat_osd.set_widget_tooltip("Rewind to start")
 
                 can_rewind_large = self._sound_wave_player.can_rewind(large_step)
@@ -82,7 +92,8 @@ class SoundWaveGui(AnyDataWithGui[SoundWave]):
                     self._sound_wave_player.seek(TimeSeconds(self._sound_wave_player.sound_wave.duration()))
                 fiat_osd.set_widget_tooltip("Fast forward to end")
 
-    def _show_position(self):
+    def _show_position(self) -> None:
+        assert self._sound_wave_player is not None
         sound_wave = self.get_actual_value()
         with imgui_ctx.begin_horizontal("Position"):
             # Use springs to center the text
@@ -90,7 +101,7 @@ class SoundWaveGui(AnyDataWithGui[SoundWave]):
             imgui.text(f"{self._sound_wave_player.position_seconds():.2f} s / {sound_wave.duration():.2f} s")
             imgui.spring()
 
-    def _plot_waveform(self):
+    def _plot_waveform(self) -> None:
         sound_wave = self.get_actual_value()
         plot_size = hello_imgui.em_to_vec2(20, 10)
         if implot.begin_plot("##Audio Waveform", plot_size):
@@ -103,7 +114,7 @@ class SoundWaveGui(AnyDataWithGui[SoundWave]):
     def present_custom(self) -> None:
         sound_wave = self.get_actual_value()
         imgui.text(f"Duration: {sound_wave.duration():.2f} s, Sample Rate: {sound_wave.sample_rate} Hz")
-        self._plot_waveform()
+        # self._plot_waveform()
 
         if self._sound_wave_player is not None:
             with imgui_ctx.begin_vertical("ControlsAndPosition"):

@@ -75,6 +75,11 @@ class AnyDataGuiCallbacks(Generic[DataType]):
     # Used in more advanced cases, when `present_custom` has an internal cache that needs to be updated.
     on_change: VoidFunction | None = None
 
+    # on_exit (Optional)
+    # if provided, this function will be called when the application is closed.
+    # Used in more advanced cases, when some resources need to be released.
+    on_exit: VoidFunction | None = None
+
     # clipboard_copy_str (Optional)
     # if provided, this function will be called when the value is copied to the clipboard.
     # Used in more advanced cases, when the data is not a simple string, or when present_str or str() is not enough.
