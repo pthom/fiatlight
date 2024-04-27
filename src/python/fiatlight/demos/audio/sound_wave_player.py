@@ -105,6 +105,9 @@ class SoundWavePlayer:
         if outdata.shape[0] < chunksize:
             chunksize = outdata.shape[0]
 
+        if chunksize <= 0:
+            raise sd.CallbackStop
+
         # Take into account if the wave is stereo
         if len(self.sound_wave.wave.shape) > 1 and self.sound_wave.wave.shape[1] == 2:
             # Assuming the outdata buffer is also set up for stereo playback
