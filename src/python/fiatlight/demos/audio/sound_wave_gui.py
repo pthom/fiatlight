@@ -5,13 +5,12 @@ from dataclasses import dataclass
 from fiatlight.fiat_core.any_data_with_gui import AnyDataWithGui
 from fiatlight.demos.audio.sound_wave import SoundWave
 from fiatlight.demos.audio.sound_wave_player import SoundWavePlayer
-from imgui_bundle import implot, imgui, hello_imgui, imgui_ctx, ImVec2
+from imgui_bundle import implot, imgui, imgui_ctx, ImVec2, immapp
 from fiatlight.fiat_widgets import (
     icons_fontawesome_6,
     fontawesome_6_ctx,
     fiat_osd,
     button_with_disable_flag,
-    widget_with_resize_handle,
 )
 from fiatlight.fiat_types import TimeSeconds, JsonDict
 from fiatlight.fiat_utils import fiat_math
@@ -88,7 +87,7 @@ class SoundWaveGui(AnyDataWithGui[SoundWave]):
             self._sound_wave_player.stop()
             self._sound_wave_player = None
         sound_wave = self.get_actual_value()
-        self._sound_wave_gui_resampled = sound_wave._rough_resample_to_max_samples(max_samples=1000)
+        self._sound_wave_gui_resampled = sound_wave._rough_resample_to_max_samples(max_samples=4000)
         self._sound_wave_player = SoundWavePlayer(sound_wave)
         selection_start = TimeSeconds(sound_wave.duration() * 0.25)
         selection_end = TimeSeconds(sound_wave.duration() * 0.75)
@@ -225,39 +224,33 @@ class SoundWaveGui(AnyDataWithGui[SoundWave]):
         if sound_wave is None:
             return
 
-        select_change, self.params.can_select = imgui.checkbox("Select", self.params.can_select)
+        implot.setup_axes("Time [s]", "Amplitude", implot.AxisFlags_.auto_fit.value, implot.AxisFlags_.auto_fit.value)
 
-        if implot.begin_plot("##Audio Waveform", hello_imgui.em_to_vec2(self.params.plot_size_em)):
-            implot.setup_axes(
-                "Time [s]", "Amplitude", implot.AxisFlags_.auto_fit.value, implot.AxisFlags_.auto_fit.value
-            )
+        # Add line / position
+        if self._sound_wave_player is not None:
+            x = self._sound_wave_player.position_seconds()
+            line_color = imgui.ImVec4(1.0, 0.0, 0.0, 1.0)
+            changed, new_x, clicked, hovered, held = implot.drag_line_x(0, x, line_color)
+            if changed:
+                self._sound_wave_player.seek(TimeSeconds(new_x))
 
-            # Add line / position
-            if self._sound_wave_player is not None:
-                x = self._sound_wave_player.position_seconds()
-                line_color = imgui.ImVec4(1.0, 0.0, 0.0, 1.0)
-                changed, new_x, clicked, hovered, held = implot.drag_line_x(0, x, line_color)
-                if changed:
-                    self._sound_wave_player.seek(TimeSeconds(new_x))
+        # Add rect / selection
+        if self._sound_wave_player is not None and self.params.can_select:
+            self._plot_selection()
 
-            # Add rect / selection
-            if self._sound_wave_player is not None and self.params.can_select:
-                self._plot_selection()
-
-            implot.plot_line("##Waveform", sound_wave.time_array(), sound_wave.wave)
-            implot.end_plot()
+        implot.plot_line("##Waveform", sound_wave.time_array(), sound_wave.wave)
 
     def present_custom(self) -> None:
         sound_wave = self.get_actual_value()
         imgui.text(f"Duration: {sound_wave.duration():.2f} s, Sample Rate: {sound_wave.sample_rate} Hz")
 
-        # self._plot_waveform()
-        if imgui.button("reset size"):
-            self.params.plot_size_em = ImVec2(20, 10)
-        new_plot_size_pixels = widget_with_resize_handle(self._plot_waveform)
-        self.params.plot_size_em = ImVec2(
-            new_plot_size_pixels.x / imgui.get_font_size(), new_plot_size_pixels.y / imgui.get_font_size()
+        _, self.params.can_select = imgui.checkbox("Select", self.params.can_select)
+
+        plot_size_pixels = immapp.em_to_vec2(self.params.plot_size_em)
+        new_plot_size_pixels = immapp.show_resizable_plot_in_node_editor(
+            "Audio Waveform", plot_size_pixels, self._plot_waveform
         )
+        self.params.plot_size_em = immapp.pixels_to_em(new_plot_size_pixels)
 
         if self._sound_wave_player is not None:
             with imgui_ctx.begin_vertical("ControlsAndPosition"):
