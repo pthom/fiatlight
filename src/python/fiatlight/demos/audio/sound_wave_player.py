@@ -28,6 +28,8 @@ class SoundWavePlayer:
     sound_wave: SoundWave
     position: int = 0
     paused: bool = False
+    _volume: float = 1.0
+    VOLUME_MAX = 2.0
 
     # Private attributes
     _stop_flag: bool = False
@@ -40,6 +42,18 @@ class SoundWavePlayer:
     def __init__(self, sound_wave: SoundWave) -> None:
         self.sound_wave: SoundWave = sound_wave
         self._init_stream()
+
+    @property
+    def volume(self) -> float:
+        return self._volume
+
+    @volume.setter
+    def volume(self, value: float) -> None:
+        if value < 0:
+            value = 0
+        elif value > self.VOLUME_MAX:
+            value = self.VOLUME_MAX
+        self._volume = value
 
     def stop(self) -> None:
         self._stop_impl()
@@ -111,10 +125,12 @@ class SoundWavePlayer:
         # Take into account if the wave is stereo
         if len(self.sound_wave.wave.shape) > 1 and self.sound_wave.wave.shape[1] == 2:
             # Assuming the outdata buffer is also set up for stereo playback
-            outdata[:chunksize] = self.sound_wave.wave[self.position : self.position + chunksize]
+            outdata[:chunksize] = self.sound_wave.wave[self.position : self.position + chunksize] * self.volume
         else:
             # Mono playback
-            outdata[:chunksize] = self.sound_wave.wave[self.position : self.position + chunksize].reshape(chunksize, -1)
+            outdata[:chunksize] = (
+                self.sound_wave.wave[self.position : self.position + chunksize].reshape(chunksize, -1) * self.volume
+            )
         outdata[chunksize:] = 0  # Fill the rest of the buffer with zeros
 
         self.position += chunksize

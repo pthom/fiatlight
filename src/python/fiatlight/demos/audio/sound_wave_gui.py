@@ -2,6 +2,8 @@
 import logging
 from dataclasses import dataclass
 
+from imgui_bundle._imgui_bundle import hello_imgui
+
 from fiatlight.fiat_core.any_data_with_gui import AnyDataWithGui
 from fiatlight.demos.audio.sound_wave import SoundWave
 from fiatlight.demos.audio.sound_wave_player import SoundWavePlayer
@@ -41,6 +43,7 @@ class SoundWaveSelection:
 class SoundWaveGuiParams:
     show_time_as_seconds: bool = False
     can_select: bool = False
+    volume: float = 1.0
     plot_size_em: ImVec2 = ImVec2(20, 10)
     selection: SoundWaveSelection = SoundWaveSelection()
 
@@ -48,6 +51,7 @@ class SoundWaveGuiParams:
         return {
             "show_time_as_seconds": self.show_time_as_seconds,
             "can_select": self.can_select,
+            "volume": self.volume,
             "plot_size_em": [self.plot_size_em.x, self.plot_size_em.y],
             "selection": self.selection.to_dict() if self.selection is not None else None,
         }
@@ -55,6 +59,7 @@ class SoundWaveGuiParams:
     def fill_from_dict(self, data: JsonDict) -> None:
         self.show_time_as_seconds = data.get("show_time_as_seconds", True)
         self.can_select = data.get("can_select", False)
+        self.volume = data.get("volume", 1.0)
         plot_size_array = data.get("plot_size_em", [20, 10])
         self.plot_size_em = ImVec2(plot_size_array[0], plot_size_array[1])
         self.selection = SoundWaveSelection.from_dict(data["selection"])
@@ -224,7 +229,14 @@ class SoundWaveGui(AnyDataWithGui[SoundWave]):
         if sound_wave is None:
             return
 
-        implot.setup_axes("Time [s]", "Amplitude", implot.AxisFlags_.auto_fit.value, implot.AxisFlags_.auto_fit.value)
+        x_axis_flags = implot.AxisFlags_.auto_fit.value
+        y_axis_flags = implot.AxisFlags_.auto_fit.value
+        x_label = "Time [s]" if self.params.show_time_as_seconds else "Time"
+        implot.setup_axes(x_label, "Amplitude", x_axis_flags, y_axis_flags)
+
+        if not self.params.show_time_as_seconds:
+            implot.get_style().use24_hour_clock = True
+            implot.setup_axis_scale(implot.ImAxis_.x1.value, implot.Scale_.time.value)
 
         # Add line / position
         if self._sound_wave_player is not None:
@@ -243,6 +255,8 @@ class SoundWaveGui(AnyDataWithGui[SoundWave]):
     def present_custom(self) -> None:
         sound_wave = self.get_actual_value()
         imgui.text(f"Duration: {sound_wave.duration():.2f} s, Sample Rate: {sound_wave.sample_rate} Hz")
+        imgui.set_next_item_width(hello_imgui.em_size(10))
+        _, self.params.volume = imgui.slider_float("Volume", self.params.volume, 0.0, SoundWavePlayer.VOLUME_MAX)
 
         _, self.params.can_select = imgui.checkbox("Select", self.params.can_select)
 
@@ -253,6 +267,7 @@ class SoundWaveGui(AnyDataWithGui[SoundWave]):
         self.params.plot_size_em = immapp.pixels_to_em(new_plot_size_pixels)
 
         if self._sound_wave_player is not None:
+            self._sound_wave_player.volume = self.params.volume
             with imgui_ctx.begin_vertical("ControlsAndPosition"):
                 self._show_controls()
                 self._show_position()
