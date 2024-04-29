@@ -1,21 +1,35 @@
-import math
-import numpy as np
-from fiatlight.fiat_array import FloatMatrix_Dim1
-from fiatlight.fiat_types import Float_0_1, Float_0_100
+"""A simple example of plotting a curve using fiatlight
+
+We use FloatMatrix_Dim2 (which is an alias for np.ndarray[ShapeDim2, AnyFloat]) to represent a 2D array of floats.
+We instruct fiatlight to display 2D arrays as plots, by calling present_float2_arrays_as_plot().
+"""
+from fiatlight.fiat_array import FloatMatrix_Dim2
+from fiatlight.fiat_types import Float_0_100
 import fiatlight
 
 
-def make_range(start: Float_0_100 = 0, stop: Float_0_100 = math.pi * 4, step: Float_0_1 = 0.01) -> FloatMatrix_Dim1:  # type: ignore
-    return np.arange(start, stop, step)  # type: ignore
+def make_spirograph_curve(
+    radius_fixed_circle: Float_0_100 = 10.84,
+    radius_moving_circle: Float_0_100 = 3.48,
+    pen_offset: Float_0_100 = 6.0,
+    nb_turns: Float_0_100 = 23.0,
+) -> FloatMatrix_Dim2:
+    """a spirograph-like curve"""
+    import numpy as np
 
-
-def make_sin(x: FloatMatrix_Dim1) -> FloatMatrix_Dim1:
-    return np.sin(x)  # type: ignore
+    t = np.linspace(0, 2 * np.pi * nb_turns, int(500 * nb_turns))
+    x = (radius_fixed_circle + radius_moving_circle) * np.cos(t) - pen_offset * np.cos(
+        (radius_fixed_circle + radius_moving_circle) / radius_moving_circle * t
+    )
+    y = (radius_fixed_circle + radius_moving_circle) * np.sin(t) - pen_offset * np.sin(
+        (radius_fixed_circle + radius_moving_circle) / radius_moving_circle * t
+    )
+    return np.array([x, y])  # type: ignore
 
 
 def main() -> None:
-    fiatlight.fiat_array.present_float1_arrays_as_plot()
-    fiatlight.fiat_run_composition([make_range, make_sin])
+    fiatlight.fiat_array.present_float2_arrays_as_plot()  # instruct fiatlight to display 2D arrays as plots
+    fiatlight.fiat_run(make_spirograph_curve)
 
 
 if __name__ == "__main__":

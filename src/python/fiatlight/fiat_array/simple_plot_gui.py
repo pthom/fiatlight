@@ -5,7 +5,7 @@ Internally, it uses ImPlot (https://github.com/epezent/implot)
 
 from fiatlight.fiat_core.any_data_with_gui import AnyDataWithGui
 from fiatlight.fiat_types.base_types import JsonDict
-from fiatlight.fiat_array.array_types import FloatMatrix_Dim1, present_array
+from fiatlight.fiat_array.array_types import FloatMatrix_Dim1, FloatMatrix_Dim2, present_array
 from dataclasses import dataclass
 from enum import Enum, auto
 from typing import List
@@ -64,31 +64,49 @@ class SimplePlotParams:
 
 class SimplePlotPresenter:
     plot_params: SimplePlotParams
-    array: FloatMatrix_Dim1 | None = None
+    array: FloatMatrix_Dim1 | FloatMatrix_Dim2 | None = None
 
     def __init__(self, array_params: SimplePlotParams | None = None) -> None:
         self.plot_params = SimplePlotParams() if array_params is None else array_params
 
-    def set_array(self, array: FloatMatrix_Dim1) -> None:
-        assert len(array.shape) == 1 or len(array.shape) == 2
-        if len(array.shape) == 2:
-            # We support only (x, y) arrays (in columns or rows)
-            assert array.shape[1] == 2 or array.shape[0] == 2
-        self.array = array
+    def set_array(self, array: FloatMatrix_Dim1 | FloatMatrix_Dim2) -> None:
+        if len(array.shape) == 1:
+            self.array = array
+            return
+        elif len(array.shape) == 2:
+            # We only support 2D arrays, with (x, y) as rows or columns
+            if array.shape[0] == 2:
+                self.array = array.T
+                return
+            elif array.shape[1] == 2:
+                self.array = array
+                return
+        raise ValueError("Only 1D arrays or 2D arrays with 2 columns or 2 rows are supported")
+
+    def _is_2d_array(self) -> bool:
+        return len(self.array.shape) == 2
+
+    def _array_x(self) -> FloatMatrix_Dim1:
+        assert self.array is not None
+        if self._is_2d_array():
+            return self.array[:, 0]
+        return self.array
+
+    def _array_y(self) -> FloatMatrix_Dim1:
+        assert self.array is not None
+        if self._is_2d_array():
+            return self.array[:, 1]
+        return self.array
 
     def _available_plot_types(self) -> List["SimplePlotType"]:
         assert self.array is not None
-        if len(self.array.shape) != 1:
-            raise ValueError("Only 1D arrays are supported")
-
         r = [SimplePlotType.line]
-
         nb_items = self.array.shape[0]
         if nb_items < self.plot_params.small_array_threshold:
             r.append(SimplePlotType.scatter)
             r.append(SimplePlotType.stairs)
-            r.append(SimplePlotType.bars)
-
+            if not self._is_2d_array():
+                r.append(SimplePlotType.bars)
         return r
 
     def _gui_select_plot_type(self) -> None:
@@ -112,14 +130,22 @@ class SimplePlotPresenter:
             axis_flags = implot.AxisFlags_.auto_fit.value if self.plot_params.auto_fit else 0
             implot.setup_axes("x", "y", axis_flags, axis_flags)
             label = "##plot"
-            if self.plot_params.presentation_type() == SimplePlotType.line:
-                implot.plot_line(label, self.array)  # type: ignore
-            elif self.plot_params.presentation_type() == SimplePlotType.scatter:
-                implot.plot_scatter(label, self.array)  # type: ignore
-            elif self.plot_params.presentation_type() == SimplePlotType.stairs:
-                implot.plot_stairs(label, self.array)  # type: ignore
-            elif self.plot_params.presentation_type() == SimplePlotType.bars:
-                implot.plot_bars(label, self.array)  # type: ignore
+            if not self._is_2d_array():
+                if self.plot_params.presentation_type() == SimplePlotType.line:
+                    implot.plot_line(label, self.array)  # type: ignore
+                elif self.plot_params.presentation_type() == SimplePlotType.scatter:
+                    implot.plot_scatter(label, self.array)  # type: ignore
+                elif self.plot_params.presentation_type() == SimplePlotType.stairs:
+                    implot.plot_stairs(label, self.array)  # type: ignore
+                elif self.plot_params.presentation_type() == SimplePlotType.bars:
+                    implot.plot_bars(label, self.array)  # type: ignore
+            else:
+                if self.plot_params.presentation_type() == SimplePlotType.line:
+                    implot.plot_line(label, self._array_x(), self._array_y())  # type: ignore
+                elif self.plot_params.presentation_type() == SimplePlotType.scatter:
+                    implot.plot_scatter(label, self._array_x(), self._array_y())
+                elif self.plot_params.presentation_type() == SimplePlotType.stairs:
+                    implot.plot_stairs(label, self._array_x(), self._array_y())
 
         self.plot_params.plot_size_em = immapp.show_resizable_plot_in_node_editor_em(
             "Plot", self.plot_params.plot_size_em, plot_function
@@ -164,3 +190,12 @@ def present_float1_arrays_as_plot() -> None:
     from fiatlight.fiat_core import gui_factories
 
     gui_factories().register_factory("fiatlight.fiat_array.array_types.FloatMatrix_Dim1", SimplePlotGui)
+
+
+def present_float2_arrays_as_plot() -> None:
+    """Will cause FloatMatrix_Dim2 to be presented as a line plot of a 2D array in the GUI.
+    This uses SimplePlotGui and ImPlot. If the array is small, scatter and stairs plots are also available
+    """
+    from fiatlight.fiat_core import gui_factories
+
+    gui_factories().register_factory("fiatlight.fiat_array.array_types.FloatMatrix_Dim2", SimplePlotGui)
