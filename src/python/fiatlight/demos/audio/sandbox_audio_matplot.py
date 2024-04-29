@@ -61,18 +61,5 @@ def main_standalone():
     # plot_spectrogram(audio_higher)
 
 
-def main_fiat():
-    import fiatlight
-
-    fiatlight.fiat_array.register_simple_plot_factory()
-
-    record_audio_gui = fiatlight.to_function_with_gui(record_audio)
-    record_audio_gui.set_invoke_manually_io()
-    record_audio_gui.set_invoke_async()
-
-    fiatlight.fiat_run(record_audio_gui)
-
-
 if __name__ == "__main__":
-    # main_standalone()
-    main_fiat()
+    main_standalone()
