@@ -86,7 +86,7 @@ def sandbox() -> None:
     from fiatlight.demos.ai.stable_diffusion_xl_wrapper import invoke_stable_diffusion_xl
     from fiatlight.fiat_image import image_source
 
-    use_stable_diffusion = False
+    use_stable_diffusion = True
     if use_stable_diffusion:
         fiatlight.fiat_run_composition([invoke_stable_diffusion_xl, add_meme_text])
     else:
