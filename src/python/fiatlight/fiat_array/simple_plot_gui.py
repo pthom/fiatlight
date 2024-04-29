@@ -113,13 +113,13 @@ class SimplePlotPresenter:
             implot.setup_axes("x", "y", axis_flags, axis_flags)
             label = "##plot"
             if self.plot_params.presentation_type() == SimplePlotType.line:
-                implot.plot_line(label, self.array)
+                implot.plot_line(label, self.array)  # type: ignore
             elif self.plot_params.presentation_type() == SimplePlotType.scatter:
-                implot.plot_scatter(label, self.array)
+                implot.plot_scatter(label, self.array)  # type: ignore
             elif self.plot_params.presentation_type() == SimplePlotType.stairs:
-                implot.plot_stairs(label, self.array)
+                implot.plot_stairs(label, self.array)  # type: ignore
             elif self.plot_params.presentation_type() == SimplePlotType.bars:
-                implot.plot_bars(label, self.array)
+                implot.plot_bars(label, self.array)  # type: ignore
 
         self.plot_params.plot_size_em = immapp.show_resizable_plot_in_node_editor_em(
             "Plot", self.plot_params.plot_size_em, plot_function

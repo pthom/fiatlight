@@ -5,12 +5,12 @@ from fiatlight.fiat_types import Float_0_1, Float_0_100
 import fiatlight
 
 
-def make_range(start: Float_0_100 = 0, stop: Float_0_100 = math.pi * 4, step: Float_0_1 = 0.01) -> FloatMatrix_Dim1:
+def make_range(start: Float_0_100 = 0, stop: Float_0_100 = math.pi * 4, step: Float_0_1 = 0.01) -> FloatMatrix_Dim1:  # type: ignore
     return np.arange(start, stop, step)  # type: ignore
 
 
 def make_sin(x: FloatMatrix_Dim1) -> FloatMatrix_Dim1:
-    return np.sin(x)
+    return np.sin(x)  # type: ignore
 
 
 def main() -> None:

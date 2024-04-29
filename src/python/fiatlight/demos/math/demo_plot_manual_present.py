@@ -1,3 +1,9 @@
+"""In this example we add a custom presentation function to a function.
+   We also manually set the limits of a float parameter.
+
+   Note: fiatlight include the type `FloatMatrix_Dim1` and `FloatMatrix_Dim2`
+         which can be automatically presented as a plot (see example demo_plot_array.py)
+"""
 import math
 import numpy as np
 from numpy.typing import NDArray

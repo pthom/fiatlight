@@ -2,7 +2,7 @@
 import logging
 from dataclasses import dataclass
 
-from imgui_bundle._imgui_bundle import hello_imgui
+from imgui_bundle import hello_imgui
 
 from fiatlight.fiat_core.any_data_with_gui import AnyDataWithGui
 from fiatlight.demos.audio.sound_wave import SoundWave

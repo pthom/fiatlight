@@ -1,3 +1,5 @@
+# type: ignore
+
 # pip install git+https://github.com/suno-ai/bark.git
 # pip install ipython
 """
@@ -6,7 +8,6 @@ https://github.com/suno-ai/bark/issues/255
 but you can test it via the env var SUNO_ENABLE_MPS
 
 """
-
 from bark import SAMPLE_RATE, generate_audio, preload_models
 from scipy.io.wavfile import write as write_wav
 from IPython.display import Audio
