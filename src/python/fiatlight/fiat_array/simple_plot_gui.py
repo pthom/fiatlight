@@ -84,19 +84,20 @@ class SimplePlotPresenter:
         raise ValueError("Only 1D arrays or 2D arrays with 2 columns or 2 rows are supported")
 
     def _is_2d_array(self) -> bool:
+        assert self.array is not None
         return len(self.array.shape) == 2
 
     def _array_x(self) -> FloatMatrix_Dim1:
         assert self.array is not None
         if self._is_2d_array():
-            return self.array[:, 0]
-        return self.array
+            return self.array[:, 0]  # type: ignore
+        return self.array  # type: ignore
 
     def _array_y(self) -> FloatMatrix_Dim1:
         assert self.array is not None
         if self._is_2d_array():
-            return self.array[:, 1]
-        return self.array
+            return self.array[:, 1]  # type: ignore
+        return self.array  # type: ignore
 
     def _available_plot_types(self) -> List["SimplePlotType"]:
         assert self.array is not None
@@ -141,7 +142,7 @@ class SimplePlotPresenter:
                     implot.plot_bars(label, self.array)  # type: ignore
             else:
                 if self.plot_params.presentation_type() == SimplePlotType.line:
-                    implot.plot_line(label, self._array_x(), self._array_y())  # type: ignore
+                    implot.plot_line(label, self._array_x(), self._array_y())
                 elif self.plot_params.presentation_type() == SimplePlotType.scatter:
                     implot.plot_scatter(label, self._array_x(), self._array_y())
                 elif self.plot_params.presentation_type() == SimplePlotType.stairs:

@@ -2,7 +2,7 @@
 """
 from fiatlight.fiat_core.any_data_with_gui import AnyDataWithGui
 from fiatlight.fiat_core.function_with_gui import FunctionWithGui
-from fiatlight.fiat_audio.sound_wave import SoundWave
+from fiatlight.fiat_audio.sound_wave import SoundWave, SampleRate
 from fiatlight.fiat_audio.sound_wave_gui import SoundWaveGui
 from fiatlight.fiat_audio import audio_functions
 from imgui_bundle import imgui, hello_imgui
@@ -13,7 +13,7 @@ from dataclasses import dataclass
 @dataclass
 class AudioRecordParams:
     duration: float = 5.0
-    sample_rate: int = 44100
+    sample_rate: SampleRate = 44100  # type: ignore
 
     def __str__(self) -> str:
         return f"{self.duration}s, Rate: {self.sample_rate}"
@@ -30,7 +30,7 @@ class AudioRecordParamsGui(AnyDataWithGui[AudioRecordParams]):
         imgui.set_next_item_width(hello_imgui.em_size(10))
         changed1, audio_params.duration = imgui.slider_float("Duration", audio_params.duration, 0.1, 100.0)
         imgui.set_next_item_width(hello_imgui.em_size(10))
-        changed2, audio_params.sample_rate = imgui.slider_int("Sample Rate", audio_params.sample_rate, 8000, 96000)
+        changed2, audio_params.sample_rate = imgui.slider_float("Sample Rate", audio_params.sample_rate, 8000, 96000)  # type: ignore
         return changed1 or changed2
 
 
