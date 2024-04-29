@@ -5,8 +5,8 @@ from dataclasses import dataclass
 from imgui_bundle import hello_imgui
 
 from fiatlight.fiat_core.any_data_with_gui import AnyDataWithGui
-from fiatlight.demos.audio.sound_wave import SoundWave
-from fiatlight.demos.audio.sound_wave_player import SoundWavePlayer
+from fiatlight.fiat_audio.sound_wave import SoundWave
+from fiatlight.fiat_audio.sound_wave_player import SoundWavePlayer
 from imgui_bundle import implot, imgui, imgui_ctx, ImVec2, immapp
 from fiatlight.fiat_widgets import (
     icons_fontawesome_6,
