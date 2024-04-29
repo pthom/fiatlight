@@ -1,6 +1,6 @@
 def sandbox_play_file() -> None:
     import fiatlight
-    from fiatlight.demos.audio.sound_wave import sound_wave_from_file
+    from fiatlight.fiat_audio.sound_wave import sound_wave_from_file
 
     fiatlight.fiat_run(sound_wave_from_file)
 

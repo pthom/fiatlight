@@ -2,9 +2,9 @@
 """
 from fiatlight.fiat_core.any_data_with_gui import AnyDataWithGui
 from fiatlight.fiat_core.function_with_gui import FunctionWithGui
-from fiatlight.demos.audio.sound_wave import SoundWave
-from fiatlight.demos.audio.sound_wave_gui import SoundWaveGui
-from fiatlight.demos.audio import audio_functions
+from fiatlight.fiat_audio.sound_wave import SoundWave
+from fiatlight.fiat_audio.sound_wave_gui import SoundWaveGui
+from fiatlight.fiat_audio import audio_functions
 from imgui_bundle import imgui, hello_imgui
 
 from dataclasses import dataclass
