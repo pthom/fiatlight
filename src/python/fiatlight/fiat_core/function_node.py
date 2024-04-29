@@ -180,7 +180,7 @@ class FunctionNode:
         if self.is_running_async():
             self._input_changes_during_async = True
             msg += " (changed while function is running)"
-        logging.debug(msg)
+        # logging.debug(msg)
         self.function_with_gui._dirty = True
         if not self.function_with_gui.invoke_manually:
             self.call_invoke_async_or_not()
