@@ -8,7 +8,7 @@ from fiatlight.fiat_array.array_types import (
     IntMatrix_Dim3,
     IntMatrix_Dim4,
 )
-from fiatlight.fiat_array.simple_plot_gui import register_simple_plot_factory, SimplePlotGui
+from fiatlight.fiat_array.simple_plot_gui import present_float1_arrays_as_plot, SimplePlotGui
 
 
 __all__ = [
@@ -20,6 +20,6 @@ __all__ = [
     "IntMatrix_Dim2",
     "IntMatrix_Dim3",
     "IntMatrix_Dim4",
-    "register_simple_plot_factory",
+    "present_float1_arrays_as_plot",
     "SimplePlotGui",
 ]
