@@ -9,10 +9,10 @@ import fiatlight
 
 
 def make_spirograph_curve(
-    radius_fixed_circle: Float_0_100 = 10.84,
-    radius_moving_circle: Float_0_100 = 3.48,
-    pen_offset: Float_0_100 = 6.0,
-    nb_turns: Float_0_100 = 23.0,
+    radius_fixed_circle: Float_0_100 = Float_0_100(10.84),
+    radius_moving_circle: Float_0_100 = Float_0_100(3.48),
+    pen_offset: Float_0_100 = Float_0_100(6.0),
+    nb_turns: Float_0_100 = Float_0_100(23.0),
 ) -> FloatMatrix_Dim2:
     """a spirograph-like curve"""
     import numpy as np

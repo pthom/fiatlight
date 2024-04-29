@@ -1,10 +1,10 @@
-from fiatlight.fiat_audio.sound_wave import SoundWave
+from fiatlight.fiat_audio.sound_wave import SoundWave, SampleRate
 from fiatlight.fiat_array import FloatMatrix_Dim1
 import sounddevice  # type: ignore
 import logging
 
 
-def record_audio(duration: float, sample_rate: int) -> SoundWave:
+def record_audio(duration: float, sample_rate: SampleRate) -> SoundWave:
     logging.info(f"Recording audio for {duration} seconds at {sample_rate} Hz...")
     audio = sounddevice.rec(int(duration * sample_rate), samplerate=sample_rate, channels=1, dtype="float32")
     sounddevice.wait()  # Wait until recording is finished

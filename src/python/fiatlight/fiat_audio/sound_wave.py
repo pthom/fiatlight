@@ -6,12 +6,16 @@ from fiatlight.fiat_array import FloatMatrix_Dim1
 from fiatlight.fiat_types import AudioPath, TimeSeconds
 from dataclasses import dataclass
 import scipy  # type: ignore
+from typing import NewType
+
+
+SampleRate = NewType("SampleRate", float)
 
 
 @dataclass
 class SoundWave:
     wave: FloatMatrix_Dim1
-    sample_rate: float
+    sample_rate: SampleRate
     _time_array: FloatMatrix_Dim1 | None = None  # cache for time array
     _max_intensity, _min_intensity = 1.0, -1.0
 
@@ -36,7 +40,7 @@ class SoundWave:
 
         num_samples = max_samples
         wave_resampled = scipy.signal.resample(self.wave, max_samples)
-        new_sample_rate = self.sample_rate * num_samples / len(self.wave)
+        new_sample_rate = SampleRate(self.sample_rate * num_samples / len(self.wave))
         return SoundWave(wave_resampled, new_sample_rate)
 
     def time_array(self) -> FloatMatrix_Dim1:
