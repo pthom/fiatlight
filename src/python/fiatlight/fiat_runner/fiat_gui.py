@@ -530,11 +530,14 @@ def fiat_run_graph(functions_graph: FunctionsGraph, params: FiatGuiParams | None
     fiat_gui.run()
 
 
-def fiat_run(fn: Callable[..., Any] | FunctionWithGui, params: FiatGuiParams | None = None) -> None:
+AnyFunction = Callable[..., Any]
+
+
+def fiat_run(fn: AnyFunction | FunctionWithGui, params: FiatGuiParams | None = None) -> None:
     functions_graph = FunctionsGraph.from_function(fn)
     fiat_run_graph(functions_graph, params)
 
 
-def fiat_run_composition(composition: List[Callable[..., Any]], params: FiatGuiParams | None = None) -> None:
+def fiat_run_composition(composition: List[AnyFunction | FunctionWithGui], params: FiatGuiParams | None = None) -> None:
     functions_graph = FunctionsGraph.from_function_composition(composition)
     fiat_run_graph(functions_graph, params)
