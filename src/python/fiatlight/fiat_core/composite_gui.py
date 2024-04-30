@@ -18,6 +18,8 @@ class OptionalWithGui(AnyDataWithGui[DataType | None]):
         self.callbacks.on_change = self.on_change
         self.callbacks.default_value_provider = self.default_provider
         self.callbacks.clipboard_copy_possible = inner_gui.callbacks.clipboard_copy_possible
+        if self.inner_gui.callbacks.present_custom is not None:
+            self.callbacks.present_custom = self.present_custom
 
     def default_provider(self) -> DataType | None:
         if self.inner_gui.callbacks.default_value_provider is None:
@@ -34,6 +36,14 @@ class OptionalWithGui(AnyDataWithGui[DataType | None]):
                 return inner_present_str(value)
             else:
                 return str(value)
+
+    def present_custom(self) -> None:
+        value = self.get_actual_value()
+        if value is None:
+            imgui.text("Optional: None")
+        else:
+            self.inner_gui.value = value
+            self.inner_gui.callbacks.present_custom()
 
     def edit(self) -> bool:
         value = self.value
