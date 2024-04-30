@@ -1,9 +1,9 @@
-from fiatlight.fiat_core.any_data_with_gui import AnyDataWithGui
-from fiatlight.fiat_audio.audio_types import SoundBlock
+from fiatlight.fiat_audio.audio_types_gui import SoundBlocksListGui
+from fiatlight.fiat_audio.audio_types import SoundBlocksList, SoundBlock
 from fiatlight.fiat_core.function_with_gui import FunctionWithGui
 from fiatlight.fiat_audio.wip_audio_provider import AudioProvider
 from imgui_bundle import ImVec2, imgui, imgui_ctx
-from typing import List, Any
+from typing import List
 from abc import ABC, abstractmethod
 
 
@@ -49,7 +49,7 @@ class AudioProviderGui(FunctionWithGui, ABC):
     # Live sound block plot
     _live_sound_block_plot_gui: _LiveSoundBlockPlotGui
     # Available sound blocks
-    _sound_blocks: List[SoundBlock]
+    _sound_blocks_list: SoundBlocksList
 
     def __init__(self, audio_provider: AudioProvider) -> None:
         self._audio_provider = audio_provider
@@ -57,24 +57,24 @@ class AudioProviderGui(FunctionWithGui, ABC):
         super().__init__(self.f)
         self.internal_state_gui = self._internal_gui
         self.on_heartbeat = self._on_heartbeat
-        self.invoke_always_dirty = True
+        # self.invoke_always_dirty = True
 
-        self._sound_blocks = []
+        self._sound_blocks_list = SoundBlocksList.make_empty()
 
         # Initialize the live sound block plot
         self._live_sound_block_plot_gui = _LiveSoundBlockPlotGui()
 
         # Add output GUI
-        output_gui_undef = AnyDataWithGui[Any]()
-        self.add_output(output_gui_undef)
+        self.add_output(SoundBlocksListGui())
 
-    def f(self) -> List[SoundBlock]:
-        return self.sound_blocks
+    def f(self) -> SoundBlocksList:
+        return self._sound_blocks_list
 
     def _on_heartbeat(self) -> bool:
-        self.sound_blocks = self._audio_provider.get_sound_blocks()
-        self._live_sound_block_plot_gui.add_sound_blocks(self.sound_blocks)
-        return False
+        self._sound_blocks_list = self._audio_provider.get_sound_blocks()
+        self._live_sound_block_plot_gui.add_sound_blocks(self._sound_blocks_list.blocks)
+        has_new_blocks = len(self._sound_blocks_list.blocks) > 0
+        return has_new_blocks
 
     def _internal_gui(self) -> bool:
         needs_refresh = self.specialized_internal_gui()

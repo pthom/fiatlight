@@ -97,12 +97,12 @@ class MicrophoneGui(FunctionWithGui):
         sound_blocks = self._microphone_io.get_sound_blocks()
 
         # Display the last sound block
-        if len(sound_blocks) > 0:
-            self._displayed_sound_block = sound_blocks[-1]
+        if len(sound_blocks.blocks) > 0:
+            self._displayed_sound_block = sound_blocks.blocks[-1]
 
         # Append sound blocks to the recording
         if self._is_recording:
-            for sound_block in sound_blocks:
+            for sound_block in sound_blocks.blocks:
                 if self._sound_wave_being_recorded is None:
                     self._sound_wave_being_recorded = sound_block
                 else:
