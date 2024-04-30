@@ -57,8 +57,9 @@ class FunctionNodeGui:
     _inputs_expanded: bool = True
     _show_output_details: Dict[int, bool] = {}
     _outputs_expanded: bool = True
-    _show_internals_details: Dict[str, bool] = {}
+    _show_internals_details: Dict[str, bool] = {}  # This is for the function's debug internals
     _internals_expanded: bool = True
+    _internal_state_gui_expanded: bool = True  # This is for the function's internal state gui
 
     # ==================================================================================================================
     #                                            Constructor
@@ -131,8 +132,9 @@ class FunctionNodeGui:
     def _Utilities_Section() -> None:  # Dummy function to create a section in the IDE # noqa
         pass
 
-    def _heartbeat(self) -> None:
-        self._function_node.heartbeat()
+    def _heartbeat(self) -> bool:
+        needs_refresh = self._function_node.heartbeat()
+        return needs_refresh
 
     @staticmethod
     def _call_gui_present_custom(value_with_gui: AnyDataWithGui[Any]) -> None:
@@ -180,7 +182,7 @@ class FunctionNodeGui:
 
     def draw_node(self, unique_name: str) -> bool:
         inputs_changed: bool
-        self._heartbeat()
+        needs_refresh_for_heartbeat = self._heartbeat()
         with imgui_ctx.push_obj_id(self._function_node):
             with ed_ctx.begin_node(self._node_id):
                 with imgui_ctx.begin_vertical("node_content"):
@@ -189,10 +191,15 @@ class FunctionNodeGui:
                         self._draw_title(unique_name)
                     # Set minimum width
                     imgui.dummy(ImVec2(hello_imgui.em_size(get_fiat_config().style.node_minimum_width_em), 1))
+
                     # Inputs
                     inputs_changed = self._draw_function_inputs(unique_name)
-                    if inputs_changed:
+                    # Function internal state
+                    internal_state_changed = self._draw_function_internal_state(unique_name)
+
+                    if inputs_changed or internal_state_changed or needs_refresh_for_heartbeat:
                         self._function_node.on_inputs_changed()
+
                     # Internals
                     self._draw_fiat_internals()
                     # Exceptions, if any
@@ -480,6 +487,39 @@ class FunctionNodeGui:
     @staticmethod
     def _Draw_Inputs_Section() -> None:  # Dummy function to create a section in the IDE # noqa
         pass
+
+    def _draw_function_internal_state(self, unique_name: str) -> bool:
+        fn_with_gui = self._function_node.function_with_gui
+        internal_state_fn = fn_with_gui.internal_state_gui
+        if internal_state_fn is None:
+            return False
+
+        #
+        # Draw the separator
+        #
+        node_separator_params = fiat_widgets.NodeSeparatorParams()
+        node_separator_params.parent_node = self._node_id
+        # expanded state
+        node_separator_params.expanded = self._internal_state_gui_expanded
+        # Separator text
+        node_separator_params.text = "Function internal state"
+        # Separator collapse button
+        node_separator_params.show_collapse_button = True
+        # Separator collapse all button
+        node_separator_params.show_toggle_collapse_all_button = False
+        # Draw the separator
+        node_separator_output = fiat_widgets.node_separator(node_separator_params)
+        # Update the expanded state
+        self._internal_state_gui_expanded = node_separator_output.expanded
+
+        #
+        # Invoke the internal state gui
+        #
+        if self._internal_state_gui_expanded:
+            result = internal_state_fn()
+            return result
+        else:
+            return False
 
     def _draw_function_inputs(self, unique_name: str) -> bool:
         shall_disable_input = (
@@ -1015,6 +1055,7 @@ class FunctionNodeGui:
             "_outputs_expanded": self._outputs_expanded,
             "_show_internals_details": self._show_internals_details,
             "_internals_expanded": self._internals_expanded,
+            "_internal_state_gui_expanded": self._internal_state_gui_expanded,
         }
         return r
 
@@ -1037,6 +1078,8 @@ class FunctionNodeGui:
         self._inputs_expanded = json_data.get("_inputs_expanded", True)
         self._outputs_expanded = json_data.get("_outputs_expanded", True)
         self._internals_expanded = json_data.get("_internals_expanded", True)
+
+        self._internal_state_gui_expanded = json_data.get("_internal_state_gui_expanded", True)
 
 
 class FunctionNodeLinkGui:

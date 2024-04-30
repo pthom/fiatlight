@@ -154,7 +154,12 @@ class FunctionNode:
             return False
         return True
 
-    def heartbeat(self) -> None:
+    def heartbeat(self) -> bool:
+        needs_refresh = False
+        if self.function_with_gui.on_heartbeat is not None:
+            if self.function_with_gui.on_heartbeat():
+                needs_refresh = True
+
         # Handle async invoke
         # -------------------
         # delete _async_invoke_thread if it is not alive anymore
@@ -171,6 +176,8 @@ class FunctionNode:
         if self.function_with_gui.is_live():
             # self.function_with_gui.set_dirty()  # done already
             self.call_invoke_async_or_not()
+
+        return needs_refresh
 
     def on_inputs_changed(self) -> None:
         """Called when one of the inputs of the function has changed.

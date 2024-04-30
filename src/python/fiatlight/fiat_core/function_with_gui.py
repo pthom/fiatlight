@@ -1,6 +1,7 @@
 from fiatlight.fiat_config import get_fiat_config
 from fiatlight.fiat_types import UnspecifiedValue, ErrorValue, Unspecified, JsonDict, GuiType
 from fiatlight.fiat_core.any_data_with_gui import AnyDataWithGui
+from fiatlight.fiat_types.function_types import BoolFunction
 from fiatlight.fiat_core.param_with_gui import ParamWithGui, ParamKind
 from fiatlight.fiat_core.output_with_gui import OutputWithGui
 from fiatlight.fiat_core.primitives_gui import IntWithGui, FloatWithGui, BoolWithGui, StrWithGui
@@ -44,6 +45,15 @@ class FunctionWithGui:
     #   - if invoke_manually is false, the function will be called at each frame
     # Note: a "live" function is thus a function with invoke_manually=False and invoke_always_dirty=True
     invoke_always_dirty: bool = False
+
+    # internal_state_gui: optional Gui for the internal state of the function
+    # (this function may display a GUI to show the internal state of the function,
+    #  and return True if the state has changed, and the function needs to be called)
+    internal_state_gui: BoolFunction | None = None
+
+    # on_heartbeat: optional function that will be called at each frame
+    # (and return True if the function needs to be called to update the output)
+    on_heartbeat: BoolFunction | None = None
 
     #
     # Private members
