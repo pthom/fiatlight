@@ -25,6 +25,19 @@ SoundBlock = NDArray[np.float32]
 
 
 @dataclass
+class SoundBlocksList:
+    blocks: list[SoundBlock]
+    sample_rate: SampleRate
+
+    @staticmethod
+    def make_empty() -> "SoundBlocksList":
+        return SoundBlocksList([], SampleRate(44100))
+
+    def is_empty(self) -> bool:
+        return len(self.blocks) == 0
+
+
+@dataclass
 class SoundWave:
     wave: FloatMatrix_Dim1
     sample_rate: SampleRate

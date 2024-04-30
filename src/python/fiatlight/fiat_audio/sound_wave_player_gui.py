@@ -88,10 +88,15 @@ class SoundWavePlayerGui(AnyDataWithGui[SoundWave]):
         self.params.fill_from_dict(data)
 
     def _on_change(self) -> None:
+        sound_wave = self.get_actual_value()
+        if self._sound_wave_player is not None:
+            is_same_wave = self._sound_wave_player.sound_wave is sound_wave
+            if is_same_wave:
+                # logging.info("SoundWavePlayerGui.on_change(): same sound wave, not changing")
+                return
         if self._sound_wave_player is not None:
             self._sound_wave_player.stop()
             self._sound_wave_player = None
-        sound_wave = self.get_actual_value()
         if sound_wave.is_empty():
             return
         self._sound_wave_gui_resampled = sound_wave._rough_resample_to_max_samples(max_samples=4000)

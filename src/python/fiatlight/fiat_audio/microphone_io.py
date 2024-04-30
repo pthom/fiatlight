@@ -1,8 +1,8 @@
-from fiatlight.fiat_audio.audio_types import SoundBlock, SampleRate, NbChannels, BlockSize
+from fiatlight.fiat_audio.audio_types import SoundBlock, SoundBlocksList, SampleRate, NbChannels, BlockSize
 from fiatlight.fiat_audio.wip_audio_provider import AudioProvider
 import sounddevice as sd  # type: ignore
 from queue import Queue, Empty
-from typing import Any, List, Optional
+from typing import Any, Optional
 import logging
 from dataclasses import dataclass
 
@@ -86,7 +86,7 @@ class MicrophoneIo(AudioProvider):
         else:
             logging.debug("No data in callback.")
 
-    def get_sound_blocks(self) -> List[SoundBlock]:
+    def get_sound_blocks(self) -> SoundBlocksList:
         """Retrieves the latest blocks of audio data from the microphone, if available.
         Should be called repeatedly to get all available data.
         Ideally, you should call this quickly enough so that the list is either empty or contains only one block.
@@ -99,7 +99,7 @@ class MicrophoneIo(AudioProvider):
                 blocks.append(block)
         except Empty:
             pass
-        return blocks
+        return SoundBlocksList(blocks, self.params.sample_rate)
 
 
 def sandbox() -> None:
@@ -112,7 +112,7 @@ def sandbox() -> None:
     with MicrophoneIo(params) as mic:
         while time.time() - start < 1.0:
             data = mic.get_sound_blocks()
-            print_repeatable_message(f"Received {len(data)} blocks of audio data.")
+            print_repeatable_message(f"Received {len(data.blocks)} blocks of audio data.")
 
 
 if __name__ == "__main__":
