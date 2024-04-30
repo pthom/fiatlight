@@ -4,13 +4,15 @@ from fiatlight.fiat_types.function_types import (
     FunctionList,
     VoidFunction,
     BoolFunction,
-    DataType,
-    GuiType,
     DataEditFunction,
     DataPresentFunction,
 )
 from fiatlight.fiat_types.str_types import FilePath, ImagePath, TextPath, AudioPath, VideoPath, StrMultiline, Prompt
 from fiatlight.fiat_types.base_types import (
+    DataType,
+    GuiType,
+    ExplainedValue,
+    ExplainedValues,
     JsonDict,
     JsonPrimitive,
     JsonPrimitiveOrDict,
@@ -70,6 +72,8 @@ __all__ = [
     "JsonPrimitiveOrDict",
     "GlobalsDict",
     "LocalsDict",
+    "ExplainedValue",
+    "ExplainedValues",
     # from fiat_number_types
     "FloatInterval",
     "IntInterval",
