@@ -31,6 +31,10 @@ class MicrophoneIo:
         """Manually stop the microphone input, when not using the context manager."""
         self._stop_io()
 
+    def started(self) -> bool:
+        """Check if the microphone input is currently running."""
+        return self._stream is not None
+
     def __enter__(self) -> "MicrophoneIo":
         self._start_io()
         return self
@@ -56,6 +60,7 @@ class MicrophoneIo:
             if self._stream is not None:
                 self._stream.stop()
                 self._stream.close()
+                self._stream = None
         except Exception as e:
             logging.error(f"Failed to stop audio stream: {e}")
             raise RuntimeError("Audio stream stop failed") from e
@@ -73,9 +78,10 @@ class MicrophoneIo:
         else:
             logging.debug("No data in callback.")
 
-    def live_wave(self) -> List[SoundBlock]:
+    def get_sound_blocks(self) -> List[SoundBlock]:
         """Retrieves the latest blocks of audio data from the microphone, if available.
         Should be called repeatedly to get all available data.
+        Ideally, you should call this quickly enough so that the list is either empty or contains only one block.
         Can be called from the main thread.
         """
         blocks = []
@@ -97,7 +103,7 @@ def sandbox() -> None:
     params = MicrophoneParams(sample_rate=44100, nb_channels=1)  # type: ignore  # noqa
     with MicrophoneIo(params) as mic:
         while time.time() - start < 1.0:
-            data = mic.live_wave()
+            data = mic.get_sound_blocks()
             print_repeatable_message(f"Received {len(data)} blocks of audio data.")
 
 

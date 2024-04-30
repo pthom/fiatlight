@@ -32,16 +32,26 @@ class SoundWave:
     _max_intensity, _min_intensity = 1.0, -1.0
 
     def __post_init__(self) -> None:
-        r = np.arange(0, self.duration(), 1 / self.sample_rate, self.wave.dtype)
-        self._time_array = r  # type: ignore
+        if self.is_empty():
+            return
+        time_array = np.arange(0, self.duration(), 1 / self.sample_rate, self.wave.dtype)
+        self._time_array = time_array  # type: ignore
         self._min_intensity = self.wave.min()
         self._max_intensity = self.wave.max()
+
+    @staticmethod
+    def make_empty() -> "SoundWave":
+        empty_wave: FloatMatrix_Dim1 = np.array([], dtype=np.float32)  # type: ignore
+        return SoundWave(empty_wave, SampleRate(44100))
 
     def duration(self) -> TimeSeconds:
         return len(self.wave) / self.sample_rate  # type: ignore
 
     def nb_samples(self) -> int:
         return len(self.wave)
+
+    def is_empty(self) -> bool:
+        return self.wave.size == 0
 
     def _rough_resample_to_max_samples(self, max_samples: int) -> "SoundWave":
         """Resample the sound wave to have at most max_samples.
@@ -57,7 +67,7 @@ class SoundWave:
 
     def time_array(self) -> FloatMatrix_Dim1:
         assert self._time_array is not None
-        return self._time_array
+        return self._time_array  # noqa
 
     def __str__(self) -> str:
         return f"{self.duration():.2f}s at {self.sample_rate / 1000:.1f} kHz"
@@ -75,8 +85,6 @@ def sound_wave_from_file(file_path: AudioPath) -> SoundWave:
 #  --------------------------------------------------------------------------------------------
 #         Gui Hints for those types
 #  --------------------------------------------------------------------------------------------
-
-
 SampleRatesExplained: ExplainedValues[SampleRate] = [
     ExplainedValue(SampleRate(8000), "8Khz", "Analog telephone"),
     ExplainedValue(SampleRate(22050), "22kHz", "22050Hz, low quality"),

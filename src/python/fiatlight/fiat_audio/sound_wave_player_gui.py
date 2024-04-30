@@ -92,6 +92,8 @@ class SoundWavePlayerGui(AnyDataWithGui[SoundWave]):
             self._sound_wave_player.stop()
             self._sound_wave_player = None
         sound_wave = self.get_actual_value()
+        if sound_wave.is_empty():
+            return
         self._sound_wave_gui_resampled = sound_wave._rough_resample_to_max_samples(max_samples=4000)
         self._sound_wave_player = SoundWavePlayer(sound_wave)
         selection_start = TimeSeconds(sound_wave.duration() * 0.25)
