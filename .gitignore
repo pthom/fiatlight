@@ -8,6 +8,6 @@ external/
 TODO.txt
 /dist/
 priv_assets/
-
 # v3* (virtualenvs)
 /v3*
+.DS_Store
