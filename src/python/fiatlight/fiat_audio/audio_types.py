@@ -3,31 +3,25 @@ import numpy as np
 import soundfile  # type: ignore
 
 from fiatlight.fiat_array import FloatMatrix_Dim1
-from fiatlight.fiat_types import AudioPath, TimeSeconds
-from dataclasses import dataclass
+from fiatlight.fiat_types import AudioPath, TimeSeconds, ExplainedValue, ExplainedValues
 import scipy  # type: ignore
 from typing import NewType
 from numpy.typing import NDArray
+from dataclasses import dataclass
 
 
-# Possible sample rates for audio:
-# 44100 Hz: This is the standard for audio CDs and is highly compatible across all playback systems. It's good for music and general audio recording.
-# 48000 Hz: This is the standard for professional video production and streaming audio. It offers slightly higher fidelity and is common in film and TV production.
-# 32000 Hz, 22050 Hz, and 16000 Hz: These are used for lower-fidelity applications, such as voice recording or telephony.
+# Possible sample rates for audio (typically 8000, 22050, 44100, 48000),
 SampleRate = NewType("SampleRate", float)
 
+# The number of channels in a sound block (1 for mono, 2 for stereo, etc.)
+NbChannels = NewType("NbChannels", int)
 
 # The number of samples in a block of sound data (typically 512 or 1024),
 BlockSize = NewType("BlockSize", int)
 
-
 # A live block of sound data, with shape (block_size, nb_channels),
 # where block_size is the number of samples per channel, user-defined (typically 512 or 1024),
 SoundBlock = NDArray[np.float32]
-
-
-# The number of channels in a sound block (1 for mono, 2 for stereo, etc.)
-NbChannels = NewType("NbChannels", int)
 
 
 @dataclass
@@ -76,3 +70,30 @@ def sound_wave_from_file(file_path: AudioPath) -> SoundWave:
     if wave.ndim == 2:
         wave = wave.mean(axis=1)
     return SoundWave(wave, sample_rate)
+
+
+#  --------------------------------------------------------------------------------------------
+#         Gui Hints for those types
+#  --------------------------------------------------------------------------------------------
+
+
+SampleRatesExplained: ExplainedValues[SampleRate] = [
+    ExplainedValue(SampleRate(8000), "8Khz", "Analog telephone"),
+    ExplainedValue(SampleRate(22050), "22kHz", "22050Hz, low quality"),
+    ExplainedValue(SampleRate(32000), "32kHz", "32000Hz"),
+    ExplainedValue(SampleRate(44100), "44kHz", "44100Hz, CD quality"),
+    ExplainedValue(SampleRate(48000), "48kHz", "48000Hz, production quality"),
+]
+
+
+BlockSizesExplained: ExplainedValues[BlockSize] = [
+    ExplainedValue(BlockSize(256), "256", "Small block size"),
+    ExplainedValue(BlockSize(512), "512", "Standard"),
+    ExplainedValue(BlockSize(1024), "1024", "Large block size"),
+]
+
+
+NbChannelsExplained: ExplainedValues[NbChannels] = [
+    ExplainedValue(NbChannels(1), "Mono", "1 channel"),
+    ExplainedValue(NbChannels(2), "Stereo", "2 channels"),
+]
