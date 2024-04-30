@@ -1,4 +1,5 @@
 from fiatlight.fiat_audio.audio_types import SoundBlock, SampleRate, NbChannels, BlockSize
+from fiatlight.fiat_audio.wip_audio_provider import AudioProvider
 import sounddevice as sd  # type: ignore
 from queue import Queue, Empty
 from typing import Any, List, Optional
@@ -13,7 +14,7 @@ class MicrophoneParams:
     block_size: BlockSize = BlockSize(512)
 
 
-class MicrophoneIo:
+class MicrophoneIo(AudioProvider):
     params: MicrophoneParams
     _queue: Queue[SoundBlock]
     _stream: Optional[sd.InputStream]
