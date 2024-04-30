@@ -31,6 +31,13 @@ class MicrophoneIo:
         """Manually stop the microphone input, when not using the context manager."""
         self._stop_io()
 
+    def toggle(self) -> None:
+        """Toggle the microphone input on/off."""
+        if self.started():
+            self.stop()
+        else:
+            self.start()
+
     def started(self) -> bool:
         """Check if the microphone input is currently running."""
         return self._stream is not None
