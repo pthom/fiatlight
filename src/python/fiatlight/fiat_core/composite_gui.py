@@ -38,6 +38,7 @@ class OptionalWithGui(AnyDataWithGui[DataType | None]):
                 return str(value)
 
     def present_custom(self) -> None:
+        assert self.inner_gui.callbacks.present_custom is not None
         value = self.get_actual_value()
         if value is None:
             imgui.text("Optional: None")
