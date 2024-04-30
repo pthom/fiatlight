@@ -1,4 +1,4 @@
-from fiatlight.fiat_types.function_types import DataType
+from fiatlight.fiat_types.base_types import DataType
 from fiatlight.fiat_core.any_data_with_gui import AnyDataWithGui
 from fiatlight.fiat_types.error_types import Error, ErrorValue, Unspecified
 from fiatlight.fiat_types.base_types import JsonDict

@@ -35,6 +35,7 @@ from fiatlight.fiat_core.primitives_gui import (
     StrWithGuiParams,
     StrEditType,
 )
+from fiatlight.fiat_core.explained_value_gui import edit_explained_value, make_explained_value_edit_callback
 
 
 __all__ = [
@@ -81,4 +82,7 @@ __all__ = [
     "StrWithGui",
     "StrWithGuiParams",
     "StrEditType",
+    # from explained_value_gui
+    "edit_explained_value",
+    "make_explained_value_edit_callback",
 ]

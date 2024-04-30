@@ -1,11 +1,5 @@
-from typing import Any, Callable, TypeAlias, TypeVar, Tuple, List
-
-
-# A type variable that represents a data type, included in a AnyDataWithGui object.
-DataType = TypeVar("DataType")
-
-# A type variable that represents a type that derives or implement AnyDataWithGui.
-GuiType = TypeVar("GuiType")
+from typing import Any, Callable, TypeAlias, Tuple, List
+from fiatlight.fiat_types.base_types import DataType
 
 
 Function: TypeAlias = Callable[..., Any]
