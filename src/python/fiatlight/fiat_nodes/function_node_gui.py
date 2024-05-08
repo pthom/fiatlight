@@ -81,9 +81,16 @@ class FunctionNodeGui:
         for i in range(self._function_node.function_with_gui.nb_outputs()):
             self._pins_output[i] = ed.PinId.create()
 
-        self._show_input_details = {
-            input_name: False for input_name in self._function_node.function_with_gui.all_inputs_names()
-        }
+        self._show_input_details = {}
+        for input_name in self._function_node.function_with_gui.all_inputs_names():
+            param = self._function_node.function_with_gui.param(input_name)
+            show_input_details = False
+            if not self._function_node.has_input_link(input_name):
+                has_default_value = param.default_value is not UnspecifiedValue
+                show_input_details = not has_default_value
+            self._show_input_details[input_name] = show_input_details
+            # self._show_input_details[input_name] = False
+
         self._show_output_details = {i: True for i in range(self._function_node.function_with_gui.nb_outputs())}
 
         self._fill_function_doc()
