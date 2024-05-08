@@ -48,8 +48,12 @@ _OSD_TOOLTIP = _OsdTooltip()
 
 
 def set_widget_tooltip(tooltip: str) -> None:
+    is_in_editor = imgui_node_editor.get_current_editor() is not None
     if imgui.is_item_hovered(imgui.HoveredFlags_.delay_normal.value):
-        _OSD_TOOLTIP.set_tooltip_str(tooltip)
+        if is_in_editor:
+            _OSD_TOOLTIP.set_tooltip_str(tooltip)
+        else:
+            imgui.set_tooltip(tooltip)
 
 
 def set_tooltip(tooltip: str) -> None:
