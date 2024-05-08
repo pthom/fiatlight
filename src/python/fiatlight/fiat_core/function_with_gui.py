@@ -80,6 +80,7 @@ class FunctionWithGui:
     def __init__(
         self,
         fn: Callable[..., Any] | None,
+        fn_name: str | None = None,
         *,
         scope_storage: ScopeStorage | None = None,
         signature_string: str | None = None,
@@ -110,9 +111,11 @@ class FunctionWithGui:
         self._inputs_with_gui = []
         self._outputs_with_gui = []
         self._f_impl = fn
+        self.name = fn_name or ""
 
         if fn is not None:
-            self.name = fn.__name__
+            if self.name == "":
+                self.name = fn.__name__
             if scope_storage is None:
                 scope_storage = _capture_scope_back_1()
             _add_input_outputs_to_function_with_gui_globals_locals_captured(

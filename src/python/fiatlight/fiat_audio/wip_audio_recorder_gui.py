@@ -25,8 +25,7 @@ class AudioRecorderGui(FunctionWithGui):
     _shall_append: bool = False
 
     def __init__(self) -> None:
-        super().__init__(self._f)
-        self.name = "AudioRecorderGui"
+        super().__init__(self._f, "AudioRecorderGui")
         self.internal_state_gui = self._internal_gui
 
     def _f(self, sound_blocks_list: SoundBlocksList) -> SoundWave | None:
