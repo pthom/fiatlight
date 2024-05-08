@@ -408,11 +408,12 @@ class StrWithGui(AnyDataWithGui[str]):
                     if imgui.button(icons_fontawesome_6.ICON_FA_BARS):
                         self.params.versatile_edit_as_multiline = True
                     fiat_osd.set_widget_tooltip("Edit in popup (multiline)")
-        else:
-            # self.callbacks.edit_popup_required = True
+        else:  # present_multiline
             assert isinstance(self.value, str)
             size = ImVec2(0, 0)
-            size.x = imgui.get_window_width()
+            size.x = imgui.get_window_width() - hello_imgui.em_size(1)
+            size.y = imgui.get_window_height() - hello_imgui.em_size(5)
+
             changed, self.value = imgui.input_text_multiline(
                 self.params.label,
                 self.value,
