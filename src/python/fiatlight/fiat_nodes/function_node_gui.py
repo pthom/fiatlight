@@ -219,6 +219,9 @@ class FunctionNodeGui:
     def _draw_title(self, unique_name: str) -> None:
         fn_name = self._function_node.function_with_gui.name
         imgui.text(fn_name)
+        if self._has_doc():
+            imgui.text(icons_fontawesome_6.ICON_FA_CIRCLE_INFO)
+            fiat_osd.set_widget_tooltip(self._function_doc.title)
         if unique_name != fn_name:
             imgui.text(f" (id: {unique_name})")
 
