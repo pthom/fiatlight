@@ -220,14 +220,14 @@ class FooWithGui(AnyDataWithGui[Foo]):
 
 def sandbox() -> None:
     # Register the Foo type with its GUI implementation (do this once at the beginning of your program)
-    from fiatlight import gui_factories, FunctionWithGui
+    import fiatlight
 
-    gui_factories().register_type(Foo, FooWithGui)
+    fiatlight.register_type(Foo, FooWithGui)
 
     def fn_using_foo(foo: Foo) -> int:
         return foo.x
 
-    fn_using_foo_with_gui = FunctionWithGui(fn_using_foo)
+    fn_using_foo_with_gui = fiatlight.FunctionWithGui(fn_using_foo)
     fn_input_gui = fn_using_foo_with_gui.input("foo")
     assert isinstance(fn_input_gui, FooWithGui)
 

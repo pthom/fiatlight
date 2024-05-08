@@ -74,7 +74,7 @@ Image = Union[ImageU8, ImageFloat]
 
 
 def _register_image_type_factories() -> None:
-    from fiatlight.fiat_core import gui_factories
+    from fiatlight.fiat_core.to_gui import gui_factories
     from fiatlight.fiat_image.image_gui import ImageChannelsWithGui, ImageWithGui
 
     prefix = "fiatlight.fiat_image.image_types.Image"

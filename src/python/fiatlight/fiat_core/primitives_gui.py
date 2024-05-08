@@ -591,45 +591,45 @@ class ColorRgbaWithGui(AnyDataWithGui[ColorRgba]):
 #                               Register all types
 ########################################################################################################################
 def __register_file_paths_types() -> None:
-    from fiatlight.fiat_core.to_gui import gui_factories
+    from fiatlight.fiat_core.to_gui import register_type
     from fiatlight.fiat_types import FilePath, TextPath, ImagePath, AudioPath, VideoPath
 
-    gui_factories().register_type(FilePath, FilePathWithGui)
-    gui_factories().register_type(TextPath, TextPathWithGui)
-    gui_factories().register_type(ImagePath, ImagePathWithGui)
-    gui_factories().register_type(AudioPath, AudioPathWithGui)
-    gui_factories().register_type(VideoPath, VideoPathWithGui)
+    register_type(FilePath, FilePathWithGui)
+    register_type(TextPath, TextPathWithGui)
+    register_type(ImagePath, ImagePathWithGui)
+    register_type(AudioPath, AudioPathWithGui)
+    register_type(VideoPath, VideoPathWithGui)
 
 
 def __register_python_types() -> None:
-    from fiatlight.fiat_core.to_gui import gui_factories
+    from fiatlight.fiat_core.to_gui import register_type
 
-    gui_factories().register_type(int, IntWithGui)
-    gui_factories().register_type(float, FloatWithGui)
-    gui_factories().register_type(str, StrWithGui)
-    gui_factories().register_type(bool, BoolWithGui)
+    register_type(int, IntWithGui)
+    register_type(float, FloatWithGui)
+    register_type(str, StrWithGui)
+    register_type(bool, BoolWithGui)
 
 
 def __register_color_types() -> None:
-    from fiatlight.fiat_core.to_gui import gui_factories
+    from fiatlight.fiat_core.to_gui import register_type
 
-    gui_factories().register_type(ColorRgb, ColorRgbWithGui)
-    gui_factories().register_type(ColorRgba, ColorRgbaWithGui)
+    register_type(ColorRgb, ColorRgbWithGui)
+    register_type(ColorRgba, ColorRgbaWithGui)
 
 
 def __register_custom_float_types() -> None:
-    from fiatlight.fiat_core.to_gui import gui_factories
+    from fiatlight.fiat_core.to_gui import register_type
     from fiatlight.fiat_types import PositiveFloat
 
-    gui_factories().register_type(PositiveFloat, make_positive_float_with_gui)
+    register_type(PositiveFloat, make_positive_float_with_gui)
 
 
 def _register_custom_str_types() -> None:
-    from fiatlight.fiat_core.to_gui import gui_factories
+    from fiatlight.fiat_core.to_gui import register_type
     from fiatlight.fiat_types.str_types import Prompt, StrMultiline
 
-    gui_factories().register_type(Prompt, PromptWithGui)
-    gui_factories().register_type(StrMultiline, StrMultilineWithGui)
+    register_type(Prompt, PromptWithGui)
+    register_type(StrMultiline, StrMultilineWithGui)
 
 
 def _register_all_primitive_types() -> None:
