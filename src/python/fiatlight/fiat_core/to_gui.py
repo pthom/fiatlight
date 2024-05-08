@@ -298,65 +298,6 @@ def _add_input_outputs_to_function_with_gui_globals_locals_captured(
                 function_with_gui._outputs_with_gui.append(OutputWithGui(output_with_gui))
 
 
-def to_function_with_gui(f: Callable[..., Any], signature_string: str | None = None) -> FunctionWithGui:
-    """Create a FunctionWithGui from a function.
-
-    :param f: the function for which we want to create a FunctionWithGui
-    :param signature_string: (advanced) a string representing the signature of the function
-                             used when the function signature cannot be retrieved automatically
-    :return: a FunctionWithGui instance that wraps the function.
-
-    Note: This function will capture the locals and globals of the caller to be able to evaluate the types.
-          Make sure to call this function *from the module where the function and its input/output types are defined*
-    """
-    globals_dict, locals_dict = _capture_caller_globals_locals()
-    r = to_function_with_gui_globals_local_captured(
-        f, globals_dict=globals_dict, locals_dict=locals_dict, signature_string=signature_string
-    )
-    return r
-
-
-def to_function_with_gui_factory(f: Callable[..., Any], signature_string: str | None = None) -> FunctionWithGuiFactory:
-    def factory() -> FunctionWithGui:
-        return to_function_with_gui(f, signature_string=signature_string)
-
-    return factory
-
-
-def to_function_with_gui_globals_local_captured(
-    f: Callable[..., Any],
-    *,
-    globals_dict: GlobalsDict,
-    locals_dict: LocalsDict,
-    signature_string: str | None = None,
-) -> FunctionWithGui:
-    """Create a FunctionWithGui from a function.
-
-    :param f: the function for which we want to create a FunctionWithGui
-    :param globals_dict: the globals dictionary of the module where the function is defined
-    :param locals_dict: the locals dictionary of the module where the function is defined
-    :param signature_string: (advanced) a string representing the signature of the function
-    :return: a FunctionWithGui instance that wraps the function.
-    """
-
-    function_with_gui = FunctionWithGui.create_empty()
-    function_with_gui.name = f.__name__
-    function_with_gui._f_impl = f
-
-    #
-    # Customization by adding attributes to the function
-    #
-    if hasattr(f, "invoke_manually"):
-        function_with_gui.invoke_manually = f.invoke_manually
-    if hasattr(f, "invoke_async"):
-        function_with_gui.invoke_async = f.invoke_async
-
-    _add_input_outputs_to_function_with_gui_globals_locals_captured(
-        function_with_gui, globals_dict=globals_dict, locals_dict=locals_dict, signature_string=signature_string
-    )
-    return function_with_gui
-
-
 # ----------------------------------------------------------------------------------------------------------------------
 #       all to gui
 # ----------------------------------------------------------------------------------------------------------------------
@@ -417,10 +358,12 @@ class GuiFactories:
         def matcher_function(tested_typename: Typename) -> bool:
             return full_typename == tested_typename or full_typename_no_class == tested_typename
 
-        msg = f"register_type: {full_typename}"
-        if len(full_typename_no_class) > 0:
-            msg += f" (no class: {full_typename_no_class})"
-        logging.debug(msg)
+        debug = False
+        if debug:
+            msg = f"register_type: {full_typename}"
+            if len(full_typename_no_class) > 0:
+                msg += f" (no class: {full_typename_no_class})"
+            logging.debug(msg)
         self.register_matcher_factory(matcher_function, factory)
 
     def register_factory_name_start_with(self, typename_prefix: Typename, factory: GuiFactory[Any]) -> None:

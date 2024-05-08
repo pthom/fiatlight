@@ -1,5 +1,5 @@
 from fiatlight.fiat_config import get_fiat_config
-from fiatlight.fiat_types import UnspecifiedValue, ErrorValue, JsonDict, GuiType
+from fiatlight.fiat_types import UnspecifiedValue, ErrorValue, JsonDict, GuiType, GlobalsDict, LocalsDict
 from fiatlight.fiat_core.any_data_with_gui import AnyDataWithGui
 from fiatlight.fiat_types.function_types import BoolFunction
 from fiatlight.fiat_core.param_with_gui import ParamWithGui, ParamKind
@@ -77,7 +77,32 @@ class FunctionWithGui:
     #        Construction
     #  input_with_gui and output_with_gui should be filled soon after construction
     # --------------------------------------------------------------------------------------------
-    def __init__(self, fn: Callable[..., Any] | None) -> None:
+    def __init__(
+        self,
+        fn: Callable[..., Any] | None,
+        *,
+        globals_dict: GlobalsDict | None = None,
+        locals_dict: LocalsDict | None = None,
+        signature_string: str | None = None,
+    ) -> None:
+        """Create a FunctionWithGui object, with the given function as implementation
+
+        The function signature is automatically parsed, and the inputs and outputs are created
+        with the correct GUI types.
+
+        :param fn: the function for which we want to create a FunctionWithGui
+
+        Note: This function will capture the locals and globals of the caller to be able to evaluate the types.
+        Make sure to call this function *from the module where the function and its input/output types are defined*
+
+        Advanced parameters:
+        ********************
+        :param globals_dict, locals_dict: the globals/locals dictionary of the module where the function is defined
+                                          (if not provided, they are captured automatically)
+
+        :param signature_string: a string representing the signature of the function
+                                 used when the function signature cannot be retrieved automatically
+        """
         from fiatlight.fiat_core.to_gui import (
             _add_input_outputs_to_function_with_gui_globals_locals_captured,
             _capture_caller_globals_locals,
@@ -88,10 +113,20 @@ class FunctionWithGui:
         self._f_impl = fn
 
         if fn is not None:
-            globals_dict, locals_dict = _capture_caller_globals_locals()
+            self.name = fn.__name__
+            if globals_dict is None or locals_dict is None:
+                globals_dict, locals_dict = _capture_caller_globals_locals()
             _add_input_outputs_to_function_with_gui_globals_locals_captured(
-                self, globals_dict=globals_dict, locals_dict=locals_dict
+                self, globals_dict=globals_dict, locals_dict=locals_dict, signature_string=signature_string
             )
+
+            #
+            # Customization by adding attributes to the function
+            #
+            if hasattr(fn, "invoke_manually"):
+                self.invoke_manually = fn.invoke_manually
+            if hasattr(fn, "invoke_async"):
+                self.invoke_async = fn.invoke_async
 
     @staticmethod
     def create_empty() -> "FunctionWithGui":

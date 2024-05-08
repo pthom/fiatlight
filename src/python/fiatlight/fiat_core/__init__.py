@@ -10,11 +10,9 @@ from fiatlight.fiat_core.function_with_gui import (
     FunctionWithGuiFactoryFromName,
 )
 from fiatlight.fiat_core.to_gui import (
-    to_function_with_gui,
     gui_factories,
     GuiFactory,
     FunctionWithGuiFactory,
-    to_function_with_gui_factory,
 )
 from fiatlight.fiat_core.function_node import FunctionNode, FunctionNodeLink
 from fiatlight.fiat_core.functions_graph import FunctionsGraph
@@ -54,8 +52,6 @@ __all__ = [
     # from output_with_gui
     "OutputWithGui",
     # from to_gui
-    "to_function_with_gui",
-    "to_function_with_gui_factory",
     "gui_factories",
     "GuiFactory",
     "FunctionWithGuiFactory",

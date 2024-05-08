@@ -3,7 +3,7 @@ import copy
 from fiatlight.fiat_core.function_with_gui import FunctionWithGui, FunctionWithGuiFactoryFromName
 from fiatlight.fiat_core.function_node import FunctionNode, FunctionNodeLink
 from fiatlight.fiat_types import Function, JsonDict, GlobalsDict, LocalsDict
-from fiatlight.fiat_core.to_gui import _capture_caller_globals_locals, to_function_with_gui_globals_local_captured
+from fiatlight.fiat_core.to_gui import _capture_caller_globals_locals
 
 from typing import Sequence, Dict, Tuple, Set, List
 
@@ -105,7 +105,7 @@ class FunctionsGraph:
         globals_dict: GlobalsDict,
         locals_dict: LocalsDict,
     ) -> FunctionNode:
-        f_gui = to_function_with_gui_globals_local_captured(f, globals_dict=globals_dict, locals_dict=locals_dict)
+        f_gui = FunctionWithGui(f, globals_dict=globals_dict, locals_dict=locals_dict)
         return self._add_function_with_gui(f_gui)
 
     @staticmethod
