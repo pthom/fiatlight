@@ -1,6 +1,8 @@
 from fiatlight.fiat_nodes.function_node_gui import FunctionNodeGui
 from fiatlight.fiat_nodes.functions_graph_gui import FunctionsGraphGui
 from fiatlight.fiat_core import FunctionsGraph, FunctionWithGui
+from fiatlight.fiat_core.to_gui import _capture_scope_back_1
+from fiatlight.fiat_types.base_types import ScopeStorage
 from fiatlight.fiat_widgets import fontawesome_6_ctx, icons_fontawesome_6, fiat_osd
 from fiatlight.fiat_utils import functional_utils
 from fiatlight.fiat_core.fiat_exception import FiatDisplayedException
@@ -533,11 +535,21 @@ def fiat_run_graph(functions_graph: FunctionsGraph, params: FiatGuiParams | None
 AnyFunction = Callable[..., Any]
 
 
-def fiat_run(fn: AnyFunction | FunctionWithGui, params: FiatGuiParams | None = None) -> None:
-    functions_graph = FunctionsGraph.from_function(fn)
+def fiat_run(
+    fn: AnyFunction | FunctionWithGui, params: FiatGuiParams | None = None, scope_storage: ScopeStorage | None = None
+) -> None:
+    if scope_storage is None:
+        scope_storage = _capture_scope_back_1()
+    functions_graph = FunctionsGraph.from_function(fn, scope_storage)
     fiat_run_graph(functions_graph, params)
 
 
-def fiat_run_composition(composition: List[AnyFunction | FunctionWithGui], params: FiatGuiParams | None = None) -> None:
-    functions_graph = FunctionsGraph.from_function_composition(composition)
+def fiat_run_composition(
+    composition: List[AnyFunction | FunctionWithGui],
+    params: FiatGuiParams | None = None,
+    scope_storage: ScopeStorage | None = None,
+) -> None:
+    if scope_storage is None:
+        scope_storage = _capture_scope_back_1()
+    functions_graph = FunctionsGraph.from_function_composition(composition, scope_storage)
     fiat_run_graph(functions_graph, params)

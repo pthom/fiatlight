@@ -1,5 +1,5 @@
 from fiatlight.fiat_config import get_fiat_config
-from fiatlight.fiat_types import UnspecifiedValue, ErrorValue, JsonDict, GuiType, GlobalsDict, LocalsDict
+from fiatlight.fiat_types import UnspecifiedValue, ErrorValue, JsonDict, GuiType, ScopeStorage
 from fiatlight.fiat_core.any_data_with_gui import AnyDataWithGui
 from fiatlight.fiat_types.function_types import BoolFunction
 from fiatlight.fiat_core.param_with_gui import ParamWithGui, ParamKind
@@ -81,8 +81,7 @@ class FunctionWithGui:
         self,
         fn: Callable[..., Any] | None,
         *,
-        globals_dict: GlobalsDict | None = None,
-        locals_dict: LocalsDict | None = None,
+        scope_storage: ScopeStorage | None = None,
         signature_string: str | None = None,
     ) -> None:
         """Create a FunctionWithGui object, with the given function as implementation
@@ -105,7 +104,7 @@ class FunctionWithGui:
         """
         from fiatlight.fiat_core.to_gui import (
             _add_input_outputs_to_function_with_gui_globals_locals_captured,
-            _capture_caller_globals_locals,
+            _capture_scope_back_1,
         )
 
         self._inputs_with_gui = []
@@ -114,10 +113,10 @@ class FunctionWithGui:
 
         if fn is not None:
             self.name = fn.__name__
-            if globals_dict is None or locals_dict is None:
-                globals_dict, locals_dict = _capture_caller_globals_locals()
+            if scope_storage is None:
+                scope_storage = _capture_scope_back_1()
             _add_input_outputs_to_function_with_gui_globals_locals_captured(
-                self, globals_dict=globals_dict, locals_dict=locals_dict, signature_string=signature_string
+                self, scope_storage=scope_storage, signature_string=signature_string
             )
 
             #

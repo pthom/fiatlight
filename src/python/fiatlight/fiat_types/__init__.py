@@ -16,8 +16,7 @@ from fiatlight.fiat_types.base_types import (
     JsonDict,
     JsonPrimitive,
     JsonPrimitiveOrDict,
-    GlobalsDict,
-    LocalsDict,
+    ScopeStorage,
 )
 from fiatlight.fiat_types.fiat_number_types import (
     FloatInterval,
@@ -70,8 +69,7 @@ __all__ = [
     "JsonDict",
     "JsonPrimitive",
     "JsonPrimitiveOrDict",
-    "GlobalsDict",
-    "LocalsDict",
+    "ScopeStorage",
     "ExplainedValue",
     "ExplainedValues",
     # from fiat_number_types
