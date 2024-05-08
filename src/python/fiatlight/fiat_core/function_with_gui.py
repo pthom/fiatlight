@@ -1,5 +1,5 @@
 from fiatlight.fiat_config import get_fiat_config
-from fiatlight.fiat_types import UnspecifiedValue, ErrorValue, Unspecified, JsonDict, GuiType
+from fiatlight.fiat_types import UnspecifiedValue, ErrorValue, JsonDict, GuiType
 from fiatlight.fiat_core.any_data_with_gui import AnyDataWithGui
 from fiatlight.fiat_types.function_types import BoolFunction
 from fiatlight.fiat_core.param_with_gui import ParamWithGui, ParamKind
@@ -77,26 +77,42 @@ class FunctionWithGui:
     #        Construction
     #  input_with_gui and output_with_gui should be filled soon after construction
     # --------------------------------------------------------------------------------------------
-    def __init__(self, fn: Callable[..., Any] | None = None) -> None:
+    def __init__(self, fn: Callable[..., Any] | None) -> None:
+        from fiatlight.fiat_core.to_gui import (
+            _add_input_outputs_to_function_with_gui_globals_locals_captured,
+            _capture_caller_globals_locals,
+        )
+
         self._inputs_with_gui = []
         self._outputs_with_gui = []
         self._f_impl = fn
 
-    def add_param(
-        self,
-        name: str,
-        data_with_gui: AnyDataWithGui[Any],
-        default_value: Any | Unspecified = UnspecifiedValue,
-        param_kind: ParamKind = ParamKind.PositionalOrKeyword,
-    ) -> None:
-        """For manual construction of the function, add a parameter to the function"""
-        self._inputs_with_gui.append(ParamWithGui(name, data_with_gui, param_kind, default_value))
+        if fn is not None:
+            globals_dict, locals_dict = _capture_caller_globals_locals()
+            _add_input_outputs_to_function_with_gui_globals_locals_captured(
+                self, globals_dict=globals_dict, locals_dict=locals_dict
+            )
 
-    def add_output(self, data_with_gui: AnyDataWithGui[Any] | None = None) -> None:
-        """For manual construction of the function, add an output to the function"""
-        if data_with_gui is None:
-            data_with_gui = AnyDataWithGui()
-        self._outputs_with_gui.append(OutputWithGui(data_with_gui))
+    @staticmethod
+    def create_empty() -> "FunctionWithGui":
+        r = FunctionWithGui(None)
+        return r
+
+    # def add_param(
+    #     self,
+    #     name: str,
+    #     data_with_gui: AnyDataWithGui[Any],
+    #     default_value: Any | Unspecified = UnspecifiedValue,
+    #     param_kind: ParamKind = ParamKind.PositionalOrKeyword,
+    # ) -> None:
+    #     """For manual construction of the function, add a parameter to the function"""
+    #     self._inputs_with_gui.append(ParamWithGui(name, data_with_gui, param_kind, default_value))
+    #
+    # def add_output(self, data_with_gui: AnyDataWithGui[Any] | None = None) -> None:
+    #     """For manual construction of the function, add an output to the function"""
+    #     if data_with_gui is None:
+    #         data_with_gui = AnyDataWithGui()
+    #     self._outputs_with_gui.append(OutputWithGui(data_with_gui))
 
     def set_invoke_live(self) -> None:
         """Set flags to make this a live function (called automatically at each frame)"""

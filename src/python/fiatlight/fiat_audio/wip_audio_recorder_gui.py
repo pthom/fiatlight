@@ -1,8 +1,5 @@
 import logging
 
-import fiatlight.fiat_core.composite_gui
-from fiatlight.fiat_audio.audio_types_gui import SoundBlocksListGui
-from fiatlight.fiat_audio.sound_wave_player_gui import SoundWavePlayerGui
 from fiatlight.fiat_core.function_with_gui import FunctionWithGui
 from fiatlight.fiat_audio.audio_types import SoundWave, SoundBlocksList
 from fiatlight.fiat_widgets import icons_fontawesome_6, fontawesome_6_ctx
@@ -31,11 +28,6 @@ class AudioRecorderGui(FunctionWithGui):
         super().__init__(self._f)
         self.name = "AudioRecorderGui"
         self.internal_state_gui = self._internal_gui
-
-        # Input and output GUI
-        self.add_param("sound_blocks_list", SoundBlocksListGui())
-        output_gui = fiatlight.fiat_core.composite_gui.OptionalWithGui(SoundWavePlayerGui())
-        self.add_output(output_gui)
 
     def _f(self, sound_blocks_list: SoundBlocksList) -> SoundWave | None:
         """This is the function in itself.

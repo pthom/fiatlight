@@ -1,4 +1,3 @@
-from fiatlight.fiat_audio.audio_types_gui import SoundBlocksListGui
 from fiatlight.fiat_audio.audio_types import SoundBlocksList, SoundBlock
 from fiatlight.fiat_core.function_with_gui import FunctionWithGui
 from fiatlight.fiat_audio.wip_audio_provider import AudioProvider
@@ -63,9 +62,6 @@ class AudioProviderGui(FunctionWithGui, ABC):
 
         # Initialize the live sound block plot
         self._live_sound_block_plot_gui = _LiveSoundBlockPlotGui()
-
-        # Add output GUI
-        self.add_output(SoundBlocksListGui())
 
     def f(self) -> SoundBlocksList:
         return self._sound_blocks_list

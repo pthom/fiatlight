@@ -190,7 +190,7 @@ def present_float1_arrays_as_plot() -> None:
     """
     from fiatlight.fiat_core import gui_factories
 
-    gui_factories().register_factory("fiatlight.fiat_array.array_types.FloatMatrix_Dim1", SimplePlotGui)
+    gui_factories().register_type(FloatMatrix_Dim1, SimplePlotGui)
 
 
 def present_float2_arrays_as_plot() -> None:
@@ -199,4 +199,4 @@ def present_float2_arrays_as_plot() -> None:
     """
     from fiatlight.fiat_core import gui_factories
 
-    gui_factories().register_factory("fiatlight.fiat_array.array_types.FloatMatrix_Dim2", SimplePlotGui)
+    gui_factories().register_type(FloatMatrix_Dim2, SimplePlotGui)

@@ -13,7 +13,7 @@ import os
 # A synonym for int, but with a font size, between 20 and 100
 # (this will create a slider in the GUI)
 FontSize = NewType("FontSize", int)
-fiatlight.gui_factories().register_bound_int((5, 200), "FontSize")
+fiatlight.gui_factories().register_bound_int(FontSize, (5, 200))
 
 
 class MemeFont(Enum):

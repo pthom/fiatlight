@@ -191,3 +191,16 @@ def _optional_cv_color_conversion_code_between(type1: ColorType, type2: ColorTyp
         return conversions[type2]
 
     return None
+
+
+def sandbox() -> None:
+    def f(c: ColorType) -> None:
+        pass
+
+    import fiatlight
+
+    fiatlight.fiat_run(f)
+
+
+if __name__ == "__main__":
+    sandbox()

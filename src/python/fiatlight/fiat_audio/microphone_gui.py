@@ -1,6 +1,5 @@
 import numpy as np
 
-from fiatlight.fiat_audio.sound_wave_player_gui import SoundWavePlayerGui
 from fiatlight.fiat_core import AnyDataWithGui, FunctionWithGui
 from fiatlight.fiat_audio.microphone_io import MicrophoneParams, MicrophoneIo
 from fiatlight.fiat_audio.audio_types_gui import SampleRateGui, BlockSizeGui
@@ -86,8 +85,6 @@ class MicrophoneGui(FunctionWithGui):
         self._displayed_sound_block = None
         self._sound_wave_being_recorded = None
         self._live_plot_size_em = ImVec2(20, 10)
-
-        self.add_output(SoundWavePlayerGui())
 
     def _f(self) -> SoundWave:
         assert self._sound_wave is not None
@@ -184,8 +181,7 @@ class MicrophoneGui(FunctionWithGui):
 def register_microphone_params_gui() -> None:
     from fiatlight.fiat_core import gui_factories
 
-    prefix = "fiatlight.fiat_audio."
-    gui_factories().register_factory(prefix + "microphone_io.MicrophoneParams", MicrophoneParamsGui)
+    gui_factories().register_type(MicrophoneParams, MicrophoneParamsGui)
 
 
 def sandbox_microphone_params() -> None:

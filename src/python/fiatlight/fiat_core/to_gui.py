@@ -1,3 +1,4 @@
+import typing
 from dataclasses import dataclass
 
 from fiatlight.fiat_types import UnspecifiedValue, DataType, GlobalsDict, LocalsDict
@@ -105,11 +106,15 @@ def _any_type_class_name_to_gui(
     type_class_name: str, *, globals_dict: GlobalsDict, locals_dict: LocalsDict
 ) -> AnyDataWithGui[Any]:
     # logging.warning(f"any_typeclass_to_gui: {type_class_name}")
-    if type_class_name.startswith("<class '") and type_class_name.endswith("'>"):
-        type_class_name = type_class_name[8:-2]
-
     if gui_factories().can_handle_typename(type_class_name):
         return gui_factories().factor(type_class_name)
+
+    # Remove the "<class '" and "'>", and retry
+    # (this is suspicious)
+    if type_class_name.startswith("<class '") and type_class_name.endswith("'>"):
+        type_class_name = type_class_name[8:-2]
+        if gui_factories().can_handle_typename(type_class_name):
+            return gui_factories().factor(type_class_name)
 
     is_optional, type_class_name = _extract_optional_typeclass(type_class_name)
     is_enum, type_class_name = _extract_enum_typeclass(type_class_name, globals_dict, locals_dict)
@@ -227,6 +232,72 @@ def _capture_caller_globals_locals() -> tuple[GlobalsDict, LocalsDict]:
     return globals_dict, locals_dict
 
 
+def _get_calling_module_name() -> str:
+    """Get the name of the module where the function is called from.
+    This is useful to register the types in the correct module.
+    This function is private to this module
+    """
+    stack = inspect.stack()
+    assert len(stack) >= 3
+    # stack[0] is the current frame (here)
+    # stack[1] is the caller frame (a function in this module)
+    # stack[2] is the original caller frame (the module where the function is called from)
+    caller_frame = stack[2]
+
+    # 'frame' is a Frame object, and from it, you can access the module object
+    module = inspect.getmodule(caller_frame[0])
+    if module:
+        return module.__name__
+    else:
+        raise ValueError("No module found")
+
+
+def add_input_outputs_to_function_with_gui(function_with_gui: FunctionWithGui) -> None:
+    """Add the inputs and outputs to a FunctionWithGui instance.
+
+    This function will capture the locals and globals of the caller to be able to evaluate the types.
+    Make sure to call this function *from the module where the function and its input/output types are defined*
+    """
+    globals_dict, locals_dict = _capture_caller_globals_locals()
+    _add_input_outputs_to_function_with_gui_globals_locals_captured(
+        function_with_gui, globals_dict=globals_dict, locals_dict=locals_dict
+    )
+
+
+def _add_input_outputs_to_function_with_gui_globals_locals_captured(
+    function_with_gui: FunctionWithGui,
+    *,
+    globals_dict: GlobalsDict,
+    locals_dict: LocalsDict,
+    signature_string: str | None = None,
+) -> None:
+    f = function_with_gui._f_impl  # noqa
+    assert f is not None
+    try:
+        sig = get_function_signature(f, signature_string=signature_string)
+    except ValueError as e:
+        raise ValueError(f"Failed to get the signature of the function {f.__name__}") from e
+
+    params = sig.parameters
+    for name, param in params.items():
+        function_with_gui._inputs_with_gui.append(
+            _to_param_with_gui(name, param, globals_dict=globals_dict, locals_dict=locals_dict)
+        )
+
+    return_annotation = sig.return_annotation
+    if return_annotation is inspect.Parameter.empty:
+        output_with_gui = AnyDataWithGui.make_for_any()
+        function_with_gui._outputs_with_gui.append(OutputWithGui(output_with_gui))
+    else:
+        return_annotation_str = str(return_annotation)
+        if return_annotation_str != "None":
+            outputs_with_guis = _any_typeclass_to_gui_split_if_tuple(
+                return_annotation_str, globals_dict=globals_dict, locals_dict=locals_dict
+            )
+            for output_with_gui in outputs_with_guis:
+                function_with_gui._outputs_with_gui.append(OutputWithGui(output_with_gui))
+
+
 def to_function_with_gui(f: Callable[..., Any], signature_string: str | None = None) -> FunctionWithGui:
     """Create a FunctionWithGui from a function.
 
@@ -268,7 +339,7 @@ def to_function_with_gui_globals_local_captured(
     :return: a FunctionWithGui instance that wraps the function.
     """
 
-    function_with_gui = FunctionWithGui()
+    function_with_gui = FunctionWithGui.create_empty()
     function_with_gui.name = f.__name__
     function_with_gui._f_impl = f
 
@@ -280,29 +351,9 @@ def to_function_with_gui_globals_local_captured(
     if hasattr(f, "invoke_async"):
         function_with_gui.invoke_async = f.invoke_async
 
-    try:
-        sig = get_function_signature(f, signature_string=signature_string)
-    except ValueError as e:
-        raise ValueError(f"Failed to get the signature of the function {f.__name__}") from e
-
-    params = sig.parameters
-    for name, param in params.items():
-        function_with_gui._inputs_with_gui.append(
-            _to_param_with_gui(name, param, globals_dict=globals_dict, locals_dict=locals_dict)
-        )
-
-    return_annotation = sig.return_annotation
-    if return_annotation is inspect.Parameter.empty:
-        output_with_gui = AnyDataWithGui.make_for_any()
-        function_with_gui._outputs_with_gui.append(OutputWithGui(output_with_gui))
-    else:
-        return_annotation_str = str(return_annotation)
-        if return_annotation_str != "None":
-            outputs_with_guis = _any_typeclass_to_gui_split_if_tuple(
-                return_annotation_str, globals_dict=globals_dict, locals_dict=locals_dict
-            )
-            for output_with_gui in outputs_with_guis:
-                function_with_gui._outputs_with_gui.append(OutputWithGui(output_with_gui))
+    _add_input_outputs_to_function_with_gui_globals_locals_captured(
+        function_with_gui, globals_dict=globals_dict, locals_dict=locals_dict, signature_string=signature_string
+    )
     return function_with_gui
 
 
@@ -357,11 +408,20 @@ class GuiFactories:
                 return factory.gui_factory
         raise ValueError(f"No factory found for typename {typename}")
 
-    def register_factory(self, typename: Typename, factory: GuiFactory[Any]) -> None:
-        def matcher_function(tested_typename: Typename) -> bool:
-            return typename == tested_typename
+    def register_type(self, type_: typing.Type[Any], factory: GuiFactory[Any]) -> None:
+        full_typename = str(type_)
+        full_typename_no_class = ""
+        if full_typename.startswith("<class '") and full_typename.endswith("'>"):
+            full_typename_no_class = full_typename[8:-2]
 
-        self._factories.append(self._GuiFactoryWithMatcher(matcher_function, factory))
+        def matcher_function(tested_typename: Typename) -> bool:
+            return full_typename == tested_typename or full_typename_no_class == tested_typename
+
+        msg = f"register_type: {full_typename}"
+        if len(full_typename_no_class) > 0:
+            msg += f" (no class: {full_typename_no_class})"
+        logging.debug(msg)
+        self.register_matcher_factory(matcher_function, factory)
 
     def register_factory_name_start_with(self, typename_prefix: Typename, factory: GuiFactory[Any]) -> None:
         def matcher_function(tested_typename: Typename) -> bool:
@@ -376,30 +436,12 @@ class GuiFactories:
         self._factories.append(self._GuiFactoryWithMatcher(matcher, factory))
 
     def register_enum(self, enum_class: type[Enum]) -> None:
-        enum_class_name = str(enum_class)
-
         def enum_gui_factory() -> EnumWithGui:
             return EnumWithGui(enum_class)
 
-        self.register_factory(enum_class_name, enum_gui_factory)
+        self.register_type(enum_class, enum_gui_factory)
 
-    def _get_calling_module_name(self) -> str:
-        frame = inspect.currentframe()
-        if frame is None:
-            raise ValueError("No current frame")
-        f_back = frame.f_back
-        if f_back is None:
-            raise ValueError("No frame back")
-        f_back_2 = f_back.f_back
-        if f_back_2 is None:
-            raise ValueError("No frame back")
-
-        calling_module: str = f_back_2.f_globals["__name__"]
-        return calling_module
-
-    def register_bound_float(
-        self, interval: FloatInterval, typename: Typename, use_calling_module_name: bool = True
-    ) -> None:
+    def register_bound_float(self, type_: typing.Type[Any], interval: FloatInterval) -> None:
         def factory() -> primitives_gui.FloatWithGui:
             r = primitives_gui.FloatWithGui()
             r.params.edit_type = primitives_gui.FloatEditType.slider
@@ -407,22 +449,17 @@ class GuiFactories:
             r.params.v_max = interval[1]
             return r
 
-        if use_calling_module_name:
-            typename = self._get_calling_module_name() + "." + typename
-        self.register_factory(typename, factory)
+        self.register_type(type_, factory)
 
-    def register_bound_int(
-        self, interval: IntInterval, typename: Typename, use_calling_module_name: bool = True
-    ) -> None:
+    def register_bound_int(self, type_: typing.Type[Any], interval: IntInterval) -> None:
         def factory() -> primitives_gui.IntWithGui:
             r = primitives_gui.IntWithGui()
+            r.params.edit_type = primitives_gui.IntEditType.slider
             r.params.v_min = interval[0]
             r.params.v_max = interval[1]
             return r
 
-        if use_calling_module_name:
-            typename = self._get_calling_module_name() + "." + typename
-        self.register_factory(typename, factory)
+        self.register_type(type_, factory)
 
     def factor(self, typename: Typename) -> AnyDataWithGui[Any]:
         return self.get_factory(typename)()

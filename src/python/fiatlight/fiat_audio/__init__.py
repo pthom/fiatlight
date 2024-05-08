@@ -8,8 +8,7 @@ def _register_gui_factories() -> None:
     from fiatlight.fiat_audio.sound_wave_player_gui import SoundWavePlayerGui
     from fiatlight.fiat_audio.audio_types_gui import register_audio_types_gui
 
-    prefix = "fiatlight.fiat_audio.audio_types."
-    gui_factories().register_factory(prefix + "SoundWave", SoundWavePlayerGui)
+    gui_factories().register_type(SoundWave, SoundWavePlayerGui)
     register_audio_types_gui()
 
 
