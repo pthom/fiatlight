@@ -137,7 +137,8 @@ class FloatEditType(Enum):
     input = 2
     drag = 3
     knob = 4
-    positive_float_slider = 5
+    slider_float_any_range = 5
+    slider_float_any_range_positive = 6
 
 
 @dataclass
@@ -147,7 +148,7 @@ class FloatWithGuiParams:
     v_max: float = 10.0
     format: str = "%.3f"
     width_em: float = 9
-    edit_type: FloatEditType = FloatEditType.slider
+    edit_type: FloatEditType = FloatEditType.slider_float_any_range
     # Specific to slider_float
     slider_flags: int = imgui.SliderFlags_.none.value
     # Specific to input_float
@@ -161,8 +162,9 @@ class FloatWithGuiParams:
     knob_variant: int = imgui_knobs.ImGuiKnobVariant_.tick.value
     knob_size_em: float = 2.5
     knob_steps: int = 0
-    # Specific to positive_float_slider
-    nb_significant_digits: int = -1
+    # Specific to slider_float_any_range
+    nb_significant_digits: int = 4
+    accept_negative: bool = True
 
 
 class FloatWithGui(AnyDataWithGui[float]):
@@ -226,12 +228,20 @@ class FloatWithGui(AnyDataWithGui[float]):
                 hello_imgui.em_size(self.params.knob_size_em),
                 self.params.knob_steps,
             )
-        elif self.params.edit_type == FloatEditType.positive_float_slider:
-            from fiatlight.fiat_widgets.float_widgets import slider_any_positive_float
+        elif (
+            self.params.edit_type == FloatEditType.slider_float_any_range
+            or self.params.edit_type == FloatEditType.slider_float_any_range_positive
+        ):
+            from fiatlight.fiat_widgets.float_widgets import slider_float_any_range
 
-            changed, self.value = slider_any_positive_float(
+            accept_negative = self.params.accept_negative
+            if self.params.edit_type == FloatEditType.slider_float_any_range_positive:
+                accept_negative = False
+
+            changed, self.value = slider_float_any_range(
                 self.params.label,
                 self.value,
+                accept_negative,
                 self.params.nb_significant_digits,
             )
 
@@ -239,7 +249,7 @@ class FloatWithGui(AnyDataWithGui[float]):
 
 
 def make_positive_float_with_gui() -> AnyDataWithGui[float]:
-    params = FloatWithGuiParams(edit_type=FloatEditType.positive_float_slider, nb_significant_digits=4)
+    params = FloatWithGuiParams(edit_type=FloatEditType.slider_float_any_range_positive, nb_significant_digits=4)
     r = FloatWithGui(params)
     return r
 
