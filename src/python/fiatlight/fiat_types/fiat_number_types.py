@@ -1,5 +1,4 @@
-from typing import NewType, Tuple, TypeAlias
-
+from typing import NewType, Tuple, TypeAlias, Type, Any
 
 FloatInterval: TypeAlias = Tuple[float, float]
 IntInterval: TypeAlias = Tuple[int, int]
@@ -55,32 +54,32 @@ def format_time_seconds_as_hh_mm_ss(time_seconds: TimeSeconds) -> str:
 def _register_bound_floats() -> None:
     from fiatlight.fiat_core.to_gui import gui_factories
 
-    float_intervals: dict[str, FloatInterval] = {
-        "Float_0_1": (0.0, 1.0),
-        "Float_0_2": (0.0, 2.0),
-        "Float_0_3": (0.0, 3.0),
-        "Float__1_1": (-1.0, 1.0),
-        "Float_0_10": (0.0, 10.0),
-        "Float_0_100": (0.0, 100.0),
-        "Float_0_1000": (0.0, 1000.0),
-        "Float_0_10000": (0.0, 10000.0),
+    float_intervals: dict[Type[Any], FloatInterval] = {
+        Float_0_1: (0.0, 1.0),
+        Float_0_2: (0.0, 2.0),
+        Float_0_3: (0.0, 3.0),
+        Float__1_1: (-1.0, 1.0),
+        Float_0_10: (0.0, 10.0),
+        Float_0_100: (0.0, 100.0),
+        Float_0_1000: (0.0, 1000.0),
+        Float_0_10000: (0.0, 10000.0),
     }
-    for name, interval in float_intervals.items():
-        gui_factories().register_bound_float(interval, name)
+    for type_, interval in float_intervals.items():
+        gui_factories().register_bound_float(type_, interval)
 
 
 def _register_bound_ints() -> None:
     from fiatlight.fiat_core.to_gui import gui_factories
 
-    int_intervals: dict[str, IntInterval] = {
-        "Int_0_10": (0, 10),
-        "Int_0_100": (0, 100),
-        "Int_0_255": (0, 255),
-        "Int_0_1000": (0, 1000),
-        "Int_0_10000": (0, 10000),
+    int_intervals: dict[Type[Any], IntInterval] = {
+        Int_0_10: (0, 10),
+        Int_0_100: (0, 100),
+        Int_0_255: (0, 255),
+        Int_0_1000: (0, 1000),
+        Int_0_10000: (0, 10000),
     }
-    for name, interval_int in int_intervals.items():
-        gui_factories().register_bound_int(interval_int, name)
+    for type_, interval_int in int_intervals.items():
+        gui_factories().register_bound_int(type_, interval_int)
 
 
 def _register_bound_numbers() -> None:

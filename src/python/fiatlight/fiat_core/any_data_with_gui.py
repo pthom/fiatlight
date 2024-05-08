@@ -222,7 +222,7 @@ def sandbox() -> None:
     # Register the Foo type with its GUI implementation (do this once at the beginning of your program)
     from fiatlight.fiat_core.to_gui import to_function_with_gui, gui_factories
 
-    gui_factories().register_factory("__main__.Foo", FooWithGui)
+    gui_factories().register_type(Foo, FooWithGui)
 
     def fn_using_foo(foo: Foo) -> int:
         return foo.x

@@ -81,4 +81,4 @@ def _register_image_type_factories() -> None:
     gui_factories().register_factory_name_start_with(prefix, ImageWithGui)
     gui_factories().register_factory_union(prefix, ImageWithGui)
 
-    gui_factories().register_factory("fiatlight.fiat_image.image_types.ChannelsImageU8", ImageChannelsWithGui)
+    gui_factories().register_type(ChannelsImageU8, ImageChannelsWithGui)

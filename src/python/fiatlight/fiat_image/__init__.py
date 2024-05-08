@@ -29,12 +29,12 @@ from fiatlight.fiat_image.lut_gui import LutParamsWithGui
 
 def _register_factories() -> None:
     from fiatlight.fiat_image.image_types import _register_image_type_factories
-    from fiatlight.fiat_core import gui_factories, composite_gui
+    from fiatlight.fiat_core import gui_factories
 
     _register_image_type_factories()
-    gui_factories().register_factory("ColorConversion", ColorConversionWithGui)
-    gui_factories().register_factory("ColorType", lambda: composite_gui.EnumWithGui(ColorType))
-    gui_factories().register_factory("fiatlight.fiat_image.lut.LutParams", LutParamsWithGui)
+    gui_factories().register_type(ColorConversion, ColorConversionWithGui)
+    gui_factories().register_type(LutParams, LutParamsWithGui)
+    gui_factories().register_enum(ColorType)
 
 
 _register_factories()

@@ -3,7 +3,6 @@
 from fiatlight.fiat_core.any_data_with_gui import AnyDataWithGui
 from fiatlight.fiat_core.function_with_gui import FunctionWithGui
 from fiatlight.fiat_audio.audio_types import SoundWave, SampleRate
-from fiatlight.fiat_audio.sound_wave_player_gui import SoundWavePlayerGui
 from fiatlight.fiat_audio import audio_functions
 from imgui_bundle import imgui, hello_imgui
 
@@ -43,8 +42,7 @@ class AudioRecordGui(FunctionWithGui):
         # And it should be called asynchronously, to avoid blocking the UI
         self.set_invoke_async()
 
-        self.add_param("params", AudioRecordParamsGui())
-        self.add_output(SoundWavePlayerGui())
+        self.param("params").data_with_gui = AudioRecordParamsGui()
 
     def _record_audio(self, params: AudioRecordParams) -> SoundWave:
         """Record audio from the microphone for a given duration and sample rate."""
