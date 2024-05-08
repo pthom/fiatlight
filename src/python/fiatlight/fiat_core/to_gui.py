@@ -402,6 +402,7 @@ class GuiFactories:
     ) -> None:
         def factory() -> primitives_gui.FloatWithGui:
             r = primitives_gui.FloatWithGui()
+            r.params.edit_type = primitives_gui.FloatEditType.slider
             r.params.v_min = interval[0]
             r.params.v_max = interval[1]
             return r

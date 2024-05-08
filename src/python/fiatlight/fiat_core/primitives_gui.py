@@ -149,12 +149,12 @@ class FloatWithGuiParams:
     v_max: float = 10.0
     format: str = "%.3f"
     width_em: float = 9
-    edit_type: FloatEditType = FloatEditType.slider_float_any_range
+    edit_type: FloatEditType = FloatEditType.input
     # Specific to slider_float
     slider_flags: int = imgui.SliderFlags_.none.value
     # Specific to input_float
-    input_step: float = 0.0
-    input_step_fast: float = 0.0
+    input_step: float = 0.1
+    input_step_fast: float = 1.0
     input_flags: int = imgui.InputTextFlags_.none.value
     # Specific to drag_float
     v_speed: float = 1.0
