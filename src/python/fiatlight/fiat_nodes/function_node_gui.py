@@ -1165,7 +1165,7 @@ class _FunctionDocElements:
 # Sandbox
 # ==================================================================================================================
 def sandbox() -> None:
-    from fiatlight.fiat_core import to_function_with_gui
+    import fiatlight
     from imgui_bundle import immapp
     from enum import Enum
 
@@ -1176,15 +1176,14 @@ def sandbox() -> None:
 
     def add(
         # a: int | None = None,
-        # e: MyEnum,
+        e: MyEnum = MyEnum.ONE,
         # x: int = 1,
         # y: int = 2,
         # s: str = "Hello",
     ) -> List[str]:
         return ["Hello", "World", "!"]
-        # return x + y + len(s) + e.value
 
-    function_with_gui = to_function_with_gui(add)
+    function_with_gui = fiatlight.FunctionWithGui(add)
     function_node = FunctionNode(function_with_gui)
     function_node_gui = FunctionNodeGui(function_node)
 

@@ -1,4 +1,5 @@
-from fiatlight.fiat_core import to_function_with_gui, AnyDataWithGui, FunctionWithGui, IntWithGui, OptionalWithGui
+import fiatlight
+from fiatlight.fiat_core import AnyDataWithGui, FunctionWithGui, IntWithGui, OptionalWithGui
 from fiatlight.fiat_core.to_gui import gui_factories
 from dataclasses import dataclass
 from typing import List, Optional
@@ -159,7 +160,7 @@ def test_with_list() -> None:
     def sum_list(x: List[int]) -> int:
         return sum(x)
 
-    sum_list_gui = to_function_with_gui(sum_list)
+    sum_list_gui = fiatlight.FunctionWithGui(sum_list)
     sum_list_gui._inputs_with_gui[0].data_with_gui.value = [1, 2, 3]
     sum_list_gui.invoke()
     assert sum_list_gui._outputs_with_gui[0].data_with_gui.value == 6

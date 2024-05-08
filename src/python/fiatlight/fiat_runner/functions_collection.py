@@ -4,7 +4,6 @@ from imgui_bundle import hello_imgui, imgui, imgui_ctx
 
 from fiatlight.fiat_core import FunctionWithGui, FunctionWithGuiFactory
 from fiatlight.fiat_widgets import fontawesome_6_ctx, icons_fontawesome_6
-from fiatlight.fiat_core.to_gui import to_function_with_gui
 from fiatlight.fiat_types import Function
 
 from typing import List, Callable, Any
@@ -32,7 +31,7 @@ class FunctionsCollection:
 
     def add_function(self, fn: Function, tags: List[str]) -> None:
         def factory() -> FunctionWithGui:
-            return to_function_with_gui(fn)
+            return FunctionWithGui(fn)
 
         self._add_function_factory(factory, tags)
 

@@ -39,7 +39,7 @@ def edit_n(n: int) -> Tuple[bool, int]:
 def main() -> None:
     import fiatlight
 
-    random_binomial_gui = fiatlight.to_function_with_gui(random_binomial)
+    random_binomial_gui = fiatlight.FunctionWithGui(random_binomial)
     random_binomial_gui.output().set_present_custom_callback(present_histogram)
 
     random_binomial_gui.input("p").set_edit_callback(edit_probability)

@@ -1,9 +1,9 @@
 from fiatlight.fiat_core.to_gui import (
     _any_type_class_name_to_gui,
     _to_data_with_gui,
-    to_function_with_gui,
 )
 from fiatlight.fiat_types import UnspecifiedValue, ErrorValue
+from fiatlight import FunctionWithGui
 
 from typing import Tuple, Optional
 
@@ -28,7 +28,7 @@ def test_any_function_to_function_with_gui_one_output() -> None:
     def add(a: int, b: int = 2) -> int:
         return a + b
 
-    add_gui = to_function_with_gui(add)
+    add_gui = FunctionWithGui(add)
 
     # Test after construction
     assert add_gui.name == "add"
@@ -67,7 +67,7 @@ def test_any_function_to_function_with_gui_two_outputs() -> None:
     def add_mult(a: int, b: int = 2) -> tuple[int, int]:
         return a + b, a * b
 
-    add_mult_gui = to_function_with_gui(add_mult)
+    add_mult_gui = FunctionWithGui(add_mult)
 
     # Test after construction
     assert add_mult_gui.name == "add_mult"
@@ -110,7 +110,7 @@ def test_any_function_to_function_with_gui_two_outputs_old_style() -> None:
     def add_mult(a: int, b: int = 2) -> Tuple[int, int]:
         return a + b, a * b
 
-    add_mult_gui = to_function_with_gui(add_mult)
+    add_mult_gui = FunctionWithGui(add_mult)
     assert len(add_mult_gui._outputs_with_gui) == 2
 
 
@@ -129,10 +129,10 @@ def test_function_with_optional_param() -> None:
         else:
             return a + 2
 
-    foo_gui = to_function_with_gui(foo)
+    foo_gui = FunctionWithGui(foo)
     assert isinstance(foo_gui._inputs_with_gui[0].data_with_gui, OptionalWithGui)
 
-    foo2_gui = to_function_with_gui(foo2)
+    foo2_gui = FunctionWithGui(foo2)
     assert isinstance(foo2_gui._inputs_with_gui[0].data_with_gui, OptionalWithGui)
 
     print("a")
@@ -152,5 +152,5 @@ def test_enum_gui() -> None:
     def foo(a: MyEnum) -> int:
         return a.value
 
-    foo_gui = to_function_with_gui(foo)
+    foo_gui = FunctionWithGui(foo)
     assert isinstance(foo_gui._inputs_with_gui[0].data_with_gui, EnumWithGui)
