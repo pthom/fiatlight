@@ -1,68 +1,17 @@
 from imgui_bundle import imgui, ImVec4, imgui_ctx, hello_imgui
 from fiatlight.fiat_widgets.fontawesome6_ctx_utils import fontawesome_6_ctx
+from fiatlight.fiat_widgets import mini_buttons
 from typing import Dict, Tuple, NewType
-from enum import Enum
 import time
 import math
-import copy
 
 
-class _ButtonRangeAction(Enum):
-    NONE = 1
-    MULTIPLY = 2
-    DIVIDE = 3
-
-
-# Buttons to change the range
-def _show_buttons_range(tooltip_mul, tooltip_div) -> _ButtonRangeAction:
-    from fiatlight.fiat_widgets.draw_symbols import draw_symbol, SymbolDrawing
-
-    r = _ButtonRangeAction.NONE
-    from fiatlight.fiat_widgets import fiat_osd
-
-    orig_cursor_pos = imgui.get_cursor_pos()
-    cur_pos = copy.copy(orig_cursor_pos)
-
-    btn_size = hello_imgui.em_to_vec2(0.7, 0.65)
-    if imgui.button("##x", btn_size):
-        r = _ButtonRangeAction.MULTIPLY
-    draw_symbol(cur_pos, btn_size, SymbolDrawing.ArrowUp)
-    fiat_osd.set_widget_tooltip(tooltip_mul)
-    cur_pos.y += hello_imgui.em_size(0.7)
-    imgui.set_cursor_pos(cur_pos)
-    if imgui.button("##10-", btn_size):
-        r = _ButtonRangeAction.DIVIDE
-    draw_symbol(cur_pos, btn_size, SymbolDrawing.ArrowDown)
-    fiat_osd.set_widget_tooltip(tooltip_div)
-
-    final_cursor_pos = orig_cursor_pos
-    final_cursor_pos.x += hello_imgui.em_size(0.8)
-    imgui.set_cursor_pos(final_cursor_pos)
-
-    return r
-
-
-def _show_zero_button() -> bool:
-    from fiatlight.fiat_widgets.draw_symbols import draw_symbol, SymbolDrawing
-
-    clicked = False
-    from fiatlight.fiat_widgets import fiat_osd
-
-    orig_cursor_pos = imgui.get_cursor_pos()
-    btn_pos = copy.copy(orig_cursor_pos)
-    btn_pos.y += hello_imgui.em_size(0.3)
-    imgui.set_cursor_pos(btn_pos)
-    btn_size = hello_imgui.em_to_vec2(0.7, 0.65)
-    if imgui.button("##0", btn_size):
-        clicked = True
-    draw_symbol(btn_pos, btn_size, SymbolDrawing.Zero)
-    fiat_osd.set_widget_tooltip("Set to zero")
-
-    final_cursor_pos = orig_cursor_pos
-    final_cursor_pos.x += hello_imgui.em_size(0.8)
-    imgui.set_cursor_pos(final_cursor_pos)
-
-    return clicked
+def _str_until_double_hash(s: str) -> str:
+    """Return the string until the first double hash `##`"""
+    idx = s.find("##")
+    if idx == -1:
+        return s
+    return s[:idx]
 
 
 #######################################################################################################################
@@ -105,10 +54,14 @@ class _SliderFloatAdaptiveInterval:
             self.current_power -= 1
             return
 
-    def format_string(self) -> str:
+    def format_string(self, is_positive: bool) -> str:
         float_format = f"%.{self.nb_significant_digits}g"
         max_value_formatted = float_format % self.interval_max()
-        r = f"{float_format}  (0 - {max_value_formatted})"
+        if not is_positive:
+            max_value_formatted = float_format % (-self.interval_max())
+        r = f"{float_format}  (0 ... {max_value_formatted})"
+        if not is_positive:
+            r = f"-{r}"
         return r
 
     def was_changed_recently(self) -> bool:
@@ -123,27 +76,38 @@ class _SliderFloatAdaptiveIntervalCache:
     def __init__(self) -> None:
         self.intervals = {}
 
-    def get_or_create(self, id: int, nb_significant_digits: int) -> _SliderFloatAdaptiveInterval:
-        if id not in self.intervals:
-            self.intervals[id] = _SliderFloatAdaptiveInterval(nb_significant_digits)
-        return self.intervals[id]
+    def get_or_create(self, id_: int, nb_significant_digits: int) -> _SliderFloatAdaptiveInterval:
+        if id_ not in self.intervals:
+            self.intervals[id_] = _SliderFloatAdaptiveInterval(nb_significant_digits)
+        return self.intervals[id_]
 
 
 _SLIDER_FLOAT_ADAPTIVE_INTERVAL_CACHE = _SliderFloatAdaptiveIntervalCache()
 
 
-def slider_any_positive_float(label: str, v: float, nb_significant_digits: int = 4) -> Tuple[bool, float]:
+def slider_any_positive_float(
+    label: str, _v: float, accept_negative: bool = True, nb_significant_digits: int = 4
+) -> Tuple[bool, float]:
     """A slider that can edit *positive* floats, with a given number of significant digits
     for any value (the slider will interactively adapt its range to the value,
     and flash red when the range changed)
     """
+    imgui.begin_group()
+    imgui.push_id(label)
+
+    if not accept_negative and _v < 0:
+        raise ValueError("The value must be positive")
+
+    v_abs = abs(_v)
+    is_positive = _v >= 0
+    sign = 1 if is_positive else -1
 
     global _SLIDER_FLOAT_ADAPTIVE_INTERVAL_CACHE
     float32_max = 3.4028234663852886e38
     max_value = float32_max / 10
-    if v > max_value:
-        v = max_value
-        return True, v
+    if v_abs > max_value:
+        v_abs = max_value
+        return True, v_abs * sign
 
     label_id = imgui.get_id(label)
     interval = _SLIDER_FLOAT_ADAPTIVE_INTERVAL_CACHE.get_or_create(label_id, nb_significant_digits)
@@ -151,34 +115,50 @@ def slider_any_positive_float(label: str, v: float, nb_significant_digits: int =
     with imgui_ctx.begin_horizontal(label):
         with imgui_ctx.push_id(str(interval.current_power)):
             changed_via_button = False
-            new_value = v
+            new_value_abs = v_abs
 
             # Display the buttons to change the range
-            action = _show_buttons_range("Multiply by 10", "Divide by 10")
-            if action == _ButtonRangeAction.MULTIPLY:
+            action = mini_buttons.show_buttons_range("Multiply by 10", "Divide by 10")
+            if action == mini_buttons.ButtonRangeAction.MULTIPLY:
                 changed_via_button = True
-                new_value *= 10
-            elif action == _ButtonRangeAction.DIVIDE:
+                new_value_abs *= 10
+            elif action == mini_buttons.ButtonRangeAction.DIVIDE:
                 changed_via_button = True
-                new_value /= 10
+                new_value_abs /= 10
 
-            if _show_zero_button():
-                new_value = 0.0
+            if mini_buttons.show_zero_button():
+                new_value_abs = 0.0
                 changed_via_button = True
 
             # Display the slider
             was_changed_recently = interval.was_changed_recently()
             if was_changed_recently:
-                imgui.push_style_color(imgui.Col_.frame_bg_hovered.value, ImVec4(1, 0, 0, 1))
-            changed_slider, new_value = imgui.slider_float(
-                label, new_value, 0.0, interval.interval_max(), interval.format_string()
+                imgui.push_style_color(imgui.Col_.frame_bg_hovered.value, ImVec4(1, 0, 1, 1))
+            changed_slider, new_value_abs = imgui.slider_float(
+                "##" + label, new_value_abs, 0.0, interval.interval_max(), interval.format_string(is_positive)
             )
             if was_changed_recently:
                 imgui.pop_style_color()
-            interval.set_target_value(new_value)
+            interval.set_target_value(new_value_abs)
+
+            if accept_negative:
+                cur_pos = imgui.get_cursor_pos()
+                cur_pos.x -= hello_imgui.em_size(0.5)
+                imgui.set_cursor_pos(cur_pos)
+                if mini_buttons.show_sign_button():
+                    sign *= -1
+                    changed_via_button = True
+                cur_pos.x += hello_imgui.em_size(1.5)
+                imgui.set_cursor_pos(cur_pos)
+
+            label = _str_until_double_hash(label)
+            if len(label) > 0:
+                imgui.text(label)
 
     changed = changed_slider or changed_via_button
-    return changed, new_value
+    imgui.pop_id()
+    imgui.end_group()
+    return changed, new_value_abs * sign
 
 
 #######################################################################################################################
@@ -196,16 +176,17 @@ class _PowerOfTenCache:
     def __init__(self) -> None:
         self.power_of_ten = {}
 
-    def _compute_power_of_ten(self, current_float_value: float) -> PowerOfTen:
+    @staticmethod
+    def _compute_power_of_ten(current_float_value: float) -> PowerOfTen:
         if current_float_value == 0.0:
-            return 1
+            return PowerOfTen(1)
         abs_value = abs(current_float_value)
         return PowerOfTen(int(math.ceil(math.log10(abs_value))))
 
-    def get_or_create(self, id: int, current_float_value: float) -> PowerOfTen:
-        if id not in self.power_of_ten:
-            self.power_of_ten[id] = self._compute_power_of_ten(current_float_value)
-        return self.power_of_ten[id]
+    def get_or_create(self, id_: int, current_float_value: float) -> PowerOfTen:
+        if id_ not in self.power_of_ten:
+            self.power_of_ten[id_] = self._compute_power_of_ten(current_float_value)
+        return self.power_of_ten[id_]
 
 
 _POWER_OF_TEN_CACHE = _PowerOfTenCache()
@@ -214,6 +195,8 @@ _POWER_OF_TEN_CACHE = _PowerOfTenCache()
 def slider_any_float_log_scale(
     label: str, v: float, accept_negative: bool = True, nb_displayed_digit=4
 ) -> Tuple[bool, float]:
+    imgui.begin_group()
+    imgui.push_id(label)
     with fontawesome_6_ctx():
         with imgui_ctx.begin_horizontal("slider_any_float_log_scale" + label):
             power_of_ten = _POWER_OF_TEN_CACHE.get_or_create(imgui.get_id(label), v)
@@ -225,11 +208,13 @@ def slider_any_float_log_scale(
 
             # Display the buttons to change the range
             tooltip_range = f"\n(current range: [{min_value}, {max_value}])"
-            action = _show_buttons_range("Multiply range by 10" + tooltip_range, "Divide range by 10" + tooltip_range)
-            if action == _ButtonRangeAction.MULTIPLY:
+            action = mini_buttons.show_buttons_range(
+                "Multiply range by 10" + tooltip_range, "Divide range by 10" + tooltip_range
+            )
+            if action == mini_buttons.ButtonRangeAction.MULTIPLY:
                 power_of_ten += 1
                 _POWER_OF_TEN_CACHE.power_of_ten[imgui.get_id(label)] = power_of_ten
-            elif action == _ButtonRangeAction.DIVIDE:
+            elif action == mini_buttons.ButtonRangeAction.DIVIDE:
                 power_of_ten -= 1
                 _POWER_OF_TEN_CACHE.power_of_ten[imgui.get_id(label)] = power_of_ten
 
@@ -243,29 +228,35 @@ def slider_any_float_log_scale(
             # Display the logarithmic slider
             format_string = f"%.{nb_displayed_digit}g"
             changed, new_value = imgui.slider_float(
-                label, v, min_value, max_value, format_string, imgui.SliderFlags_.logarithmic.value
+                "##" + label, v, min_value, max_value, format_string, imgui.SliderFlags_.logarithmic.value
             )
+            label = _str_until_double_hash(label)
+            if len(label) > 0:
+                imgui.text(label)
 
+    imgui.pop_id()
+    imgui.end_group()
     return changed, new_value
 
 
 def sandbox() -> None:
-    from imgui_bundle import hello_imgui
-
     value1 = 300.0
     value2 = 3.0
 
     value_log = 11.0
     value_log_positive = 1.0
 
+    value_input = 4
+
     def gui() -> None:
-        nonlocal value1, value2, value_log, value_log_positive
-        changed, value1 = slider_any_positive_float("##slider", value1)
-        changed, value2 = slider_any_positive_float("##slider2", value2)
+        nonlocal value1, value2, value_log, value_log_positive, value_input
+        changed, value1 = slider_any_positive_float("slider_pos", value1, accept_negative=False)
+        changed, value2 = slider_any_positive_float("slider_pos_neg", value2)
         changed, value_log = slider_any_float_log_scale("slider_log", value_log)
         changed, value_log_positive = slider_any_float_log_scale(
             "slider_log_pos", value_log_positive, accept_negative=False
         )
+        changed, value_input = imgui.input_float("input_float", value_input, step=0.1, step_fast=1.0)
 
     hello_imgui.run(gui)
 
