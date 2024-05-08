@@ -45,12 +45,12 @@ class SoundBlocksListGui(AnyDataWithGui[SoundBlocksList]):
 
 
 def register_audio_types_gui() -> None:
-    from fiatlight.fiat_core import gui_factories
+    from fiatlight.fiat_core.to_gui import register_type
 
-    gui_factories().register_type(SampleRate, SampleRateGui)
-    gui_factories().register_type(NbChannels, NbChannelsGui)
-    gui_factories().register_type(BlockSize, BlockSizeGui)
-    gui_factories().register_type(SoundBlocksList, SoundBlocksListGui)
+    register_type(SampleRate, SampleRateGui)
+    register_type(NbChannels, NbChannelsGui)
+    register_type(BlockSize, BlockSizeGui)
+    register_type(SoundBlocksList, SoundBlocksListGui)
 
 
 def sandbox() -> None:

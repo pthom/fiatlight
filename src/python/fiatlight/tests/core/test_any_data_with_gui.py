@@ -39,9 +39,9 @@ def test_custom_data_with_gui_serialization() -> None:
     from fiatlight.fiat_core.any_data_with_gui import Foo, FooWithGui
 
     # Register the Foo type with its GUI implementation (do this once at the beginning of your program)
-    from fiatlight.fiat_core import gui_factories
+    from fiatlight.fiat_core.to_gui import register_type
 
-    gui_factories().register_type(Foo, FooWithGui)
+    register_type(Foo, FooWithGui)
 
     # Use the Foo type with its GUI implementation
     from fiatlight.fiat_core.to_gui import _to_data_with_gui

@@ -12,7 +12,7 @@ class CannyApertureSize(Enum):
     APERTURE_7 = 7
 
 
-fiatlight.gui_factories().register_enum(CannyApertureSize)
+fiatlight.register_enum(CannyApertureSize)
 
 
 def canny(
@@ -44,7 +44,7 @@ class MorphShape(Enum):
     MORPH_ELLIPSE = cv2.MORPH_ELLIPSE
 
 
-fiatlight.gui_factories().register_enum(MorphShape)
+fiatlight.register_enum(MorphShape)
 
 
 def dilate(

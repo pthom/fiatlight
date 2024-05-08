@@ -10,9 +10,12 @@ from fiatlight.fiat_core.function_with_gui import (
     FunctionWithGuiFactoryFromName,
 )
 from fiatlight.fiat_core.to_gui import (
-    gui_factories,
     GuiFactory,
     FunctionWithGuiFactory,
+    register_type,
+    register_enum,
+    register_bound_int,
+    register_bound_float,
 )
 from fiatlight.fiat_core.function_node import FunctionNode, FunctionNodeLink
 from fiatlight.fiat_core.functions_graph import FunctionsGraph
@@ -52,10 +55,13 @@ __all__ = [
     # from output_with_gui
     "OutputWithGui",
     # from to_gui
-    "gui_factories",
     "GuiFactory",
     "FunctionWithGuiFactory",
     "FunctionWithGuiFactoryFromName",
+    "register_type",
+    "register_enum",
+    "register_bound_int",
+    "register_bound_float",
     # from function_node
     "FunctionNode",
     "FunctionNodeLink",

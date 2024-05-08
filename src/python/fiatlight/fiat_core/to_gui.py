@@ -415,6 +415,22 @@ def gui_factories() -> GuiFactories:
     return _GUI_FACTORIES
 
 
+def register_type(type_: typing.Type[Any], factory: GuiFactory[Any]) -> None:
+    gui_factories().register_type(type_, factory)
+
+
+def register_enum(enum_class: type[Enum]) -> None:
+    gui_factories().register_enum(enum_class)
+
+
+def register_bound_float(type_: typing.Type[Any], interval: FloatInterval) -> None:
+    gui_factories().register_bound_float(type_, interval)
+
+
+def register_bound_int(type_: typing.Type[Any], interval: IntInterval) -> None:
+    gui_factories().register_bound_int(type_, interval)
+
+
 # ----------------------------------------------------------------------------------------------------------------------
 #       register primitive types
 # ----------------------------------------------------------------------------------------------------------------------

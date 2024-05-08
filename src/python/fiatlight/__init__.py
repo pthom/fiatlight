@@ -1,5 +1,13 @@
 from fiatlight import fiat_core, fiat_widgets, fiat_types, fiat_image, fiat_runner, fiat_config, fiat_array
-from fiatlight.fiat_core import AnyDataWithGui, FunctionWithGui, FunctionsGraph, gui_factories
+from fiatlight.fiat_core import (
+    AnyDataWithGui,
+    FunctionWithGui,
+    FunctionsGraph,
+    register_type,
+    register_enum,
+    register_bound_int,
+    register_bound_float,
+)
 from fiatlight.fiat_runner import fiat_run, fiat_run_composition, fiat_run_graph, FiatGuiParams
 
 
@@ -25,7 +33,10 @@ __all__ = [
     "FunctionsGraph",
     "AnyDataWithGui",
     "FunctionWithGui",
-    "gui_factories",
+    "register_type",
+    "register_enum",
+    "register_bound_int",
+    "register_bound_float",
     # from fiat_runner
     "fiat_run",
     "fiat_run_composition",

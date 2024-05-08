@@ -1,6 +1,6 @@
 import fiatlight
 from fiatlight.fiat_core import AnyDataWithGui, FunctionWithGui, IntWithGui, OptionalWithGui
-from fiatlight.fiat_core.to_gui import gui_factories
+from fiatlight.fiat_core.to_gui import register_type
 from dataclasses import dataclass
 from typing import List, Optional
 
@@ -67,7 +67,7 @@ class IntWrapperWithGui(AnyDataWithGui[IntWrapper]):
 
 
 # Register the GUI type as a module global type
-gui_factories().register_type(IntWrapper, IntWrapperWithGui)
+fiatlight.register_type(IntWrapper, IntWrapperWithGui)
 
 
 def test_with_class_function_and_module_global_types() -> None:
@@ -104,7 +104,7 @@ def test_with_class_function_and_local_types() -> None:
             super().__init__()
 
     # Register the GUI type as a module global type
-    gui_factories().register_type(IntWrapperLocal, IntWrapperLocalWithGui)
+    register_type(IntWrapperLocal, IntWrapperLocalWithGui)
 
     class FooGui(FunctionWithGui):
         nb: int = 10
@@ -135,7 +135,7 @@ class AWithGui(AnyDataWithGui[A]):
         super().__init__()
 
 
-gui_factories().register_type(A, AWithGui)
+register_type(A, AWithGui)
 
 
 def test_optional_composite_type() -> None:
