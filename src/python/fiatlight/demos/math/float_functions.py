@@ -54,12 +54,6 @@ all_functions = [
 def sandbox() -> None:
     from fiatlight import fiat_run_composition
 
-    def add_mul(a: float, b: float) -> tuple[float, float]:
-        """An example of a function that returns multiple values:
-        the sum and the product of its inputs.
-        """
-        return a + b, a * b
-
     fiat_run_composition([float_source, sin, log])
 
 
