@@ -28,7 +28,7 @@ class IntEditType(Enum):
 
 @dataclass
 class IntWithGuiParams:
-    edit_type: IntEditType = IntEditType.slider_and_minus_plus
+    edit_type: IntEditType = IntEditType.input
     # Common
     label: str = "##int"
     v_min: int = 0

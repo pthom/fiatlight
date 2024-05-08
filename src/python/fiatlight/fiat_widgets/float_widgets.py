@@ -55,7 +55,7 @@ class _SliderFloatAdaptiveInterval:
         if target_value == 0.0:
             if self.current_power != 1:
                 self.time_last_power_change = time.time()
-            self.current_power = 1
+            self.current_power = 0
             return
 
         k = 0.1
