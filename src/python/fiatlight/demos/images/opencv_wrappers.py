@@ -12,9 +12,6 @@ class CannyApertureSize(Enum):
     APERTURE_7 = 7
 
 
-fiatlight.register_enum(CannyApertureSize)
-
-
 def canny(
     image: ImageU8,
     t_lower: PositiveFloat = PositiveFloat(1000.0),
@@ -42,9 +39,6 @@ class MorphShape(Enum):
     MORPH_RECT = cv2.MORPH_RECT
     MORPH_CROSS = cv2.MORPH_CROSS
     MORPH_ELLIPSE = cv2.MORPH_ELLIPSE
-
-
-fiatlight.register_enum(MorphShape)
 
 
 def dilate(

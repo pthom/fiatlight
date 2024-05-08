@@ -1,7 +1,8 @@
 import typing
 from dataclasses import dataclass
 
-from fiatlight.fiat_types import UnspecifiedValue, DataType, GlobalsDict, LocalsDict
+from fiatlight.fiat_types import UnspecifiedValue, DataType
+from fiatlight.fiat_types.base_types import ScopeStorage
 from fiatlight.fiat_core import primitives_gui
 from fiatlight.fiat_core.any_data_with_gui import AnyDataWithGui
 from fiatlight.fiat_core.param_with_gui import ParamKind, ParamWithGui
@@ -32,9 +33,7 @@ def _extract_optional_typeclass(type_class_name: str) -> Tuple[bool, str]:
     return False, type_class_name
 
 
-def _extract_enum_typeclass(
-    type_class_name: str, globals_dict: GlobalsDict, locals_dict: LocalsDict
-) -> Tuple[bool, str]:
+def _extract_enum_typeclass(type_class_name: str, scope_storage: ScopeStorage) -> Tuple[bool, str]:
     # An enum type will be displayed as
     #     <enum 'EnumName'>
     # or
@@ -45,7 +44,7 @@ def _extract_enum_typeclass(
         second_quote = type_class_name.index("'", first_quote + 1)
         return True, type_class_name[first_quote + 1 : second_quote]
     try:
-        type_class = eval(type_class_name, globals_dict, locals_dict)
+        type_class = eval(type_class_name, scope_storage.globals_, scope_storage.locals_)
         if issubclass(type_class, Enum):
             return True, type_class_name
     except (NameError, AttributeError, SyntaxError, TypeError):
@@ -102,9 +101,7 @@ def _extract_tuple_typeclasses(type_class_name: str) -> Tuple[bool, List[str]]:
     return False, []
 
 
-def _any_type_class_name_to_gui(
-    type_class_name: str, *, globals_dict: GlobalsDict, locals_dict: LocalsDict
-) -> AnyDataWithGui[Any]:
+def _any_type_class_name_to_gui(type_class_name: str, scope_storage: ScopeStorage) -> AnyDataWithGui[Any]:
     # logging.warning(f"any_typeclass_to_gui: {type_class_name}")
     if gui_factories().can_handle_typename(type_class_name):
         return gui_factories().factor(type_class_name)
@@ -117,19 +114,17 @@ def _any_type_class_name_to_gui(
             return gui_factories().factor(type_class_name)
 
     is_optional, type_class_name = _extract_optional_typeclass(type_class_name)
-    is_enum, type_class_name = _extract_enum_typeclass(type_class_name, globals_dict, locals_dict)
+    is_enum, type_class_name = _extract_enum_typeclass(type_class_name, scope_storage)
     is_list, type_class_name = _extract_list_typeclass(type_class_name)
 
     if is_enum:
         try:
             if gui_factories().can_handle_typename(type_class_name):
                 return gui_factories().factor(type_class_name)
-            elif globals_dict is not None and locals_dict is not None:
-                enum_class = eval(type_class_name, globals_dict, locals_dict)
             else:
                 # If you get an error here (NameError: name 'MyEnum' is not defined),
                 # you need to pass the globals and locals
-                enum_class = eval(type_class_name)
+                enum_class = eval(type_class_name, scope_storage.globals_, scope_storage.locals_)
             r = EnumWithGui(enum_class)
             return r
         except NameError:
@@ -137,10 +132,10 @@ def _any_type_class_name_to_gui(
             return AnyDataWithGui.make_for_any()
 
     if is_optional:
-        inner_gui = _any_type_class_name_to_gui(type_class_name, globals_dict=globals_dict, locals_dict=locals_dict)
+        inner_gui = _any_type_class_name_to_gui(type_class_name, scope_storage=scope_storage)
         return OptionalWithGui(inner_gui)
     elif is_list:
-        inner_gui = _any_type_class_name_to_gui(type_class_name, globals_dict=globals_dict, locals_dict=locals_dict)
+        inner_gui = _any_type_class_name_to_gui(type_class_name, scope_storage=scope_storage)
         return ListWithGui(inner_gui)
 
     # if we reach this point, we have no GUI implementation for the type
@@ -151,44 +146,36 @@ def _any_type_class_name_to_gui(
 
 
 def _any_typeclass_to_gui_split_if_tuple(
-    type_class_name: str, *, globals_dict: GlobalsDict, locals_dict: LocalsDict
+    type_class_name: str, scope_storage: ScopeStorage
 ) -> List[AnyDataWithGui[Any]]:
     r = []
     is_tuple, inner_type_classes = _extract_tuple_typeclasses(type_class_name)
     if is_tuple:
         for inner_type_class in inner_type_classes:
-            r.append(_any_type_class_name_to_gui(inner_type_class, globals_dict=globals_dict, locals_dict=locals_dict))
+            r.append(_any_type_class_name_to_gui(inner_type_class, scope_storage=scope_storage))
     else:
-        r.append(_any_type_class_name_to_gui(type_class_name, globals_dict=globals_dict, locals_dict=locals_dict))
+        r.append(_any_type_class_name_to_gui(type_class_name, scope_storage=scope_storage))
     return r
 
 
 def _to_data_with_gui(
     value: DataType,
-    *,
-    globals_dict: GlobalsDict,
-    locals_dict: LocalsDict,
+    scope_storage: ScopeStorage,
 ) -> AnyDataWithGui[DataType]:
     type_class_name = str(type(value))
-    r = _any_type_class_name_to_gui(type_class_name, globals_dict=globals_dict, locals_dict=locals_dict)
+    r = _any_type_class_name_to_gui(type_class_name, scope_storage)
     r.value = value
     return r
 
 
-def _to_param_with_gui(
-    name: str,
-    param: inspect.Parameter,
-    *,
-    globals_dict: GlobalsDict,
-    locals_dict: LocalsDict,
-) -> ParamWithGui[Any]:
+def _to_param_with_gui(name: str, param: inspect.Parameter, scope_storage: ScopeStorage) -> ParamWithGui[Any]:
     annotation = param.annotation
 
     data_with_gui: AnyDataWithGui[Any]
     if annotation is None or annotation is inspect.Parameter.empty:
         data_with_gui = AnyDataWithGui.make_for_any()
     else:
-        data_with_gui = _any_type_class_name_to_gui(str(annotation), globals_dict=globals_dict, locals_dict=locals_dict)
+        data_with_gui = _any_type_class_name_to_gui(str(annotation), scope_storage)
 
     param_kind = ParamKind.PositionalOrKeyword
     if param.kind is inspect.Parameter.POSITIONAL_ONLY:
@@ -200,7 +187,7 @@ def _to_param_with_gui(
     return ParamWithGui(name, data_with_gui, param_kind, default_value)
 
 
-def _capture_caller_globals_locals() -> tuple[GlobalsDict, LocalsDict]:
+def _capture_scope(nb_steps_back: int = 0) -> ScopeStorage:
     """Advanced: when a function is added, capture the locals and globals of the caller.
 
     This is required to be able to "eval" the types in the function signature
@@ -210,26 +197,24 @@ def _capture_caller_globals_locals() -> tuple[GlobalsDict, LocalsDict]:
     :return:
     """
     import inspect
+    import copy
 
-    current_frame = inspect.currentframe()
-    if current_frame is None:
-        raise ValueError("No current frame")
+    nb_steps_back += 1  # 1 for this function
 
-    # We need to go up the call stack twice to get the caller's locals and globals
+    stack = inspect.stack()
+    assert len(stack) >= nb_steps_back
+    caller_frame = stack[nb_steps_back]
+    globals_ = copy.copy(caller_frame.frame.f_globals)
+    locals_ = copy.copy(caller_frame.frame.f_locals)
+    return ScopeStorage(globals_, locals_)
 
-    frame_back_1 = current_frame.f_back
-    if frame_back_1 is None:
-        raise ValueError("No frame back")
 
-    frame_back_2 = frame_back_1.f_back
-    if frame_back_2 is None:
-        raise ValueError("No frame back")
+def _capture_current_scope() -> ScopeStorage:
+    return _capture_scope(0 + 1)  # 0 for the caller, 1 for this function
 
-    # Make sure we don't modify the user namespace
-    globals_dict = frame_back_2.f_globals.copy()
-    locals_dict = frame_back_2.f_locals.copy()
 
-    return globals_dict, locals_dict
+def _capture_scope_back_1() -> ScopeStorage:
+    return _capture_scope(1 + 1)  # 1 for the caller, 1 for this function (capture_scope_back_2
 
 
 def _get_calling_module_name() -> str:
@@ -258,17 +243,13 @@ def add_input_outputs_to_function_with_gui(function_with_gui: FunctionWithGui) -
     This function will capture the locals and globals of the caller to be able to evaluate the types.
     Make sure to call this function *from the module where the function and its input/output types are defined*
     """
-    globals_dict, locals_dict = _capture_caller_globals_locals()
-    _add_input_outputs_to_function_with_gui_globals_locals_captured(
-        function_with_gui, globals_dict=globals_dict, locals_dict=locals_dict
-    )
+    scope_storage = _capture_scope()
+    _add_input_outputs_to_function_with_gui_globals_locals_captured(function_with_gui, scope_storage)
 
 
 def _add_input_outputs_to_function_with_gui_globals_locals_captured(
     function_with_gui: FunctionWithGui,
-    *,
-    globals_dict: GlobalsDict,
-    locals_dict: LocalsDict,
+    scope_storage: ScopeStorage,
     signature_string: str | None = None,
 ) -> None:
     f = function_with_gui._f_impl  # noqa
@@ -280,9 +261,7 @@ def _add_input_outputs_to_function_with_gui_globals_locals_captured(
 
     params = sig.parameters
     for name, param in params.items():
-        function_with_gui._inputs_with_gui.append(
-            _to_param_with_gui(name, param, globals_dict=globals_dict, locals_dict=locals_dict)
-        )
+        function_with_gui._inputs_with_gui.append(_to_param_with_gui(name, param, scope_storage))
 
     return_annotation = sig.return_annotation
     if return_annotation is inspect.Parameter.empty:
@@ -291,9 +270,7 @@ def _add_input_outputs_to_function_with_gui_globals_locals_captured(
     else:
         return_annotation_str = str(return_annotation)
         if return_annotation_str != "None":
-            outputs_with_guis = _any_typeclass_to_gui_split_if_tuple(
-                return_annotation_str, globals_dict=globals_dict, locals_dict=locals_dict
-            )
+            outputs_with_guis = _any_typeclass_to_gui_split_if_tuple(return_annotation_str, scope_storage)
             for output_with_gui in outputs_with_guis:
                 function_with_gui._outputs_with_gui.append(OutputWithGui(output_with_gui))
 

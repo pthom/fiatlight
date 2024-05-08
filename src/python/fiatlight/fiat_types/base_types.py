@@ -1,4 +1,4 @@
-from typing import Any, TypeAlias, TypeVar, Generic, List
+from typing import Any, TypeVar, Generic, List
 from dataclasses import dataclass
 
 # A type variable that represents a data type, included in a AnyDataWithGui object.
@@ -29,6 +29,9 @@ JsonPrimitive = str | int | float | bool | None
 JsonDict = dict[str, Any]
 JsonPrimitiveOrDict = JsonPrimitive | JsonDict
 
-# Types for globals and locals dictionaries
-GlobalsDict: TypeAlias = dict[str, Any]
-LocalsDict: TypeAlias = dict[str, Any]
+
+# Storage for globals and locals dictionaries
+@dataclass
+class ScopeStorage:
+    globals_: dict[str, Any]
+    locals_: dict[str, Any]

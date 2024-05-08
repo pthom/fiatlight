@@ -2,8 +2,8 @@ import copy
 
 from fiatlight.fiat_core.function_with_gui import FunctionWithGui, FunctionWithGuiFactoryFromName
 from fiatlight.fiat_core.function_node import FunctionNode, FunctionNodeLink
-from fiatlight.fiat_types import Function, JsonDict, GlobalsDict, LocalsDict
-from fiatlight.fiat_core.to_gui import _capture_caller_globals_locals
+from fiatlight.fiat_types import Function, JsonDict, ScopeStorage
+from fiatlight.fiat_core.to_gui import _capture_scope_back_1
 
 from typing import Sequence, Dict, Tuple, Set, List
 
@@ -53,39 +53,43 @@ class FunctionsGraph:
         pass
 
     @staticmethod
-    def from_function(f: Function | FunctionWithGui) -> "FunctionsGraph":
+    def from_function(f: Function | FunctionWithGui, scope_storage: ScopeStorage | None = None) -> "FunctionsGraph":
         r = FunctionsGraph.create_empty()
         if isinstance(f, FunctionWithGui):
             r._add_function_with_gui(f)
         else:
-            globals_dict, locals_dict = _capture_caller_globals_locals()
-            r._add_function(f, globals_dict=globals_dict, locals_dict=locals_dict)
+            if scope_storage is None:
+                scope_storage = _capture_scope_back_1()
+            r._add_function(f, scope_storage)
         return r
 
     @staticmethod
-    def from_function_composition(functions: Sequence[Function | FunctionWithGui]) -> "FunctionsGraph":
+    def from_function_composition(
+        functions: Sequence[Function | FunctionWithGui], scope_storage: ScopeStorage | None = None
+    ) -> "FunctionsGraph":
         """Create a FunctionsGraph from a list of PureFunctions([InputType] -> OutputType)
         * They should all be pure functions
         * The output[0] of one should be the input[0] of the next
         """
-        globals_dict, locals_dict = _capture_caller_globals_locals()
-        return FunctionsGraph._create_from_function_composition(
-            functions, globals_dict=globals_dict, locals_dict=locals_dict
-        )
+        if scope_storage is None:
+            scope_storage = _capture_scope_back_1()
+        return FunctionsGraph._create_from_function_composition(functions, scope_storage)
 
-    def add_function_composition(self, functions: Sequence[Function | FunctionWithGui]) -> None:
-        globals_dict, locals_dict = _capture_caller_globals_locals()
-        composition = FunctionsGraph._create_from_function_composition(
-            functions, globals_dict=globals_dict, locals_dict=locals_dict
-        )
+    def add_function_composition(
+        self, functions: Sequence[Function | FunctionWithGui], scope_storage: ScopeStorage | None = None
+    ) -> None:
+        if scope_storage is None:
+            scope_storage = _capture_scope_back_1()
+        composition = FunctionsGraph._create_from_function_composition(functions, scope_storage)
         self.merge_graph(composition)
 
-    def add_function(self, f: Function | FunctionWithGui) -> FunctionNode:
+    def add_function(self, f: Function | FunctionWithGui, scope_storage: ScopeStorage | None = None) -> FunctionNode:
         if isinstance(f, FunctionWithGui):
             return self._add_function_with_gui(f)
         else:
-            globals_dict, locals_dict = _capture_caller_globals_locals()
-            return self._add_function(f, globals_dict=globals_dict, locals_dict=locals_dict)
+            if scope_storage is None:
+                scope_storage = _capture_scope_back_1()
+            return self._add_function(f, scope_storage)
 
     # ================================================================================================================
     #                                            Private API / Add functions
@@ -102,17 +106,14 @@ class FunctionsGraph:
     def _add_function(
         self,
         f: Function,
-        globals_dict: GlobalsDict,
-        locals_dict: LocalsDict,
+        scope_storage: ScopeStorage,
     ) -> FunctionNode:
-        f_gui = FunctionWithGui(f, globals_dict=globals_dict, locals_dict=locals_dict)
+        f_gui = FunctionWithGui(f, scope_storage=scope_storage)
         return self._add_function_with_gui(f_gui)
 
     @staticmethod
     def _create_from_function_composition(
-        functions: Sequence[Function | FunctionWithGui],
-        globals_dict: GlobalsDict,
-        locals_dict: LocalsDict,
+        functions: Sequence[Function | FunctionWithGui], scope_storage: ScopeStorage
     ) -> "FunctionsGraph":
         """Create a FunctionsGraph from a list of PureFunctions([InputType] -> OutputType)
         * They should all be pure functions
@@ -127,7 +128,7 @@ class FunctionsGraph:
                 if isinstance(f, FunctionWithGui):
                     r._add_function_with_gui(f)
                 else:
-                    r._add_function(f, globals_dict=globals_dict, locals_dict=locals_dict)
+                    r._add_function(f, scope_storage)
 
         def fill_links() -> None:
             r.functions_nodes_links = []
