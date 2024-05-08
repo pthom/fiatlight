@@ -14,6 +14,22 @@ def _str_until_double_hash(s: str) -> str:
     return s[:idx]
 
 
+def _get_next_item_width() -> float:
+    g = imgui.get_current_context()
+    if not g.next_item_data.flags & imgui.internal.NextItemDataFlags_.has_width.value:
+        return -1.0
+    return g.next_item_data.width
+
+
+def _get_slider_width() -> float:
+    next_item_width = _get_next_item_width()
+    if next_item_width > 0.0:
+        r = next_item_width
+    else:
+        r = hello_imgui.em_size(10)
+    return r
+
+
 #######################################################################################################################
 # slider_any_positive_float(label: str, v: float, nb_significant_digits: int = 4) -> Tuple[bool, float]:
 #     """A slider that can edit *positive* floats, with a given number of significant digits
@@ -27,6 +43,7 @@ class _SliderFloatAdaptiveInterval:
     time_last_power_change: float = 0.0
 
     def __init__(self, nb_significant_digits: int = 4) -> None:
+        assert nb_significant_digits > 0
         self.nb_significant_digits = nb_significant_digits
 
     def interval_max(self) -> float:
@@ -85,13 +102,14 @@ class _SliderFloatAdaptiveIntervalCache:
 _SLIDER_FLOAT_ADAPTIVE_INTERVAL_CACHE = _SliderFloatAdaptiveIntervalCache()
 
 
-def slider_any_positive_float(
+def slider_float_any_range(
     label: str, _v: float, accept_negative: bool = True, nb_significant_digits: int = 4
 ) -> Tuple[bool, float]:
     """A slider that can edit *positive* floats, with a given number of significant digits
     for any value (the slider will interactively adapt its range to the value,
     and flash red when the range changed)
     """
+    slider_width = _get_slider_width()
     imgui.begin_group()
     imgui.push_id(label)
 
@@ -131,6 +149,7 @@ def slider_any_positive_float(
                 changed_via_button = True
 
             # Display the slider
+            imgui.set_next_item_width(slider_width)
             was_changed_recently = interval.was_changed_recently()
             if was_changed_recently:
                 imgui.push_style_color(imgui.Col_.frame_bg_hovered.value, ImVec4(1, 0, 1, 1))
@@ -192,9 +211,10 @@ class _PowerOfTenCache:
 _POWER_OF_TEN_CACHE = _PowerOfTenCache()
 
 
-def slider_any_float_log_scale(
-    label: str, v: float, accept_negative: bool = True, nb_displayed_digit=4
+def slider_float_any_range_log_scale(
+    label: str, v: float, accept_negative: bool = True, nb_displayed_digit: int = 4
 ) -> Tuple[bool, float]:
+    slider_width = _get_slider_width()
     imgui.begin_group()
     imgui.push_id(label)
     with fontawesome_6_ctx():
@@ -212,10 +232,10 @@ def slider_any_float_log_scale(
                 "Multiply range by 10" + tooltip_range, "Divide range by 10" + tooltip_range
             )
             if action == mini_buttons.ButtonRangeAction.MULTIPLY:
-                power_of_ten += 1
+                power_of_ten += 1  # type: ignore
                 _POWER_OF_TEN_CACHE.power_of_ten[imgui.get_id(label)] = power_of_ten
             elif action == mini_buttons.ButtonRangeAction.DIVIDE:
-                power_of_ten -= 1
+                power_of_ten -= 1  # type: ignore
                 _POWER_OF_TEN_CACHE.power_of_ten[imgui.get_id(label)] = power_of_ten
 
             # Work around a bug in imgui: we need to display more digits for small values
@@ -226,6 +246,7 @@ def slider_any_float_log_scale(
                     nb_displayed_digit = nb_min_displayed_digit
 
             # Display the logarithmic slider
+            imgui.set_next_item_width(slider_width)
             format_string = f"%.{nb_displayed_digit}g"
             changed, new_value = imgui.slider_float(
                 "##" + label, v, min_value, max_value, format_string, imgui.SliderFlags_.logarithmic.value
@@ -246,14 +267,14 @@ def sandbox() -> None:
     value_log = 11.0
     value_log_positive = 1.0
 
-    value_input = 4
+    value_input = 4.0
 
     def gui() -> None:
         nonlocal value1, value2, value_log, value_log_positive, value_input
-        changed, value1 = slider_any_positive_float("slider_pos", value1, accept_negative=False)
-        changed, value2 = slider_any_positive_float("slider_pos_neg", value2)
-        changed, value_log = slider_any_float_log_scale("slider_log", value_log)
-        changed, value_log_positive = slider_any_float_log_scale(
+        changed, value1 = slider_float_any_range("slider_pos", value1, accept_negative=False)
+        changed, value2 = slider_float_any_range("slider_pos_neg", value2)
+        changed, value_log = slider_float_any_range_log_scale("slider_log", value_log)
+        changed, value_log_positive = slider_float_any_range_log_scale(
             "slider_log_pos", value_log_positive, accept_negative=False
         )
         changed, value_input = imgui.input_float("input_float", value_input, step=0.1, step_fast=1.0)

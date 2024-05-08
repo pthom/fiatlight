@@ -66,7 +66,7 @@ class ButtonRangeAction(Enum):
 
 
 # Buttons to change the range
-def show_buttons_range(tooltip_mul, tooltip_div) -> ButtonRangeAction:
+def show_buttons_range(tooltip_mul: str, tooltip_div: str) -> ButtonRangeAction:
     r = ButtonRangeAction.NONE
     from fiatlight.fiat_widgets import fiat_osd
 
