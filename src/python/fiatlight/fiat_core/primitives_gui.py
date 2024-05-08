@@ -363,6 +363,8 @@ class StrWithGui(AnyDataWithGui[str]):
                 self.params.versatile_edit_as_multiline = use_multiline
 
             self.callbacks.edit_popup_required = self.params.versatile_edit_as_multiline
+        if self.params.edit_type == StrEditType.multiline:
+            self.callbacks.edit_popup_required = True
         return False
 
     def present_custom(self) -> None:
