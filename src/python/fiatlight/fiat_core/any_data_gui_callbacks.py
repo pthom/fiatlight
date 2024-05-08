@@ -80,6 +80,11 @@ class AnyDataGuiCallbacks(Generic[DataType]):
     # Used in more advanced cases, when some resources need to be released.
     on_exit: VoidFunction | None = None
 
+    # on_heartbeat: (Optional)
+    # If provided, this function will be called at each heartbeat of the function node.
+    # (before the value is drawn). It should return True if any change has been made to the data.
+    on_heartbeat: BoolFunction | None = None
+
     # clipboard_copy_str (Optional)
     # if provided, this function will be called when the value is copied to the clipboard.
     # Used in more advanced cases, when the data is not a simple string, or when present_str or str() is not enough.

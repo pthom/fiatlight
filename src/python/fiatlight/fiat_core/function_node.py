@@ -160,6 +160,18 @@ class FunctionNode:
             if self.function_with_gui.on_heartbeat():
                 needs_refresh = True
 
+        for input_with_gui in self.function_with_gui._inputs_with_gui:
+            input_heartbeat = input_with_gui.data_with_gui.callbacks.on_heartbeat
+            if input_heartbeat is not None:
+                if input_heartbeat():
+                    needs_refresh = True
+
+        for output_with_gui in self.function_with_gui._outputs_with_gui:
+            output_heartbeat = output_with_gui.data_with_gui.callbacks.on_heartbeat
+            if output_heartbeat is not None:
+                if output_heartbeat():
+                    needs_refresh = True
+
         # Handle async invoke
         # -------------------
         # delete _async_invoke_thread if it is not alive anymore
