@@ -2,6 +2,7 @@ from imgui_bundle import imgui, hello_imgui, imgui_knobs, imgui_toggle, portable
 from fiatlight.fiat_core import AnyDataWithGui
 from fiatlight.fiat_types import FilePath
 from fiatlight.fiat_types.color_types import ColorRgb, ColorRgba
+from fiatlight.fiat_widgets import fontawesome_6_ctx, icons_fontawesome_6, fiat_osd
 from typing import Any, Callable, TypeAlias
 from dataclasses import dataclass
 from enum import Enum
@@ -31,7 +32,7 @@ class IntWithGuiParams:
     # Common
     label: str = "##int"
     v_min: int = 0
-    v_max: int = 30
+    v_max: int = 100
     width_em: float = 9
     format: str = "%d"
     # Specific to slider_int and drag_int
@@ -305,24 +306,25 @@ class BoolWithGui(AnyDataWithGui[bool]):
 ########################################################################################################################
 class StrEditType(Enum):
     input = 1
-    input_with_hint = 2
-    multiline = 3  # multiline text input does *not* work inside a Node
+    versatile = 2
+    multiline = 3  # multiline text input does *not* work inside a Node (only in a popup)
 
 
 @dataclass
 class StrWithGuiParams:
     default_edit_value = ""
     label: str = "##str"
-    edit_type: StrEditType = StrEditType.input
+    edit_type: StrEditType = StrEditType.versatile
     input_flags: int = imgui.InputTextFlags_.none.value
-    width_em: float = 10  # if 0, then use all available width
     # Callbacks
     callback: Callable[[imgui.InputTextCallbackData], int] = None  # type: ignore
     user_data: Any | None = None
-    # Specific to input_with_hint
+    # Will display this hint if the string is empty
     hint: str = ""
-    # Specific to multiline
-    height_em: int = 5
+    # Only used if edit_type is input (not multiline)
+    width_em_one_line: float = 10
+    # status
+    versatile_edit_as_multiline: bool | None = None
 
 
 class StrWithGui(AnyDataWithGui[str]):
@@ -340,10 +342,28 @@ class StrWithGui(AnyDataWithGui[str]):
         self.callbacks.present_custom = self.present_custom
         self.callbacks.present_custom_popup_required = True
         self.callbacks.clipboard_copy_possible = True
+        self.callbacks.on_heartbeat = self.on_heartbeat
 
     @staticmethod
     def present_str(s: str) -> str:
         return s
+
+    def on_heartbeat(self) -> bool:
+        if self.params.edit_type == StrEditType.versatile:
+            # Compute if the string should be edited as multiline
+            # (if it is long or contains newlines)
+            if self.params.versatile_edit_as_multiline is None:
+                use_multiline = False
+                value = self.value
+                if isinstance(value, str):
+                    if len(value) > 60:
+                        use_multiline = True
+                    if "\n" in value:
+                        use_multiline = True
+                self.params.versatile_edit_as_multiline = use_multiline
+
+            self.callbacks.edit_popup_required = self.params.versatile_edit_as_multiline
+        return False
 
     def present_custom(self) -> None:
         text_value = self.get_actual_value()
@@ -355,22 +375,39 @@ class StrWithGui(AnyDataWithGui[str]):
     def edit(self) -> bool:
         assert isinstance(self.value, str)
         changed = False
-        imgui.set_next_item_width(hello_imgui.em_size(self.params.width_em))
-        if self.params.edit_type == StrEditType.input:
-            changed, self.value = imgui.input_text(
-                self.params.label, self.value, self.params.input_flags, self.params.callback, self.params.user_data
-            )
-        elif self.params.edit_type == StrEditType.input_with_hint:
-            changed, self.value = imgui.input_text_with_hint(
-                self.params.label,
-                self.params.hint,
-                self.value,
-                self.params.input_flags,
-                self.params.callback,
-                self.params.user_data,
-            )
-        elif self.params.edit_type == StrEditType.multiline:
-            self.callbacks.edit_popup_required = True
+        present_multiline = False
+        is_versatile = self.params.edit_type == StrEditType.versatile
+        if is_versatile:
+            assert self.params.versatile_edit_as_multiline is not None
+            present_multiline = self.params.versatile_edit_as_multiline
+        if self.params.edit_type == StrEditType.multiline:
+            present_multiline = True
+
+        if not present_multiline:
+            imgui.set_next_item_width(hello_imgui.em_size(self.params.width_em_one_line))
+            has_hint = len(self.params.hint) > 0
+            if has_hint:
+                changed, self.value = imgui.input_text_with_hint(
+                    self.params.label,
+                    self.params.hint,
+                    self.value,
+                    self.params.input_flags,
+                    self.params.callback,
+                    self.params.user_data,
+                )
+            else:
+                changed, self.value = imgui.input_text(
+                    self.params.label, self.value, self.params.input_flags, self.params.callback, self.params.user_data
+                )
+
+            if is_versatile:
+                imgui.same_line()
+                with fontawesome_6_ctx():
+                    if imgui.button(icons_fontawesome_6.ICON_FA_BARS):
+                        self.params.versatile_edit_as_multiline = True
+                    fiat_osd.set_widget_tooltip("Edit in popup (multiline)")
+        else:
+            # self.callbacks.edit_popup_required = True
             assert isinstance(self.value, str)
             size = ImVec2(0, 0)
             size.x = imgui.get_window_width()
@@ -382,6 +419,7 @@ class StrWithGui(AnyDataWithGui[str]):
                 self.params.callback,
                 self.params.user_data,
             )
+
         return changed
 
 
@@ -399,8 +437,6 @@ class PromptWithGui(StrMultilineWithGui):
     def __init__(self) -> None:
         super().__init__()
         self.params.hint = "Enter a prompt here"
-        self.params.width_em = 60
-        self.params.height_em = 5
 
 
 ########################################################################################################################
