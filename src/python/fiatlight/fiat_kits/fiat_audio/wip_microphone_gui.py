@@ -1,7 +1,7 @@
-from fiatlight.fiat_audio.microphone_io import MicrophoneParams, MicrophoneIo
+from fiatlight.fiat_kits.fiat_audio.microphone_io import MicrophoneParams, MicrophoneIo
 from fiatlight.fiat_widgets import fontawesome_6_ctx, icons_fontawesome_6
-from fiatlight.fiat_audio.microphone_gui import MicrophoneParamsGui
-from fiatlight.fiat_audio.wip_audio_provider_gui import AudioProviderGui
+from fiatlight.fiat_kits.fiat_audio.microphone_gui import MicrophoneParamsGui
+from fiatlight.fiat_kits.fiat_audio.wip_audio_provider_gui import AudioProviderGui
 from imgui_bundle import imgui, imgui_ctx, ImVec4, hello_imgui
 
 

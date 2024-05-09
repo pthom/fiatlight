@@ -1,7 +1,7 @@
 """Gui for simple types in fiat_audio.audio_types"""
 from fiatlight.fiat_core import AnyDataWithGui
 from fiatlight.fiat_togui import make_explained_value_edit_callback
-from fiatlight.fiat_audio.audio_types import (
+from fiatlight.fiat_kits.fiat_audio.audio_types import (
     SampleRate,
     SampleRatesExplained,
     NbChannels,

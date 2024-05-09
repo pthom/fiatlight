@@ -1,9 +1,9 @@
 import numpy as np
 
 from fiatlight.fiat_core import AnyDataWithGui, FunctionWithGui
-from fiatlight.fiat_audio.microphone_io import MicrophoneParams, MicrophoneIo
-from fiatlight.fiat_audio.audio_types_gui import SampleRateGui, BlockSizeGui
-from fiatlight.fiat_audio.audio_types import SoundBlock, SoundWave
+from fiatlight.fiat_kits.fiat_audio.microphone_io import MicrophoneParams, MicrophoneIo
+from fiatlight.fiat_kits.fiat_audio.audio_types_gui import SampleRateGui, BlockSizeGui
+from fiatlight.fiat_kits.fiat_audio.audio_types import SoundBlock, SoundWave
 from fiatlight.fiat_widgets import fontawesome_6_ctx, icons_fontawesome_6
 from imgui_bundle import imgui, imgui_ctx, ImVec4, hello_imgui, ImVec2
 

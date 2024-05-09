@@ -1,4 +1,4 @@
-from fiatlight.fiat_audio.audio_types import SoundBlocksList
+from fiatlight.fiat_kits.fiat_audio.audio_types import SoundBlocksList
 from abc import ABC, abstractmethod
 
 

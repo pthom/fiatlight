@@ -2,8 +2,8 @@
 """
 from fiatlight.fiat_core.any_data_with_gui import AnyDataWithGui
 from fiatlight.fiat_core.function_with_gui import FunctionWithGui
-from fiatlight.fiat_audio.audio_types import SoundWave, SampleRate
-from fiatlight.fiat_audio import audio_functions
+from fiatlight.fiat_kits.fiat_audio.audio_types import SoundWave, SampleRate
+from fiatlight.fiat_kits.fiat_audio import audio_functions
 from imgui_bundle import imgui, hello_imgui
 
 from dataclasses import dataclass
