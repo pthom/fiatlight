@@ -13,9 +13,6 @@ from dataclasses import dataclass
 # Possible sample rates for audio (typically 8000, 22050, 44100, 48000),
 SampleRate = NewType("SampleRate", float)
 
-# The number of channels in a sound block (1 for mono, 2 for stereo, etc.)
-NbChannels = NewType("NbChannels", int)
-
 # The number of samples in a block of sound data (typically 512 or 1024),
 BlockSize = NewType("BlockSize", int)
 
@@ -27,10 +24,11 @@ SoundBlock = NDArray[np.float32]
 @dataclass
 class SoundStreamParams:
     """A *small* subset of parameters for a sound stream
-    (available in the sounddevice library)"""
+    (available in the sounddevice library)
+    This simple audio library only supports mono sound.
+    """
 
     sample_rate: SampleRate = SampleRate(44100)
-    nb_channels: NbChannels = NbChannels(1)
     block_size: BlockSize = BlockSize(512)
 
 
@@ -121,10 +119,4 @@ BlockSizesExplained: ExplainedValues[BlockSize] = [
     ExplainedValue(BlockSize(256), "256", "Small block size"),
     ExplainedValue(BlockSize(512), "512", "Standard"),
     ExplainedValue(BlockSize(1024), "1024", "Large block size"),
-]
-
-
-NbChannelsExplained: ExplainedValues[NbChannels] = [
-    ExplainedValue(NbChannels(1), "Mono", "1 channel"),
-    ExplainedValue(NbChannels(2), "Stereo", "2 channels"),
 ]

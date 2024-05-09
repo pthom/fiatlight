@@ -5,8 +5,6 @@ from fiatlight.fiat_togui import make_explained_value_edit_callback
 from .audio_types import (
     SampleRate,
     SampleRatesExplained,
-    NbChannels,
-    NbChannelsExplained,
     BlockSize,
     BlockSizesExplained,
     SoundBlocksList,
@@ -20,14 +18,6 @@ class SampleRateGui(AnyDataWithGui[SampleRate]):
         self.callbacks.edit = make_explained_value_edit_callback("sample_rate", self, SampleRatesExplained)
         self.callbacks.default_value_provider = lambda: SampleRate(44100)
         self.callbacks.present_str = lambda x: f"{x / 1000} kHz"
-
-
-class NbChannelsGui(AnyDataWithGui[NbChannels]):
-    def __init__(self) -> None:
-        super().__init__()
-        self.callbacks.edit = make_explained_value_edit_callback("nb_channels", self, NbChannelsExplained)
-        self.callbacks.default_value_provider = lambda: NbChannels(1)
-        self.callbacks.present_str = lambda x: "Mono" if x == 1 else "Stereo"
 
 
 class BlockSizeGui(AnyDataWithGui[BlockSize]):
@@ -52,9 +42,7 @@ class SoundStreamParamsGui(AnyDataWithGui[SoundStreamParams]):
     def __init__(self) -> None:
         super().__init__()
         self.callbacks.default_value_provider = lambda: SoundStreamParams()
-        self.callbacks.present_str = (
-            lambda x: f"{x.sample_rate / 1000} kHz, {x.nb_channels} channels, {x.block_size} samples"
-        )
+        self.callbacks.present_str = lambda x: f"{x.sample_rate / 1000} kHz, {x.block_size} samples"
         self.callbacks.edit = self.edit
 
     def edit(self) -> bool:
@@ -96,6 +84,5 @@ def register_audio_types_gui() -> None:
     from fiatlight.fiat_togui.to_gui import register_type
 
     register_type(SampleRate, SampleRateGui)
-    register_type(NbChannels, NbChannelsGui)
     register_type(BlockSize, BlockSizeGui)
     register_type(SoundBlocksList, SoundBlocksListGui)

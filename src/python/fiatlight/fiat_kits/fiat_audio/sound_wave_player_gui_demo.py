@@ -1,3 +1,5 @@
+"""Demonstrates playing a sound wave from a file using SoundWavePlayerGui"""
+
 import fiatlight
 from fiatlight import fiat_audio
 

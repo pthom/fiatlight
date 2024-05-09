@@ -84,7 +84,6 @@ class AudioProviderMic:
         try:
             self._sd_stream = sd.InputStream(
                 samplerate=int(stream_params.sample_rate),
-                channels=stream_params.nb_channels,
                 callback=self._audio_callback,
                 blocksize=stream_params.block_size,
             )

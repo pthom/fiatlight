@@ -13,9 +13,7 @@ class MicrophoneParamsGui(AnyDataWithGui[SoundStreamParams]):
     def __init__(self) -> None:
         super().__init__()
         self.callbacks.default_value_provider = lambda: SoundStreamParams()
-        self.callbacks.present_str = (
-            lambda x: f"{x.sample_rate / 1000} kHz, {x.nb_channels} channels, {x.block_size} samples"
-        )
+        self.callbacks.present_str = lambda x: f"{x.sample_rate / 1000} kHz, {x.block_size} samples"
         self.callbacks.edit = self.edit
 
     def edit(self) -> bool:
@@ -75,7 +73,6 @@ class MicrophoneGui(FunctionWithGui):
     def __init__(self) -> None:
         super().__init__(self._f)
         self.name = "MicrophoneGui"
-        # self.invoke_always_dirty = True # Nein, noch nicht (we return a full wave, for the moment)
         self.internal_state_gui = self._internal_gui
         self.on_heartbeat = self._on_heartbeat
 
