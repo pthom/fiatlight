@@ -1,3 +1,9 @@
+"""fiat_audio_simple: A *very* simple audio kit for FiatLight
+
+It is provided only for simple usages (playing sound waves from files, recording from a microphone).
+It supports only mono sound waves (no stereo).
+"""
+
 from .audio_types import (
     SoundWave,
     sound_wave_from_file,

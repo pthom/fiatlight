@@ -1,8 +1,8 @@
 import numpy as np
-from imgui_bundle import imgui, imgui_ctx, ImVec4, hello_imgui, ImVec2
+from imgui_bundle import imgui, imgui_ctx, hello_imgui, ImVec2
 
 from fiatlight.fiat_core import AnyDataWithGui, FunctionWithGui
-from fiatlight.fiat_widgets import fontawesome_6_ctx, icons_fontawesome_6
+from fiatlight.fiat_widgets import fontawesome_6_ctx, icons_fontawesome_6, fiat_osd, misc_widgets
 
 from .microphone_io import AudioProviderMic
 from .audio_types_gui import SampleRateGui, BlockSizeGui
@@ -28,17 +28,6 @@ class MicrophoneParamsGui(AnyDataWithGui[SoundStreamParams]):
             if sample_rate_gui.callbacks.edit():
                 value.sample_rate = sample_rate_gui.value
                 changed = True
-
-            # Disabled because some computers can only record in mono,
-            # and trying to record with two channels will fail.
-            #
-            # imgui.text("Nb Channels")
-            # nb_channels_gui = NbChannelsGui()
-            # nb_channels_gui.value = value.nb_channels
-            # assert nb_channels_gui.callbacks.edit is not None
-            # if nb_channels_gui.callbacks.edit():
-            #     value.nb_channels = nb_channels_gui.value
-            #     changed = True
 
             imgui.text("Block Size")
             block_size_gui = BlockSizeGui()
@@ -84,9 +73,13 @@ class MicrophoneGui(FunctionWithGui):
         self._sound_wave_being_recorded = None
         self._live_plot_size_em = ImVec2(20, 10)
 
-    def _f(self) -> SoundWave:
-        assert self._sound_wave is not None
+    def _f(self) -> SoundWave | None:
         return self._sound_wave
+
+    def _clear(self) -> None:
+        self._sound_wave = None
+        self._sound_wave_being_recorded = None
+        self._was_recording_just_stopped = False
 
     def _on_heartbeat(self) -> bool:
         sound_blocks = self._microphone_io.get_buffer().get_sound_blocks()
@@ -142,38 +135,47 @@ class MicrophoneGui(FunctionWithGui):
 
     def _draw_microphone_button(self) -> None:
         is_started = self._microphone_io.started()
-        icon = (
-            icons_fontawesome_6.ICON_FA_MICROPHONE_LINES
-            if is_started
-            else icons_fontawesome_6.ICON_FA_MICROPHONE_LINES_SLASH
+
+        clicked = misc_widgets.on_off_button(
+            "##on_off_mic",
+            is_started,
+            icons_fontawesome_6.ICON_FA_MICROPHONE_LINES_SLASH,
+            icons_fontawesome_6.ICON_FA_MICROPHONE_LINES,
+            "Start recording",
+            "Stop recording",
         )
 
-        # color: dark red if started, else dark gray
-        color = ImVec4(1.0, 0.3, 0.3, 1.0) if is_started else ImVec4(0.7, 0.7, 0.7, 1.0)
-        with imgui_ctx.push_style_color(imgui.Col_.text.value, color):
-            with imgui_ctx.begin_horizontal("MicrophoneButton"):
-                imgui.spring()
+        if clicked:
+            if is_started:
+                self._on_stop_recording()
+            else:
+                self._on_start_recording()
+
+    def _draw_control_buttons(self) -> bool:
+        changed = False
+        with imgui_ctx.begin_horizontal("ControlButtons"):
+            self._draw_microphone_button()
+            if self._sound_wave is not None:
                 button_size = hello_imgui.em_to_vec2(3, 3)
-                clicked = imgui.button(icon, button_size)
-                if clicked:
-                    if is_started:
-                        self._on_stop_recording()
-                    else:
-                        self._on_start_recording()
-                imgui.spring()
+                if imgui.button(icons_fontawesome_6.ICON_FA_TRASH, button_size):
+                    self._clear()
+                    changed = True
+                fiat_osd.set_widget_tooltip("Delete the recorded sound wave")
+        return changed
 
     def _internal_gui(self) -> bool:
         """Draw the internal GUI of the function."""
         with fontawesome_6_ctx():
             is_started = self._microphone_io.started()
+            has_data = self._sound_wave is not None or self._sound_wave_being_recorded is not None
 
-            imgui.begin_disabled(is_started)
+            imgui.begin_disabled(is_started or has_data)
             _params_changed = self._microphone_params_gui.edit()
             imgui.end_disabled()
-            self._draw_microphone_button()
+            need_refresh = self._draw_control_buttons()
             self._show_live_sound_block()
 
-        return False
+        return need_refresh
 
 
 def register_microphone_params_gui() -> None:

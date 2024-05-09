@@ -195,6 +195,7 @@ class SoundWavePlayerGui(AnyDataWithGui[SoundWave]):
             _, self.params.show_time_as_seconds = imgui.checkbox("seconds", self.params.show_time_as_seconds)
 
     def _plot_selection(self) -> None:
+        """Unused"""
         sound_wave = self._sound_wave_gui_resampled
         if sound_wave is None:
             return
@@ -269,7 +270,7 @@ class SoundWavePlayerGui(AnyDataWithGui[SoundWave]):
         imgui.set_next_item_width(hello_imgui.em_size(10))
         _, self.params.volume = imgui.slider_float("Volume", self.params.volume, 0.0, SoundWavePlayer.VOLUME_MAX)
 
-        _, self.params.can_select = imgui.checkbox("Select", self.params.can_select)
+        # _, self.params.can_select = imgui.checkbox("Select", self.params.can_select)
 
         plot_size_pixels = immapp.em_to_vec2(self.params.plot_size_em)
         new_plot_size_pixels = immapp.show_resizable_plot_in_node_editor(

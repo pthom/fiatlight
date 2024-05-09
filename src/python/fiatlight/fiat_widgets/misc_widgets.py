@@ -114,14 +114,33 @@ def button_with_disable_flag(label: str, is_disabled: bool) -> bool:
     return clicked
 
 
-def on_off_button_with_icons(is_on: bool, on_icon: str, off_icon: str) -> bool:
-    icon = on_icon if is_on else off_icon
-    # color: dark red if on, else dark gray
-    color = ImVec4(1.0, 0.3, 0.3, 1.0) if is_on else ImVec4(0.7, 0.7, 0.7, 1.0)
-    with imgui_ctx.push_style_color(imgui.Col_.text.value, color):
-        with imgui_ctx.begin_horizontal("OnOffButton"):
-            imgui.spring()
-            button_size = hello_imgui.em_to_vec2(3, 3)
-            clicked = imgui.button(icon, button_size)
-            imgui.spring()
+_ON_OFF_BUTTON_HOVER_REGISTRY: AutoRegistry[bool] = AutoRegistry(bool)
+
+
+def on_off_button(
+    label_id: str, is_on: bool, icon_off: str = "", icon_on: str = "", tooltip_off: str = "", tooltip_on: str = ""
+) -> bool:
+    id_ = imgui.get_id(label_id)
+    is_mouse_hovered = _ON_OFF_BUTTON_HOVER_REGISTRY.get(id_)  # from last frame
+
+    button_size = hello_imgui.em_to_vec2(3, 3)
+
+    icon = icon_on if is_on else icon_off
+    if is_mouse_hovered:
+        icon = icon_off if is_on else icon_on
+
+    tooltip = tooltip_on if is_on else tooltip_off
+
+    # text_color: dark red if on, else dark gray
+    orange = ImVec4(1.0, 0.5, 0.0, 1.0)
+    gray = ImVec4(0.7, 0.7, 0.7, 1.0)
+    orange_gray = ImVec4(0.9, 0.6, 0.2, 1.0)
+    text_color = orange if is_on else gray
+    if is_mouse_hovered:
+        text_color = orange_gray
+
+    with imgui_ctx.push_style_color(imgui.Col_.text.value, text_color):
+        clicked = imgui.button(icon, button_size)
+    fiat_osd.set_widget_tooltip(tooltip)
+    _ON_OFF_BUTTON_HOVER_REGISTRY[id_] = imgui.is_item_hovered()
     return clicked
