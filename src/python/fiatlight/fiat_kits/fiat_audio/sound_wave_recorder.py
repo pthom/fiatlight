@@ -1,4 +1,4 @@
-# from fiatlight.fiat_audio.sound_wave import SoundWave
+# from fiatlight.fiat_kits.fiat_audio.sound_wave import SoundWave
 #
 #
 # class SoundWaveRecorder:

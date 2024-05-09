@@ -1,7 +1,7 @@
 import logging
 
 from fiatlight.fiat_core.function_with_gui import FunctionWithGui
-from fiatlight.fiat_audio.audio_types import SoundWave, SoundBlocksList
+from fiatlight.fiat_kits.fiat_audio.audio_types import SoundWave, SoundBlocksList
 from fiatlight.fiat_widgets import icons_fontawesome_6, fontawesome_6_ctx
 from imgui_bundle import imgui_ctx, imgui, hello_imgui
 from enum import Enum
@@ -123,7 +123,7 @@ class AudioRecorderGui(FunctionWithGui):
 
 def sandbox_audio_recorder_gui() -> None:
     import fiatlight
-    from fiatlight.fiat_audio.wip_microphone_gui import MicrophoneGui
+    from fiatlight.fiat_kits.fiat_audio.wip_microphone_gui import MicrophoneGui
 
     microphone_gui = MicrophoneGui()
     audio_recorder_gui = AudioRecorderGui()
@@ -155,7 +155,7 @@ def sandbox_audio_recorder_gui() -> None:
 #
 #     import fiatlight
 #     graph = fiatlight.FunctionsGraph()
-#     from fiatlight.fiat_audio.wip_microphone_gui import MicrophoneGui
+#     from fiatlight.fiat_kits.fiat_audio.wip_microphone_gui import MicrophoneGui
 #     # microphone_gui = MicrophoneGui()
 #     # audio_recorder_gui = AudioRecorderGui()
 #     graph.add_function_composition([AudioRecorderGui(), MicrophoneGui()])

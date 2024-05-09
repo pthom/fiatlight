@@ -1,5 +1,5 @@
-from fiatlight.fiat_audio.audio_types import SoundBlock, SoundBlocksList, SampleRate, NbChannels, BlockSize
-from fiatlight.fiat_audio.wip_audio_provider import AudioProvider
+from fiatlight.fiat_kits.fiat_audio.audio_types import SoundBlock, SoundBlocksList, SampleRate, NbChannels, BlockSize
+from fiatlight.fiat_kits.fiat_audio.wip_audio_provider import AudioProvider
 import sounddevice as sd  # type: ignore
 from queue import Queue, Empty
 from typing import Any, Optional
