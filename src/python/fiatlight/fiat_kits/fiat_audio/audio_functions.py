@@ -1,5 +1,5 @@
 from fiatlight.fiat_kits.fiat_audio.audio_types import SoundWave, SampleRate
-from fiatlight.fiat_array import FloatMatrix_Dim1
+from fiatlight.fiat_kits.fiat_array import FloatMatrix_Dim1
 import sounddevice  # type: ignore
 import logging
 
