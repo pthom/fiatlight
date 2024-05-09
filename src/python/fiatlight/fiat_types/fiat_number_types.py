@@ -52,7 +52,7 @@ def format_time_seconds_as_hh_mm_ss(time_seconds: TimeSeconds) -> str:
 
 
 def _register_bound_floats() -> None:
-    from fiatlight.fiat_core.to_gui import gui_factories
+    from fiatlight.fiat_togui.to_gui import gui_factories
 
     float_intervals: dict[Type[Any], FloatInterval] = {
         Float_0_1: (0.0, 1.0),
@@ -69,7 +69,7 @@ def _register_bound_floats() -> None:
 
 
 def _register_bound_ints() -> None:
-    from fiatlight.fiat_core.to_gui import gui_factories
+    from fiatlight.fiat_togui.to_gui import gui_factories
 
     int_intervals: dict[Type[Any], IntInterval] = {
         Int_0_10: (0, 10),

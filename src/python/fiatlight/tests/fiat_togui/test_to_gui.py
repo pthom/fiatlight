@@ -1,4 +1,4 @@
-from fiatlight.fiat_core.to_gui import _any_type_class_name_to_gui, _to_data_with_gui, _capture_current_scope
+from fiatlight.fiat_togui.to_gui import _any_type_class_name_to_gui, _to_data_with_gui, _capture_current_scope
 from fiatlight.fiat_types import UnspecifiedValue, ErrorValue
 from fiatlight import FunctionWithGui
 
@@ -112,7 +112,7 @@ def test_any_function_to_function_with_gui_two_outputs_old_style() -> None:
 
 
 def test_function_with_optional_param() -> None:
-    from fiatlight.fiat_core.composite_gui import OptionalWithGui
+    from fiatlight.fiat_togui.composite_gui import OptionalWithGui
 
     def foo(a: int | None = None) -> int:
         if a is None:
@@ -136,7 +136,7 @@ def test_function_with_optional_param() -> None:
 
 
 def test_enum_gui() -> None:
-    from fiatlight.fiat_core.composite_gui import EnumWithGui
+    from fiatlight.fiat_togui.composite_gui import EnumWithGui
     from enum import Enum
 
     class MyEnum(Enum):

@@ -179,7 +179,7 @@ class MicrophoneGui(FunctionWithGui):
 
 
 def register_microphone_params_gui() -> None:
-    from fiatlight.fiat_core.to_gui import register_type
+    from fiatlight.fiat_togui.to_gui import register_type
 
     register_type(MicrophoneParams, MicrophoneParamsGui)
 

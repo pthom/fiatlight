@@ -3,13 +3,13 @@ from dataclasses import dataclass
 
 from fiatlight.fiat_types import UnspecifiedValue, DataType
 from fiatlight.fiat_types.base_types import ScopeStorage
-from fiatlight.fiat_core import primitives_gui
+from fiatlight.fiat_togui import primitives_gui
 from fiatlight.fiat_core.any_data_with_gui import AnyDataWithGui
 from fiatlight.fiat_core.param_with_gui import ParamKind, ParamWithGui
 from fiatlight.fiat_core.function_with_gui import FunctionWithGui
 from fiatlight.fiat_core.output_with_gui import OutputWithGui
-from fiatlight.fiat_core.composite_gui import OptionalWithGui, EnumWithGui, ListWithGui
-from fiatlight.fiat_core.function_signature import get_function_signature
+from fiatlight.fiat_togui.composite_gui import OptionalWithGui, EnumWithGui, ListWithGui
+from fiatlight.fiat_togui.function_signature import get_function_signature
 from fiatlight.fiat_types.fiat_number_types import FloatInterval, IntInterval
 from enum import Enum
 
@@ -413,7 +413,7 @@ def register_bound_int(type_: typing.Type[Any], interval: IntInterval) -> None:
 # ----------------------------------------------------------------------------------------------------------------------
 def _register_base_types() -> None:
     from fiatlight.fiat_types import fiat_number_types
-    from fiatlight.fiat_core import primitives_gui
+    from fiatlight.fiat_togui import primitives_gui
 
     fiat_number_types._register_bound_numbers()
     primitives_gui._register_all_primitive_types()
