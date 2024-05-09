@@ -20,7 +20,7 @@ class AudioProvider:
         self._queue = Queue()
         self._sd_stream = None
 
-    def _enqueue_sound_block(self, block: SoundBlock, sample_rate: SampleRate) -> None:
+    def enqueue_sound_block(self, block: SoundBlock, sample_rate: SampleRate) -> None:
         if not self._queue.empty():
             # Ensure that all blocks have the same sample rate
             if sample_rate != self._sample_rate:
@@ -46,4 +46,7 @@ class AudioProvider:
                 blocks.append(block)
         except Empty:
             pass
+
+        if len(blocks) > 0 and self._sample_rate <= 0:
+            raise ValueError("Sample rate not set")
         return SoundBlocksList(blocks, self._sample_rate)

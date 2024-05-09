@@ -63,6 +63,7 @@ class AudioProviderMic(AudioProvider):
             logging.warning(f"Status: {status}")
         if indata.size > 0:
             # logging.debug(f"Received data: {indata.shape}")
-            self._queue.put(indata.copy())
+            assert self._sd_stream is not None
+            self.enqueue_sound_block(indata.copy(), self._sd_stream.samplerate)
         else:
             logging.debug("No data in callback.")
