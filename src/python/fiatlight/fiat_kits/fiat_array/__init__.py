@@ -14,6 +14,9 @@ from fiatlight.fiat_kits.fiat_array.simple_plot_gui import (
     SimplePlotGui,
 )
 
+present_float1_arrays_as_plot()
+present_float2_arrays_as_plot()
+
 __all__ = [
     # from array_types
     "FloatMatrix_Dim1",
@@ -25,7 +28,7 @@ __all__ = [
     "IntMatrix_Dim3",
     "IntMatrix_Dim4",
     # from simple_plot_gui
-    "present_float1_arrays_as_plot",
-    "present_float2_arrays_as_plot",
+    # "present_float1_arrays_as_plot",
+    # "present_float2_arrays_as_plot",
     "SimplePlotGui",
 ]
