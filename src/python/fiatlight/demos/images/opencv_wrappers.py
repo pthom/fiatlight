@@ -1,5 +1,5 @@
 import fiatlight
-from fiatlight.fiat_image import ImageU8, ImageU8_GRAY
+from fiatlight.fiat_kits.fiat_image import ImageU8, ImageU8_GRAY
 from fiatlight.fiat_types import PositiveFloat, Float_0_10, Int_0_10
 from enum import Enum
 
@@ -66,7 +66,7 @@ all_functions = [canny, dilate, oil_paint]
 
 
 def main() -> None:
-    from fiatlight.fiat_image import image_source
+    from fiatlight.fiat_kits.fiat_image import image_source
 
     fiatlight.fiat_run_composition([image_source, canny, dilate])
 

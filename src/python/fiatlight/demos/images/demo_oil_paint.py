@@ -1,6 +1,6 @@
 from fiatlight import fiat_run_composition
-from fiatlight.fiat_image import lut_channels_in_colorspace
-from fiatlight.fiat_image import image_source
+from fiatlight.fiat_kits.fiat_image import lut_channels_in_colorspace
+from fiatlight.fiat_kits.fiat_image import image_source
 from fiatlight.demos.images.opencv_wrappers import oil_paint
 
 

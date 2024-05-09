@@ -1,4 +1,4 @@
-from fiatlight.fiat_image.cv_color_type import ColorConversion, ColorType
+from fiatlight.fiat_kits.fiat_image.cv_color_type import ColorConversion, ColorType
 from fiatlight.fiat_core import AnyDataWithGui
 from imgui_bundle import imgui_ctx, imgui
 from typing import Tuple
@@ -44,7 +44,7 @@ class ColorConversionWithGui(AnyDataWithGui[ColorConversion]):
 
 
 def sandbox() -> None:
-    from fiatlight.fiat_image.lut import LutParams
+    from fiatlight.fiat_kits.fiat_image.lut import LutParams
 
     def f(conversion: ColorConversion, lut_param: LutParams) -> str:
         return str(conversion) + " - " + str(lut_param)

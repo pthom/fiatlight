@@ -285,8 +285,8 @@ FnTypenameMatcher = Callable[[Typename], bool]
 def _make_union_matcher(typenames_prefix: str) -> FnTypenameMatcher:
     """Create a matcher for union of types whose name start with the given prefix."""
 
-    # e.g. for typenames_prefix="fiatlight.fiat_image.image_types.Image" the matcher will match types like
-    #     typing.Union[fiatlight.fiat_image.image_types.ImageU8_1, fiatlight.fiat_image.image_types.ImageU8_2, ...]
+    # e.g. for typenames_prefix="fiatlight.fiat_kits.fiat_image.image_types.Image" the matcher will match types like
+    #     typing.Union[fiatlight.fiat_kits.fiat_image.image_types.ImageU8_1, fiatlight.fiat_kits.fiat_image.image_types.ImageU8_2, ...]
     def union_matcher(typename: str) -> bool:
         if not typename.startswith("typing.Union[") or not typename.endswith("]"):
             return False

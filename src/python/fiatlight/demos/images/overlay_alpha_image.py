@@ -1,4 +1,4 @@
-from fiatlight.fiat_image.image_types import ImageU8_3, ImageU8_4
+from fiatlight.fiat_kits.fiat_image.image_types import ImageU8_3, ImageU8_4
 from fiatlight.fiat_types import Float_0_1, Float_0_3
 
 import numpy as np

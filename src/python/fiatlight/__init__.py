@@ -1,4 +1,4 @@
-from fiatlight import fiat_core, fiat_widgets, fiat_types, fiat_image, fiat_runner, fiat_config, fiat_array
+from fiatlight import fiat_core, fiat_widgets, fiat_types, fiat_runner, fiat_config, fiat_array, fiat_kits
 from fiatlight.fiat_core import (
     AnyDataWithGui,
     FunctionWithGui,
@@ -9,6 +9,7 @@ from fiatlight.fiat_core import (
     register_bound_float,
 )
 from fiatlight.fiat_runner import fiat_run, fiat_run_composition, fiat_run_graph, FiatGuiParams
+from fiatlight.fiat_kits import fiat_image as fiat_image
 
 
 def demo_assets_dir() -> str:
@@ -23,12 +24,12 @@ __all__ = [
     # sub packages
     "fiat_core",
     "fiat_types",
-    "fiat_image",
     "fiat_runner",
     "fiat_nodes",
     "fiat_widgets",
     "fiat_config",
     "fiat_array",
+    "fiat_kits",
     # from core
     "FunctionsGraph",
     "AnyDataWithGui",
@@ -44,4 +45,6 @@ __all__ = [
     "FiatGuiParams",
     # from here
     "demo_assets_dir",
+    # fiat_kits subpackages
+    "fiat_image",
 ]

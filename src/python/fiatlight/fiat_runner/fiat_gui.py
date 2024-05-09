@@ -7,7 +7,7 @@ from fiatlight.fiat_widgets import fontawesome_6_ctx, icons_fontawesome_6, fiat_
 from fiatlight.fiat_utils import functional_utils
 from fiatlight.fiat_types.fiat_exception import FiatDisplayedException
 from fiatlight.fiat_runner.functions_collection import FunctionCollectionGui
-from fiatlight.fiat_image.image_types import ImageU8_3
+from fiatlight.fiat_kits.fiat_image.image_types import ImageU8_3
 from imgui_bundle import immapp, imgui, imgui_ctx, ImVec4, portable_file_dialogs as pfd
 from typing import Any, Callable
 from imgui_bundle import hello_imgui, ImVec2, immvision
