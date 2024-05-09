@@ -4,9 +4,9 @@ from imgui_bundle import imgui, imgui_ctx, ImVec4, hello_imgui, ImVec2
 from fiatlight.fiat_core import AnyDataWithGui, FunctionWithGui
 from fiatlight.fiat_widgets import fontawesome_6_ctx, icons_fontawesome_6
 
-from fiatlight.fiat_kits.fiat_audio.audio_provider_mic import SoundStreamParams, AudioProviderMic
-from fiatlight.fiat_kits.fiat_audio.audio_types_gui import SampleRateGui, BlockSizeGui
-from fiatlight.fiat_kits.fiat_audio.audio_types import SoundBlock, SoundWave
+from .microphone_io import AudioProviderMic
+from .audio_types_gui import SampleRateGui, BlockSizeGui
+from .audio_types import SoundBlock, SoundWave, SoundStreamParams
 
 
 class MicrophoneParamsGui(AnyDataWithGui[SoundStreamParams]):
@@ -92,7 +92,7 @@ class MicrophoneGui(FunctionWithGui):
         return self._sound_wave
 
     def _on_heartbeat(self) -> bool:
-        sound_blocks = self._microphone_io.get_sound_blocks()
+        sound_blocks = self._microphone_io.get_buffer().get_sound_blocks()
 
         # Display the last sound block
         if len(sound_blocks.blocks) > 0:

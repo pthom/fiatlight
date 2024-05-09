@@ -2,14 +2,60 @@ import sounddevice as sd  # type: ignore
 from typing import Any, Optional
 import logging
 from .audio_types import SoundBlock, SoundStreamParams
-from .audio_provider import AudioProvider
 
 
-class AudioProviderMic(AudioProvider):
+from queue import Queue, Empty
+from .audio_types import SoundBlocksList, SampleRate
+
+
+class MicrophoneBuffer:
+    """Thread-safe buffer for audio data. Used to pass audio data from the microphone to the main thread."""
+
+    _queue: Queue[SoundBlock]
+    _sample_rate: SampleRate = SampleRate(0)
+
+    def __init__(self) -> None:
+        self._queue = Queue()
+
+    def enqueue_sound_block(self, block: SoundBlock, sample_rate: SampleRate) -> None:
+        if not self._queue.empty():
+            # Ensure that all blocks have the same sample rate
+            if sample_rate != self._sample_rate:
+                raise ValueError("All sound blocks must have the same sample rate")
+        else:
+            self._sample_rate = sample_rate
+        self._queue.put(block)
+
+    def has_sound_blocks(self) -> bool:
+        """Returns True if there are sound blocks available in the queue."""
+        return not self._queue.empty()
+
+    def get_sound_blocks(self) -> SoundBlocksList:
+        """Retrieves the latest blocks of audio data from the microphone, if available.
+        Should be called repeatedly to get all available data.
+        Ideally, you should call this quickly enough so that the list contains only few block.
+        Can be called from the main thread.
+        """
+        blocks = []
+        try:
+            while True:
+                block = self._queue.get(block=False)
+                blocks.append(block)
+        except Empty:
+            pass
+
+        if len(blocks) > 0 and self._sample_rate <= 0:
+            raise ValueError("Sample rate not set")
+        return SoundBlocksList(blocks, self._sample_rate)
+
+
+class AudioProviderMic:
     _sd_stream: Optional[sd.InputStream]
+    _audio_buffer: MicrophoneBuffer
 
     def __init__(self) -> None:
         super().__init__()
+        self._audio_buffer = MicrophoneBuffer()
         self._sd_stream = None
 
     def start(self, stream_params: SoundStreamParams) -> None:
@@ -30,6 +76,9 @@ class AudioProviderMic(AudioProvider):
     def started(self) -> bool:
         """Check if the microphone input is currently running."""
         return self._sd_stream is not None
+
+    def get_buffer(self) -> MicrophoneBuffer:
+        return self._audio_buffer
 
     def _start_io(self, stream_params: SoundStreamParams) -> None:
         try:
@@ -64,6 +113,6 @@ class AudioProviderMic(AudioProvider):
         if indata.size > 0:
             # logging.debug(f"Received data: {indata.shape}")
             assert self._sd_stream is not None
-            self.enqueue_sound_block(indata.copy(), self._sd_stream.samplerate)
+            self._audio_buffer.enqueue_sound_block(indata.copy(), self._sd_stream.samplerate)
         else:
             logging.debug("No data in callback.")

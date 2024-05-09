@@ -2,10 +2,10 @@ import fiatlight
 from fiatlight import fiat_audio
 
 
-def sandbox() -> None:
-    fn = fiat_audio.AudioProviderMicGui()
+def sandbox_microphone_gui() -> None:
+    fn = fiat_audio.MicrophoneGui()
     fiatlight.fiat_run(fn)
 
 
 if __name__ == "__main__":
-    sandbox()
+    sandbox_microphone_gui()
