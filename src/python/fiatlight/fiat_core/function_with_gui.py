@@ -4,7 +4,7 @@ from fiatlight.fiat_core.any_data_with_gui import AnyDataWithGui
 from fiatlight.fiat_types.function_types import BoolFunction
 from fiatlight.fiat_core.param_with_gui import ParamWithGui, ParamKind
 from fiatlight.fiat_core.output_with_gui import OutputWithGui
-from fiatlight.fiat_core.primitives_gui import IntWithGui, FloatWithGui, BoolWithGui, StrWithGui
+from fiatlight.fiat_togui.primitives_gui import IntWithGui, FloatWithGui, BoolWithGui, StrWithGui
 
 from typing import Any, List, final, Callable, Optional, Type, TypeAlias
 import logging
@@ -103,7 +103,7 @@ class FunctionWithGui:
         :param signature_string: a string representing the signature of the function
                                  used when the function signature cannot be retrieved automatically
         """
-        from fiatlight.fiat_core.to_gui import (
+        from fiatlight.fiat_togui.to_gui import (
             _add_input_outputs_to_function_with_gui_globals_locals_captured,
             _capture_scope_back_1,
         )

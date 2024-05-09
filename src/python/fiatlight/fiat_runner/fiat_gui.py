@@ -1,11 +1,11 @@
 from fiatlight.fiat_nodes.function_node_gui import FunctionNodeGui
 from fiatlight.fiat_nodes.functions_graph_gui import FunctionsGraphGui
 from fiatlight.fiat_core import FunctionsGraph, FunctionWithGui
-from fiatlight.fiat_core.to_gui import _capture_scope_back_1
+from fiatlight.fiat_togui.to_gui import _capture_scope_back_1
 from fiatlight.fiat_types.base_types import ScopeStorage
 from fiatlight.fiat_widgets import fontawesome_6_ctx, icons_fontawesome_6, fiat_osd
 from fiatlight.fiat_utils import functional_utils
-from fiatlight.fiat_core.fiat_exception import FiatDisplayedException
+from fiatlight.fiat_types.fiat_exception import FiatDisplayedException
 from fiatlight.fiat_runner.functions_collection import FunctionCollectionGui
 from fiatlight.fiat_image.image_types import ImageU8_3
 from imgui_bundle import immapp, imgui, imgui_ctx, ImVec4, portable_file_dialogs as pfd

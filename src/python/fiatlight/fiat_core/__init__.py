@@ -9,7 +9,7 @@ from fiatlight.fiat_core.function_with_gui import (
     FunctionWithGui,
     FunctionWithGuiFactoryFromName,
 )
-from fiatlight.fiat_core.to_gui import (
+from fiatlight.fiat_togui.to_gui import (
     GuiFactory,
     FunctionWithGuiFactory,
     register_type,
@@ -19,29 +19,9 @@ from fiatlight.fiat_core.to_gui import (
 )
 from fiatlight.fiat_core.function_node import FunctionNode, FunctionNodeLink
 from fiatlight.fiat_core.functions_graph import FunctionsGraph
-from fiatlight.fiat_core.function_signature import get_function_signature
-from fiatlight.fiat_core.composite_gui import OptionalWithGui, EnumWithGui
-from fiatlight.fiat_core.primitives_gui import (
-    IntWithGui,
-    IntWithGuiParams,
-    IntEditType,
-    FloatWithGui,
-    FloatWithGuiParams,
-    FloatEditType,
-    make_positive_float_with_gui,
-    BoolWithGui,
-    BoolWithGuiParams,
-    BoolEditType,
-    StrWithGui,
-    StrWithGuiParams,
-    StrEditType,
-)
-from fiatlight.fiat_core.explained_value_gui import edit_explained_value, make_explained_value_edit_callback
 
 
 __all__ = [
-    # from function_signature
-    "get_function_signature",
     # from any_data_gui_handlers
     "AnyDataGuiCallbacks",
     # from any_data_with_gui
@@ -67,24 +47,4 @@ __all__ = [
     "FunctionNodeLink",
     # from functions_graph
     "FunctionsGraph",
-    # from composite_gui
-    "OptionalWithGui",
-    "EnumWithGui",
-    # from primitives_gui
-    "IntWithGui",
-    "IntWithGuiParams",
-    "IntEditType",
-    "FloatWithGui",
-    "FloatWithGuiParams",
-    "FloatEditType",
-    "make_positive_float_with_gui",
-    "BoolWithGui",
-    "BoolWithGuiParams",
-    "BoolEditType",
-    "StrWithGui",
-    "StrWithGuiParams",
-    "StrEditType",
-    # from explained_value_gui
-    "edit_explained_value",
-    "make_explained_value_edit_callback",
 ]

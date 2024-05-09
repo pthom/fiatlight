@@ -29,7 +29,7 @@ from fiatlight.fiat_image.lut_gui import LutParamsWithGui
 
 def _register_factories() -> None:
     from fiatlight.fiat_image.image_types import _register_image_type_factories
-    from fiatlight.fiat_core.to_gui import register_type, register_enum
+    from fiatlight.fiat_togui.to_gui import register_type, register_enum
 
     _register_image_type_factories()
     register_type(ColorConversion, ColorConversionWithGui)

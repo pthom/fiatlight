@@ -3,7 +3,7 @@ import copy
 from fiatlight.fiat_core.function_with_gui import FunctionWithGui, FunctionWithGuiFactoryFromName
 from fiatlight.fiat_core.function_node import FunctionNode, FunctionNodeLink
 from fiatlight.fiat_types import Function, JsonDict, ScopeStorage
-from fiatlight.fiat_core.to_gui import _capture_scope_back_1
+from fiatlight.fiat_togui.to_gui import _capture_scope_back_1
 
 from typing import Sequence, Dict, Tuple, Set, List
 
