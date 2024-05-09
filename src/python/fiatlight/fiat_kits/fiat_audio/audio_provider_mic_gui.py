@@ -12,30 +12,30 @@ from .audio_types_gui import SoundStreamParamsGui
 
 class AudioProviderMicGui(AudioProviderGui):
     # IO
-    _audio_provider_mic: AudioProviderMic
+    _mic_provider: AudioProviderMic
     # Serialized options
-    _sound_stream_params_gui: SoundStreamParamsGui
+    _mic_stream_params_gui: SoundStreamParamsGui
 
     def __init__(self) -> None:
         # Initialize the microphone
-        self._audio_provider_mic = AudioProviderMic()
+        self._mic_provider = AudioProviderMic()
 
         # FunctionWithGui init
-        super().__init__(self._audio_provider_mic)
+        super().__init__(self._mic_provider)
         self.name = "AudioProviderMicGui"
 
         # Initialize the sound stream params GUI: TODO make it easy to create AnyDataWithGui with a linked value
-        self._sound_stream_params_gui = SoundStreamParamsGui()
-        self._sound_stream_params_gui.value = SoundStreamParams()
+        self._mic_stream_params_gui = SoundStreamParamsGui()
+        self._mic_stream_params_gui.value = SoundStreamParams()
 
     def specialized_internal_gui(self) -> bool:
         """Draw the internal GUI of the function (mic related)"""
         with fontawesome_6_ctx():
-            is_started = self._audio_provider_mic.started()
+            is_started = self._mic_provider.started()
 
             # Edit the sound stream params (only if the audio provider is not started)
             imgui.begin_disabled(is_started)
-            _changed_stream_params = self._sound_stream_params_gui.edit()
+            _changed_stream_params = self._mic_stream_params_gui.edit()
             imgui.end_disabled()
 
             if misc_widgets.on_off_button_with_icons(
@@ -43,7 +43,7 @@ class AudioProviderMicGui(AudioProviderGui):
                 icons_fontawesome_6.ICON_FA_MICROPHONE_LINES,
                 icons_fontawesome_6.ICON_FA_MICROPHONE_LINES_SLASH,
             ):
-                stream_params = self._sound_stream_params_gui.get_actual_value()
-                self._audio_provider_mic.toggle(stream_params)
+                stream_params = self._mic_stream_params_gui.get_actual_value()
+                self._mic_provider.toggle(stream_params)
 
         return False
