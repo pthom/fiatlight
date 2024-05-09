@@ -9,8 +9,8 @@ from .microphone_gui import MicrophoneGui
 
 def _register_gui_factories() -> None:
     from fiatlight.fiat_togui.to_gui import register_type
-    from fiatlight.fiat_kits.fiat_audio.sound_wave_player_gui import SoundWavePlayerGui
-    from fiatlight.fiat_kits.fiat_audio.audio_types_gui import register_audio_types_gui
+    from .sound_wave_player_gui import SoundWavePlayerGui
+    from .audio_types_gui import register_audio_types_gui
 
     register_type(SoundWave, SoundWavePlayerGui)
     register_audio_types_gui()

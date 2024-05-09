@@ -9,7 +9,7 @@ from fiatlight.fiat_core import (
     register_bound_float,
 )
 from fiatlight.fiat_runner import fiat_run, fiat_run_composition, fiat_run_graph, FiatGuiParams
-from fiatlight.fiat_kits import fiat_image, fiat_array, fiat_audio
+from fiatlight.fiat_kits import fiat_image, fiat_array, fiat_audio_simple
 
 
 def demo_assets_dir() -> str:
@@ -48,5 +48,5 @@ __all__ = [
     # fiat_kits subpackages
     "fiat_image",
     "fiat_array",
-    "fiat_audio",
+    "fiat_audio_simple",
 ]
