@@ -11,10 +11,12 @@ def sandbox() -> None:
 
     start = time.time()
     params = fiat_audio.SoundStreamParams(sample_rate=44100, nb_channels=1)  # type: ignore  # noqa
-    with fiat_audio.AudioProviderMic(params) as mic:
-        while time.time() - start < 1.0:
-            data = mic.get_sound_blocks()
-            print_repeatable_message(f"Received {len(data.blocks)} blocks of audio data.")
+    mic = fiat_audio.AudioProviderMic()
+    mic.start(params)
+    while time.time() - start < 1.0:
+        data = mic.get_sound_blocks()
+        print_repeatable_message(f"Received {len(data.blocks)} blocks of audio data.")
+    mic.stop()
 
 
 if __name__ == "__main__":

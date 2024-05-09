@@ -1,7 +1,13 @@
+"""AudioProviderGui: a GUI wrapper for an AudioProvider.
+
+It displays the live sound blocks.
+It may be derived and specialized by overriding the specialized_internal_gui() method.
+"""
 from fiatlight.fiat_core.function_with_gui import FunctionWithGui
 from imgui_bundle import ImVec2, imgui, imgui_ctx
 from typing import List
-from abc import ABC, abstractmethod
+from abc import ABC
+
 from .audio_types import SoundBlocksList, SoundBlock
 from .audio_provider import AudioProvider
 
@@ -52,16 +58,19 @@ class AudioProviderGui(FunctionWithGui, ABC):
 
     def __init__(self, audio_provider: AudioProvider) -> None:
         self._audio_provider = audio_provider
+
         # FunctionWithGui init
         super().__init__(self.f)
         self.internal_state_gui = self._internal_gui
         self.on_heartbeat = self._on_heartbeat
         # self.invoke_always_dirty = True
 
+        # Initialize the sound block list and its plot
         self._sound_blocks_list = SoundBlocksList.make_empty()
-
-        # Initialize the live sound block plot
         self._live_sound_block_plot_gui = _LiveSoundBlockPlotGui()
+
+    def specialized_internal_gui(self) -> bool:
+        return False
 
     def f(self) -> SoundBlocksList:
         return self._sound_blocks_list
@@ -73,10 +82,10 @@ class AudioProviderGui(FunctionWithGui, ABC):
         return has_new_blocks
 
     def _internal_gui(self) -> bool:
-        needs_refresh = self.specialized_internal_gui()
-        self._live_sound_block_plot_gui.gui()
-        return needs_refresh
+        # Display the specialized internal GUI (for derived classes: for example, the microphone On/Off button)
+        changed = self.specialized_internal_gui()
 
-    @abstractmethod
-    def specialized_internal_gui(self) -> bool:
-        pass
+        # Display the live sound block plot
+        self._live_sound_block_plot_gui.gui()
+
+        return changed
