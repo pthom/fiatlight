@@ -8,43 +8,36 @@ from .audio_provider import AudioProvider
 class AudioProviderMic(AudioProvider):
     _sd_stream: Optional[sd.InputStream]
 
-    def __init__(self, sound_stream_params: SoundStreamParams) -> None:
-        super().__init__(sound_stream_params)
+    def __init__(self) -> None:
+        super().__init__()
         self._sd_stream = None
 
-    def start(self) -> None:
+    def start(self, stream_params: SoundStreamParams) -> None:
         """Manually start the microphone input, when not using the context manager."""
-        self._start_io()
+        self._start_io(stream_params)
 
     def stop(self) -> None:
         """Manually stop the microphone input, when not using the context manager."""
         self._stop_io()
 
-    def toggle(self) -> None:
+    def toggle(self, stream_params: SoundStreamParams) -> None:
         """Toggle the microphone input on/off."""
         if self.started():
             self.stop()
         else:
-            self.start()
+            self.start(stream_params)
 
     def started(self) -> bool:
         """Check if the microphone input is currently running."""
         return self._sd_stream is not None
 
-    def __enter__(self) -> "AudioProviderMic":
-        self._start_io()
-        return self
-
-    def __exit__(self, exc_type: Optional[type], exc_value: Optional[Exception], traceback: Optional[Any]) -> None:
-        self._stop_io()
-
-    def _start_io(self) -> None:
+    def _start_io(self, stream_params: SoundStreamParams) -> None:
         try:
             self._sd_stream = sd.InputStream(
-                samplerate=int(self.stream_params.sample_rate),
-                channels=self.stream_params.nb_channels,
+                samplerate=int(stream_params.sample_rate),
+                channels=stream_params.nb_channels,
                 callback=self._audio_callback,
-                blocksize=self.stream_params.block_size,
+                blocksize=stream_params.block_size,
             )
             self._sd_stream.start()
         except Exception as e:

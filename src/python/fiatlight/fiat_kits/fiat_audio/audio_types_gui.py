@@ -1,4 +1,5 @@
 """Gui for simple types in fiat_audio.audio_types"""
+from imgui_bundle import imgui, imgui_ctx
 from fiatlight.fiat_core import AnyDataWithGui
 from fiatlight.fiat_togui import make_explained_value_edit_callback
 from .audio_types import (
@@ -9,6 +10,7 @@ from .audio_types import (
     BlockSize,
     BlockSizesExplained,
     SoundBlocksList,
+    SoundStreamParams,
 )
 
 
@@ -41,8 +43,53 @@ class SoundBlocksListGui(AnyDataWithGui[SoundBlocksList]):
         super().__init__()
         self.callbacks.present_str = self._present_str
 
-    def _present_str(self, value: SoundBlocksList) -> str:
+    @staticmethod
+    def _present_str(value: SoundBlocksList) -> str:
         return f"{len(value.blocks)} blocks at {value.sample_rate / 1000:.1f} kHz"
+
+
+class SoundStreamParamsGui(AnyDataWithGui[SoundStreamParams]):
+    def __init__(self) -> None:
+        super().__init__()
+        self.callbacks.default_value_provider = lambda: SoundStreamParams()
+        self.callbacks.present_str = (
+            lambda x: f"{x.sample_rate / 1000} kHz, {x.nb_channels} channels, {x.block_size} samples"
+        )
+        self.callbacks.edit = self.edit
+
+    def edit(self) -> bool:
+        value = self.get_actual_value()
+        changed = False
+
+        with imgui_ctx.begin_vertical("Params"):
+            imgui.text("Sample Rate")
+            sample_rate_gui = SampleRateGui()
+            sample_rate_gui.value = value.sample_rate
+            assert sample_rate_gui.callbacks.edit is not None
+            if sample_rate_gui.callbacks.edit():
+                value.sample_rate = sample_rate_gui.value
+                changed = True
+
+            # Disabled because some computers can only record in mono,
+            # and trying to record with two channels will fail.
+            #
+            # imgui.text("Nb Channels")
+            # nb_channels_gui = NbChannelsGui()
+            # nb_channels_gui.value = value.nb_channels
+            # assert nb_channels_gui.callbacks.edit is not None
+            # if nb_channels_gui.callbacks.edit():
+            #     value.nb_channels = nb_channels_gui.value
+            #     changed = True
+
+            imgui.text("Block Size")
+            block_size_gui = BlockSizeGui()
+            block_size_gui.value = value.block_size
+            assert block_size_gui.callbacks.edit is not None
+            if block_size_gui.callbacks.edit():
+                value.block_size = block_size_gui.value
+                changed = True
+
+        return changed
 
 
 def register_audio_types_gui() -> None:
