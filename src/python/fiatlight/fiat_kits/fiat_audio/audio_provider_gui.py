@@ -1,7 +1,6 @@
 """AudioProviderGui: a GUI wrapper for an AudioProvider.
 
 It displays the live sound blocks.
-It may be derived and specialized by overriding the specialized_internal_gui() method.
 """
 from fiatlight.fiat_core.function_with_gui import FunctionWithGui
 from imgui_bundle import ImVec2, imgui, imgui_ctx
@@ -59,7 +58,8 @@ class AudioProviderGui(FunctionWithGui, ABC):
     def __init__(self, audio_provider: AudioProvider) -> None:
         self._audio_provider = audio_provider
 
-        # FunctionWithGui init
+        # FunctionWithGui init:
+        #    internal_state_gui and on_heartbeat are callbacks inside FunctionWithGui
         super().__init__(self.f)
         self.internal_state_gui = self._internal_gui
         self.on_heartbeat = self._on_heartbeat

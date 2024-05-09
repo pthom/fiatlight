@@ -18,7 +18,6 @@ class AudioProvider:
 
     def __init__(self) -> None:
         self._queue = Queue()
-        self._sd_stream = None
 
     def enqueue_sound_block(self, block: SoundBlock, sample_rate: SampleRate) -> None:
         if not self._queue.empty():
