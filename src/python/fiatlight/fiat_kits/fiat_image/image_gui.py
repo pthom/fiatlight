@@ -1,6 +1,6 @@
 from fiatlight.fiat_types import JsonDict, ImagePath, Int_0_1000
 from fiatlight.fiat_core import AnyDataWithGui
-from fiatlight.fiat_image.image_types import Image, ImageU8
+from fiatlight.fiat_kits.fiat_image.image_types import Image, ImageU8
 from imgui_bundle import immvision, imgui
 from imgui_bundle import portable_file_dialogs as pfd
 

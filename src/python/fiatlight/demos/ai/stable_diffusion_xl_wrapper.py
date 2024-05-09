@@ -2,7 +2,7 @@
 # SDXL-Turbo is a distilled version of SDXL 1.0, trained for real-time synthesis
 # To run this, you will need to install the following packages:
 #   pip install -r requirements_ai.txt
-from fiatlight.fiat_image import ImageU8
+from fiatlight.fiat_kits.fiat_image import ImageU8
 from fiatlight.fiat_utils import LazyModule
 from fiatlight import fiat_types
 import numpy as np

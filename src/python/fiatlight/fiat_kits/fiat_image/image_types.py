@@ -75,9 +75,9 @@ Image = Union[ImageU8, ImageFloat]
 
 def _register_image_type_factories() -> None:
     from fiatlight.fiat_togui.to_gui import gui_factories
-    from fiatlight.fiat_image.image_gui import ImageChannelsWithGui, ImageWithGui
+    from fiatlight.fiat_kits.fiat_image.image_gui import ImageChannelsWithGui, ImageWithGui
 
-    prefix = "fiatlight.fiat_image.image_types.Image"
+    prefix = "fiatlight.fiat_kits.fiat_image.image_types.Image"
     gui_factories().register_factory_name_start_with(prefix, ImageWithGui)
     gui_factories().register_factory_union(prefix, ImageWithGui)
 

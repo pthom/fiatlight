@@ -2,7 +2,7 @@ from typing import Tuple, TypeAlias
 from numpy.typing import NDArray
 import cv2
 import numpy as np
-from fiatlight.fiat_image import ImageU8, ColorType, ColorConversion
+from fiatlight.fiat_kits.fiat_image import ImageU8, ColorType, ColorConversion
 
 
 LutTable: TypeAlias = NDArray[np.uint8]  # an array of 256 elements (LUT, aka Look-Up Table values)

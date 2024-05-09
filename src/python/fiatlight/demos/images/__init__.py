@@ -1,7 +1,7 @@
 from fiatlight.demos.images.overlay_alpha_image import overlay_alpha_image
 from fiatlight.demos.images.toon_edges import add_toon_edges
 from fiatlight.demos.images.old_school_meme import add_meme_text
-from fiatlight.fiat_image import image_source
+from fiatlight.fiat_kits.fiat_image import image_source
 from fiatlight.fiat_types import FunctionList
 
 

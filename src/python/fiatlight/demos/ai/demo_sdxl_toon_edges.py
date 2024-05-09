@@ -1,7 +1,7 @@
 import fiatlight
 from fiatlight.demos.ai.stable_diffusion_xl_wrapper import invoke_stable_diffusion_xl
 from fiatlight.demos.images.toon_edges import add_toon_edges
-from fiatlight.fiat_image import lut_channels_in_colorspace
+from fiatlight.fiat_kits.fiat_image import lut_channels_in_colorspace
 
 
 def main() -> None:

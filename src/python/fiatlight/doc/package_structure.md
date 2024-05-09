@@ -1,4 +1,6 @@
-
+```
+tree -F -I "__pycache__|*json|*ini|doc|demos|sandbox|tests" src/python/
+```
 
 # Core of Fiatlight framework
 
@@ -69,26 +71,27 @@ src/python/fiatlight/
 
 # Specialized modules and presenters per data type:
 ```
-├── fiat_array
-│     ├── __init__.py
-│     ├── array_types.py         # FloatMatrix_Dim1, FloatMatrix_Dim2, IntMatrix_Dim1, etc
-│     └── simple_plot_gui.py     # Can present FloatMatrix_Dim1 & FloatMatrix_Dim2 as a plot
-│
-├── fiat_audio
-│     ├── __init__.py
-│     ├── audio_functions.py
-│     ├── audio_record_gui.py
-│     ├── sound_wave.py
-│     ├── sound_wave_gui.py
-│     └── sound_wave_player.py
-├── fiat_image
-│     ├── __init__.py
-│     ├── cv_color_type.py
-│     ├── cv_color_type_gui.py
-│     ├── image_gui.py
-│     ├── image_types.py
-│     ├── lut.py
-│     └── lut_gui.py
-├── py.typed
+fiat_kits/
+    ├── fiat_array
+    │     ├── __init__.py
+    │     ├── array_types.py         # FloatMatrix_Dim1, FloatMatrix_Dim2, IntMatrix_Dim1, etc
+    │     └── simple_plot_gui.py     # Can present FloatMatrix_Dim1 & FloatMatrix_Dim2 as a plot
+    │
+    ├── fiat_audio
+    │     ├── __init__.py
+    │     ├── audio_functions.py
+    │     ├── audio_record_gui.py
+    │     ├── sound_wave.py
+    │     ├── sound_wave_gui.py
+    │     └── sound_wave_player.py
+    ├── fiat_image
+    │     ├── __init__.py
+    │     ├── cv_color_type.py
+    │     ├── cv_color_type_gui.py
+    │     ├── image_gui.py
+    │     ├── image_types.py
+    │     ├── lut.py
+    │     └── lut_gui.py
+    ├── py.typed
 
 ```

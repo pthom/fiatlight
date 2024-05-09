@@ -1,5 +1,6 @@
-from fiatlight.fiat_image.image_types import ImageU8_1, ImageU8, Image
-from fiatlight.fiat_image.image_gui import ImageWithGui
+from fiatlight.fiat_kits.fiat_image.image_types import ImageU8_1, ImageU8, Image
+from fiatlight.fiat_kits.fiat_image.image_gui import ImageWithGui
+
 from fiatlight import FunctionWithGui
 
 

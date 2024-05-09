@@ -1,5 +1,5 @@
 import fiatlight
-from fiatlight.fiat_image import ImageU8
+from fiatlight.fiat_kits.fiat_image import ImageU8
 from fiatlight.fiat_types import Float_0_1, ColorRgb
 from typing import NewType
 
@@ -84,7 +84,7 @@ def add_meme_text(
 
 def sandbox() -> None:
     from fiatlight.demos.ai.stable_diffusion_xl_wrapper import invoke_stable_diffusion_xl
-    from fiatlight.fiat_image import image_source
+    from fiatlight.fiat_kits.fiat_image import image_source
 
     use_stable_diffusion = True
     if use_stable_diffusion:

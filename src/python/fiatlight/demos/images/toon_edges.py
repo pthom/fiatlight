@@ -1,5 +1,5 @@
 import fiatlight
-from fiatlight.fiat_image import ImageU8_GRAY, ImageU8_3, image_source
+from fiatlight.fiat_kits.fiat_image import ImageU8_GRAY, ImageU8_3, image_source
 from fiatlight.fiat_types import Float_0_1, PositiveFloat, Float_0_10, Int_0_10
 from fiatlight.demos.images.opencv_wrappers import canny, dilate, MorphShape, CannyApertureSize
 from fiatlight.demos.images.overlay_alpha_image import overlay_alpha_image
@@ -53,7 +53,7 @@ def add_toon_edges(
     image_with_edges = merge_toon_edges(image, dilated_edges, edges_intensity)
 
     # Add internals for debugging
-    from fiatlight.fiat_image import ImageWithGui
+    from fiatlight.fiat_kits.fiat_image import ImageWithGui
     from fiatlight import AnyDataWithGui
 
     if not hasattr(add_toon_edges, "fiat_internals"):
