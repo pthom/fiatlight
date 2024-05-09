@@ -81,7 +81,7 @@ class MicrophoneGui(FunctionWithGui):
 
         self._microphone_params_gui = MicrophoneParamsGui()
         self._microphone_params_gui.value = SoundStreamParams()
-        self._microphone_io = AudioProviderMic(self._microphone_params_gui.value)
+        self._microphone_io = AudioProviderMic()
 
         self._displayed_sound_block = None
         self._sound_wave_being_recorded = None
@@ -112,7 +112,7 @@ class MicrophoneGui(FunctionWithGui):
         return needs_refresh
 
     def _on_start_recording(self) -> None:
-        self._microphone_io.start()
+        self._microphone_io.start(self._microphone_params_gui.get_actual_value())
         self._sound_wave = None
         self._is_recording = True
 
