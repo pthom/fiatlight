@@ -1,0 +1,82 @@
+@startuml
+
+package fiat_audio {
+    entity SoundBlock {
+        <=> array[float32]
+    }
+
+    class SoundBlocksList {
+        blocks: list[SoundBlock]
+        sample_rate: SampleRate
+    }
+
+    class SoundWave {
+        wave: FloatMatrix_Dim1
+        sample_rate: SampleRate
+    }
+
+    class SoundStreamParams {
+        A small subset of parameters for a sound stream
+        ---
+        + sample_rate: SampleRate = SampleRate(44100)
+        + nb_channels: NbChannels = NbChannels(1)
+        + block_size: BlockSize = BlockSize(512)
+    }
+
+    class SoundStreamParamsGui<<DataWithGui>> {}
+    SoundStreamParamsGui *... SoundStreamParams
+
+
+    class AudioProvider {
+        - _queue: Queue[SoundBlock]
+        - _sample_rate: SampleRate
+        + enqueue_sound_block(block, sample_rate)
+        + has_sound_blocks()
+        + get_sound_blocks()
+    }
+
+    class AudioProviderGui<<FunctionWithGui>> {
+        - _audio_provider: AudioProvider
+        - _live_sound_block_plot_gui
+        - _sound_blocks_list: SoundBlocksList
+        + f() -> SoundBlocksList
+        + _on_heartbeat() -> bool
+    }
+
+    AudioProviderGui *-- AudioProvider
+
+    class AudioProviderMic {
+        - _sd_stream: Optional[sd.InputStream]
+        + start(stream_params)
+        + stop()
+        + started(self) -> bool
+    }
+
+    AudioProviderMic --|> AudioProvider
+
+    class AudioProviderMicGui {
+        # IO
+        _mic_provider: AudioProviderMic
+        # Serialized options
+        _mic_stream_params_gui: SoundStreamParamsGui
+
+        + specialized_internal_gui(self) -> bool:
+    }
+
+    AudioProviderMicGui *-- AudioProviderMic
+    AudioProviderMicGui *-- SoundStreamParamsGui
+    AudioProviderMicGui --|> AudioProviderGui
+
+    class AudioRecorderGui<<FunctionWithGui>> {
+        - _sound_wave_being_recorded
+        - _recording_status
+        # Output after recording
+        - _sound_wave: SoundWave | None
+        - _shall_append: bool = False
+
+        + _f(self, sound_blocks_list) -> opt SoundWave
+    }
+}
+
+
+@enduml
