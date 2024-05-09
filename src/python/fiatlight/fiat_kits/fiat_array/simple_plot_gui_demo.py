@@ -9,7 +9,7 @@ def sin_wave() -> fiat_array.FloatMatrix_Dim2:
     x = np.arange(0, 10, 0.1)
     y = np.sin(x)
     r = np.stack((x, y))
-    return r
+    return r  # type: ignore
 
 
 def make_spirograph_curve(

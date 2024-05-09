@@ -1,4 +1,4 @@
-from imgui_bundle import imgui, ImVec4
+from imgui_bundle import imgui, ImVec4, hello_imgui, imgui_ctx
 from fiatlight.fiat_widgets import fiat_osd
 from fiatlight.fiat_utils.registry import AutoRegistry
 from typing import Callable, Tuple
@@ -111,4 +111,17 @@ def button_with_disable_flag(label: str, is_disabled: bool) -> bool:
     clicked = imgui.button(label)
     if is_disabled:
         imgui.end_disabled()
+    return clicked
+
+
+def on_off_button_with_icons(is_on: bool, on_icon: str, off_icon: str) -> bool:
+    icon = on_icon if is_on else off_icon
+    # color: dark red if on, else dark gray
+    color = ImVec4(1.0, 0.3, 0.3, 1.0) if is_on else ImVec4(0.7, 0.7, 0.7, 1.0)
+    with imgui_ctx.push_style_color(imgui.Col_.text.value, color):
+        with imgui_ctx.begin_horizontal("OnOffButton"):
+            imgui.spring()
+            button_size = hello_imgui.em_to_vec2(3, 3)
+            clicked = imgui.button(icon, button_size)
+            imgui.spring()
     return clicked

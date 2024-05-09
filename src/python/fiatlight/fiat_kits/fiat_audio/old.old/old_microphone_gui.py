@@ -1,17 +1,18 @@
 import numpy as np
-
-from fiatlight.fiat_core import AnyDataWithGui, FunctionWithGui
-from fiatlight.fiat_kits.fiat_audio.microphone_io import MicrophoneParams, MicrophoneIo
-from fiatlight.fiat_kits.fiat_audio.audio_types_gui import SampleRateGui, BlockSizeGui
-from fiatlight.fiat_kits.fiat_audio.audio_types import SoundBlock, SoundWave
-from fiatlight.fiat_widgets import fontawesome_6_ctx, icons_fontawesome_6
 from imgui_bundle import imgui, imgui_ctx, ImVec4, hello_imgui, ImVec2
 
+from fiatlight.fiat_core import AnyDataWithGui, FunctionWithGui
+from fiatlight.fiat_widgets import fontawesome_6_ctx, icons_fontawesome_6
 
-class MicrophoneParamsGui(AnyDataWithGui[MicrophoneParams]):
+from fiatlight.fiat_kits.fiat_audio.audio_provider_mic import SoundStreamParams, AudioProviderMic
+from fiatlight.fiat_kits.fiat_audio.audio_types_gui import SampleRateGui, BlockSizeGui
+from fiatlight.fiat_kits.fiat_audio.audio_types import SoundBlock, SoundWave
+
+
+class MicrophoneParamsGui(AnyDataWithGui[SoundStreamParams]):
     def __init__(self) -> None:
         super().__init__()
-        self.callbacks.default_value_provider = lambda: MicrophoneParams()
+        self.callbacks.default_value_provider = lambda: SoundStreamParams()
         self.callbacks.present_str = (
             lambda x: f"{x.sample_rate / 1000} kHz, {x.nb_channels} channels, {x.block_size} samples"
         )
@@ -58,7 +59,7 @@ class MicrophoneGui(FunctionWithGui):
     _live_plot_size_em: ImVec2
 
     # IO
-    _microphone_io: MicrophoneIo
+    _microphone_io: AudioProviderMic
 
     # Live sound blocks
     _displayed_sound_block: SoundBlock | None
@@ -79,8 +80,8 @@ class MicrophoneGui(FunctionWithGui):
         self.on_heartbeat = self._on_heartbeat
 
         self._microphone_params_gui = MicrophoneParamsGui()
-        self._microphone_params_gui.value = MicrophoneParams()
-        self._microphone_io = MicrophoneIo(self._microphone_params_gui.value)
+        self._microphone_params_gui.value = SoundStreamParams()
+        self._microphone_io = AudioProviderMic(self._microphone_params_gui.value)
 
         self._displayed_sound_block = None
         self._sound_wave_being_recorded = None
@@ -181,26 +182,4 @@ class MicrophoneGui(FunctionWithGui):
 def register_microphone_params_gui() -> None:
     from fiatlight.fiat_togui.to_gui import register_type
 
-    register_type(MicrophoneParams, MicrophoneParamsGui)
-
-
-def sandbox_microphone_params() -> None:
-    import fiatlight
-
-    def my_function(params: MicrophoneParams) -> None:
-        pass
-
-    register_microphone_params_gui()
-    fiatlight.fiat_run(my_function)
-
-
-def sandbox_microphone_gui() -> None:
-    import fiatlight
-
-    fn = MicrophoneGui()
-    fiatlight.fiat_run(fn)
-
-
-if __name__ == "__main__":
-    # sandbox_microphone_params()
-    sandbox_microphone_gui()
+    register_type(SoundStreamParams, MicrophoneParamsGui)
