@@ -5,7 +5,7 @@ Internally, it uses ImPlot (https://github.com/epezent/implot)
 
 from fiatlight.fiat_core.any_data_with_gui import AnyDataWithGui
 from fiatlight.fiat_types.base_types import JsonDict
-from fiatlight.fiat_array.array_types import FloatMatrix_Dim1, FloatMatrix_Dim2, present_array
+from fiatlight.fiat_kits.fiat_array.array_types import FloatMatrix_Dim1, FloatMatrix_Dim2, present_array
 from dataclasses import dataclass
 from enum import Enum, auto
 from typing import List
