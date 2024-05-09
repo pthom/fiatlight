@@ -1,3 +1,33 @@
+"""FunctionNodeGui represents the GUI for a FunctionNode
+
+In summary, the FunctionNodeGui manages the GUI for a FunctionNode: it provides methods for drawing the node's GUI,
+interacting with the node's inputs and outputs, and saving and loading the GUI's state.
+It is responsible for interacting with imgui-node-editor, and for handling the user interactions.
+
+Notes:
+    - high-level overview of the classes involved:
+
+        FunctionNodeGui *--- FunctionNode *--- FunctionWithGui
+           (i.e. FunctionNodeGui includes 1 FunctionNode, and FunctionNode includes 1 FunctionWithGui)
+
+        FunctionsGraph *--many- FunctionNode
+        FunctionsGraph *--many- FunctionNodeLink
+          (i.e. FunctionsGraph includes many FunctionNode, and many FunctionNodeLink)
+
+        FunctionGraphGui *-- FunctionsGraph
+        FunctionGraphGui *--many- FunctionNodeGui
+            (i.e. FunctionGraphGui includes 1 FunctionsGraph, and many FunctionNodeGui)
+
+
+    - `FunctionWithGui` is a class that wraps a function and provides GUI for its inputs and outputs
+          The inputs and outputs are represented as instances of AnyDataWithGui, which also stores the GUI callbacks.
+    - `FunctionNode` is a node in the "symbolic" functions graph.
+        It contains a FunctionWithGui, and links to other nodes. It is not able to draw itself.
+    - `FunctionNodeGui` is a node in the "visual" function graph, handled by imgui-node-editor.
+         It is able to draw itself, and to handle user interactions. It contains a FunctionNode.
+
+"""
+
 from __future__ import annotations
 
 from fiatlight.fiat_types import Error, Unspecified, UnspecifiedValue, BoolFunction, JsonDict, ErrorValue
@@ -51,8 +81,8 @@ class FunctionNodeGui:
     _fiat_internals_with_gui: Dict[str, AnyDataWithGui[Any]]
 
     # user settings:
-    # Shall we show the details of the inputs/outputs?
-    # Those settings are saved in the user settings file
+    #   Flags that indicate whether the details of the inputs/outputs/internals are shown or not
+    #   (those settings are saved in the user settings file)
     _show_input_details: Dict[str, bool] = {}
     _inputs_expanded: bool = True
     _show_output_details: Dict[int, bool] = {}
