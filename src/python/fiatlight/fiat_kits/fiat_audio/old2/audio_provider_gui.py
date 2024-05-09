@@ -1,4 +1,5 @@
-"""AudioProviderGui: a GUI wrapper for an AudioProvider.
+# type: ignore
+"""AudioProviderGui: a GUI wrapper for an AudioBuffer.
 
 It displays the live sound blocks.
 """
@@ -7,8 +8,8 @@ from imgui_bundle import ImVec2, imgui, imgui_ctx
 from typing import List
 from abc import ABC
 
-from .audio_types import SoundBlocksList, SoundBlock
-from .audio_provider import AudioProvider
+from fiatlight.fiat_kits.fiat_audio.audio_types import SoundBlocksList, SoundBlock
+from fiatlight.fiat_kits.fiat_audio.audio_buffer import AudioBuffer
 
 
 class _LiveSoundBlockPlotGui:
@@ -49,13 +50,13 @@ class _LiveSoundBlockPlotGui:
 
 
 class AudioProviderGui(FunctionWithGui, ABC):
-    _audio_provider: AudioProvider
+    _audio_provider: AudioBuffer
     # Live sound block plot
     _live_sound_block_plot_gui: _LiveSoundBlockPlotGui
     # Available sound blocks
     _sound_blocks_list: SoundBlocksList
 
-    def __init__(self, audio_provider: AudioProvider) -> None:
+    def __init__(self, audio_provider: AudioBuffer) -> None:
         self._audio_provider = audio_provider
 
         # FunctionWithGui init:

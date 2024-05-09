@@ -18,7 +18,7 @@ from fiatlight.fiat_widgets import (
 from fiatlight.fiat_types import TimeSeconds, JsonDict
 from fiatlight.fiat_utils import fiat_math
 
-from .audio_types import SoundWave
+from fiatlight.fiat_kits.fiat_audio.sound_wave import SoundWave
 from .sound_wave_player import SoundWavePlayer
 
 

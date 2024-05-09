@@ -14,8 +14,8 @@ def sandbox() -> None:
     mic = fiat_audio.AudioProviderMic()
     mic.start(params)
     while time.time() - start < 1.0:
-        data = mic.get_sound_blocks()
-        print_repeatable_message(f"Received {len(data.blocks)} blocks of audio data.")
+        sound_wave = mic.get_audio_buffer().get()
+        print_repeatable_message(f"Received sound wave: {sound_wave}")
     mic.stop()
 
 

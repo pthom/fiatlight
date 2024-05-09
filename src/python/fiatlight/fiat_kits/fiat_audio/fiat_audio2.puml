@@ -1,0 +1,56 @@
+@startuml
+
+package fiat_audio {
+    entity SoundData {
+        <=> array[float32]
+        ---
+        shape = nb_samples, nb_channels
+    }
+
+
+    class SoundWave {
+        + wave: SoundData
+        + sample_rate: SampleRate
+
+        + sound_wave_from_file(file_path)
+        + static concatenate(sound_waves)
+    }
+
+    SoundWave *-- SoundData
+
+
+    class SoundStreamParams {
+        A small subset of parameters for a sound stream
+        ---
+        + sample_rate: SampleRate = SampleRate(44100)
+        + nb_channels: NbChannels = NbChannels(1)
+        + block_size: BlockSize = BlockSize(512)
+    }
+
+
+    class AudioBuffer {
+        - _queue: Queue[SoundBlock]
+        - _sample_rate: SampleRate
+        + enqueue(sound_wave)
+        + has_data() -> bool
+        + get() -> SoundWave
+    }
+
+    AudioBuffer <... SoundWave: receives
+    AudioBuffer ...> SoundWave: emits (remaining)
+
+
+    class AudioProviderMic {
+        - _sd_stream: Optional[sd.InputStream]
+        + get_audio_buffer() -> AudioBuffer
+        + start(stream_params)
+        + stop()
+        + started(self) -> bool
+    }
+
+    AudioProviderMic *-- AudioBuffer
+    AudioProviderMic ---> SoundStreamParams: uses
+}
+
+
+@enduml

@@ -1,11 +1,8 @@
 """SoundWave: a simple dataclass for storing audio waveforms, along with their sample rate."""
-import numpy as np
-import soundfile  # type: ignore
 
-from fiatlight.fiat_kits.fiat_array import FloatMatrix_Dim1
-from fiatlight.fiat_types import AudioPath, TimeSeconds, ExplainedValue, ExplainedValues
-import scipy  # type: ignore
+from fiatlight.fiat_types import ExplainedValue, ExplainedValues
 from typing import NewType
+import numpy as np
 from numpy.typing import NDArray
 from dataclasses import dataclass
 
@@ -19,8 +16,12 @@ NbChannels = NewType("NbChannels", int)
 # The number of samples in a block of sound data (typically 512 or 1024),
 BlockSize = NewType("BlockSize", int)
 
+# A block of sound data, with shape (nb_samples, nb_channels),
+SoundData = NDArray[np.float32]
+
 # A live block of sound data, with shape (block_size, nb_channels),
 # where block_size is the number of samples per channel, user-defined (typically 512 or 1024),
+# (used when communicating with sounddevice)
 SoundBlock = NDArray[np.float32]
 
 
@@ -32,77 +33,6 @@ class SoundStreamParams:
     sample_rate: SampleRate = SampleRate(44100)
     nb_channels: NbChannels = NbChannels(1)
     block_size: BlockSize = BlockSize(512)
-
-
-@dataclass
-class SoundBlocksList:
-    blocks: list[SoundBlock]
-    sample_rate: SampleRate
-
-    @staticmethod
-    def make_empty() -> "SoundBlocksList":
-        return SoundBlocksList([], SampleRate(44100))
-
-    def is_empty(self) -> bool:
-        return len(self.blocks) == 0
-
-
-@dataclass
-class SoundWave:
-    wave: FloatMatrix_Dim1
-    sample_rate: SampleRate
-    _time_array: FloatMatrix_Dim1 | None = None  # cache for time array
-    _max_intensity, _min_intensity = 1.0, -1.0
-
-    def __post_init__(self) -> None:
-        if self.is_empty():
-            return
-        time_array = np.arange(0, self.duration(), 1 / self.sample_rate, self.wave.dtype)
-        self._time_array = time_array  # type: ignore
-        self._min_intensity = self.wave.min()
-        self._max_intensity = self.wave.max()
-
-    @staticmethod
-    def make_empty() -> "SoundWave":
-        empty_wave: FloatMatrix_Dim1 = np.array([], dtype=np.float32)  # type: ignore
-        return SoundWave(empty_wave, SampleRate(44100))
-
-    def duration(self) -> TimeSeconds:
-        return len(self.wave) / self.sample_rate  # type: ignore
-
-    def nb_samples(self) -> int:
-        return len(self.wave)
-
-    def is_empty(self) -> bool:
-        return self.wave.size == 0
-
-    def _rough_resample_to_max_samples(self, max_samples: int) -> "SoundWave":
-        """Resample the sound wave to have at most max_samples.
-        Do not trust this for sound. This is only used for plotting, for performance reasons.
-        """
-        if len(self.wave) <= max_samples:
-            return self
-
-        num_samples = max_samples
-        wave_resampled = scipy.signal.resample(self.wave, max_samples)
-        new_sample_rate = SampleRate(self.sample_rate * num_samples / len(self.wave))
-        return SoundWave(wave_resampled, new_sample_rate)
-
-    def time_array(self) -> FloatMatrix_Dim1:
-        assert self._time_array is not None
-        return self._time_array  # noqa
-
-    def __str__(self) -> str:
-        return f"{self.duration():.2f}s at {self.sample_rate / 1000:.1f} kHz"
-
-
-def sound_wave_from_file(file_path: AudioPath) -> SoundWave:
-    """Load a sound wave from a file."""
-    wave, sample_rate = soundfile.read(file_path)
-    # Convert to mono if necessary
-    if wave.ndim == 2:
-        wave = wave.mean(axis=1)
-    return SoundWave(wave, sample_rate)
 
 
 #  --------------------------------------------------------------------------------------------

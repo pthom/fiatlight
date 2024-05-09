@@ -9,7 +9,6 @@ from .audio_types import (
     NbChannelsExplained,
     BlockSize,
     BlockSizesExplained,
-    SoundBlocksList,
     SoundStreamParams,
 )
 
@@ -36,16 +35,6 @@ class BlockSizeGui(AnyDataWithGui[BlockSize]):
         self.callbacks.edit = make_explained_value_edit_callback("block_size", self, BlockSizesExplained)
         self.callbacks.default_value_provider = lambda: BlockSize(1024)
         self.callbacks.present_str = lambda x: f"{x} samples"
-
-
-class SoundBlocksListGui(AnyDataWithGui[SoundBlocksList]):
-    def __init__(self) -> None:
-        super().__init__()
-        self.callbacks.present_str = self._present_str
-
-    @staticmethod
-    def _present_str(value: SoundBlocksList) -> str:
-        return f"{len(value.blocks)} blocks at {value.sample_rate / 1000:.1f} kHz"
 
 
 class SoundStreamParamsGui(AnyDataWithGui[SoundStreamParams]):
@@ -98,4 +87,3 @@ def register_audio_types_gui() -> None:
     register_type(SampleRate, SampleRateGui)
     register_type(NbChannels, NbChannelsGui)
     register_type(BlockSize, BlockSizeGui)
-    register_type(SoundBlocksList, SoundBlocksListGui)

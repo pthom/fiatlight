@@ -6,7 +6,7 @@ from fiatlight.fiat_core.function_with_gui import FunctionWithGui
 from fiatlight.fiat_widgets import icons_fontawesome_6, fontawesome_6_ctx
 from imgui_bundle import imgui_ctx, imgui, hello_imgui
 
-from .audio_types import SoundWave, SoundBlocksList
+from fiatlight.fiat_kits.fiat_audio.audio_types import SoundWave, SoundBlocksList
 
 
 class RecordingStatus(Enum):

@@ -21,7 +21,7 @@ from typing import Optional
 from fiatlight.fiat_kits.fiat_array import FloatMatrix_Dim1
 from fiatlight.fiat_types import TimeSeconds
 
-from .audio_types import SoundWave
+from fiatlight.fiat_kits.fiat_audio.sound_wave import SoundWave
 
 
 class SoundWavePlayer:

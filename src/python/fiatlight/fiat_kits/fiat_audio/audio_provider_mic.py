@@ -1,16 +1,22 @@
 import sounddevice as sd  # type: ignore
 from typing import Any, Optional
 import logging
-from .audio_types import SoundBlock, SoundStreamParams
-from .audio_provider import AudioProvider
+from .audio_types import SoundStreamParams, SoundBlock
+from .sound_wave import SoundWave
+from .audio_buffer import AudioBuffer
 
 
-class AudioProviderMic(AudioProvider):
+class AudioProviderMic:
     _sd_stream: Optional[sd.InputStream]
+    _audio_buffer: AudioBuffer
 
     def __init__(self) -> None:
         super().__init__()
+        self._audio_buffer = AudioBuffer()
         self._sd_stream = None
+
+    def get_audio_buffer(self) -> AudioBuffer:
+        return self._audio_buffer
 
     def start(self, stream_params: SoundStreamParams) -> None:
         """Manually start the microphone input, when not using the context manager."""
@@ -64,6 +70,7 @@ class AudioProviderMic(AudioProvider):
         if indata.size > 0:
             # logging.debug(f"Received data: {indata.shape}")
             assert self._sd_stream is not None
-            self.enqueue_sound_block(indata.copy(), self._sd_stream.samplerate)
+            sound_wave = SoundWave(indata.copy(), self._sd_stream.samplerate)
+            self._audio_buffer.enqueue(sound_wave)
         else:
             logging.debug("No data in callback.")

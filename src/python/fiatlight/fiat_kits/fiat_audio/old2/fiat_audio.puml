@@ -1,4 +1,11 @@
 @startuml
+package fiat_core {
+    class AnyDataWithGui {
+    }
+    class FunctionWithGui {
+    }
+}
+
 
 package fiat_audio {
     entity SoundBlock {
@@ -35,7 +42,7 @@ package fiat_audio {
         + get_sound_blocks()
     }
 
-    class AudioProviderGui<<FunctionWithGui>> {
+    class AudioProviderGui {
         - _audio_provider: AudioProvider
         - _live_sound_block_plot_gui
         - _sound_blocks_list: SoundBlocksList
@@ -43,6 +50,7 @@ package fiat_audio {
         + _on_heartbeat() -> bool
     }
 
+    AudioProviderGui --|> fiat_core.FunctionWithGui
     AudioProviderGui *-- AudioProvider
 
     class AudioProviderMic {
@@ -67,7 +75,7 @@ package fiat_audio {
     AudioProviderMicGui *-- SoundStreamParamsGui
     AudioProviderMicGui --|> AudioProviderGui
 
-    class AudioRecorderGui<<FunctionWithGui>> {
+    class AudioRecorderGui {
         - _sound_wave_being_recorded
         - _recording_status
         # Output after recording
@@ -76,6 +84,8 @@ package fiat_audio {
 
         + _f(self, sound_blocks_list) -> opt SoundWave
     }
+
+    AudioRecorderGui --|> fiat_core.FunctionWithGui
 }
 
 
