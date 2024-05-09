@@ -25,6 +25,16 @@ SoundBlock = NDArray[np.float32]
 
 
 @dataclass
+class SoundStreamParams:
+    """A *small* subset of parameters for a sound stream
+    (available in the sounddevice library)"""
+
+    sample_rate: SampleRate = SampleRate(44100)
+    nb_channels: NbChannels = NbChannels(1)
+    block_size: BlockSize = BlockSize(512)
+
+
+@dataclass
 class SoundBlocksList:
     blocks: list[SoundBlock]
     sample_rate: SampleRate

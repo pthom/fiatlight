@@ -1,7 +1,7 @@
 """Gui for simple types in fiat_audio.audio_types"""
 from fiatlight.fiat_core import AnyDataWithGui
 from fiatlight.fiat_togui import make_explained_value_edit_callback
-from fiatlight.fiat_kits.fiat_audio.audio_types import (
+from .audio_types import (
     SampleRate,
     SampleRatesExplained,
     NbChannels,
@@ -52,16 +52,3 @@ def register_audio_types_gui() -> None:
     register_type(NbChannels, NbChannelsGui)
     register_type(BlockSize, BlockSizeGui)
     register_type(SoundBlocksList, SoundBlocksListGui)
-
-
-def sandbox() -> None:
-    import fiatlight
-
-    def my_function(sample_rate: SampleRate, nb_channels: NbChannels, block_size: BlockSize) -> None:
-        pass
-
-    fiatlight.fiat_run(my_function)
-
-
-if __name__ == "__main__":
-    sandbox()

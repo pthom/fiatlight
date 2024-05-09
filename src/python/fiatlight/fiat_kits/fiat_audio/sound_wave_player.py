@@ -11,16 +11,17 @@ Usage:
     time.sleep(2)  # Play for 2 seconds
     player.stop()
 """
-import sounddevice as sd  # type: ignore
-from threading import Thread, current_thread
-from typing import Optional
-from fiatlight.fiat_kits.fiat_audio.audio_types import SoundWave
-from fiatlight.fiat_kits.fiat_array import FloatMatrix_Dim1
-from fiatlight.fiat_types import TimeSeconds
 from typing import Any
 import time
 import numpy as np
 import logging
+import sounddevice as sd  # type: ignore
+from threading import Thread, current_thread
+from typing import Optional
+from fiatlight.fiat_kits.fiat_array import FloatMatrix_Dim1
+from fiatlight.fiat_types import TimeSeconds
+
+from .audio_types import SoundWave
 
 
 class SoundWavePlayer:
@@ -218,30 +219,3 @@ def create_demo_sound_wave() -> SoundWave:
             full_wave = np.concatenate([full_wave, wave])
 
     return SoundWave(full_wave, sample_rate)  # type: ignore
-
-
-def sandbox() -> None:
-    import time
-
-    sound_wave = create_demo_sound_wave()
-    # sound_wave = sound_wave_from_file(
-    #     "/Users/pascal/dvp/OpenSource/ImGuiWork/_Bundle/fiatlight/priv_assets/audio/3 - Sanctus.mp3"  # type: ignore
-    # )
-
-    player = SoundWavePlayer(sound_wave)
-    # Play "do - re"
-    player.play()
-    time.sleep(1)  # Wait for 2 notes of 0.5 seconds each to play
-
-    player.pause()
-    time.sleep(1)  # Pause for 1 second
-
-    # Seek to "sol" (the fifth note, which starts at 2 seconds into the audio)
-    player.seek(TimeSeconds(4 * 0.5))  # 4 notes skipped, each 0.5 seconds long
-    player.play()  # Resume playback from "sol"
-    time.sleep(2)  # Play "sol - la - si - do", 4 notes of 0.5 seconds each
-    player.stop()
-
-
-if __name__ == "__main__":
-    sandbox()

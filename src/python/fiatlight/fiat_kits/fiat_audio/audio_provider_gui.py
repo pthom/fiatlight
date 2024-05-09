@@ -1,9 +1,9 @@
-from fiatlight.fiat_kits.fiat_audio.audio_types import SoundBlocksList, SoundBlock
 from fiatlight.fiat_core.function_with_gui import FunctionWithGui
-from fiatlight.fiat_kits.fiat_audio.wip_audio_provider import AudioProvider
 from imgui_bundle import ImVec2, imgui, imgui_ctx
 from typing import List
 from abc import ABC, abstractmethod
+from .audio_types import SoundBlocksList, SoundBlock
+from .audio_provider import AudioProvider
 
 
 class _LiveSoundBlockPlotGui:

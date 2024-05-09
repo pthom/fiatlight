@@ -1,11 +1,12 @@
 import logging
-
-from fiatlight.fiat_core.function_with_gui import FunctionWithGui
-from fiatlight.fiat_kits.fiat_audio.audio_types import SoundWave, SoundBlocksList
-from fiatlight.fiat_widgets import icons_fontawesome_6, fontawesome_6_ctx
-from imgui_bundle import imgui_ctx, imgui, hello_imgui
 from enum import Enum
 import numpy as np
+
+from fiatlight.fiat_core.function_with_gui import FunctionWithGui
+from fiatlight.fiat_widgets import icons_fontawesome_6, fontawesome_6_ctx
+from imgui_bundle import imgui_ctx, imgui, hello_imgui
+
+from .audio_types import SoundWave, SoundBlocksList
 
 
 class RecordingStatus(Enum):
@@ -119,51 +120,3 @@ class AudioRecorderGui(FunctionWithGui):
                     self._sound_wave_being_recorded.wave = np.concatenate(
                         [self._sound_wave_being_recorded.wave, sound_block]
                     )
-
-
-def sandbox_audio_recorder_gui() -> None:
-    import fiatlight
-    from fiatlight.fiat_kits.fiat_audio.wip_microphone_gui import MicrophoneGui
-
-    microphone_gui = MicrophoneGui()
-    audio_recorder_gui = AudioRecorderGui()
-
-    fiatlight.fiat_run_composition([microphone_gui, audio_recorder_gui])
-
-
-# def sandbox_audio_recorder_gui_with_freq_display() -> None:
-#     def find_dominant_frequency(signal, sample_rate):  # type: ignore
-#         import numpy as np
-#         from scipy.fft import fft  # type: ignore
-#
-#         signal_fft = fft(signal)
-#         magnitudes = np.abs(signal_fft)
-#         # Exclude the zero frequency "DC component" for finding the maximum
-#         positive_frequencies = magnitudes[:len(magnitudes) // 2]
-#         # Find the frequency with the maximum magnitude
-#         peak_frequency = np.argmax(positive_frequencies)
-#         # Convert the index of the maximum frequency component to an actual frequency
-#         dominant_frequency = peak_frequency * sample_rate / len(signal)
-#         return dominant_frequency
-#
-#     def find_dom_freq(block_list: SoundBlocksList) -> str:
-#         if len(block_list.blocks) == 0:
-#             return "0.0"
-#         sound_block = block_list.blocks[-1]
-#         dom_freq = find_dominant_frequency(sound_block, block_list.sample_rate) # type: ignore
-#         return f"Dominant frequency: {dom_freq:.1f} Hz"
-#
-#     import fiatlight
-#     graph = fiatlight.FunctionsGraph()
-#     from fiatlight.fiat_kits.fiat_audio.wip_microphone_gui import MicrophoneGui
-#     # microphone_gui = MicrophoneGui()
-#     # audio_recorder_gui = AudioRecorderGui()
-#     graph.add_function_composition([AudioRecorderGui(), MicrophoneGui()])
-#     graph.add_function(find_dom_freq)
-#     graph.add_link("MicrophoneGui", "find_dom_freq")
-#     fiatlight.fiat_run_graph(graph)
-
-
-if __name__ == "__main__":
-    sandbox_audio_recorder_gui()
-    # sandbox_audio_recorder_gui_with_freq_display()

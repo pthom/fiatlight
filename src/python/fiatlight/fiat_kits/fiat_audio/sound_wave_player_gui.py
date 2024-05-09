@@ -1,13 +1,14 @@
-"""SoundWavePlayerGui class for displaying SoundWave data in a GUI."""
+"""SoundWavePlayerGui class for displaying and playing SoundWave data in a GUI.
+
+This version might be refactored in the future since it mixes the sound source and the play & display part.
+"""
 import logging
 from dataclasses import dataclass
 
 from imgui_bundle import hello_imgui
+from imgui_bundle import implot, imgui, imgui_ctx, ImVec2, immapp
 
 from fiatlight.fiat_core.any_data_with_gui import AnyDataWithGui
-from fiatlight.fiat_kits.fiat_audio.audio_types import SoundWave
-from fiatlight.fiat_kits.fiat_audio.sound_wave_player import SoundWavePlayer
-from imgui_bundle import implot, imgui, imgui_ctx, ImVec2, immapp
 from fiatlight.fiat_widgets import (
     icons_fontawesome_6,
     fontawesome_6_ctx,
@@ -16,6 +17,9 @@ from fiatlight.fiat_widgets import (
 )
 from fiatlight.fiat_types import TimeSeconds, JsonDict
 from fiatlight.fiat_utils import fiat_math
+
+from .audio_types import SoundWave
+from .sound_wave_player import SoundWavePlayer
 
 
 @dataclass(frozen=True)
