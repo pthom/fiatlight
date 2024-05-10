@@ -96,8 +96,14 @@ class FunctionWithGui:
 
         :param fn: the function for which we want to create a FunctionWithGui
 
-        Note: This function will capture the locals and globals of the caller to be able to evaluate the types.
+        Notes:
+        This function will capture the locals and globals of the caller to be able to evaluate the types.
         Make sure to call this function *from the module where the function and its input/output types are defined*
+
+        If the function has attributes like invoke_manually or invoke_async, they will be taken into account:
+            - if `invoke_async` is True, the function will be called asynchronously
+            - if `invoke_manually` is True, the function will be called only if the user clicks on the "invoke" button
+
 
         Advanced parameters:
         ********************
@@ -373,6 +379,8 @@ class FunctionWithGui:
     def _can_emit_none_output(self) -> bool:
         if len(self._outputs_with_gui) > 1:
             return False
+        if len(self._outputs_with_gui) == 0:
+            return True
         output = self._outputs_with_gui[0]
         r = output.data_with_gui.can_be_none
         return r

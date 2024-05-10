@@ -2,6 +2,8 @@
 
 It is provided only for simple usages (playing sound waves from files, recording from a microphone).
 It supports only mono sound waves (no stereo).
+
+This is only a draft and should not be considered as a good starting point for a full-fledged audio framework.
 """
 
 from .audio_types import (
