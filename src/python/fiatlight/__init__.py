@@ -10,6 +10,7 @@ from fiatlight.fiat_core import (
 )
 from fiatlight.fiat_runner import fiat_run, fiat_run_composition, fiat_run_graph, FiatGuiParams
 from fiatlight.fiat_kits import fiat_image, fiat_array
+from fiatlight.fiat_widgets.fiat_osd import is_rendering_in_node, is_rendering_in_window
 
 
 def demo_assets_dir() -> str:
@@ -48,4 +49,7 @@ __all__ = [
     # fiat_kits subpackages
     "fiat_image",
     "fiat_array",
+    # from fiat_widgets
+    "is_rendering_in_node",
+    "is_rendering_in_window",
 ]

@@ -10,6 +10,38 @@ from imgui_bundle import imgui, ImVec2, imgui_node_editor, hello_imgui, imgui_ct
 from dataclasses import dataclass
 
 
+_IS_PRESENTLY_IN_DETACHED_WINDOW = False
+
+
+def is_rendering_in_node() -> bool:
+    """Check if we are currently rendering inside a Node.
+
+    You may want to check this value when implementing `present_custom` or `edit`
+    callbacks inside `AnyDataGuiCallbacks` for several possible reasons:
+
+        - Some widgets cannot be presented in a Node (e.g., a multiline text input),
+          be can be presented in a detached window.
+        - When inside a Node, you may want to render a smaller version, to save space
+          (as opposed to rendering a larger version in a detached window).
+    """
+    if imgui_node_editor.get_current_editor() is None:
+        return False
+    return not _IS_PRESENTLY_IN_DETACHED_WINDOW
+
+
+def is_rendering_in_window() -> bool:
+    """Check if we are currently rendering inside a regular ImGui window.
+    You may want to check this value when implementing `present_custom` or `edit`
+    callbacks inside `AnyDataGuiCallbacks` for several possible reasons:
+
+    - Some widgets cannot be presented in a Node (e.g., a multiline text input),
+      be can be presented in a detached window.
+    - When inside a Node, you may want to render a smaller version, to save space
+      (as opposed to rendering a larger version in a detached window).
+    """
+    return _IS_PRESENTLY_IN_DETACHED_WINDOW
+
+
 # ======================================================================================================================
 # OSD TOOLTIP
 # ======================================================================================================================
@@ -94,6 +126,7 @@ class _OsdDetachedWindows:
         self.detached_windows = []
 
     def _render_detached_windows(self) -> None:
+        global _IS_PRESENTLY_IN_DETACHED_WINDOW
         alive_windows = []  # remove windows that are closed
         for detached_info in self.detached_windows:
             window_flags = imgui.WindowFlags_.no_collapse.value
@@ -108,7 +141,9 @@ class _OsdDetachedWindows:
             imgui.set_next_window_size(window_size, imgui.Cond_.once.value)
             show, flag_open = imgui.begin(detached_info.popup_label, True, window_flags)
             if show and flag_open:
+                _IS_PRESENTLY_IN_DETACHED_WINDOW = True
                 detached_info.bool_returned = detached_info.gui_function()
+                _IS_PRESENTLY_IN_DETACHED_WINDOW = False
                 shall_close = imgui.button("Close")
                 if not shall_close:
                     alive_windows.append(detached_info)
