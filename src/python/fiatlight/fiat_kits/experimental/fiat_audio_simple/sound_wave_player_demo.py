@@ -2,7 +2,7 @@
 This example does not provide a GUI. It's simply plays notes.
 """
 
-from fiatlight import fiat_audio_simple
+from fiatlight.fiat_kits.experimental import fiat_audio_simple
 from fiatlight.fiat_types import TimeSeconds
 import numpy as np
 

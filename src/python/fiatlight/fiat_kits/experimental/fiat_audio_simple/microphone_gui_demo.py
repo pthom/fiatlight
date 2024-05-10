@@ -1,5 +1,5 @@
 import fiatlight
-from fiatlight import fiat_audio_simple
+from fiatlight.fiat_kits.experimental import fiat_audio_simple
 
 
 def sandbox_microphone_gui() -> None:

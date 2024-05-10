@@ -1,7 +1,7 @@
 """Demonstrates playing a sound wave from a file using SoundWavePlayerGui"""
 
 import fiatlight
-from fiatlight import fiat_audio_simple
+from fiatlight.fiat_kits.experimental import fiat_audio_simple
 
 
 def sandbox_play_file() -> None:
