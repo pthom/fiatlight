@@ -77,6 +77,10 @@ class FunctionWithGui:
     #        Construction
     #  input_with_gui and output_with_gui should be filled soon after construction
     # --------------------------------------------------------------------------------------------
+    @staticmethod
+    def _Construct_Section() -> None:  # Dummy function to create a section in the IDE # noqa
+        pass
+
     def __init__(
         self,
         fn: Callable[..., Any] | None,
@@ -135,22 +139,6 @@ class FunctionWithGui:
         r = FunctionWithGui(None)
         return r
 
-    # def add_param(
-    #     self,
-    #     name: str,
-    #     data_with_gui: AnyDataWithGui[Any],
-    #     default_value: Any | Unspecified = UnspecifiedValue,
-    #     param_kind: ParamKind = ParamKind.PositionalOrKeyword,
-    # ) -> None:
-    #     """For manual construction of the function, add a parameter to the function"""
-    #     self._inputs_with_gui.append(ParamWithGui(name, data_with_gui, param_kind, default_value))
-    #
-    # def add_output(self, data_with_gui: AnyDataWithGui[Any] | None = None) -> None:
-    #     """For manual construction of the function, add an output to the function"""
-    #     if data_with_gui is None:
-    #         data_with_gui = AnyDataWithGui()
-    #     self._outputs_with_gui.append(OutputWithGui(data_with_gui))
-
     def set_invoke_live(self) -> None:
         """Set flags to make this a live function (called automatically at each frame)"""
         self.invoke_manually = False
@@ -182,6 +170,10 @@ class FunctionWithGui:
     # --------------------------------------------------------------------------------------------
     #        Utilities
     # --------------------------------------------------------------------------------------------
+    @staticmethod
+    def _Utilities_Section() -> None:  # Dummy function to create a section in the IDE # noqa
+        pass
+
     def is_dirty(self) -> bool:
         return self._dirty
 
@@ -197,6 +189,10 @@ class FunctionWithGui:
     # --------------------------------------------------------------------------------------------
     #        Inputs, aka parameters
     # --------------------------------------------------------------------------------------------
+    @staticmethod
+    def _Inputs_Section() -> None:  # Dummy function to create a section in the IDE # noqa
+        pass
+
     def nb_inputs(self) -> int:
         return len(self._inputs_with_gui)
 
@@ -261,6 +257,10 @@ class FunctionWithGui:
     # --------------------------------------------------------------------------------------------
     #        Outputs
     # --------------------------------------------------------------------------------------------
+    @staticmethod
+    def _Outputs_Section() -> None:  # Dummy function to create a section in the IDE # noqa
+        pass
+
     def nb_outputs(self) -> int:
         return len(self._outputs_with_gui)
 
@@ -293,6 +293,10 @@ class FunctionWithGui:
     # This is the heart of fiatlight: it calls the function with the current inputs
     # and stores the result in the outputs, stores the exception if any, etc.
     # --------------------------------------------------------------------------------------------
+    @staticmethod
+    def _Invoke_Section() -> None:  # Dummy function to create a section in the IDE # noqa
+        pass
+
     @final
     def invoke(self) -> None:
         assert self._f_impl is not None
@@ -361,6 +365,10 @@ class FunctionWithGui:
     #   - the options of the inputs
     #   - the options of the outputs
     # --------------------------------------------------------------------------------------------
+    @staticmethod
+    def _Serialize_Section() -> None:  # Dummy function to create a section in the IDE # noqa
+        pass
+
     def save_gui_options_to_json(self) -> JsonDict:
         input_options = {}
         for input_with_gui in self._inputs_with_gui:
@@ -401,6 +409,10 @@ class FunctionWithGui:
     # --------------------------------------------------------------------------------------------
     #       Function documentation & source code
     # --------------------------------------------------------------------------------------------
+    @staticmethod
+    def _Doc_Section() -> None:  # Dummy function to create a section in the IDE # noqa
+        pass
+
     def has_doc(self) -> bool:
         return self.get_function_doc() is not None
 
