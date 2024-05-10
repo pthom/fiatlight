@@ -24,7 +24,7 @@ Victor Hugo, extrait du recueil «Les Contemplations» (1856)
         """
 
     def f(text: str = poem) -> str:
-        text.upper()
+        return text.upper()
 
     f_gui = fiatlight.FunctionWithGui(f)
 

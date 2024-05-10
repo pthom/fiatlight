@@ -12,6 +12,7 @@ class OptionalWithGui(AnyDataWithGui[DataType | None]):
 
     def __init__(self, inner_gui: AnyDataWithGui[DataType]) -> None:
         super().__init__()
+        self.can_be_none = True
         self.inner_gui = inner_gui
         self.callbacks.present_str = self.present_str
         self.callbacks.edit = self.edit
