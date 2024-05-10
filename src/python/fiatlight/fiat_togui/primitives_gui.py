@@ -1,8 +1,10 @@
+import fiatlight
 from imgui_bundle import imgui, hello_imgui, imgui_knobs, imgui_toggle, portable_file_dialogs as pfd, ImVec2, imgui_ctx
 from fiatlight.fiat_core import AnyDataWithGui
 from fiatlight.fiat_types import FilePath
 from fiatlight.fiat_types.color_types import ColorRgb, ColorRgba
 from fiatlight.fiat_widgets import fontawesome_6_ctx, icons_fontawesome_6, fiat_osd
+from fiatlight import fiat_widgets
 from typing import Any, Callable, TypeAlias
 from dataclasses import dataclass
 from enum import Enum
@@ -340,7 +342,8 @@ class StrWithGui(AnyDataWithGui[str]):
             self.callbacks.edit_popup_required = True
 
         self.callbacks.present_custom = self.present_custom
-        self.callbacks.present_custom_popup_required = True
+        self.callbacks.present_custom_popup_required = False
+        self.callbacks.present_custom_popup_possible = True
         self.callbacks.clipboard_copy_possible = True
         self.callbacks.on_heartbeat = self.on_heartbeat
 
@@ -369,10 +372,17 @@ class StrWithGui(AnyDataWithGui[str]):
 
     def present_custom(self) -> None:
         text_value = self.get_actual_value()
-        text_edit_size = ImVec2(
-            imgui.get_window_width() - hello_imgui.em_size(1), imgui.get_window_height() - hello_imgui.em_size(5)
-        )
-        imgui.input_text_multiline("##str", text_value, text_edit_size, imgui.InputTextFlags_.read_only.value)
+        if fiatlight.is_rendering_in_window():
+            text_edit_size = ImVec2(
+                imgui.get_window_width() - hello_imgui.em_size(1), imgui.get_window_height() - hello_imgui.em_size(5)
+            )
+            imgui.input_text_multiline("##str", text_value, text_edit_size, imgui.InputTextFlags_.read_only.value)
+        else:
+            fiat_widgets.text_maybe_truncated(
+                text_value,
+                max_width_chars=50,
+                max_lines=5,
+            )
 
     def edit(self) -> bool:
         assert isinstance(self.value, str)
