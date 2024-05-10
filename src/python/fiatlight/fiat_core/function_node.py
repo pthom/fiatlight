@@ -1,6 +1,6 @@
 from fiatlight.fiat_core.function_with_gui import FunctionWithGui
 from fiatlight.fiat_core.param_with_gui import ParamWithGui
-from fiatlight.fiat_types import JsonDict
+from fiatlight.fiat_types import JsonDict, ErrorValue
 from typing import Any, List
 import logging
 import threading
@@ -212,7 +212,23 @@ class FunctionNode:
         for link in self.output_links:
             src_output = self.function_with_gui.output(link.src_output_idx)
             dst_input = link.dst_function_node.function_with_gui.input(link.dst_input_name)
-            dst_input.value = src_output.value
+
+            if src_output.value is not None:
+                dst_input.value = src_output.value
+            else:
+                if not dst_input.can_be_none:
+                    this_function_name = self.function_with_gui.name
+                    other_function_name = link.dst_function_node.function_with_gui.name
+                    msg = f"""{this_function_name} returned None, but {other_function_name} cannot accept it as param "{link.dst_input_name}"!"""
+                    logging.warning(msg)
+                    self.function_with_gui._last_exception_message = msg
+                    self.function_with_gui._last_exception_traceback = (
+                        f"No traceback available. Please investigate {this_function_name} and {other_function_name}."
+                    )
+                    dst_input.value = ErrorValue
+                else:
+                    dst_input.value = None
+
             link.dst_function_node.on_inputs_changed()
 
     def call_invoke_async_or_not(self) -> None:
