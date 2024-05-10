@@ -31,7 +31,7 @@ class LutParamsWithGui(AnyDataWithGui[LutParams]):
         changed = self.gui_params()
         return changed
 
-    def on_change(self) -> None:
+    def on_change(self, _lut_params: LutParams) -> None:
         self._lut_graph_needs_refresh = True
 
     def lut_params(self) -> LutParams:

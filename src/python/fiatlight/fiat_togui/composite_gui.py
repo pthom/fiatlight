@@ -84,9 +84,7 @@ class OptionalWithGui(AnyDataWithGui[DataType | None]):
 
         return changed
 
-    def on_change(self) -> None:
-        value = self.value
-        assert not isinstance(value, (Unspecified, Error))
+    def on_change(self, value: DataType | None) -> None:
         if value is not None:
             self.inner_gui.value = value
 

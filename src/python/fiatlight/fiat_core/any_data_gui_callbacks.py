@@ -80,8 +80,9 @@ class AnyDataGuiCallbacks(Generic[DataType]):
 
     # on_change (Optional)
     # if provided, this function will be called when the value changes.
-    # Used in more advanced cases, when `present_custom` has an internal cache that needs to be updated.
-    on_change: VoidFunction | None = None
+    # Can be used in more advanced cases,
+    # for example when `present_custom` has an internal cache that needs to be updated.
+    on_change: Callable[[DataType], None] | None = None
 
     # on_exit (Optional)
     # if provided, this function will be called when the application is closed.

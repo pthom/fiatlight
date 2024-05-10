@@ -91,8 +91,7 @@ class SoundWavePlayerGui(AnyDataWithGui[SoundWave]):
     def load_gui_options_from_json(self, data: JsonDict) -> None:
         self.params.fill_from_dict(data)
 
-    def _on_change(self) -> None:
-        sound_wave = self.get_actual_value()
+    def _on_change(self, sound_wave: SoundWave) -> None:
         if self._sound_wave_player is not None:
             is_same_wave = self._sound_wave_player.sound_wave is sound_wave
             if is_same_wave:

@@ -64,8 +64,9 @@ class AnyDataWithGui(Generic[DataType]):
     @value.setter
     def value(self, new_value: DataType | Unspecified | Error) -> None:
         self._value = new_value
-        if self.callbacks.on_change is not None and isinstance(new_value, (Unspecified, Error)) is False:
-            self.callbacks.on_change()
+        if not isinstance(new_value, (Unspecified, Error)):
+            if self.callbacks.on_change is not None:
+                self.callbacks.on_change(new_value)
 
     def get_actual_value(self) -> DataType:
         """Returns the actual value of the data, or raises an exception if the value is Unspecified or Error.

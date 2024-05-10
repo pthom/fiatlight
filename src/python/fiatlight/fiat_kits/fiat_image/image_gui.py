@@ -151,8 +151,8 @@ class ImageWithGui(AnyDataWithGui[Image]):
         # r += f"\n{image}"
         return r
 
-    def on_change(self) -> None:
-        self.image_presenter.set_image(self.get_actual_value())
+    def on_change(self, image: Image) -> None:
+        self.image_presenter.set_image(image)
 
     def save_gui_options_to_json(self) -> JsonDict:
         return self.image_presenter.save_gui_options_to_json()
