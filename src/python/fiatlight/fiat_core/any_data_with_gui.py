@@ -87,14 +87,14 @@ class AnyDataWithGui(Generic[DataType]):
         self.callbacks.edit = edit_callback_wrapper
 
     def set_present_custom_callback(
-        self, present_callback: DataPresentFunction[DataType], popup_required: bool | None = None
+        self, present_callback: DataPresentFunction[DataType], present_custom_popup_required: bool | None = None
     ) -> None:
         def present_callback_wrapper() -> None:
             present_callback(self.get_actual_value())
 
         self.callbacks.present_custom = present_callback_wrapper
-        if popup_required is not None:
-            self.callbacks.present_custom_popup_required = popup_required
+        if present_custom_popup_required is not None:
+            self.callbacks.present_custom_popup_required = present_custom_popup_required
 
     # ------------------------------------------------------------------------------------------------------------------
     #            Serialization and deserialization
