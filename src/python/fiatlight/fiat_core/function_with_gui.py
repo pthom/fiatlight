@@ -327,6 +327,17 @@ class FunctionWithGui:
 
         try:
             fn_output = self._f_impl(*positional_only_values, **keyword_values)
+
+            if fn_output is None and not self._can_emit_none_output():
+                msg = f"Function {self.name} returned None, which is not allowed"
+                logging.warning(msg)
+                # If you are trying to debug and find the root cause of your problem,
+                # be informed that a user was just called a few lines before, with this call:
+                #     fn_output = self._f_impl(*positional_only_values, **keyword_values)
+                # This user function returned none and this was not expected.
+                # In the debugger, look at self.name to know which function this was.
+                raise ValueError(msg)
+
             if not isinstance(fn_output, tuple):
                 assert len(self._outputs_with_gui) <= 1
                 if len(self._outputs_with_gui) == 1:
@@ -358,6 +369,13 @@ class FunctionWithGui:
         for input_with_gui in self._inputs_with_gui:
             if input_with_gui.data_with_gui.callbacks.on_exit is not None:
                 input_with_gui.data_with_gui.callbacks.on_exit()
+
+    def _can_emit_none_output(self) -> bool:
+        if len(self._outputs_with_gui) > 1:
+            return False
+        output = self._outputs_with_gui[0]
+        r = output.data_with_gui.can_be_none
+        return r
 
     # --------------------------------------------------------------------------------------------
     #        Save and load to json

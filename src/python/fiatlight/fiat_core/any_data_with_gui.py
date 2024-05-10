@@ -37,6 +37,11 @@ class AnyDataWithGui(Generic[DataType]):
     # Think of them as __dunder__ methods for the GUI.
     callbacks: AnyDataGuiCallbacks[DataType]
 
+    # If True, the value can be None. This is useful when the data is optional.
+    # Otherwise, any None value will be considered as an Error.
+    # Note: when using Optional[any registered type], this flag is automatically set to True.
+    can_be_none: bool = False
+
     # ------------------------------------------------------------------------------------------------------------------
     #            Initialization
     # ------------------------------------------------------------------------------------------------------------------
