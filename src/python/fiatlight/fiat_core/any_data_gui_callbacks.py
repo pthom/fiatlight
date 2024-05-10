@@ -25,6 +25,12 @@ class AnyDataGuiCallbacks(Generic[DataType]):
     # Provide a draw function that presents the data content for more complex types (images, etc.)
     # It will be presented in "expanded" mode, and can use imgui widgets on several lines.
     # If not provided, the data will be presented using present_str
+    #
+    # Note: Some widgets cannot be presented in a Node (e.g., a multiline text input, a child window, etc.)!
+    #       You can query `fiatlight.is_rendering_in_node()` or its opposite `fiatlight.is_rendering_in_window()`
+    #       to know if you are rendering in a node.
+    #       Also, when inside a Node, you may want to render a smaller version, to save space
+    #       (as opposed to rendering a larger version in a detached window).
     present_custom: VoidFunction | None = None
 
     # present_custom_popup_required (Optional: leave to False in most cases)
@@ -47,6 +53,8 @@ class AnyDataGuiCallbacks(Generic[DataType]):
     # edit: (Mandatory if edition is required)
     # Provide a draw function that presents an editable interface for the data, and returns True if changed.
     # If not provided, the data will be presented as read-only
+    # Note: Some widgets cannot be presented in a Node (e.g., a multiline text input, a child window, etc.)!
+    #       You can query `fiatlight.is_rendering_in_node()` or its opposite `fiatlight.is_rendering_in_window()`
     edit: BoolFunction | None = None
 
     # edit_popup_required (Optional: leave to False in most cases)
