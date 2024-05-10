@@ -39,7 +39,7 @@ class HelloImGuiLogHandler(logging.Handler):
 
 # Create a logger
 root_logger = logging.getLogger()
-root_logger.setLevel(logging.DEBUG)  # Or whatever level you want
+root_logger.setLevel(logging.INFO)  # Or whatever level you want
 
 # Create the HelloImGuiLogHandler
 hello_imgui_log_handler = HelloImGuiLogHandler()
