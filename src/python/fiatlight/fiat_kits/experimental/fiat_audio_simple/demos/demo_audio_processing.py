@@ -3,10 +3,27 @@
 from fiatlight import FunctionWithGui
 from fiatlight.fiat_kits.experimental import fiat_audio_simple
 from imgui_bundle import hello_imgui, imgui_fig, ImVec2
+from fiatlight.fiat_types import Float_0_1
 import matplotlib.pyplot as plt
 
 import librosa
 import numpy as np
+
+PRE_EMPHASIS_FACTOR = 0.97
+
+
+def set_pre_emphasis_factor(factor: Float_0_1 = 0.97) -> None:
+    """Set the pre-emphasis factor for the pre-emphasis filter. Good values are between 0.9 and 0.97.
+    This will be applied to all functions in this demo."""
+    global PRE_EMPHASIS_FACTOR
+    PRE_EMPHASIS_FACTOR = factor
+
+
+def apply_pre_emphasis_filter(wave: fiat_audio_simple.SoundWave) -> fiat_audio_simple.SoundWave:
+    """Apply a pre-emphasis filter to the input wave."""
+    y = np.array(wave.wave)
+    y = np.append(y[0], y[1:] - PRE_EMPHASIS_FACTOR * y[:-1])
+    return fiat_audio_simple.SoundWave(wave=y, sample_rate=wave.sample_rate)  # type: ignore
 
 
 def convert_accidental_to_ascii(note: str) -> str:
@@ -40,11 +57,10 @@ def note_to_solfege(note: str) -> str:
 def evaluate_note(wave: fiat_audio_simple.SoundWave) -> str:
     """Given a short SoundWave, return textual information about the note played,
     along with the frequency, error in cents, and solfege notation."""
+    wave = apply_pre_emphasis_filter(wave)
+
     y = np.array(wave.wave)
     sr = wave.sample_rate
-
-    # Pre-emphasis to increase the signal-to-noise ratio
-    y = np.append(y[0], y[1:] - 0.97 * y[:-1])
 
     # Estimate the fundamental frequency (f0) of the signal
     f0, voiced_flag, voiced_probs = librosa.pyin(y, sr=sr, fmin=librosa.note_to_hz("C2"), fmax=librosa.note_to_hz("C7"))  # type: ignore
@@ -109,16 +125,12 @@ class ShowFundamentalFreqGraph(FunctionWithGui):
         self.should_refresh_fig = False
 
     def _compute_note_graph(self, wave: fiat_audio_simple.SoundWave) -> None:
+        wave = apply_pre_emphasis_filter(wave)
+
         # this function will be called asynchronously!
         # (see self.invoke_async = True in __init__)
         y = np.array(wave.wave)
         sr = wave.sample_rate
-
-        # Pre-emphasis to increase the signal-to-noise ratio
-        # This is a high-pass filter that boosts the high frequencies
-        # (see https://en.wikipedia.org/wiki/Pre-emphasis)
-        # (Without this we may experience failures)
-        y = np.append(y[0], y[1:] - 0.97 * y[:-1])
 
         # Estimate the fundamental frequency (f0) of the signal
         f0, voiced_flag, voiced_probs = librosa.pyin(
@@ -138,6 +150,58 @@ class ShowFundamentalFreqGraph(FunctionWithGui):
         ax.legend(loc="upper right")
 
         # And copy it atomically when it is ready
+        self.fig = fig
+        self.should_refresh_fig = True
+
+
+class ShowHarmonicPercussiveGraph(FunctionWithGui):
+    fig: plt.Figure | None = None
+    fig_size: ImVec2 | None = None
+    should_refresh_fig: bool = False
+
+    def __init__(self) -> None:
+        super().__init__(self.f, "ShowHarmonicPercussiveGraph")
+        self.internal_state_gui = self.internal_state_gui
+        self.invoke_async = True
+
+    def f(self, sound_wave: fiat_audio_simple.SoundWave) -> None:
+        self._compute_graph(sound_wave)
+
+    def internal_state_gui(self) -> None:
+        if self.fig is None:
+            return
+
+        if self.fig_size is None:
+            self.fig_size = hello_imgui.em_to_vec2(20, 20)
+
+        imgui_fig.fig("##OnsetGraph", self.fig, self.fig_size, refresh_image=self.should_refresh_fig)
+        self.should_refresh_fig = False
+
+    def _compute_graph(self, wave: fiat_audio_simple.SoundWave) -> None:
+        wave = apply_pre_emphasis_filter(wave)
+
+        y = wave.wave
+        sr = wave.sample_rate
+
+        # Load audio file
+        # y, sr = librosa.load(librosa.ex("choice"), duration=10)
+
+        # Perform harmonic-percussive source separation
+        y_harm, y_perc = librosa.effects.hpss(y)
+
+        # Create a figure with a single subplot
+        fig, ax = plt.subplots(figsize=(10, 4))
+
+        # Plot harmonic component
+        librosa.display.waveshow(y_harm, sr=sr, alpha=0.5, color="b", ax=ax, label="Harmonic")
+
+        # Plot percussive component
+        librosa.display.waveshow(y_perc, sr=sr, color="r", alpha=0.5, ax=ax, label="Percussive")
+
+        # Set title and legend
+        ax.set(title="Multiple waveforms")
+        ax.legend()
+
         self.fig = fig
         self.should_refresh_fig = True
 
@@ -162,6 +226,8 @@ def sandbox() -> None:
 
     graph = fiatlight.FunctionsGraph()
 
+    graph.add_function(set_pre_emphasis_factor)
+
     graph.add_function(fiat_audio_simple.MicrophoneGui())
 
     graph.add_function(evaluate_note)
@@ -169,6 +235,9 @@ def sandbox() -> None:
 
     graph.add_function(ShowFundamentalFreqGraph())
     graph.add_link("MicrophoneGui", "ShowFundamentalFreqGraph")
+
+    graph.add_function(ShowHarmonicPercussiveGraph())
+    graph.add_link("MicrophoneGui", "ShowHarmonicPercussiveGraph")
 
     graph.add_function(add_chorus_effect)
     graph.add_link("MicrophoneGui", "add_chorus_effect")
