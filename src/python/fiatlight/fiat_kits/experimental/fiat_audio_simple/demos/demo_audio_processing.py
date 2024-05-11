@@ -1,5 +1,6 @@
 from fiatlight import FunctionWithGui
 from fiatlight.fiat_kits.experimental import fiat_audio_simple
+from imgui_bundle import hello_imgui, imgui_fig, ImVec2
 import matplotlib.pyplot as plt
 
 import librosa
@@ -79,11 +80,14 @@ evaluate_note.invoke_async = True  # type: ignore
 class ShowNoteGraph(FunctionWithGui):
     # cf example here: https://librosa.org/doc/latest/generated/librosa.pyin.html#librosa.pyin
 
+    # A matplotlib figure and axis to display the note graph
     fig: plt.Figure | None = None
     ax: plt.Axes | None = None
+    fig_size: ImVec2 | None = None
 
     def __init__(self) -> None:
         super().__init__(self.f, "ShowNoteGraph")
+        # Our internal state GUI function will display the matplotlib figure
         self.internal_state_gui = self.internal_state_gui
         # Tell fiatlight to run this function asynchronously
         self.invoke_async = True
@@ -92,10 +96,13 @@ class ShowNoteGraph(FunctionWithGui):
         self._compute_note_graph(sound_wave)
 
     def internal_state_gui(self) -> None:
-        from imgui_bundle import imgui_fig
+        if self.fig is None:
+            return
 
-        if self.fig is not None:
-            imgui_fig.fig("NoteGraph", self.fig)
+        if self.fig_size is None:
+            self.fig_size = hello_imgui.em_to_vec2(20, 20)
+
+        imgui_fig.fig("##NoteGraph", self.fig, self.fig_size)
 
     def _compute_note_graph(self, wave: fiat_audio_simple.SoundWave) -> None:
         y = np.array(wave.wave)
