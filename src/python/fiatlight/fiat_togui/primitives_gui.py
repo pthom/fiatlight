@@ -28,6 +28,10 @@ class IntEditType(Enum):
     slider_and_minus_plus = 5
 
 
+def available_int_edit_types() -> list[str]:
+    return [e.name for e in IntEditType]
+
+
 @dataclass
 class IntWithGuiParams:
     edit_type: IntEditType = IntEditType.input
@@ -50,6 +54,7 @@ class IntWithGuiParams:
     knob_variant: int = ImGuiKnobVariant_.tick.value
     knob_size_em: float = 2.5
     knob_steps: int = 0
+    knob_flags: int = 0
 
 
 class IntWithGui(AnyDataWithGui[int]):
@@ -61,6 +66,71 @@ class IntWithGui(AnyDataWithGui[int]):
         self.callbacks.edit = self.edit
         self.callbacks.default_value_provider = lambda: 0
         self.callbacks.clipboard_copy_possible = True
+        self.callbacks.on_heartbeat = self._on_heartbeat
+
+    def _on_heartbeat(self) -> bool:
+        self._handle_custom_attrs()
+        return False
+
+    def _check_custom_attrs(self) -> None:
+        def _authorized_custom_attrs() -> list[str]:
+            return ["range", "edit_type", "format", "width_em", "knob_size_em", "knob_steps"]
+
+        has_unauthorized = any(k not in _authorized_custom_attrs() for k in self._custom_attrs)
+        if has_unauthorized:
+            msg = f"""
+            Encountered an unauthorized custom attribute for IntWithGui!
+                Authorized attributes are: {_authorized_custom_attrs()}
+                Where type can be one of: {available_int_edit_types()}
+
+            Example:
+                def modulo_12(x: int) -> int:
+                    return x % 12
+
+                modulo_12.x__range = (-60, 60)
+                modulo_12.x__edit_type = "knob"
+                modulo_12.x__format = "%d"
+                modulo_12.x__knob_size_em = 4
+            """
+            raise ValueError(msg)
+
+    def _handle_custom_attrs(self) -> None:
+        self._check_custom_attrs()
+        if "range" in self._custom_attrs:
+            range_ = self._custom_attrs["range"]
+            if not isinstance(range_, tuple) or len(range_) != 2:
+                raise ValueError(f"range must be a tuple of two numbers, got: {range_}")
+            if not all(isinstance(x, int) for x in range_):
+                raise ValueError(f"range must be a tuple of two integers, got: {range_}")
+            self.params.v_min = range_[0]
+            self.params.v_max = range_[1]
+            self.params.edit_type = IntEditType.slider
+
+        if "edit_type" in self._custom_attrs:
+            edit_type_ = self._custom_attrs["edit_type"]
+            try:
+                edit_type = IntEditType[edit_type_]
+                self.params.edit_type = edit_type
+            except KeyError:
+                raise ValueError(f"Unknown edit_type: {edit_type_}. Available types: {available_int_edit_types()}")
+
+        if "format" in self._custom_attrs:
+            self.params.format = self._custom_attrs["format"]
+
+        if "width_em" in self._custom_attrs:
+            if not isinstance(self._custom_attrs["width_em"], (int, float)):
+                raise ValueError(f"width_em must be a number, got: {self._custom_attrs['width_em']}")
+            self.params.width_em = self._custom_attrs["width_em"]
+
+        if "knob_size_em" in self._custom_attrs:
+            if not isinstance(self._custom_attrs["knob_size_em"], (int, float)):
+                raise ValueError(f"knob_size_em must be a number, got: {self._custom_attrs['knob_size_em']}")
+            self.params.knob_size_em = self._custom_attrs["knob_size_em"]
+
+        if "knob_steps" in self._custom_attrs:
+            if not isinstance(self._custom_attrs["knob_steps"], int):
+                raise ValueError(f"knob_steps must be an integer, got: {self._custom_attrs['knob_steps']}")
+            self.params.knob_steps = self._custom_attrs["knob_steps"]
 
     def edit(self) -> bool:
         assert isinstance(self.value, int)
@@ -103,6 +173,7 @@ class IntWithGui(AnyDataWithGui[int]):
                 self.params.format,
                 self.params.knob_variant,
                 hello_imgui.em_size(self.params.knob_size_em),
+                self.params.knob_flags,
                 self.params.knob_steps,
             )
         if self.params.edit_type == IntEditType.slider_and_minus_plus:
@@ -204,7 +275,7 @@ class FloatWithGui(AnyDataWithGui[float]):
 
             Example:
                 def to_fahrenheit(celsius: float) -> float:
-                    return x
+                    return celsius * 9 / 5 + 32
 
                 to_fahrenheit.celsius__range = (-273.15, 1000)
                 to_fahrenheit.celsius__edit_type = "slider"
@@ -336,8 +407,11 @@ def make_positive_float_with_gui() -> AnyDataWithGui[float]:
 ########################################################################################################################
 class BoolEditType(Enum):
     checkbox = 1
-    radio_button = 2
     toggle = 3
+
+
+def _available_bool_edit_types() -> list[str]:
+    return [e.name for e in BoolEditType]
 
 
 @dataclass
@@ -345,8 +419,6 @@ class BoolWithGuiParams:
     default_edit_value = False
     label: str = "##bool"
     edit_type: BoolEditType = BoolEditType.checkbox
-    # Specific to toggle
-    toggle_config: ToggleConfig | None = None
 
 
 class BoolWithGui(AnyDataWithGui[bool]):
@@ -358,21 +430,52 @@ class BoolWithGui(AnyDataWithGui[bool]):
         self.callbacks.edit = self.edit
         self.callbacks.default_value_provider = lambda: False
         self.callbacks.clipboard_copy_possible = True
+        self.callbacks.on_heartbeat = self._on_heartbeat
+
+    def _on_heartbeat(self) -> bool:
+        self._handle_custom_attrs()
+        return False
+
+    def _check_custom_attrs(self) -> None:
+        def _authorized_custom_attrs() -> list[str]:
+            return ["edit_type"]
+
+        has_unauthorized = any(k not in _authorized_custom_attrs() for k in self._custom_attrs)
+        if has_unauthorized:
+            msg = f"""
+            Encountered an unauthorized custom attribute for BoolWithGui!
+                Authorized attributes are: {_authorized_custom_attrs()}
+                Where type can be one of: {_available_bool_edit_types()}
+
+            Example:
+                def is_even(x: int) -> bool:
+                    return x % 2 == 0
+
+                is_even.x__edit_type = "radio_button"
+            """
+            raise ValueError(msg)
+
+    def _handle_custom_attrs(self) -> None:
+        self._check_custom_attrs()
+        if "edit_type" in self._custom_attrs:
+            edit_type_ = self._custom_attrs["edit_type"]
+            try:
+                edit_type = BoolEditType[edit_type_]
+                self.params.edit_type = edit_type
+            except KeyError:
+                raise ValueError(f"Unknown edit_type: {edit_type_}. Available types: {_available_bool_edit_types()}")
 
     def edit(self) -> bool:
         assert isinstance(self.value, bool)
         changed = False
         if self.params.edit_type == BoolEditType.checkbox:
             changed, self.value = imgui.checkbox(self.params.label, self.value)
-        elif self.params.edit_type == BoolEditType.radio_button:
-            new_x = imgui.radio_button(self.params.label, self.value)
-            if new_x != self.value:
-                self.value = new_x
-                changed = True
         elif self.params.edit_type == BoolEditType.toggle:
-            if self.params.toggle_config is None:
-                raise ValueError("toggle_config must be set for BoolEditType.toggle")
-            changed, self.value = imgui_toggle.toggle(self.params.label, self.value, self.params.toggle_config)
+            # if self.params.toggle_config is None:
+            #     raise ValueError("toggle_config must be set for BoolEditType.toggle")
+            changed, self.value = imgui_toggle.toggle(
+                self.params.label, self.value, imgui_toggle.ToggleFlags_.animated.value
+            )
 
         return changed
 
