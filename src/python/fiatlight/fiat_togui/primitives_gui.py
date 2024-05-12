@@ -153,7 +153,7 @@ class FloatWithGuiParams:
     label: str = "##float"
     v_min: float = 0.0
     v_max: float = 10.0
-    format: str = "%.2f"
+    format: str = "%.3f"
     width_em: float = 9
     edit_type: FloatEditType = FloatEditType.input
     # Specific to slider_float
@@ -169,6 +169,7 @@ class FloatWithGuiParams:
     knob_variant: int = imgui_knobs.ImGuiKnobVariant_.stepped.value
     knob_size_em: float = 2.5
     knob_steps: int = 10
+    knob_flags: int = 0
     # Specific to slider_float_any_range
     nb_significant_digits: int = 4
     accept_negative: bool = True
@@ -192,7 +193,7 @@ class FloatWithGui(AnyDataWithGui[float]):
 
     def _check_custom_attrs(self) -> None:
         def _authorized_custom_attrs() -> list[str]:
-            return ["range", "edit_type", "format", "width_em"]
+            return ["range", "edit_type", "format", "width_em", "knob_size_em", "knob_steps"]
 
         has_unauthorized = any(k not in _authorized_custom_attrs() for k in self._custom_attrs)
         if has_unauthorized:
@@ -230,6 +231,8 @@ class FloatWithGui(AnyDataWithGui[float]):
             try:
                 edit_type = FloatEditType[edit_type_]
                 self.params.edit_type = edit_type
+                if edit_type == FloatEditType.knob:
+                    self.params.format = "%.2f"
             except KeyError:
                 raise ValueError(f"Unknown edit_type: {edit_type_}. Available types: {_available_float_edit_types()}")
 
@@ -240,6 +243,16 @@ class FloatWithGui(AnyDataWithGui[float]):
             if not isinstance(self._custom_attrs["width_em"], (int, float)):
                 raise ValueError(f"width_em must be a number, got: {self._custom_attrs['width_em']}")
             self.params.width_em = self._custom_attrs["width_em"]
+
+        if "knob_size_em" in self._custom_attrs:
+            if not isinstance(self._custom_attrs["knob_size_em"], (int, float)):
+                raise ValueError(f"knob_size_em must be a number, got: {self._custom_attrs['knob_size_em']}")
+            self.params.knob_size_em = self._custom_attrs["knob_size_em"]
+
+        if "knob_steps" in self._custom_attrs:
+            if not isinstance(self._custom_attrs["knob_steps"], int):
+                raise ValueError(f"knob_steps must be an integer, got: {self._custom_attrs['knob_steps']}")
+            self.params.knob_steps = self._custom_attrs["knob_steps"]
 
     def present_str(self, value: float) -> str:
         if self.params.nb_significant_digits >= 0:
@@ -289,6 +302,7 @@ class FloatWithGui(AnyDataWithGui[float]):
                 self.params.format,
                 self.params.knob_variant,
                 hello_imgui.em_size(self.params.knob_size_em),
+                self.params.knob_flags,
                 self.params.knob_steps,
             )
         elif (
