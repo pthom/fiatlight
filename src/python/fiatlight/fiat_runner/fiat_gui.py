@@ -7,6 +7,7 @@ from fiatlight.fiat_widgets import fontawesome_6_ctx, icons_fontawesome_6, fiat_
 from fiatlight.fiat_utils import functional_utils
 from fiatlight.fiat_runner.functions_collection import FunctionCollectionGui
 from fiatlight.fiat_kits.fiat_image.image_types import ImageU8_3
+from fiatlight import fiat_config
 from imgui_bundle import immapp, imgui, imgui_ctx, ImVec4, portable_file_dialogs as pfd
 from typing import Any, Callable
 from imgui_bundle import hello_imgui, ImVec2, immvision
@@ -160,6 +161,12 @@ class FiatGui:
         # Set window_title from the name of the calling module
         if params.runner_params.app_window_params.window_title == "":
             params.runner_params.app_window_params.window_title = _main_python_module_name()
+        shall_record_screenshot = fiat_config.get_fiat_config().is_recording_snippet_screenshot
+        if shall_record_screenshot:
+            import time
+
+            time_unix = int(time.time())
+            params.runner_params.app_window_params.window_title += "_rec_" + str(time_unix)
 
         self.params = params
         self._functions_graph_gui = FunctionsGraphGui(functions_graph)
@@ -186,8 +193,7 @@ class FiatGui:
         pass
 
     def _post_init(self) -> None:
-        if self.params.customizable_graph:
-            self._load_graph_composition_at_startup()
+        self._load_graph_composition_at_startup()
         self._load_user_inputs_at_startup()
         self._functions_graph_gui.invoke_all_functions(also_invoke_manual_function=False)
         self._notify_if_dirty_functions()
@@ -197,6 +203,7 @@ class FiatGui:
         if self.params.customizable_graph:
             self._save_graph_composition(self._graph_composition_filename())
         self._save_user_inputs(self._user_settings_filename())
+        self._handle_snippet_screenshot_on_exit()
 
     def run(self) -> None:
         self.params.runner_params.docking_params.docking_splits += self._docking_splits()
@@ -226,6 +233,15 @@ class FiatGui:
         self.params.runner_params.callbacks.show_gui = self._heartbeat
 
         immapp.run(self.params.runner_params, self.params.addons)
+
+    def _handle_snippet_screenshot_on_exit(self) -> None:
+        from fiatlight.fiat_runner.fiat_shot_snippet import set_screenshot_bounds
+
+        shall_record_screenshot = fiat_config.get_fiat_config().is_recording_snippet_screenshot
+        if not shall_record_screenshot:
+            return
+        nodes_boundings = self._functions_graph_gui._get_node_screenshot_boundings()
+        set_screenshot_bounds(nodes_boundings)
 
     def _heartbeat(self) -> None:
         fiat_osd._render_all_osd()  # noqa

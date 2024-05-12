@@ -7,6 +7,8 @@ class FiatConfig:
     exception_config: FiatExceptionConfig = FiatExceptionConfig()
     disable_input_during_execution: bool = False
 
+    is_recording_snippet_screenshot: bool = False
+
     def __init__(self) -> None:
         self.style = FiatStyle()
         self.exception_config = FiatExceptionConfig()

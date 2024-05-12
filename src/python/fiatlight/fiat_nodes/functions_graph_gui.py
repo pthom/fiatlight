@@ -258,6 +258,39 @@ class FunctionsGraphGui:
                     current_position.y += current_row_height + height_between_nodes
                     current_row_height = 0
 
+    def _get_node_screenshot_boundings(self) -> imgui.internal.ImRect:
+        all_nodes_boundings = []
+        for fn in self.function_nodes_gui:
+            node_id = fn.node_id()
+            # position and size are in canvas coordinates
+            node_tl = ed.get_node_position(node_id)
+            node_br = node_tl + ed.get_node_size(node_id)
+            # convert to screen coordinates (i.e coordinates on the computer screen)
+            node_tl = ed.canvas_to_screen(node_tl)
+            node_br = ed.canvas_to_screen(node_br)
+            # convert to viewport coordinates (i.e. from the top left corner of the app window)
+            main_viewport_pos = imgui.get_main_viewport().pos
+            node_tl -= main_viewport_pos
+            node_br -= main_viewport_pos
+            # take into account the display frame buffer scale
+            fbs = imgui.get_io().display_framebuffer_scale
+            node_tl *= fbs
+            node_br *= fbs
+            # phew, done...
+
+            all_nodes_boundings.append(imgui.internal.ImRect(node_tl, node_br))
+
+        big = 1_000_000
+        tl = ImVec2(big, big)
+        br = ImVec2(-big, -big)
+        for node_boundings in all_nodes_boundings:
+            tl.x = min(tl.x, node_boundings.min.x)
+            tl.y = min(tl.y, node_boundings.min.y)
+            br.x = max(br.x, node_boundings.max.x)
+            br.y = max(br.y, node_boundings.max.y)
+
+        return imgui.internal.ImRect(tl, br)
+
     # ======================================================================================================================
     # Utilities
     # ======================================================================================================================
