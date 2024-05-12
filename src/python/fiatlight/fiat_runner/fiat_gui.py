@@ -13,6 +13,7 @@ from typing import Any, Callable
 from imgui_bundle import hello_imgui, ImVec2, immvision
 
 import json
+import time
 import logging
 import pathlib
 from typing import List, Tuple
@@ -163,8 +164,8 @@ class FiatGui:
             params.runner_params.app_window_params.window_title = _main_python_module_name()
         shall_record_screenshot = fiat_config.get_fiat_config().is_recording_snippet_screenshot
         if shall_record_screenshot:
-            import time
-
+            # When recording a snippet, add a timestamp to the window title
+            # (this is a hack so that settings are not restored)
             time_unix = int(time.time())
             params.runner_params.app_window_params.window_title += "_rec_" + str(time_unix)
 

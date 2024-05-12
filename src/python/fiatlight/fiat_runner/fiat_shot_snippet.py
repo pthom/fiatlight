@@ -48,9 +48,9 @@ def _record_snippet_screenshot(snippet_code: PythonCode) -> fiat_image.ImageU8_3
 
 def save_snippet_screenshot(snippet_code: PythonCode, output_file: ImageFile) -> None:
     img = _record_snippet_screenshot(snippet_code)
-    img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+    img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)  # type: ignore
     ratio_resize = 0.5
-    img = cv2.resize(img, (0, 0), fx=ratio_resize, fy=ratio_resize)
+    img = cv2.resize(img, (0, 0), fx=ratio_resize, fy=ratio_resize)  # type: ignore
     cv2.imwrite(output_file, img)
 
 
@@ -65,8 +65,8 @@ def _is_snippet_start(line: str) -> bool:
 
 
 def _split_md_around_snippets(file_lines: MdLines) -> list[MdLines]:
-    parts = []
-    current_part = []
+    parts: list[MdLines] = []
+    current_part: list[MdLine] = []
     for line in file_lines:
         if _is_snippet_start(line):
             if current_part:
@@ -92,8 +92,9 @@ def _snippet_image_file_name(md_file: str, md_lines: MarkdownLinesWithSnippetCod
     # token_line look like
     # *Visual example: a function with a float parameter, and no specific range*
     token_line = md_lines.token_line
+    assert token_line is not None
     # Remove token
-    token_line = token_line.replace(_TOKEN_SNIPPET, "")
+    token_line = token_line.replace(_TOKEN_SNIPPET, "")  #
     # replace spaces and special characters by _
     filename = images_prefix
     for c in token_line:
@@ -166,6 +167,7 @@ def add_screenshots_to_markdown_file(markdown_file: str) -> None:
         else:
             has_already_image = False
 
+            assert markdown_lines_with_snippet_code.token_line is not None
             all_markdown_lines.append(markdown_lines_with_snippet_code.token_line)
             all_markdown_lines.append("```python")
             all_markdown_lines.extend(markdown_lines_with_snippet_code.snippet_code.split("\n"))

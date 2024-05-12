@@ -264,18 +264,18 @@ class FunctionsGraphGui:
             node_id = fn.node_id()
             # position and size are in canvas coordinates
             node_tl = ed.get_node_position(node_id)
-            node_br = node_tl + ed.get_node_size(node_id)
+            node_br = node_tl + ed.get_node_size(node_id)  # type: ignore
             # convert to screen coordinates (i.e coordinates on the computer screen)
             node_tl = ed.canvas_to_screen(node_tl)
             node_br = ed.canvas_to_screen(node_br)
             # convert to viewport coordinates (i.e. from the top left corner of the app window)
             main_viewport_pos = imgui.get_main_viewport().pos
-            node_tl -= main_viewport_pos
+            node_tl -= main_viewport_pos  # type: ignore # noqa
             node_br -= main_viewport_pos
             # take into account the display frame buffer scale
             fbs = imgui.get_io().display_framebuffer_scale
-            node_tl *= fbs
-            node_br *= fbs
+            node_tl = node_tl * fbs  # type: ignore
+            node_br = node_br * fbs
             # phew, done...
 
             all_nodes_boundings.append(imgui.internal.ImRect(node_tl, node_br))
