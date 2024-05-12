@@ -1,5 +1,9 @@
-from fiatlight.fiat_kits import fiat_image, fiat_array
-from fiatlight.fiat_kits.experimental import fiat_audio_simple
+from . import fiat_image, fiat_array
+from .experimental import fiat_audio_simple
+from .fiat_matplotlib import _register_figure_with_gui  # noqa
+
+_register_figure_with_gui()
+
 
 __all__ = [
     "fiat_image",
