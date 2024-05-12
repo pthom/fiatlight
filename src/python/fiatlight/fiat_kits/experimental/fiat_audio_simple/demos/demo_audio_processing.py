@@ -2,7 +2,6 @@
 # pip install librosa matplotlib numpy scipy pedalboard
 
 from fiatlight.fiat_kits.experimental import fiat_audio_simple
-from fiatlight.fiat_types import Float_0_1
 import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
 
@@ -12,11 +11,14 @@ import numpy as np
 PRE_EMPHASIS_FACTOR = 0.97
 
 
-def set_pre_emphasis_factor(factor: Float_0_1 = 0.97) -> None:
+def set_pre_emphasis_factor(factor: float = 0.97) -> None:
     """Signal from the microphone needs to be pre-emphasized: good values are between 0.9 and 0.97.
     This will be applied to all functions in this demo."""
     global PRE_EMPHASIS_FACTOR
     PRE_EMPHASIS_FACTOR = factor
+
+
+set_pre_emphasis_factor.factor__range = (0.8, 0.99)  # type: ignore
 
 
 def apply_pre_emphasis_filter(wave: fiat_audio_simple.SoundWave) -> fiat_audio_simple.SoundWave:
