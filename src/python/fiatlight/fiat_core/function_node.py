@@ -131,7 +131,7 @@ class FunctionNode:
         for input_param in self.user_editable_params():
             input_params[input_param.name] = input_param.save_to_json()
 
-        gui_options = self.function_with_gui.save_gui_options_to_json()
+        gui_options = self.function_with_gui._save_gui_options_to_json()
         r = {"inputs": input_params, "gui_options": gui_options}
         return r
 
@@ -140,7 +140,7 @@ class FunctionNode:
         for input_param in self.user_editable_params():
             input_param.load_from_json(input_params[input_param.name])
 
-        self.function_with_gui.load_gui_options_from_json(json_data["gui_options"])
+        self.function_with_gui._load_gui_options_from_json(json_data["gui_options"])
 
     # ------------------------------------------------------------------------------------------------------------------
     #  Invoke

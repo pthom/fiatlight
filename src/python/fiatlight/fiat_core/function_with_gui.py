@@ -19,20 +19,14 @@ class FunctionWithGui:
     """
 
     # --------------------------------------------------------------------------------------------
-    #        Members
+    #        Public Members
     # --------------------------------------------------------------------------------------------
-
-    #
-    # Public members
-    #
-
     # the name of the function
     name: str = ""
 
     #
     # Behavioral Flags
-    #
-
+    # ----------------
     # invoke_async: if true, the function shall be called asynchronously
     invoke_async: bool = False
 
@@ -46,19 +40,35 @@ class FunctionWithGui:
     # Note: a "live" function is thus a function with invoke_manually=False and invoke_always_dirty=True
     invoke_always_dirty: bool = False
 
+    #
+    # Internal state GUI
+    # ------------------
     # internal_state_gui: optional Gui for the internal state of the function
     # (this function may display a GUI to show the internal state of the function,
     #  and return True if the state has changed, and the function needs to be called)
     internal_state_gui: BoolFunction | None = None
 
+    #
+    # Heartbeat
+    # ---------
     # on_heartbeat: optional function that will be called at each frame
     # (and return True if the function needs to be called to update the output)
     on_heartbeat: BoolFunction | None = None
 
     #
-    # Private members
-    #
+    # Serialization
+    # -------------
+    # save/load_internal_gui_options_from_json (Optional)
+    # Optional serialization and deserialization of the internal state GUI presentation options
+    # (i.e. anything that deals with how the GUI is presented, not the data itself)
+    # If provided, these functions will be used to recreate the GUI presentation options when loading a graph,
+    # so that the GUI looks the same when the application is restarted.
+    save_internal_gui_options_to_json: Callable[[], JsonDict] | None = None
+    load_internal_gui_options_from_json: Callable[[JsonDict], None] | None = None
 
+    # --------------------------------------------------------------------------------------------
+    #        Private Members
+    # --------------------------------------------------------------------------------------------
     # if True, this indicates that the inputs have changed since the last call, and the function needs to be called
     _dirty: bool = True
 
@@ -395,7 +405,7 @@ class FunctionWithGui:
     def _Serialize_Section() -> None:  # Dummy function to create a section in the IDE # noqa
         pass
 
-    def save_gui_options_to_json(self) -> JsonDict:
+    def _save_gui_options_to_json(self) -> JsonDict:
         input_options = {}
         for input_with_gui in self._inputs_with_gui:
             if input_with_gui.data_with_gui.callbacks.save_gui_options_to_json is not None:
@@ -406,13 +416,18 @@ class FunctionWithGui:
             if output_with_gui.data_with_gui.callbacks.save_gui_options_to_json is not None:
                 output_options[i] = output_with_gui.data_with_gui.callbacks.save_gui_options_to_json()
 
+        internal_gui_options = {}
+        if self.save_internal_gui_options_to_json is not None:
+            internal_gui_options = self.save_internal_gui_options_to_json()
+
         r = {
             "inputs": input_options,
             "outputs": output_options,
+            "internal_gui_options": internal_gui_options,
         }
         return r
 
-    def load_gui_options_from_json(self, json_data: JsonDict) -> None:
+    def _load_gui_options_from_json(self, json_data: JsonDict) -> None:
         input_options = json_data.get("inputs", {})
         for input_name, input_option in input_options.items():
             for input_with_gui in self._inputs_with_gui:
@@ -431,6 +446,10 @@ class FunctionWithGui:
             callback_load = output_with_gui.data_with_gui.callbacks.load_gui_options_from_json
             if callback_load is not None:
                 callback_load(output_option)
+
+        internal_gui_options = json_data.get("internal_gui_options", {})
+        if self.load_internal_gui_options_from_json is not None:
+            self.load_internal_gui_options_from_json(internal_gui_options)
 
     # --------------------------------------------------------------------------------------------
     #       Function documentation & source code

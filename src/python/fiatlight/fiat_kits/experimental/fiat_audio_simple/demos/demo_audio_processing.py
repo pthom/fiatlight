@@ -110,6 +110,16 @@ class ShowFundamentalFreqGraph(FunctionWithGui):
         self.internal_state_gui = self.internal_state_gui
         # Tell fiatlight to run this function asynchronously
         self.invoke_async = True
+        # Save internal Gui option
+        self.save_internal_gui_options_to_json = self.save_internal_gui_options_to_json
+        self.load_internal_gui_options_from_json = self.load_internal_gui_options_from_json
+
+    def save_internal_gui_options_to_json(self) -> dict:
+        return {"fig_size": self.fig_size.to_dict()}
+
+    def load_internal_gui_options_from_json(self, options: dict) -> None:
+        if "fig_size" in options:
+            self.fig_size = ImVec2.from_dict(options["fig_size"])
 
     def f(self, sound_wave: fiat_audio_simple.SoundWave) -> None:
         self._compute_note_graph(sound_wave)
