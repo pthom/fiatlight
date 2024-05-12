@@ -1,4 +1,4 @@
-from fiatlight.fiat_kits.fiat_image.image_types import (
+from .image_types import (
     ImageU8,
     ImageFloat,
     Image,
@@ -13,15 +13,15 @@ from fiatlight.fiat_kits.fiat_image.image_types import (
     ImageU8_3,
     ImageU8_4,
 )
-from fiatlight.fiat_kits.fiat_image.image_gui import (
+from .image_gui import (
     ImageWithGui,
     ImageChannelsWithGui,
     ImagePresenterParams,
     image_source,
 )
-from fiatlight.fiat_kits.fiat_image.cv_color_type import ColorType, ColorConversion
-from fiatlight.fiat_kits.fiat_image.cv_color_type_gui import ColorConversionWithGui
-from fiatlight.fiat_kits.fiat_image.lut import (
+from .cv_color_type import ColorType, ColorConversion
+from .cv_color_type_gui import ColorConversionWithGui
+from .lut import (
     LutParams,
     LutTable,
     lut,
@@ -29,11 +29,12 @@ from fiatlight.fiat_kits.fiat_image.lut import (
     lut_channels_with_params,
     lut_channels_in_colorspace,
 )
-from fiatlight.fiat_kits.fiat_image.lut_gui import LutParamsWithGui
+from .lut_gui import LutParamsWithGui
+from .overlay_alpha_image import overlay_alpha_image
 
 
 def _register_factories() -> None:
-    from fiatlight.fiat_kits.fiat_image.image_types import _register_image_type_factories
+    from .image_types import _register_image_type_factories
     from fiatlight.fiat_togui.to_gui import register_type, register_enum
 
     _register_image_type_factories()
@@ -79,4 +80,6 @@ __all__ = [
     "lut_channels_in_colorspace",
     # from lut_gui
     "LutParamsWithGui",
+    # from overlay_alpha_image
+    "overlay_alpha_image",
 ]

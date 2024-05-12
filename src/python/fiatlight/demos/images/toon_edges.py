@@ -2,7 +2,7 @@ import fiatlight
 from fiatlight.fiat_kits.fiat_image import ImageU8_GRAY, ImageU8_3, image_source
 from fiatlight.fiat_types import Float_0_1, PositiveFloat, Float_0_10, Int_0_10
 from fiatlight.demos.images.opencv_wrappers import canny, dilate, MorphShape, CannyApertureSize
-from fiatlight.demos.images.overlay_alpha_image import overlay_alpha_image
+from fiatlight.fiat_kits.fiat_image import overlay_alpha_image
 import numpy as np
 import cv2
 
