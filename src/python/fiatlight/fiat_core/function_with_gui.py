@@ -136,10 +136,11 @@ class FunctionWithGui:
         if fn is not None:
             if self.name == "":
                 self.name = fn.__name__
+            fn_dict = fn.__dict__
             if scope_storage is None:
                 scope_storage = _capture_scope_back_1()
             _add_input_outputs_to_function_with_gui_globals_locals_captured(
-                self, scope_storage=scope_storage, signature_string=signature_string
+                self, scope_storage=scope_storage, signature_string=signature_string, fn_dict=fn_dict
             )
 
             #

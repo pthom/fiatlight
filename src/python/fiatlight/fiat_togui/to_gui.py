@@ -2,7 +2,7 @@ import typing
 from dataclasses import dataclass
 
 from fiatlight.fiat_types import UnspecifiedValue, DataType
-from fiatlight.fiat_types.base_types import ScopeStorage
+from fiatlight.fiat_types.base_types import ScopeStorage, JsonDict
 from fiatlight.fiat_togui import primitives_gui
 from fiatlight.fiat_core.any_data_with_gui import AnyDataWithGui
 from fiatlight.fiat_core.param_with_gui import ParamKind, ParamWithGui
@@ -168,7 +168,9 @@ def _to_data_with_gui(
     return r
 
 
-def _to_param_with_gui(name: str, param: inspect.Parameter, scope_storage: ScopeStorage) -> ParamWithGui[Any]:
+def _to_param_with_gui(
+    name: str, param: inspect.Parameter, scope_storage: ScopeStorage, param_custom_attrs: JsonDict
+) -> ParamWithGui[Any]:
     annotation = param.annotation
 
     data_with_gui: AnyDataWithGui[Any]
@@ -184,7 +186,9 @@ def _to_param_with_gui(name: str, param: inspect.Parameter, scope_storage: Scope
         param_kind = ParamKind.KeywordOnly
 
     default_value = param.default if param.default is not inspect.Parameter.empty else UnspecifiedValue
-    return ParamWithGui(name, data_with_gui, param_kind, default_value)
+    r = ParamWithGui(name, data_with_gui, param_kind, default_value)
+    r.data_with_gui._custom_attrs = param_custom_attrs
+    return r
 
 
 def _capture_scope(nb_steps_back: int = 0) -> ScopeStorage:
@@ -237,20 +241,26 @@ def _get_calling_module_name() -> str:
         raise ValueError("No module found")
 
 
-def add_input_outputs_to_function_with_gui(function_with_gui: FunctionWithGui) -> None:
-    """Add the inputs and outputs to a FunctionWithGui instance.
-
-    This function will capture the locals and globals of the caller to be able to evaluate the types.
-    Make sure to call this function *from the module where the function and its input/output types are defined*
-    """
-    scope_storage = _capture_scope()
-    _add_input_outputs_to_function_with_gui_globals_locals_captured(function_with_gui, scope_storage)
+def _get_input_param_custom_attributes(fn_dict: JsonDict, param_name: str) -> JsonDict:
+    # Get the optional custom attributes for the parameter. For example:
+    #     def f(x: float):
+    #         return x
+    #
+    #    f.x__range = (0, 1)
+    #    f.x__type = "slider"
+    #
+    r = {}
+    for k, v in fn_dict.items():
+        if k.startswith(param_name + "__"):
+            r[k[len(param_name) + 2 :]] = v
+    return r
 
 
 def _add_input_outputs_to_function_with_gui_globals_locals_captured(
     function_with_gui: FunctionWithGui,
     scope_storage: ScopeStorage,
-    signature_string: str | None = None,
+    signature_string: str | None,
+    fn_dict: JsonDict,
 ) -> None:
     f = function_with_gui._f_impl  # noqa
     assert f is not None
@@ -261,7 +271,8 @@ def _add_input_outputs_to_function_with_gui_globals_locals_captured(
 
     params = sig.parameters
     for name, param in params.items():
-        function_with_gui._inputs_with_gui.append(_to_param_with_gui(name, param, scope_storage))
+        param_custom_attrs = _get_input_param_custom_attributes(fn_dict, name)
+        function_with_gui._inputs_with_gui.append(_to_param_with_gui(name, param, scope_storage, param_custom_attrs))
 
     return_annotation = sig.return_annotation
     if return_annotation is inspect.Parameter.empty:

@@ -144,6 +144,10 @@ class FloatEditType(Enum):
     slider_float_any_range_positive = 6
 
 
+def _available_float_edit_types() -> list[str]:
+    return [e.name for e in FloatEditType]
+
+
 @dataclass
 class FloatWithGuiParams:
     label: str = "##float"
@@ -180,6 +184,62 @@ class FloatWithGui(AnyDataWithGui[float]):
         self.callbacks.default_value_provider = lambda: 0.0
         self.callbacks.clipboard_copy_possible = True
         self.callbacks.present_str = self.present_str
+        self.callbacks.on_heartbeat = self._on_heartbeat
+
+    def _on_heartbeat(self) -> bool:
+        self._handle_custom_attrs()
+        return False
+
+    def _check_custom_attrs(self) -> None:
+        def _authorized_custom_attrs() -> list[str]:
+            return ["range", "edit_type", "format", "width_em"]
+
+        has_unauthorized = any(k not in _authorized_custom_attrs() for k in self._custom_attrs)
+        if has_unauthorized:
+            msg = f"""
+            Encountered an unauthorized custom attribute for FloatWithGui!
+                Authorized attributes are: {_authorized_custom_attrs()}
+                Where type can be one of: {_available_float_edit_types()}
+
+            Example:
+                def to_fahrenheit(celsius: float) -> float:
+                    return x
+
+                to_fahrenheit.celsius__range = (-273.15, 1000)
+                to_fahrenheit.celsius__edit_type = "slider"
+                to_fahrenheit.celsius__format = "%.2f °C"
+                to_fahrenheit.celsius__width_em = 10
+
+            """
+            raise ValueError(msg)
+
+    def _handle_custom_attrs(self) -> None:
+        self._check_custom_attrs()
+        if "range" in self._custom_attrs:
+            range_ = self._custom_attrs["range"]
+            if not isinstance(range_, tuple) or len(range_) != 2:
+                raise ValueError(f"range must be a tuple of two numbers, got: {range_}")
+            if not all(isinstance(x, (int, float)) for x in range_):
+                raise ValueError(f"range must be a tuple of two numbers, got: {range_}")
+            self.params.v_min = range_[0]
+            self.params.v_max = range_[1]
+            self.params.edit_type = FloatEditType.slider
+
+        if "edit_type" in self._custom_attrs:
+            edit_type_ = self._custom_attrs["edit_type"]
+            try:
+                edit_type = FloatEditType[edit_type_]
+                self.params.edit_type = edit_type
+            except KeyError:
+                raise ValueError(f"Unknown edit_type: {edit_type_}. Available types: {_available_float_edit_types()}")
+
+        if "format" in self._custom_attrs:
+            self.params.format = self._custom_attrs["format"]
+
+        if "width_em" in self._custom_attrs:
+            if not isinstance(self._custom_attrs["width_em"], (int, float)):
+                raise ValueError(f"width_em must be a number, got: {self._custom_attrs['width_em']}")
+            self.params.width_em = self._custom_attrs["width_em"]
 
     def present_str(self, value: float) -> str:
         if self.params.nb_significant_digits >= 0:

@@ -42,11 +42,20 @@ class AnyDataWithGui(Generic[DataType]):
     # Note: when using Optional[any registered type], this flag is automatically set to True.
     can_be_none: bool = False
 
+    # Custom attributes that can be set by the user, to give hints to the GUI.
+    # For example, with this declaration,
+    #         def f(x: int, y: int) -> int:
+    #             return x + y
+    #        f.x__range = (0, 10)
+    # _custom_attrs["range"] will be (0, 10) for the parameter x.
+    _custom_attrs: dict[str, Any]
+
     # ------------------------------------------------------------------------------------------------------------------
     #            Initialization
     # ------------------------------------------------------------------------------------------------------------------
     def __init__(self) -> None:
         self.callbacks = AnyDataGuiCallbacks.no_handlers()
+        self._custom_attrs = {}
 
     @staticmethod
     def make_for_any() -> "AnyDataWithGui[Any]":
