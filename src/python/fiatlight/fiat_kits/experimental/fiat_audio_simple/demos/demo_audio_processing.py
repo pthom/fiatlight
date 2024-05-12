@@ -56,7 +56,7 @@ def note_to_solfege(note: str) -> str:
 
 def evaluate_note(wave: fiat_audio_simple.SoundWave) -> str:
     """Given a short SoundWave, return textual information about the note played,
-    along with the frequency, error in cents, and solfege notation."""
+    along with the frequency, error in cents, and solfege notation + tempo."""
     wave = apply_pre_emphasis_filter(wave)
 
     y = np.array(wave.wave)
