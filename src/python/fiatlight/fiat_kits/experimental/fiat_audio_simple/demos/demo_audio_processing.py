@@ -13,7 +13,7 @@ PRE_EMPHASIS_FACTOR = 0.97
 
 
 def set_pre_emphasis_factor(factor: Float_0_1 = 0.97) -> None:
-    """Set the pre-emphasis factor for the pre-emphasis filter. Good values are between 0.9 and 0.97.
+    """Signal from the microphone needs to be pre-emphasized: good values are between 0.9 and 0.97.
     This will be applied to all functions in this demo."""
     global PRE_EMPHASIS_FACTOR
     PRE_EMPHASIS_FACTOR = factor

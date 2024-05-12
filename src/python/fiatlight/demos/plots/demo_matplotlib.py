@@ -1,9 +1,10 @@
 import matplotlib.pyplot as plt
+from matplotlib.figure import Figure
 import numpy as np
 from enum import Enum
 
 
-def interactive_sine_wave(freq: float = 1.0, phase: float = 0.0, amplitude: float = 1.0) -> plt.Figure:
+def interactive_sine_wave(freq: float = 1.0, phase: float = 0.0, amplitude: float = 1.0) -> Figure:
     """Generate an interactive sine wave with adjustable frequency, phase, and amplitude."""
     x = np.linspace(0, 2 * np.pi, 3000)
     y = amplitude * np.sin(2 * np.pi * freq * x + phase)
@@ -23,7 +24,7 @@ class ColorMap(Enum):
 
 def gaussian_heatmap(
     mean: float = 0, variance: float = 1, colormap: ColorMap = ColorMap.VIRIDIS, levels: int = 10
-) -> plt.Figure:
+) -> Figure:
     """Generate a Gaussian heatmap with adjustable mean, variance, colormap, and number of contour levels."""
     x = y = np.linspace(-5, 5, 100)
     X, Y = np.meshgrid(x, y)
@@ -34,7 +35,7 @@ def gaussian_heatmap(
     return fig
 
 
-def data_smoothing(window_size: int = 5) -> plt.Figure:
+def data_smoothing(window_size: int = 5) -> Figure:
     """Demonstrate data smoothing using a moving average filter."""
     x = np.linspace(0, 10, 100)
     y = np.sin(x) + np.random.normal(0, 0.1, 100)  # noisy sine wave
@@ -47,7 +48,7 @@ def data_smoothing(window_size: int = 5) -> plt.Figure:
     return fig
 
 
-def interactive_histogram(n_bars: int = 10, mu: float = 0, sigma: float = 1) -> plt.Figure:
+def interactive_histogram(n_bars: int = 10, mu: float = 0, sigma: float = 1) -> Figure:
     """Generate an interactive histogram with adjustable number of bars, mean, and standard deviation."""
     data = np.random.normal(mu, sigma, 1000)
     bins = np.linspace(np.min(data), np.max(data), n_bars)
@@ -57,7 +58,7 @@ def interactive_histogram(n_bars: int = 10, mu: float = 0, sigma: float = 1) -> 
     return fig
 
 
-def main():
+def main() -> None:
     import fiatlight
 
     graph = fiatlight.FunctionsGraph()
