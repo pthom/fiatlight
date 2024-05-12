@@ -5,7 +5,6 @@ from fiatlight.fiat_togui.to_gui import _capture_scope_back_1
 from fiatlight.fiat_types.base_types import ScopeStorage
 from fiatlight.fiat_widgets import fontawesome_6_ctx, icons_fontawesome_6, fiat_osd
 from fiatlight.fiat_utils import functional_utils
-from fiatlight.fiat_types.fiat_exception import FiatDisplayedException
 from fiatlight.fiat_runner.functions_collection import FunctionCollectionGui
 from fiatlight.fiat_kits.fiat_image.image_types import ImageU8_3
 from imgui_bundle import immapp, imgui, imgui_ctx, ImVec4, portable_file_dialogs as pfd
@@ -140,7 +139,6 @@ class FiatGui:
     _info_dock_space_id: str = "info_dock"
     _idx_frame: int = 0
     _show_inspector: bool = False
-    _exception_to_display: FiatDisplayedException | None = None
 
     save_dialog: pfd.save_file | None = None
     save_dialog_callback: Callable[[str], None] | None = None
@@ -234,10 +232,6 @@ class FiatGui:
         self._handle_file_dialogs()
         if self.params.customizable_graph:
             self._functions_collection_gui.gui()
-        if self._exception_to_display is not None:
-            self._exception_to_display.gui_display()
-            if self._exception_to_display.was_dismissed:
-                self._exception_to_display = None
 
     # ==================================================================================================================
     #                                  GUI
@@ -465,19 +459,18 @@ class FiatGui:
             with open(filename, "r") as f:
                 json_data = json.load(f)
         except json.JSONDecodeError as e:
-            self._exception_to_display = FiatDisplayedException(
+            logging.warning(
                 f"""
-                Error loading state file {self._user_settings_filename()}:
+                JSONDecodeError when loading state file {self._user_settings_filename()}:
                 (json.JSONDecodeError)
                 ========================================
                 {e}
                 """
             )
+            return False
         except FileNotFoundError:
             if whine_if_not_found:
-                self._exception_to_display = FiatDisplayedException(
-                    f"Could not find state file {self._user_settings_filename()}"
-                )
+                logging.warning(f"Could not find state file {self._user_settings_filename()}")
             return False
         try:
             if save_type == _SaveType.UserInputs:
@@ -489,7 +482,7 @@ class FiatGui:
 
                 self._functions_graph_gui.load_graph_composition_from_json(json_data, factor_function_from_name)
         except Exception as e:
-            self._exception_to_display = FiatDisplayedException(
+            logging.warning(
                 f"""
                 Error loading state file {self._user_settings_filename()}:
                 (while invoking load_user_inputs_from_json: the nodes may have changed)
