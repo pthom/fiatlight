@@ -149,7 +149,7 @@ class FloatWithGuiParams:
     label: str = "##float"
     v_min: float = 0.0
     v_max: float = 10.0
-    format: str = "%.3f"
+    format: str = "%.2f"
     width_em: float = 9
     edit_type: FloatEditType = FloatEditType.input
     # Specific to slider_float
@@ -161,10 +161,10 @@ class FloatWithGuiParams:
     # Specific to drag_float
     v_speed: float = 1.0
     # Specific to knob
-    knob_speed: float = 0.0
-    knob_variant: int = imgui_knobs.ImGuiKnobVariant_.tick.value
+    knob_speed: float = 1.0
+    knob_variant: int = imgui_knobs.ImGuiKnobVariant_.stepped.value
     knob_size_em: float = 2.5
-    knob_steps: int = 0
+    knob_steps: int = 10
     # Specific to slider_float_any_range
     nb_significant_digits: int = 4
     accept_negative: bool = True
