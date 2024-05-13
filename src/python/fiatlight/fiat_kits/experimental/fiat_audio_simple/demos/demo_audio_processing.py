@@ -18,9 +18,6 @@ def set_pre_emphasis_factor(factor: float = 0.97) -> None:
     PRE_EMPHASIS_FACTOR = factor
 
 
-set_pre_emphasis_factor.factor__range = (0.8, 0.99)  # type: ignore
-
-
 def apply_pre_emphasis_filter(wave: fiat_audio_simple.SoundWave) -> fiat_audio_simple.SoundWave:
     """Apply a pre-emphasis filter to the input wave."""
     y = np.array(wave.wave)
@@ -94,10 +91,6 @@ tempo: {tempo:.2f} BPM
     return info
 
 
-# Tell fiatlight to run this function asynchronously
-evaluate_note.invoke_async = True  # type: ignore
-
-
 def show_fundamental_freq_graph(wave: fiat_audio_simple.SoundWave) -> Figure:
     # cf example here: https://librosa.org/doc/latest/generated/librosa.pyin.html#librosa.pyin
     wave = apply_pre_emphasis_filter(wave)
@@ -140,19 +133,23 @@ def show_harmonic_percussive_graph(wave: fiat_audio_simple.SoundWave) -> Figure:
 def sandbox() -> None:
     import fiatlight  # noqa
 
+    # Tell fiatlight to run this function asynchronously
+    evaluate_note.invoke_async = True  # type: ignore
+    show_fundamental_freq_graph.invoke_async = True  # type: ignore
+    show_harmonic_percussive_graph.invoke_async = True  # type: ignore
+
+    # Tell fiatlight to display a slider for the pre-emphasis factor with a range from 0.8 to 0.99
+    set_pre_emphasis_factor.factor__range = (0.8, 0.99)  # type: ignore
+
     graph = fiatlight.FunctionsGraph()
-
     graph.add_function(set_pre_emphasis_factor)
-
     graph.add_function(fiat_audio_simple.MicrophoneGui())
-
     graph.add_function(evaluate_note)
-    graph.add_link("MicrophoneGui", "evaluate_note")
-
     graph.add_function(show_fundamental_freq_graph)
-    graph.add_link("MicrophoneGui", "show_fundamental_freq_graph")
-
     graph.add_function(show_harmonic_percussive_graph)
+
+    graph.add_link("MicrophoneGui", "evaluate_note")
+    graph.add_link("MicrophoneGui", "show_fundamental_freq_graph")
     graph.add_link("MicrophoneGui", "show_harmonic_percussive_graph")
 
     fiatlight.fiat_run_graph(graph)
