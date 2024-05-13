@@ -64,9 +64,11 @@ def data_smoothing(window_size: int = 5) -> Figure:
 data_smoothing.window_size__range = (1, 40)  # type: ignore
 
 
-def interactive_histogram(n_bars: int = 10, mu: float = 0, sigma: float = 1, nb_data: int = 1000) -> Figure:
+def interactive_histogram(
+    n_bars: int = 10, mu: float = 0, sigma: float = 1, average: float = 500, nb_data: int = 1000
+) -> Figure:
     """Generate an interactive histogram with adjustable number of bars, mean, and standard deviation."""
-    data = np.random.normal(mu, sigma, nb_data)
+    data = np.random.normal(mu, sigma, int(nb_data)) + average
     bins = np.linspace(np.min(data), np.max(data), n_bars)
 
     fig, ax = plt.subplots()
@@ -74,10 +76,23 @@ def interactive_histogram(n_bars: int = 10, mu: float = 0, sigma: float = 1, nb_
     return fig
 
 
+interactive_histogram.n_bars__edit_type = "knob"  # type: ignore
 interactive_histogram.n_bars__range = (1, 300)  # type: ignore
+
+interactive_histogram.mu__edit_type = "input"  # type: ignore
 interactive_histogram.mu__range = (-5, 5)  # type: ignore
+
+interactive_histogram.sigma__edit_type = "drag"  # type: ignore
 interactive_histogram.sigma__range = (0.1, 5)  # type: ignore
-interactive_histogram.nb_data__range = (100, 100000)  # type: ignore
+
+# slider_float_any_range: a slider for a float value with any range
+# (the slider range will adapt interactively, when dragging far to the left or to the right)
+interactive_histogram.average__edit_type = "slider_float_any_range"  # type: ignore
+
+# Note: you can ctrl+click on a slider to input a value directly
+interactive_histogram.nb_data__edit_type = "slider"  # type: ignore
+interactive_histogram.nb_data__range = (100, 1_000_000)  # type: ignore
+interactive_histogram.nb_data__slider_logarithmic = True  # type: ignore
 
 
 def main() -> None:

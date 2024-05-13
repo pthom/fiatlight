@@ -42,7 +42,7 @@ class IntWithGuiParams:
     width_em: float = 9
     format: str = "%d"
     # Specific to slider_int and drag_int
-    slider_flags: int = imgui.SliderFlags_.none.value
+    slider_logarithmic: bool = False
     # Specific to input_int
     input_flags: int = imgui.InputTextFlags_.none.value
     input_step: int = 1
@@ -54,7 +54,7 @@ class IntWithGuiParams:
     knob_variant: int = ImGuiKnobVariant_.tick.value
     knob_size_em: float = 2.5
     knob_steps: int = 0
-    no_input: bool = True
+    knob_no_input: bool = True
 
 
 class IntWithGui(AnyDataWithGui[int]):
@@ -74,7 +74,16 @@ class IntWithGui(AnyDataWithGui[int]):
 
     def _check_custom_attrs(self) -> None:
         def _authorized_custom_attrs() -> list[str]:
-            return ["range", "edit_type", "format", "width_em", "knob_size_em", "knob_steps", "no_input"]
+            return [
+                "range",
+                "edit_type",
+                "format",
+                "width_em",
+                "knob_size_em",
+                "knob_steps",
+                "knob_no_input",
+                "slider_logarithmic",
+            ]
 
         has_unauthorized = any(k not in _authorized_custom_attrs() for k in self._custom_attrs)
         if has_unauthorized:
@@ -132,23 +141,34 @@ class IntWithGui(AnyDataWithGui[int]):
                 raise ValueError(f"knob_steps must be an integer, got: {self._custom_attrs['knob_steps']}")
             self.params.knob_steps = self._custom_attrs["knob_steps"]
 
-        if "no_input" in self._custom_attrs:
-            if not isinstance(self._custom_attrs["no_input"], bool):
-                raise ValueError(f"no_input must be a boolean, got: {self._custom_attrs['no_input']}")
-            self.params.no_input = self._custom_attrs["no_input"]
+        if "knob_no_input" in self._custom_attrs:
+            if not isinstance(self._custom_attrs["knob_no_input"], bool):
+                raise ValueError(f"knob_no_input must be a boolean, got: {self._custom_attrs['knob_no_input']}")
+            self.params.knob_no_input = self._custom_attrs["knob_no_input"]
+
+        if "slider_logarithmic" in self._custom_attrs:
+            if not isinstance(self._custom_attrs["slider_logarithmic"], bool):
+                raise ValueError(
+                    f"slider_logarithmic must be a boolean, got: {self._custom_attrs['slider_logarithmic']}"
+                )
+            self.params.slider_logarithmic = self._custom_attrs["slider_logarithmic"]
 
     def edit(self) -> bool:
-        assert isinstance(self.value, int)
+        if not isinstance(self.value, int):
+            raise ValueError(f"IntWithGui expects an int, got: {type(self.value)}")
         changed = False
         imgui.set_next_item_width(hello_imgui.em_size(self.params.width_em))
         if self.params.edit_type == IntEditType.slider:
+            slider_flags = 0
+            if self.params.slider_logarithmic:
+                slider_flags = imgui.SliderFlags_.logarithmic.value
             changed, self.value = imgui.slider_int(
                 self.params.label,
                 self.value,
                 self.params.v_min,
                 self.params.v_max,
                 self.params.format,
-                self.params.slider_flags,
+                slider_flags,
             )
         elif self.params.edit_type == IntEditType.input:
             changed, self.value = imgui.input_int(
@@ -159,6 +179,9 @@ class IntWithGui(AnyDataWithGui[int]):
                 self.params.input_flags,
             )
         elif self.params.edit_type == IntEditType.drag:
+            slider_flags = 0
+            if self.params.slider_logarithmic:
+                slider_flags = imgui.SliderFlags_.logarithmic.value
             changed, self.value = imgui.drag_int(
                 self.params.label,
                 self.value,
@@ -166,11 +189,11 @@ class IntWithGui(AnyDataWithGui[int]):
                 self.params.v_min,
                 self.params.v_max,
                 self.params.format,
-                self.params.slider_flags,
+                slider_flags,
             )
         elif self.params.edit_type == IntEditType.knob:
             knob_flags = 0
-            if self.params.no_input:
+            if self.params.knob_no_input:
                 knob_flags = imgui_knobs.ImGuiKnobFlags_.no_input.value
             changed, self.value = imgui_knobs.knob_int(
                 self.params.label,
@@ -190,6 +213,9 @@ class IntWithGui(AnyDataWithGui[int]):
             spacing = hello_imgui.em_to_vec2(0.1, 0)
             with imgui_ctx.begin_horizontal("##int", ImVec2(item_width + buttons_width, 0)):
                 with imgui_ctx.push_style_var(imgui.StyleVar_.item_spacing.value, spacing):
+                    slider_flags = 0
+                    if self.params.slider_logarithmic:
+                        slider_flags = imgui.SliderFlags_.logarithmic.value
                     imgui.set_next_item_width(item_width)
                     changed, self.value = imgui.slider_int(
                         self.params.label,
@@ -197,7 +223,7 @@ class IntWithGui(AnyDataWithGui[int]):
                         self.params.v_min,
                         self.params.v_max,
                         self.params.format,
-                        self.params.slider_flags,
+                        slider_flags,
                     )
                     if imgui.button("-"):
                         if self.value > self.params.v_min:
@@ -235,9 +261,9 @@ class FloatWithGuiParams:
     format: str = "%.3f"
     width_em: float = 9
     edit_type: FloatEditType = FloatEditType.input
-    no_input: bool = False  # Disable text input on knobs and sliders
-    # Specific to slider_float
-    slider_flags: int = imgui.SliderFlags_.none.value
+    knob_no_input: bool = False  # Disable text input on knobs and sliders
+    # Specific to slider
+    slider_logarithmic: bool = False
     # Specific to input_float
     input_step: float = 0.1
     input_step_fast: float = 1.0
@@ -272,7 +298,16 @@ class FloatWithGui(AnyDataWithGui[float]):
 
     def _check_custom_attrs(self) -> None:
         def _authorized_custom_attrs() -> list[str]:
-            return ["range", "edit_type", "format", "width_em", "knob_size_em", "knob_steps", "no_input"]
+            return [
+                "range",
+                "edit_type",
+                "format",
+                "width_em",
+                "knob_size_em",
+                "knob_steps",
+                "knob_no_input",
+                "slider_logarithmic",
+            ]
 
         has_unauthorized = any(k not in _authorized_custom_attrs() for k in self._custom_attrs)
         if has_unauthorized:
@@ -333,10 +368,17 @@ class FloatWithGui(AnyDataWithGui[float]):
                 raise ValueError(f"knob_steps must be an integer, got: {self._custom_attrs['knob_steps']}")
             self.params.knob_steps = self._custom_attrs["knob_steps"]
 
-        if "no_input" in self._custom_attrs:
-            if not isinstance(self._custom_attrs["no_input"], bool):
-                raise ValueError(f"no_input must be a boolean, got: {self._custom_attrs['no_input']}")
-            self.params.no_input = self._custom_attrs["no_input"]
+        if "knob_no_input" in self._custom_attrs:
+            if not isinstance(self._custom_attrs["knob_no_input"], bool):
+                raise ValueError(f"knob_no_input must be a boolean, got: {self._custom_attrs['knob_no_input']}")
+            self.params.knob_no_input = self._custom_attrs["knob_no_input"]
+
+        if "slider_logarithmic" in self._custom_attrs:
+            if not isinstance(self._custom_attrs["slider_logarithmic"], bool):
+                raise ValueError(
+                    f"slider_logarithmic must be a boolean, got: {self._custom_attrs['slider_logarithmic']}"
+                )
+            self.params.slider_logarithmic = self._custom_attrs["slider_logarithmic"]
 
     def present_str(self, value: float) -> str:
         if self.params.nb_significant_digits >= 0:
@@ -345,17 +387,21 @@ class FloatWithGui(AnyDataWithGui[float]):
             return str(value)
 
     def edit(self) -> bool:
-        assert isinstance(self.value, float) or isinstance(self.value, int)
+        if not isinstance(self.value, float) and not isinstance(self.value, int):
+            raise ValueError(f"FloatWithGui expects a float, got: {type(self.value)}")
         changed = False
         imgui.set_next_item_width(hello_imgui.em_size(self.params.width_em))
         if self.params.edit_type == FloatEditType.slider:
+            slider_flags = 0
+            if self.params.slider_logarithmic:
+                slider_flags = imgui.SliderFlags_.logarithmic.value
             changed, self.value = imgui.slider_float(
                 self.params.label,
                 self.value,
                 self.params.v_min,
                 self.params.v_max,
                 self.params.format,
-                self.params.slider_flags,
+                slider_flags,
             )
         elif self.params.edit_type == FloatEditType.input:
             changed, self.value = imgui.input_float(
@@ -367,6 +413,9 @@ class FloatWithGui(AnyDataWithGui[float]):
                 self.params.input_flags,
             )
         elif self.params.edit_type == FloatEditType.drag:
+            slider_flags = 0
+            if self.params.slider_logarithmic:
+                slider_flags = imgui.SliderFlags_.logarithmic.value
             changed, self.value = imgui.drag_float(
                 self.params.label,
                 self.value,
@@ -374,11 +423,11 @@ class FloatWithGui(AnyDataWithGui[float]):
                 self.params.v_min,
                 self.params.v_max,
                 self.params.format,
-                self.params.slider_flags,
+                slider_flags,
             )
         elif self.params.edit_type == FloatEditType.knob:
             knob_flags = 0
-            if self.params.no_input:
+            if self.params.knob_no_input:
                 knob_flags = imgui_knobs.ImGuiKnobFlags_.no_input.value
             changed, self.value = imgui_knobs.knob(
                 self.params.label,
@@ -578,7 +627,8 @@ class StrWithGui(AnyDataWithGui[str]):
             )
 
     def edit(self) -> bool:
-        assert isinstance(self.value, str)
+        if not isinstance(self.value, str):
+            raise ValueError(f"StrWithGui expects a string, got: {type(self.value)}")
         changed = False
         present_multiline = False
         is_versatile = self.params.edit_type == StrEditType.versatile
