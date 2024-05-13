@@ -52,9 +52,9 @@ class IntWithGuiParams:
     v_speed: float = 1.0
     # Specific to knob
     knob_speed: float = 0.0
-    knob_variant: int = ImGuiKnobVariant_.tick.value
+    knob_variant: int = ImGuiKnobVariant_.stepped.value
     knob_size_em: float = 2.5
-    knob_steps: int = 0
+    knob_steps: int = 10
     knob_no_input: bool = True
 
 

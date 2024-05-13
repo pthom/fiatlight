@@ -76,23 +76,25 @@ def interactive_histogram(
     return fig
 
 
+# Edit the number of bars with a knob
 interactive_histogram.n_bars__edit_type = "knob"  # type: ignore
 interactive_histogram.n_bars__range = (1, 300)  # type: ignore
-
+# Edit the mean with an input field
 interactive_histogram.mu__edit_type = "input"  # type: ignore
 interactive_histogram.mu__range = (-5, 5)  # type: ignore
-
+# Edit the standard deviation with a drag
 interactive_histogram.sigma__edit_type = "drag"  # type: ignore
 interactive_histogram.sigma__range = (0.1, 5)  # type: ignore
-
-# slider_float_any_range: a slider for a float value with any range
+# Edit the average with a slider for a float value with any range
 # (the slider range will adapt interactively, when dragging far to the left or to the right)
 interactive_histogram.average__edit_type = "slider_float_any_range"  # type: ignore
-
-# Note: you can ctrl+click on a slider to input a value directly
+# Edit the number of data points with a logarithmic slider
+# Note: by default, you can ctrl+click on a slider to input a value directly,
+#       this is disabled here with nb_data__slider_no_input
 interactive_histogram.nb_data__edit_type = "slider"  # type: ignore
 interactive_histogram.nb_data__range = (100, 1_000_000)  # type: ignore
 interactive_histogram.nb_data__slider_logarithmic = True  # type: ignore
+interactive_histogram.nb_data__slider_no_input = True  # type: ignore
 
 
 def main() -> None:
