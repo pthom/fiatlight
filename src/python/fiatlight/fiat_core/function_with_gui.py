@@ -11,12 +11,7 @@ import logging
 
 
 class FunctionWithGui:
-    """Instantiate this class with your functions, to make them available in a graph
-    You need to provide:
-    - the name of the function
-    - the implementation of the function (_f_impl)
-    - the inputs and outputs of the function, as a list of ParamWithGui
-    """
+    """Instantiate this class with your functions, to make them available in a graph"""
 
     # --------------------------------------------------------------------------------------------
     #        Public Members

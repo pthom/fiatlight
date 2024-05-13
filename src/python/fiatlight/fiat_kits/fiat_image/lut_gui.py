@@ -27,9 +27,12 @@ class LutParamsWithGui(AnyDataWithGui[LutParams]):
             return "Lut(default)"
         return "Lut(...)"
 
-    def edit(self) -> bool:
+    def edit(self, _value: LutParams) -> tuple[bool, LutParams]:
+        # _value is not used, as the value is accessed via self.lut_params() which accesses self.value
+        # (note self.value is of type LutParams | Unspecified | Error)
         changed = self.gui_params()
-        return changed
+        assert isinstance(self.value, LutParams)
+        return changed, self.value
 
     def on_change(self, _lut_params: LutParams) -> None:
         self._lut_graph_needs_refresh = True

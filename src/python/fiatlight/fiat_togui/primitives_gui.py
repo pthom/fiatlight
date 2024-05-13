@@ -160,9 +160,9 @@ class IntWithGui(AnyDataWithGui[int]):
                 )
             self.params.slider_logarithmic = self._custom_attrs["slider_logarithmic"]
 
-    def edit(self) -> bool:
-        if not isinstance(self.value, int):
-            raise ValueError(f"IntWithGui expects an int, got: {type(self.value)}")
+    def edit(self, value: int) -> tuple[bool, int]:
+        if not isinstance(value, int):
+            raise ValueError(f"IntWithGui expects an int, got: {type(value)}")
         changed = False
         imgui.set_next_item_width(hello_imgui.em_size(self.params.width_em))
         if self.params.edit_type == IntEditType.slider:
@@ -171,18 +171,18 @@ class IntWithGui(AnyDataWithGui[int]):
                 slider_flags = imgui.SliderFlags_.logarithmic.value
             if self.params.slider_no_input:
                 slider_flags |= imgui.SliderFlags_.no_input.value
-            changed, self.value = imgui.slider_int(
+            changed, value = imgui.slider_int(
                 self.params.label,
-                self.value,
+                value,
                 self.params.v_min,
                 self.params.v_max,
                 self.params.format,
                 slider_flags,
             )
         elif self.params.edit_type == IntEditType.input:
-            changed, self.value = imgui.input_int(
+            changed, value = imgui.input_int(
                 self.params.label,
-                self.value,
+                value,
                 self.params.input_step,
                 self.params.input_step_fast,
                 self.params.input_flags,
@@ -193,9 +193,9 @@ class IntWithGui(AnyDataWithGui[int]):
                 slider_flags = imgui.SliderFlags_.logarithmic.value
             if self.params.slider_no_input:
                 slider_flags |= imgui.SliderFlags_.no_input.value
-            changed, self.value = imgui.drag_int(
+            changed, value = imgui.drag_int(
                 self.params.label,
-                self.value,
+                value,
                 self.params.v_speed,
                 self.params.v_min,
                 self.params.v_max,
@@ -206,9 +206,9 @@ class IntWithGui(AnyDataWithGui[int]):
             knob_flags = 0
             if self.params.knob_no_input:
                 knob_flags = imgui_knobs.ImGuiKnobFlags_.no_input.value
-            changed, self.value = imgui_knobs.knob_int(
+            changed, value = imgui_knobs.knob_int(
                 self.params.label,
-                self.value,
+                value,
                 self.params.v_min,
                 self.params.v_max,
                 self.params.knob_speed,
@@ -228,24 +228,24 @@ class IntWithGui(AnyDataWithGui[int]):
                     if self.params.slider_logarithmic:
                         slider_flags = imgui.SliderFlags_.logarithmic.value
                     imgui.set_next_item_width(item_width)
-                    changed, self.value = imgui.slider_int(
+                    changed, value = imgui.slider_int(
                         self.params.label,
-                        self.value,
+                        value,
                         self.params.v_min,
                         self.params.v_max,
                         self.params.format,
                         slider_flags,
                     )
                     if imgui.button("-"):
-                        if self.value > self.params.v_min:
-                            self.value -= 1
+                        if value > self.params.v_min:
+                            value -= 1
                             changed = True
                     if imgui.button("+"):
-                        if self.value < self.params.v_max:
-                            self.value += 1
+                        if value < self.params.v_max:
+                            value += 1
                         changed = True
 
-        return changed
+        return changed, value
 
 
 ########################################################################################################################
@@ -404,9 +404,9 @@ class FloatWithGui(AnyDataWithGui[float]):
         else:
             return str(value)
 
-    def edit(self) -> bool:
-        if not isinstance(self.value, float) and not isinstance(self.value, int):
-            raise ValueError(f"FloatWithGui expects a float, got: {type(self.value)}")
+    def edit(self, value: float) -> tuple[bool, float]:
+        if not isinstance(value, float) and not isinstance(value, int):
+            raise ValueError(f"FloatWithGui expects a float, got: {type(value)}")
         changed = False
         imgui.set_next_item_width(hello_imgui.em_size(self.params.width_em))
         if self.params.edit_type == FloatEditType.slider:
@@ -415,18 +415,18 @@ class FloatWithGui(AnyDataWithGui[float]):
                 slider_flags = imgui.SliderFlags_.logarithmic.value
             if self.params.slider_no_input:
                 slider_flags |= imgui.SliderFlags_.no_input.value
-            changed, self.value = imgui.slider_float(
+            changed, value = imgui.slider_float(
                 self.params.label,
-                self.value,
+                value,
                 self.params.v_min,
                 self.params.v_max,
                 self.params.format,
                 slider_flags,
             )
         elif self.params.edit_type == FloatEditType.input:
-            changed, self.value = imgui.input_float(
+            changed, value = imgui.input_float(
                 self.params.label,
-                self.value,
+                value,
                 self.params.input_step,
                 self.params.input_step_fast,
                 self.params.format,
@@ -438,9 +438,9 @@ class FloatWithGui(AnyDataWithGui[float]):
                 slider_flags = imgui.SliderFlags_.logarithmic.value
             if self.params.slider_no_input:
                 slider_flags |= imgui.SliderFlags_.no_input.value
-            changed, self.value = imgui.drag_float(
+            changed, value = imgui.drag_float(
                 self.params.label,
-                self.value,
+                value,
                 self.params.v_speed,
                 self.params.v_min,
                 self.params.v_max,
@@ -451,9 +451,9 @@ class FloatWithGui(AnyDataWithGui[float]):
             knob_flags = 0
             if self.params.knob_no_input:
                 knob_flags = imgui_knobs.ImGuiKnobFlags_.no_input.value
-            changed, self.value = imgui_knobs.knob(
+            changed, value = imgui_knobs.knob(
                 self.params.label,
-                self.value,
+                value,
                 self.params.v_min,
                 self.params.v_max,
                 self.params.knob_speed,
@@ -473,14 +473,14 @@ class FloatWithGui(AnyDataWithGui[float]):
             if self.params.edit_type == FloatEditType.slider_float_any_range_positive:
                 accept_negative = False
 
-            changed, self.value = slider_float_any_range(
+            changed, value = slider_float_any_range(
                 self.params.label,
-                self.value,
+                value,
                 accept_negative,
                 self.params.nb_significant_digits,
             )
 
-        return changed
+        return changed, value
 
 
 def make_positive_float_with_gui() -> AnyDataWithGui[float]:
@@ -552,19 +552,18 @@ class BoolWithGui(AnyDataWithGui[bool]):
             except KeyError:
                 raise ValueError(f"Unknown edit_type: {edit_type_}. Available types: {_available_bool_edit_types()}")
 
-    def edit(self) -> bool:
-        assert isinstance(self.value, bool)
+    def edit(self, value: bool) -> tuple[bool, bool]:
+        if not isinstance(value, bool):
+            raise ValueError(f"BoolWithGui expects a bool, got: {type(value)}")
         changed = False
         if self.params.edit_type == BoolEditType.checkbox:
-            changed, self.value = imgui.checkbox(self.params.label, self.value)
+            changed, value = imgui.checkbox(self.params.label, value)
         elif self.params.edit_type == BoolEditType.toggle:
             # if self.params.toggle_config is None:
             #     raise ValueError("toggle_config must be set for BoolEditType.toggle")
-            changed, self.value = imgui_toggle.toggle(
-                self.params.label, self.value, imgui_toggle.ToggleFlags_.animated.value
-            )
+            changed, value = imgui_toggle.toggle(self.params.label, value, imgui_toggle.ToggleFlags_.animated.value)
 
-        return changed
+        return changed, value
 
 
 ########################################################################################################################
@@ -634,7 +633,8 @@ class StrWithGui(AnyDataWithGui[str]):
             self.callbacks.edit_popup_required = True
         return False
 
-    def present_custom(self, text_value: str) -> None:
+    @staticmethod
+    def present_custom(text_value: str) -> None:
         if fiatlight.is_rendering_in_window():
             text_edit_size = ImVec2(
                 imgui.get_window_width() - hello_imgui.em_size(1), imgui.get_window_height() - hello_imgui.em_size(5)
@@ -647,10 +647,10 @@ class StrWithGui(AnyDataWithGui[str]):
                 max_lines=5,
             )
 
-    def edit(self) -> bool:
-        if not isinstance(self.value, str):
-            raise ValueError(f"StrWithGui expects a string, got: {type(self.value)}")
-        changed = False
+    def edit(self, value: str) -> tuple[bool, str]:
+        if not isinstance(value, str):
+            raise ValueError(f"StrWithGui expects a string, got: {type(value)}")
+        changed = False  # noqa
         present_multiline = False
         is_versatile = self.params.edit_type == StrEditType.versatile
         if is_versatile:
@@ -663,17 +663,17 @@ class StrWithGui(AnyDataWithGui[str]):
             imgui.set_next_item_width(hello_imgui.em_size(self.params.width_em_one_line))
             has_hint = len(self.params.hint) > 0
             if has_hint:
-                changed, self.value = imgui.input_text_with_hint(
+                changed, value = imgui.input_text_with_hint(
                     self.params.label,
                     self.params.hint,
-                    self.value,
+                    value,
                     self.params.input_flags,
                     self.params.callback,
                     self.params.user_data,
                 )
             else:
-                changed, self.value = imgui.input_text(
-                    self.params.label, self.value, self.params.input_flags, self.params.callback, self.params.user_data
+                changed, value = imgui.input_text(
+                    self.params.label, value, self.params.input_flags, self.params.callback, self.params.user_data
                 )
 
             if is_versatile:
@@ -683,21 +683,20 @@ class StrWithGui(AnyDataWithGui[str]):
                         self.params.versatile_edit_as_multiline = True
                     fiat_osd.set_widget_tooltip("Edit in popup (multiline)")
         else:  # present_multiline
-            assert isinstance(self.value, str)
             size = ImVec2(0, 0)
             size.x = imgui.get_window_width() - hello_imgui.em_size(1)
             size.y = imgui.get_window_height() - hello_imgui.em_size(5)
 
-            changed, self.value = imgui.input_text_multiline(
+            changed, value = imgui.input_text_multiline(
                 self.params.label,
-                self.value,
+                value,
                 size,
                 self.params.input_flags,
                 self.params.callback,
                 self.params.user_data,
             )
 
-        return changed
+        return changed, value
 
 
 ########################################################################################################################
@@ -734,17 +733,17 @@ class FilePathWithGui(AnyDataWithGui[FilePath]):
         self.callbacks.clipboard_copy_possible = True
         self.filters = []
 
-    def edit(self) -> bool:
+    def edit(self, value: FilePath) -> tuple[bool, FilePath]:
         changed = False
         if imgui.button("Select file"):
             self._open_file_dialog = pfd.open_file("Select file", self.default_path, self.filters)
         if self._open_file_dialog is not None and self._open_file_dialog.ready():
             if len(self._open_file_dialog.result()) == 1:
                 selected_file = self._open_file_dialog.result()[0]
-                self.value = FilePath(selected_file)
+                value = FilePath(selected_file)
                 changed = True
             self._open_file_dialog = None
-        return changed
+        return changed, value
 
     @staticmethod
     def present_str(value: FilePath) -> str:
@@ -796,10 +795,12 @@ class ColorRgbWithGui(AnyDataWithGui[ColorRgb]):
         self.callbacks.present_str = self.present_str
         self.callbacks.clipboard_copy_possible = True
 
-    def edit(self) -> bool:
-        assert isinstance(self.value, tuple)
-        assert len(self.value) == 3
-        value = self.value
+    @staticmethod
+    def edit(value: ColorRgb) -> tuple[bool, ColorRgb]:
+        if not isinstance(value, tuple):
+            raise ValueError(f"ColorRgbWithGui expects a tuple, got: {type(value)}")
+        if len(value) != 3:
+            raise ValueError(f"ColorRgbWithGui expects a tuple of 3 ints, got: {value}")
         value_as_floats = [value[0] / 255.0, value[1] / 255.0, value[2] / 255.0]
 
         imgui.text("Edit")
@@ -813,16 +814,16 @@ class ColorRgbWithGui(AnyDataWithGui[ColorRgb]):
         imgui.set_next_item_width(hello_imgui.em_size(8))
         changed2, value_as_floats = imgui.color_picker3("##color", value_as_floats, picker_flags_wheel)
         if changed1 or changed2:
-            self.value = ColorRgb(
+            value = ColorRgb(
                 (
                     int(value_as_floats[0] * 255),
                     int(value_as_floats[1] * 255),
                     int(value_as_floats[2] * 255),
                 )
             )
-            return True
+            return True, value
         else:
-            return False
+            return False, value
 
     @staticmethod
     def present_str(value: ColorRgb) -> str:
@@ -837,14 +838,16 @@ class ColorRgbaWithGui(AnyDataWithGui[ColorRgba]):
         self.callbacks.present_str = self.present_str
         self.callbacks.clipboard_copy_possible = True
 
-    def edit(self) -> bool:
-        assert isinstance(self.value, tuple)
-        assert len(self.value) == 4
-        value = self.value
+    @staticmethod
+    def edit(value: ColorRgba) -> tuple[bool, ColorRgba]:
+        if not isinstance(value, tuple):
+            raise ValueError(f"ColorRgbaWithGui expects a tuple, got: {type(value)}")
+        if len(value) != 4:
+            raise ValueError(f"ColorRgbaWithGui expects a tuple of 4 ints, got: {value}")
         value_as_floats = [value[0] / 255.0, value[1] / 255.0, value[2] / 255.0, value[3] / 255.0]
         changed, value_as_floats = imgui.color_edit4("##color", value_as_floats)
         if changed:
-            self.value = ColorRgba(
+            value = ColorRgba(
                 (
                     int(value_as_floats[0] * 255),
                     int(value_as_floats[1] * 255),
@@ -852,9 +855,9 @@ class ColorRgbaWithGui(AnyDataWithGui[ColorRgba]):
                     int(value_as_floats[3] * 255),
                 )
             )
-            return True
+            return True, value
         else:
-            return False
+            return False, value
 
     @staticmethod
     def present_str(value: ColorRgba) -> str:

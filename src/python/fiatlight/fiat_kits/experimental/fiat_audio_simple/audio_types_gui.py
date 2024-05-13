@@ -15,7 +15,7 @@ from .audio_types import (
 class SampleRateGui(AnyDataWithGui[SampleRate]):
     def __init__(self) -> None:
         super().__init__()
-        self.callbacks.edit = make_explained_value_edit_callback("sample_rate", self, SampleRatesExplained)
+        self.callbacks.edit = make_explained_value_edit_callback("sample_rate", SampleRatesExplained)
         self.callbacks.default_value_provider = lambda: SampleRate(44100)
         self.callbacks.present_str = lambda x: f"{x / 1000} kHz"
 
@@ -23,7 +23,7 @@ class SampleRateGui(AnyDataWithGui[SampleRate]):
 class BlockSizeGui(AnyDataWithGui[BlockSize]):
     def __init__(self) -> None:
         super().__init__()
-        self.callbacks.edit = make_explained_value_edit_callback("block_size", self, BlockSizesExplained)
+        self.callbacks.edit = make_explained_value_edit_callback("block_size", BlockSizesExplained)
         self.callbacks.default_value_provider = lambda: BlockSize(1024)
         self.callbacks.present_str = lambda x: f"{x} samples"
 
@@ -45,39 +45,19 @@ class SoundStreamParamsGui(AnyDataWithGui[SoundStreamParams]):
         self.callbacks.present_str = lambda x: f"{x.sample_rate / 1000} kHz, {x.block_size} samples"
         self.callbacks.edit = self.edit
 
-    def edit(self) -> bool:
-        value = self.get_actual_value()
-        changed = False
-
+    def edit(self, value: SoundStreamParams) -> tuple[bool, SoundStreamParams]:
         with imgui_ctx.begin_vertical("Params"):
             imgui.text("Sample Rate")
             sample_rate_gui = SampleRateGui()
-            sample_rate_gui.value = value.sample_rate
             assert sample_rate_gui.callbacks.edit is not None
-            if sample_rate_gui.callbacks.edit():
-                value.sample_rate = sample_rate_gui.value
-                changed = True
-
-            # Disabled because some computers can only record in mono,
-            # and trying to record with two channels will fail.
-            #
-            # imgui.text("Nb Channels")
-            # nb_channels_gui = NbChannelsGui()
-            # nb_channels_gui.value = value.nb_channels
-            # assert nb_channels_gui.callbacks.edit is not None
-            # if nb_channels_gui.callbacks.edit():
-            #     value.nb_channels = nb_channels_gui.value
-            #     changed = True
+            sample_rate_changed, value.sample_rate = sample_rate_gui.callbacks.edit(value.sample_rate)
 
             imgui.text("Block Size")
             block_size_gui = BlockSizeGui()
-            block_size_gui.value = value.block_size
             assert block_size_gui.callbacks.edit is not None
-            if block_size_gui.callbacks.edit():
-                value.block_size = block_size_gui.value
-                changed = True
+            block_size_changed, value.block_size = block_size_gui.callbacks.edit(value.block_size)
 
-        return changed
+        return sample_rate_changed or block_size_changed, value
 
 
 def register_audio_types_gui() -> None:

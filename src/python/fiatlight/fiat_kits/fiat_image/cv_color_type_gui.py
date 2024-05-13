@@ -35,12 +35,12 @@ class ColorConversionWithGui(AnyDataWithGui[ColorConversion]):
         self.callbacks.edit = self.edit
         self.callbacks.default_value_provider = lambda: ColorConversion(ColorType.BGR, ColorType.RGB)
 
-    def edit(self) -> bool:
-        value = self.get_actual_value()
+    @staticmethod
+    def edit(value: ColorConversion) -> tuple[bool, ColorConversion]:
         imgui.text(str(value))
         imgui.same_line()
         changed, value = gui_color_conversion(value)
-        return changed
+        return changed, value
 
 
 def sandbox() -> None:

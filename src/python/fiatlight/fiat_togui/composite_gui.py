@@ -46,8 +46,7 @@ class OptionalWithGui(AnyDataWithGui[DataType | None]):
             self.inner_gui.value = value
             self.inner_gui.callbacks.present_custom(value)
 
-    def edit(self) -> bool:
-        value = self.value
+    def edit(self, value: DataType | None) -> tuple[bool, DataType | None]:
         assert not isinstance(value, (Unspecified, Error))
 
         changed = False
@@ -58,7 +57,7 @@ class OptionalWithGui(AnyDataWithGui[DataType | None]):
             if imgui.button("Set"):
                 default_value_provider = self.inner_gui.callbacks.default_value_provider
                 assert default_value_provider is not None
-                self.value = default_value_provider()
+                value = default_value_provider()
                 changed = True
             fiat_osd.set_widget_tooltip("Set Optional to default value for this type.")
             imgui.end_horizontal()
@@ -67,21 +66,24 @@ class OptionalWithGui(AnyDataWithGui[DataType | None]):
             imgui.begin_horizontal("##OptionalH")
             imgui.text("Optional: Set")
             if imgui.button("Unset"):
-                self.value = None
+                value = None
                 changed = True
             fiat_osd.set_widget_tooltip("Unset Optional.")
             imgui.end_horizontal()
             fn_edit = self.inner_gui.callbacks.edit
-            if fn_edit is not None:
-                changed_in_edit = fn_edit()
+            if value is not None and fn_edit is not None:
+                changed_in_edit, value = fn_edit(value)
                 if changed_in_edit:
-                    self.value = self.inner_gui.value
+                    inner_gui_value = self.inner_gui.value
+                    if isinstance(inner_gui_value, (Unspecified, Error)):
+                        raise ValueError("Inner GUI value is Unspecified or Error")
+                    value = inner_gui_value
                     changed = True
             else:
                 imgui.text("No edit function!")
             imgui.end_vertical()
 
-        return changed
+        return changed, value
 
     def on_change(self, value: DataType | None) -> None:
         if value is not None:
@@ -133,28 +135,29 @@ class ListWithGui(AnyDataWithGui[List[DataType]]):
         )
         return r
 
-    def edit(self) -> bool:  # noqa
-        imgui.text("Edit not implemented for ListWithGui")
-        return False
+    def edit(self, value: List[DataType]) -> tuple[bool, List[DataType]]:  # noqa
+        raise NotImplementedError("Edit function not implemented for ListWithGui")
 
-    def popup_details(self) -> None:
-        assert not isinstance(self.value, (Unspecified, Error))
+    def popup_details(self, value: List[DataType]) -> None:
         imgui.text("List elements")
         _, self.show_idx = imgui.checkbox("Show index", self.show_idx)
-        txt = self._elements_str(self.value, self.popup_max_elements)
+        txt = self._elements_str(value, self.popup_max_elements)
         imgui.input_text_multiline("##ListElements", txt, hello_imgui.em_to_vec2(0, 20))
 
-        if self.popup_max_elements < len(self.value):
+        if self.popup_max_elements < len(value):
             if imgui.button("Show more"):
                 self.popup_max_elements += 300
 
     def present_custom(self, value: List[DataType]) -> None:
         max_elements = get_fiat_config().style.list_maximum_elements_in_node
 
+        def popup_details_value() -> None:
+            self.popup_details(value)
+
         fiat_osd.show_void_detached_window_button(
             "Details",
             "List details",
-            self.popup_details,
+            popup_details_value,
         )
 
         txt = self._elements_str(value, max_elements)
@@ -176,15 +179,15 @@ class EnumWithGui(AnyDataWithGui[Enum]):
         self.callbacks.create_from_value = self.create_from_name
         self.callbacks.clipboard_copy_possible = True
 
-    def edit(self) -> bool:
-        assert not isinstance(self.value, (Unspecified, Error))
+    def edit(self, value: Enum) -> tuple[bool, Enum]:
+        assert not isinstance(value, (Unspecified, Error))
         changed = False
 
         for enum_value in list(self.enum_type):
-            if imgui.radio_button(enum_value.name, self.value == enum_value):
-                self.value = enum_value
+            if imgui.radio_button(enum_value.name, value == enum_value):
+                value = enum_value
                 changed = True
-        return changed
+        return changed, value
 
     def create_from_name(self, name: str) -> Enum:
         return self.enum_type[name]

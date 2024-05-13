@@ -788,8 +788,9 @@ class FunctionNodeGui:
             def fn_edit() -> bool:
                 changed = False
                 if data_callbacks.edit is not None:
-                    if data_callbacks.edit():
-                        changed = True
+                    changed, new_value = data_callbacks.edit(value)
+                    if changed:
+                        input_param.data_with_gui.value = new_value
                 else:
                     imgui.text("No editor")
                 return changed

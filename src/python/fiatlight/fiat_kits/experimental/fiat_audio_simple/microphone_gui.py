@@ -16,33 +16,25 @@ class MicrophoneParamsGui(AnyDataWithGui[SoundStreamParams]):
         self.callbacks.present_str = lambda x: f"{x.sample_rate / 1000} kHz, {x.block_size} samples"
         self.callbacks.edit = self.edit
 
-    def edit(self) -> bool:
-        value = self.get_actual_value()
-        changed = False
-
+    def edit(self, value: SoundStreamParams) -> tuple[bool, SoundStreamParams]:
         with imgui_ctx.begin_vertical("Params"):
             imgui.text("Sample Rate")
             sample_rate_gui = SampleRateGui()
-            sample_rate_gui.value = value.sample_rate
             assert sample_rate_gui.callbacks.edit is not None
-            if sample_rate_gui.callbacks.edit():
-                value.sample_rate = sample_rate_gui.value
-                changed = True
+            changed_sample_rate, value.sample_rate = sample_rate_gui.callbacks.edit(value.sample_rate)
 
             imgui.text("Block Size")
             block_size_gui = BlockSizeGui()
-            block_size_gui.value = value.block_size
             assert block_size_gui.callbacks.edit is not None
-            if block_size_gui.callbacks.edit():
-                value.block_size = block_size_gui.value
-                changed = True
+            changed_block_size, value.block_size = block_size_gui.callbacks.edit(value.block_size)
 
-        return changed
+        return changed_sample_rate or changed_block_size, value
 
 
 class MicrophoneGui(FunctionWithGui):
     # Serialized options
     _microphone_params_gui: MicrophoneParamsGui
+    _sound_stream_params: SoundStreamParams
     _live_plot_size_em: ImVec2
 
     # IO
@@ -66,7 +58,7 @@ class MicrophoneGui(FunctionWithGui):
         self.on_heartbeat = self._on_heartbeat
 
         self._microphone_params_gui = MicrophoneParamsGui()
-        self._microphone_params_gui.value = SoundStreamParams()
+        self._sound_stream_params = SoundStreamParams()
         self._microphone_io = AudioProviderMic()
 
         self._displayed_sound_block = None
@@ -102,13 +94,13 @@ class MicrophoneGui(FunctionWithGui):
         return needs_refresh
 
     def _on_start_recording(self) -> None:
-        self._microphone_io.start(self._microphone_params_gui.get_actual_value())
+        self._microphone_io.start(self._sound_stream_params)
         self._sound_wave = None
         self._is_recording = True
 
     def _on_stop_recording(self) -> None:
         self._microphone_io.stop()
-        self._sound_wave = SoundWave(self._sound_wave_being_recorded, self._microphone_params_gui.value.sample_rate)  # type: ignore
+        self._sound_wave = SoundWave(self._sound_wave_being_recorded, self._sound_stream_params.sample_rate)  # type: ignore
         self._was_recording_just_stopped = True
         self._is_recording = False
 
@@ -170,7 +162,7 @@ class MicrophoneGui(FunctionWithGui):
             has_data = self._sound_wave is not None or self._sound_wave_being_recorded is not None
 
             imgui.begin_disabled(is_started or has_data)
-            _params_changed = self._microphone_params_gui.edit()
+            _params_changed = self._microphone_params_gui.edit(self._sound_stream_params)
             imgui.end_disabled()
             need_refresh = self._draw_control_buttons()
             self._show_live_sound_block()

@@ -125,7 +125,7 @@ class ImageWithGui(AnyDataWithGui[Image]):
         self.callbacks.load_gui_options_from_json = self.load_gui_options_from_json
         self.callbacks.present_custom_popup_possible = True
 
-    def edit(self) -> bool:
+    def edit(self, value: Image) -> tuple[bool, Image]:
         changed = False
         if imgui.button("Select image file"):
             # self.open_file_dialog = pfd.open_file(
@@ -137,10 +137,10 @@ class ImageWithGui(AnyDataWithGui[Image]):
                 image_file = self.open_file_dialog.result()[0]
                 new_image = cv2.imread(image_file)
                 if new_image is not None:
-                    self.value = new_image  # type: ignore
+                    value = new_image  # type: ignore
                     changed = True
             self.open_file_dialog = None
-        return changed
+        return changed, value
 
     def present_custom(self, _image: Image) -> None:
         # _image is not used, as the image is set with on_change

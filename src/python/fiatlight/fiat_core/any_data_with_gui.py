@@ -93,13 +93,7 @@ class AnyDataWithGui(Generic[DataType]):
     #            Callback utility functions: add callbacks from free functions
     # ------------------------------------------------------------------------------------------------------------------
     def set_edit_callback(self, edit_callback: DataEditFunction[DataType]) -> None:
-        def edit_callback_wrapper() -> bool:
-            changed, new_value = edit_callback(self.get_actual_value())
-            if changed:
-                self.value = new_value
-            return changed
-
-        self.callbacks.edit = edit_callback_wrapper
+        self.callbacks.edit = edit_callback
 
     def set_present_custom_callback(
         self, present_callback: DataPresentFunction[DataType], present_custom_popup_required: bool | None = None
@@ -220,14 +214,11 @@ class FooWithGui(AnyDataWithGui[Foo]):
         self.callbacks.default_value_provider = lambda: Foo(x=0)
 
     # Edit and present functions
-    def edit(self) -> bool:
+    def edit(self, value: Foo) -> tuple[bool, Foo]:
         # When edit is called, self.value is guaranteed to be a Foo, so that we can call self.get_actual_value()
         # in order to get the actual value with the correct type.
-        value = self.get_actual_value()
         changed, value.x = imgui.input_int("x", value.x)
-        if changed:
-            self.value = value
-        return changed
+        return changed, value
 
     @staticmethod
     def present_str(value: Foo) -> str:

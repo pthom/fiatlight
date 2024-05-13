@@ -51,11 +51,13 @@ class AnyDataGuiCallbacks(Generic[DataType]):
     present_custom_popup_possible: bool = False
 
     # edit: (Mandatory if edition is required)
-    # Provide a draw function that presents an editable interface for the data, and returns True if changed.
+    # Provide a draw function that presents an editable interface for the data, and returns
+    #     (True, new_value) if changed
+    #     (False, old_value) if not changed
     # If not provided, the data will be presented as read-only
     # Note: Some widgets cannot be presented in a Node (e.g., a multiline text input, a child window, etc.)!
     #       You can query `fiatlight.is_rendering_in_node()` or its opposite `fiatlight.is_rendering_in_window()`
-    edit: BoolFunction | None = None
+    edit: Callable[[DataType], tuple[bool, DataType]] | None = None
 
     # edit_popup_required (Optional: leave to False in most cases)
     # If True, the edit function needs to be called in a popup window.
