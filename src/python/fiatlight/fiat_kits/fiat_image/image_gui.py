@@ -142,7 +142,8 @@ class ImageWithGui(AnyDataWithGui[Image]):
             self.open_file_dialog = None
         return changed
 
-    def present_custom(self) -> None:
+    def present_custom(self, _image: Image) -> None:
+        # _image is not used, as the image is set with on_change
         self.image_presenter.gui()
 
     @staticmethod

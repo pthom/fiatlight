@@ -31,7 +31,7 @@ class AnyDataGuiCallbacks(Generic[DataType]):
     #       to know if you are rendering in a node.
     #       Also, when inside a Node, you may want to render a smaller version, to save space
     #       (as opposed to rendering a larger version in a detached window).
-    present_custom: VoidFunction | None = None
+    present_custom: Callable[[DataType], None] | None = None
 
     # present_custom_popup_required (Optional: leave to False in most cases)
     # If True, the present_custom function needs to be called in a popup window.

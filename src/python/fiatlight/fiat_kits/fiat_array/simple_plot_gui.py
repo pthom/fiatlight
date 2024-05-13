@@ -171,7 +171,8 @@ class SimplePlotGui(AnyDataWithGui[FloatMatrix_Dim1]):
         self.callbacks.save_gui_options_to_json = self.save_gui_options_to_json
         self.callbacks.load_gui_options_from_json = self.load_gui_options_from_json
 
-    def present_custom(self) -> None:
+    def present_custom(self, _value: FloatMatrix_Dim1) -> None:
+        # _value is not used, as the array is set with on_change
         self.plot_presenter.gui()
 
     def on_change(self, value: FloatMatrix_Dim1) -> None:

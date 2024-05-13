@@ -263,8 +263,7 @@ class SoundWavePlayerGui(AnyDataWithGui[SoundWave]):
 
         implot.plot_line("##Waveform", sound_wave.time_array(), sound_wave.wave)
 
-    def present_custom(self) -> None:
-        sound_wave = self.get_actual_value()
+    def present_custom(self, sound_wave: SoundWave) -> None:
         imgui.text(f"Duration: {sound_wave.duration():.2f} s, Sample Rate: {sound_wave.sample_rate} Hz")
         imgui.set_next_item_width(hello_imgui.em_size(10))
         _, self.params.volume = imgui.slider_float("Volume", self.params.volume, 0.0, SoundWavePlayer.VOLUME_MAX)

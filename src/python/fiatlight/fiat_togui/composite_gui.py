@@ -38,14 +38,13 @@ class OptionalWithGui(AnyDataWithGui[DataType | None]):
             else:
                 return str(value)
 
-    def present_custom(self) -> None:
+    def present_custom(self, value: DataType | None) -> None:
         assert self.inner_gui.callbacks.present_custom is not None
-        value = self.get_actual_value()
         if value is None:
             imgui.text("Optional: None")
         else:
             self.inner_gui.value = value
-            self.inner_gui.callbacks.present_custom()
+            self.inner_gui.callbacks.present_custom(value)
 
     def edit(self) -> bool:
         value = self.value
@@ -149,9 +148,8 @@ class ListWithGui(AnyDataWithGui[List[DataType]]):
             if imgui.button("Show more"):
                 self.popup_max_elements += 300
 
-    def present_custom(self) -> None:
+    def present_custom(self, value: List[DataType]) -> None:
         max_elements = get_fiat_config().style.list_maximum_elements_in_node
-        actual_value = self.get_actual_value()
 
         fiat_osd.show_void_detached_window_button(
             "Details",
@@ -159,7 +157,7 @@ class ListWithGui(AnyDataWithGui[List[DataType]]):
             self.popup_details,
         )
 
-        txt = self._elements_str(actual_value, max_elements)
+        txt = self._elements_str(value, max_elements)
         imgui.text(txt)
 
 

@@ -135,8 +135,8 @@ class FunctionWithGui:
 
         if fn is not None:
             if self.name == "":
-                self.name = fn.__name__
-            fn_dict = fn.__dict__
+                self.name = fn.__name__ if hasattr(fn, "__name__") else ""
+            fn_dict = fn.__dict__ if hasattr(fn, "__dict__") else {}
             if scope_storage is None:
                 scope_storage = _capture_scope_back_1()
             _add_input_outputs_to_function_with_gui_globals_locals_captured(

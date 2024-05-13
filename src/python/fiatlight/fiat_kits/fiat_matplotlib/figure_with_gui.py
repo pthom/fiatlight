@@ -22,9 +22,7 @@ class FigureWithGui(AnyDataWithGui[Figure]):
         self.callbacks.load_gui_options_from_json = self._load_gui_options_from_json
         self.callbacks.on_change = self._on_change
 
-    def _present_custom(self) -> None:
-        figure = self.get_actual_value()
-
+    def _present_custom(self, figure: Figure) -> None:
         imgui_fig.fig("##Figure", figure, self._figure_size, refresh_image=self.should_refresh_fig)
         self.should_refresh_fig = False
 

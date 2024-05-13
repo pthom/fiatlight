@@ -181,7 +181,7 @@ class FunctionNodeGui:
             return
         assert not isinstance(value, (Error, Unspecified))
         assert fn_present is not None
-        fn_present()
+        fn_present(value)
 
     def input_pin_to_param_name(self, pin_id: ed.PinId) -> str | None:
         for k, v in self._pins_input.items():
