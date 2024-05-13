@@ -14,11 +14,11 @@ def interactive_sine_wave(freq: float = 1.0, phase: float = 0.0, amplitude: floa
     return fig
 
 
-interactive_sine_wave.freq__range = (0.1, 10)  # type: ignore
-interactive_sine_wave.freq__edit_type = "knob"  # type: ignore
+interactive_sine_wave.freq__range = (0.1, 3)  # type: ignore
 interactive_sine_wave.phase__range = (-np.pi, np.pi)  # type: ignore
-interactive_sine_wave.phase__edit_type = "knob"  # type: ignore
 interactive_sine_wave.amplitude__range = (0.1, 2)  # type: ignore
+interactive_sine_wave.freq__edit_type = "knob"  # type: ignore
+interactive_sine_wave.phase__edit_type = "knob"  # type: ignore
 interactive_sine_wave.amplitude__edit_type = "knob"  # type: ignore
 
 
@@ -50,8 +50,8 @@ gaussian_heatmap.levels__range = (1, 20)  # type: ignore
 
 def data_smoothing(window_size: int = 5) -> Figure:
     """Demonstrate data smoothing using a moving average filter."""
-    x = np.linspace(0, 10, 100)
-    y = np.sin(x) + np.random.normal(0, 0.1, 100)  # noisy sine wave
+    x = np.linspace(0, 15, 300)
+    y = np.sin(x) + np.random.normal(0, 0.1, 300)  # noisy sine wave
     y_smooth = np.convolve(y, np.ones(window_size) / window_size, mode="same")
 
     fig, ax = plt.subplots()
@@ -61,14 +61,23 @@ def data_smoothing(window_size: int = 5) -> Figure:
     return fig
 
 
-def interactive_histogram(n_bars: int = 10, mu: float = 0, sigma: float = 1) -> Figure:
+data_smoothing.window_size__range = (1, 40)  # type: ignore
+
+
+def interactive_histogram(n_bars: int = 10, mu: float = 0, sigma: float = 1, nb_data: int = 1000) -> Figure:
     """Generate an interactive histogram with adjustable number of bars, mean, and standard deviation."""
-    data = np.random.normal(mu, sigma, 1000)
+    data = np.random.normal(mu, sigma, nb_data)
     bins = np.linspace(np.min(data), np.max(data), n_bars)
 
     fig, ax = plt.subplots()
     ax.hist(data, bins=bins, color="blue", alpha=0.7)
     return fig
+
+
+interactive_histogram.n_bars__range = (1, 300)  # type: ignore
+interactive_histogram.mu__range = (-5, 5)  # type: ignore
+interactive_histogram.sigma__range = (0.1, 5)  # type: ignore
+interactive_histogram.nb_data__range = (100, 100000)  # type: ignore
 
 
 def main() -> None:
