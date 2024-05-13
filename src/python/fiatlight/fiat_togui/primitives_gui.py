@@ -54,7 +54,7 @@ class IntWithGuiParams:
     knob_variant: int = ImGuiKnobVariant_.tick.value
     knob_size_em: float = 2.5
     knob_steps: int = 0
-    knob_no_input: bool = True
+    no_input: bool = True
 
 
 class IntWithGui(AnyDataWithGui[int]):
@@ -74,7 +74,7 @@ class IntWithGui(AnyDataWithGui[int]):
 
     def _check_custom_attrs(self) -> None:
         def _authorized_custom_attrs() -> list[str]:
-            return ["range", "edit_type", "format", "width_em", "knob_size_em", "knob_steps", "knob_no_input"]
+            return ["range", "edit_type", "format", "width_em", "knob_size_em", "knob_steps", "no_input"]
 
         has_unauthorized = any(k not in _authorized_custom_attrs() for k in self._custom_attrs)
         if has_unauthorized:
@@ -132,10 +132,10 @@ class IntWithGui(AnyDataWithGui[int]):
                 raise ValueError(f"knob_steps must be an integer, got: {self._custom_attrs['knob_steps']}")
             self.params.knob_steps = self._custom_attrs["knob_steps"]
 
-        if "knob_no_input" in self._custom_attrs:
-            if not isinstance(self._custom_attrs["knob_no_input"], bool):
-                raise ValueError(f"knob_no_input must be a boolean, got: {self._custom_attrs['knob_no_input']}")
-            self.params.knob_no_input = self._custom_attrs["knob_no_input"]
+        if "no_input" in self._custom_attrs:
+            if not isinstance(self._custom_attrs["no_input"], bool):
+                raise ValueError(f"no_input must be a boolean, got: {self._custom_attrs['no_input']}")
+            self.params.no_input = self._custom_attrs["no_input"]
 
     def edit(self) -> bool:
         assert isinstance(self.value, int)
@@ -170,7 +170,7 @@ class IntWithGui(AnyDataWithGui[int]):
             )
         elif self.params.edit_type == IntEditType.knob:
             knob_flags = 0
-            if self.params.knob_no_input:
+            if self.params.no_input:
                 knob_flags = imgui_knobs.ImGuiKnobFlags_.no_input.value
             changed, self.value = imgui_knobs.knob_int(
                 self.params.label,
@@ -235,6 +235,7 @@ class FloatWithGuiParams:
     format: str = "%.3f"
     width_em: float = 9
     edit_type: FloatEditType = FloatEditType.input
+    no_input: bool = False  # Disable text input on knobs and sliders
     # Specific to slider_float
     slider_flags: int = imgui.SliderFlags_.none.value
     # Specific to input_float
@@ -248,7 +249,6 @@ class FloatWithGuiParams:
     knob_variant: int = imgui_knobs.ImGuiKnobVariant_.stepped.value
     knob_size_em: float = 2.5
     knob_steps: int = 10
-    knob_no_input: bool = True
     # Specific to slider_float_any_range
     nb_significant_digits: int = 4
     accept_negative: bool = True
@@ -272,7 +272,7 @@ class FloatWithGui(AnyDataWithGui[float]):
 
     def _check_custom_attrs(self) -> None:
         def _authorized_custom_attrs() -> list[str]:
-            return ["range", "edit_type", "format", "width_em", "knob_size_em", "knob_steps", "knob_no_input"]
+            return ["range", "edit_type", "format", "width_em", "knob_size_em", "knob_steps", "no_input"]
 
         has_unauthorized = any(k not in _authorized_custom_attrs() for k in self._custom_attrs)
         if has_unauthorized:
@@ -333,10 +333,10 @@ class FloatWithGui(AnyDataWithGui[float]):
                 raise ValueError(f"knob_steps must be an integer, got: {self._custom_attrs['knob_steps']}")
             self.params.knob_steps = self._custom_attrs["knob_steps"]
 
-        if "knob_no_input" in self._custom_attrs:
-            if not isinstance(self._custom_attrs["knob_no_input"], bool):
-                raise ValueError(f"knob_no_input must be a boolean, got: {self._custom_attrs['knob_no_input']}")
-            self.params.knob_no_input = self._custom_attrs["knob_no_input"]
+        if "no_input" in self._custom_attrs:
+            if not isinstance(self._custom_attrs["no_input"], bool):
+                raise ValueError(f"no_input must be a boolean, got: {self._custom_attrs['no_input']}")
+            self.params.no_input = self._custom_attrs["no_input"]
 
     def present_str(self, value: float) -> str:
         if self.params.nb_significant_digits >= 0:
@@ -378,7 +378,7 @@ class FloatWithGui(AnyDataWithGui[float]):
             )
         elif self.params.edit_type == FloatEditType.knob:
             knob_flags = 0
-            if self.params.knob_no_input:
+            if self.params.no_input:
                 knob_flags = imgui_knobs.ImGuiKnobFlags_.no_input.value
             changed, self.value = imgui_knobs.knob(
                 self.params.label,
