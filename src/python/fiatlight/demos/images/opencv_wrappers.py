@@ -41,6 +41,9 @@ class MorphShape(Enum):
     MORPH_ELLIPSE = cv2.MORPH_ELLIPSE
 
 
+fiatlight.register_enum(MorphShape)
+
+
 def dilate(
     image: ImageU8_GRAY,
     kernel_size: Int_0_10 = Int_0_10(2),

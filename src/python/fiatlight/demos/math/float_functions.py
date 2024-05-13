@@ -6,6 +6,9 @@ def float_source(x: float) -> float:
     return x
 
 
+float_source.x__edit_type = "slider_float_any_range"
+
+
 def sin(x: float) -> float:
     """A function that computes the sine of its input."""
     return math.sin(x)
