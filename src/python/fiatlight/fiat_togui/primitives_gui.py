@@ -43,6 +43,7 @@ class IntWithGuiParams:
     format: str = "%d"
     # Specific to slider_int and drag_int
     slider_logarithmic: bool = False
+    slider_no_input: bool = False
     # Specific to input_int
     input_flags: int = imgui.InputTextFlags_.none.value
     input_step: int = 1
@@ -82,6 +83,7 @@ class IntWithGui(AnyDataWithGui[int]):
                 "knob_size_em",
                 "knob_steps",
                 "knob_no_input",
+                "slider_no_input",
                 "slider_logarithmic",
             ]
 
@@ -146,6 +148,11 @@ class IntWithGui(AnyDataWithGui[int]):
                 raise ValueError(f"knob_no_input must be a boolean, got: {self._custom_attrs['knob_no_input']}")
             self.params.knob_no_input = self._custom_attrs["knob_no_input"]
 
+        if "slider_no_input" in self._custom_attrs:
+            if not isinstance(self._custom_attrs["slider_no_input"], bool):
+                raise ValueError(f"slider_no_input must be a boolean, got: {self._custom_attrs['slider_no_input']}")
+            self.params.slider_no_input = self._custom_attrs["slider_no_input"]
+
         if "slider_logarithmic" in self._custom_attrs:
             if not isinstance(self._custom_attrs["slider_logarithmic"], bool):
                 raise ValueError(
@@ -162,6 +169,8 @@ class IntWithGui(AnyDataWithGui[int]):
             slider_flags = 0
             if self.params.slider_logarithmic:
                 slider_flags = imgui.SliderFlags_.logarithmic.value
+            if self.params.slider_no_input:
+                slider_flags |= imgui.SliderFlags_.no_input.value
             changed, self.value = imgui.slider_int(
                 self.params.label,
                 self.value,
@@ -182,6 +191,8 @@ class IntWithGui(AnyDataWithGui[int]):
             slider_flags = 0
             if self.params.slider_logarithmic:
                 slider_flags = imgui.SliderFlags_.logarithmic.value
+            if self.params.slider_no_input:
+                slider_flags |= imgui.SliderFlags_.no_input.value
             changed, self.value = imgui.drag_int(
                 self.params.label,
                 self.value,
@@ -264,6 +275,7 @@ class FloatWithGuiParams:
     knob_no_input: bool = False  # Disable text input on knobs and sliders
     # Specific to slider
     slider_logarithmic: bool = False
+    slider_no_input: bool = False
     # Specific to input_float
     input_step: float = 0.1
     input_step_fast: float = 1.0
@@ -306,6 +318,7 @@ class FloatWithGui(AnyDataWithGui[float]):
                 "knob_size_em",
                 "knob_steps",
                 "knob_no_input",
+                "slider_no_input",
                 "slider_logarithmic",
             ]
 
@@ -373,6 +386,11 @@ class FloatWithGui(AnyDataWithGui[float]):
                 raise ValueError(f"knob_no_input must be a boolean, got: {self._custom_attrs['knob_no_input']}")
             self.params.knob_no_input = self._custom_attrs["knob_no_input"]
 
+        if "slider_no_input" in self._custom_attrs:
+            if not isinstance(self._custom_attrs["slider_no_input"], bool):
+                raise ValueError(f"slider_no_input must be a boolean, got: {self._custom_attrs['slider_no_input']}")
+            self.params.slider_no_input = self._custom_attrs["slider_no_input"]
+
         if "slider_logarithmic" in self._custom_attrs:
             if not isinstance(self._custom_attrs["slider_logarithmic"], bool):
                 raise ValueError(
@@ -395,6 +413,8 @@ class FloatWithGui(AnyDataWithGui[float]):
             slider_flags = 0
             if self.params.slider_logarithmic:
                 slider_flags = imgui.SliderFlags_.logarithmic.value
+            if self.params.slider_no_input:
+                slider_flags |= imgui.SliderFlags_.no_input.value
             changed, self.value = imgui.slider_float(
                 self.params.label,
                 self.value,
@@ -416,6 +436,8 @@ class FloatWithGui(AnyDataWithGui[float]):
             slider_flags = 0
             if self.params.slider_logarithmic:
                 slider_flags = imgui.SliderFlags_.logarithmic.value
+            if self.params.slider_no_input:
+                slider_flags |= imgui.SliderFlags_.no_input.value
             changed, self.value = imgui.drag_float(
                 self.params.label,
                 self.value,
