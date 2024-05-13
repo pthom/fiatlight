@@ -1,3 +1,20 @@
+"""FunctionWithGui: a class to wrap a function with a GUI presenting its inputs and outputs
+
+
+For a parameter named `param`, you can add attributes starting with `param__` (the double underscore is important):
+
+* `param__edit_type` (for float, int, bool params): the type of widget to use for the parameter.
+  - Possible values are for int are: `"slider"`, `"input"`, `"drag"`, `"knob"`, `"slider_and_minus_plus"`
+  - Possible values are for float are:  `"slider"`, `"input"`, `"drag"`, `"knob"` `"slider_float_any_range"`,`"slider_float_any_range_positive"`
+  - Possible values are for bool are: `"checkbox"`, "`toggle`"
+* `param__range` (for numeric params): a tuple (min, max) to restrict the range of the parameter
+* `param__format` (for numeric params): a format string to display the parameter value (e.g., `"%d"`, `"%0.2f"`, etc.)
+* `param__no_input` (for sliders and knobs): if set to `True`, no input field will be displayed beside the slider or knob
+* `knob_size_em` and `knob_steps` (for numeric params): for the knob widget, the size of the knob in em units and the number of steps
+* `width_em` (for numeric and str params): the width of the widget in em units (1 em is the width of the letter "m" in the default font)
+
+"""
+
 from fiatlight.fiat_config import get_fiat_config
 from fiatlight.fiat_types import UnspecifiedValue, ErrorValue, JsonDict, GuiType, ScopeStorage
 from fiatlight.fiat_core.any_data_with_gui import AnyDataWithGui

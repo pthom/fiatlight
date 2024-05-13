@@ -6,7 +6,7 @@ def float_source(x: float) -> float:
     return x
 
 
-float_source.x__edit_type = "slider_float_any_range"
+float_source.x__edit_type = "slider_float_any_range"  # type: ignore
 
 
 def sin(x: float) -> float:
