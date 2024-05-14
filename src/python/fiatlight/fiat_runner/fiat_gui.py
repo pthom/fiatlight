@@ -224,7 +224,7 @@ class FiatGui:
             hello_imgui.imgui_default_settings.load_default_font_with_font_awesome_icons, _load_font_awesome_6
         )
 
-        top_toolbar_options = hello_imgui.EdgeToolbarOptions(size_em=3.5, window_bg=ImVec4(0.3, 0.3, 0.3, 1.0))
+        top_toolbar_options = hello_imgui.EdgeToolbarOptions(size_em=2.5, window_bg=ImVec4(0.3, 0.3, 0.3, 1.0))
         self.params.runner_params.callbacks.add_edge_toolbar(
             edge_toolbar_type=hello_imgui.EdgeToolbarType.top,
             gui_function=lambda: self._top_toolbar(),
@@ -259,7 +259,7 @@ class FiatGui:
 
     @staticmethod
     def _top_toolbar_btn_size() -> ImVec2:
-        return hello_imgui.em_to_vec2(2, 2)
+        return hello_imgui.em_to_vec2(1.5, 1.5)
 
     def _panel_save_load_user_inputs(self) -> None:
         btn_size = self._top_toolbar_btn_size()
@@ -320,19 +320,28 @@ class FiatGui:
         vertical_separator()
 
     def _display_logo(self) -> None:
-        logo_display_size = int(hello_imgui.em_size(3.0))
-        immvision.image_display("##logo", self._logo_image, (logo_display_size, logo_display_size))
-        if imgui.begin_item_tooltip():
-            logo_display_size_big = int(hello_imgui.em_size(40))
-            immvision.image_display("##logo_big", self._logo_image, (logo_display_size_big, logo_display_size_big))
-            imgui.end_tooltip()
+        with imgui_ctx.begin_vertical("Logo"):
+            logo_display_size = self._top_toolbar_btn_size()
+            logo_display_size_tuple = (int(logo_display_size.x), int(logo_display_size.y))
+            immvision.image_display("##logo", self._logo_image, logo_display_size_tuple)
+            if imgui.begin_item_tooltip():
+                logo_display_size_big = int(hello_imgui.em_size(40))
+                immvision.image_display("##logo_big", self._logo_image, (logo_display_size_big, logo_display_size_big))
+                imgui.end_tooltip()
+            imgui.text_disabled("fiatlight")
 
     def _top_toolbar(self) -> None:
         from fiatlight.fiat_widgets.ribbon_panel import ribbon_panel, vertical_separator  # noqa
 
         btn_size = self._top_toolbar_btn_size()
 
-        layout_width = imgui.get_window_width() - hello_imgui.em_size(0.5)
+        layout_width = imgui.get_window_width() - hello_imgui.em_size(0.4)
+
+        # Move the cursor up a bit
+        cursor_pos = imgui.get_cursor_pos()
+        cursor_pos.y -= hello_imgui.em_size(0.5)
+        imgui.set_cursor_pos(cursor_pos)
+
         with imgui_ctx.begin_horizontal("TopToolbar", ImVec2(layout_width, 0)):
             with fontawesome_6_ctx():
                 self._display_logo()
@@ -411,7 +420,7 @@ class FiatGui:
             initial_dock_=self._main_dock_space_id,
             new_dock_=self._info_dock_space_id,
             direction_=imgui.Dir_.down,
-            ratio_=0.15,
+            ratio_=0.1,
         )
         return [split_main_info]
 
