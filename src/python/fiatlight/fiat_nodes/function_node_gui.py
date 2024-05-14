@@ -665,6 +665,7 @@ class FunctionNodeGui:
         # capture the input_param for the lambda
         # (otherwise, the lambda would capture the last input_param in the loop)
         input_param_captured = input_param
+        is_specified = not isinstance(input_param.data_with_gui.value, Unspecified)
 
         def edit_input() -> bool:
             # Edit input can be called either directly in this window or in a detached window
@@ -672,7 +673,7 @@ class FunctionNodeGui:
 
         callbacks = input_param.data_with_gui.callbacks
         can_edit_in_node = not callbacks.edit_popup_required
-        can_edit_in_popup = callbacks.edit_popup_required or callbacks.edit_popup_possible
+        can_edit_in_popup = (callbacks.edit_popup_required or callbacks.edit_popup_possible) and is_specified
         btn_label = "" if can_edit_in_node else "edit"
 
         if can_edit_in_popup:
