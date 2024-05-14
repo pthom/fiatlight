@@ -208,3 +208,12 @@ class DataclassGui(AnyDataWithGui[DataclassType]):
                 changed = True
 
         return changed, value
+
+
+def make_dataclass_with_gui(
+    dataclass_type: Type[DataclassType], default_provider: Callable[[], DataclassType] | None = None
+) -> Callable[[], DataclassGui[DataclassType]]:
+    def fn() -> DataclassGui[DataclassType]:
+        return DataclassGui.from_dataclass_type(dataclass_type, default_provider)
+
+    return fn

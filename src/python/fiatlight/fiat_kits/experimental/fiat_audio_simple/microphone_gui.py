@@ -1,12 +1,15 @@
 import numpy as np
 from imgui_bundle import imgui, imgui_ctx, hello_imgui, ImVec2
 
-from fiatlight.fiat_core import AnyDataWithGui, FunctionWithGui
+from fiatlight.fiat_core import FunctionWithGui, AnyDataWithGui
 from fiatlight.fiat_widgets import fontawesome_6_ctx, icons_fontawesome_6, fiat_osd, misc_widgets
+from .audio_types_gui import SampleRateGui, BlockSizeGui
 
 from .microphone_io import AudioProviderMic
-from .audio_types_gui import SampleRateGui, BlockSizeGui
 from .audio_types import SoundBlock, SoundWave, SoundStreamParams
+
+
+# MicrophoneParamsGui = make_dataclass_with_gui(SoundStreamParams)
 
 
 class MicrophoneParamsGui(AnyDataWithGui[SoundStreamParams]):
