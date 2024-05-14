@@ -17,6 +17,10 @@ def make_range(start: float = 0, stop: float = math.pi * 4, step: float = 0.01) 
     return np.arange(start, stop, step)
 
 
+make_range.start__range = (0, 10)  # type: ignore
+make_range.stop__range = (0, 10)  # type: ignore
+
+
 def make_sin(x: FloatArray) -> FloatArray:
     return np.sin(x)
 
@@ -59,9 +63,6 @@ def main() -> None:
     # present the output of make_sin as a plot (using the present_plot function)
     graph.function_with_gui("make_sin").output().set_present_custom_callback(present_plot_draggable)
     # graph.function_with_gui("make_sin").output().set_present_custom_callback(present_plot_standard)
-
-    # set the range of the stop parameter of make_range to 100
-    graph.function_with_gui("make_range").input_as_float("stop").params.v_max = 100
 
     fiat_run_graph(graph)
 

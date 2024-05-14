@@ -1,6 +1,4 @@
 import fiatlight
-from fiatlight.fiat_togui.dataclass_gui import DataclassGui
-from fiatlight import register_type
 
 
 def main() -> None:
@@ -11,7 +9,9 @@ def main() -> None:
         x: int = 3
         y: str = "Hello"
 
-    register_type(MyParam, lambda: DataclassGui.from_dataclass_type(MyParam))
+    from fiatlight.fiat_togui import register_dataclass
+
+    register_dataclass(MyParam)
 
     def f(param: MyParam) -> None:
         pass

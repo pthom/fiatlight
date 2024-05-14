@@ -21,10 +21,8 @@ from fiatlight.fiat_core.any_data_with_gui import AnyDataWithGui
 from fiatlight.fiat_types.function_types import BoolFunction
 from fiatlight.fiat_core.param_with_gui import ParamWithGui, ParamKind
 from fiatlight.fiat_core.output_with_gui import OutputWithGui
-from fiatlight.fiat_togui.primitives_gui import IntWithGui, FloatWithGui, BoolWithGui
-from fiatlight.fiat_togui.str_with_resizable_gui import StrWithResizableGui
-
 from typing import Any, List, final, Callable, Optional, Type, TypeAlias
+
 import logging
 
 
@@ -257,17 +255,14 @@ class FunctionWithGui:
                 return r
         raise ValueError(f"Parameter {name} not found")
 
-    def input_as_float(self, name: str) -> FloatWithGui:
-        return self.input_as(name, FloatWithGui)
-
-    def input_as_int(self, name: str) -> IntWithGui:
-        return self.input_as(name, IntWithGui)
-
-    def input_as_bool(self, name: str) -> BoolWithGui:
-        return self.input_as(name, BoolWithGui)
-
-    def input_as_str(self, name: str) -> StrWithResizableGui:
-        return self.input_as(name, StrWithResizableGui)
+    # def input_as_float(self, name: str) -> FloatWithGui:
+    #     return self.input_as(name, FloatWithGui)
+    #
+    # def input_as_int(self, name: str) -> IntWithGui:
+    #     return self.input_as(name, IntWithGui)
+    #
+    # def input_as_bool(self, name: str) -> BoolWithGui:
+    #     return self.input_as(name, BoolWithGui)
 
     def input_of_idx(self, idx: int) -> ParamWithGui[Any]:
         return self._inputs_with_gui[idx]

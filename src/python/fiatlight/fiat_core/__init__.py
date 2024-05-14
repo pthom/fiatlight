@@ -1,24 +1,16 @@
-from fiatlight.fiat_core.any_data_gui_callbacks import AnyDataGuiCallbacks
-from fiatlight.fiat_core.any_data_with_gui import AnyDataWithGui
-from fiatlight.fiat_core.param_with_gui import (
+from .any_data_gui_callbacks import AnyDataGuiCallbacks
+from .any_data_with_gui import AnyDataWithGui
+from .param_with_gui import (
     ParamKind,
     ParamWithGui,
 )
-from fiatlight.fiat_core.output_with_gui import OutputWithGui
-from fiatlight.fiat_core.function_with_gui import (
+from .output_with_gui import OutputWithGui
+from .function_with_gui import (
     FunctionWithGui,
     FunctionWithGuiFactoryFromName,
 )
-from fiatlight.fiat_togui.to_gui import (
-    GuiFactory,
-    FunctionWithGuiFactory,
-    register_type,
-    register_enum,
-    register_bound_int,
-    register_bound_float,
-)
-from fiatlight.fiat_core.function_node import FunctionNode, FunctionNodeLink
-from fiatlight.fiat_core.functions_graph import FunctionsGraph
+from .function_node import FunctionNode, FunctionNodeLink
+from .functions_graph import FunctionsGraph
 
 
 __all__ = [

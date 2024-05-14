@@ -11,6 +11,7 @@ from fiatlight.fiat_core.output_with_gui import OutputWithGui
 from fiatlight.fiat_togui.composite_gui import OptionalWithGui, EnumWithGui, ListWithGui
 from fiatlight.fiat_togui.function_signature import get_function_signature
 from fiatlight.fiat_types.fiat_number_types import FloatInterval, IntInterval
+from .dataclass_gui import DataclassType
 from enum import Enum
 
 import inspect
@@ -409,6 +410,16 @@ def register_type(type_: typing.Type[Any], factory: GuiFactory[Any]) -> None:
 
 def register_enum(enum_class: type[Enum]) -> None:
     gui_factories().register_enum(enum_class)
+
+
+def register_dataclass(dataclass_type: typing.Type[DataclassType]) -> None:
+    from fiatlight.fiat_togui.dataclass_gui import DataclassGui
+
+    def factory() -> AnyDataWithGui[Any]:
+        r = DataclassGui.from_dataclass_type(dataclass_type)
+        return r
+
+    gui_factories().register_type(dataclass_type, factory)
 
 
 def register_bound_float(type_: typing.Type[Any], interval: FloatInterval) -> None:

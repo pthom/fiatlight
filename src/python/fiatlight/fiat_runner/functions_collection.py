@@ -2,7 +2,8 @@ from dataclasses import dataclass
 
 from imgui_bundle import hello_imgui, imgui, imgui_ctx
 
-from fiatlight.fiat_core import FunctionWithGui, FunctionWithGuiFactory
+from fiatlight.fiat_core import FunctionWithGui
+from fiatlight.fiat_togui import FunctionWithGuiFactory
 from fiatlight.fiat_widgets import fontawesome_6_ctx, icons_fontawesome_6
 from fiatlight.fiat_types import Function
 
