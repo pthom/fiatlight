@@ -46,12 +46,12 @@ class PromptWithGui(AnyDataWithGui[Prompt]):
             is_in_node = fiatlight.is_rendering_in_node()
             if is_in_node:
                 with imgui_ctx.begin_horizontal("Prompt"):
-                    _edited_prompt_changed, self._edited_prompt = self._str_with_resizable_gui.edit(self._edited_prompt)
+                    _edited_prompt_changed, self._edited_prompt = self._str_with_resizable_gui.edit(self._edited_prompt)  # type: ignore
                     if imgui.button("Submit"):
                         fire_change = True
             else:
                 with imgui_ctx.begin_vertical("Prompt"):
-                    _edited_prompt_changed, self._edited_prompt = self._str_with_resizable_gui.edit(self._edited_prompt)
+                    _edited_prompt_changed, self._edited_prompt = self._str_with_resizable_gui.edit(self._edited_prompt)  # type: ignore
                     if imgui.button("Submit"):
                         fire_change = True
 
