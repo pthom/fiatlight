@@ -5,6 +5,7 @@
 from fiatlight.fiat_kits.fiat_image import ImageU8
 from fiatlight.fiat_utils import LazyModule
 from fiatlight import fiat_types
+from .prompt import Prompt
 import numpy as np
 import cv2
 import sys
@@ -17,6 +18,7 @@ if sys.platform == "darwin":
     INFERENCE_DEVICE_TYPE = "mps"
 else:
     INFERENCE_DEVICE_TYPE = "cuda"
+
 # reduce memory usage (cuda only)
 ENABLE_CPU_OFFLOAD = True
 
@@ -38,7 +40,7 @@ else:
     pipeline_stable_diffusion_xl = LazyModule("diffusers.pipelines.stable_diffusion_xl.pipeline_stable_diffusion_xl")
 
 
-class _StableDiffusionXLWrapper:
+class _SdxlTurboWrapper:
     pipe: "diffusers.AutoPipelineForText2Image"
     generator: "torch.Generator"
 
@@ -76,11 +78,11 @@ class _StableDiffusionXLWrapper:
         return as_array  # type: ignore
 
 
-_stable_diffusion_xl_wrapper: _StableDiffusionXLWrapper | None = None
+_stable_diffusion_xl_wrapper: _SdxlTurboWrapper | None = None
 
 
-def invoke_stable_diffusion_xl(
-    prompt: fiat_types.Prompt,
+def invoke_sdxl_turbo(
+    prompt: Prompt,
     seed: fiat_types.Int_0_1000 = 0,  # type: ignore
     # num_inference_steps: int = 1,
     # guidance_scale: float = 0.0,
@@ -94,18 +96,18 @@ def invoke_stable_diffusion_xl(
     """
     global _stable_diffusion_xl_wrapper
     if _stable_diffusion_xl_wrapper is None:
-        _stable_diffusion_xl_wrapper = _StableDiffusionXLWrapper()
+        _stable_diffusion_xl_wrapper = _SdxlTurboWrapper()
     return _stable_diffusion_xl_wrapper.query(prompt, seed)
 
 
 # Options that will control how the function is invoked in fiatlight
-invoke_stable_diffusion_xl.invoke_async = True  # type: ignore
+invoke_sdxl_turbo.invoke_async = True  # type: ignore
 
 
 def main_test_sdxl() -> None:
     import fiatlight
 
-    fiatlight.fiat_run(invoke_stable_diffusion_xl)
+    fiatlight.fiat_run(invoke_sdxl_turbo)
 
 
 if __name__ == "__main__":

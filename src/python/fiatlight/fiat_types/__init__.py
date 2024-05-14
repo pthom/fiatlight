@@ -7,7 +7,7 @@ from fiatlight.fiat_types.function_types import (
     DataEditFunction,
     DataPresentFunction,
 )
-from fiatlight.fiat_types.str_types import FilePath, ImagePath, TextPath, AudioPath, VideoPath, StrMultiline, Prompt
+from fiatlight.fiat_types.str_types import FilePath, ImagePath, TextPath, AudioPath, VideoPath, StrMultiline
 from fiatlight.fiat_types.base_types import (
     DataType,
     GuiType,
@@ -64,7 +64,6 @@ __all__ = [
     "AudioPath",
     "VideoPath",
     "StrMultiline",
-    "Prompt",
     # from base_types
     "JsonDict",
     "JsonPrimitive",

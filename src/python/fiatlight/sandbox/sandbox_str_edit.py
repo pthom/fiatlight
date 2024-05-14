@@ -1,5 +1,4 @@
 import fiatlight
-from fiatlight.fiat_types import Prompt
 
 
 def str_stats(s: str) -> tuple[int, int, int]:
@@ -10,7 +9,7 @@ def str_stats(s: str) -> tuple[int, int, int]:
     return n_chars, n_lines, n_words
 
 
-def prompt_stats(s: Prompt) -> tuple[int, int, int]:
+def prompt_stats(s: str) -> tuple[int, int, int]:
     """Return simple statistics about the prompt: number of characters, lines, and words"""
     n_chars = len(s)
     n_lines = s.count("\n") + 1

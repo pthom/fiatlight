@@ -710,9 +710,20 @@ class StrMultilineWithGui(StrWithGui):
 
 
 class PromptWithGui(StrMultilineWithGui):
+    _edited_value: str
+
     def __init__(self) -> None:
         super().__init__()
         self.params.hint = "Enter a prompt here"
+        self.callbacks.edit = self._edit
+
+    def _edit(self, value: str) -> tuple[bool, str]:
+        # For prompt edition, we rely on the user to click on OK in order to fire a change
+        # We do not want to do it in real time as calling an AI engine could be slow.
+        _changed, value = super().edit(value)
+        fire_change = imgui.button("Submit")
+        imgui.same_line()
+        return fire_change, value
 
 
 ########################################################################################################################
@@ -903,9 +914,8 @@ def __register_custom_float_types() -> None:
 
 def _register_custom_str_types() -> None:
     from fiatlight.fiat_togui.to_gui import register_type
-    from fiatlight.fiat_types.str_types import Prompt, StrMultiline
+    from fiatlight.fiat_types.str_types import StrMultiline
 
-    register_type(Prompt, PromptWithGui)
     register_type(StrMultiline, StrMultilineWithGui)
 
 

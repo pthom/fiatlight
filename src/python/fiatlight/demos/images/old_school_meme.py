@@ -83,12 +83,12 @@ def add_meme_text(
 
 
 def sandbox() -> None:
-    from fiatlight.demos.ai.stable_diffusion_xl_wrapper import invoke_stable_diffusion_xl
+    from fiatlight.fiat_kits.fiat_ai import invoke_sdxl_turbo
     from fiatlight.fiat_kits.fiat_image import image_source
 
     use_stable_diffusion = True
     if use_stable_diffusion:
-        fiatlight.fiat_run_composition([invoke_stable_diffusion_xl, add_meme_text])
+        fiatlight.fiat_run_composition([invoke_sdxl_turbo, add_meme_text])
     else:
         fiatlight.fiat_run_composition([image_source, add_meme_text])
 

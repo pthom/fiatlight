@@ -7,12 +7,12 @@ def add_functions_to_collection(collection: FunctionsCollection) -> None:
     from fiatlight.demos.math import all_functions as all_math_functions
     from fiatlight.demos.images import all_functions as all_image_functions
     from fiatlight.demos.string import all_functions as all_string_functions
-    from fiatlight.demos.ai import invoke_stable_diffusion_xl
+    from fiatlight.fiat_kits.fiat_ai import invoke_sdxl_turbo
 
     collection.add_function_list(all_math_functions(), ["math"])
     collection.add_function_list(all_image_functions(), ["images"])
     collection.add_function_list(all_string_functions(), ["string"])
-    collection.add_function(invoke_stable_diffusion_xl, ["ai", "images"])
+    collection.add_function(invoke_sdxl_turbo, ["ai", "images"])
 
 
 def main() -> None:

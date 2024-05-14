@@ -1,4 +1,4 @@
-from imgui_bundle import imgui, ImVec4, hello_imgui, imgui_ctx
+from imgui_bundle import imgui, ImVec4, imgui_ctx, hello_imgui
 from fiatlight.fiat_widgets import fiat_osd
 from fiatlight.fiat_utils.registry import AutoRegistry
 from typing import Callable, Tuple

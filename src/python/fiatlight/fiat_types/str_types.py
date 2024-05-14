@@ -18,7 +18,3 @@ VideoPath = NewType("VideoPath", str)
 
 # A string that can be multiline (displayed as a textarea in the GUI)
 StrMultiline = NewType("StrMultiline", str)
-
-# A string used as a prompt (displayed as a textarea in the GUI)
-# Mainly used for AI text and image generation models.
-Prompt = NewType("Prompt", str)
