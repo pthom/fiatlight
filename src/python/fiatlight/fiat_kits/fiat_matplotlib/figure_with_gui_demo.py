@@ -2,6 +2,20 @@ import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
 import numpy as np
 from enum import Enum
+import time
+
+_start_time = time.time()
+
+
+def time_seconds() -> float:
+    return time.time() - _start_time
+
+
+def phase_from_time_seconds(time_: float) -> float:
+    return time_ * 15.0
+
+
+time_seconds.invoke_always_dirty = True  # type: ignore
 
 
 def interactive_sine_wave(freq: float = 1.0, phase: float = 0.0, amplitude: float = 1.0) -> Figure:
@@ -105,6 +119,11 @@ def main() -> None:
     graph.add_function(gaussian_heatmap)
     graph.add_function(data_smoothing)
     graph.add_function(interactive_histogram)
+
+    graph.add_function(time_seconds)
+    graph.add_function(phase_from_time_seconds)
+    graph.add_link("time_seconds", "phase_from_time_seconds", "time_")
+    graph.add_link("phase_from_time_seconds", "interactive_sine_wave", "phase")
     fiatlight.fiat_run_graph(graph)
 
 

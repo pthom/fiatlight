@@ -161,6 +161,8 @@ class FunctionWithGui:
                 self.invoke_manually = fn.invoke_manually
             if hasattr(fn, "invoke_async"):
                 self.invoke_async = fn.invoke_async
+            if hasattr(fn, "invoke_always_dirty"):
+                self.invoke_always_dirty = fn.invoke_always_dirty
 
     @staticmethod
     def create_empty() -> "FunctionWithGui":
@@ -254,15 +256,6 @@ class FunctionWithGui:
                     raise TypeError(f"Expected type {gui_type.__name__}, got {type(r).__name__} instead.")
                 return r
         raise ValueError(f"Parameter {name} not found")
-
-    # def input_as_float(self, name: str) -> FloatWithGui:
-    #     return self.input_as(name, FloatWithGui)
-    #
-    # def input_as_int(self, name: str) -> IntWithGui:
-    #     return self.input_as(name, IntWithGui)
-    #
-    # def input_as_bool(self, name: str) -> BoolWithGui:
-    #     return self.input_as(name, BoolWithGui)
 
     def input_of_idx(self, idx: int) -> ParamWithGui[Any]:
         return self._inputs_with_gui[idx]
