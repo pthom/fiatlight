@@ -1,5 +1,5 @@
 from fiatlight.fiat_togui.dataclass_gui import DataclassGui
-from fiatlight import register_type, FunctionWithGui
+from fiatlight import register_dataclass, FunctionWithGui
 import copy
 
 
@@ -12,7 +12,7 @@ def test_dataclass_gui() -> None:
         y: str = "Hello"
         z: float = 3.14
 
-    my_param_gui = DataclassGui.from_dataclass_type(MyParam)
+    my_param_gui = DataclassGui(MyParam)
 
     # Test the default value provider
     assert my_param_gui.callbacks.default_value_provider is not None
@@ -37,7 +37,7 @@ def test_dataclass_gui() -> None:
     assert present_str_result == "MyParam(x: 3, y: Hello, z: 3.14)"
 
     # Test the register_type function
-    register_type(MyParam, lambda: DataclassGui.from_dataclass_type(MyParam))
+    register_dataclass(MyParam)
 
     def f(param: MyParam) -> None:
         pass

@@ -1,42 +1,17 @@
 import numpy as np
 from imgui_bundle import imgui, imgui_ctx, hello_imgui, ImVec2
 
-from fiatlight.fiat_core import FunctionWithGui, AnyDataWithGui
+from fiatlight.fiat_core import FunctionWithGui
 from fiatlight.fiat_widgets import fontawesome_6_ctx, icons_fontawesome_6, fiat_osd, misc_widgets
-from .audio_types_gui import SampleRateGui, BlockSizeGui
 
 from .microphone_io import AudioProviderMic
 from .audio_types import SoundBlock, SoundWave, SoundStreamParams
-
-
-# MicrophoneParamsGui = make_dataclass_with_gui(SoundStreamParams)
-
-
-class MicrophoneParamsGui(AnyDataWithGui[SoundStreamParams]):
-    def __init__(self) -> None:
-        super().__init__()
-        self.callbacks.default_value_provider = lambda: SoundStreamParams()
-        self.callbacks.present_str = lambda x: f"{x.sample_rate / 1000} kHz, {x.block_size} samples"
-        self.callbacks.edit = self.edit
-
-    def edit(self, value: SoundStreamParams) -> tuple[bool, SoundStreamParams]:
-        with imgui_ctx.begin_vertical("Params"):
-            imgui.text("Sample Rate")
-            sample_rate_gui = SampleRateGui()
-            assert sample_rate_gui.callbacks.edit is not None
-            changed_sample_rate, value.sample_rate = sample_rate_gui.callbacks.edit(value.sample_rate)
-
-            imgui.text("Block Size")
-            block_size_gui = BlockSizeGui()
-            assert block_size_gui.callbacks.edit is not None
-            changed_block_size, value.block_size = block_size_gui.callbacks.edit(value.block_size)
-
-        return changed_sample_rate or changed_block_size, value
+from fiatlight.fiat_togui.dataclass_gui import DataclassGui
 
 
 class MicrophoneGui(FunctionWithGui):
     # Serialized options
-    _microphone_params_gui: MicrophoneParamsGui
+    _microphone_params_gui: DataclassGui[SoundStreamParams]
     _sound_stream_params: SoundStreamParams
     _live_plot_size_em: ImVec2
 
@@ -60,7 +35,7 @@ class MicrophoneGui(FunctionWithGui):
         self.internal_state_gui = self._internal_gui
         self.on_heartbeat = self._on_heartbeat
 
-        self._microphone_params_gui = MicrophoneParamsGui()
+        self._microphone_params_gui = DataclassGui(SoundStreamParams)
         self._sound_stream_params = SoundStreamParams()
         self._microphone_io = AudioProviderMic()
 
@@ -171,9 +146,3 @@ class MicrophoneGui(FunctionWithGui):
             self._show_live_sound_block()
 
         return need_refresh
-
-
-def register_microphone_params_gui() -> None:
-    from fiatlight.fiat_togui.to_gui import register_type
-
-    register_type(SoundStreamParams, MicrophoneParamsGui)

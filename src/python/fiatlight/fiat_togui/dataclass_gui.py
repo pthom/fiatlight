@@ -1,14 +1,12 @@
-import logging
-
 from fiatlight.fiat_core import AnyDataWithGui
-from fiatlight.fiat_types import DataType, JsonDict
+from fiatlight.fiat_types import JsonDict
 from fiatlight.fiat_togui import to_gui
 from imgui_bundle import imgui, imgui_ctx, hello_imgui, ImVec2  # noqa
 from typing import Type, Any, Callable, TypeVar
 from dataclasses import is_dataclass
 
 
-# A type variable that represents a data type, included in a AnyDataWithGui object.
+# A type variable that represents a dataclass type
 DataclassType = TypeVar("DataclassType")
 
 
@@ -16,18 +14,11 @@ class DataclassGui(AnyDataWithGui[DataclassType]):
     parameters_with_gui: dict[str, AnyDataWithGui[Any]]
     _dataclass_type: Type[DataclassType]
 
-    def __init__(self, secret: int) -> None:
-        if secret != 42:
-            raise ValueError(
-                "You are not allowed to create a DataclassGui directly. Use from_parameters_with_gui instead."
-            )
+    def __init__(
+        self, dataclass_type: Type[DataclassType], default_provider: Callable[[], DataclassType] | None = None
+    ) -> None:
         super().__init__()
-        self.parameters_with_gui = {}
 
-    @staticmethod
-    def from_dataclass_type(
-        dataclass_type: Type[DataclassType], default_provider: Callable[[], DataclassType] | None = None
-    ) -> "DataclassGui[DataclassType]":
         if not is_dataclass(dataclass_type):
             raise ValueError(f"{dataclass_type} is not a dataclass")
 
@@ -61,17 +52,13 @@ class DataclassGui(AnyDataWithGui[DataclassType]):
         if default_provider is None:
             default_provider = provider_from_default_ctor
 
-        # Construct the DataclassGui object
-        r: DataclassGui[Any] = DataclassGui(42)
-        r._dataclass_type = dataclass_type
-        r.parameters_with_gui = parameters_with_gui
-        r.callbacks.default_value_provider = default_provider
-        r.fill_callbacks()
-
-        return r
+        # Fill the DataclassGui object
+        self.parameters_with_gui = parameters_with_gui
+        self._dataclass_type = dataclass_type  # type: ignore
+        self.callbacks.default_value_provider = default_provider
+        self.fill_callbacks()
 
     def fill_callbacks(self) -> None:
-        logging.info("entering fill_callbacks")
         self.callbacks.present_str = self.present_str
         self.callbacks.present_custom = self.present_custom
 
@@ -99,7 +86,6 @@ class DataclassGui(AnyDataWithGui[DataclassType]):
 
         self.callbacks.save_gui_options_to_json = self.save_gui_options_to_json
         self.callbacks.load_gui_options_from_json = self.load_gui_options_from_json
-        logging.info("leaving fill_callbacks")
 
     def on_change(self, value: DataclassType) -> None:
         for param_name, param_gui in self.parameters_with_gui.items():
@@ -138,7 +124,7 @@ class DataclassGui(AnyDataWithGui[DataclassType]):
                 if load_gui_options_from_json is not None:
                     load_gui_options_from_json(json[param_name])
 
-    def present_str(self, value: DataType) -> str:
+    def present_str(self, value: DataclassType) -> str:
         strs: dict[str, str] = {}
         for param_name, param_gui in self.parameters_with_gui.items():
             if not hasattr(value, param_name):
@@ -154,7 +140,7 @@ class DataclassGui(AnyDataWithGui[DataclassType]):
         r = f"{self._dataclass_type.__name__}({joined_strs})"
         return r
 
-    def present_custom(self, value: DataType) -> None:
+    def present_custom(self, value: DataclassType) -> None:
         with imgui_ctx.begin_vertical("##CompositeGui_present_custom"):
             for param_name, param_gui in self.parameters_with_gui.items():
                 if not hasattr(value, param_name):
@@ -177,7 +163,7 @@ class DataclassGui(AnyDataWithGui[DataclassType]):
                     fn_present_param()
                     imgui.end_group()
 
-    def edit(self, value: DataType) -> tuple[bool, DataType]:
+    def edit(self, value: DataclassType) -> tuple[bool, DataclassType]:
         changed = False
 
         for param_name_, param_gui_ in self.parameters_with_gui.items():
@@ -214,6 +200,6 @@ def make_dataclass_with_gui(
     dataclass_type: Type[DataclassType], default_provider: Callable[[], DataclassType] | None = None
 ) -> Callable[[], DataclassGui[DataclassType]]:
     def fn() -> DataclassGui[DataclassType]:
-        return DataclassGui.from_dataclass_type(dataclass_type, default_provider)
+        return DataclassGui(dataclass_type, default_provider)
 
     return fn

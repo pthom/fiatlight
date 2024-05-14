@@ -416,7 +416,7 @@ def register_dataclass(dataclass_type: typing.Type[DataclassType]) -> None:
     from fiatlight.fiat_togui.dataclass_gui import DataclassGui
 
     def factory() -> AnyDataWithGui[Any]:
-        r = DataclassGui.from_dataclass_type(dataclass_type)
+        r = DataclassGui(dataclass_type)
         return r
 
     gui_factories().register_type(dataclass_type, factory)
