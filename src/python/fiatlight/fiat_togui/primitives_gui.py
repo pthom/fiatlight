@@ -1,11 +1,8 @@
-import fiatlight
 from imgui_bundle import imgui, hello_imgui, imgui_knobs, imgui_toggle, portable_file_dialogs as pfd, ImVec2, imgui_ctx
 from fiatlight.fiat_core import AnyDataWithGui
 from fiatlight.fiat_types import FilePath
 from fiatlight.fiat_types.color_types import ColorRgb, ColorRgba
-from fiatlight.fiat_widgets import fontawesome_6_ctx, icons_fontawesome_6, fiat_osd
-from fiatlight import fiat_widgets
-from typing import Any, Callable, TypeAlias
+from typing import Callable, TypeAlias
 from dataclasses import dataclass
 from enum import Enum
 
@@ -567,163 +564,8 @@ class BoolWithGui(AnyDataWithGui[bool]):
 
 
 ########################################################################################################################
-#                               Str
+#                               Str: see str_with_resizable_gui.py
 ########################################################################################################################
-class StrEditType(Enum):
-    input = 1
-    versatile = 2
-    multiline = 3  # multiline text input does *not* work inside a Node (only in a popup)
-
-
-@dataclass
-class StrWithGuiParams:
-    default_edit_value = ""
-    label: str = "##str"
-    edit_type: StrEditType = StrEditType.versatile
-    input_flags: int = imgui.InputTextFlags_.none.value
-    # Callbacks
-    callback: Callable[[imgui.InputTextCallbackData], int] = None  # type: ignore
-    user_data: Any | None = None
-    # Will display this hint if the string is empty
-    hint: str = ""
-    # Only used if edit_type is input (not multiline)
-    width_em_one_line: float = 10
-    # status
-    versatile_edit_as_multiline: bool | None = None
-
-
-class StrWithGui(AnyDataWithGui[str]):
-    params: StrWithGuiParams
-
-    def __init__(self, params: StrWithGuiParams | None = None) -> None:
-        super().__init__()
-        self.params = params if params is not None else StrWithGuiParams()
-        self.callbacks.edit = self.edit
-        self.callbacks.default_value_provider = lambda: ""
-        self.callbacks.present_str = self.present_str
-        if self.params.edit_type == StrEditType.multiline:
-            self.callbacks.edit_popup_required = True
-
-        self.callbacks.present_custom = self.present_custom
-        self.callbacks.present_custom_popup_required = False
-        self.callbacks.present_custom_popup_possible = True
-        self.callbacks.clipboard_copy_possible = True
-        self.callbacks.on_heartbeat = self.on_heartbeat
-
-    @staticmethod
-    def present_str(s: str) -> str:
-        return s
-
-    def on_heartbeat(self) -> bool:
-        if self.params.edit_type == StrEditType.versatile:
-            # Compute if the string should be edited as multiline
-            # (if it is long or contains newlines)
-            if self.params.versatile_edit_as_multiline is None:
-                use_multiline = False
-                value = self.value
-                if isinstance(value, str):
-                    if len(value) > 60:
-                        use_multiline = True
-                    if "\n" in value:
-                        use_multiline = True
-                self.params.versatile_edit_as_multiline = use_multiline
-
-            self.callbacks.edit_popup_required = self.params.versatile_edit_as_multiline
-        if self.params.edit_type == StrEditType.multiline:
-            self.callbacks.edit_popup_required = True
-        return False
-
-    @staticmethod
-    def present_custom(text_value: str) -> None:
-        if fiatlight.is_rendering_in_window():
-            text_edit_size = ImVec2(
-                imgui.get_window_width() - hello_imgui.em_size(1), imgui.get_window_height() - hello_imgui.em_size(5)
-            )
-            imgui.input_text_multiline("##str", text_value, text_edit_size, imgui.InputTextFlags_.read_only.value)
-        else:
-            fiat_widgets.text_maybe_truncated(
-                text_value,
-                max_width_chars=50,
-                max_lines=5,
-            )
-
-    def edit(self, value: str) -> tuple[bool, str]:
-        if not isinstance(value, str):
-            raise ValueError(f"StrWithGui expects a string, got: {type(value)}")
-        changed = False  # noqa
-        present_multiline = False
-        is_versatile = self.params.edit_type == StrEditType.versatile
-        if is_versatile:
-            assert self.params.versatile_edit_as_multiline is not None
-            present_multiline = self.params.versatile_edit_as_multiline
-        if self.params.edit_type == StrEditType.multiline:
-            present_multiline = True
-
-        if not present_multiline:
-            imgui.set_next_item_width(hello_imgui.em_size(self.params.width_em_one_line))
-            has_hint = len(self.params.hint) > 0
-            if has_hint:
-                changed, value = imgui.input_text_with_hint(
-                    self.params.label,
-                    self.params.hint,
-                    value,
-                    self.params.input_flags,
-                    self.params.callback,
-                    self.params.user_data,
-                )
-            else:
-                changed, value = imgui.input_text(
-                    self.params.label, value, self.params.input_flags, self.params.callback, self.params.user_data
-                )
-
-            if is_versatile:
-                imgui.same_line()
-                with fontawesome_6_ctx():
-                    if imgui.button(icons_fontawesome_6.ICON_FA_BARS):
-                        self.params.versatile_edit_as_multiline = True
-                    fiat_osd.set_widget_tooltip("Edit in popup (multiline)")
-        else:  # present_multiline
-            size = ImVec2(0, 0)
-            size.x = imgui.get_window_width() - hello_imgui.em_size(1)
-            size.y = imgui.get_window_height() - hello_imgui.em_size(5)
-
-            changed, value = imgui.input_text_multiline(
-                self.params.label,
-                value,
-                size,
-                self.params.input_flags,
-                self.params.callback,
-                self.params.user_data,
-            )
-
-        return changed, value
-
-
-########################################################################################################################
-#                               Specialized strings
-########################################################################################################################
-class StrMultilineWithGui(StrWithGui):
-    def __init__(self, params: StrWithGuiParams | None = None) -> None:
-        super().__init__(params)
-        self.callbacks.edit_popup_required = True
-        self.params.edit_type = StrEditType.multiline
-
-
-class PromptWithGui(StrMultilineWithGui):
-    _edited_value: str
-
-    def __init__(self) -> None:
-        super().__init__()
-        self.params.hint = "Enter a prompt here"
-        self.callbacks.edit = self._edit
-
-    def _edit(self, value: str) -> tuple[bool, str]:
-        # For prompt edition, we rely on the user to click on OK in order to fire a change
-        # We do not want to do it in real time as calling an AI engine could be slow.
-        _changed, value = super().edit(value)
-        fire_change = imgui.button("Submit")
-        imgui.same_line()
-        return fire_change, value
 
 
 ########################################################################################################################
@@ -891,10 +733,11 @@ def __register_file_paths_types() -> None:
 
 def __register_python_types() -> None:
     from fiatlight.fiat_togui.to_gui import register_type
+    from .str_with_resizable_gui import StrWithResizableGui
 
     register_type(int, IntWithGui)
     register_type(float, FloatWithGui)
-    register_type(str, StrWithGui)
+    register_type(str, StrWithResizableGui)
     register_type(bool, BoolWithGui)
 
 
@@ -912,16 +755,8 @@ def __register_custom_float_types() -> None:
     register_type(PositiveFloat, make_positive_float_with_gui)
 
 
-def _register_custom_str_types() -> None:
-    from fiatlight.fiat_togui.to_gui import register_type
-    from fiatlight.fiat_types.str_types import StrMultiline
-
-    register_type(StrMultiline, StrMultilineWithGui)
-
-
 def _register_all_primitive_types() -> None:
     __register_file_paths_types()
     __register_python_types()
     __register_color_types()
     __register_custom_float_types()
-    _register_custom_str_types()

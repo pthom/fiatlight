@@ -1,4 +1,4 @@
-from fiatlight.fiat_togui.primitives_gui import (
+from .primitives_gui import (
     IntWithGui,
     IntWithGuiParams,
     IntEditType,
@@ -9,13 +9,11 @@ from fiatlight.fiat_togui.primitives_gui import (
     BoolWithGui,
     BoolWithGuiParams,
     BoolEditType,
-    StrWithGui,
-    StrWithGuiParams,
-    StrEditType,
 )
-from fiatlight.fiat_togui.composite_gui import OptionalWithGui, EnumWithGui
-from fiatlight.fiat_togui.explained_value_gui import edit_explained_value, make_explained_value_edit_callback
-from fiatlight.fiat_togui.function_signature import get_function_signature
+from .composite_gui import OptionalWithGui, EnumWithGui
+from .function_signature import get_function_signature
+from .str_with_resizable_gui import StrWithResizableGui
+from .explained_value_gui import edit_explained_value, make_explained_value_edit_callback
 
 
 __all__ = [
@@ -35,9 +33,8 @@ __all__ = [
     "BoolWithGui",
     "BoolWithGuiParams",
     "BoolEditType",
-    "StrWithGui",
-    "StrWithGuiParams",
-    "StrEditType",
+    # from str_with_resizable_gui
+    "StrWithResizableGui",
     # from explained_value_gui
     "edit_explained_value",
     "make_explained_value_edit_callback",
