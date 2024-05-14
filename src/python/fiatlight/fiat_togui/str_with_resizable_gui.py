@@ -14,7 +14,7 @@ class StrWithResizableGui(AnyDataWithGui[str]):
         self._input_text_in_node = hello_imgui.InputTextData("", multiline=False, size_em=ImVec2(15, 0))
         self._input_text_in_popup = hello_imgui.InputTextData("", multiline=True, size_em=ImVec2(60, 15))
         self.callbacks.on_change = self.on_change
-        self.callbacks.edit = self.edit_resizable
+        self.callbacks.edit = self.edit
         self.callbacks.edit_popup_possible = True
         self.callbacks.present_custom = self.present_custom
         self.callbacks.default_value_provider = lambda: ""
@@ -52,7 +52,7 @@ class StrWithResizableGui(AnyDataWithGui[str]):
                 max_lines=5,
             )
 
-    def edit_resizable(self, value: str) -> tuple[bool, str]:
+    def edit(self, value: str) -> tuple[bool, str]:
         if not isinstance(value, str):
             raise ValueError(f"StrWithResizableGui expects a string, got: {type(value)}")
         changed: bool
