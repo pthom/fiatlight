@@ -26,11 +26,29 @@ FunctionWithGuiFactory = Callable[[], FunctionWithGui]
 _COMPLAINTS_MISSING_GUI_FACTORY = []
 
 
+def _wip_extract_union_list(type_class_name: str) -> List[str]:
+    if type_class_name.startswith("typing.Union[") and type_class_name.endswith("]"):
+        inner_type_str = type_class_name[len("typing.Union[") : -1]
+        # inner_type_strs = _parse_typeclasses_list(inner_type_str)
+        inner_type_strs = inner_type_str.split(", ")
+        return inner_type_strs
+    return []
+
+
 def _extract_optional_typeclass(type_class_name: str) -> Tuple[bool, str]:
     if type_class_name.startswith("typing.Optional[") and type_class_name.endswith("]"):
         return True, type_class_name[16:-1]
     if type_class_name.endswith(" | None"):
         return True, type_class_name[:-7]
+
+    # If the type is a union of multiple types, and one of them is NoneType, we can convert it to Optional
+    union_list = _wip_extract_union_list(type_class_name)
+    if len(union_list) >= 2 and "NoneType" in union_list:
+        union_list.remove("NoneType")
+        union_str = ", ".join(union_list)
+        new_union_type = f"typing.Union[{union_str}]"
+        return True, new_union_type
+
     return False, type_class_name
 
 

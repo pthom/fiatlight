@@ -4,14 +4,11 @@ See example implementation for a custom type at the bottom of this file.
 """
 from enum import Enum
 
-from fiatlight.fiat_types import (
-    Error,
-    ErrorValue,
-    Unspecified,
-    UnspecifiedValue,
+from fiatlight.fiat_types.base_types import (
     JsonDict,
     DataType,
 )
+from fiatlight.fiat_types.error_types import Error, ErrorValue, Unspecified, UnspecifiedValue
 from fiatlight.fiat_types.function_types import DataPresentFunction, DataEditFunction  # noqa
 from fiatlight.fiat_core.any_data_gui_callbacks import AnyDataGuiCallbacks
 from typing import Generic, Any

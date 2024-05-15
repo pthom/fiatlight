@@ -1,5 +1,17 @@
 from fiatlight.fiat_core.any_data_with_gui import AnyDataWithGui
-from .file_types import FilePath, FilePath_Save
+from fiatlight.fiat_core.function_with_gui import FunctionWithGui
+from fiatlight.fiat_types.file_types import (  # noqa
+    FilePath,
+    FilePath_Save,
+    TextPath,
+    TextPath_Save,
+    ImagePath,
+    ImagePath_Save,
+    AudioPath,
+    AudioPath_Save,
+    VideoPath,
+    VideoPath_Save,
+)
 from imgui_bundle import imgui, portable_file_dialogs as pfd
 import os.path
 
@@ -105,16 +117,19 @@ class FilePathSaveWithGui(AnyDataWithGui[FilePath_Save]):
             return "???"
 
 
+_ACCEPT_ANY_FILE = "*.*"
+
+
 class ImagePathWithGui(FilePathWithGui):
     def __init__(self) -> None:
         super().__init__()
-        self.filters = ["*.png", "*.jpg", "*.jpeg", "*.bmp", "*.tga"]
+        self.filters = ["*.png", "*.jpg", "*.jpeg", "*.bmp", "*.tga", _ACCEPT_ANY_FILE]
 
 
 class ImagePathSaveWithGui(FilePathSaveWithGui):
     def __init__(self) -> None:
         super().__init__()
-        self.filters = ["*.png", "*.jpg", "*.jpeg", "*.bmp", "*.tga"]
+        self.filters = ["*.png", "*.jpg", "*.jpeg", "*.bmp", "*.tga", _ACCEPT_ANY_FILE]
 
 
 class TextPathWithGui(FilePathWithGui):
@@ -132,25 +147,25 @@ class TextPathSaveWithGui(FilePathSaveWithGui):
 class AudioPathWithGui(FilePathWithGui):
     def __init__(self) -> None:
         super().__init__()
-        self.filters = ["*.wav", "*.mp3", "*.ogg", "*.flac", "*.aiff", "*.m4a"]
+        self.filters = ["*.wav", "*.mp3", "*.ogg", "*.flac", "*.aiff", "*.m4a", _ACCEPT_ANY_FILE]
 
 
 class AudioPathSaveWithGui(FilePathSaveWithGui):
     def __init__(self) -> None:
         super().__init__()
-        self.filters = ["*.wav", "*.mp3", "*.ogg", "*.flac", "*.aiff", "*.m4a"]
+        self.filters = ["*.wav", "*.mp3", "*.ogg", "*.flac", "*.aiff", "*.m4a", _ACCEPT_ANY_FILE]
 
 
 class VideoPathWithGui(FilePathWithGui):
     def __init__(self) -> None:
         super().__init__()
-        self.filters = ["*.mp4", "*.avi", "*.mkv"]
+        self.filters = ["*.mp4", "*.avi", "*.mkv", _ACCEPT_ANY_FILE]
 
 
 class VideoPathSaveWithGui(FilePathSaveWithGui):
     def __init__(self) -> None:
         super().__init__()
-        self.filters = ["*.mp4", "*.avi", "*.mkv"]
+        self.filters = ["*.mp4", "*.avi", "*.mkv", _ACCEPT_ANY_FILE]
 
 
 ########################################################################################################################
@@ -158,20 +173,6 @@ class VideoPathSaveWithGui(FilePathSaveWithGui):
 ########################################################################################################################
 def _register_file_paths_types() -> None:
     from fiatlight.fiat_togui.to_gui import register_type
-    from fiatlight.fiat_types import (
-        # Open file types
-        FilePath,
-        TextPath,
-        ImagePath,
-        AudioPath,
-        VideoPath,
-        # Save file types
-        FilePath_Save,
-        TextPath_Save,
-        ImagePath_Save,
-        AudioPath_Save,
-        VideoPath_Save,
-    )
 
     register_type(FilePath, FilePathWithGui)
     register_type(TextPath, TextPathWithGui)
@@ -183,3 +184,38 @@ def _register_file_paths_types() -> None:
     register_type(ImagePath_Save, ImagePathSaveWithGui)
     register_type(AudioPath_Save, AudioPathSaveWithGui)
     register_type(VideoPath_Save, VideoPathSaveWithGui)
+
+
+def text_from_file(path: TextPath) -> str | None:
+    try:
+        with open(path, "r") as f:
+            r = f.read()
+        return r
+    except OSError:
+        return None
+
+
+class TextToFileGui(FunctionWithGui):
+    _save_dialog: pfd.save_file | None = None
+    _text: str | None = None
+
+    def __init__(self) -> None:
+        super().__init__(self.f, "TextToFile")
+
+    def f(self, text: str) -> None:
+        self._text = text
+
+    def do_write(self, path: FilePath_Save) -> None:
+        with open(path, "w") as f:
+            f.write(self._text)
+
+    def internal_state_gui(self) -> bool:
+        if self._text is None:
+            return False
+        if imgui.button("Save file"):
+            self._save_dialog = pfd.save_file("Select file", "", ["*.txt", _ACCEPT_ANY_FILE])
+        if self._save_dialog is not None and self._save_dialog.ready():
+            selected_file = self._save_dialog.result()
+            self.do_write(selected_file)  # type: ignore
+            self._save_dialog = None
+        return False

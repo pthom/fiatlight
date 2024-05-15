@@ -23,6 +23,11 @@ from fiatlight.fiat_togui.to_gui import (
     register_bound_float,
     register_dataclass,
 )
+from .file_types_gui import text_from_file, TextToFileGui
+
+from .file_types_gui import _register_file_paths_types
+
+_register_file_paths_types()
 
 
 __all__ = [
@@ -47,6 +52,9 @@ __all__ = [
     # from explained_value_gui
     "edit_explained_value",
     "make_explained_value_edit_callback",
+    # from file_types_gui
+    "text_from_file",
+    "TextToFileGui",
     # from to_gui
     "GuiFactory",
     "FunctionWithGuiFactory",

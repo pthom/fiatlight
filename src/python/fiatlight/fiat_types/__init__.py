@@ -19,6 +19,7 @@ from .file_types import (
     VideoPath,
     VideoPath_Save,
 )
+
 from .str_types import StrMultiline
 
 from .base_types import (
@@ -52,10 +53,6 @@ from .fiat_number_types import (
     format_time_seconds,
 )
 from .color_types import ColorRgb, ColorRgba
-
-from .file_types_gui import _register_file_paths_types
-
-_register_file_paths_types()
 
 __all__ = [
     # from error_types

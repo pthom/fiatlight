@@ -1,4 +1,5 @@
-from fiatlight.fiat_types import DataType, VoidFunction, BoolFunction, JsonDict
+from fiatlight.fiat_types.base_types import DataType, JsonDict
+from fiatlight.fiat_types.function_types import VoidFunction, BoolFunction
 from typing import Callable, Generic, Any
 
 
