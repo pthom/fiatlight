@@ -628,7 +628,7 @@ class TextPathWithGui(FilePathWithGui):
 class AudioPathWithGui(FilePathWithGui):
     def __init__(self) -> None:
         super().__init__()
-        self.filters = ["*.wav", "*.mp3", "*.ogg", "*.flac"]
+        self.filters = ["*.wav", "*.mp3", "*.ogg", "*.flac", "*.aiff", "*.m4a"]
 
 
 class VideoPathWithGui(FilePathWithGui):

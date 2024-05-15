@@ -55,6 +55,13 @@ class SoundWave:
     def __post_init__(self) -> None:
         if self.is_empty():
             return
+
+        # SoundWave only supports mono
+        if self.wave.ndim == 2:
+            self.wave = self.wave.mean(axis=0)
+            # remove the second dimension
+            self.wave = self.wave.squeeze()
+
         time_array = np.arange(0, self.duration(), 1 / self.sample_rate, self.wave.dtype)
         self._time_array = time_array  # type: ignore
         self._min_intensity = self.wave.min()

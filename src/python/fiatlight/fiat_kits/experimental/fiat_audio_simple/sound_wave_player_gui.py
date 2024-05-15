@@ -169,17 +169,12 @@ class SoundWavePlayerGui(AnyDataWithGui[SoundWave]):
                 fiat_osd.set_widget_tooltip("Fast forward to end")
 
     def _format_time(self, timepoint: TimeSeconds) -> str:
-        sound_wave = self.get_actual_value()
-        from fiatlight.fiat_types import format_time_seconds_as_hh_mm_ss_cc, format_time_seconds_as_mm_ss_cc
+        from fiatlight.fiat_types import format_time_seconds
 
         if self.params.show_time_as_seconds:
             return f"{timepoint:.2f}s"
         else:
-            is_longer_than_1_hour = sound_wave.duration() >= 3600
-            if is_longer_than_1_hour:
-                return format_time_seconds_as_hh_mm_ss_cc(timepoint)
-            else:
-                return format_time_seconds_as_mm_ss_cc(timepoint)
+            return format_time_seconds(timepoint, show_centiseconds=True)
 
     def _show_position(self) -> None:
         assert self._sound_wave_player is not None

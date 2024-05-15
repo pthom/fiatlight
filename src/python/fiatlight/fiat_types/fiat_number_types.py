@@ -26,29 +26,20 @@ Int_0_10000 = NewType("Int_0_10000", int)  # 0 to 100
 TimeSeconds = NewType("TimeSeconds", float)  # Time in seconds
 
 
-def format_time_seconds_as_hh_mm_ss_cc(time_seconds: TimeSeconds) -> str:
+def format_time_seconds(time_seconds: TimeSeconds, show_centiseconds: bool = False) -> str:
     """Format a time in seconds as a string in the format HH:MM:SS.cc."""
     hours = int(time_seconds) // 3600
     minutes = (int(time_seconds) % 3600) // 60
     seconds = int(time_seconds) % 60
     centiseconds = int((time_seconds - int(time_seconds)) * 100)
-    return f"{hours:02}:{minutes:02}:{seconds:02}.{centiseconds:02}"
-
-
-def format_time_seconds_as_mm_ss_cc(time_seconds: TimeSeconds) -> str:
-    """Format a time in seconds as a string in the format MM:SS.cc."""
-    minutes = int(time_seconds) // 60
-    seconds = int(time_seconds) % 60
-    centiseconds = int((time_seconds - int(time_seconds)) * 100)
-    return f"{minutes:02}:{seconds:02}.{centiseconds:02}"
-
-
-def format_time_seconds_as_hh_mm_ss(time_seconds: TimeSeconds) -> str:
-    """Format a time in seconds as a string in the format HH:MM:SS."""
-    hours = int(time_seconds) // 3600
-    minutes = (int(time_seconds) % 3600) // 60
-    seconds = int(time_seconds) % 60
-    return f"{hours:02}:{minutes:02}:{seconds:02}"
+    r = ""
+    if hours > 0:
+        r += f"{hours:02}:"
+    r += f"{minutes:02}:"
+    r += f"{seconds:02}"
+    if show_centiseconds:
+        r += f".{centiseconds:02}"
+    return r
 
 
 def _register_bound_floats() -> None:
