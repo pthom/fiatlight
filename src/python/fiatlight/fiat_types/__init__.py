@@ -1,5 +1,5 @@
-from fiatlight.fiat_types.error_types import Error, ErrorValue, Unspecified, UnspecifiedValue
-from fiatlight.fiat_types.function_types import (
+from .error_types import Error, ErrorValue, Unspecified, UnspecifiedValue
+from .function_types import (
     Function,
     FunctionList,
     VoidFunction,
@@ -7,7 +7,7 @@ from fiatlight.fiat_types.function_types import (
     DataEditFunction,
     DataPresentFunction,
 )
-from fiatlight.fiat_types.str_types import (
+from .file_types import (
     FilePath,
     FilePath_Save,
     ImagePath,
@@ -18,10 +18,10 @@ from fiatlight.fiat_types.str_types import (
     AudioPath_Save,
     VideoPath,
     VideoPath_Save,
-    StrMultiline,
 )
+from .str_types import StrMultiline
 
-from fiatlight.fiat_types.base_types import (
+from .base_types import (
     DataType,
     GuiType,
     ExplainedValue,
@@ -31,7 +31,7 @@ from fiatlight.fiat_types.base_types import (
     JsonPrimitiveOrDict,
     ScopeStorage,
 )
-from fiatlight.fiat_types.fiat_number_types import (
+from .fiat_number_types import (
     FloatInterval,
     IntInterval,
     Float_0_1,
@@ -51,7 +51,11 @@ from fiatlight.fiat_types.fiat_number_types import (
     TimeSeconds,
     format_time_seconds,
 )
-from fiatlight.fiat_types.color_types import ColorRgb, ColorRgba
+from .color_types import ColorRgb, ColorRgba
+
+from .file_types_gui import _register_file_paths_types
+
+_register_file_paths_types()
 
 __all__ = [
     # from error_types
@@ -68,18 +72,19 @@ __all__ = [
     "GuiType",
     "DataEditFunction",
     "DataPresentFunction",
-    # from str_types
+    # from file_types
     "FilePath",
     "ImagePath",
     "TextPath",
     "AudioPath",
     "VideoPath",
-    "StrMultiline",
     "FilePath_Save",
     "ImagePath_Save",
     "TextPath_Save",
     "AudioPath_Save",
     "VideoPath_Save",
+    # from str_types
+    "StrMultiline",
     # from base_types
     "JsonDict",
     "JsonPrimitive",
