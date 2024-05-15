@@ -1,0 +1,209 @@
+Demo Keypoints
+**************
+
+Motto Ideas:
+    Best of:
+        "Fiatlight: Brighten(ing) the Journey from Idea to Creation"
+        "Fiatlight: Visualize. Understand. Innovate."
+        "Fiatlight: shine light onto your ideas."
+
+    Features:
+        - Make a full app in 3 lines of python, by chaining pure python function in a graph,
+          and then calling fiatlight.run()
+            The graph will:
+                - display each function's inputs, output
+                - enable to manually change the inputs
+            This will be a full app, i.e. the user can save/load the data, together with the Gui options (window size, widgets positions, etc.)
+        - Pipeline in 3 lines:
+
+        - Shine Light inside the algorithms & pipelines
+            - view and analyse each step / function
+            - view function internals (e.g. analyse intermediate results, such as images, etc.)
+            - replay debug on error (each exception is caught and displayed, and the user can replay the debug)
+        - Custom Graph creation "a la scratch", by dragging nodes and connecting them
+        - Kits per domain (e.g. audio, image, plots, ai, etc.)
+        - Custom widgets
+            - Custom ranges for float, int, etc.
+            - Custom widgets & custom function with full control on the GUI
+            - Special function attributes: async, live (invoke_always_dirty), ranges,
+
+    Uses cases:
+        - Education
+        - App creation
+        - Data exploration
+        - New framework exploration
+        - AI
+        - Debugging & IDE data viewer
+
+    Could be compared to:
+        - Scratch (for the graph creation)
+        - Jupyter (for the data exploration)
+        - Unity Blueprints (for the graph creation and the custom widgets)
+        - python streamlit & dash (for the app creation, and the ease of use)
+        - Ryven (for the graph creation)
+        - comfy ui (stable diffusion) (for the node creation, and the use cases in AI)
+        - LEGO Mindstorms (for education and creative usage)
+
+
+    Demos list:
+       Intro: demo_oil_paint (Beacon & variation)
+       A full app in 3 lines:   demo_oil_paint
+           => see code
+           => see save and load (load encore_loin)
+           => see immvision, image inspector + detached views for further analysis
+       Shine light inside the algorithms & pipelines:
+           => see pipeline: demo_word_count
+           => view function internals: demo toon_edges.py
+           => see debug and replay error: demo_float_functions
+       Custom Graph creation "a la scratch":
+            => see demo_custom_graph (load house_canny)
+                + create a new graph
+       Kits per domain:
+            => audio (demo_audio_processing & sound_wave_player_gui_demo)
+            => image: already demoed
+            => AI: see invoke_sdxl_turbo
+            => matplotlib: see figure_with_gui_demo
+            => arrays: see simple_plot_gui_demo (ImPlot)
+        Custom widgets:
+            custom gui:
+                See demo_binomial (custom widget)
+             custom ranges:
+                See figure_with_gui_demo (custom ranges + live function)
+             special attributes:
+                async: see sdxl
+                live: see figure_with_gui_demo
+
+
+
+
+Intro by GPT4o
+**************
+Fiatlight is an innovative Python framework designed to simplify the creation, visualization, and debugging of applications. Built on top of Dear ImGui, ImGui Bundle, and Hello ImGui, Fiatlight empowers users to transform ideas into reality with minimal effort. Whether you're a developer, educator, or data scientist, Fiatlight offers a seamless environment to explore creative ideas, visualize complex data, and build robust applications.
+
+Fiatlight: Brighten(ing) the Journey from Idea to Creation
+
+With Fiatlight, you can create a full application with just three lines of code by chaining pure Python functions into a graph and running fiatlight.run(). This intuitive approach allows you to visualize each function's inputs and outputs, manually adjust parameters, and save or load your work effortlessly. Fiatlight's ability to shine light on each step of your algorithms and pipelines ensures you can view and analyze intermediate results, debug errors, and understand the inner workings of your code.
+
+Fiatlight: Visualize. Understand. Innovate.
+
+Fiatlight provides a versatile set of widgets and tools for custom graph creation, enabling you to drag and connect nodes to build your workflows visually. With domain-specific kits for audio, image processing, data plotting, AI, and more, Fiatlight caters to a wide range of applications. Its integration with popular Python libraries like Numpy, Matplotlib, SoundFile, and Librosa, along with support for interactive widgets and async functions, ensures your applications remain responsive and efficient even when handling large datasets or complex computations.
+
+Fiatlight: Shine light onto your ideas.
+
+Designed for ease of use and quick data exploration, Fiatlight is an ideal choice for educators, developers, and researchers. Its user-friendly interface, combined with powerful debugging tools and the ability to create custom widgets, makes it an excellent platform for both learning and professional development. By visualizing and understanding your data and algorithms in real-time, Fiatlight helps you innovate and bring your ideas to life.
+
+Join the Fiatlight community and experience a new way to develop, visualize, and debug your applications. Whether you're exploring new frameworks, building educational tools, or diving into AI and data science, Fiatlight is here to light the way.
+
+Feel free to adjust or expand upon this introduction to best fit your needs.
+
+
+****************************************************************
+
+Comprehensive Introduction and Features of Fiatlight
+
+Fiatlight: The Ultimate Framework for Rapid Application Development and Data Visualization
+
+Fiatlight is a revolutionary Python framework designed to streamline the development of applications, visualizations, and data analysis pipelines. By leveraging the power of Dear ImGui, ImGui Bundle, and Hello ImGui, Fiatlight offers an intuitive and efficient environment for both beginners and experts. Here’s an in-depth look at the standout features of Fiatlight.
+
+Key Features
+
+    Rapid App Creation:
+        Full App in Three Lines: Create a complete application with just three lines of Python code. By chaining pure Python functions into a graph and calling fiatlight.run(), you can build powerful apps effortlessly.
+        Interactive Graphs: The graph displays each function’s inputs and outputs, enabling users to manually adjust inputs and immediately see the effects.
+        Save and Load Functionality: Save and load data, including GUI options like window size and widget positions, ensuring a seamless user experience.
+
+    Detailed Pipeline Analysis:
+        Step-by-Step Visualization: Shine light on your algorithms and pipelines by viewing and analyzing each step or function. This granular approach helps in understanding and optimizing your code.
+        Function Internals: Analyze intermediate results such as images or data points to gain deeper insights into the workings of your functions.
+        Replay Debugging: Catch and display exceptions, allowing users to replay and debug errors efficiently.
+
+    Custom Graph Creation:
+        Drag-and-Drop Interface: Create custom graphs easily, à la Scratch, by dragging nodes and connecting them. This visual approach simplifies complex workflows and enhances productivity.
+
+    Domain-Specific Kits:
+        Versatile Tools: Utilize kits tailored for specific domains like audio processing, image manipulation, data plotting, artificial intelligence, and more. These kits provide specialized tools to accelerate development in various fields.
+
+    Custom Widgets:
+        Range Control: Customize ranges for different data types such as float and int, providing precise control over input values.
+        Full Control over GUI: Design custom widgets and functions with complete control over the GUI, enabling highly tailored user interfaces.
+        Special Attributes: Leverage special function attributes like async functions, "live" functions , and ranges to enhance functionality and performance.
+
+Advantages of Using Fiatlight
+
+    Ease of Use: Fiatlight’s intuitive design ensures that users can quickly create and modify applications without a steep learning curve.
+    Interactive Debugging: The ability to replay and debug exceptions interactively makes it easier to identify and resolve issues.
+    Flexibility and Customization: With extensive support for custom widgets and functions, users can tailor their applications to meet specific needs.
+    High Performance: By supporting asynchronous functions and efficient data handling, Fiatlight ensures that applications remain responsive and performant even when dealing with large datasets or complex algorithms.
+    Seamless Integration: Fiatlight integrates smoothly with popular Python libraries like Numpy, Matplotlib, SoundFile, and Librosa, enhancing its versatility and power.
+
+Summary
+
+Fiatlight is more than just a framework; it’s a comprehensive toolset designed to empower users to create, visualize, and debug applications with ease. Whether you’re exploring new ideas, developing educational tools, or diving into data science and AI, Fiatlight provides the features and flexibility you need to succeed. Experience the future of application development and data visualization with Fiatlight, and let your ideas shine.
+
+
+
+Use Cases and Comparisons for Fiatlight
+****************************************
+
+Fiatlight: Versatile Applications and Powerful Comparisons
+
+Fiatlight is designed to cater to a wide range of use cases, providing users with the tools and flexibility needed for various applications. Below, we expand on these use cases and compare Fiatlight to other popular frameworks, highlighting its unique advantages.
+Use Cases
+
+    Education:
+        Context: Fiatlight serves as an excellent educational tool, allowing students to visualize and interact with code and data in real-time.
+        Advantages: Its drag-and-drop interface simplifies learning complex concepts, making it easier for students to understand algorithms, data flows, and debugging processes.
+
+    App Creation:
+        Context: Quickly create full-fledged applications with minimal code, perfect for rapid prototyping and development.
+        Advantages: The ability to chain functions into a graph and the extensive set of custom widgets allow for highly customized and efficient app development.
+
+    Data Exploration:
+        Context: Visualize and analyze data interactively, making it ideal for data scientists and analysts.
+        Advantages: Fiatlight's integration with popular data visualization libraries like Matplotlib and ImPlot, combined with its interactive widgets, offers a robust environment for exploring and understanding complex datasets.
+
+    New Framework Exploration:
+        Context: Experiment with new libraries and frameworks by integrating them into Fiatlight and leveraging its visual interface to explore their functionalities.
+        Advantages: The modular and flexible nature of Fiatlight makes it easy to plug in new tools and visualize their effects, aiding in quick learning and experimentation.
+
+    AI:
+        Context: Develop and visualize AI models and algorithms, enhancing understanding and debugging of machine learning workflows.
+        Advantages: Fiatlight’s capability to handle large datasets, asynchronous functions, and detailed visualization tools make it an excellent choice for AI research and development.
+
+    Debugging & IDE helper:
+        Context: Use Fiatlight as a powerful debugging tool and data viewer within an integrated development environment (IDE).
+        Advantages: The replay debugging feature and ability to inspect intermediate results provide deep insights into code behavior, aiding in efficient debugging and development.
+
+Comparisons with Other Frameworks
+----------------------------------
+    Scratch (for the graph creation):
+        Context: Scratch is a visual programming language aimed at children and beginners, using a block-based interface to create programs.
+        Advantages of Fiatlight: While similar in its visual approach, Fiatlight offers more advanced features, making it suitable for professional and educational use cases beyond the beginner level. It integrates seamlessly with Python, providing more power and flexibility.
+
+    Jupyter (for the data exploration):
+        Context: Jupyter notebooks are widely used for data exploration and interactive computing.
+        Advantages of Fiatlight: Fiatlight offers a more interactive and visually engaging interface for data exploration. It supports real-time interaction with data and functions, providing a more dynamic and user-friendly experience compared to static Jupyter notebooks.
+
+    Unity Blueprints (for the graph creation and the custom widgets):
+        Context: Unity’s Blueprints provide a visual scripting environment mainly used in game development.
+        Advantages of Fiatlight: Fiatlight brings similar visual scripting capabilities to Python, allowing for custom widgets and detailed control over GUI elements. It is versatile for a wider range of applications beyond game development.
+
+    Python Streamlit & Dash (for the app creation, and the ease of use):
+        Context: Streamlit and Dash are popular frameworks for building interactive web applications with Python.
+        Advantages of Fiatlight: Fiatlight offers a more integrated development experience with visual graph creation and interactive widgets directly within the Python environment, reducing the need for web development knowledge and streamlining the app creation process.
+
+    Ryven (for the graph creation):
+        Context: Ryven is a visual scripting tool for Python, allowing users to create node-based workflows.
+        Advantages of Fiatlight: While similar in concept, Fiatlight provides additional features such as custom widgets, domain-specific kits, and detailed debugging tools, making it a more comprehensive and powerful option for developers.
+
+    Comfy UI (Stable Diffusion) (for the node creation, and the use cases in AI):
+        Context: Comfy UI is used for creating and managing nodes in AI workflows.
+        Advantages of Fiatlight: Fiatlight excels in its ability to handle AI workflows with ease, providing tools for visualization and debugging that are critical in AI development. Its integration with popular AI libraries enhances its utility in this domain.
+
+    LEGO Mindstorms (for education and creative usage):
+        Context: LEGO Mindstorms is an educational tool that uses visual programming to teach robotics and programming concepts.
+        Advantages of Fiatlight: Fiatlight offers a similar educational approach but with a focus on software development and data science. It provides a scalable platform that can grow with the user’s skills, making it suitable for both beginners and advanced users.
+
+Summary
+
+Fiatlight stands out by combining the best aspects of various frameworks and tools, providing a comprehensive and flexible environment for a wide range of applications. Whether you're educating students, developing sophisticated applications, exploring new frameworks, or working on AI projects, Fiatlight offers the features and advantages needed to succeed. Embrace the power of visual programming and interactive development with Fiatlight, and illuminate your path from ideas to creation.
