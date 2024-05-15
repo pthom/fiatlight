@@ -24,13 +24,13 @@ from .cv_color_type_gui import ColorConversionWithGui
 from .lut import (
     LutParams,
     LutTable,
-    lut,
     lut_with_params,
     lut_channels_with_params,
     lut_channels_in_colorspace,
 )
 from .lut_gui import LutParamsWithGui
 from .overlay_alpha_image import overlay_alpha_image
+from .image_to_from_file_gui import image_from_file, ImageToFileGui
 
 
 def _register_factories() -> None:
@@ -74,7 +74,6 @@ __all__ = [
     # from lut
     "LutParams",
     "LutTable",
-    "lut",
     "lut_with_params",
     "lut_channels_with_params",
     "lut_channels_in_colorspace",
@@ -82,4 +81,7 @@ __all__ = [
     "LutParamsWithGui",
     # from overlay_alpha_image
     "overlay_alpha_image",
+    # from image_to_from_file_gui
+    "image_from_file",
+    "ImageToFileGui",
 ]
