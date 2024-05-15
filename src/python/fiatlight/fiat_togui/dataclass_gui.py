@@ -1,3 +1,40 @@
+"""DataclassGui: adds a GUI to a dataclass, or to a pydantic model
+
+Usage example
+
+1. Register the dataclass or pydantic model with `register_dataclass`:
+* With pydantic:
+    from pydantic import BaseModel
+
+    class MyParam(BaseModel):
+        image_in: ImagePath
+        image_out: ImagePath_Save = "save.png"  # type: ignore
+        x: int | None = None
+        y: str = "Hello"
+
+    from fiatlight.fiat_togui import register_dataclass
+    register_dataclass(MyParam)
+
+
+* With dataclasses:
+    from dataclasses import dataclass
+
+    @dataclass
+    class MyParam:
+        image_in: ImagePath
+        image_out: ImagePath_Save = "save.png"  # type: ignore
+        x: int | None = None
+        y: str = "Hello"
+
+    from fiatlight.fiat_togui import register_dataclass
+    register_dataclass(MyParam)
+
+2. Use the dataclass in a function:
+    def f(param: MyParam) -> MyParam:
+        return param
+
+    fiatlight.fiat_run(f)
+"""
 import copy
 
 from fiatlight import fiat_widgets
@@ -7,25 +44,14 @@ from fiatlight.fiat_togui import to_gui
 from fiatlight.fiat_config import get_fiat_config, FiatColorType
 from fiatlight.fiat_widgets import fiat_osd
 from imgui_bundle import imgui, imgui_ctx, hello_imgui, ImVec2  # noqa
-from typing import Type, Any, Callable, TypeVar, List
-from dataclasses import is_dataclass
+from typing import Type, Any, TypeVar, List
 
 
 # A type variable that represents a dataclass type
 DataclassType = TypeVar("DataclassType")
 
 
-"""
-Q:
-default_provider:
-   pas besoin de specifier provider
-       le default provider doit
-              set param to default value
-              or to unspecified
-"""
-
-
-def _draw_dataclass_member_name(member_name: str):
+def _draw_dataclass_member_name(member_name: str) -> None:
     width_align_after = hello_imgui.em_size(5)
 
     # Draw param name (might be shortened if too long)
@@ -54,14 +80,14 @@ class DataclassGui(AnyDataWithGui[DataclassType]):
     def __init__(self, dataclass_type: Type[DataclassType]) -> None:
         super().__init__()
 
-        if not is_dataclass(dataclass_type):
-            raise ValueError(f"{dataclass_type} is not a dataclass")
+        # if not is_dataclass(dataclass_type):
+        #     raise ValueError(f"{dataclass_type} is not a dataclass")
 
         scope_storage = to_gui._capture_current_scope()
         constructor_gui = FunctionWithGui(dataclass_type, scope_storage=scope_storage)
 
         self._parameters_with_gui = constructor_gui._inputs_with_gui
-        self._dataclass_type = dataclass_type  # type: ignore
+        self._dataclass_type = dataclass_type
         self.fill_callbacks()
 
     def fill_callbacks(self) -> None:
@@ -122,7 +148,7 @@ class DataclassGui(AnyDataWithGui[DataclassType]):
                 default_value_provider = param_gui.data_with_gui.callbacks.default_value_provider
                 if default_value_provider is None:
                     raise ValueError(f"Parameter {param_gui.name} has no default value provider")
-                param_gui.data_with_gui.value = param_gui.data_with_gui.callbacks.default_value_provider()
+                param_gui.data_with_gui.value = default_value_provider()
 
         r = self.factor_dataclass_instance()
         return r
@@ -238,10 +264,3 @@ class DataclassGui(AnyDataWithGui[DataclassType]):
             return changed, r
         else:
             return False, value
-
-
-def make_dataclass_with_gui(dataclass_type: Type[DataclassType]) -> Callable[[], DataclassGui[DataclassType]]:
-    def fn() -> DataclassGui[DataclassType]:
-        return DataclassGui(dataclass_type)
-
-    return fn

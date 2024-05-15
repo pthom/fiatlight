@@ -6,3 +6,4 @@ makefun
 Pillow
 types-Pillow
 brotli
+pydantic
