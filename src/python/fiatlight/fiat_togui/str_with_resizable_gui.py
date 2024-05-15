@@ -17,6 +17,7 @@ class StrWithResizableGui(AnyDataWithGui[str]):
         self.callbacks.edit = self.edit
         self.callbacks.edit_popup_possible = True
         self.callbacks.present_custom = self.present_custom
+        self.callbacks.present_custom_popup_possible = True
         self.callbacks.default_value_provider = lambda: ""
         self.callbacks.save_gui_options_to_json = self.save_gui_options_to_json
         self.callbacks.load_gui_options_from_json = self.load_gui_options_from_json
