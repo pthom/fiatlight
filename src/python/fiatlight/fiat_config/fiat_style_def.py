@@ -25,6 +25,8 @@ class FiatColorType(Enum):
     OutputValueUnspecified = auto()
     OutputValueOk = auto()
 
+    DataclassMemberName = auto()
+
     # Exception color
     ExceptionError = auto()
 
@@ -67,4 +69,6 @@ class FiatStyle:
             FiatColorType.OutputValueOk: self.white,
             # Exception color
             FiatColorType.ExceptionError: self.red,
+            # Dataclass member name
+            FiatColorType.DataclassMemberName: ImVec4(0.7, 0.8, 0.7, 1.0),
         }

@@ -1,6 +1,11 @@
+import copy
+
+from fiatlight import fiat_widgets
 from fiatlight.fiat_core import AnyDataWithGui, FunctionWithGui, ParamWithGui
 from fiatlight.fiat_types import JsonDict, Unspecified, Error
 from fiatlight.fiat_togui import to_gui
+from fiatlight.fiat_config import get_fiat_config, FiatColorType
+from fiatlight.fiat_widgets import fiat_osd
 from imgui_bundle import imgui, imgui_ctx, hello_imgui, ImVec2  # noqa
 from typing import Type, Any, Callable, TypeVar, List
 from dataclasses import is_dataclass
@@ -18,6 +23,28 @@ default_provider:
               set param to default value
               or to unspecified
 """
+
+
+def _draw_dataclass_member_name(member_name: str):
+    width_align_after = hello_imgui.em_size(5)
+
+    # Draw param name (might be shortened if too long)
+    cursor_pos_before_label = imgui.get_cursor_pos()
+    member_name_color = get_fiat_config().style.colors[FiatColorType.DataclassMemberName]
+    with imgui_ctx.push_style_color(imgui.Col_.text.value, member_name_color):
+        member_name_short = member_name
+        while imgui.calc_text_size(member_name_short).x > width_align_after:
+            member_name_short = member_name_short[:-1]
+        is_too_long = len(member_name_short) < len(member_name)
+        if is_too_long:
+            member_name_short = member_name_short[:-1] + "..."
+        imgui.text(member_name_short)
+        if is_too_long:
+            fiat_osd.set_widget_tooltip(member_name)
+
+    cursor_pos_after_label = copy.copy(cursor_pos_before_label)
+    cursor_pos_after_label.x += width_align_after
+    imgui.set_cursor_pos(cursor_pos_after_label)
 
 
 class DataclassGui(AnyDataWithGui[DataclassType]):
@@ -161,23 +188,27 @@ class DataclassGui(AnyDataWithGui[DataclassType]):
                 def fn_present_param() -> None:
                     if present_custom is not None:
                         present_custom(param_value)
-                    elif present_str is not None:
-                        imgui.text(present_str(param_value))
                     else:
-                        imgui.text(str(param_value))
+                        as_str: str
+                        if present_str is not None:
+                            as_str = present_str(param_value)
+                        else:
+                            as_str = str(param_value)
+                        max_width_pixels = hello_imgui.em_size(40)
+                        fiat_widgets.text_maybe_truncated(as_str, max_lines=1, max_width_pixels=max_width_pixels)
 
-                    imgui.text(param_gui.name)
-                    imgui.begin_group()
-                    fn_present_param()
-                    imgui.end_group()
+                _draw_dataclass_member_name(param_gui.name)
+                imgui.begin_group()
+                fn_present_param()
+                imgui.end_group()
 
-    def edit(self, _value: DataclassType) -> tuple[bool, DataclassType]:
+    def edit(self, value: DataclassType) -> tuple[bool, DataclassType]:
         changed = False
 
         for param_gui_ in self._parameters_with_gui:
-            if not hasattr(_value, param_gui_.name):
+            if not hasattr(value, param_gui_.name):
                 raise ValueError(f"Object does not have attribute {param_gui_.name}")
-            param_gui_.data_with_gui.value = getattr(_value, param_gui_.name)
+            param_gui_.data_with_gui.value = getattr(value, param_gui_.name)
 
             param_value = param_gui_.data_with_gui.value
             param_edit = param_gui_.data_with_gui.callbacks.edit
@@ -188,13 +219,13 @@ class DataclassGui(AnyDataWithGui[DataclassType]):
                     changed_in_edit, new_value = param_edit(param_value)
                     if changed_in_edit:
                         param_gui_.data_with_gui.value = new_value
+                        setattr(value, param_name, new_value)
                     return changed_in_edit
                 else:
                     imgui.text("No editor")
                     return False
 
-            imgui.text(param_name)
-            imgui.same_line()
+            _draw_dataclass_member_name(param_name)
             imgui.begin_group()
             param_changed = fn_edit_param()
             imgui.end_group()
@@ -206,7 +237,7 @@ class DataclassGui(AnyDataWithGui[DataclassType]):
             r = self.factor_dataclass_instance()
             return changed, r
         else:
-            return False, _value
+            return False, value
 
 
 def make_dataclass_with_gui(dataclass_type: Type[DataclassType]) -> Callable[[], DataclassGui[DataclassType]]:

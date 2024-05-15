@@ -77,13 +77,15 @@ def text_maybe_truncated(
     output_text(msg_truncated)
 
     # Tooltip
-    tooltip_str = None
+    tooltip_str = ""
     if info_tooltip is not None:
         tooltip_str = info_tooltip
     if is_truncated:
-        if tooltip_str is not None:
+        if len(tooltip_str) > 0:
             tooltip_str += "\n\n" + msg
-    if tooltip_str is not None:
+        else:
+            tooltip_str = msg
+    if len(tooltip_str) > 0:
         fiat_osd.set_widget_tooltip(tooltip_str[:1000])
 
 

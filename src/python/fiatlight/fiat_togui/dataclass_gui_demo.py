@@ -1,9 +1,9 @@
 import fiatlight
+from fiatlight.fiat_types import ImagePath, ImagePath_Save
 
 
 def main() -> None:
     from dataclasses import dataclass
-    from fiatlight.fiat_types import ImagePath, ImagePath_Save
 
     @dataclass
     class MyParam:
