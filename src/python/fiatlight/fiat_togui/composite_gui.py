@@ -74,10 +74,8 @@ class OptionalWithGui(AnyDataWithGui[DataType | None]):
             if value is not None and fn_edit is not None:
                 changed_in_edit, value = fn_edit(value)
                 if changed_in_edit:
-                    inner_gui_value = self.inner_gui.value
-                    if isinstance(inner_gui_value, (Unspecified, Error)):
+                    if isinstance(value, (Unspecified, Error)):
                         raise ValueError("Inner GUI value is Unspecified or Error")
-                    value = inner_gui_value
                     changed = True
             else:
                 imgui.text("No edit function!")
