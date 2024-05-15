@@ -19,6 +19,12 @@ class OptionalWithGui(AnyDataWithGui[DataType | None]):
         self.callbacks.on_change = self.on_change
         self.callbacks.default_value_provider = self.default_provider
         self.callbacks.clipboard_copy_possible = inner_gui.callbacks.clipboard_copy_possible
+
+        self.callbacks.present_custom_popup_possible = inner_gui.callbacks.present_custom_popup_possible
+        self.callbacks.present_custom_popup_required = inner_gui.callbacks.present_custom_popup_required
+        self.callbacks.edit_popup_possible = inner_gui.callbacks.edit_popup_possible
+        self.callbacks.edit_popup_required = inner_gui.callbacks.edit_popup_required
+
         if self.inner_gui.callbacks.present_custom is not None:
             self.callbacks.present_custom = self.present_custom
 
