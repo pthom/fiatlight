@@ -1,3 +1,5 @@
+# type: ignore
+
 import time
 
 from pedalboard.io import AudioStream

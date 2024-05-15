@@ -60,7 +60,7 @@ class SoundWave:
         if self.wave.ndim == 2:
             self.wave = self.wave.mean(axis=0)
             # remove the second dimension
-            self.wave = self.wave.squeeze()
+            self.wave = self.wave.squeeze()  # type: ignore
 
         time_array = np.arange(0, self.duration(), 1 / self.sample_rate, self.wave.dtype)
         self._time_array = time_array  # type: ignore

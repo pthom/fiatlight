@@ -1,6 +1,6 @@
 from imgui_bundle import imgui, hello_imgui, imgui_knobs, imgui_toggle, portable_file_dialogs as pfd, ImVec2, imgui_ctx
 from fiatlight.fiat_core import AnyDataWithGui
-from fiatlight.fiat_types import FilePath
+from fiatlight.fiat_types import FilePath, FilePath_Save
 from fiatlight.fiat_types.color_types import ColorRgb, ColorRgba
 from typing import Callable, TypeAlias
 from dataclasses import dataclass
@@ -588,7 +588,7 @@ class FilePathWithGui(AnyDataWithGui[FilePath]):
 
     def edit(self, value: FilePath) -> tuple[bool, FilePath]:
         changed = False
-        if imgui.button("Select file"):
+        if imgui.button("Open file"):
             self._open_file_dialog = pfd.open_file("Select file", self.default_path, self.filters)
         if self._open_file_dialog is not None and self._open_file_dialog.ready():
             if len(self._open_file_dialog.result()) == 1:
@@ -613,7 +613,54 @@ class FilePathWithGui(AnyDataWithGui[FilePath]):
             return "???"
 
 
+class FilePathSaveWithGui(AnyDataWithGui[FilePath_Save]):
+    filters: list[str]
+    default_path: str = ""
+
+    _save_file_dialog: pfd.save_file | None = None
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.callbacks.edit = self.edit
+        self.callbacks.default_value_provider = lambda: FilePath_Save("")
+        self.callbacks.present_str = self.present_str
+        self.callbacks.clipboard_copy_str = lambda x: str(x)
+        self.callbacks.clipboard_copy_possible = True
+        self.filters = []
+
+    def edit(self, value: FilePath_Save) -> tuple[bool, FilePath_Save]:
+        changed = False
+        if imgui.button("Select save file"):
+            self._save_file_dialog = pfd.save_file("Select file", self.default_path, self.filters)
+        if self._save_file_dialog is not None and self._save_file_dialog.ready():
+            selected_file = self._save_file_dialog.result()
+            value = FilePath_Save(selected_file)
+            changed = True
+            self._open_file_dialog = None
+        return changed, value
+
+    @staticmethod
+    def present_str(value: FilePath_Save) -> str:
+        from pathlib import Path
+
+        # Returns two lines: the file name and the full path
+        # (which will be presented as a tooltip)
+        try:
+            as_path = Path(value)
+            r = str(as_path.name) + "\n"
+            r += str(as_path.absolute())
+            return r
+        except TypeError:
+            return "???"
+
+
 class ImagePathWithGui(FilePathWithGui):
+    def __init__(self) -> None:
+        super().__init__()
+        self.filters = ["*.png", "*.jpg", "*.jpeg", "*.bmp", "*.tga"]
+
+
+class ImagePathSaveWithGui(FilePathSaveWithGui):
     def __init__(self) -> None:
         super().__init__()
         self.filters = ["*.png", "*.jpg", "*.jpeg", "*.bmp", "*.tga"]
@@ -622,7 +669,13 @@ class ImagePathWithGui(FilePathWithGui):
 class TextPathWithGui(FilePathWithGui):
     def __init__(self) -> None:
         super().__init__()
-        self.filters = ["*.txt"]
+        self.filters = ["*.txt, *.*"]
+
+
+class TextPathSaveWithGui(FilePathSaveWithGui):
+    def __init__(self) -> None:
+        super().__init__()
+        self.filters = ["*.txt, *.*"]
 
 
 class AudioPathWithGui(FilePathWithGui):
@@ -631,7 +684,19 @@ class AudioPathWithGui(FilePathWithGui):
         self.filters = ["*.wav", "*.mp3", "*.ogg", "*.flac", "*.aiff", "*.m4a"]
 
 
+class AudioPathSaveWithGui(FilePathSaveWithGui):
+    def __init__(self) -> None:
+        super().__init__()
+        self.filters = ["*.wav", "*.mp3", "*.ogg", "*.flac", "*.aiff", "*.m4a"]
+
+
 class VideoPathWithGui(FilePathWithGui):
+    def __init__(self) -> None:
+        super().__init__()
+        self.filters = ["*.mp4", "*.avi", "*.mkv"]
+
+
+class VideoPathSaveWithGui(FilePathSaveWithGui):
     def __init__(self) -> None:
         super().__init__()
         self.filters = ["*.mp4", "*.avi", "*.mkv"]
@@ -722,13 +787,29 @@ class ColorRgbaWithGui(AnyDataWithGui[ColorRgba]):
 ########################################################################################################################
 def __register_file_paths_types() -> None:
     from fiatlight.fiat_togui.to_gui import register_type
-    from fiatlight.fiat_types import FilePath, TextPath, ImagePath, AudioPath, VideoPath
+    from fiatlight.fiat_types import (
+        FilePath,
+        TextPath,
+        ImagePath,
+        AudioPath,
+        VideoPath,
+        FilePath_Save,
+        TextPath_Save,
+        ImagePath_Save,
+        AudioPath_Save,
+        VideoPath_Save,
+    )
 
     register_type(FilePath, FilePathWithGui)
     register_type(TextPath, TextPathWithGui)
     register_type(ImagePath, ImagePathWithGui)
     register_type(AudioPath, AudioPathWithGui)
     register_type(VideoPath, VideoPathWithGui)
+    register_type(FilePath_Save, FilePathSaveWithGui)
+    register_type(TextPath_Save, TextPathSaveWithGui)
+    register_type(ImagePath_Save, ImagePathSaveWithGui)
+    register_type(AudioPath_Save, AudioPathSaveWithGui)
+    register_type(VideoPath_Save, VideoPathSaveWithGui)
 
 
 def __register_python_types() -> None:

@@ -27,3 +27,8 @@ def sandbox_enum() -> None:
 
     graph = FunctionsGraph.from_function_composition([foo])
     fiat_run_graph(graph)
+
+
+if __name__ == "__main__":
+    # sandbox_optional()
+    sandbox_enum()

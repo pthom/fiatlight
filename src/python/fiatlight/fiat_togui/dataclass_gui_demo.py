@@ -3,9 +3,12 @@ import fiatlight
 
 def main() -> None:
     from dataclasses import dataclass
+    from fiatlight.fiat_types import ImagePath, ImagePath_Save
 
     @dataclass
     class MyParam:
+        image_in: ImagePath
+        image_out: ImagePath_Save = "save.png"  # type: ignore
         x: int = 3
         y: str = "Hello"
 
