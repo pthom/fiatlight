@@ -102,6 +102,7 @@ def invoke_sdxl_turbo(
 
 # Options that will control how the function is invoked in fiatlight
 invoke_sdxl_turbo.invoke_async = True  # type: ignore
+invoke_sdxl_turbo.seed__edit_type = "slider_and_minus_plus"  # type: ignore
 
 
 def main_test_sdxl() -> None:

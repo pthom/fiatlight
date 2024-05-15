@@ -57,7 +57,7 @@ class SoundWave:
             return
 
         # SoundWave only supports mono
-        if self.wave.ndim == 2:
+        if self.wave.ndim == 2 and self.wave.shape[1] > 1:
             self.wave = self.wave.mean(axis=0)
             # remove the second dimension
             self.wave = self.wave.squeeze()  # type: ignore

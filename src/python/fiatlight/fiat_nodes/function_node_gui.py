@@ -997,7 +997,9 @@ class FunctionNodeGui:
                 if self._show_internals_details[name]:
                     if data_with_gui.can_present_custom():
                         assert data_with_gui.callbacks.present_custom is not None
-                        data_with_gui.callbacks.present_custom()
+                        data_with_gui_value = data_with_gui.value
+                        assert not isinstance(data_with_gui_value, (Unspecified, Error))
+                        data_with_gui.callbacks.present_custom(data_with_gui_value)
                     else:
                         as_str = data_with_gui.datatype_value_to_str(data_with_gui.value)
                         imgui.text(as_str)
