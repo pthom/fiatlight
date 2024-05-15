@@ -9,15 +9,15 @@ def main() -> None:
     class MyParam:
         image_in: ImagePath
         image_out: ImagePath_Save = "save.png"  # type: ignore
-        x: int = 3
+        x: int | None = None
         y: str = "Hello"
 
     from fiatlight.fiat_togui import register_dataclass
 
     register_dataclass(MyParam)
 
-    def f(param: MyParam) -> None:
-        pass
+    def f(param: MyParam) -> MyParam:
+        return param
 
     fiatlight.fiat_run(f)
 

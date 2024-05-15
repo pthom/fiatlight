@@ -1,3 +1,5 @@
+import os.path
+
 from imgui_bundle import imgui, hello_imgui, imgui_knobs, imgui_toggle, portable_file_dialogs as pfd, ImVec2, imgui_ctx
 from fiatlight.fiat_core import AnyDataWithGui
 from fiatlight.fiat_types import FilePath, FilePath_Save
@@ -587,8 +589,10 @@ class FilePathWithGui(AnyDataWithGui[FilePath]):
         self.filters = []
 
     def edit(self, value: FilePath) -> tuple[bool, FilePath]:
+        from fiatlight.fiat_widgets import fiat_osd
+
         changed = False
-        if imgui.button("Open file"):
+        if imgui.button("Select file"):
             self._open_file_dialog = pfd.open_file("Select file", self.default_path, self.filters)
         if self._open_file_dialog is not None and self._open_file_dialog.ready():
             if len(self._open_file_dialog.result()) == 1:
@@ -596,6 +600,11 @@ class FilePathWithGui(AnyDataWithGui[FilePath]):
                 value = FilePath(selected_file)
                 changed = True
             self._open_file_dialog = None
+        if len(value) > 0:
+            basename = os.path.basename(value)
+            imgui.same_line()
+            imgui.text(basename)
+            fiat_osd.set_widget_tooltip(value)
         return changed, value
 
     @staticmethod
@@ -629,6 +638,8 @@ class FilePathSaveWithGui(AnyDataWithGui[FilePath_Save]):
         self.filters = []
 
     def edit(self, value: FilePath_Save) -> tuple[bool, FilePath_Save]:
+        from fiatlight.fiat_widgets import fiat_osd
+
         changed = False
         if imgui.button("Select save file"):
             self._save_file_dialog = pfd.save_file("Select file", self.default_path, self.filters)
@@ -637,6 +648,12 @@ class FilePathSaveWithGui(AnyDataWithGui[FilePath_Save]):
             value = FilePath_Save(selected_file)
             changed = True
             self._open_file_dialog = None
+
+        if len(value) > 0:
+            basename = os.path.basename(value)
+            imgui.same_line()
+            imgui.text(basename)
+            fiat_osd.set_widget_tooltip(value)
         return changed, value
 
     @staticmethod

@@ -1,8 +1,8 @@
-from fiatlight.fiat_core import AnyDataWithGui
-from fiatlight.fiat_types import JsonDict
+from fiatlight.fiat_core import AnyDataWithGui, FunctionWithGui, ParamWithGui
+from fiatlight.fiat_types import JsonDict, Unspecified, Error
 from fiatlight.fiat_togui import to_gui
 from imgui_bundle import imgui, imgui_ctx, hello_imgui, ImVec2  # noqa
-from typing import Type, Any, Callable, TypeVar
+from typing import Type, Any, Callable, TypeVar, List
 from dataclasses import is_dataclass
 
 
@@ -10,52 +10,31 @@ from dataclasses import is_dataclass
 DataclassType = TypeVar("DataclassType")
 
 
+"""
+Q:
+default_provider:
+   pas besoin de specifier provider
+       le default provider doit
+              set param to default value
+              or to unspecified
+"""
+
+
 class DataclassGui(AnyDataWithGui[DataclassType]):
-    parameters_with_gui: dict[str, AnyDataWithGui[Any]]
+    _parameters_with_gui: List[ParamWithGui[Any]]
     _dataclass_type: Type[DataclassType]
 
-    def __init__(
-        self, dataclass_type: Type[DataclassType], default_provider: Callable[[], DataclassType] | None = None
-    ) -> None:
+    def __init__(self, dataclass_type: Type[DataclassType]) -> None:
         super().__init__()
 
         if not is_dataclass(dataclass_type):
             raise ValueError(f"{dataclass_type} is not a dataclass")
 
         scope_storage = to_gui._capture_current_scope()
+        constructor_gui = FunctionWithGui(dataclass_type, scope_storage=scope_storage)
 
-        """
-        Note:
-        It would also be possible to get the field list by inspecting the signature of the constructor.
-        This approach would be more generic and not limited to dataclasses.
-        But we might lose some advantages of data classes.
-            # Get the signature of the dataclass constructor
-            signature = inspect.signature(dataclass_type.__init__)
-            parameters = signature.parameters
-            for name, param in parameters.items():
-                if name == "self":  # Skip 'self' parameter
-                    continue
-                print(f"Parameter name: {name}, type: {param.annotation}")
-        """
-
-        parameters_with_gui = {}
-        for field in dataclass_type.__dataclass_fields__.values():  # noqa
-            is_public = not field.name.startswith("_")
-            if is_public:
-                field_type = field.type
-                parameters_with_gui[field.name] = to_gui._any_type_class_name_to_gui(str(field_type), scope_storage)
-
-        def provider_from_default_ctor() -> DataclassType:
-            r = dataclass_type()
-            return r  # type: ignore
-
-        if default_provider is None:
-            default_provider = provider_from_default_ctor
-
-        # Fill the DataclassGui object
-        self.parameters_with_gui = parameters_with_gui
+        self._parameters_with_gui = constructor_gui._inputs_with_gui
         self._dataclass_type = dataclass_type  # type: ignore
-        self.callbacks.default_value_provider = default_provider
         self.fill_callbacks()
 
     def fill_callbacks(self) -> None:
@@ -66,14 +45,14 @@ class DataclassGui(AnyDataWithGui[DataclassType]):
         self.callbacks.present_custom_popup_required = False
         self.callbacks.edit_popup_possible = False
         self.callbacks.edit_popup_required = False
-        for param_gui in self.parameters_with_gui.values():
-            if param_gui.callbacks.present_custom_popup_required:
+        for param_gui in self._parameters_with_gui:
+            if param_gui.data_with_gui.callbacks.present_custom_popup_required:
                 self.callbacks.present_custom_popup_required = True
-            if param_gui.callbacks.present_custom_popup_possible:
+            if param_gui.data_with_gui.callbacks.present_custom_popup_possible:
                 self.callbacks.present_custom_popup_possible = True
-            if param_gui.callbacks.edit_popup_possible:
+            if param_gui.data_with_gui.callbacks.edit_popup_possible:
                 self.callbacks.edit_popup_possible = True
-            if param_gui.callbacks.edit_popup_required:
+            if param_gui.data_with_gui.callbacks.edit_popup_required:
                 self.callbacks.edit_popup_required = True
 
         self.callbacks.edit = self.edit
@@ -87,23 +66,57 @@ class DataclassGui(AnyDataWithGui[DataclassType]):
         self.callbacks.save_gui_options_to_json = self.save_gui_options_to_json
         self.callbacks.load_gui_options_from_json = self.load_gui_options_from_json
 
+        self.callbacks.default_value_provider = self.default_value_provider
+
+    def is_fully_specified(self) -> bool:
+        has_unspecified = False
+        for param_gui in self._parameters_with_gui:
+            param_value = param_gui.data_with_gui.value
+            if isinstance(param_value, (Unspecified, Error)):
+                has_unspecified = True
+                break
+        return not has_unspecified
+
+    def factor_dataclass_instance(self) -> DataclassType:
+        kwargs = {}
+        for param_gui in self._parameters_with_gui:
+            param_value = param_gui.data_with_gui.value
+            if isinstance(param_value, (Unspecified, Error)):
+                raise ValueError(f"Parameter {param_gui.name} is unspecified")
+            kwargs[param_gui.name] = param_value
+        r = self._dataclass_type(**kwargs)
+        return r
+
+    def default_value_provider(self) -> DataclassType:
+        for param_gui in self._parameters_with_gui:
+            if not isinstance(param_gui.default_value, Unspecified):
+                param_gui.data_with_gui.value = param_gui.default_value
+            else:
+                default_value_provider = param_gui.data_with_gui.callbacks.default_value_provider
+                if default_value_provider is None:
+                    raise ValueError(f"Parameter {param_gui.name} has no default value provider")
+                param_gui.data_with_gui.value = param_gui.data_with_gui.callbacks.default_value_provider()
+
+        r = self.factor_dataclass_instance()
+        return r
+
     def on_change(self, value: DataclassType) -> None:
-        for param_name, param_gui in self.parameters_with_gui.items():
-            param_on_change = param_gui.callbacks.on_change
-            param_value = getattr(value, param_name)
-            if param_on_change is not None:
-                param_on_change(param_value)
+        for param_gui in self._parameters_with_gui:
+            if not hasattr(value, param_gui.name):
+                raise ValueError(f"Object does not have attribute {param_gui.name}")
+            param_value = getattr(value, param_gui.name)
+            param_gui.data_with_gui.value = param_value  # will fire on_change
 
     def on_exit(self) -> None:
-        for param_gui in self.parameters_with_gui.values():
-            param_on_exit = param_gui.callbacks.on_exit
+        for param_gui in self._parameters_with_gui:
+            param_on_exit = param_gui.data_with_gui.callbacks.on_exit
             if param_on_exit is not None:
                 param_on_exit()
 
     def on_heartbeat(self) -> bool:
         changed = False
-        for param_name, param_gui in self.parameters_with_gui.items():
-            param_on_heartbeat = param_gui.callbacks.on_heartbeat
+        for param_gui in self._parameters_with_gui:
+            param_on_heartbeat = param_gui.data_with_gui.callbacks.on_heartbeat
             if param_on_heartbeat is not None:
                 if param_on_heartbeat():
                     changed = True
@@ -111,44 +124,39 @@ class DataclassGui(AnyDataWithGui[DataclassType]):
 
     def save_gui_options_to_json(self) -> JsonDict:
         r = {}
-        for param_name, param_gui in self.parameters_with_gui.items():
-            save_gui_options_to_json = param_gui.callbacks.save_gui_options_to_json
+        for param_gui in self._parameters_with_gui:
+            save_gui_options_to_json = param_gui.data_with_gui.callbacks.save_gui_options_to_json
             if save_gui_options_to_json is not None:
-                r[param_name] = save_gui_options_to_json()
+                r[param_gui.name] = save_gui_options_to_json()
         return r
 
     def load_gui_options_from_json(self, json: JsonDict) -> None:
-        for param_name, param_gui in self.parameters_with_gui.items():
-            if param_name in json:
-                load_gui_options_from_json = param_gui.callbacks.load_gui_options_from_json
+        for param_gui in self._parameters_with_gui:
+            if param_gui.name in json:
+                load_gui_options_from_json = param_gui.data_with_gui.callbacks.load_gui_options_from_json
                 if load_gui_options_from_json is not None:
-                    load_gui_options_from_json(json[param_name])
+                    load_gui_options_from_json(json[param_gui.name])
 
-    def present_str(self, value: DataclassType) -> str:
+    def present_str(self, _: DataclassType) -> str:
+        # the parameter is not used, because we have the data in the self._parameters_with_gui
         strs: dict[str, str] = {}
-        for param_name, param_gui in self.parameters_with_gui.items():
-            if not hasattr(value, param_name):
-                raise ValueError(f"Object does not have attribute {param_name}")
-            param_value = getattr(value, param_name)
-
-            present_str = param_gui.callbacks.present_str
-            if present_str is not None:
-                strs[param_name] = present_str(param_value)
-            else:
-                strs[param_name] = str(param_value)
+        for param_gui in self._parameters_with_gui:
+            param_value = param_gui.data_with_gui.value
+            assert not isinstance(param_value, (Error, Unspecified))
+            param_str = param_gui.data_with_gui.datatype_value_to_str(param_value)
+            strs[param_gui.name] = param_str
         joined_strs = ", ".join(f"{k}: {v}" for k, v in strs.items())
         r = f"{self._dataclass_type.__name__}({joined_strs})"
         return r
 
-    def present_custom(self, value: DataclassType) -> None:
+    def present_custom(self, _: DataclassType) -> None:
+        # the parameter is not used, because we have the data in self._parameters_with_gui
         with imgui_ctx.begin_vertical("##CompositeGui_present_custom"):
-            for param_name, param_gui in self.parameters_with_gui.items():
-                if not hasattr(value, param_name):
-                    raise ValueError(f"Object does not have attribute {param_name}")
-                param_value = getattr(value, param_name)
+            for param_gui in self._parameters_with_gui:
+                param_value = param_gui.data_with_gui.value
 
-                present_custom = param_gui.callbacks.present_custom
-                present_str = param_gui.callbacks.present_str
+                present_custom = param_gui.data_with_gui.callbacks.present_custom
+                present_str = param_gui.data_with_gui.callbacks.present_str
 
                 def fn_present_param() -> None:
                     if present_custom is not None:
@@ -158,33 +166,34 @@ class DataclassGui(AnyDataWithGui[DataclassType]):
                     else:
                         imgui.text(str(param_value))
 
-                    imgui.text(param_name)
+                    imgui.text(param_gui.name)
                     imgui.begin_group()
                     fn_present_param()
                     imgui.end_group()
 
-    def edit(self, value: DataclassType) -> tuple[bool, DataclassType]:
+    def edit(self, _value: DataclassType) -> tuple[bool, DataclassType]:
         changed = False
 
-        for param_name_, param_gui_ in self.parameters_with_gui.items():
-            if not hasattr(value, param_name_):
-                raise ValueError(f"Object does not have attribute {param_name_}")
+        for param_gui_ in self._parameters_with_gui:
+            if not hasattr(_value, param_gui_.name):
+                raise ValueError(f"Object does not have attribute {param_gui_.name}")
+            param_gui_.data_with_gui.value = getattr(_value, param_gui_.name)
 
-            param_value = getattr(value, param_name_)
-            param_edit = param_gui_.callbacks.edit
-            param_name_copy = param_name_  # copy to avoid being bound to the loop variable
+            param_value = param_gui_.data_with_gui.value
+            param_edit = param_gui_.data_with_gui.callbacks.edit
+            param_name = param_gui_.name  # copy to avoid being bound to the loop variable
 
             def fn_edit_param() -> bool:
                 if param_edit is not None:
                     changed_in_edit, new_value = param_edit(param_value)
                     if changed_in_edit:
-                        setattr(value, param_name_copy, new_value)
+                        param_gui_.data_with_gui.value = new_value
                     return changed_in_edit
                 else:
                     imgui.text("No editor")
                     return False
 
-            imgui.text(param_name_copy)
+            imgui.text(param_name)
             imgui.same_line()
             imgui.begin_group()
             param_changed = fn_edit_param()
@@ -193,13 +202,15 @@ class DataclassGui(AnyDataWithGui[DataclassType]):
             if param_changed:
                 changed = True
 
-        return changed, value
+        if changed:
+            r = self.factor_dataclass_instance()
+            return changed, r
+        else:
+            return False, _value
 
 
-def make_dataclass_with_gui(
-    dataclass_type: Type[DataclassType], default_provider: Callable[[], DataclassType] | None = None
-) -> Callable[[], DataclassGui[DataclassType]]:
+def make_dataclass_with_gui(dataclass_type: Type[DataclassType]) -> Callable[[], DataclassGui[DataclassType]]:
     def fn() -> DataclassGui[DataclassType]:
-        return DataclassGui(dataclass_type, default_provider)
+        return DataclassGui(dataclass_type)
 
     return fn
