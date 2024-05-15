@@ -3,11 +3,25 @@ from fiatlight import fiat_array
 from fiatlight.fiat_types import Float_0_100
 import numpy as np
 import math
+import time
+
+_start_time = time.time()
 
 
-def sin_wave() -> fiat_array.FloatMatrix_Dim2:
+def time_seconds() -> float:
+    return time.time() - _start_time
+
+
+def phase_from_time_seconds(time_: float) -> float:
+    return time_ * 15.0
+
+
+time_seconds.invoke_always_dirty = True  # type: ignore
+
+
+def sin_wave(phase: float, amplitude: float = 1.0) -> fiat_array.FloatMatrix_Dim2:
     x = np.arange(0, 10, 0.1)
-    y = np.sin(x)
+    y = np.sin(x + phase) * amplitude
     r = np.stack((x, y))
     return r  # type: ignore
 
@@ -40,9 +54,15 @@ def get_simple_values(x: float) -> fiat_array.FloatMatrix_Dim1:
 
 def sandbox() -> None:
     graph = fiatlight.FunctionsGraph()
-    graph.add_function(sin_wave)
     graph.add_function(make_spirograph_curve)
     graph.add_function(get_simple_values)
+
+    graph.add_function(time_seconds)
+    graph.add_function(phase_from_time_seconds)
+    graph.add_function(sin_wave)
+    graph.add_link("time_seconds", "phase_from_time_seconds")
+    graph.add_link("phase_from_time_seconds", "sin_wave")
+
     fiatlight.fiat_run_graph(graph)
 
 
