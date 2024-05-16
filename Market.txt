@@ -74,7 +74,15 @@ Motto Ideas:
                 live: see figure_with_gui_demo
 
 
+Intro in two sentences:
+    For Non-Technical Users:
+    "Fiatlight is a user-friendly tool that helps you create and explore interactive applications and data visualizations with minimal effort, using a simple drag-and-drop interface. The delay between an idea and a full prototype application around it may be reduced to a few minutes."
 
+    For Tech-Savvy Users:
+    "Fiatlight is a versatile Python framework offering and enabling rapid development and visualization of applications by chaining functions into interactive graphs and providing powerful debugging tools. It features automatic GUI generation for diverse data types, including images, audio, arrays, and numbers."
+
+    For Computer Scientists:
+    "Fiatlight is a Python-based framework built on Dear ImGui, offering a visual programming environment for developing, analyzing, and debugging complex data pipelines and algorithms with integrated support for custom widgets and asynchronous execution. Just provide your business logic, and Fiatlight will provide you a full application that includes a GUI, data visualization, debugging tools, and user data persistence."
 
 Intro by GPT4o
 **************
