@@ -9,7 +9,7 @@ from typing import Optional
 fiatlight.get_fiat_config().catch_function_exceptions = False
 
 
-@fiatlight.base_model_with_gui_registration({"rotation_degree__range": (-180, 180)})
+@fiatlight.base_model_with_gui_registration({"rotation_degree__range": (0, 360)})
 class ImageEffect(BaseModel):
     rotation_degree: int = 0
     flip_horizontal: bool = False

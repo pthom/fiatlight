@@ -32,6 +32,8 @@ class OptionalWithGui(AnyDataWithGui[DataType | None]):
         self.callbacks.save_to_dict = self._save_to_dict
         self.callbacks.load_from_dict = self._load_from_dict
 
+        self.callbacks.on_heartbeat = self.inner_gui.callbacks.on_heartbeat
+
     def default_provider(self) -> DataType | None:
         if self.inner_gui.callbacks.default_value_provider is None:
             return None
@@ -132,6 +134,7 @@ class ListWithGui(AnyDataWithGui[List[DataType]]):
         self.callbacks.clipboard_copy_possible = inner_gui.callbacks.clipboard_copy_possible
         self.callbacks.save_to_dict = self._save_to_dict
         self.callbacks.load_from_dict = self._load_from_dict
+        self.callbacks.on_heartbeat = self.inner_gui.callbacks.on_heartbeat
 
     @staticmethod
     def clipboard_copy_str(v: List[DataType]) -> str:
@@ -219,6 +222,7 @@ class EnumWithGui(AnyDataWithGui[Enum]):
 
         self.callbacks.save_to_dict = self._save_to_dict
         self.callbacks.load_from_dict = self._load_from_dict
+        self.callbacks.on_heartbeat = None
 
     def edit(self, value: Enum) -> tuple[bool, Enum]:
         assert not isinstance(value, (Unspecified, Error))
