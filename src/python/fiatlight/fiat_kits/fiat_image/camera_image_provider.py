@@ -11,6 +11,7 @@ from fiatlight.fiat_core.any_data_with_gui import AnyDataWithGui
 from fiatlight.fiat_widgets import fontawesome_6_ctx, icons_fontawesome_6
 from enum import Enum
 from imgui_bundle import imgui, imgui_ctx, hello_imgui
+from typing import Optional
 
 
 @enum_with_gui_registration
@@ -30,7 +31,7 @@ class CameraFps(Enum):
     FPS_240 = 240
 
 
-@base_model_with_gui_registration
+@base_model_with_gui_registration()
 class CameraParams(BaseModel):
     device_number: int = 0
     camera_resolution: CameraResolution = CameraResolution.VGA_640_480
@@ -41,10 +42,10 @@ class CameraParams(BaseModel):
 
 class CameraProvider:
     camera_params: CameraParams
-    previous_camera_params: CameraParams | None = None
+    previous_camera_params: Optional[CameraParams] = None
     cv_cap: cv2.VideoCapture | None = None
 
-    def __init__(self, params: CameraParams | None = None):
+    def __init__(self, params: Optional[CameraParams] = None):
         if params is None:
             params = CameraParams()
         self.camera_params = params

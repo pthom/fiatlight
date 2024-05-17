@@ -80,17 +80,29 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
 
     _parameters_with_gui: List[ParamWithGui[Any]]
 
-    def __init__(self, dataclass_type: Type[DataclassLikeType]) -> None:
+    def __init__(self, dataclass_type: Type[DataclassLikeType], param_attrs: dict[str, Any] | None = None) -> None:
         super().__init__(dataclass_type)
-
-        # if not is_dataclass(dataclass_type):
-        #     raise ValueError(f"{dataclass_type} is not a dataclass")
+        if param_attrs is not None:
+            self._custom_attrs = param_attrs
 
         scope_storage = to_gui.capture_current_scope()
         constructor_gui = FunctionWithGui(dataclass_type, scope_storage=scope_storage)
 
         self._parameters_with_gui = constructor_gui._inputs_with_gui
         self.fill_callbacks()
+        self._apply_param_attrs()
+
+    def _apply_param_attrs(self) -> None:
+        if self._custom_attrs is None:
+            return
+        for param_gui in self._parameters_with_gui:
+            prefix = f"{param_gui.name}__"
+            this_param_attrs = {}
+            for k, v in self._custom_attrs.items():
+                if k.startswith(prefix):
+                    this_param_attrs[k[len(prefix) :]] = v
+            if len(this_param_attrs) > 0:
+                param_gui.data_with_gui._custom_attrs = this_param_attrs
 
     def fill_callbacks(self) -> None:
         self.callbacks.present_str = self.present_str
@@ -170,6 +182,7 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
 
     def on_heartbeat(self) -> bool:
         changed = False
+        self._apply_param_attrs()
         for param_gui in self._parameters_with_gui:
             param_on_heartbeat = param_gui.data_with_gui.callbacks.on_heartbeat
             if param_on_heartbeat is not None:
@@ -272,18 +285,18 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
 
 
 class DataclassGui(DataclassLikeGui[DataclassLikeType]):
-    def __init__(self, dataclass_type: Type[DataclassLikeType]) -> None:
+    def __init__(self, dataclass_type: Type[DataclassLikeType], param_attrs: dict[str, Any] | None = None) -> None:
         if not is_dataclass(dataclass_type):
             raise ValueError(f"{dataclass_type} is not a dataclass")
 
-        super().__init__(dataclass_type)  # type: ignore
+        super().__init__(dataclass_type, param_attrs)  # type: ignore
 
 
 class BaseModelGui(DataclassLikeGui[DataclassLikeType]):
-    def __init__(self, dataclass_type: Type[DataclassLikeType]) -> None:
+    def __init__(self, dataclass_type: Type[DataclassLikeType], param_attrs: dict[str, Any] | None = None) -> None:
         if not issubclass(dataclass_type, BaseModel):
             raise ValueError(f"{dataclass_type} is not a pydantic model")
-        super().__init__(dataclass_type)  # type: ignore
+        super().__init__(dataclass_type, param_attrs)  # type: ignore
         self.callbacks.load_from_dict = self._load_from_dict
         self.callbacks.save_to_dict = self._save_to_dict
 

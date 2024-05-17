@@ -101,7 +101,7 @@ def test_base_model_gui() -> None:
 
 
 def test_decorators() -> None:
-    @dataclass_with_gui_registration
+    @dataclass_with_gui_registration()
     class MyParam:
         x: int = 3
         y: str = "Hello"
@@ -115,7 +115,7 @@ def test_decorators() -> None:
     assert isinstance(f_gui_param_gui, DataclassGui)
     assert f_gui_param_gui._type == MyParam
 
-    @base_model_with_gui_registration
+    @base_model_with_gui_registration()
     class MyParam2(BaseModel):
         x: int = 3
         y: str = "Hello"
@@ -141,7 +141,7 @@ def test_pydantic_with_enum() -> None:
         A = 1
         B = 2
 
-    @fiatlight.base_model_with_gui_registration
+    @fiatlight.base_model_with_gui_registration()
     class MyParam(BaseModel):
         my_enum: MyEnum = MyEnum.A
         x: int = 3
@@ -156,3 +156,59 @@ def test_pydantic_with_enum() -> None:
 
     as_dict = my_param_gui.save_to_dict(my_param_gui.value)
     assert as_dict == {"type": "Pydantic", "value": {"my_enum": 2, "x": 4}}
+
+
+def test_base_model_with_custom_attributes() -> None:
+    @fiatlight.base_model_with_gui_registration({"rotation_degree__range": (-180, 180)})
+    class ImageEffect(BaseModel):
+        rotation_degree: int = 0
+
+    # Test the custom attribute
+    # 1. When creating the GUI manually
+    my_param_gui = BaseModelGui(ImageEffect, {"rotation_degree__range": (-180, 180)})
+    rot_gui = my_param_gui._parameters_with_gui[0].data_with_gui
+    assert rot_gui._custom_attrs["range"] == (-180, 180)
+
+    # 2. When using fiatlight machinery
+    current_scope = fiatlight.fiat_togui.to_gui.capture_current_scope()
+    gui2 = fiatlight.fiat_togui.to_type_with_gui(ImageEffect, current_scope)
+    assert isinstance(gui2, BaseModelGui)
+    rot_gui2 = gui2._parameters_with_gui[0].data_with_gui
+    assert rot_gui2._custom_attrs["range"] == (-180, 180)
+
+    # 3 When using fiatlight machinery with a function
+    def f(effect: ImageEffect) -> ImageEffect:
+        return effect
+
+    f_gui = FunctionWithGui(f)
+    f_gui_param_gui = f_gui.input("effect")
+    rot_gui3 = f_gui_param_gui._parameters_with_gui[0].data_with_gui  # type: ignore
+    assert rot_gui3._custom_attrs["range"] == (-180, 180)
+
+    # 4.  When using fiatlight machinery with a function where the param is optional
+    def f2(effect: ImageEffect | None = None) -> ImageEffect | None:
+        return effect
+
+    f2_gui = FunctionWithGui(f2)
+    f2_gui_param_gui = f2_gui.input("effect")
+    assert isinstance(f2_gui_param_gui, fiatlight.fiat_togui.composite_gui.OptionalWithGui)
+    assert isinstance(f2_gui_param_gui.inner_gui, BaseModelGui)
+    range_f2 = f2_gui_param_gui.inner_gui._parameters_with_gui[0].data_with_gui._custom_attrs["range"]
+    assert range_f2 == (-180, 180)
+
+
+def test_dataclass_with_custom_attributes() -> None:
+    @fiatlight.dataclass_with_gui_registration({"rotation_degree__range": (-180, 180)})
+    class ImageEffect:
+        rotation_degree: int = 0
+
+    # 4.  When using fiatlight machinery with a function where the param is optional
+    def f2(effect: ImageEffect | None = None) -> ImageEffect | None:
+        return effect
+
+    f2_gui = FunctionWithGui(f2)
+    f2_gui_param_gui = f2_gui.input("effect")
+    assert isinstance(f2_gui_param_gui, fiatlight.fiat_togui.composite_gui.OptionalWithGui)
+    assert isinstance(f2_gui_param_gui.inner_gui, DataclassGui)
+    range_f2 = f2_gui_param_gui.inner_gui._parameters_with_gui[0].data_with_gui._custom_attrs["range"]
+    assert range_f2 == (-180, 180)

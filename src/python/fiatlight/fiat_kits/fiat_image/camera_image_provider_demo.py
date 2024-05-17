@@ -4,18 +4,19 @@ from fiatlight.fiat_kits.fiat_image import ImageU8_3
 import fiatlight
 from pydantic import BaseModel
 import cv2
+from typing import Optional
 
 fiatlight.get_fiat_config().catch_function_exceptions = False
 
 
-@fiatlight.base_model_with_gui_registration
+@fiatlight.base_model_with_gui_registration({"rotation_degree__range": (-180, 180)})
 class ImageEffect(BaseModel):
     rotation_degree: int = 0
     flip_horizontal: bool = False
     flip_vertical: bool = False
 
 
-def apply_image_effect(image: ImageU8_3, effect: ImageEffect | None = None) -> ImageU8_3:
+def apply_image_effect(image: ImageU8_3, effect: Optional[ImageEffect] = None) -> ImageU8_3:
     if effect is None:
         return image
     if effect.rotation_degree != 0:
