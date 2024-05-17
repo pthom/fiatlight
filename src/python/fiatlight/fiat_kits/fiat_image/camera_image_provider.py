@@ -3,8 +3,9 @@ import logging
 
 import cv2
 from pydantic import BaseModel
+
 from fiatlight.fiat_togui.to_gui import enum_with_gui_registration, base_model_with_gui_registration
-from fiatlight.fiat_types import Float_0_1, JsonDict
+from fiatlight.fiat_types import JsonDict
 from fiatlight.fiat_kits.fiat_image import ImageU8_3
 from fiatlight.fiat_core.function_with_gui import FunctionWithGui
 from fiatlight.fiat_core.any_data_with_gui import AnyDataWithGui
@@ -31,13 +32,15 @@ class CameraFps(Enum):
     FPS_240 = 240
 
 
-@base_model_with_gui_registration()
+@base_model_with_gui_registration(
+    {"device_number__range": (0, 5), "brightness__range": (0, 1), "contrast__range": (0, 1)}
+)
 class CameraParams(BaseModel):
     device_number: int = 0
     camera_resolution: CameraResolution = CameraResolution.VGA_640_480
     # fps: CameraFps = CameraFps.FPS_30  # too much hassle for now
-    brightness: Float_0_1 = 0.5  # type: ignore
-    contrast: Float_0_1 = 0.5  # type: ignore
+    brightness: float = 0.5
+    contrast: float = 0.5
 
 
 class CameraProvider:
