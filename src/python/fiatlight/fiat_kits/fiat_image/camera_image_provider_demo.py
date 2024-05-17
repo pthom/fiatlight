@@ -1,9 +1,11 @@
+from fiatlight.demos.images import add_meme_text
 from fiatlight.fiat_kits.fiat_image.camera_image_provider import CameraGui
 from fiatlight.fiat_kits.fiat_image import ImageU8_3
-from fiatlight.demos.images.old_school_meme import add_meme_text
 import fiatlight
 from pydantic import BaseModel
 import cv2
+
+fiatlight.get_fiat_config().catch_function_exceptions = False
 
 
 @fiatlight.base_model_with_gui_registration

@@ -8,7 +8,6 @@ _FONT_AWESOME_6: imgui.ImFont | None = None
 
 def _load_font_awesome_6() -> None:
     global _FONT_AWESOME_6
-    print("_load_font_awesome_6")
     font_size = 15
     _FONT_AWESOME_6 = hello_imgui.load_font("fonts/DroidSans.ttf", font_size)
     font_params = hello_imgui.FontLoadingParams()

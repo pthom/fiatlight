@@ -1,4 +1,5 @@
 import cv2
+from imgui_bundle._imgui_bundle import hello_imgui
 from pydantic import BaseModel
 from fiatlight.fiat_togui.to_gui import enum_with_gui_registration, base_model_with_gui_registration
 from fiatlight.fiat_types import Float_0_1, JsonDict
@@ -10,11 +11,11 @@ from imgui_bundle import imgui, imgui_ctx  # noqa
 
 @enum_with_gui_registration
 class CameraResolution(Enum):
-    HD_1280_720 = (1280, 720)
-    FULL_HD_1920_1080 = (1920, 1080)
-    UHD_4K_3840_2160 = (3840, 2160)
-    VGA_640_480 = (640, 480)
-    QVGA_320_240 = (320, 240)
+    HD_1280_720 = [1280, 720]
+    FULL_HD_1920_1080 = [1920, 1080]
+    UHD_4K_3840_2160 = [3840, 2160]
+    VGA_640_480 = [640, 480]
+    QVGA_320_240 = [320, 240]
 
 
 @enum_with_gui_registration
@@ -106,12 +107,11 @@ class CameraGui(FunctionWithGui):
         return self._camera_provider.get_image()
 
     def _save_internal_gui_options_to_json(self) -> JsonDict:
-        r = self._camera_provider.camera_params.model_dump()
+        r = self._camera_provider.camera_params.model_dump(mode="json")
         return r
 
     def _load_internal_gui_options_from_json(self, json_dict: JsonDict) -> None:
-        self._camera_provider.camera_params = CameraParams.validate(json_dict)
-        print("ok")
+        self._camera_provider.camera_params = CameraParams.model_validate(json_dict)
 
     def _internal_state_gui(self) -> bool:
         from fiatlight.fiat_widgets import fontawesome_6_ctx, icons_fontawesome_6
@@ -119,11 +119,15 @@ class CameraGui(FunctionWithGui):
         started = self._camera_provider.started()
 
         with fontawesome_6_ctx():
-            if not started:
-                if imgui.button(icons_fontawesome_6.ICON_FA_CIRCLE_PLAY):
-                    self._camera_provider.start()
-            else:
-                if imgui.button(icons_fontawesome_6.ICON_FA_CIRCLE_STOP):
-                    self._camera_provider.stop()
+            with imgui_ctx.begin_horizontal("CamButton"):
+                imgui.spring()
+                button_size = hello_imgui.em_to_vec2(2, 2)
+                if not started:
+                    if imgui.button(icons_fontawesome_6.ICON_FA_CIRCLE_PLAY, button_size):
+                        self._camera_provider.start()
+                else:
+                    if imgui.button(icons_fontawesome_6.ICON_FA_CIRCLE_STOP, button_size):
+                        self._camera_provider.stop()
+                imgui.spring()
 
         return False
