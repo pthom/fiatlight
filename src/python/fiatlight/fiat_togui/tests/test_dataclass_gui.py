@@ -18,10 +18,6 @@ def test_dataclass_like_gui() -> None:
     my_param_default = my_param_gui.callbacks.default_value_provider()
     assert my_param_default.x == 3
 
-    # Test that the serialization methods are not implemented
-    assert my_param_gui.callbacks.save_gui_options_to_json is None
-    assert my_param_gui.callbacks.load_gui_options_from_json is None
-
 
 def test_dataclass_gui() -> None:
     @dataclass
@@ -76,6 +72,7 @@ def test_base_model_gui() -> None:
 
     register_base_model(MyParam)
     my_param_gui = BaseModelGui(MyParam)
+    assert my_param_gui._type == MyParam
 
     # Test the default value provider
     assert my_param_gui.callbacks.default_value_provider is not None

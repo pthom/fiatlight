@@ -185,7 +185,7 @@ def any_type_to_gui(type_: DataType, scope_storage: ScopeStorage) -> AnyDataWith
     return r
 
 
-def _to_data_with_gui(
+def to_data_with_gui(
     value: DataType,
     scope_storage: ScopeStorage,
 ) -> AnyDataWithGui[DataType]:
@@ -240,7 +240,7 @@ def _capture_scope(nb_steps_back: int = 0) -> ScopeStorage:
     return ScopeStorage(globals_, locals_)
 
 
-def _capture_current_scope() -> ScopeStorage:
+def capture_current_scope() -> ScopeStorage:
     return _capture_scope(0 + 1)  # 0 for the caller, 1 for this function
 
 

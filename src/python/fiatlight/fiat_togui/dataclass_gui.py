@@ -87,7 +87,7 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
         # if not is_dataclass(dataclass_type):
         #     raise ValueError(f"{dataclass_type} is not a dataclass")
 
-        scope_storage = to_gui._capture_current_scope()
+        scope_storage = to_gui.capture_current_scope()
         constructor_gui = FunctionWithGui(dataclass_type, scope_storage=scope_storage)
 
         self._parameters_with_gui = constructor_gui._inputs_with_gui

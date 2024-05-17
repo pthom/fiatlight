@@ -1,4 +1,4 @@
-from fiatlight.fiat_togui.to_gui import _any_type_class_name_to_gui, _to_data_with_gui, _capture_current_scope
+from fiatlight.fiat_togui.to_gui import _any_type_class_name_to_gui, to_data_with_gui, capture_current_scope
 from fiatlight.fiat_types import UnspecifiedValue, ErrorValue
 from fiatlight import FunctionWithGui
 
@@ -10,14 +10,14 @@ class Dummy:
 
 
 def test_any_typeclass_to_data_with_gui() -> None:
-    d = _any_type_class_name_to_gui("Dummy", _capture_current_scope())
+    d = _any_type_class_name_to_gui("Dummy", capture_current_scope())
     assert d.callbacks.edit is None
     assert d.callbacks.default_value_provider is None
     assert d.callbacks.default_value_provider is None
 
 
 def test_any_value_to_data_with_gui() -> None:
-    a = _to_data_with_gui(1, _capture_current_scope())
+    a = to_data_with_gui(1, capture_current_scope())
     assert a.value == 1
 
 
@@ -143,7 +143,7 @@ def test_enum_gui() -> None:
         A = 1
         B = 2
 
-    scope_storage = _capture_current_scope()
+    scope_storage = capture_current_scope()
     my_enum_gui = _any_type_class_name_to_gui("<enum 'MyEnum'>", scope_storage)
     assert isinstance(my_enum_gui, EnumWithGui)
 

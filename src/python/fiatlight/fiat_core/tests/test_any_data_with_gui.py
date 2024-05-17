@@ -3,22 +3,22 @@ from typing import List, Optional
 from fiatlight.fiat_types import UnspecifiedValue
 from fiatlight.fiat_core import ParamKind, ParamWithGui, AnyDataWithGui
 from fiatlight.fiat_togui.to_gui import (
-    _to_data_with_gui,
+    to_data_with_gui,
     _any_type_class_name_to_gui,
-    _capture_current_scope,
+    capture_current_scope,
     any_type_to_gui,
 )
 
 
 def test_creation() -> None:
-    a: AnyDataWithGui[int] = _any_type_class_name_to_gui("int", _capture_current_scope())
+    a: AnyDataWithGui[int] = _any_type_class_name_to_gui("int", capture_current_scope())
     assert a.callbacks.edit is not None
     assert a.callbacks.default_value_provider is not None
     assert a.callbacks.default_value_provider() == 0
 
 
 def test_primitive_serialization() -> None:
-    a = _to_data_with_gui(1, _capture_current_scope())
+    a = to_data_with_gui(1, capture_current_scope())
     assert a.value == 1
     assert a.save_to_json() == {"type": "Primitive", "value": 1}
     a.load_from_json({"type": "Primitive", "value": 2})
@@ -26,14 +26,14 @@ def test_primitive_serialization() -> None:
 
 
 def test_named_data_with_gui_creation() -> None:
-    x = _to_data_with_gui(1, _capture_current_scope())
+    x = to_data_with_gui(1, capture_current_scope())
     n = ParamWithGui("x", x, ParamKind.PositionalOrKeyword, UnspecifiedValue)
     assert n.name == "x"
     assert n.data_with_gui.value == 1
 
 
 def test_named_data_with_gui_serialization() -> None:
-    d = _to_data_with_gui(1, _capture_current_scope())
+    d = to_data_with_gui(1, capture_current_scope())
     n = ParamWithGui("x", d, ParamKind.PositionalOrKeyword, UnspecifiedValue)
     assert n.save_to_json() == {"name": "x", "data": {"type": "Primitive", "value": 1}}
 
@@ -51,10 +51,10 @@ def test_custom_data_with_gui_serialization() -> None:
     register_type(Foo, FooWithGui)
 
     # Use the Foo type with its GUI implementation
-    from fiatlight.fiat_togui.to_gui import _to_data_with_gui
+    from fiatlight.fiat_togui.to_gui import to_data_with_gui
 
     foo = Foo(1)
-    foo_gui = _to_data_with_gui(foo, _capture_current_scope())
+    foo_gui = to_data_with_gui(foo, capture_current_scope())
     assert foo_gui.value == foo
     assert foo_gui.save_to_json() == {"type": "Dict", "value": {"x": 1}}
 
@@ -78,7 +78,7 @@ def test_enum_serialization() -> None:
         A = 1
         B = 2
 
-    a = _to_data_with_gui(MyEnum.A, _capture_current_scope())
+    a = to_data_with_gui(MyEnum.A, capture_current_scope())
     assert a.value == MyEnum.A
     as_json = a.save_to_json()
     assert as_json == {"class": "MyEnum", "type": "Enum", "value_name": "A"}
@@ -86,8 +86,52 @@ def test_enum_serialization() -> None:
     assert a.value == MyEnum.B  # type: ignore
 
 
+def test_pydantic_serialization() -> None:
+    from pydantic import BaseModel
+    from fiatlight import register_base_model
+
+    current_scope = capture_current_scope()
+
+    class A(BaseModel):
+        x: int
+        y: str
+
+    register_base_model(A)
+
+    a = A(x=1, y="hello")
+    a_gui = to_data_with_gui(a, current_scope)
+    assert a_gui.value == a
+
+    as_dict = a_gui.save_to_json()
+    assert as_dict == {"type": "Pydantic", "value": {"x": 1, "y": "hello"}}
+
+    a2_gui = any_type_to_gui(A, current_scope)
+    a2_gui.load_from_json(as_dict)
+    assert isinstance(a2_gui.value, A)
+    assert a2_gui.value == a
+
+    # With composed types
+    class B(BaseModel):
+        a: A
+        z: float
+
+    register_base_model(B)
+    b = B(a=a, z=3.14)
+    b_gui = to_data_with_gui(b, current_scope)
+    assert b_gui.value == b
+
+    as_dict = b_gui.save_to_json()
+    assert as_dict == {"type": "Pydantic", "value": {"a": {"x": 1, "y": "hello"}, "z": 3.14}}
+
+    b2_gui = any_type_to_gui(B, current_scope)
+    assert b2_gui.value is UnspecifiedValue
+    b2_gui.load_from_json(as_dict)
+    assert isinstance(b2_gui.value, B)
+    assert b2_gui.value == b
+
+
 def test_type_storage() -> None:
-    scope_storage = _capture_current_scope()
+    scope_storage = capture_current_scope()
 
     assert any_type_to_gui(int, scope_storage)._type == int  # type: ignore
     assert any_type_to_gui(float, scope_storage)._type == float  # type: ignore
