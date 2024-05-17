@@ -198,6 +198,7 @@ class FiatGui:
         self._load_user_inputs_at_startup()
         self._functions_graph_gui.invoke_all_functions(also_invoke_manual_function=False)
         self._notify_if_dirty_functions()
+        self._disable_idling_if_any_live_function()
 
     def _before_exit(self) -> None:
         self._functions_graph_gui.on_exit()
@@ -249,6 +250,15 @@ class FiatGui:
         self._handle_file_dialogs()
         if self.params.customizable_graph:
             self._functions_collection_gui.gui()
+
+    def _disable_idling_if_any_live_function(self) -> None:
+        has_live_function = False
+        for fn in self._functions_graph_gui.functions_graph.functions_nodes:
+            if fn.function_with_gui.is_live():
+                has_live_function = True
+                break
+        if has_live_function:
+            self.params.runner_params.fps_idling.enable_idling = False
 
     # ==================================================================================================================
     #                                  GUI
