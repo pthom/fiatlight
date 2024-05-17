@@ -33,7 +33,7 @@ class CameraFps(Enum):
 @base_model_with_gui_registration
 class CameraParams(BaseModel):
     device_number: int = 0
-    camera_resolution: CameraResolution = CameraResolution.HD_1280_720
+    camera_resolution: CameraResolution = CameraResolution.VGA_640_480
     # fps: CameraFps = CameraFps.FPS_30  # too much hassle for now
     brightness: Float_0_1 = 0.5  # type: ignore
     contrast: Float_0_1 = 0.5  # type: ignore
@@ -157,7 +157,7 @@ class CameraGui(FunctionWithGui):
         started = self._camera_provider.started()
         with imgui_ctx.begin_horizontal("CamButton"):
             imgui.spring()
-            button_size = hello_imgui.em_to_vec2(2, 2)
+            button_size = hello_imgui.em_to_vec2(3, 3)
             if not started:
                 if imgui.button(icons_fontawesome_6.ICON_FA_CIRCLE_PLAY, button_size):
                     self._camera_provider.start()
@@ -169,11 +169,12 @@ class CameraGui(FunctionWithGui):
     def _internal_state_gui(self) -> bool:
         with fontawesome_6_ctx():
             with imgui_ctx.begin_vertical("CamParams"):
-                imgui.text_wrapped("Camera Parameters")
-                imgui.text_wrapped("(Note: some cameras may not support all the settings below)")
+                imgui.text("Camera Parameters")
+                imgui.text_wrapped("(Note: some cameras may not support all the settings)")
                 changed = self._camera_params_gui.call_edit()
                 if changed:
                     self._camera_provider.apply_params(self._camera_params_gui.value)
+                imgui.text("Start/Stop Camera")
                 self._show_cam_button()
 
         return False
