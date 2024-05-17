@@ -32,6 +32,7 @@ class ImageToFileGui(FunctionWithGui):
 
     def __init__(self) -> None:
         super().__init__(self.f, "ImageToFile")
+        self.internal_state_gui = self._internal_state_gui
 
     def f(self, image: ImageU8_3, convert_rgb_to_bgr: bool = False) -> None:
         import cv2
@@ -49,7 +50,7 @@ class ImageToFileGui(FunctionWithGui):
         assert self._image is not None
         cv2.imwrite(path, self._image)
 
-    def internal_state_gui(self) -> bool:
+    def _internal_state_gui(self) -> bool:
         if self._image is None:
             return False
         if imgui.button("Save file"):

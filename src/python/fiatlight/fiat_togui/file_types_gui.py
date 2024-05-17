@@ -75,7 +75,7 @@ class FilePathSaveWithGui(AnyDataWithGui[FilePath_Save]):
     _save_file_dialog: pfd.save_file | None = None
 
     def __init__(self) -> None:
-        super().__init__()
+        super().__init__(FilePath_Save)
         self.callbacks.edit = self.edit
         self.callbacks.default_value_provider = lambda: FilePath_Save("")
         self.callbacks.present_str = self.present_str
@@ -201,15 +201,17 @@ class TextToFileGui(FunctionWithGui):
 
     def __init__(self) -> None:
         super().__init__(self.f, "TextToFile")
+        self.internal_state_gui = self._internal_state_gui
 
     def f(self, text: str) -> None:
         self._text = text
 
     def do_write(self, path: FilePath_Save) -> None:
+        assert self._text is not None
         with open(path, "w") as f:
             f.write(self._text)
 
-    def internal_state_gui(self) -> bool:
+    def _internal_state_gui(self) -> bool:
         if self._text is None:
             return False
         if imgui.button("Save file"):

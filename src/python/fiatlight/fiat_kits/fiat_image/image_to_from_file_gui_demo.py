@@ -6,7 +6,7 @@ from fiatlight.fiat_kits.fiat_image import image_from_file, lut_channels_in_colo
 import fiatlight
 
 
-def main():
+def main() -> None:
     fiatlight.fiat_run_composition([image_from_file, lut_channels_in_colorspace, ImageToFileGui()])
     # fiatlight.fiat_run_composition([image_from_file])
 
