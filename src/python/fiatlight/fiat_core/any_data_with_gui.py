@@ -106,7 +106,7 @@ class AnyDataWithGui(Generic[DataType]):
     # ------------------------------------------------------------------------------------------------------------------
     #            Serialization and deserialization
     # ------------------------------------------------------------------------------------------------------------------
-    def save_to_json(self) -> JsonDict:
+    def save_to_dict(self) -> JsonDict:
         if isinstance(self.value, Unspecified):
             return {"type": "Unspecified"}
         elif isinstance(self.value, Error):
@@ -135,7 +135,7 @@ class AnyDataWithGui(Generic[DataType]):
             logging.warning(f"Cannot serialize {self.value}, it has no __dict__ attribute.")
             return {"type": "Error"}
 
-    def load_from_json(self, json_data: JsonDict) -> None:
+    def load_from_dict(self, json_data: JsonDict) -> None:
         if "type" not in json_data:
             raise ValueError(f"Cannot deserialize {json_data}")
         if json_data["type"] == "Unspecified":

@@ -129,7 +129,7 @@ class FunctionNode:
     def save_user_inputs_to_json(self) -> JsonDict:
         input_params = {}
         for input_param in self.user_editable_params():
-            input_params[input_param.name] = input_param.save_to_json()
+            input_params[input_param.name] = input_param.save_to_dict()
 
         gui_options = self.function_with_gui._save_gui_options_to_json()
         r = {"inputs": input_params, "gui_options": gui_options}
@@ -138,7 +138,7 @@ class FunctionNode:
     def load_user_inputs_from_json(self, json_data: JsonDict) -> None:
         input_params = json_data["inputs"]
         for input_param in self.user_editable_params():
-            input_param.load_from_json(input_params[input_param.name])
+            input_param.load_from_dict(input_params[input_param.name])
 
         self.function_with_gui._load_gui_options_from_json(json_data["gui_options"])
 
