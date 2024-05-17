@@ -13,6 +13,7 @@ from fiatlight.fiat_togui import (
     register_bound_int,
     register_bound_float,
     register_dataclass,
+    register_base_model,
 )
 
 
@@ -43,6 +44,7 @@ __all__ = [
     "register_bound_int",
     "register_bound_float",
     "register_dataclass",
+    "register_base_model",
     # from fiat_runner
     "fiat_run",
     "fiat_run_composition",

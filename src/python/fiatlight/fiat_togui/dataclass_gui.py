@@ -45,10 +45,12 @@ from fiatlight.fiat_config import get_fiat_config, FiatColorType
 from fiatlight.fiat_widgets import fiat_osd
 from imgui_bundle import imgui, imgui_ctx, hello_imgui, ImVec2  # noqa
 from typing import Type, Any, TypeVar, List
+from dataclasses import is_dataclass
+from pydantic import BaseModel
 
 
-# A type variable that represents a dataclass type
-DataclassType = TypeVar("DataclassType")
+# A type variable that represents a dataclass type, or a pydantic BaseModel type
+DataclassLikeType = TypeVar("DataclassLikeType")
 
 
 def _draw_dataclass_member_name(member_name: str) -> None:
@@ -73,12 +75,14 @@ def _draw_dataclass_member_name(member_name: str) -> None:
     imgui.set_cursor_pos(cursor_pos_after_label)
 
 
-class DataclassGui(AnyDataWithGui[DataclassType]):
-    _parameters_with_gui: List[ParamWithGui[Any]]
-    _dataclass_type: Type[DataclassType]
+class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
+    """Base GUI class for a dataclass or a pydantic model"""
 
-    def __init__(self, dataclass_type: Type[DataclassType]) -> None:
-        super().__init__()
+    _parameters_with_gui: List[ParamWithGui[Any]]
+    _inner_type: Type[DataclassLikeType]
+
+    def __init__(self, dataclass_type: Type[DataclassLikeType]) -> None:
+        super().__init__(dataclass_type)
 
         # if not is_dataclass(dataclass_type):
         #     raise ValueError(f"{dataclass_type} is not a dataclass")
@@ -87,7 +91,7 @@ class DataclassGui(AnyDataWithGui[DataclassType]):
         constructor_gui = FunctionWithGui(dataclass_type, scope_storage=scope_storage)
 
         self._parameters_with_gui = constructor_gui._inputs_with_gui
-        self._dataclass_type = dataclass_type
+        self._inner_type = dataclass_type
         self.fill_callbacks()
 
     def fill_callbacks(self) -> None:
@@ -116,10 +120,10 @@ class DataclassGui(AnyDataWithGui[DataclassType]):
         self.callbacks.clipboard_copy_str = None
         self.callbacks.clipboard_copy_possible = False
 
+        self.callbacks.default_value_provider = self.default_value_provider
+
         self.callbacks.save_gui_options_to_json = self.save_gui_options_to_json
         self.callbacks.load_gui_options_from_json = self.load_gui_options_from_json
-
-        self.callbacks.default_value_provider = self.default_value_provider
 
     def is_fully_specified(self) -> bool:
         has_unspecified = False
@@ -130,17 +134,17 @@ class DataclassGui(AnyDataWithGui[DataclassType]):
                 break
         return not has_unspecified
 
-    def factor_dataclass_instance(self) -> DataclassType:
+    def factor_dataclass_instance(self) -> DataclassLikeType:
         kwargs = {}
         for param_gui in self._parameters_with_gui:
             param_value = param_gui.data_with_gui.value
             if isinstance(param_value, (Unspecified, Error)):
                 raise ValueError(f"Parameter {param_gui.name} is unspecified")
             kwargs[param_gui.name] = param_value
-        r = self._dataclass_type(**kwargs)
+        r = self._inner_type(**kwargs)
         return r
 
-    def default_value_provider(self) -> DataclassType:
+    def default_value_provider(self) -> DataclassLikeType:
         for param_gui in self._parameters_with_gui:
             if not isinstance(param_gui.default_value, Unspecified):
                 param_gui.data_with_gui.value = param_gui.default_value
@@ -153,7 +157,7 @@ class DataclassGui(AnyDataWithGui[DataclassType]):
         r = self.factor_dataclass_instance()
         return r
 
-    def on_change(self, value: DataclassType) -> None:
+    def on_change(self, value: DataclassLikeType) -> None:
         for param_gui in self._parameters_with_gui:
             if not hasattr(value, param_gui.name):
                 raise ValueError(f"Object does not have attribute {param_gui.name}")
@@ -175,22 +179,7 @@ class DataclassGui(AnyDataWithGui[DataclassType]):
                     changed = True
         return changed
 
-    def save_gui_options_to_json(self) -> JsonDict:
-        r = {}
-        for param_gui in self._parameters_with_gui:
-            save_gui_options_to_json = param_gui.data_with_gui.callbacks.save_gui_options_to_json
-            if save_gui_options_to_json is not None:
-                r[param_gui.name] = save_gui_options_to_json()
-        return r
-
-    def load_gui_options_from_json(self, json: JsonDict) -> None:
-        for param_gui in self._parameters_with_gui:
-            if param_gui.name in json:
-                load_gui_options_from_json = param_gui.data_with_gui.callbacks.load_gui_options_from_json
-                if load_gui_options_from_json is not None:
-                    load_gui_options_from_json(json[param_gui.name])
-
-    def present_str(self, _: DataclassType) -> str:
+    def present_str(self, _: DataclassLikeType) -> str:
         # the parameter is not used, because we have the data in the self._parameters_with_gui
         strs: dict[str, str] = {}
         for param_gui in self._parameters_with_gui:
@@ -199,10 +188,10 @@ class DataclassGui(AnyDataWithGui[DataclassType]):
             param_str = param_gui.data_with_gui.datatype_value_to_str(param_value)
             strs[param_gui.name] = param_str
         joined_strs = ", ".join(f"{k}: {v}" for k, v in strs.items())
-        r = f"{self._dataclass_type.__name__}({joined_strs})"
+        r = f"{self._inner_type.__name__}({joined_strs})"
         return r
 
-    def present_custom(self, _: DataclassType) -> None:
+    def present_custom(self, _: DataclassLikeType) -> None:
         # the parameter is not used, because we have the data in self._parameters_with_gui
         with imgui_ctx.begin_vertical("##CompositeGui_present_custom"):
             for param_gui in self._parameters_with_gui:
@@ -228,39 +217,72 @@ class DataclassGui(AnyDataWithGui[DataclassType]):
                 fn_present_param()
                 imgui.end_group()
 
-    def edit(self, value: DataclassType) -> tuple[bool, DataclassType]:
+    def edit(self, value: DataclassLikeType) -> tuple[bool, DataclassLikeType]:
         changed = False
 
         for param_gui_ in self._parameters_with_gui:
-            if not hasattr(value, param_gui_.name):
-                raise ValueError(f"Object does not have attribute {param_gui_.name}")
-            param_gui_.data_with_gui.value = getattr(value, param_gui_.name)
+            with imgui_ctx.push_id(param_gui_.name):
+                if not hasattr(value, param_gui_.name):
+                    raise ValueError(f"Object does not have attribute {param_gui_.name}")
+                param_gui_.data_with_gui.value = getattr(value, param_gui_.name)
 
-            param_value = param_gui_.data_with_gui.value
-            param_edit = param_gui_.data_with_gui.callbacks.edit
-            param_name = param_gui_.name  # copy to avoid being bound to the loop variable
+                param_value = param_gui_.data_with_gui.value
+                param_edit = param_gui_.data_with_gui.callbacks.edit
+                param_name = param_gui_.name  # copy to avoid being bound to the loop variable
 
-            def fn_edit_param() -> bool:
-                if param_edit is not None:
-                    changed_in_edit, new_value = param_edit(param_value)
-                    if changed_in_edit:
-                        param_gui_.data_with_gui.value = new_value
-                        setattr(value, param_name, new_value)
-                    return changed_in_edit
-                else:
-                    imgui.text("No editor")
-                    return False
+                def fn_edit_param() -> bool:
+                    if param_edit is not None:
+                        changed_in_edit, new_value = param_edit(param_value)
+                        if changed_in_edit:
+                            param_gui_.data_with_gui.value = new_value
+                            setattr(value, param_name, new_value)
+                        return changed_in_edit
+                    else:
+                        imgui.text("No editor")
+                        return False
 
-            _draw_dataclass_member_name(param_name)
-            imgui.begin_group()
-            param_changed = fn_edit_param()
-            imgui.end_group()
+                _draw_dataclass_member_name(param_name)
+                imgui.begin_group()
+                param_changed = fn_edit_param()
+                imgui.end_group()
 
-            if param_changed:
-                changed = True
+                if param_changed:
+                    changed = True
 
         if changed:
             r = self.factor_dataclass_instance()
             return changed, r
         else:
             return False, value
+
+    def save_gui_options_to_json(self) -> JsonDict:
+        # We only save the GUI options, not the data!
+        r = {}
+        for param_gui in self._parameters_with_gui:
+            save_gui_options_to_json = param_gui.data_with_gui.callbacks.save_gui_options_to_json
+            if save_gui_options_to_json is not None:
+                r[param_gui.name] = save_gui_options_to_json()
+        return r
+
+    def load_gui_options_from_json(self, json: JsonDict) -> None:
+        # We only load the GUI options, not the data!
+        for param_gui in self._parameters_with_gui:
+            if param_gui.name in json:
+                load_gui_options_from_json = param_gui.data_with_gui.callbacks.load_gui_options_from_json
+                if load_gui_options_from_json is not None:
+                    load_gui_options_from_json(json[param_gui.name])
+
+
+class DataclassGui(DataclassLikeGui[DataclassLikeType]):
+    def __init__(self, dataclass_type: Type[DataclassLikeType]) -> None:
+        if not is_dataclass(dataclass_type):
+            raise ValueError(f"{dataclass_type} is not a dataclass")
+
+        super().__init__(dataclass_type)  # type: ignore
+
+
+class BaseModelGui(DataclassLikeGui[DataclassLikeType]):
+    def __init__(self, dataclass_type: Type[DataclassLikeType]) -> None:
+        if not issubclass(dataclass_type, BaseModel):
+            raise ValueError(f"{dataclass_type} is not a pydantic model")
+        super().__init__(dataclass_type)  # type: ignore

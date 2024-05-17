@@ -22,6 +22,7 @@ from fiatlight.fiat_togui.to_gui import (
     register_bound_int,
     register_bound_float,
     register_dataclass,
+    register_base_model,
 )
 from .file_types_gui import text_from_file, TextToFileGui
 
@@ -63,4 +64,5 @@ __all__ = [
     "register_bound_int",
     "register_bound_float",
     "register_dataclass",
+    "register_base_model",
 ]
