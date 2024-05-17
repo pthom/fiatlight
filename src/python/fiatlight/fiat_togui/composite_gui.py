@@ -1,5 +1,5 @@
 from fiatlight.fiat_config import get_fiat_config
-from fiatlight.fiat_types import DataType, Unspecified, Error
+from fiatlight.fiat_types import DataType, Unspecified, Error, JsonDict
 from fiatlight.fiat_core import AnyDataWithGui
 from fiatlight.fiat_widgets import fiat_osd
 from imgui_bundle import hello_imgui, imgui, imgui_node_editor as ed  # noqa
@@ -94,6 +94,22 @@ class OptionalWithGui(AnyDataWithGui[DataType | None]):
         if value is not None:
             self.inner_gui.value = value
 
+    def save_to_dict(self) -> JsonDict:
+        if self.value is None:
+            return {"type": "Optional", "value": None}
+        else:
+            return {"type": "Optional", "value": self.inner_gui.save_to_dict()}
+
+    def load_from_dict(self, json_data: JsonDict) -> None:
+        if json_data["type"] == "Optional":
+            if json_data["value"] is None:
+                self.value = None
+            else:
+                self.inner_gui.load_from_dict(json_data["value"])
+                self.value = self.inner_gui.value
+        else:
+            raise ValueError("Invalid JSON data for OptionalWithGui")
+
 
 class ListWithGui(AnyDataWithGui[List[DataType]]):
     inner_gui: AnyDataWithGui[DataType]
@@ -168,6 +184,16 @@ class ListWithGui(AnyDataWithGui[List[DataType]]):
         txt = self._elements_str(value, max_elements)
         imgui.text(txt)
 
+    def save_to_dict(self) -> JsonDict:
+        r = {"type": "List", "value": [self.inner_gui.save_to_dict() for v in self.value]}
+        return r
+
+    def load_from_dict(self, json_data: JsonDict) -> None:
+        if json_data["type"] == "List":
+            self.value = [self.inner_gui.load_from_dict(v) for v in json_data["value"]]
+        else:
+            raise ValueError("Invalid JSON data for ListWithGui")
+
 
 class EnumWithGui(AnyDataWithGui[Enum]):
     enum_type: Type[Enum]
@@ -181,7 +207,6 @@ class EnumWithGui(AnyDataWithGui[Enum]):
 
         self.callbacks.edit = self.edit
         self.callbacks.default_value_provider = lambda: list(self.enum_type)[0]
-        self.callbacks.create_from_value = self.create_from_name
         self.callbacks.clipboard_copy_possible = True
 
     def edit(self, value: Enum) -> tuple[bool, Enum]:
@@ -196,3 +221,22 @@ class EnumWithGui(AnyDataWithGui[Enum]):
 
     def create_from_name(self, name: str) -> Enum:
         return self.enum_type[name]
+
+    def save_to_dict(self) -> JsonDict:
+        r = {"type": "Enum", "value_name": self.value.name, "class": self.value.__class__.__name__}
+        return r
+
+    def load_from_dict(self, json_data: JsonDict) -> None:
+        if json_data["type"] == "Enum":
+            if "value_name" not in json_data:
+                raise ValueError("Invalid JSON data for EnumWithGui")
+            if "class" not in json_data:
+                raise ValueError("Invalid JSON data for EnumWithGui")
+            class_name = json_data["class"]
+            if class_name != self.enum_type.__name__:
+                raise ValueError("Invalid JSON data for EnumWithGui")
+
+            value_name = json_data["value_name"]
+            self.value = self.create_from_name(value_name)
+        else:
+            raise ValueError("Invalid JSON data for EnumWithGui")
