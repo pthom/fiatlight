@@ -361,7 +361,8 @@ class GuiFactories:
         return False
 
     def get_factory(self, typename: Typename) -> GuiFactory[Any]:
-        for factory in self._factories:
+        # We reverse the list to give priority to the last registered factories
+        for factory in reversed(self._factories):
             if factory.fn_matcher(typename):
                 return factory.gui_factory
         raise ValueError(f"No factory found for typename {typename}")
