@@ -10,6 +10,7 @@ from fiatlight.fiat_types.base_types import (
 from fiatlight.fiat_types.error_types import Error, ErrorValue, Unspecified, UnspecifiedValue
 from fiatlight.fiat_types.function_types import DataPresentFunction, DataEditFunction  # noqa
 from fiatlight.fiat_core.any_data_gui_callbacks import AnyDataGuiCallbacks
+from imgui_bundle import imgui
 from typing import Generic, Any, Type, final
 import logging
 
@@ -86,6 +87,21 @@ class AnyDataWithGui(Generic[DataType]):
             raise ValueError("Cannot get value of Error")
         else:
             return self.value
+
+    # ------------------------------------------------------------------------------------------------------------------
+    #            Call the Callbacks
+    # ------------------------------------------------------------------------------------------------------------------
+    def call_edit(self) -> bool:
+        if isinstance(self.value, (Unspecified, Error)):
+            imgui.text("Cannot edit Unspecified or Error")
+            return False
+        if self.callbacks.edit is not None:
+            changed, new_value = self.callbacks.edit(self.value)
+            if changed:
+                self.value = new_value
+            return changed
+        else:
+            return False
 
     # ------------------------------------------------------------------------------------------------------------------
     #            Callback utility functions: add callbacks from free functions

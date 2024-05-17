@@ -1,12 +1,13 @@
 import cv2
-from imgui_bundle._imgui_bundle import hello_imgui
 from pydantic import BaseModel
 from fiatlight.fiat_togui.to_gui import enum_with_gui_registration, base_model_with_gui_registration
 from fiatlight.fiat_types import Float_0_1, JsonDict
 from fiatlight.fiat_kits.fiat_image import ImageU8_3
 from fiatlight.fiat_core.function_with_gui import FunctionWithGui
+from fiatlight.fiat_core.any_data_with_gui import AnyDataWithGui
+from fiatlight.fiat_widgets import fontawesome_6_ctx, icons_fontawesome_6
 from enum import Enum
-from imgui_bundle import imgui, imgui_ctx  # noqa
+from imgui_bundle import imgui, imgui_ctx, hello_imgui
 
 
 @enum_with_gui_registration
@@ -89,10 +90,16 @@ class CameraProvider:
 
 class CameraGui(FunctionWithGui):
     _camera_provider: CameraProvider
+    _camera_params_gui: AnyDataWithGui[CameraParams]
 
     def __init__(self) -> None:
         super().__init__(self.f, "CameraGui")
-        self._camera_provider = CameraProvider(CameraParams())
+
+        from fiatlight.fiat_togui import to_data_with_gui, capture_current_scope
+
+        self._camera_params_gui = to_data_with_gui(CameraParams(), capture_current_scope())
+        self._camera_provider = CameraProvider(self._camera_params_gui.value)
+
         self.internal_state_gui = self._internal_state_gui
         self.save_internal_gui_options_to_json = self._save_internal_gui_options_to_json
         self.load_internal_gui_options_from_json = self._load_internal_gui_options_from_json
@@ -100,10 +107,7 @@ class CameraGui(FunctionWithGui):
         # A flag for fiatlight to set this as a live function
         self.invoke_always_dirty = True
 
-    def f(self, params: CameraParams | None = None) -> ImageU8_3 | None:
-        if params is None:
-            params = CameraParams()
-        self._camera_provider.apply_params(params)
+    def f(self) -> ImageU8_3 | None:
         return self._camera_provider.get_image()
 
     def _save_internal_gui_options_to_json(self) -> JsonDict:
@@ -113,21 +117,23 @@ class CameraGui(FunctionWithGui):
     def _load_internal_gui_options_from_json(self, json_dict: JsonDict) -> None:
         self._camera_provider.camera_params = CameraParams.model_validate(json_dict)
 
-    def _internal_state_gui(self) -> bool:
-        from fiatlight.fiat_widgets import fontawesome_6_ctx, icons_fontawesome_6
-
+    def _show_cam_button(self) -> None:
         started = self._camera_provider.started()
+        with imgui_ctx.begin_horizontal("CamButton"):
+            imgui.spring()
+            button_size = hello_imgui.em_to_vec2(2, 2)
+            if not started:
+                if imgui.button(icons_fontawesome_6.ICON_FA_CIRCLE_PLAY, button_size):
+                    self._camera_provider.start()
+            else:
+                if imgui.button(icons_fontawesome_6.ICON_FA_CIRCLE_STOP, button_size):
+                    self._camera_provider.stop()
+            imgui.spring()
 
+    def _internal_state_gui(self) -> bool:
         with fontawesome_6_ctx():
-            with imgui_ctx.begin_horizontal("CamButton"):
-                imgui.spring()
-                button_size = hello_imgui.em_to_vec2(2, 2)
-                if not started:
-                    if imgui.button(icons_fontawesome_6.ICON_FA_CIRCLE_PLAY, button_size):
-                        self._camera_provider.start()
-                else:
-                    if imgui.button(icons_fontawesome_6.ICON_FA_CIRCLE_STOP, button_size):
-                        self._camera_provider.stop()
-                imgui.spring()
+            with imgui_ctx.begin_vertical("CamParams"):
+                _changed = self._camera_params_gui.call_edit()
+                self._show_cam_button()
 
         return False
