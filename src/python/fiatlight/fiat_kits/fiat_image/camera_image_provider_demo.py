@@ -12,7 +12,7 @@ class ImageEffect(BaseModel):
     flip_vertical: bool = False
 
 
-fiatlight.register_dataclass(ImageEffect)
+fiatlight.register_base_model(ImageEffect)
 
 
 def apply_image_effect(image: ImageU8_3, effect: ImageEffect | None = None) -> ImageU8_3:
@@ -22,15 +22,15 @@ def apply_image_effect(image: ImageU8_3, effect: ImageEffect | None = None) -> I
         height, width = image.shape[:2]
         center = (width / 2, height / 2)
         rotation_matrix = cv2.getRotationMatrix2D(center, effect.rotation_degree, 1.0)
-        image = cv2.warpAffine(image, rotation_matrix, (width, height))
+        image = cv2.warpAffine(image, rotation_matrix, (width, height))  # type: ignore
     if effect.flip_horizontal:
-        image = cv2.flip(image, 1)
+        image = cv2.flip(image, 1)  # type: ignore
     if effect.flip_vertical:
-        image = cv2.flip(image, 0)
+        image = cv2.flip(image, 0)  # type: ignore
     return image
 
 
-def main():
+def main() -> None:
     camera_gui = CameraGui()
     fiatlight.fiat_run_composition([camera_gui, apply_image_effect, add_meme_text])
 

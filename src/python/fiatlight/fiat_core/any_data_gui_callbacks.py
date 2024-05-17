@@ -109,7 +109,7 @@ class AnyDataGuiCallbacks(Generic[DataType]):
 
     # save/load_gui_options_from_json (Optional)
     # Optional serialization and deserialization of the GUI presentation options
-    # (i.e. anything that deals with how the data is presented in the GUI, not the data itself)
+    # (i.e. anything that deals with how the data is presented in the GUI, *not the data itself*)
     # If provided, these functions will be used to recreate the GUI presentation options when loading a graph,
     # so that the GUI looks the same when the application is restarted.
     save_gui_options_to_json: Callable[[], JsonDict] | None = None

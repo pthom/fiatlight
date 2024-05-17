@@ -1,6 +1,6 @@
 import cv2
 from pydantic import BaseModel
-from fiatlight.fiat_togui.to_gui import register_dataclass, register_enum
+from fiatlight.fiat_togui.to_gui import register_enum, register_base_model
 from fiatlight.fiat_types import Float_0_1, JsonDict
 from fiatlight.fiat_kits.fiat_image import ImageU8_3
 from fiatlight.fiat_core.function_with_gui import FunctionWithGui
@@ -33,11 +33,11 @@ class CameraParams(BaseModel):
     device_number: int = 0
     camera_resolution: CameraResolution = CameraResolution.HD_1280_720
     fps: CameraFps = CameraFps.FPS_30
-    brightness: Float_0_1 = 0.5
-    contrast: Float_0_1 = 0.5
+    brightness: Float_0_1 = 0.5  # type: ignore
+    contrast: Float_0_1 = 0.5  # type: ignore
 
 
-register_dataclass(CameraParams)
+register_base_model(CameraParams)
 
 
 class CameraProvider:
@@ -55,9 +55,9 @@ class CameraProvider:
         ret, frame = self.cv_cap.read()
         if frame.shape[0] == 0 or frame.shape[1] == 0:
             return None
-        return frame
+        return frame  # type: ignore
 
-    def apply_params(self, params: CameraParams):
+    def apply_params(self, params: CameraParams) -> None:
         if params == self.camera_params:
             return
         self.camera_params = params
@@ -68,19 +68,22 @@ class CameraProvider:
             self._do_set_params()
             self.start()
 
-    def start(self):
+    def start(self) -> None:
         self.cv_cap = cv2.VideoCapture()
         self.cv_cap.open(self.camera_params.device_number)
         self._do_set_params()
 
-    def stop(self):
+    def stop(self) -> None:
+        if self.cv_cap is None:
+            return
         self.cv_cap.release()
         self.cv_cap = None
 
     def started(self) -> bool:
         return self.cv_cap is not None
 
-    def _do_set_params(self):
+    def _do_set_params(self) -> None:
+        assert self.cv_cap is not None
         width, height = self.camera_params.camera_resolution.value
         self.cv_cap.set(cv2.CAP_PROP_FRAME_WIDTH, width)
         self.cv_cap.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
@@ -92,7 +95,7 @@ class CameraProvider:
 class CameraGui(FunctionWithGui):
     _camera_provider: CameraProvider
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(self.f, "CameraGui")
         self._camera_provider = CameraProvider(CameraParams())
         self.internal_state_gui = self._internal_state_gui
@@ -109,12 +112,11 @@ class CameraGui(FunctionWithGui):
         return self._camera_provider.get_image()
 
     def _save_internal_gui_options_to_json(self) -> JsonDict:
-        # r = self._camera_provider.camera_params.dict()
-        r = {}
+        r = self._camera_provider.camera_params.model_dump()
         return r
 
-    def _load_internal_gui_options_from_json(self, json_dict: JsonDict):
-        # self._camera_provider.apply_params(CameraParams(**json_dict))
+    def _load_internal_gui_options_from_json(self, json_dict: JsonDict) -> None:
+        self._camera_provider.camera_params = CameraParams.validate(json_dict)
         print("ok")
 
     def _internal_state_gui(self) -> bool:
@@ -129,3 +131,5 @@ class CameraGui(FunctionWithGui):
             else:
                 if imgui.button(icons_fontawesome_6.ICON_FA_CIRCLE_STOP):
                     self._camera_provider.stop()
+
+        return False
