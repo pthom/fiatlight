@@ -6,7 +6,7 @@ from fiatlight.fiat_togui.to_gui import (
     to_data_with_gui,
     _any_type_class_name_to_gui,
     capture_current_scope,
-    any_type_to_gui,
+    to_type_with_gui,
 )
 
 
@@ -54,7 +54,7 @@ def test_enum_serialization() -> None:
     as_json = a.save_to_dict(a.value)
     assert as_json == {"class": "MyEnum", "type": "Enum", "value_name": "A"}
     a.value = a.load_from_dict({"class": "MyEnum", "type": "Enum", "value_name": "B"})
-    assert a.value == MyEnum.B  # type: ignore
+    assert a.value == MyEnum.B
 
 
 def test_pydantic_serialization() -> None:
@@ -76,7 +76,7 @@ def test_pydantic_serialization() -> None:
     as_dict = a_gui.save_to_dict(a_gui.value)
     assert as_dict == {"type": "Pydantic", "value": {"x": 1, "y": "hello"}}
 
-    a2_gui = any_type_to_gui(A, current_scope)
+    a2_gui = to_type_with_gui(A, current_scope)
     a2_gui.value = a2_gui.load_from_dict(as_dict)
     assert isinstance(a2_gui.value, A)
     assert a2_gui.value == a
@@ -94,7 +94,7 @@ def test_pydantic_serialization() -> None:
     as_dict = b_gui.save_to_dict(b_gui.value)
     assert as_dict == {"type": "Pydantic", "value": {"a": {"x": 1, "y": "hello"}, "z": 3.14}}
 
-    b2_gui = any_type_to_gui(B, current_scope)
+    b2_gui = to_type_with_gui(B, current_scope)
     assert b2_gui.value is UnspecifiedValue
     b2_gui.value = b2_gui.load_from_dict(as_dict)
     assert isinstance(b2_gui.value, B)
@@ -104,24 +104,24 @@ def test_pydantic_serialization() -> None:
 def test_type_storage() -> None:
     scope_storage = capture_current_scope()
 
-    assert any_type_to_gui(int, scope_storage)._type == int  # type: ignore
-    assert any_type_to_gui(float, scope_storage)._type == float  # type: ignore
-    assert any_type_to_gui(str, scope_storage)._type == str  # type: ignore
-    assert any_type_to_gui(bool, scope_storage)._type == bool  # type: ignore
+    assert to_type_with_gui(int, scope_storage)._type == int  # type: ignore
+    assert to_type_with_gui(float, scope_storage)._type == float  # type: ignore
+    assert to_type_with_gui(str, scope_storage)._type == str  # type: ignore
+    assert to_type_with_gui(bool, scope_storage)._type == bool  # type: ignore
 
     ListInt = List[int]
-    li = any_type_to_gui(ListInt, scope_storage)
+    li = to_type_with_gui(ListInt, scope_storage)
     assert li._type == ListInt  # type: ignore
 
     OptionalInt = Optional[int]
-    oi = any_type_to_gui(OptionalInt, scope_storage)
+    oi = to_type_with_gui(OptionalInt, scope_storage)
     assert oi._type == OptionalInt  # type: ignore
 
     OptionalInt2 = int | None
-    oi2 = any_type_to_gui(OptionalInt2, scope_storage)
+    oi2 = to_type_with_gui(OptionalInt2, scope_storage)
     assert oi2._type == OptionalInt2  # type: ignore
 
     from fiatlight.fiat_kits.fiat_image import ImageU8_3, Image
 
-    gi = any_type_to_gui(ImageU8_3, scope_storage)
+    gi = to_type_with_gui(ImageU8_3, scope_storage)
     assert gi._type == Image  # type: ignore

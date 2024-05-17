@@ -179,7 +179,7 @@ def _any_typeclass_to_gui_split_if_tuple(
     return r
 
 
-def any_type_to_gui(type_: DataType, scope_storage: ScopeStorage) -> AnyDataWithGui[DataType]:
+def to_type_with_gui(type_: DataType, scope_storage: ScopeStorage) -> AnyDataWithGui[DataType]:
     typename = str(type_)
     r = _any_type_class_name_to_gui(typename, scope_storage)
     return r

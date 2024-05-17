@@ -26,6 +26,9 @@ from .to_gui import (
     dataclass_with_gui_registration,
     register_base_model,
     base_model_with_gui_registration,
+    capture_current_scope,
+    to_data_with_gui,
+    to_type_with_gui,
 )
 from .file_types_gui import text_from_file, TextToFileGui
 
@@ -71,4 +74,7 @@ __all__ = [
     "dataclass_with_gui_registration",
     "register_base_model",
     "base_model_with_gui_registration",
+    "capture_current_scope",
+    "to_data_with_gui",
+    "to_type_with_gui",
 ]
