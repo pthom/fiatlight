@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 
+import fiatlight
 from fiatlight.fiat_togui.dataclass_gui import DataclassGui, DataclassLikeGui, BaseModelGui
 from fiatlight import (
     FunctionWithGui,
@@ -127,3 +128,31 @@ def test_decorators() -> None:
     f2_gui_param_gui = f2_gui.input("param")
     assert isinstance(f2_gui_param_gui, BaseModelGui)
     assert f2_gui_param_gui._type == MyParam2
+
+
+def test_pydantic_with_enum() -> None:
+    from enum import Enum
+    from fiatlight.fiat_togui.to_gui import to_data_with_gui, capture_current_scope
+
+    current_scope = capture_current_scope()
+
+    @fiatlight.enum_with_gui_registration
+    class MyEnum(Enum):
+        A = 1
+        B = 2
+
+    @fiatlight.base_model_with_gui_registration
+    class MyParam(BaseModel):
+        my_enum: MyEnum = MyEnum.A
+        x: int = 3
+
+    my_param = MyParam(my_enum=MyEnum.B, x=4)
+
+    as_dict_base_model = my_param.model_dump(mode="json")
+    assert as_dict_base_model == {"my_enum": 2, "x": 4}
+
+    my_param_gui = to_data_with_gui(my_param, current_scope)
+    assert my_param_gui.value == my_param
+
+    as_dict = my_param_gui.save_to_dict(my_param_gui.value)
+    assert as_dict == {"type": "Pydantic", "value": {"my_enum": 2, "x": 4}}
