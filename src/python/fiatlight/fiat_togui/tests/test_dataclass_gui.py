@@ -8,8 +8,10 @@ from fiatlight import (
     register_base_model,
     dataclass_with_gui_registration,
     base_model_with_gui_registration,
+    AnyDataWithGui,
 )
 from dataclasses import dataclass
+from fiatlight.fiat_togui.to_gui import to_data_with_gui, capture_current_scope
 import copy
 
 
@@ -132,7 +134,6 @@ def test_decorators() -> None:
 
 def test_pydantic_with_enum() -> None:
     from enum import Enum
-    from fiatlight.fiat_togui.to_gui import to_data_with_gui, capture_current_scope
 
     current_scope = capture_current_scope()
 
@@ -212,3 +213,32 @@ def test_dataclass_with_custom_attributes() -> None:
     assert isinstance(f2_gui_param_gui.inner_gui, DataclassGui)
     range_f2 = f2_gui_param_gui.inner_gui._parameters_with_gui[0].data_with_gui._custom_attrs["range"]
     assert range_f2 == (-180, 180)
+
+
+def test_dataclass_in_custom_function() -> None:
+    @fiatlight.base_model_with_gui_registration({"x__range": (0, 10)})
+    class Foo(BaseModel):
+        x: int = 3
+
+    class MyFunction(FunctionWithGui):
+        foo_gui: AnyDataWithGui[Foo]
+
+        def __init__(self) -> None:
+            super().__init__(self.my_function)
+            foo = Foo()
+            self.foo_gui = to_data_with_gui(foo, capture_current_scope())
+            self.internal_state_gui = self._internal_state_gui
+
+        def my_function(self) -> None:
+            return
+
+        def _internal_state_gui(self) -> bool:
+            changed = self.foo_gui.call_edit()
+            return changed
+
+    my_function = MyFunction()
+    fn_attrs = my_function.foo_gui._custom_attrs
+    assert fn_attrs == {"x__range": (0, 10)}
+    assert isinstance(my_function.foo_gui, BaseModelGui)
+    x_attrs = my_function.foo_gui._parameters_with_gui[0].data_with_gui._custom_attrs
+    assert x_attrs == {"range": (0, 10)}

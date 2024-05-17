@@ -102,7 +102,7 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
                 if k.startswith(prefix):
                     this_param_attrs[k[len(prefix) :]] = v
             if len(this_param_attrs) > 0:
-                param_gui.data_with_gui._custom_attrs = this_param_attrs
+                param_gui.data_with_gui.merge_custom_attrs(this_param_attrs)
 
     def fill_callbacks(self) -> None:
         self.callbacks.present_str = self.present_str

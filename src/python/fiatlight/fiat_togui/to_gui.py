@@ -206,6 +206,8 @@ def _to_param_with_gui(
     else:
         data_with_gui = _any_type_class_name_to_gui(str(annotation), scope_storage)
 
+    data_with_gui.merge_custom_attrs(param_custom_attrs)
+
     param_kind = ParamKind.PositionalOrKeyword
     if param.kind is inspect.Parameter.POSITIONAL_ONLY:
         param_kind = ParamKind.PositionalOnly
@@ -214,7 +216,7 @@ def _to_param_with_gui(
 
     default_value = param.default if param.default is not inspect.Parameter.empty else UnspecifiedValue
     r = ParamWithGui(name, data_with_gui, param_kind, default_value)
-    r.data_with_gui._custom_attrs = param_custom_attrs
+
     return r
 
 

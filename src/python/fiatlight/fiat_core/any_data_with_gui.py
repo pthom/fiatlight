@@ -88,6 +88,10 @@ class AnyDataWithGui(Generic[DataType]):
         else:
             return self.value
 
+    def merge_custom_attrs(self, custom_attrs: dict[str, Any] | None = None) -> None:
+        if custom_attrs is not None:
+            self._custom_attrs.update(custom_attrs)
+
     # ------------------------------------------------------------------------------------------------------------------
     #            Call the Callbacks
     # ------------------------------------------------------------------------------------------------------------------

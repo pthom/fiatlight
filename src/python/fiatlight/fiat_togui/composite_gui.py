@@ -32,7 +32,7 @@ class OptionalWithGui(AnyDataWithGui[DataType | None]):
         self.callbacks.save_to_dict = self._save_to_dict
         self.callbacks.load_from_dict = self._load_from_dict
 
-        self.callbacks.on_heartbeat = self.inner_gui.callbacks.on_heartbeat
+        self.callbacks.on_heartbeat = self._on_heartbeat
 
     def default_provider(self) -> DataType | None:
         if self.inner_gui.callbacks.default_value_provider is None:
@@ -49,6 +49,14 @@ class OptionalWithGui(AnyDataWithGui[DataType | None]):
                 return inner_present_str(value)
             else:
                 return str(value)
+
+    def _on_heartbeat(self) -> bool:
+        if self.value is None:
+            return False
+        if self.inner_gui.callbacks.on_heartbeat is not None:
+            r = self.inner_gui.callbacks.on_heartbeat()
+            return r
+        return False
 
     def present_custom(self, value: DataType | None) -> None:
         assert self.inner_gui.callbacks.present_custom is not None

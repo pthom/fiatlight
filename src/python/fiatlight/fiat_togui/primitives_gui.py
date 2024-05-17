@@ -63,11 +63,6 @@ class IntWithGui(AnyDataWithGui[int]):
         self.callbacks.edit = self.edit
         self.callbacks.default_value_provider = lambda: 0
         self.callbacks.clipboard_copy_possible = True
-        self.callbacks.on_heartbeat = self._on_heartbeat
-
-    def _on_heartbeat(self) -> bool:
-        self._handle_custom_attrs()
-        return False
 
     def _check_custom_attrs(self) -> None:
         def _authorized_custom_attrs() -> list[str]:
@@ -159,6 +154,7 @@ class IntWithGui(AnyDataWithGui[int]):
     def edit(self, value: int) -> tuple[bool, int]:
         if not isinstance(value, int):
             raise ValueError(f"IntWithGui expects an int, got: {type(value)}")
+        self._handle_custom_attrs()
         changed = False
         imgui.set_next_item_width(hello_imgui.em_size(self.params.width_em))
         if self.params.edit_type == IntEditType.slider:
@@ -298,11 +294,6 @@ class FloatWithGui(AnyDataWithGui[float]):
         self.callbacks.default_value_provider = lambda: 0.0
         self.callbacks.clipboard_copy_possible = True
         self.callbacks.present_str = self.present_str
-        self.callbacks.on_heartbeat = self._on_heartbeat
-
-    def _on_heartbeat(self) -> bool:
-        self._handle_custom_attrs()
-        return False
 
     def _check_custom_attrs(self) -> None:
         def _authorized_custom_attrs() -> list[str]:
@@ -403,6 +394,7 @@ class FloatWithGui(AnyDataWithGui[float]):
     def edit(self, value: float) -> tuple[bool, float]:
         if not isinstance(value, float) and not isinstance(value, int):
             raise ValueError(f"FloatWithGui expects a float, got: {type(value)}")
+        self._handle_custom_attrs()
         changed = False
         imgui.set_next_item_width(hello_imgui.em_size(self.params.width_em))
         if self.params.edit_type == FloatEditType.slider:
@@ -513,11 +505,6 @@ class BoolWithGui(AnyDataWithGui[bool]):
         self.callbacks.edit = self.edit
         self.callbacks.default_value_provider = lambda: False
         self.callbacks.clipboard_copy_possible = True
-        self.callbacks.on_heartbeat = self._on_heartbeat
-
-    def _on_heartbeat(self) -> bool:
-        self._handle_custom_attrs()
-        return False
 
     def _check_custom_attrs(self) -> None:
         def _authorized_custom_attrs() -> list[str]:
@@ -551,6 +538,7 @@ class BoolWithGui(AnyDataWithGui[bool]):
     def edit(self, value: bool) -> tuple[bool, bool]:
         if not isinstance(value, bool):
             raise ValueError(f"BoolWithGui expects a bool, got: {type(value)}")
+        self._handle_custom_attrs()
         changed = False
         if self.params.edit_type == BoolEditType.checkbox:
             changed, value = imgui.checkbox(self.params.label, value)
