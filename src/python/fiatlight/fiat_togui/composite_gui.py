@@ -224,10 +224,24 @@ class EnumWithGui(AnyDataWithGui[Enum]):
         assert not isinstance(value, (Unspecified, Error))
         changed = False
 
-        for enum_value in list(self.enum_type):
+        nb_values = len(list(self.enum_type))
+        shall_show_two_columns = nb_values >= 3
+        if shall_show_two_columns:
+            end_first_column = nb_values // 2
+        else:
+            end_first_column = -1
+
+        for i, enum_value in enumerate(list(self.enum_type)):
+            if i == 0:
+                imgui.begin_group()
             if imgui.radio_button(enum_value.name, value == enum_value):
                 value = enum_value
                 changed = True
+            if i == end_first_column:
+                imgui.end_group()
+                imgui.same_line()
+                imgui.begin_group()
+        imgui.end_group()
         return changed, value
 
     def create_from_name(self, name: str) -> Enum:
