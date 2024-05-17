@@ -2,7 +2,6 @@
 This module provides a class to wrap any data with a GUI (AnyDataWithGui), and a class to wrap a named data with a GUI.
 See example implementation for a custom type at the bottom of this file.
 """
-from enum import Enum
 
 from fiatlight.fiat_types.base_types import (
     JsonDict,
@@ -11,10 +10,8 @@ from fiatlight.fiat_types.base_types import (
 from fiatlight.fiat_types.error_types import Error, ErrorValue, Unspecified, UnspecifiedValue
 from fiatlight.fiat_types.function_types import DataPresentFunction, DataEditFunction  # noqa
 from fiatlight.fiat_core.any_data_gui_callbacks import AnyDataGuiCallbacks
-from typing import Generic, Any, Type
-from imgui_bundle import imgui
+from typing import Generic, Any, Type, final
 import logging
-import pydantic
 
 
 class AnyDataWithGui(Generic[DataType]):
@@ -106,71 +103,39 @@ class AnyDataWithGui(Generic[DataType]):
     # ------------------------------------------------------------------------------------------------------------------
     #            Serialization and deserialization
     # ------------------------------------------------------------------------------------------------------------------
-    def save_to_dict(self) -> JsonDict:
-        if isinstance(self.value, Unspecified):
+    @final
+    def save_to_dict(self, value: DataType | Unspecified | Error) -> JsonDict:
+        if isinstance(value, Unspecified):
             return {"type": "Unspecified"}
-        elif isinstance(self.value, Error):
+        elif isinstance(value, Error):
             return {"type": "Error"}
-        elif isinstance(self.value, (str, int, float, bool)):
-            return {"type": "Primitive", "value": self.value}
-        elif self.value is None:
-            return {"type": "Primitive", "value": None}
-        elif isinstance(self.value, pydantic.BaseModel):
-            return {"type": "Pydantic", "value": self.value.model_dump()}
-        # elif self.callbacks.to_dict_impl is not None:
-        #     as_dict = self.callbacks.to_dict_impl(self.value)
-        #     return {"type": "Custom", "value": as_dict}
-        elif isinstance(self.value, Enum):
-            return {"type": "Enum", "value_name": self.value.name, "class": self.value.__class__.__name__}
-        elif hasattr(self.value, "__dict__"):
-            as_dict = self.value.__dict__
-            return {"type": "Dict", "value": as_dict}
-        elif isinstance(self.value, list):
-            # return {"type": "List", "value": [AnyDataWithGui(x, self.callbacks).to_json() for x in self.value]}
-            logging.warning("List serialization not implemented yet")
-            return {"type": "List"}
-        elif isinstance(self.value, tuple):
-            return {"type": "Tuple", "value": self.value}
+        elif self.callbacks.save_to_dict is not None:
+            return self.callbacks.save_to_dict(value)
+        elif isinstance(value, (str, int, float, bool)):
+            return {"type": "Primitive", "value": value}
+        elif isinstance(value, tuple):
+            return {"type": "Tuple", "value": value}
         else:
-            logging.warning(f"Cannot serialize {self.value}, it has no __dict__ attribute.")
+            logging.warning(f"Cannot serialize {value}")
             return {"type": "Error"}
 
-    def load_from_dict(self, json_data: JsonDict) -> None:
+    @final
+    def load_from_dict(self, json_data: JsonDict) -> DataType | Unspecified | Error:
         if "type" not in json_data:
             raise ValueError(f"Cannot deserialize {json_data}")
         if json_data["type"] == "Unspecified":
-            self.value = UnspecifiedValue
+            return UnspecifiedValue
         elif json_data["type"] == "Error":
-            self.value = ErrorValue
+            return ErrorValue
+        elif self.callbacks.load_from_dict is not None:
+            return self.callbacks.load_from_dict(json_data)
         elif json_data["type"] == "Primitive":
-            self.value = json_data["value"]
-        elif json_data["type"] == "Pydantic":
-            assert self._type is not None
-            assert issubclass(self._type, pydantic.BaseModel)
-            r = self._type.model_validate(json_data["value"])
-            assert isinstance(r, self._type)
-            self.value = r  # type: ignore
-
-        # elif json_data["type"] == "Custom":
-        #     assert self.callbacks.from_dict_impl is not None
-        #     self.value = self.callbacks.from_dict_impl(json_data["value"])
-        elif json_data["type"] == "Enum":
-            if self.callbacks.create_from_value is None:
-                raise ValueError("Cannot deserialize an Enum without a create_from_value callback")
-            self.value = self.callbacks.create_from_value(json_data["value_name"])
-
-        elif json_data["type"] == "Dict":
-            if self.value is UnspecifiedValue:
-                if self.callbacks.default_value_provider is None:
-                    raise ValueError("Cannot deserialize a None value without a default_value_provider")
-                self.value = self.callbacks.default_value_provider()
-            self.value.__dict__.update(json_data["value"])
+            r = json_data["value"]
+            assert isinstance(r, (str, int, float, bool))
+            return r  # type: ignore
         elif json_data["type"] == "Tuple":
             as_list = json_data["value"]
-            self.value = tuple(as_list)  # type: ignore
-        elif json_data["type"] == "List":
-            logging.warning("List deserialization not implemented yet")
-            return
+            return tuple(as_list)  # type: ignore
         else:
             raise ValueError(f"Cannot deserialize {json_data}")
 
@@ -204,50 +169,3 @@ class AnyDataWithGui(Generic[DataType]):
         if isinstance(self.value, (Error, Unspecified)):
             return False
         return self.callbacks.present_custom is not None
-
-
-##############################################################################################################
-# Example implementation for a custom type
-##############################################################################################################
-class Foo:
-    x: int
-
-    def __init__(self, x: int) -> None:
-        self.x = x
-
-
-class FooWithGui(AnyDataWithGui[Foo]):
-    def __init__(self) -> None:
-        super().__init__(Foo)
-        self.callbacks.edit = self.edit
-        self.callbacks.present_str = self.present_str
-        self.callbacks.default_value_provider = lambda: Foo(x=0)
-
-    # Edit and present functions
-    def edit(self, value: Foo) -> tuple[bool, Foo]:
-        # When edit is called, self.value is guaranteed to be a Foo, so that we can call self.get_actual_value()
-        # in order to get the actual value with the correct type.
-        changed, value.x = imgui.input_int("x", value.x)
-        return changed, value
-
-    @staticmethod
-    def present_str(value: Foo) -> str:
-        return f"Foo: x={value.x}"
-
-
-def sandbox() -> None:
-    # Register the Foo type with its GUI implementation (do this once at the beginning of your program)
-    import fiatlight
-
-    fiatlight.register_type(Foo, FooWithGui)
-
-    def fn_using_foo(foo: Foo) -> int:
-        return foo.x
-
-    fn_using_foo_with_gui = fiatlight.FunctionWithGui(fn_using_foo)
-    fn_input_gui = fn_using_foo_with_gui.input("foo")
-    assert isinstance(fn_input_gui, FooWithGui)
-
-
-if __name__ == "__main__":
-    sandbox()

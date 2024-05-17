@@ -1,6 +1,6 @@
 from fiatlight.fiat_types.base_types import DataType, JsonDict
 from fiatlight.fiat_types.function_types import VoidFunction, BoolFunction
-from typing import Callable, Generic, Any
+from typing import Callable, Generic
 
 
 class AnyDataGuiCallbacks(Generic[DataType]):
@@ -115,18 +115,13 @@ class AnyDataGuiCallbacks(Generic[DataType]):
     save_gui_options_to_json: Callable[[], JsonDict] | None = None
     load_gui_options_from_json: Callable[[JsonDict], None] | None = None
 
-    # create_from_value (Optional)
-    # Only used in more advanced cases, when the data type can not directly be constructed from a value.
-    # (example: Enum when serialized as a string, when we need to convert the string back to the Enum class)
-    create_from_value: Callable[[Any], DataType] | None = None
-
     # (On hold)
     # Optional serialization and deserialization functions for DataType
     # If provided, these functions will be used to serialize and deserialize the data with a custom dict format.
     # If not provided, "value" will be serialized as a dict of its __dict__ attribute,
     # or as a json string (for int, float, str, bool, and None)
-    # to_dict_impl: Callable[[DataType], JsonDict] | None = None
-    # from_dict_impl: Callable[[JsonDict], DataType] | None = None
+    save_to_dict: Callable[[DataType], JsonDict] | None = None
+    load_from_dict: Callable[[JsonDict], DataType] | None = None
 
     @staticmethod
     def no_handlers() -> "AnyDataGuiCallbacks[DataType]":

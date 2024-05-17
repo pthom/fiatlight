@@ -29,6 +29,9 @@ class OptionalWithGui(AnyDataWithGui[DataType | None]):
         if self.inner_gui.callbacks.present_custom is not None:
             self.callbacks.present_custom = self.present_custom
 
+        self.callbacks.save_to_dict = self._save_to_dict
+        self.callbacks.load_from_dict = self._load_from_dict
+
     def default_provider(self) -> DataType | None:
         if self.inner_gui.callbacks.default_value_provider is None:
             return None
@@ -94,19 +97,20 @@ class OptionalWithGui(AnyDataWithGui[DataType | None]):
         if value is not None:
             self.inner_gui.value = value
 
-    def save_to_dict(self) -> JsonDict:
-        if self.value is None:
+    def _save_to_dict(self, value: DataType | None) -> JsonDict:
+        if value is None:
             return {"type": "Optional", "value": None}
         else:
-            return {"type": "Optional", "value": self.inner_gui.save_to_dict()}
+            return {"type": "Optional", "value": self.inner_gui.save_to_dict(value)}
 
-    def load_from_dict(self, json_data: JsonDict) -> None:
+    def _load_from_dict(self, json_data: JsonDict) -> DataType | None:
         if json_data["type"] == "Optional":
             if json_data["value"] is None:
-                self.value = None
+                return None
             else:
-                self.inner_gui.load_from_dict(json_data["value"])
-                self.value = self.inner_gui.value
+                r = self.inner_gui.load_from_dict(json_data["value"])
+                assert not isinstance(r, (Unspecified, Error))
+                return r
         else:
             raise ValueError("Invalid JSON data for OptionalWithGui")
 
@@ -126,6 +130,8 @@ class ListWithGui(AnyDataWithGui[List[DataType]]):
         self.callbacks.present_custom = self.present_custom
         self.callbacks.clipboard_copy_str = self.clipboard_copy_str
         self.callbacks.clipboard_copy_possible = inner_gui.callbacks.clipboard_copy_possible
+        self.callbacks.save_to_dict = self._save_to_dict
+        self.callbacks.load_from_dict = self._load_from_dict
 
     @staticmethod
     def clipboard_copy_str(v: List[DataType]) -> str:
@@ -184,13 +190,15 @@ class ListWithGui(AnyDataWithGui[List[DataType]]):
         txt = self._elements_str(value, max_elements)
         imgui.text(txt)
 
-    def save_to_dict(self) -> JsonDict:
-        r = {"type": "List", "value": [self.inner_gui.save_to_dict() for v in self.value]}
+    def _save_to_dict(self, value: List[DataType]) -> JsonDict:
+        r = {"type": "List", "value": [self.inner_gui.save_to_dict(v) for v in value]}
         return r
 
-    def load_from_dict(self, json_data: JsonDict) -> None:
+    def _load_from_dict(self, json_data: JsonDict) -> List[DataType]:
         if json_data["type"] == "List":
-            self.value = [self.inner_gui.load_from_dict(v) for v in json_data["value"]]
+            r = [self.inner_gui.load_from_dict(v) for v in json_data["value"]]
+            assert not any(isinstance(v, (Unspecified, Error)) for v in r)
+            return r  # type: ignore
         else:
             raise ValueError("Invalid JSON data for ListWithGui")
 
@@ -209,6 +217,9 @@ class EnumWithGui(AnyDataWithGui[Enum]):
         self.callbacks.default_value_provider = lambda: list(self.enum_type)[0]
         self.callbacks.clipboard_copy_possible = True
 
+        self.callbacks.save_to_dict = self._save_to_dict
+        self.callbacks.load_from_dict = self._load_from_dict
+
     def edit(self, value: Enum) -> tuple[bool, Enum]:
         assert not isinstance(value, (Unspecified, Error))
         changed = False
@@ -222,11 +233,11 @@ class EnumWithGui(AnyDataWithGui[Enum]):
     def create_from_name(self, name: str) -> Enum:
         return self.enum_type[name]
 
-    def save_to_dict(self) -> JsonDict:
-        r = {"type": "Enum", "value_name": self.value.name, "class": self.value.__class__.__name__}
+    def _save_to_dict(self, value: Enum) -> JsonDict:
+        r = {"type": "Enum", "value_name": value.name, "class": value.__class__.__name__}
         return r
 
-    def load_from_dict(self, json_data: JsonDict) -> None:
+    def _load_from_dict(self, json_data: JsonDict) -> Enum:
         if json_data["type"] == "Enum":
             if "value_name" not in json_data:
                 raise ValueError("Invalid JSON data for EnumWithGui")
@@ -237,6 +248,7 @@ class EnumWithGui(AnyDataWithGui[Enum]):
                 raise ValueError("Invalid JSON data for EnumWithGui")
 
             value_name = json_data["value_name"]
-            self.value = self.create_from_name(value_name)
+            r = self.create_from_name(value_name)
+            return r
         else:
             raise ValueError("Invalid JSON data for EnumWithGui")

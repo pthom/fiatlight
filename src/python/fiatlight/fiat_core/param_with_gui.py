@@ -21,16 +21,16 @@ class ParamWithGui(Generic[DataType]):
     param_kind: ParamKind
     default_value: DataType | Unspecified
 
-    def save_to_dict(self) -> JsonDict:
-        data_json = self.data_with_gui.save_to_dict()
+    def save_self_value_to_dict(self) -> JsonDict:
+        data_json = self.data_with_gui.save_to_dict(self.data_with_gui.value)
         data_dict = {"name": self.name, "data": data_json}
         return data_dict
 
-    def load_from_dict(self, json_data: JsonDict) -> None:
+    def load_self_value_from_dict(self, json_data: JsonDict) -> None:
         if json_data["name"] != self.name:
             raise ValueError(f"Expected name {self.name}, got {json_data['name']}")
         if "data" in json_data:
-            self.data_with_gui.load_from_dict(json_data["data"])
+            self.data_with_gui.value = self.data_with_gui.load_from_dict(json_data["data"])
 
     def get_value_or_default(self) -> DataType | Unspecified | Error:
         param_value = self.data_with_gui.value

@@ -284,3 +284,20 @@ class BaseModelGui(DataclassLikeGui[DataclassLikeType]):
         if not issubclass(dataclass_type, BaseModel):
             raise ValueError(f"{dataclass_type} is not a pydantic model")
         super().__init__(dataclass_type)  # type: ignore
+        self.callbacks.load_from_dict = self._load_from_dict
+        self.callbacks.save_to_dict = self._save_to_dict
+
+    @staticmethod
+    def _save_to_dict(value: DataclassLikeType) -> JsonDict:
+        r = {"type": "Pydantic", "value": value.model_dump(mode="json")}  # type: ignore
+        return r
+
+    def _load_from_dict(self, json_data: JsonDict) -> DataclassLikeType:
+        json_data_type = json_data.get("type")
+        if json_data_type != "Pydantic":
+            raise ValueError(f"Expected type Pydantic, got {json_data_type}")
+        assert self._type is not None
+        assert issubclass(self._type, BaseModel)
+        r = self._type.model_validate(json_data["value"])
+        assert isinstance(r, self._type)
+        return r  # type: ignore
