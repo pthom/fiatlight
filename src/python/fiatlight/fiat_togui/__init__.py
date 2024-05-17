@@ -14,7 +14,7 @@ from .composite_gui import OptionalWithGui, EnumWithGui
 from .function_signature import get_function_signature
 from .str_with_resizable_gui import StrWithResizableGui
 from .explained_value_gui import edit_explained_value, make_explained_value_edit_callback
-from fiatlight.fiat_togui.to_gui import (
+from .to_gui import (
     GuiFactory,
     FunctionWithGuiFactory,
     register_type,
@@ -23,6 +23,7 @@ from fiatlight.fiat_togui.to_gui import (
     register_bound_float,
     register_dataclass,
     register_base_model,
+    dataclass_with_gui_registration,
 )
 from .file_types_gui import text_from_file, TextToFileGui
 
@@ -65,4 +66,6 @@ __all__ = [
     "register_bound_float",
     "register_dataclass",
     "register_base_model",
+    # from dataclass_gui
+    "dataclass_with_gui_registration",
 ]

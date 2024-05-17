@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 
 from fiatlight.fiat_togui.dataclass_gui import DataclassGui, DataclassLikeGui, BaseModelGui
-from fiatlight import FunctionWithGui, register_dataclass, register_base_model
+from fiatlight import FunctionWithGui, register_dataclass, register_base_model, dataclass_with_gui_registration
 from dataclasses import dataclass
 import copy
 
@@ -61,7 +61,7 @@ def test_dataclass_gui() -> None:
     f_gui = FunctionWithGui(f)
     f_gui_param_gui = f_gui.input("param")
     assert isinstance(f_gui_param_gui, DataclassGui)
-    assert f_gui_param_gui._inner_type == MyParam
+    assert f_gui_param_gui._type == MyParam
 
 
 def test_base_model_gui() -> None:
@@ -88,6 +88,22 @@ def test_base_model_gui() -> None:
     f_gui = FunctionWithGui(f)
     f_gui_param_gui = f_gui.input("param")
     assert isinstance(f_gui_param_gui, BaseModelGui)
-    assert f_gui_param_gui._inner_type == MyParam
+    assert f_gui_param_gui._type == MyParam
     assert len(f_gui_param_gui._parameters_with_gui) == 3
     assert f_gui_param_gui._parameters_with_gui[0].name == "x"
+
+
+def test_dataclass_decorator() -> None:
+    @dataclass_with_gui_registration
+    class MyParam:
+        x: int = 3
+        y: str = "Hello"
+        z: float = 3.14
+
+    def f(param: MyParam) -> MyParam:
+        return param
+
+    f_gui = FunctionWithGui(f)
+    f_gui_param_gui = f_gui.input("param")
+    assert isinstance(f_gui_param_gui, DataclassGui)
+    assert f_gui_param_gui._type == MyParam

@@ -14,6 +14,7 @@ from fiatlight.fiat_togui import (
     register_bound_float,
     register_dataclass,
     register_base_model,
+    dataclass_with_gui_registration,
 )
 
 
@@ -39,12 +40,14 @@ __all__ = [
     "FunctionsGraph",
     "AnyDataWithGui",
     "FunctionWithGui",
+    # from to_gui
     "register_type",
     "register_enum",
     "register_bound_int",
     "register_bound_float",
     "register_dataclass",
     "register_base_model",
+    "dataclass_with_gui_registration",
     # from fiat_runner
     "fiat_run",
     "fiat_run_composition",

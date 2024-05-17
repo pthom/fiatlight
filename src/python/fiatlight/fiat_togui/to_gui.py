@@ -1,4 +1,4 @@
-import typing
+import dataclasses
 from dataclasses import dataclass
 
 import pydantic
@@ -18,7 +18,7 @@ from enum import Enum
 
 import inspect
 import logging
-from typing import TypeAlias, Callable, Any, Tuple, List
+from typing import TypeAlias, Callable, Any, Tuple, List, Type
 
 
 GuiFactory = Callable[[], AnyDataWithGui[DataType]]
@@ -364,7 +364,7 @@ class GuiFactories:
                 return factory.gui_factory
         raise ValueError(f"No factory found for typename {typename}")
 
-    def register_type(self, type_: typing.Type[Any], factory: GuiFactory[Any]) -> None:
+    def register_type(self, type_: Type[Any], factory: GuiFactory[Any]) -> None:
         full_typename = str(type_)
         full_typename_no_class = ""
         if full_typename.startswith("<class '") and full_typename.endswith("'>"):
@@ -399,7 +399,7 @@ class GuiFactories:
 
         self.register_type(enum_class, enum_gui_factory)
 
-    def register_bound_float(self, type_: typing.Type[Any], interval: FloatInterval) -> None:
+    def register_bound_float(self, type_: Type[Any], interval: FloatInterval) -> None:
         def factory() -> primitives_gui.FloatWithGui:
             r = primitives_gui.FloatWithGui()
             r.params.edit_type = primitives_gui.FloatEditType.slider
@@ -409,7 +409,7 @@ class GuiFactories:
 
         self.register_type(type_, factory)
 
-    def register_bound_int(self, type_: typing.Type[Any], interval: IntInterval) -> None:
+    def register_bound_int(self, type_: Type[Any], interval: IntInterval) -> None:
         def factory() -> primitives_gui.IntWithGui:
             r = primitives_gui.IntWithGui()
             r.params.edit_type = primitives_gui.IntEditType.slider
@@ -430,7 +430,7 @@ def gui_factories() -> GuiFactories:
     return _GUI_FACTORIES
 
 
-def register_type(type_: typing.Type[Any], factory: GuiFactory[Any]) -> None:
+def register_type(type_: Type[Any], factory: GuiFactory[Any]) -> None:
     gui_factories().register_type(type_, factory)
 
 
@@ -438,7 +438,7 @@ def register_enum(enum_class: type[Enum]) -> None:
     gui_factories().register_enum(enum_class)
 
 
-def register_dataclass(dataclass_type: typing.Type[DataclassLikeType]) -> None:
+def register_dataclass(dataclass_type: Type[DataclassLikeType]) -> None:
     from fiatlight.fiat_togui.dataclass_gui import DataclassGui
 
     def factory() -> AnyDataWithGui[Any]:
@@ -448,7 +448,7 @@ def register_dataclass(dataclass_type: typing.Type[DataclassLikeType]) -> None:
     gui_factories().register_type(dataclass_type, factory)
 
 
-def register_base_model(base_model_type: typing.Type[DataclassLikeType]) -> None:
+def register_base_model(base_model_type: Type[DataclassLikeType]) -> None:
     from fiatlight.fiat_togui.dataclass_gui import BaseModelGui
 
     assert issubclass(base_model_type, pydantic.BaseModel)
@@ -460,11 +460,18 @@ def register_base_model(base_model_type: typing.Type[DataclassLikeType]) -> None
     gui_factories().register_type(base_model_type, factory)
 
 
-def register_bound_float(type_: typing.Type[Any], interval: FloatInterval) -> None:
+# Decorators for registered dataclasses and pydantic models
+def dataclass_with_gui_registration(cls: Type[DataType]) -> Type[DataType]:
+    cls = dataclasses.dataclass(cls)  # First, create the dataclass
+    register_dataclass(cls)  # Then, register it
+    return cls
+
+
+def register_bound_float(type_: Type[Any], interval: FloatInterval) -> None:
     gui_factories().register_bound_float(type_, interval)
 
 
-def register_bound_int(type_: typing.Type[Any], interval: IntInterval) -> None:
+def register_bound_int(type_: Type[Any], interval: IntInterval) -> None:
     gui_factories().register_bound_int(type_, interval)
 
 

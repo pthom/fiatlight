@@ -43,7 +43,7 @@ from fiatlight.fiat_types import JsonDict, Unspecified, Error
 from fiatlight.fiat_togui import to_gui
 from fiatlight.fiat_config import get_fiat_config, FiatColorType
 from fiatlight.fiat_widgets import fiat_osd
-from imgui_bundle import imgui, imgui_ctx, hello_imgui, ImVec2  # noqa
+from imgui_bundle import imgui, imgui_ctx, hello_imgui
 from typing import Type, Any, TypeVar, List
 from dataclasses import is_dataclass
 from pydantic import BaseModel
@@ -79,7 +79,6 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
     """Base GUI class for a dataclass or a pydantic model"""
 
     _parameters_with_gui: List[ParamWithGui[Any]]
-    _inner_type: Type[DataclassLikeType]
 
     def __init__(self, dataclass_type: Type[DataclassLikeType]) -> None:
         super().__init__(dataclass_type)
@@ -91,7 +90,6 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
         constructor_gui = FunctionWithGui(dataclass_type, scope_storage=scope_storage)
 
         self._parameters_with_gui = constructor_gui._inputs_with_gui
-        self._inner_type = dataclass_type
         self.fill_callbacks()
 
     def fill_callbacks(self) -> None:
@@ -141,7 +139,7 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
             if isinstance(param_value, (Unspecified, Error)):
                 raise ValueError(f"Parameter {param_gui.name} is unspecified")
             kwargs[param_gui.name] = param_value
-        r = self._inner_type(**kwargs)
+        r = self._type(**kwargs)
         return r
 
     def default_value_provider(self) -> DataclassLikeType:
@@ -188,7 +186,7 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
             param_str = param_gui.data_with_gui.datatype_value_to_str(param_value)
             strs[param_gui.name] = param_str
         joined_strs = ", ".join(f"{k}: {v}" for k, v in strs.items())
-        r = f"{self._inner_type.__name__}({joined_strs})"
+        r = f"{self._type.__name__}({joined_strs})"
         return r
 
     def present_custom(self, _: DataclassLikeType) -> None:
