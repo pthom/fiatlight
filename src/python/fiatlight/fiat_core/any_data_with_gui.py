@@ -14,6 +14,7 @@ from fiatlight.fiat_core.any_data_gui_callbacks import AnyDataGuiCallbacks
 from typing import Generic, Any
 from imgui_bundle import imgui
 import logging
+import pydantic
 
 
 class AnyDataWithGui(Generic[DataType]):
@@ -111,6 +112,8 @@ class AnyDataWithGui(Generic[DataType]):
             return {"type": "Primitive", "value": self.value}
         elif self.value is None:
             return {"type": "Primitive", "value": None}
+        elif isinstance(self.value, pydantic.BaseModel):
+            return {"type": "Pydantic", "value": self.value.model_dump()}
         # elif self.callbacks.to_dict_impl is not None:
         #     as_dict = self.callbacks.to_dict_impl(self.value)
         #     return {"type": "Custom", "value": as_dict}
@@ -138,6 +141,13 @@ class AnyDataWithGui(Generic[DataType]):
             self.value = ErrorValue
         elif json_data["type"] == "Primitive":
             self.value = json_data["value"]
+        elif json_data["type"] == "Pydantic":
+            assert self._type is not None
+            assert issubclass(self._type, pydantic.BaseModel)
+            r = self._type.model_validate(json_data["value"])
+            assert isinstance(r, self._type)
+            self.value = r  # type: ignore
+
         # elif json_data["type"] == "Custom":
         #     assert self.callbacks.from_dict_impl is not None
         #     self.value = self.callbacks.from_dict_impl(json_data["value"])
