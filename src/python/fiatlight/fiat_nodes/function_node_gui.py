@@ -1012,7 +1012,7 @@ class FunctionNodeGui:
         if last_exception_message is None:
             return
 
-        min_exception_width = hello_imgui.em_size(16)
+        min_exception_width = hello_imgui.em_size(30)
         exception_width = min_exception_width
         if self._node_size is not None:
             exception_width = self._node_size.x - hello_imgui.em_size(2)
@@ -1021,6 +1021,7 @@ class FunctionNodeGui:
         fiat_widgets.text_maybe_truncated(
             "Exception:\n" + last_exception_message,
             max_width_pixels=exception_width,
+            max_lines=3,
             color=get_fiat_config().style.colors[FiatColorType.ExceptionError],
         )
 

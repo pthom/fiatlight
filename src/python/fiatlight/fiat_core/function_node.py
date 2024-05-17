@@ -217,14 +217,16 @@ class FunctionNode:
                 dst_input.value = src_output.value
             else:
                 if not dst_input.can_be_none:
-                    # this_function_name = self.function_with_gui.name
-                    # other_function_name = link.dst_function_node.function_with_gui.name
-                    # msg = f"""{this_function_name} returned None, but {other_function_name} cannot accept it as param "{link.dst_input_name}"!"""
+                    this_function_name = self.function_with_gui.name
+                    other_function_name = link.dst_function_node.function_with_gui.name
+                    msg = f"""{this_function_name} returned None, but {other_function_name} cannot accept it as param "{link.dst_input_name}"!\n\n"""
+                    msg += "Fiatlight will not transmit None values to functions that cannot accept them.\n"
+                    msg += "(This might be what you expect, as it is spares you from checking for\nNone values in your code, when using Fiatlight)\n\n"
+                    msg += f"If you want to debug this, please place a breakpoint in {this_function_name},\n"
+                    msg += "and inspect why the function returns none."
+
                     # logging.warning(msg)
-                    # self.function_with_gui._last_exception_message = msg
-                    # self.function_with_gui._last_exception_traceback = (
-                    #     f"No traceback available. Please investigate {this_function_name} and {other_function_name}."
-                    # )
+                    self.function_with_gui._last_exception_message = msg
                     dst_input.value = ErrorValue
                 else:
                     dst_input.value = None
