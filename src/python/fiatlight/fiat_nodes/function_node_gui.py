@@ -1052,7 +1052,7 @@ class FunctionNodeGui:
 
                 imgui.text(msg)
                 if imgui.button("Yes, raise the exception"):
-                    get_fiat_config().exception_config.catch_function_exceptions = False
+                    get_fiat_config().catch_function_exceptions = False
                     self._function_node.function_with_gui._dirty = True
                     self._function_node.function_with_gui.invoke()
                     imgui.close_current_popup()  # close the popup (which will never happen, we will crash)

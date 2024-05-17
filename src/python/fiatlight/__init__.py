@@ -18,6 +18,7 @@ from fiatlight.fiat_togui import (
     register_base_model,
     base_model_with_gui_registration,
 )
+from fiatlight.fiat_config import get_fiat_config
 
 
 def demo_assets_dir() -> str:
@@ -65,4 +66,6 @@ __all__ = [
     # from fiat_widgets
     "is_rendering_in_node",
     "is_rendering_in_window",
+    # from fiat_config
+    "get_fiat_config",
 ]

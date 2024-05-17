@@ -372,7 +372,7 @@ class FunctionWithGui:
                 for i, output_with_gui in enumerate(self._outputs_with_gui):
                     output_with_gui.data_with_gui.value = fn_output[i]
         except Exception as e:
-            if not get_fiat_config().exception_config.catch_function_exceptions:
+            if not get_fiat_config().catch_function_exceptions:
                 raise e
             else:
                 self._last_exception_message = str(e)

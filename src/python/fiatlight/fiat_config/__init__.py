@@ -2,7 +2,6 @@ from fiatlight.fiat_config.fiat_config_def import (
     FiatConfig,
     get_fiat_config,
     FiatStyle,
-    FiatExceptionConfig,
     FiatColorType,
 )
 
@@ -12,5 +11,4 @@ __all__ = [
     "FiatConfig",
     "FiatColorType",
     "FiatStyle",
-    "FiatExceptionConfig",
 ]
