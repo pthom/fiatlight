@@ -173,6 +173,7 @@ class CameraGui(FunctionWithGui):
                 imgui.text_wrapped("(Note: some cameras may not support all the settings)")
                 changed = self._camera_params_gui.call_edit()
                 if changed:
+                    assert isinstance(self._camera_params_gui.value, CameraParams)
                     self._camera_provider.apply_params(self._camera_params_gui.value)
                 imgui.text("Start/Stop Camera")
                 self._show_cam_button()
