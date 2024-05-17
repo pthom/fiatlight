@@ -1,3 +1,6 @@
+import copy
+import logging
+
 import cv2
 from pydantic import BaseModel
 from fiatlight.fiat_togui.to_gui import enum_with_gui_registration, base_model_with_gui_registration
@@ -31,13 +34,14 @@ class CameraFps(Enum):
 class CameraParams(BaseModel):
     device_number: int = 0
     camera_resolution: CameraResolution = CameraResolution.HD_1280_720
-    fps: CameraFps = CameraFps.FPS_30
+    # fps: CameraFps = CameraFps.FPS_30  # too much hassle for now
     brightness: Float_0_1 = 0.5  # type: ignore
     contrast: Float_0_1 = 0.5  # type: ignore
 
 
 class CameraProvider:
     camera_params: CameraParams
+    previous_camera_params: CameraParams | None = None
     cv_cap: cv2.VideoCapture | None = None
 
     def __init__(self, params: CameraParams | None = None):
@@ -49,27 +53,69 @@ class CameraProvider:
         if self.cv_cap is None:
             return None
         ret, frame = self.cv_cap.read()
+        if frame is None:
+            return None
         if frame.shape[0] == 0 or frame.shape[1] == 0:
             return None
         return frame  # type: ignore
 
     def apply_params(self, params: CameraParams) -> None:
-        if params == self.camera_params:
+        logging.info(f"apply_params: {params}")
+        if self.previous_camera_params is not None and params == self.previous_camera_params:
+            logging.info("params are the same")
             return
-        self.camera_params = params
         if self.cv_cap is None:
+            self.camera_params = params
             return
-        else:
-            # self.stop()
-            self._do_set_params()
+
+        shall_restart = False
+        if self.previous_camera_params is not None:
+            if self.previous_camera_params.device_number != params.device_number:
+                shall_restart = True
+            if self.previous_camera_params.camera_resolution != params.camera_resolution:
+                shall_restart = True
+            # if self.previous_camera_params.fps != params.fps:
+            #     shall_restart = True
+
+        self.previous_camera_params = copy.deepcopy(self.camera_params)
+        self.camera_params = params
+
+        if shall_restart:
+            logging.info("shall_restart")
+            self.stop()
             self.start()
+        else:
+            logging.info("just apply")
+            brightness_set = self.cv_cap.set(cv2.CAP_PROP_BRIGHTNESS, self.camera_params.brightness)
+            contrast_set = self.cv_cap.set(cv2.CAP_PROP_CONTRAST, self.camera_params.contrast)
+            if not brightness_set:
+                logging.warning("This camera does not support setting brightness")
+            if not contrast_set:
+                logging.warning("This camera does not support setting contrast")
 
     def start(self) -> None:
+        logging.info(f"start: {self.camera_params}")
         self.cv_cap = cv2.VideoCapture()
         self.cv_cap.open(self.camera_params.device_number)
-        self._do_set_params()
+        frame_width_set = self.cv_cap.set(cv2.CAP_PROP_FRAME_WIDTH, self.camera_params.camera_resolution.value[0])
+        frame_height_set = self.cv_cap.set(cv2.CAP_PROP_FRAME_HEIGHT, self.camera_params.camera_resolution.value[1])
+        # fps_set = self.cv_cap.set(cv2.CAP_PROP_FPS, self.camera_params.fps.value)
+        brightness_set = self.cv_cap.set(cv2.CAP_PROP_BRIGHTNESS, self.camera_params.brightness)
+        contrast_set = self.cv_cap.set(cv2.CAP_PROP_CONTRAST, self.camera_params.contrast)
+
+        if not frame_width_set or not frame_height_set:
+            logging.warning("This camera does not support setting frame width and height")
+        # if not fps_set:
+        #     logging.warning("This camera does not support setting fps")
+        if not brightness_set:
+            logging.warning("This camera does not support setting brightness")
+        if not contrast_set:
+            logging.warning("This camera does not support setting contrast")
+
+        self.previous_camera_params = copy.deepcopy(self.camera_params)
 
     def stop(self) -> None:
+        logging.info("stop")
         if self.cv_cap is None:
             return
         self.cv_cap.release()
@@ -77,15 +123,6 @@ class CameraProvider:
 
     def started(self) -> bool:
         return self.cv_cap is not None
-
-    def _do_set_params(self) -> None:
-        assert self.cv_cap is not None
-        width, height = self.camera_params.camera_resolution.value
-        self.cv_cap.set(cv2.CAP_PROP_FRAME_WIDTH, width)
-        self.cv_cap.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
-        self.cv_cap.set(cv2.CAP_PROP_FPS, self.camera_params.fps.value)
-        self.cv_cap.set(cv2.CAP_PROP_BRIGHTNESS, self.camera_params.brightness)
-        self.cv_cap.set(cv2.CAP_PROP_CONTRAST, self.camera_params.contrast)
 
 
 class CameraGui(FunctionWithGui):
@@ -133,7 +170,11 @@ class CameraGui(FunctionWithGui):
     def _internal_state_gui(self) -> bool:
         with fontawesome_6_ctx():
             with imgui_ctx.begin_vertical("CamParams"):
-                _changed = self._camera_params_gui.call_edit()
+                imgui.text_wrapped("Camera Parameters")
+                imgui.text_wrapped("(Note: some cameras may not support all the settings below)")
+                changed = self._camera_params_gui.call_edit()
+                if changed:
+                    self._camera_provider.apply_params(self._camera_params_gui.value)
                 self._show_cam_button()
 
         return False
