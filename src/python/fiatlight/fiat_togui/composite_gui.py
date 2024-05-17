@@ -192,10 +192,11 @@ class ListWithGui(AnyDataWithGui[List[DataType]]):
         def popup_details_value() -> None:
             self.popup_details(value)
 
+        window_label = f"List of {len(value)} elements##" + str(id(self))
         fiat_osd.show_void_detached_window_button(
             "Details",
-            "List details",
-            popup_details_value,
+            window_label=window_label,
+            gui_function=popup_details_value,
         )
 
         txt = self._elements_str(value, max_elements)
