@@ -60,9 +60,7 @@ class CameraProvider:
         return frame  # type: ignore
 
     def apply_params(self, params: CameraParams) -> None:
-        logging.info(f"apply_params: {params}")
         if self.previous_camera_params is not None and params == self.previous_camera_params:
-            logging.info("params are the same")
             return
         if self.cv_cap is None:
             self.camera_params = params
@@ -81,11 +79,9 @@ class CameraProvider:
         self.camera_params = params
 
         if shall_restart:
-            logging.info("shall_restart")
             self.stop()
             self.start()
         else:
-            logging.info("just apply")
             brightness_set = self.cv_cap.set(cv2.CAP_PROP_BRIGHTNESS, self.camera_params.brightness)
             contrast_set = self.cv_cap.set(cv2.CAP_PROP_CONTRAST, self.camera_params.contrast)
             if not brightness_set:
@@ -94,7 +90,7 @@ class CameraProvider:
                 logging.warning("This camera does not support setting contrast")
 
     def start(self) -> None:
-        logging.info(f"start: {self.camera_params}")
+        logging.info(f"CameraProvider start: {self.camera_params}")
         self.cv_cap = cv2.VideoCapture()
         self.cv_cap.open(self.camera_params.device_number)
         frame_width_set = self.cv_cap.set(cv2.CAP_PROP_FRAME_WIDTH, self.camera_params.camera_resolution.value[0])
@@ -115,7 +111,7 @@ class CameraProvider:
         self.previous_camera_params = copy.deepcopy(self.camera_params)
 
     def stop(self) -> None:
-        logging.info("stop")
+        logging.info("CameraProvider stop")
         if self.cv_cap is None:
             return
         self.cv_cap.release()
@@ -134,8 +130,8 @@ class CameraGui(FunctionWithGui):
 
         from fiatlight.fiat_togui import to_data_with_gui, capture_current_scope
 
-        self._camera_params_gui = to_data_with_gui(CameraParams(), capture_current_scope())
-        self._camera_provider = CameraProvider(self._camera_params_gui.value)
+        self._camera_provider = CameraProvider()
+        self._camera_params_gui = to_data_with_gui(self._camera_provider.camera_params, capture_current_scope())
 
         self.internal_state_gui = self._internal_state_gui
         self.save_internal_gui_options_to_json = self._save_internal_gui_options_to_json
@@ -152,7 +148,10 @@ class CameraGui(FunctionWithGui):
         return r
 
     def _load_internal_gui_options_from_json(self, json_dict: JsonDict) -> None:
-        self._camera_provider.camera_params = CameraParams.model_validate(json_dict)
+        camera_params = CameraParams.model_validate(json_dict)
+        self._camera_provider.camera_params = camera_params
+        self._camera_params_gui.value = camera_params
+        print("aa")
 
     def _show_cam_button(self) -> None:
         started = self._camera_provider.started()
