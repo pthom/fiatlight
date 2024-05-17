@@ -1,6 +1,6 @@
 import cv2
 from pydantic import BaseModel
-from fiatlight.fiat_togui.to_gui import register_enum, register_base_model
+from fiatlight.fiat_togui.to_gui import enum_with_gui_registration, base_model_with_gui_registration
 from fiatlight.fiat_types import Float_0_1, JsonDict
 from fiatlight.fiat_kits.fiat_image import ImageU8_3
 from fiatlight.fiat_core.function_with_gui import FunctionWithGui
@@ -8,6 +8,7 @@ from enum import Enum
 from imgui_bundle import imgui, imgui_ctx  # noqa
 
 
+@enum_with_gui_registration
 class CameraResolution(Enum):
     HD_1280_720 = (1280, 720)
     FULL_HD_1920_1080 = (1920, 1080)
@@ -16,9 +17,7 @@ class CameraResolution(Enum):
     QVGA_320_240 = (320, 240)
 
 
-register_enum(CameraResolution)
-
-
+@enum_with_gui_registration
 class CameraFps(Enum):
     FPS_30 = 30
     FPS_60 = 60
@@ -26,18 +25,13 @@ class CameraFps(Enum):
     FPS_240 = 240
 
 
-register_enum(CameraFps)
-
-
+@base_model_with_gui_registration
 class CameraParams(BaseModel):
     device_number: int = 0
     camera_resolution: CameraResolution = CameraResolution.HD_1280_720
     fps: CameraFps = CameraFps.FPS_30
     brightness: Float_0_1 = 0.5  # type: ignore
     contrast: Float_0_1 = 0.5  # type: ignore
-
-
-register_base_model(CameraParams)
 
 
 class CameraProvider:

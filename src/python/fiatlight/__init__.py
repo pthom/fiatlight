@@ -9,12 +9,14 @@ from fiatlight.fiat_kits import fiat_image, fiat_array
 from fiatlight.fiat_widgets.fiat_osd import is_rendering_in_node, is_rendering_in_window
 from fiatlight.fiat_togui import (
     register_type,
-    register_enum,
     register_bound_int,
     register_bound_float,
+    register_enum,
+    enum_with_gui_registration,
     register_dataclass,
-    register_base_model,
     dataclass_with_gui_registration,
+    register_base_model,
+    base_model_with_gui_registration,
 )
 
 
@@ -42,12 +44,14 @@ __all__ = [
     "FunctionWithGui",
     # from to_gui
     "register_type",
-    "register_enum",
     "register_bound_int",
     "register_bound_float",
+    "register_enum",
+    "enum_with_gui_registration",
     "register_dataclass",
-    "register_base_model",
     "dataclass_with_gui_registration",
+    "register_base_model",
+    "base_model_with_gui_registration",
     # from fiat_runner
     "fiat_run",
     "fiat_run_composition",

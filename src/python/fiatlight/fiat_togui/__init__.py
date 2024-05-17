@@ -18,12 +18,14 @@ from .to_gui import (
     GuiFactory,
     FunctionWithGuiFactory,
     register_type,
-    register_enum,
     register_bound_int,
     register_bound_float,
+    register_enum,
+    enum_with_gui_registration,
     register_dataclass,
-    register_base_model,
     dataclass_with_gui_registration,
+    register_base_model,
+    base_model_with_gui_registration,
 )
 from .file_types_gui import text_from_file, TextToFileGui
 
@@ -61,11 +63,12 @@ __all__ = [
     "GuiFactory",
     "FunctionWithGuiFactory",
     "register_type",
-    "register_enum",
     "register_bound_int",
     "register_bound_float",
+    "register_enum",
+    "enum_with_gui_registration",
     "register_dataclass",
-    "register_base_model",
-    # from dataclass_gui
     "dataclass_with_gui_registration",
+    "register_base_model",
+    "base_model_with_gui_registration",
 ]

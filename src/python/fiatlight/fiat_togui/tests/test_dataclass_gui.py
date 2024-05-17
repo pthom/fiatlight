@@ -1,7 +1,13 @@
 from pydantic import BaseModel
 
 from fiatlight.fiat_togui.dataclass_gui import DataclassGui, DataclassLikeGui, BaseModelGui
-from fiatlight import FunctionWithGui, register_dataclass, register_base_model, dataclass_with_gui_registration
+from fiatlight import (
+    FunctionWithGui,
+    register_dataclass,
+    register_base_model,
+    dataclass_with_gui_registration,
+    base_model_with_gui_registration,
+)
 from dataclasses import dataclass
 import copy
 
@@ -93,7 +99,7 @@ def test_base_model_gui() -> None:
     assert f_gui_param_gui._parameters_with_gui[0].name == "x"
 
 
-def test_dataclass_decorator() -> None:
+def test_decorators() -> None:
     @dataclass_with_gui_registration
     class MyParam:
         x: int = 3
@@ -107,3 +113,17 @@ def test_dataclass_decorator() -> None:
     f_gui_param_gui = f_gui.input("param")
     assert isinstance(f_gui_param_gui, DataclassGui)
     assert f_gui_param_gui._type == MyParam
+
+    @base_model_with_gui_registration
+    class MyParam2(BaseModel):
+        x: int = 3
+        y: str = "Hello"
+        z: float = 3.14
+
+    def f2(param: MyParam2) -> MyParam2:
+        return param
+
+    f2_gui = FunctionWithGui(f2)
+    f2_gui_param_gui = f2_gui.input("param")
+    assert isinstance(f2_gui_param_gui, BaseModelGui)
+    assert f2_gui_param_gui._type == MyParam2

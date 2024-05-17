@@ -435,10 +435,19 @@ def register_type(type_: Type[Any], factory: GuiFactory[Any]) -> None:
 
 
 def register_enum(enum_class: type[Enum]) -> None:
+    """Register an enum with its GUI implementation.
+    Note: you can also use the enum_with_registration decorator."""
     gui_factories().register_enum(enum_class)
 
 
+def enum_with_gui_registration(cls: Type[Enum]) -> Type[Enum]:
+    register_enum(cls)
+    return cls
+
+
 def register_dataclass(dataclass_type: Type[DataclassLikeType]) -> None:
+    """Register a dataclass with its GUI implementation.
+    Note: you can also use the dataclass_with_gui_registration decorator."""
     from fiatlight.fiat_togui.dataclass_gui import DataclassGui
 
     def factory() -> AnyDataWithGui[Any]:
@@ -448,7 +457,16 @@ def register_dataclass(dataclass_type: Type[DataclassLikeType]) -> None:
     gui_factories().register_type(dataclass_type, factory)
 
 
+# Decorators for registered dataclasses and pydantic models
+def dataclass_with_gui_registration(cls: Type[DataType]) -> Type[DataType]:
+    cls = dataclasses.dataclass(cls)  # First, create the dataclass
+    register_dataclass(cls)  # Then, register it
+    return cls
+
+
 def register_base_model(base_model_type: Type[DataclassLikeType]) -> None:
+    """Register a pydantic BaseModel with its GUI implementation.
+    Note: you can also use the base_model_with_gui_registration decorator."""
     from fiatlight.fiat_togui.dataclass_gui import BaseModelGui
 
     assert issubclass(base_model_type, pydantic.BaseModel)
@@ -460,11 +478,9 @@ def register_base_model(base_model_type: Type[DataclassLikeType]) -> None:
     gui_factories().register_type(base_model_type, factory)
 
 
-# Decorators for registered dataclasses and pydantic models
-def dataclass_with_gui_registration(cls: Type[DataType]) -> Type[DataType]:
-    cls = dataclasses.dataclass(cls)  # First, create the dataclass
-    register_dataclass(cls)  # Then, register it
-    return cls
+def base_model_with_gui_registration(cls: Type[pydantic.BaseModel]) -> Type[pydantic.BaseModel]:
+    register_base_model(cls)
+    return cls  # Return the class as is
 
 
 def register_bound_float(type_: Type[Any], interval: FloatInterval) -> None:

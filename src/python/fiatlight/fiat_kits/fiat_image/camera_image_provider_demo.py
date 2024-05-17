@@ -6,13 +6,11 @@ from pydantic import BaseModel
 import cv2
 
 
+@fiatlight.base_model_with_gui_registration
 class ImageEffect(BaseModel):
     rotation_degree: int = 0
     flip_horizontal: bool = False
     flip_vertical: bool = False
-
-
-fiatlight.register_base_model(ImageEffect)
 
 
 def apply_image_effect(image: ImageU8_3, effect: ImageEffect | None = None) -> ImageU8_3:
