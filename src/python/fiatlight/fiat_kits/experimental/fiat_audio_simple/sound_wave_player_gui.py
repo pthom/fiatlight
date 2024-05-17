@@ -45,13 +45,18 @@ class SoundWaveSelection:
 
 @dataclass
 class SoundWaveGuiParams:
+    plot_size_em: ImVec2 | None = None
     show_time_as_seconds: bool = False
     can_select: bool = False
     volume: float = 1.0
-    plot_size_em: ImVec2 = ImVec2(20, 10)
     selection: SoundWaveSelection = SoundWaveSelection()
 
+    def __post_init__(self) -> None:
+        if self.plot_size_em is None:
+            self.plot_size_em = ImVec2(20, 10)
+
     def to_dict(self) -> JsonDict:
+        assert self.plot_size_em is not None
         return {
             "show_time_as_seconds": self.show_time_as_seconds,
             "can_select": self.can_select,
@@ -72,13 +77,14 @@ class SoundWaveGuiParams:
 class SoundWavePlayerGui(AnyDataWithGui[SoundWave]):
     """SoundWavePlayerGui: a FunctionWithGui that displays a SoundWave in a GUI, with playback controls."""
 
-    params: SoundWaveGuiParams = SoundWaveGuiParams()
+    params: SoundWaveGuiParams
     _sound_wave_player: SoundWavePlayer | None = None
     # A sound wave with fewer samples, for faster plotting
     _sound_wave_gui_resampled: SoundWave | None = None
 
     def __init__(self) -> None:
         super().__init__(SoundWave)
+        self.params = SoundWaveGuiParams()
         self.callbacks.present_custom = self.present_custom
         self.callbacks.on_change = self._on_change
         self.callbacks.on_exit = self._on_exit
@@ -264,7 +270,7 @@ class SoundWavePlayerGui(AnyDataWithGui[SoundWave]):
         _, self.params.volume = imgui.slider_float("Volume", self.params.volume, 0.0, SoundWavePlayer.VOLUME_MAX)
 
         # _, self.params.can_select = imgui.checkbox("Select", self.params.can_select)
-
+        assert self.params.plot_size_em is not None
         plot_size_pixels = immapp.em_to_vec2(self.params.plot_size_em)
         new_plot_size_pixels = immapp.show_resizable_plot_in_node_editor(
             "Audio Waveform", plot_size_pixels, self._plot_waveform
