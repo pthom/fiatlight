@@ -4,14 +4,15 @@ from fiatlight.fiat_core import AnyDataWithGui
 from fiatlight.fiat_widgets import fiat_osd
 from imgui_bundle import hello_imgui, imgui, imgui_node_editor as ed  # noqa
 from enum import Enum
-from typing import Type, List
+from typing import Type, List, Union
+from types import NoneType
 
 
 class OptionalWithGui(AnyDataWithGui[DataType | None]):
     inner_gui: AnyDataWithGui[DataType]
 
     def __init__(self, inner_gui: AnyDataWithGui[DataType]) -> None:
-        super().__init__()
+        super().__init__(Union[inner_gui._type, NoneType])  # type: ignore
         self.can_be_none = True
         self.inner_gui = inner_gui
         self.callbacks.present_str = self.present_str
@@ -101,7 +102,7 @@ class ListWithGui(AnyDataWithGui[List[DataType]]):
     show_idx: bool = True
 
     def __init__(self, inner_gui: AnyDataWithGui[DataType]) -> None:
-        super().__init__()
+        super().__init__(List[inner_gui._type])  # type: ignore
         self.inner_gui = inner_gui
         self.callbacks.present_str = self.present_str
         self.callbacks.edit = self.edit
@@ -172,7 +173,7 @@ class EnumWithGui(AnyDataWithGui[Enum]):
     enum_type: Type[Enum]
 
     def __init__(self, enum_type: Type[Enum]) -> None:
-        super().__init__()
+        super().__init__(enum_type)
         self.enum_type = enum_type
 
         nb_values = len(list(self.enum_type))

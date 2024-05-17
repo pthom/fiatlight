@@ -159,7 +159,7 @@ class SimplePlotGui(AnyDataWithGui[FloatMatrix_Dim1]):
     plot_presenter: SimplePlotPresenter
 
     def __init__(self, array_params: SimplePlotParams | None = None) -> None:
-        super().__init__()
+        super().__init__(FloatMatrix_Dim1)
         self.plot_presenter = SimplePlotPresenter(array_params)
 
         self.callbacks.present_custom = self.present_custom

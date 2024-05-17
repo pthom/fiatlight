@@ -14,7 +14,7 @@ class FigureWithGui(AnyDataWithGui[Figure]):
     _save_file_dialog: pfd.save_file | None = None
 
     def __init__(self) -> None:
-        super().__init__()
+        super().__init__(Figure)
         self._figure_size = ImVec2(0, 0)
         self.callbacks.present_custom = self._present_custom
 

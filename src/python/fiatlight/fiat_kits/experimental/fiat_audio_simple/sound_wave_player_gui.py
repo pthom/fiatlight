@@ -78,7 +78,7 @@ class SoundWavePlayerGui(AnyDataWithGui[SoundWave]):
     _sound_wave_gui_resampled: SoundWave | None = None
 
     def __init__(self) -> None:
-        super().__init__()
+        super().__init__(SoundWave)
         self.callbacks.present_custom = self.present_custom
         self.callbacks.on_change = self._on_change
         self.callbacks.on_exit = self._on_exit

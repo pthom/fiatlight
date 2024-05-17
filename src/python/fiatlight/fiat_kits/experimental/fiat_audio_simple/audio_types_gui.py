@@ -12,7 +12,7 @@ from .audio_types import (
 
 class SampleRateGui(AnyDataWithGui[SampleRate]):
     def __init__(self) -> None:
-        super().__init__()
+        super().__init__(SampleRate)
         self.callbacks.edit = make_explained_value_edit_callback("sample_rate", SampleRatesExplained)
         self.callbacks.default_value_provider = lambda: SampleRate(44100)
         self.callbacks.present_str = lambda x: f"{x / 1000} kHz"
@@ -20,7 +20,7 @@ class SampleRateGui(AnyDataWithGui[SampleRate]):
 
 class BlockSizeGui(AnyDataWithGui[BlockSize]):
     def __init__(self) -> None:
-        super().__init__()
+        super().__init__(BlockSize)
         self.callbacks.edit = make_explained_value_edit_callback("block_size", BlockSizesExplained)
         self.callbacks.default_value_provider = lambda: BlockSize(1024)
         self.callbacks.present_str = lambda x: f"{x} samples"
@@ -28,7 +28,7 @@ class BlockSizeGui(AnyDataWithGui[BlockSize]):
 
 class SoundBlocksListGui(AnyDataWithGui[SoundBlocksList]):
     def __init__(self) -> None:
-        super().__init__()
+        super().__init__(SoundBlocksList)
         self.callbacks.present_str = self._present_str
 
     @staticmethod

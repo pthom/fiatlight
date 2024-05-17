@@ -26,7 +26,7 @@ class FilePathWithGui(AnyDataWithGui[FilePath]):
     _open_file_dialog: pfd.open_file | None = None
 
     def __init__(self) -> None:
-        super().__init__()
+        super().__init__(FilePath)
         self.callbacks.edit = self.edit
         self.callbacks.default_value_provider = lambda: FilePath("")
         self.callbacks.present_str = self.present_str

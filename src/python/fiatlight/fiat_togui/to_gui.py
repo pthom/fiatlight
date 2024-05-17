@@ -134,18 +134,18 @@ def _any_type_class_name_to_gui(type_class_name: str, scope_storage: ScopeStorag
         if gui_factories().can_handle_typename(type_class_name):
             return gui_factories().factor(type_class_name)
 
-    is_optional, type_class_name = _extract_optional_typeclass(type_class_name)
-    is_enum, type_class_name = _extract_enum_typeclass(type_class_name, scope_storage)
-    is_list, type_class_name = _extract_list_typeclass(type_class_name)
+    is_optional, optional_inner_type_class_name = _extract_optional_typeclass(type_class_name)
+    is_enum, enum_type_class_name = _extract_enum_typeclass(type_class_name, scope_storage)
+    is_list, list_inner_type_class_name = _extract_list_typeclass(type_class_name)
 
     if is_enum:
         try:
-            if gui_factories().can_handle_typename(type_class_name):
-                return gui_factories().factor(type_class_name)
+            if gui_factories().can_handle_typename(enum_type_class_name):
+                return gui_factories().factor(enum_type_class_name)
             else:
                 # If you get an error here (NameError: name 'MyEnum' is not defined),
                 # you need to pass the globals and locals
-                enum_class = eval(type_class_name, scope_storage.globals_, scope_storage.locals_)
+                enum_class = eval(enum_type_class_name, scope_storage.globals_, scope_storage.locals_)
             r = EnumWithGui(enum_class)
             return r
         except NameError:
@@ -153,10 +153,10 @@ def _any_type_class_name_to_gui(type_class_name: str, scope_storage: ScopeStorag
             return AnyDataWithGui.make_for_any()
 
     if is_optional:
-        inner_gui = _any_type_class_name_to_gui(type_class_name, scope_storage=scope_storage)
+        inner_gui = _any_type_class_name_to_gui(optional_inner_type_class_name, scope_storage=scope_storage)
         return OptionalWithGui(inner_gui)
     elif is_list:
-        inner_gui = _any_type_class_name_to_gui(type_class_name, scope_storage=scope_storage)
+        inner_gui = _any_type_class_name_to_gui(list_inner_type_class_name, scope_storage=scope_storage)
         return ListWithGui(inner_gui)
 
     # if we reach this point, we have no GUI implementation for the type
@@ -176,6 +176,12 @@ def _any_typeclass_to_gui_split_if_tuple(
             r.append(_any_type_class_name_to_gui(inner_type_class, scope_storage=scope_storage))
     else:
         r.append(_any_type_class_name_to_gui(type_class_name, scope_storage=scope_storage))
+    return r
+
+
+def any_type_to_gui(type_: DataType, scope_storage: ScopeStorage) -> AnyDataWithGui[DataType]:
+    typename = str(type_)
+    r = _any_type_class_name_to_gui(typename, scope_storage)
     return r
 
 

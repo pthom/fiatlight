@@ -11,7 +11,7 @@ from fiatlight.fiat_types.base_types import (
 from fiatlight.fiat_types.error_types import Error, ErrorValue, Unspecified, UnspecifiedValue
 from fiatlight.fiat_types.function_types import DataPresentFunction, DataEditFunction  # noqa
 from fiatlight.fiat_core.any_data_gui_callbacks import AnyDataGuiCallbacks
-from typing import Generic, Any
+from typing import Generic, Any, Type
 from imgui_bundle import imgui
 import logging
 import pydantic
@@ -26,6 +26,9 @@ class AnyDataWithGui(Generic[DataType]):
     # ------------------------------------------------------------------------------------------------------------------
     #            Members
     # ------------------------------------------------------------------------------------------------------------------
+    # The type of the data
+    _type: Type[DataType]
+
     # The value of the data - can be a DataType, Unspecified, or Error
     # It is accessed through the value property, which triggers the on_change callback (if set)
     _value: DataType | Unspecified | Error = UnspecifiedValue
@@ -51,15 +54,15 @@ class AnyDataWithGui(Generic[DataType]):
     # ------------------------------------------------------------------------------------------------------------------
     #            Initialization
     # ------------------------------------------------------------------------------------------------------------------
-    def __init__(self) -> None:
+    def __init__(self, data_type: Type[DataType]) -> None:
+        self._type = data_type
         self.callbacks = AnyDataGuiCallbacks.no_handlers()
         self._custom_attrs = {}
 
     @staticmethod
     def make_for_any() -> "AnyDataWithGui[Any]":
-        """Creates an AnyDataWithGui with no type specified.
-        This is useful when we don't know the type of the data."""
-        return AnyDataWithGui()
+        r = AnyDataWithGui[Any](type(Any))
+        return r
 
     # ------------------------------------------------------------------------------------------------------------------
     #            Value getter and setter + get_actual_value (which returns a DataType or raises an exception)
@@ -215,7 +218,7 @@ class Foo:
 
 class FooWithGui(AnyDataWithGui[Foo]):
     def __init__(self) -> None:
-        super().__init__()
+        super().__init__(Foo)
         self.callbacks.edit = self.edit
         self.callbacks.present_str = self.present_str
         self.callbacks.default_value_provider = lambda: Foo(x=0)

@@ -10,7 +10,7 @@ class StrWithResizableGui(AnyDataWithGui[str]):
     _input_text_in_popup: hello_imgui.InputTextData
 
     def __init__(self) -> None:
-        super().__init__()
+        super().__init__(str)
         self._input_text_in_node = hello_imgui.InputTextData("", multiline=False, size_em=ImVec2(15, 0))
         self._input_text_in_popup = hello_imgui.InputTextData("", multiline=True, size_em=ImVec2(60, 15))
         self.callbacks.on_change = self.on_change

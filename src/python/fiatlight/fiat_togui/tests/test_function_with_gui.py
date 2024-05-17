@@ -64,7 +64,7 @@ class IntWrapper:
 # Create a GUI type for our local type
 class IntWrapperWithGui(AnyDataWithGui[IntWrapper]):
     def __init__(self) -> None:
-        super().__init__()
+        super().__init__(IntWrapper)
 
 
 # Register the GUI type as a module global type
@@ -102,7 +102,7 @@ def test_with_class_function_and_local_types() -> None:
     # Create a GUI type for our local type
     class IntWrapperLocalWithGui(AnyDataWithGui[IntWrapperLocal]):
         def __init__(self) -> None:
-            super().__init__()
+            super().__init__(IntWrapperLocal)
 
     # Register the GUI type as a module global type
     register_type(IntWrapperLocal, IntWrapperLocalWithGui)
@@ -133,7 +133,7 @@ class A:
 
 class AWithGui(AnyDataWithGui[A]):
     def __init__(self) -> None:
-        super().__init__()
+        super().__init__(A)
 
 
 register_type(A, AWithGui)

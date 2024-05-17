@@ -58,7 +58,7 @@ class IntWithGui(AnyDataWithGui[int]):
     params: IntWithGuiParams
 
     def __init__(self, params: IntWithGuiParams | None = None) -> None:
-        super().__init__()
+        super().__init__(int)
         self.params = params if params is not None else IntWithGuiParams()
         self.callbacks.edit = self.edit
         self.callbacks.default_value_provider = lambda: 0
@@ -292,7 +292,7 @@ class FloatWithGui(AnyDataWithGui[float]):
     params: FloatWithGuiParams
 
     def __init__(self, params: FloatWithGuiParams | None = None) -> None:
-        super().__init__()
+        super().__init__(float)
         self.params = params if params is not None else FloatWithGuiParams()
         self.callbacks.edit = self.edit
         self.callbacks.default_value_provider = lambda: 0.0
@@ -508,7 +508,7 @@ class BoolWithGui(AnyDataWithGui[bool]):
     params: BoolWithGuiParams
 
     def __init__(self, params: BoolWithGuiParams | None = None):
-        super().__init__()
+        super().__init__(bool)
         self.params = params if params is not None else BoolWithGuiParams()
         self.callbacks.edit = self.edit
         self.callbacks.default_value_provider = lambda: False
@@ -572,7 +572,7 @@ class BoolWithGui(AnyDataWithGui[bool]):
 ########################################################################################################################
 class ColorRgbWithGui(AnyDataWithGui[ColorRgb]):
     def __init__(self) -> None:
-        super().__init__()
+        super().__init__(ColorRgb)
         self.callbacks.edit = self.edit
         self.callbacks.default_value_provider = lambda: ColorRgb((0, 0, 0))
         self.callbacks.present_str = self.present_str
@@ -615,7 +615,7 @@ class ColorRgbWithGui(AnyDataWithGui[ColorRgb]):
 
 class ColorRgbaWithGui(AnyDataWithGui[ColorRgba]):
     def __init__(self) -> None:
-        super().__init__()
+        super().__init__(ColorRgba)
         self.callbacks.edit = self.edit
         self.callbacks.default_value_provider = lambda: ColorRgba((0, 0, 0, 255))
         self.callbacks.present_str = self.present_str

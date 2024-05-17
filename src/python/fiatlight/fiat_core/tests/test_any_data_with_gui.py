@@ -1,6 +1,13 @@
+from typing import List, Optional
+
 from fiatlight.fiat_types import UnspecifiedValue
 from fiatlight.fiat_core import ParamKind, ParamWithGui, AnyDataWithGui
-from fiatlight.fiat_togui.to_gui import _to_data_with_gui, _any_type_class_name_to_gui, _capture_current_scope
+from fiatlight.fiat_togui.to_gui import (
+    _to_data_with_gui,
+    _any_type_class_name_to_gui,
+    _capture_current_scope,
+    any_type_to_gui,
+)
 
 
 def test_creation() -> None:
@@ -77,3 +84,29 @@ def test_enum_serialization() -> None:
     assert as_json == {"class": "MyEnum", "type": "Enum", "value_name": "A"}
     a.load_from_json({"class": "MyEnum", "type": "Enum", "value_name": "B"})
     assert a.value == MyEnum.B  # type: ignore
+
+
+def test_type_storage() -> None:
+    scope_storage = _capture_current_scope()
+
+    assert any_type_to_gui(int, scope_storage)._type == int  # type: ignore
+    assert any_type_to_gui(float, scope_storage)._type == float  # type: ignore
+    assert any_type_to_gui(str, scope_storage)._type == str  # type: ignore
+    assert any_type_to_gui(bool, scope_storage)._type == bool  # type: ignore
+
+    ListInt = List[int]
+    li = any_type_to_gui(ListInt, scope_storage)
+    assert li._type == ListInt  # type: ignore
+
+    OptionalInt = Optional[int]
+    oi = any_type_to_gui(OptionalInt, scope_storage)
+    assert oi._type == OptionalInt  # type: ignore
+
+    OptionalInt2 = int | None
+    oi2 = any_type_to_gui(OptionalInt2, scope_storage)
+    assert oi2._type == OptionalInt2  # type: ignore
+
+    from fiatlight.fiat_kits.fiat_image import ImageU8_3, Image
+
+    gi = any_type_to_gui(ImageU8_3, scope_storage)
+    assert gi._type == Image  # type: ignore

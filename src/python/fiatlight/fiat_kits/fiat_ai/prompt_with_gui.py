@@ -12,7 +12,7 @@ class PromptWithGui(AnyDataWithGui[Prompt]):
     _edited_prompt: Prompt  # not yet submitted
 
     def __init__(self) -> None:
-        super().__init__()
+        super().__init__(Prompt)
         self._str_with_resizable_gui = StrWithResizableGui()
         self._edited_prompt = Prompt("")
         self.callbacks.on_change = self.on_change

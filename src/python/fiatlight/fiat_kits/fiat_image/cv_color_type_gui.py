@@ -31,7 +31,7 @@ def gui_color_conversion(color_conversion: ColorConversion) -> Tuple[bool, Color
 
 class ColorConversionWithGui(AnyDataWithGui[ColorConversion]):
     def __init__(self) -> None:
-        super().__init__()
+        super().__init__(ColorConversion)
         self.callbacks.edit = self.edit
         self.callbacks.default_value_provider = lambda: ColorConversion(ColorType.BGR, ColorType.RGB)
 

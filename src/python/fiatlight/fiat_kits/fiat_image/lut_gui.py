@@ -15,7 +15,7 @@ class LutParamsWithGui(AnyDataWithGui[LutParams]):
     _lut_graph_size_em: float = 3.5
 
     def __init__(self) -> None:
-        super().__init__()
+        super().__init__(LutParams)
         self.callbacks.present_str = self.present_str
         self.callbacks.edit = self.edit
         self.callbacks.on_change = self.on_change

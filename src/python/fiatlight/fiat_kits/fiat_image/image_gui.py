@@ -113,7 +113,7 @@ class ImageWithGui(AnyDataWithGui[Image]):
     open_file_dialog: Optional[pfd.open_file]
 
     def __init__(self, image_params: immvision.ImageParams | None = None, show_channels: bool = False) -> None:
-        super().__init__()
+        super().__init__(Image)  # type: ignore
         self.image_presenter = ImagePresenter(image_params, show_channels)
         self.open_file_dialog = None
         self.callbacks.edit = self.edit
