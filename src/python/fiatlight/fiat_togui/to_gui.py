@@ -1,6 +1,8 @@
 import typing
 from dataclasses import dataclass
 
+import pydantic
+
 from fiatlight.fiat_types import UnspecifiedValue, DataType
 from fiatlight.fiat_types.base_types import ScopeStorage, JsonDict
 from fiatlight.fiat_togui import primitives_gui
@@ -11,7 +13,7 @@ from fiatlight.fiat_core.output_with_gui import OutputWithGui
 from fiatlight.fiat_togui.composite_gui import OptionalWithGui, EnumWithGui, ListWithGui
 from fiatlight.fiat_togui.function_signature import get_function_signature
 from fiatlight.fiat_types.fiat_number_types import FloatInterval, IntInterval
-from .dataclass_gui import DataclassType
+from .dataclass_gui import DataclassLikeType
 from enum import Enum
 
 import inspect
@@ -430,7 +432,7 @@ def register_enum(enum_class: type[Enum]) -> None:
     gui_factories().register_enum(enum_class)
 
 
-def register_dataclass(dataclass_type: typing.Type[DataclassType]) -> None:
+def register_dataclass(dataclass_type: typing.Type[DataclassLikeType]) -> None:
     from fiatlight.fiat_togui.dataclass_gui import DataclassGui
 
     def factory() -> AnyDataWithGui[Any]:
@@ -438,6 +440,18 @@ def register_dataclass(dataclass_type: typing.Type[DataclassType]) -> None:
         return r
 
     gui_factories().register_type(dataclass_type, factory)
+
+
+def register_base_model(base_model_type: typing.Type[DataclassLikeType]) -> None:
+    from fiatlight.fiat_togui.dataclass_gui import BaseModelGui
+
+    assert issubclass(base_model_type, pydantic.BaseModel)
+
+    def factory() -> AnyDataWithGui[Any]:
+        r = BaseModelGui(base_model_type)
+        return r
+
+    gui_factories().register_type(base_model_type, factory)
 
 
 def register_bound_float(type_: typing.Type[Any], interval: FloatInterval) -> None:
