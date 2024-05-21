@@ -3,21 +3,31 @@ from fiatlight.fiat_nodes.functions_graph_gui import FunctionsGraphGui
 from fiatlight.fiat_core import FunctionsGraph, FunctionWithGui
 from fiatlight.fiat_togui.to_gui import _capture_scope_back_1
 from fiatlight.fiat_types.base_types import ScopeStorage
+from fiatlight.fiat_types.function_types import Function
 from fiatlight.fiat_widgets import fontawesome_6_ctx, icons_fontawesome_6, fiat_osd
 from fiatlight.fiat_utils import functional_utils
 from fiatlight.fiat_runner.functions_collection import FunctionCollectionGui
 from fiatlight.fiat_kits.fiat_image.image_types import ImageU8_3
-from fiatlight import fiat_config
 from imgui_bundle import immapp, imgui, imgui_ctx, ImVec4, portable_file_dialogs as pfd
 from typing import Any, Callable
 from imgui_bundle import hello_imgui, ImVec2, immvision
 
 import json
-import time
 import logging
 import pathlib
 from typing import List, Tuple
 from enum import Enum, auto
+
+
+def _is_running_in_notebook():
+    try:
+        from IPython import get_ipython
+
+        if "IPKernelApp" in get_ipython().config:
+            return True
+    except ImportError:
+        return False
+    return False
 
 
 # ==================================================================================================================
@@ -51,6 +61,14 @@ root_logger.addHandler(hello_imgui_log_handler)
 console_handler = logging.StreamHandler()
 console_handler.setFormatter(logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s"))
 root_logger.addHandler(console_handler)
+
+# Last image
+_LAST_SCREENSHOT: ImageU8_3 | None = None
+
+
+def get_last_screenshot() -> ImageU8_3 | None:
+    """Returns a screenshot of the nodes of the last frame, just before exiting the app."""
+    return _LAST_SCREENSHOT
 
 
 # ==================================================================================================================
@@ -162,12 +180,6 @@ class FiatGui:
         # Set window_title from the name of the calling module
         if params.runner_params.app_window_params.window_title == "":
             params.runner_params.app_window_params.window_title = _main_python_module_name()
-        shall_record_screenshot = fiat_config.get_fiat_config().is_recording_snippet_screenshot
-        if shall_record_screenshot:
-            # When recording a snippet, add a timestamp to the window title
-            # (this is a hack so that settings are not restored)
-            time_unix = int(time.time())
-            params.runner_params.app_window_params.window_title += "_rec_" + str(time_unix)
 
         self.params = params
         self._functions_graph_gui = FunctionsGraphGui(functions_graph)
@@ -201,11 +213,11 @@ class FiatGui:
         self._disable_idling_if_any_live_function()
 
     def _before_exit(self) -> None:
+        self._store_final_app_window_screenshot()
         self._functions_graph_gui.on_exit()
         if self.params.customizable_graph:
             self._save_graph_composition(self._graph_composition_filename())
         self._save_user_inputs(self._user_settings_filename())
-        self._handle_snippet_screenshot_on_exit()
 
     def run(self) -> None:
         self.params.runner_params.docking_params.docking_splits += self._docking_splits()
@@ -236,14 +248,15 @@ class FiatGui:
 
         immapp.run(self.params.runner_params, self.params.addons)
 
-    def _handle_snippet_screenshot_on_exit(self) -> None:
-        from fiatlight.fiat_runner.fiat_shot_snippet import set_screenshot_bounds
-
-        shall_record_screenshot = fiat_config.get_fiat_config().is_recording_snippet_screenshot
-        if not shall_record_screenshot:
-            return
-        nodes_boundings = self._functions_graph_gui._get_node_screenshot_boundings()
-        set_screenshot_bounds(nodes_boundings)
+    def _store_final_app_window_screenshot(self) -> None:
+        global _LAST_SCREENSHOT
+        last_hello_imgui_image = hello_imgui.final_app_window_screenshot()
+        nodes_boundings = self._functions_graph_gui._get_node_screenshot_boundings()  # noqa
+        last_nodes_image = last_hello_imgui_image[  # type: ignore
+            int(nodes_boundings.min.y) : int(nodes_boundings.max.y),
+            int(nodes_boundings.min.x) : int(nodes_boundings.max.x),
+        ]
+        _LAST_SCREENSHOT = last_nodes_image
 
     def _heartbeat(self) -> None:
         fiat_osd._render_all_osd()  # noqa
@@ -557,15 +570,17 @@ class FiatGui:
 
 
 def fiat_run_graph(functions_graph: FunctionsGraph, params: FiatGuiParams | None = None) -> None:
-    fiat_gui = FiatGui(functions_graph, params)
-    fiat_gui.run()
+    if _is_running_in_notebook():
+        from fiatlight.fiat_runner.fiat_run_notebook import _fiat_run_graph_nb
 
-
-AnyFunction = Callable[..., Any]
+        _fiat_run_graph_nb(functions_graph, params, params)
+    else:
+        fiat_gui = FiatGui(functions_graph, params)
+        fiat_gui.run()
 
 
 def fiat_run(
-    fn: AnyFunction | FunctionWithGui, params: FiatGuiParams | None = None, scope_storage: ScopeStorage | None = None
+    fn: Function | FunctionWithGui, params: FiatGuiParams | None = None, scope_storage: ScopeStorage | None = None
 ) -> None:
     if scope_storage is None:
         scope_storage = _capture_scope_back_1()
@@ -574,7 +589,7 @@ def fiat_run(
 
 
 def fiat_run_composition(
-    composition: List[AnyFunction | FunctionWithGui],
+    composition: List[Function | FunctionWithGui],
     params: FiatGuiParams | None = None,
     scope_storage: ScopeStorage | None = None,
 ) -> None:

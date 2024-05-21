@@ -276,6 +276,10 @@ class FunctionsGraphGui:
             fbs = imgui.get_io().display_framebuffer_scale
             node_tl = node_tl * fbs  # type: ignore
             node_br = node_br * fbs
+            # Add some margin
+            margin = 3
+            node_tl -= ImVec2(margin, margin)
+            node_br += ImVec2(margin, margin)
             # phew, done...
 
             all_nodes_boundings.append(imgui.internal.ImRect(node_tl, node_br))

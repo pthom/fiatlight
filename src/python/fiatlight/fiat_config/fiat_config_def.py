@@ -5,7 +5,6 @@ class FiatConfig:
     style: FiatStyle = FiatStyle()
     catch_function_exceptions: bool = True
     disable_input_during_execution: bool = False
-    is_recording_snippet_screenshot: bool = False
 
     def __init__(self) -> None:
         self.style = FiatStyle()

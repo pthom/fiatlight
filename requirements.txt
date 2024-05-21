@@ -10,3 +10,4 @@ pydantic
 matplotlib
 scipy
 scikit-learn
+pyglfw
