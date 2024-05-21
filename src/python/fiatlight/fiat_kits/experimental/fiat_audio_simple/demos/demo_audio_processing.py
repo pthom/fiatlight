@@ -86,7 +86,7 @@ def evaluate_note(wave: fiat_audio_simple.SoundWave) -> str:
 note: {note}
 solfege: {solfege}
 error: {error_cents:.2f} cents (100 cents is one semitone)
-tempo: {tempo:.2f} BPM
+tempo: {tempo[0]:.2f} BPM
         """
     return info
 

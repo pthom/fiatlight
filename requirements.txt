@@ -7,3 +7,6 @@ Pillow
 types-Pillow
 brotli
 pydantic
+matplotlib
+scipy
+scikit-learn

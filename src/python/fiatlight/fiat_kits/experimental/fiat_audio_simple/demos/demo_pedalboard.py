@@ -6,7 +6,7 @@ from fiatlight.fiat_kits.experimental import fiat_audio_simple
 
 
 def add_chorus_effect(wave: fiat_audio_simple.SoundWave) -> fiat_audio_simple.SoundWave:
-    from pedalboard import Pedalboard, Chorus, Reverb
+    from pedalboard import Pedalboard, Chorus, Reverb  # type: ignore
 
     # Make a Pedalboard object, containing multiple audio plugins:
     board = Pedalboard([Chorus(), Reverb(room_size=0.25)])

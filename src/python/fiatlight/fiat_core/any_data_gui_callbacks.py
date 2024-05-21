@@ -115,7 +115,6 @@ class AnyDataGuiCallbacks(Generic[DataType]):
     save_gui_options_to_json: Callable[[], JsonDict] | None = None
     load_gui_options_from_json: Callable[[JsonDict], None] | None = None
 
-    # (On hold)
     # Optional serialization and deserialization functions for DataType
     # If provided, these functions will be used to serialize and deserialize the data with a custom dict format.
     # If not provided, "value" will be serialized as a dict of its __dict__ attribute,
