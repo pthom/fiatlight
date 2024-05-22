@@ -12,3 +12,5 @@ priv_assets/
 /v3*
 .DS_Store
 .ipynb_checkpoints
+/fiatlight.*.json
+/*.ini

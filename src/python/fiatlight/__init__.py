@@ -1,4 +1,4 @@
-from fiatlight import fiat_core, fiat_widgets, fiat_types, fiat_runner, fiat_config, fiat_kits
+from fiatlight import fiat_core, fiat_widgets, fiat_types, fiat_runner, fiat_config, fiat_kits, fiat_doc
 from fiatlight.fiat_core import (
     AnyDataWithGui,
     FunctionWithGui,
@@ -39,6 +39,7 @@ __all__ = [
     "fiat_config",
     "fiat_array",
     "fiat_kits",
+    "fiat_doc",
     # from core
     "FunctionsGraph",
     "AnyDataWithGui",

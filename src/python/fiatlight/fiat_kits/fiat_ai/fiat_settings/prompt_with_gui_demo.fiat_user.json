@@ -1,0 +1,48 @@
+{
+    "functions_graph": {
+        "functions_nodes": {
+            "f": {
+                "inputs": {
+                    "prompt": {
+                        "name": "prompt",
+                        "data": {
+                            "type": "Primitive",
+                            "value": "abcdcxwcx  cddd"
+                        }
+                    }
+                },
+                "gui_options": {
+                    "inputs": {
+                        "prompt": {
+                            "_str_with_resizable_gui": {
+                                "_input_text_in_node_size": {
+                                    "x": 15.0,
+                                    "y": 0.0
+                                },
+                                "_input_text_in_popup_size": {
+                                    "x": 37.0,
+                                    "y": 15.0
+                                }
+                            }
+                        }
+                    },
+                    "outputs": {},
+                    "internal_gui_options": {}
+                }
+            }
+        }
+    },
+    "functions_gui_settings": {
+        "f": {
+            "_show_input_details": {
+                "prompt": true
+            },
+            "_inputs_expanded": true,
+            "_show_output_details": {},
+            "_outputs_expanded": true,
+            "_show_internals_details": {},
+            "_internals_expanded": true,
+            "_internal_state_gui_expanded": true
+        }
+    }
+}

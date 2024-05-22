@@ -1,0 +1,71 @@
+{
+    "functions_graph": {
+        "functions_nodes": {
+            "make_range": {
+                "inputs": {
+                    "start": {
+                        "name": "start",
+                        "data": {
+                            "type": "Unspecified"
+                        }
+                    },
+                    "stop": {
+                        "name": "stop",
+                        "data": {
+                            "type": "Unspecified"
+                        }
+                    },
+                    "step": {
+                        "name": "step",
+                        "data": {
+                            "type": "Unspecified"
+                        }
+                    }
+                },
+                "gui_options": {
+                    "inputs": {},
+                    "outputs": {},
+                    "internal_gui_options": {}
+                }
+            },
+            "make_sin": {
+                "inputs": {},
+                "gui_options": {
+                    "inputs": {},
+                    "outputs": {},
+                    "internal_gui_options": {}
+                }
+            }
+        }
+    },
+    "functions_gui_settings": {
+        "make_range": {
+            "_show_input_details": {
+                "start": false,
+                "stop": false,
+                "step": false
+            },
+            "_inputs_expanded": true,
+            "_show_output_details": {
+                "0": true
+            },
+            "_outputs_expanded": true,
+            "_show_internals_details": {},
+            "_internals_expanded": true,
+            "_internal_state_gui_expanded": true
+        },
+        "make_sin": {
+            "_show_input_details": {
+                "x": false
+            },
+            "_inputs_expanded": true,
+            "_show_output_details": {
+                "0": true
+            },
+            "_outputs_expanded": true,
+            "_show_internals_details": {},
+            "_internals_expanded": true,
+            "_internal_state_gui_expanded": true
+        }
+    }
+}

@@ -1,0 +1,68 @@
+{
+    "functions_graph": {
+        "functions_nodes": {
+            "f": {
+                "inputs": {
+                    "param": {
+                        "name": "param",
+                        "data": {
+                            "type": "Dict",
+                            "value": {
+                                "image_in": "/Users/pascal/dvp/OpenSource/ImGuiWork/_Bundle/fiatlight/priv_assets/fig.jpg",
+                                "image_out": "save.png",
+                                "x": 4,
+                                "y": "Hello\n\nWorld\n\ncwxc\n\n\ncxww\n\n\n\ncxw\n\n\nxwcw"
+                            }
+                        }
+                    }
+                },
+                "gui_options": {
+                    "inputs": {
+                        "param": {
+                            "y": {
+                                "_input_text_in_node_size": {
+                                    "x": 8.266666412353516,
+                                    "y": 0.0
+                                },
+                                "_input_text_in_popup_size": {
+                                    "x": 37.0,
+                                    "y": 15.0
+                                }
+                            }
+                        }
+                    },
+                    "outputs": {
+                        "0": {
+                            "y": {
+                                "_input_text_in_node_size": {
+                                    "x": 15.0,
+                                    "y": 0.0
+                                },
+                                "_input_text_in_popup_size": {
+                                    "x": 60.0,
+                                    "y": 15.0
+                                }
+                            }
+                        }
+                    },
+                    "internal_gui_options": {}
+                }
+            }
+        }
+    },
+    "functions_gui_settings": {
+        "f": {
+            "_show_input_details": {
+                "param": true
+            },
+            "_inputs_expanded": true,
+            "_show_output_details": {
+                "0": true
+            },
+            "_outputs_expanded": true,
+            "_show_internals_details": {},
+            "_internals_expanded": true,
+            "_internal_state_gui_expanded": true
+        }
+    }
+}

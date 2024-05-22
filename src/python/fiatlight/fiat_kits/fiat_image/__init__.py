@@ -21,7 +21,7 @@ from .image_gui import (
 )
 from .cv_color_type import ColorType, ColorConversion
 from .cv_color_type_gui import ColorConversionWithGui
-from .lut import (
+from .lut_functions import (
     LutParams,
     LutTable,
     lut_with_params,
@@ -31,6 +31,7 @@ from .lut import (
 from .lut_gui import LutParamsWithGui
 from .overlay_alpha_image import overlay_alpha_image
 from .image_to_from_file_gui import image_from_file, ImageToFileGui
+from .camera_image_provider import CameraImageProvider, CameraImageProviderGui
 
 
 def _register_factories() -> None:
@@ -84,4 +85,7 @@ __all__ = [
     # from image_to_from_file_gui
     "image_from_file",
     "ImageToFileGui",
+    # from camera_image_provider
+    "CameraImageProvider",
+    "CameraImageProviderGui",
 ]

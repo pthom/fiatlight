@@ -1,3 +1,11 @@
+"""Demonstrates plots generated using ImPlot (https://github.com/epezent/implot). ImPlot is an immediate mode plotting library for Dear ImGui, whose rendering is often faster than MatPlotLib.
+
+This example demonstrates
+- how to create a live sine wave plot with adjustable frequency, phase, and amplitude using ImPlot.
+  The frequency, phase, and amplitude can be adjusted interactively using knobs.
+- how to create a spirograph-like curve using ImPlot.
+"""
+
 import fiatlight
 from fiatlight import fiat_array
 from fiatlight.fiat_types import Float_0_100
@@ -52,7 +60,7 @@ def get_simple_values(x: float) -> fiat_array.FloatMatrix_Dim1:
     return np.array(r)  # type: ignore
 
 
-def sandbox() -> None:
+def main() -> None:
     graph = fiatlight.FunctionsGraph()
     graph.add_function(make_spirograph_curve)
     graph.add_function(get_simple_values)
@@ -63,8 +71,8 @@ def sandbox() -> None:
     graph.add_link("time_seconds", "phase_from_time_seconds")
     graph.add_link("phase_from_time_seconds", "sin_wave")
 
-    fiatlight.fiat_run_graph(graph)
+    fiatlight.fiat_run_graph(graph, app_name="Demo ImPlot")
 
 
 if __name__ == "__main__":
-    sandbox()
+    main()

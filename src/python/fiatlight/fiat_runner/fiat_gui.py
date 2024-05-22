@@ -33,6 +33,15 @@ def _is_running_in_notebook() -> bool:
     return False
 
 
+def _is_running_in_documentation() -> bool:
+    from fiatlight.fiat_config import fiatlight_doc_path
+    import os
+
+    cwd = os.path.abspath(os.getcwd())
+    r = cwd.startswith(fiatlight_doc_path())
+    return r
+
+
 # ==================================================================================================================
 #                                  Logging
 # ==================================================================================================================
@@ -61,9 +70,10 @@ hello_imgui_log_handler.setFormatter(logging.Formatter("%(asctime)s - %(name)s -
 root_logger.addHandler(hello_imgui_log_handler)
 
 # Create a console handler
-console_handler = logging.StreamHandler()
-console_handler.setFormatter(logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s"))
-root_logger.addHandler(console_handler)
+if not _is_running_in_documentation():  # do not add logs to doc notebooks
+    console_handler = logging.StreamHandler()
+    console_handler.setFormatter(logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s"))
+    root_logger.addHandler(console_handler)
 
 # Last image
 _LAST_SCREENSHOT: ImageU8_3 | None = None
@@ -92,6 +102,16 @@ def _main_python_module_name() -> str:
             main_python_module_name = pathlib.Path(frame_full_file).stem
             return main_python_module_name
     return "fiatlight"
+
+
+def _ini_filename_from_app_name(app_name: str) -> str:
+    app_name_sane = ""
+    for c in app_name:
+        if c.isalnum():
+            app_name_sane += c
+        else:
+            app_name_sane += "_"
+    return "fiat_settings/" + app_name_sane + ".ini"
 
 
 # ==================================================================================================================
@@ -175,14 +195,22 @@ class FiatGui:
     # ==================================================================================================================
     #                                  Constructor
     # ==================================================================================================================
-    def __init__(self, functions_graph: FunctionsGraph, params: FiatGuiParams | None = None) -> None:
+    def __init__(
+        self, functions_graph: FunctionsGraph, params: FiatGuiParams | None = None, app_name: str | None = None
+    ) -> None:
         if params is None:
-            # params.runner_params.app_window_params.window_title
             params = FiatGuiParams()
 
-        # Set window_title from the name of the calling module
-        if params.runner_params.app_window_params.window_title == "":
+        if app_name is not None:
+            params.runner_params.app_window_params.window_title = app_name
+        elif params.runner_params.app_window_params.window_title == "":
+            # Set window_title from the name of the calling module
             params.runner_params.app_window_params.window_title = _main_python_module_name()
+
+        if len(params.runner_params.ini_filename) == 0:
+            params.runner_params.ini_filename = _ini_filename_from_app_name(
+                params.runner_params.app_window_params.window_title
+            )
 
         self.params = params
         self._functions_graph_gui = FunctionsGraphGui(functions_graph)
@@ -573,33 +601,53 @@ class FiatGui:
         self._save_data(filename, _SaveType.GraphComposition)
 
 
-def fiat_run_graph(functions_graph: FunctionsGraph, params: FiatGuiParams | None = None) -> None:
+def fiat_run_graph(
+    functions_graph: FunctionsGraph,
+    params: FiatGuiParams | None = None,
+    app_name: str | None = None,
+) -> None:
     if _is_running_in_notebook():
         from fiatlight.fiat_runner.fiat_run_notebook import _fiat_run_graph_nb, NotebookRunnerParams
 
+        if app_name is None:
+            raise ValueError(
+                "app_name must be specified when running in a notebook, so that the settings can be saved."
+            )
+
         notebook_runner_params = NotebookRunnerParams()
 
-        _fiat_run_graph_nb(functions_graph, params, notebook_runner_params)
+        _fiat_run_graph_nb(
+            functions_graph, params=params, app_name=app_name, notebook_runner_params=notebook_runner_params
+        )
     else:
-        fiat_gui = FiatGui(functions_graph, params)
+        fiat_gui = FiatGui(functions_graph, params=params, app_name=app_name)
         fiat_gui.run()
 
 
 def fiat_run(
-    fn: Function | FunctionWithGui, params: FiatGuiParams | None = None, scope_storage: ScopeStorage | None = None
+    fn: Function | FunctionWithGui,
+    params: FiatGuiParams | None = None,
+    app_name: str | None = None,
+    scope_storage: ScopeStorage | None = None,
 ) -> None:
     if scope_storage is None:
         scope_storage = _capture_scope_back_1()
     functions_graph = FunctionsGraph.from_function(fn, scope_storage)
-    fiat_run_graph(functions_graph, params)
+    fiat_run_graph(functions_graph, params=params, app_name=app_name)
 
 
 def fiat_run_composition(
     composition: List[Function | FunctionWithGui],
     params: FiatGuiParams | None = None,
+    app_name: str | None = None,
     scope_storage: ScopeStorage | None = None,
 ) -> None:
+    """Runs a composition of functions in the Fiat GUI.
+    - app_name: will be displayed in the window title, and used to save/load the user inputs and graph composition.
+                if it is None, then the name of the calling module will be used.
+                Note: inside a notebook, specifying app_name is mandatory, since the module name is not available.
+    """
     if scope_storage is None:
         scope_storage = _capture_scope_back_1()
     functions_graph = FunctionsGraph.from_function_composition(composition, scope_storage)
-    fiat_run_graph(functions_graph, params)
+    fiat_run_graph(functions_graph, params=params, app_name=app_name)

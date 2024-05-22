@@ -1,0 +1,110 @@
+{
+    "functions_graph": {
+        "functions_nodes": {
+            "text_from_file": {
+                "inputs": {
+                    "path": {
+                        "name": "path",
+                        "data": {
+                            "type": "Primitive",
+                            "value": "/Users/pascal/dvp/OpenSource/ImGuiWork/_Bundle/fiatlight/priv_assets/text/hamlet_Shakespeare.txt"
+                        }
+                    }
+                },
+                "gui_options": {
+                    "inputs": {},
+                    "outputs": {},
+                    "internal_gui_options": {}
+                }
+            },
+            "to_lower": {
+                "inputs": {},
+                "gui_options": {
+                    "inputs": {
+                        "text": {
+                            "_input_text_in_node_size": {
+                                "x": 15.0,
+                                "y": 0.0
+                            },
+                            "_input_text_in_popup_size": {
+                                "x": 60.0,
+                                "y": 15.0
+                            }
+                        }
+                    },
+                    "outputs": {
+                        "0": {
+                            "_input_text_in_node_size": {
+                                "x": 15.0,
+                                "y": 0.0
+                            },
+                            "_input_text_in_popup_size": {
+                                "x": 60.0,
+                                "y": 15.0
+                            }
+                        }
+                    },
+                    "internal_gui_options": {}
+                }
+            },
+            "TextToFile": {
+                "inputs": {},
+                "gui_options": {
+                    "inputs": {
+                        "text": {
+                            "_input_text_in_node_size": {
+                                "x": 15.0,
+                                "y": 0.0
+                            },
+                            "_input_text_in_popup_size": {
+                                "x": 60.0,
+                                "y": 15.0
+                            }
+                        }
+                    },
+                    "outputs": {},
+                    "internal_gui_options": {}
+                }
+            }
+        }
+    },
+    "functions_gui_settings": {
+        "text_from_file": {
+            "_show_input_details": {
+                "path": true
+            },
+            "_inputs_expanded": true,
+            "_show_output_details": {
+                "0": true
+            },
+            "_outputs_expanded": true,
+            "_show_internals_details": {},
+            "_internals_expanded": true,
+            "_internal_state_gui_expanded": true
+        },
+        "to_lower": {
+            "_show_input_details": {
+                "text": false
+            },
+            "_inputs_expanded": true,
+            "_show_output_details": {
+                "0": true
+            },
+            "_outputs_expanded": true,
+            "_show_internals_details": {},
+            "_internals_expanded": true,
+            "_internal_state_gui_expanded": true
+        },
+        "TextToFile": {
+            "_show_input_details": {
+                "text": false
+            },
+            "_inputs_expanded": true,
+            "_show_output_details": {},
+            "_outputs_expanded": true,
+            "_show_internals_details": {},
+            "_internals_expanded": true,
+            "_internal_state_gui_expanded": true
+        }
+    }
+}

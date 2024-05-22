@@ -44,7 +44,7 @@ class ColorConversionWithGui(AnyDataWithGui[ColorConversion]):
 
 
 def sandbox() -> None:
-    from fiatlight.fiat_kits.fiat_image.lut import LutParams
+    from fiatlight.fiat_kits.fiat_image.lut_functions import LutParams
 
     def f(conversion: ColorConversion, lut_param: LutParams) -> str:
         return str(conversion) + " - " + str(lut_param)

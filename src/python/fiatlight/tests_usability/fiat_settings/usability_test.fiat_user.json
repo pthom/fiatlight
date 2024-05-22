@@ -1,0 +1,35 @@
+{
+    "functions_graph": {
+        "functions_nodes": {
+            "f": {
+                "inputs": {
+                    "text": {
+                        "name": "text",
+                        "data": {
+                            "type": "Unspecified"
+                        }
+                    }
+                },
+                "gui_options": {
+                    "inputs": {},
+                    "outputs": {}
+                }
+            }
+        }
+    },
+    "functions_gui_settings": {
+        "f": {
+            "_show_input_details": {
+                "text": false
+            },
+            "_inputs_expanded": true,
+            "_show_output_details": {
+                "0": true
+            },
+            "_outputs_expanded": true,
+            "_show_internals_details": {},
+            "_internals_expanded": true,
+            "_internal_state_gui_expanded": true
+        }
+    }
+}

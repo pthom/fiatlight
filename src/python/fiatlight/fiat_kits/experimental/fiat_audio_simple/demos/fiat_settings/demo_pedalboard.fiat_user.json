@@ -1,0 +1,76 @@
+{
+    "functions_graph": {
+        "functions_nodes": {
+            "MicrophoneGui": {
+                "inputs": {},
+                "gui_options": {
+                    "inputs": {},
+                    "outputs": {},
+                    "internal_gui_options": {}
+                }
+            },
+            "add_chorus_effect": {
+                "inputs": {},
+                "gui_options": {
+                    "inputs": {
+                        "wave": {
+                            "show_time_as_seconds": false,
+                            "can_select": false,
+                            "volume": 1.0,
+                            "plot_size_em": [
+                                29.866666793823242,
+                                15.466666221618652
+                            ],
+                            "selection": {
+                                "start": 0.26702947845804986,
+                                "end": 0.8010884353741496
+                            }
+                        }
+                    },
+                    "outputs": {
+                        "0": {
+                            "show_time_as_seconds": false,
+                            "can_select": false,
+                            "volume": 1.0,
+                            "plot_size_em": [
+                                43.86666488647461,
+                                22.866666793823242
+                            ],
+                            "selection": {
+                                "start": 0.26702947845804986,
+                                "end": 0.8010884353741496
+                            }
+                        }
+                    },
+                    "internal_gui_options": {}
+                }
+            }
+        }
+    },
+    "functions_gui_settings": {
+        "MicrophoneGui": {
+            "_show_input_details": {},
+            "_inputs_expanded": true,
+            "_show_output_details": {
+                "0": true
+            },
+            "_outputs_expanded": true,
+            "_show_internals_details": {},
+            "_internals_expanded": true,
+            "_internal_state_gui_expanded": true
+        },
+        "add_chorus_effect": {
+            "_show_input_details": {
+                "wave": false
+            },
+            "_inputs_expanded": true,
+            "_show_output_details": {
+                "0": true
+            },
+            "_outputs_expanded": true,
+            "_show_internals_details": {},
+            "_internals_expanded": true,
+            "_internal_state_gui_expanded": true
+        }
+    }
+}

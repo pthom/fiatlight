@@ -46,24 +46,25 @@ Motto Ideas:
 
 
     Demos list:
-       Intro: demo_oil_paint (Beacon & variation)
+       Intro: demo_oil_paint (Beacon & variation) -- A demo where an oil painting effect is applied to an image created by sdxl (stable diffusion)
        A full app in 3 lines:   demo_oil_paint
            => see code
            => see save and load (load encore_loin)
            => see immvision, image inspector + detached views for further analysis
        Shine light inside the algorithms & pipelines:
-           => see pipeline: demo_word_count
-           => view function internals: demo toon_edges.py
-           => see debug and replay error: demo_float_functions
+           => see pipeline: demo_word_count   --- A demo where a most common words are extracted from Hamlet, using a series of string transformations
+           => view function internals: demo toon_edges.py  -- A demo where toon-like edges are added onto an image (either a photo or a generated image)
+           => see debug and replay error: demo_float_functions -- A demo where a math function throws an exception, and the user can replay the debug
        Custom Graph creation "a la scratch":
-            => see demo_custom_graph (load house_canny)
+            => see demo_custom_graph (load house_canny)  -- A demo where the user can create a custom graph with a list of string / image functions
                 + create a new graph
        Kits per domain:
-            => audio (demo_audio_processing & sound_wave_player_gui_demo)
+            => audio: demo_audio_processing  -- A demo where you can sing into the microphone and see information about the note you're singing + advanced graphs using librosa
+                      demo sound_wave_player_gui_demo  -- A demo where you can load a sound file, play it, see and navigate inside its waveform
             => image: already demoed
-            => AI: see invoke_sdxl_turbo
-            => matplotlib: see figure_with_gui_demo
-            => arrays: see simple_plot_gui_demo (ImPlot)
+            => AI: see invoke_sdxl_turbo -- A demo where you can generate images using sdxl (stable diffusion)
+            => matplotlib: see figure_with_gui_demo -- Demonstrates several example of matplotlib figures rendered within fiatlight with interactive GUI elements: plot, heatmap, data smoothing, histogram.
+            => arrays: see simple_plot_gui_demo (ImPlot) -- Demonstrates plots generated using ImPlot (https://github.com/epezent/implot). ImPlot is an immediate mode plotting library for Dear ImGui, whose rendering is often faster than MatPlotLib.
         Custom widgets:
             custom gui:
                 See demo_binomial (custom widget)

@@ -1,0 +1,34 @@
+{
+    "functions_names": [
+        "float_source",
+        "sin",
+        "square",
+        "add"
+    ],
+    "functions_nodes_links": [
+        {
+            "src_function_name": "float_source",
+            "dst_function_name": "sin",
+            "dst_input_name": "x",
+            "src_output_idx": 0
+        },
+        {
+            "src_function_name": "sin",
+            "dst_function_name": "square",
+            "dst_input_name": "x",
+            "src_output_idx": 0
+        },
+        {
+            "src_function_name": "float_source",
+            "dst_function_name": "add",
+            "dst_input_name": "a",
+            "src_output_idx": 0
+        },
+        {
+            "src_function_name": "square",
+            "dst_function_name": "add",
+            "dst_input_name": "b",
+            "src_output_idx": 0
+        }
+    ]
+}

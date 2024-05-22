@@ -1,0 +1,71 @@
+{
+    "functions_graph": {
+        "functions_nodes": {
+            "f": {
+                "inputs": {
+                    "i": {
+                        "name": "i",
+                        "data": {
+                            "type": "Primitive",
+                            "value": 0
+                        }
+                    },
+                    "f": {
+                        "name": "f",
+                        "data": {
+                            "type": "Primitive",
+                            "value": 0.20000000298023224
+                        }
+                    },
+                    "s": {
+                        "name": "s",
+                        "data": {
+                            "type": "Primitive",
+                            "value": "cfdfsdv"
+                        }
+                    },
+                    "b": {
+                        "name": "b",
+                        "data": {
+                            "type": "Unspecified"
+                        }
+                    }
+                },
+                "gui_options": {
+                    "inputs": {
+                        "s": {
+                            "_input_text_in_node_size": {
+                                "x": 14.666666984558105,
+                                "y": 0.0
+                            },
+                            "_input_text_in_popup_size": {
+                                "x": 37.0,
+                                "y": 15.0
+                            }
+                        }
+                    },
+                    "outputs": {},
+                    "internal_gui_options": {}
+                }
+            }
+        }
+    },
+    "functions_gui_settings": {
+        "f": {
+            "_show_input_details": {
+                "i": true,
+                "f": true,
+                "s": true,
+                "b": true
+            },
+            "_inputs_expanded": true,
+            "_show_output_details": {
+                "0": true
+            },
+            "_outputs_expanded": true,
+            "_show_internals_details": {},
+            "_internals_expanded": true,
+            "_internal_state_gui_expanded": true
+        }
+    }
+}

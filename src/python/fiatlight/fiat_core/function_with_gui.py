@@ -14,8 +14,8 @@ import logging
 class FunctionWithGui:
     """FunctionWithGui: add GUI to a function
 
-    FunctionWithGui: add GUI to a function
-    ========================================
+    FunctionWithGui
+    ===============
 
      Introduction
      ------------
@@ -33,83 +33,121 @@ class FunctionWithGui:
      it will display the result of the function.
 
          ```python
-         import fiatlight as ft
-         def foo(a: int, b: float) -> float:
+         import fiatlight as fl
+         def foo(a: int, b: float = 1.5) -> float:
              return a + b
-         ft.fiat_run(foo)
+         # When invoking fiat_run, fiatlight will automatically wrap the function into a FunctionWithGui object
+         fl.fiat_run(foo, app_name="Automatic creation")
          ```
+
+         *Note: fiatlight handles the default values of the parameters, so the user can leave the float parameter empty,
+                or click on the "+" button to set it to the default value, and further change it*
 
      ### Manual creation example
      If you want to create the GUI manually, you can use the `FunctionWithGui` class.
      The previous example can be rewritten as follows:
 
          ```python
-         import fiatlight as ft
+         import fiatlight as fl
          def foo(a: int, b: float) -> float:
              return a + b
 
-         foo_gui = ft.FunctionWithGui(foo)
+         foo_gui = fl.FunctionWithGui(foo)
+
          # Method 1: directly run the function
-         # ft.fiat_run(foo_gui)
+         # fl.fiat_run(foo_gui)
+
          # Method 2: create a graph and run it
-         graph = ft.FunctionsGraph()
+         graph = fl.FunctionsGraph()
          graph.add_function(foo_gui)
-         ft.fiat_run_graph(graph)
+         fl.fiat_run_graph(graph, app_name="Manual creation")
          ```
 
-     Customizing the GUI for a given function
-     ----------------------------------------
+    ### Use registered types
 
-     As an example, let's consider the following function:
+    If you use registered types, the GUI will be automatically created for the parameters and outputs.
+    In the example below:
+      - `fl.fiat_types.TextPath` is an alias for str, but it is registered to be displayed with a file selection dialog.
+      - `matplotlib.figure.Figure` is registered to be displayed as a plot in the GUI
+
+        ```python
+        import fiatlight as fl
+        import matplotlib.figure
+        import matplotlib.pyplot as plt
+
+        def words_length_histogram(text_file: fl.fiat_types.TextPath) -> matplotlib.figure.Figure:
+            "Create a histogram of the lengths of words in a text file."
+            with open(text_file) as f:
+                text = f.read()
+            words = text.split()
+            lengths = [len(word) for word in words]
+            fig, ax = plt.subplots()
+            ax.hist(lengths, bins=range(0, 20))
+            ax.set_title("Word Length Histogram")
+            ax.set_xlabel("Word Length")
+            ax.set_ylabel("Frequency")
+            return fig
+
+
+        fl.fiat_run(words_length_histogram, app_name="Registered types")
+        ```
+
+     Customizing parameters GUI
+     --------------------------
+
+     As an example, let's consider the function "my_asin" below: if you run this function with `fiat_run()`,
+     the GUI will allow the user to enter any float value for x.
+     This lets the user enter values that may not be valid for the function.
 
          ```python
-         import fiatlight as ft
+         import fiatlight as fl
 
          # Ideally, we would like to restrict the range of x to [-1, 1]
          def my_asin(x: float = 0.5) -> float:
              import math
              return math.asin(x)
 
-         ft.fiat_run(my_asin)
+         fl.fiat_run(my_asin, app_name="No range restriction")
          ```
 
-     If you run this function with `fiat_run(my_asin)`, the GUI will allow the user to enter any float value for `x`.
-     Without further customization, the GUI will allow the user to input any float value, and the x parameter will be
-     presented using a widget that allows manual entry of a value for x.
-     This lets the user enter values that may not be valid for the function.
 
-
-     ### Customize the range of a parameter
+     ### Customize the range of a numeric parameter
 
     It is possible to customize the GUI for parameters using function attributes:
-    below, we set the range for x inside [-1, 1]. As a consequence it will be displayed with a slider widget.
+    below, we set the range for x. As a consequence it will be displayed with a slider widget
+    with a range from -1 to 1.
 
         ```python
-        import fiatlight as ft
+        import fiatlight as fl
         def my_asin(x: float = 0.5) -> float:
             import math
             return math.asin(x)
 
-        # Set the range of the x parameter: note the double "_" after the parameter name
+        # Set the range of the x parameter: note the double underscore ("_") after the parameter name
         my_asin.x__range = (-1, 1)
 
-        ft.fiat_run(my_asin)
+        fl.fiat_run(my_asin, app_name="Range restriction")
         ```
 
     ### Available customization options
 
-     For a parameter named `param`, you can add attributes starting with `param__` (the double underscore is important):
+     For a parameter named "param", you can add attributes starting with `param__` (the double underscore is important).
 
-     * `param__edit_type`: the type of widget to use for the parameter
-        * for float, int, bool params):
-         - Possible values are for int are: `"slider"`, `"input"`, `"drag"`, `"knob"`, `"slider_and_minus_plus"`
-         - Possible values are for float are:  `"slider"`, `"input"`, `"drag"`, `"knob"` `"slider_float_any_range"`,`"slider_float_any_range_positive"`
-         - Possible values are for bool are: `"checkbox"`, "`toggle`"
-     * `param__range` (for numeric params): a tuple (min, max) to restrict the range of the parameter
-     * `param__format` (for numeric params): a format string to display the parameter value (e.g., `"%d"`, `"%0.2f"`, etc.)
-     * `param__no_input` (for sliders and knobs): if set to `True`, no input field will be displayed beside the slider or knob
-     * `knob_size_em` and `knob_steps` (for numeric params): for the knob widget, the size of the knob in em units and the number of steps
-     * `width_em` (for numeric and str params): the width of the widget in em units (1 em is the width of the letter "m" in the default font)
+     **For most parameters, you can set the following attributes**
+
+     * `param__edit_type`: the type of widget to use for the parameter.
+       The available types depend on the type of the parameter
+         - `int`: "slider", "input", "drag", "knob", "slider_and_minus_plus"
+         - `float`:  "slider", "input", "drag", "knob" "slider_float_any_range","slider_float_any_range_positive"
+         - `bool`: "checkbox", "toggle"
+     * `width_em`: the width of the widget in em units. 1 em is the width of the letter "m" in the default font.
+                   (width_em is accepted for some widgets like "input" and "slider")
+
+     **For numeric parameters, you can also set the following attributes**
+     * `param__range`: a tuple (min, max) to restrict the range of the parameter
+     * `param__format`: a format string to display the parameter value, e.g., "%d", "%0.2f"
+     * `param__no_input`: if set to `True`, no input field will be displayed beside the slider or knob (for sliders and knobs)
+     * `knob_size_em` and `knob_steps`: for the knob widget, the size of the knob in em units and the number of steps
 
     **A full example with custom attributes for function parameters**
 
@@ -151,7 +189,253 @@ class FunctionWithGui:
         interactive_histogram.nb_data__slider_logarithmic = True
         interactive_histogram.nb_data__slider_no_input = True
 
-        fiatlight.fiat_run(interactive_histogram)
+        fiatlight.fiat_run(interactive_histogram, app_name="Custom attributes")
+        ```
+
+    ### Customizing the GUI for a function parameter or output
+
+    You can also customize the GUI for a parameter or output by setting a custom callback function, using
+    `set_present_custom_callback` or `set_edit_callback` on the parameter or output.
+
+        ```python
+        import fiatlight as fl
+
+
+        def fahrenheit_to_celsius(fahrenheit: float = 0) -> float:
+            return (fahrenheit - 32) * 5 / 9
+
+        # This will be our edit callback: it accepts a float and returns a tuple (bool, float)
+        # where the first element is True if the value has changed, and the second element is the new value
+        def edit_temperature(fahrenheit: float) -> tuple[bool, float]:
+            from imgui_bundle import imgui, hello_imgui
+
+            # Set the width of the slider field to 10 em units (using em units is a good practice to make the GUI dpi aware)
+            imgui.set_next_item_width(hello_imgui.em_size(10))
+            changed, new_value = imgui.slider_float("Fahrenheit", fahrenheit, -100, 200)
+            return changed, new_value
+
+        # This will be our present callback: it accepts a float and returns None
+        def present_temperature(celsius: float) -> None:
+            from imgui_bundle import imgui, ImVec4
+
+            note = "Cold" if celsius < 20 else "Hot" if celsius > 40 else "Warm"
+            color = ImVec4(0, 0.4, 1, 1) if celsius < 20 else ImVec4(1, 0.4, 0, 1) if celsius > 40 else ImVec4(0, 1, 0, 1)
+            imgui.text_colored(color, f"{celsius:.2f} °C ({note})")
+
+
+        fahrenheit_to_celsius_gui = fl.FunctionWithGui(fahrenheit_to_celsius)
+        fahrenheit_to_celsius_gui.output(0).set_present_custom_callback(present_temperature)
+        fahrenheit_to_celsius_gui.input("fahrenheit").set_edit_callback(edit_temperature)
+
+        fl.fiat_run(fahrenheit_to_celsius_gui, app_name="Custom callbacks")
+        ```
+
+
+    Control function behavior
+    -------------------------
+
+    By default, the function will be called only when one of its inputs has changed (either because the user
+    entered a new value, or because an input is connected to another function that has changed).
+
+    You can control the behavior of the function by setting attributes on the function object.
+
+    * `invoke_async`: if True, the function will be called asynchronously
+    * `invoke_manually`: if True, the function will be called only if the user clicks on the "invoke" button
+    * `invoke_always_dirty`: if True, the function output will always be considered out of date, and
+        - if "invoke_manually" is True, the "Refresh needed" label will be displayed
+        - if "invoke_manually" is False, the function will be called at each frame
+
+    Note: a "live" function is thus a function with `invoke_manually=False` and `invoke_always_dirty=True`
+
+    **Example: a live function that display a camera image**
+
+    *Note:`fiatlight.fiat_kits.fiat_image.ImageU8_3` is a registered type,
+    synonym of numpy.ndarray with shape (h, w, 3) and dtype uint8.
+    Fiatlight will display it as an image in the GUI with a sophisticated image widget (you can zoom in/out,
+    pan, examine pixel values, etc.)*
+
+    ```python
+    import fiatlight as fl
+    from fiatlight.fiat_kits.fiat_image import ImageU8_3
+    import cv2  # we use OpenCV to capture the camera image (pip install opencv-python)
+    cap = cv2.VideoCapture(0)  # you will need a camera!
+
+    def get_camera_image() -> ImageU8_3 | None:
+        ret, frame = cap.read()
+        return ImageU8_3(frame) if ret else None
+
+    # Set flags to make this a live function (called automatically at each frame)
+    get_camera_image.invoke_always_dirty = True
+
+    fl.fiat_run(get_camera_image, app_name="Live camera image")
+    ```
+
+    **Example: an async function**
+
+    When your function is slow, you can set the `invoke_async` flag to True.
+    In the image below, the yellow spinner indicates that the function is running,
+    and the GUI remains responsive.
+
+    ```python
+    import fiatlight as fl
+    import time
+    def slow_function() -> int:
+        time.sleep(5)
+        return 42
+
+    slow_function.invoke_async = True
+    fl.fiat_run(slow_function, app_name="Async function")
+    ```
+
+    **Example: a function that needs to be called manually**
+
+    If you set the `invoke_manually` flag to True, the function will be called
+    only if the user clicks on the "invoke" button (i.e. the button with a "recycle" icon).
+    If the inputs were changed, a "Refresh needed" label will be displayed.
+
+    ```python
+    import fiatlight as fl
+    def my_function(a: int, b: float) -> float:
+        return a + b
+
+    my_function.invoke_manually = True
+    fl.fiat_run(my_function, app_name="Manual invocation")
+    ```
+
+
+     Fully customizing a FunctionWithGui object
+     ------------------------------------------
+
+    By subclassing `FunctionWithGui`, you can fully customize the behavior of the function:
+    - you can add a GUI for the internal state of the function (e.g. displaying a live plot of a sound signal)
+    - you can add a heartbeat function that will be called at each frame (e.g. get the latest data from a sensor)
+    - you can save and load the internal GUI presentation options to/from a JSON file (e.g. to save the layout of a plot)
+
+    **Example: a camera provider with an internal state and saved options**
+
+    [fiatlight.fiat_kits.fiat_image.CameraImageProviderGui](../fiat_kits/fiat_image/camera_image_provider.py)
+    is a good example of a custom FunctionWithGui class.
+
+    You can see it in action with the following code:
+        ```python
+        import fiatlight as fl
+        from fiatlight.fiat_kits.fiat_image import CameraImageProviderGui, ImageU8_3
+        import cv2
+
+        def rotate_45(image: ImageU8_3) -> ImageU8_3:
+            transform = cv2.getRotationMatrix2D((image.shape[1] / 2, image.shape[0] / 2), 45, 1)
+            return cv2.warpAffine(image, transform, (image.shape[1], image.shape[0]))  # type: ignore
+
+        camera_provider_gui = CameraImageProviderGui()
+        fl.fiat_run_composition([camera_provider_gui, rotate_45], app_name="Camera provider with rotation")
+        ```
+
+    **Commented extracts of [camera_image_provider.py](../fiat_kits/fiat_image/camera_image_provider.py)**
+
+    Look at the `CameraImageProviderGui` class that extends `FunctionWithGui`:
+
+        ```python
+        import fiatlight
+        fiatlight.fiat_doc.look_at_python_code(fiatlight.fiat_kits.fiat_image.camera_image_provider.CameraImageProviderGui)
+        ```
+
+    Note: CameraImageProviderGui uses a `CameraImageProvider` class that provides images from a camera,
+          as well `CameraParams`, as a Pydantic model for the camera parameters that will be displayed in the GUI,
+          and saved to a JSON file.
+
+    We use the `enum_with_gui_registration` and `base_model_with_gui_registration` decorators to automatically create
+    a GUI for the enums and the Pydantic model (note: `dataclass_with_gui_registration` is also available for dataclasses)
+
+        ```python
+        from fiatlight.fiat_togui.to_gui import enum_with_gui_registration, base_model_with_gui_registration
+        from enum import Enum
+        from pydantic import BaseModel
+        import cv2
+
+        @enum_with_gui_registration
+        class CameraResolution(Enum):
+            HD_1280_720 = [1280, 720]
+            FULL_HD_1920_1080 = [1920, 1080]
+            VGA_640_480 = [640, 480]
+
+        @base_model_with_gui_registration(
+            {"device_number__range": (0, 5), "brightness__range": (0, 1), "contrast__range": (0, 1)}
+        )
+        class CameraParams(BaseModel):
+            device_number: int = 0
+            brightness: float = 0.5
+            contrast: float = 0.5
+            camera_resolution: CameraResolution = CameraResolution.VGA_640_480
+
+
+        class CameraImageProvider:
+            '''A class that provides images from a camera'''
+            camera_params: CameraParams
+            cv_cap: cv2.VideoCapture | None = None
+            ...
+        ```
+
+     Debug function internals
+     ------------------------
+
+    fiatlight provides you with powerful tools to visually debug the intermediate states of your function.
+
+    [demos/images/toon_edges.py](../demos/images/toon_edges.py) is a good example of how to use the `fiat_internals` attribute.
+
+    This is a complex function that adds a toon effect to an image, by adding colored edges to the image contours.
+
+    Here are some commented extracts of the function:
+
+    ```python
+    from fiatlight.fiat_kits.fiat_image import ImageU8_3, ImageU8_1
+
+    def add_toon_edges(
+    image: ImageU8_3,
+    # ... lots of parameters ...
+    ) -> ImageU8_3:
+        edges: ImageU8_1 # = ...             (compute the edges)
+        dilated_edges: ImageU8_1 #  = ...    (dilate the edges)
+        image_with_edges: ImageU8_3  # = ... (superimpose the edges on the image)
+
+        # Add internals for debugging
+        from fiatlight.fiat_kits.fiat_image import ImageWithGui
+        from fiatlight import AnyDataWithGui
+        if not hasattr(add_toon_edges, "fiat_internals"):
+            add_toon_edges.fiat_internals: dict[str, AnyDataWithGui] = {  # type: ignore
+                "edges": ImageWithGui(),
+                "dilated_edges": ImageWithGui(),
+                "image_with_edges": ImageWithGui(),
+            }
+        add_toon_edges.fiat_internals["edges"].value = edges  # type: ignore
+        add_toon_edges.fiat_internals["dilated_edges"].value = dilated_edges  # type: ignore
+        add_toon_edges.fiat_internals["image_with_edges"].value = image_with_edges  # type: ignore
+
+        # return the image with edges
+        return image_with_edges
+    ```
+
+    Once these internals are set, you can see the function "Internals" in the GUI:
+
+    ```python
+    import fiatlight as fl
+    from fiatlight.fiat_kits.fiat_image import ImageU8_GRAY, ImageU8_3, image_source
+    from fiatlight.demos.images.toon_edges import add_toon_edges
+
+    fl.fiat_run_composition([image_source, add_toon_edges], app_name="Toon edges")
+    ```
+
+    fiat_core: FunctionWithGui in the class diagram
+    -----------------------------------------------
+        ```python
+        from fiatlight.fiat_doc import plantuml_magic
+        ```
+
+        ```python
+        %%plantuml_local
+
+        @startuml
+        !include class_diagrams/fiat_core.puml
+        @enduml
         ```
 
     """

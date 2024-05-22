@@ -1,4 +1,12 @@
 # type: ignore
+"""A demo where you can sing into the microphone and see information about the note you're singing + advanced graphs using librosa
+- The frequency of the note
+- The note name
+- The note name in solfege
+- The error in cents (100 cents is one semitone)
+- The tempo of the song
+"""
+
 # pip install librosa matplotlib numpy scipy pedalboard
 
 from fiatlight.fiat_kits.experimental import fiat_audio_simple
@@ -130,7 +138,7 @@ def show_harmonic_percussive_graph(wave: fiat_audio_simple.SoundWave) -> Figure:
     return fig
 
 
-def sandbox() -> None:
+def main() -> None:
     import fiatlight  # noqa
 
     # Tell fiatlight to run this function asynchronously
@@ -152,8 +160,8 @@ def sandbox() -> None:
     graph.add_link("MicrophoneGui", "show_fundamental_freq_graph")
     graph.add_link("MicrophoneGui", "show_harmonic_percussive_graph")
 
-    fiatlight.fiat_run_graph(graph)
+    fiatlight.fiat_run_graph(graph, app_name="demo_audio_processing")
 
 
 if __name__ == "__main__":
-    sandbox()
+    main()

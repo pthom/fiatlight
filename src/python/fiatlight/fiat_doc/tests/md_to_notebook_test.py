@@ -56,3 +56,13 @@ def test_md_to_notebook() -> None:
         ft.fiat_run(foo)
             """,
     )
+
+
+def test_replace_python_links_by_github_links() -> None:
+    s = " a [fiat_image](../fiat_kits/fiat_image/__init__.py)"
+    s_gh = notebook_utils._replace_python_links_by_github_links(s)
+    assert (
+        s_gh
+        == " a [fiat_image](https://github.com/pthom/fiatlight/tree/refact_io/src/python/fiatlight/fiat_kits/fiat_image/__init__.py)"
+    )
+    print("Test passed!")

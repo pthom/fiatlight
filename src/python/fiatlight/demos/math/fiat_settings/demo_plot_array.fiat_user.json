@@ -1,0 +1,71 @@
+{
+    "functions_graph": {
+        "functions_nodes": {
+            "make_spirograph_curve": {
+                "inputs": {
+                    "radius_fixed_circle": {
+                        "name": "radius_fixed_circle",
+                        "data": {
+                            "type": "Primitive",
+                            "value": 71.03299713134766
+                        }
+                    },
+                    "radius_moving_circle": {
+                        "name": "radius_moving_circle",
+                        "data": {
+                            "type": "Primitive",
+                            "value": 21.631000518798828
+                        }
+                    },
+                    "pen_offset": {
+                        "name": "pen_offset",
+                        "data": {
+                            "type": "Primitive",
+                            "value": 16.298999786376953
+                        }
+                    },
+                    "nb_turns": {
+                        "name": "nb_turns",
+                        "data": {
+                            "type": "Primitive",
+                            "value": 21.20599937438965
+                        }
+                    }
+                },
+                "gui_options": {
+                    "inputs": {},
+                    "outputs": {
+                        "0": {
+                            "_plot_type_str": "line",
+                            "plot_size_em": [
+                                58.70035934448242,
+                                48.48395919799805
+                            ],
+                            "small_array_threshold": 100,
+                            "auto_fit": true
+                        }
+                    },
+                    "internal_gui_options": {}
+                }
+            }
+        }
+    },
+    "functions_gui_settings": {
+        "make_spirograph_curve": {
+            "_show_input_details": {
+                "radius_fixed_circle": true,
+                "radius_moving_circle": true,
+                "pen_offset": true,
+                "nb_turns": true
+            },
+            "_inputs_expanded": true,
+            "_show_output_details": {
+                "0": true
+            },
+            "_outputs_expanded": true,
+            "_show_internals_details": {},
+            "_internals_expanded": true,
+            "_internal_state_gui_expanded": true
+        }
+    }
+}

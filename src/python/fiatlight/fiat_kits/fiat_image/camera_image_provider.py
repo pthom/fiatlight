@@ -2,6 +2,7 @@ import copy
 import logging
 
 import cv2
+import os  # noqa
 from pydantic import BaseModel
 
 from fiatlight.fiat_togui.to_gui import enum_with_gui_registration, base_model_with_gui_registration
@@ -13,6 +14,11 @@ from fiatlight.fiat_widgets import fontawesome_6_ctx, icons_fontawesome_6
 from enum import Enum
 from imgui_bundle import imgui, imgui_ctx, hello_imgui
 from typing import Optional
+
+
+# hack, used when building documentation: we replace the camera image with a static image
+# _HACK_IMAGE: ImageU8_3 = cv2.imread(os.path.dirname(__file__) + "/paris.jpg")  # type: ignore
+_HACK_IMAGE = None
 
 
 @enum_with_gui_registration
@@ -38,12 +44,11 @@ class CameraFps(Enum):
 class CameraParams(BaseModel):
     device_number: int = 0
     camera_resolution: CameraResolution = CameraResolution.VGA_640_480
-    # fps: CameraFps = CameraFps.FPS_30  # too much hassle for now
     brightness: float = 0.5
     contrast: float = 0.5
 
 
-class CameraProvider:
+class CameraImageProvider:
     camera_params: CameraParams
     previous_camera_params: Optional[CameraParams] = None
     cv_cap: cv2.VideoCapture | None = None
@@ -54,6 +59,8 @@ class CameraProvider:
         self.camera_params = params
 
     def get_image(self) -> ImageU8_3 | None:
+        if _HACK_IMAGE is not None:
+            return _HACK_IMAGE
         if self.cv_cap is None:
             return None
         ret, frame = self.cv_cap.read()
@@ -76,8 +83,6 @@ class CameraProvider:
                 shall_restart = True
             if self.previous_camera_params.camera_resolution != params.camera_resolution:
                 shall_restart = True
-            # if self.previous_camera_params.fps != params.fps:
-            #     shall_restart = True
 
         self.previous_camera_params = copy.deepcopy(self.camera_params)
         self.camera_params = params
@@ -94,7 +99,7 @@ class CameraProvider:
                 logging.warning("This camera does not support setting contrast")
 
     def start(self) -> None:
-        logging.info(f"CameraProvider start: {self.camera_params}")
+        logging.info(f"CameraImageProvider start: {self.camera_params}")
         self.cv_cap = cv2.VideoCapture()
         self.cv_cap.open(self.camera_params.device_number)
         frame_width_set = self.cv_cap.set(cv2.CAP_PROP_FRAME_WIDTH, self.camera_params.camera_resolution.value[0])
@@ -105,8 +110,6 @@ class CameraProvider:
 
         if not frame_width_set or not frame_height_set:
             logging.warning("This camera does not support setting frame width and height")
-        # if not fps_set:
-        #     logging.warning("This camera does not support setting fps")
         if not brightness_set:
             logging.warning("This camera does not support setting brightness")
         if not contrast_set:
@@ -115,7 +118,7 @@ class CameraProvider:
         self.previous_camera_params = copy.deepcopy(self.camera_params)
 
     def stop(self) -> None:
-        logging.info("CameraProvider stop")
+        logging.info("CameraImageProvider stop")
         if self.cv_cap is None:
             return
         self.cv_cap.release()
@@ -125,16 +128,16 @@ class CameraProvider:
         return self.cv_cap is not None
 
 
-class CameraGui(FunctionWithGui):
-    _camera_provider: CameraProvider
+class CameraImageProviderGui(FunctionWithGui):
+    _camera_provider: CameraImageProvider
     _camera_params_gui: AnyDataWithGui[CameraParams]
 
     def __init__(self) -> None:
-        super().__init__(self.f, "CameraGui")
+        super().__init__(self.f, "CameraImageProviderGui")
 
         from fiatlight.fiat_togui import to_data_with_gui, capture_current_scope
 
-        self._camera_provider = CameraProvider()
+        self._camera_provider = CameraImageProvider()
         self._camera_params_gui = to_data_with_gui(self._camera_provider.camera_params, capture_current_scope())
 
         self.internal_state_gui = self._internal_state_gui
@@ -155,7 +158,6 @@ class CameraGui(FunctionWithGui):
         camera_params = CameraParams.model_validate(json_dict)
         self._camera_provider.camera_params = camera_params
         self._camera_params_gui.value = camera_params
-        print("aa")
 
     def _show_cam_button(self) -> None:
         started = self._camera_provider.started()

@@ -18,6 +18,7 @@ class NotebookRunnerParams:
 def _fiat_run_graph_nb(
     functions_graph: FunctionsGraph,
     params: FiatGuiParams | None,
+    app_name: str | None,
     notebook_runner_params: NotebookRunnerParams | None,
 ) -> None:
     "fiatlight runner for jupyter notebook"
@@ -39,7 +40,7 @@ def _fiat_run_graph_nb(
         #         static.was_theme_set = True
         #     gui_function()
 
-        fiat_gui = FiatGui(functions_graph, params)
+        fiat_gui = FiatGui(functions_graph, params=params, app_name=app_name)
         fiat_gui.run()
 
     def make_thumbnail(image: ImageU8_3) -> ImageU8_3:
@@ -50,6 +51,10 @@ def _fiat_run_graph_nb(
             resize_ratio = notebook_runner_params.thumbnail_height / image.shape[0]
 
         if resize_ratio != 1:
+            if image.shape[0] == 0 or image.shape[1] == 0:
+                raise ValueError(
+                    "cannot store thumbnail! Make sure that all nodes are visible before exiting the app, so that a screenshot can be taken."
+                )
             thumbnail_image = cv2.resize(
                 image,
                 (0, 0),

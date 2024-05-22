@@ -1,5 +1,5 @@
 from fiatlight.demos.images import add_meme_text
-from fiatlight.fiat_kits.fiat_image.camera_image_provider import CameraGui
+from fiatlight.fiat_kits.fiat_image.camera_image_provider import CameraImageProviderGui
 from fiatlight.fiat_kits.fiat_image import ImageU8_3
 import fiatlight
 from pydantic import BaseModel
@@ -32,7 +32,7 @@ def apply_image_effect(image: ImageU8_3, effect: Optional[ImageEffect] = None) -
 
 
 def main() -> None:
-    camera_gui = CameraGui()
+    camera_gui = CameraImageProviderGui()
     fiatlight.fiat_run_composition([camera_gui, apply_image_effect, add_meme_text])
 
 

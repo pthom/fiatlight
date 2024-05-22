@@ -293,7 +293,10 @@ class FunctionsGraphGui:
             br.x = max(br.x, node_boundings.max.x)
             br.y = max(br.y, node_boundings.max.y)
 
-        return imgui.internal.ImRect(tl, br)
+        r = imgui.internal.ImRect(tl, br)
+        if r.get_width() <= 0 or r.get_height() <= 0:
+            raise ValueError("Invalid screenshot boundings: please make sure the nodes are fully visible")
+        return r
 
     # ======================================================================================================================
     # Utilities

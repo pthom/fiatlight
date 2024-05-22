@@ -80,7 +80,8 @@ def main() -> None:
             sort_words,
             run_length_encode,
             sort_word_with_counts,
-        ]
+        ],
+        app_name="demo_word_count",
     )
 
 

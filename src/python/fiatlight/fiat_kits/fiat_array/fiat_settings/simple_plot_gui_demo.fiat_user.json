@@ -1,0 +1,189 @@
+{
+    "functions_graph": {
+        "functions_nodes": {
+            "make_spirograph_curve": {
+                "inputs": {
+                    "radius_fixed_circle": {
+                        "name": "radius_fixed_circle",
+                        "data": {
+                            "type": "Primitive",
+                            "value": 51.17599868774414
+                        }
+                    },
+                    "radius_moving_circle": {
+                        "name": "radius_moving_circle",
+                        "data": {
+                            "type": "Primitive",
+                            "value": 5.160999774932861
+                        }
+                    },
+                    "pen_offset": {
+                        "name": "pen_offset",
+                        "data": {
+                            "type": "Primitive",
+                            "value": 6.0
+                        }
+                    },
+                    "nb_turns": {
+                        "name": "nb_turns",
+                        "data": {
+                            "type": "Unspecified"
+                        }
+                    }
+                },
+                "gui_options": {
+                    "inputs": {},
+                    "outputs": {
+                        "0": {
+                            "_plot_type_str": "line",
+                            "plot_size_em": [
+                                35.13333511352539,
+                                30.933332443237305
+                            ],
+                            "small_array_threshold": 100,
+                            "auto_fit": true
+                        }
+                    },
+                    "internal_gui_options": {}
+                }
+            },
+            "get_simple_values": {
+                "inputs": {
+                    "x": {
+                        "name": "x",
+                        "data": {
+                            "type": "Primitive",
+                            "value": 1.8000003099441528
+                        }
+                    }
+                },
+                "gui_options": {
+                    "inputs": {},
+                    "outputs": {
+                        "0": {
+                            "_plot_type_str": "bars",
+                            "plot_size_em": [
+                                26.799999237060547,
+                                28.866666793823242
+                            ],
+                            "small_array_threshold": 100,
+                            "auto_fit": true
+                        }
+                    },
+                    "internal_gui_options": {}
+                }
+            },
+            "time_seconds": {
+                "inputs": {},
+                "gui_options": {
+                    "inputs": {},
+                    "outputs": {},
+                    "internal_gui_options": {}
+                }
+            },
+            "phase_from_time_seconds": {
+                "inputs": {},
+                "gui_options": {
+                    "inputs": {},
+                    "outputs": {},
+                    "internal_gui_options": {}
+                }
+            },
+            "sin_wave": {
+                "inputs": {
+                    "amplitude": {
+                        "name": "amplitude",
+                        "data": {
+                            "type": "Primitive",
+                            "value": 0.7999999523162842
+                        }
+                    }
+                },
+                "gui_options": {
+                    "inputs": {},
+                    "outputs": {
+                        "0": {
+                            "_plot_type_str": "line",
+                            "plot_size_em": [
+                                35.0,
+                                20.0
+                            ],
+                            "small_array_threshold": 100,
+                            "auto_fit": true
+                        }
+                    },
+                    "internal_gui_options": {}
+                }
+            }
+        }
+    },
+    "functions_gui_settings": {
+        "make_spirograph_curve": {
+            "_show_input_details": {
+                "radius_fixed_circle": true,
+                "radius_moving_circle": true,
+                "pen_offset": true,
+                "nb_turns": false
+            },
+            "_inputs_expanded": true,
+            "_show_output_details": {
+                "0": true
+            },
+            "_outputs_expanded": true,
+            "_show_internals_details": {},
+            "_internals_expanded": true,
+            "_internal_state_gui_expanded": true
+        },
+        "get_simple_values": {
+            "_show_input_details": {
+                "x": true
+            },
+            "_inputs_expanded": true,
+            "_show_output_details": {
+                "0": true
+            },
+            "_outputs_expanded": true,
+            "_show_internals_details": {},
+            "_internals_expanded": true,
+            "_internal_state_gui_expanded": true
+        },
+        "time_seconds": {
+            "_show_input_details": {},
+            "_inputs_expanded": true,
+            "_show_output_details": {
+                "0": true
+            },
+            "_outputs_expanded": true,
+            "_show_internals_details": {},
+            "_internals_expanded": true,
+            "_internal_state_gui_expanded": true
+        },
+        "phase_from_time_seconds": {
+            "_show_input_details": {
+                "time_": false
+            },
+            "_inputs_expanded": true,
+            "_show_output_details": {
+                "0": true
+            },
+            "_outputs_expanded": true,
+            "_show_internals_details": {},
+            "_internals_expanded": true,
+            "_internal_state_gui_expanded": true
+        },
+        "sin_wave": {
+            "_show_input_details": {
+                "phase": false,
+                "amplitude": true
+            },
+            "_inputs_expanded": true,
+            "_show_output_details": {
+                "0": true
+            },
+            "_outputs_expanded": true,
+            "_show_internals_details": {},
+            "_internals_expanded": true,
+            "_internal_state_gui_expanded": true
+        }
+    }
+}

@@ -1,0 +1,248 @@
+{
+    "functions_graph": {
+        "functions_nodes": {
+            "interactive_sine_wave": {
+                "inputs": {
+                    "freq": {
+                        "name": "freq",
+                        "data": {
+                            "type": "Primitive",
+                            "value": 1.0
+                        }
+                    },
+                    "amplitude": {
+                        "name": "amplitude",
+                        "data": {
+                            "type": "Unspecified"
+                        }
+                    }
+                },
+                "gui_options": {
+                    "inputs": {},
+                    "outputs": {
+                        "0": {
+                            "figure_size": {
+                                "x": 473.0,
+                                "y": 375.0
+                            }
+                        }
+                    },
+                    "internal_gui_options": {}
+                }
+            },
+            "gaussian_heatmap": {
+                "inputs": {
+                    "mean": {
+                        "name": "mean",
+                        "data": {
+                            "type": "Unspecified"
+                        }
+                    },
+                    "variance": {
+                        "name": "variance",
+                        "data": {
+                            "type": "Unspecified"
+                        }
+                    },
+                    "colormap": {
+                        "name": "colormap",
+                        "data": {
+                            "type": "Enum",
+                            "value_name": "INFERNO",
+                            "class": "ColorMap"
+                        }
+                    },
+                    "levels": {
+                        "name": "levels",
+                        "data": {
+                            "type": "Unspecified"
+                        }
+                    }
+                },
+                "gui_options": {
+                    "inputs": {},
+                    "outputs": {
+                        "0": {
+                            "figure_size": {
+                                "x": 660.0,
+                                "y": 379.0
+                            }
+                        }
+                    },
+                    "internal_gui_options": {}
+                }
+            },
+            "data_smoothing": {
+                "inputs": {
+                    "window_size": {
+                        "name": "window_size",
+                        "data": {
+                            "type": "Unspecified"
+                        }
+                    }
+                },
+                "gui_options": {
+                    "inputs": {},
+                    "outputs": {
+                        "0": {
+                            "figure_size": {
+                                "x": 640.0,
+                                "y": 480.0
+                            }
+                        }
+                    },
+                    "internal_gui_options": {}
+                }
+            },
+            "interactive_histogram": {
+                "inputs": {
+                    "n_bars": {
+                        "name": "n_bars",
+                        "data": {
+                            "type": "Unspecified"
+                        }
+                    },
+                    "mu": {
+                        "name": "mu",
+                        "data": {
+                            "type": "Unspecified"
+                        }
+                    },
+                    "sigma": {
+                        "name": "sigma",
+                        "data": {
+                            "type": "Unspecified"
+                        }
+                    },
+                    "average": {
+                        "name": "average",
+                        "data": {
+                            "type": "Unspecified"
+                        }
+                    },
+                    "nb_data": {
+                        "name": "nb_data",
+                        "data": {
+                            "type": "Unspecified"
+                        }
+                    }
+                },
+                "gui_options": {
+                    "inputs": {},
+                    "outputs": {
+                        "0": {
+                            "figure_size": {
+                                "x": 640.0,
+                                "y": 480.0
+                            }
+                        }
+                    },
+                    "internal_gui_options": {}
+                }
+            },
+            "time_seconds": {
+                "inputs": {},
+                "gui_options": {
+                    "inputs": {},
+                    "outputs": {},
+                    "internal_gui_options": {}
+                }
+            },
+            "phase_from_time_seconds": {
+                "inputs": {},
+                "gui_options": {
+                    "inputs": {},
+                    "outputs": {},
+                    "internal_gui_options": {}
+                }
+            }
+        }
+    },
+    "functions_gui_settings": {
+        "interactive_sine_wave": {
+            "_show_input_details": {
+                "freq": false,
+                "phase": false,
+                "amplitude": false
+            },
+            "_inputs_expanded": true,
+            "_show_output_details": {
+                "0": true
+            },
+            "_outputs_expanded": true,
+            "_show_internals_details": {},
+            "_internals_expanded": true,
+            "_internal_state_gui_expanded": true
+        },
+        "gaussian_heatmap": {
+            "_show_input_details": {
+                "mean": false,
+                "variance": false,
+                "colormap": false,
+                "levels": false
+            },
+            "_inputs_expanded": true,
+            "_show_output_details": {
+                "0": true
+            },
+            "_outputs_expanded": true,
+            "_show_internals_details": {},
+            "_internals_expanded": true,
+            "_internal_state_gui_expanded": true
+        },
+        "data_smoothing": {
+            "_show_input_details": {
+                "window_size": false
+            },
+            "_inputs_expanded": true,
+            "_show_output_details": {
+                "0": true
+            },
+            "_outputs_expanded": true,
+            "_show_internals_details": {},
+            "_internals_expanded": true,
+            "_internal_state_gui_expanded": true
+        },
+        "interactive_histogram": {
+            "_show_input_details": {
+                "n_bars": false,
+                "mu": false,
+                "sigma": false,
+                "average": false,
+                "nb_data": false
+            },
+            "_inputs_expanded": true,
+            "_show_output_details": {
+                "0": true
+            },
+            "_outputs_expanded": true,
+            "_show_internals_details": {},
+            "_internals_expanded": true,
+            "_internal_state_gui_expanded": true
+        },
+        "time_seconds": {
+            "_show_input_details": {},
+            "_inputs_expanded": true,
+            "_show_output_details": {
+                "0": true
+            },
+            "_outputs_expanded": true,
+            "_show_internals_details": {},
+            "_internals_expanded": true,
+            "_internal_state_gui_expanded": true
+        },
+        "phase_from_time_seconds": {
+            "_show_input_details": {
+                "time_": false
+            },
+            "_inputs_expanded": true,
+            "_show_output_details": {
+                "0": true
+            },
+            "_outputs_expanded": true,
+            "_show_internals_details": {},
+            "_internals_expanded": true,
+            "_internal_state_gui_expanded": true
+        }
+    }
+}

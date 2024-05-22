@@ -1,0 +1,45 @@
+{
+    "functions_graph": {
+        "functions_nodes": {
+            "random_binomial": {
+                "inputs": {
+                    "n": {
+                        "name": "n",
+                        "data": {
+                            "type": "Primitive",
+                            "value": 50
+                        }
+                    },
+                    "p": {
+                        "name": "p",
+                        "data": {
+                            "type": "Primitive",
+                            "value": 0.1
+                        }
+                    }
+                },
+                "gui_options": {
+                    "inputs": {},
+                    "outputs": {},
+                    "internal_gui_options": {}
+                }
+            }
+        }
+    },
+    "functions_gui_settings": {
+        "random_binomial": {
+            "_show_input_details": {
+                "n": true,
+                "p": true
+            },
+            "_inputs_expanded": true,
+            "_show_output_details": {
+                "0": true
+            },
+            "_outputs_expanded": true,
+            "_show_internals_details": {},
+            "_internals_expanded": true,
+            "_internal_state_gui_expanded": true
+        }
+    }
+}

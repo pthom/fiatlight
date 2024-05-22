@@ -1,0 +1,92 @@
+{
+    "functions_graph": {
+        "functions_nodes": {
+            "open_audio_file": {
+                "inputs": {
+                    "audio_path": {
+                        "name": "audio_path",
+                        "data": {
+                            "type": "Primitive",
+                            "value": "/Users/pascal/dvp/OpenSource/ImGuiWork/_Bundle/fiatlight/priv_assets/audio/r.mp3"
+                        }
+                    }
+                },
+                "gui_options": {
+                    "inputs": {},
+                    "outputs": {},
+                    "internal_gui_options": {}
+                }
+            },
+            "Save audio file": {
+                "inputs": {},
+                "gui_options": {
+                    "inputs": {},
+                    "outputs": {},
+                    "internal_gui_options": {}
+                }
+            },
+            "readable_audio_file_to_sound_wave": {
+                "inputs": {},
+                "gui_options": {
+                    "inputs": {},
+                    "outputs": {
+                        "0": {
+                            "show_time_as_seconds": false,
+                            "can_select": false,
+                            "volume": 1.0,
+                            "plot_size_em": [
+                                20.0,
+                                10.0
+                            ],
+                            "selection": {
+                                "start": 57.031836734693876,
+                                "end": 171.09551020408162
+                            }
+                        }
+                    },
+                    "internal_gui_options": {}
+                }
+            }
+        }
+    },
+    "functions_gui_settings": {
+        "open_audio_file": {
+            "_show_input_details": {
+                "audio_path": true
+            },
+            "_inputs_expanded": true,
+            "_show_output_details": {
+                "0": true
+            },
+            "_outputs_expanded": true,
+            "_show_internals_details": {},
+            "_internals_expanded": true,
+            "_internal_state_gui_expanded": true
+        },
+        "Save audio file": {
+            "_show_input_details": {
+                "in_audio_file": false,
+                "audio_path": true
+            },
+            "_inputs_expanded": true,
+            "_show_output_details": {},
+            "_outputs_expanded": true,
+            "_show_internals_details": {},
+            "_internals_expanded": true,
+            "_internal_state_gui_expanded": true
+        },
+        "readable_audio_file_to_sound_wave": {
+            "_show_input_details": {
+                "data": false
+            },
+            "_inputs_expanded": true,
+            "_show_output_details": {
+                "0": true
+            },
+            "_outputs_expanded": true,
+            "_show_internals_details": {},
+            "_internals_expanded": true,
+            "_internal_state_gui_expanded": true
+        }
+    }
+}

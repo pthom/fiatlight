@@ -7,8 +7,8 @@ from fiatlight.demos.images.old_school_meme import add_meme_text
 
 
 def main() -> None:
-    # source = image_source
-    source = invoke_sdxl_turbo
+    source = image_source
+    # source = invoke_sdxl_turbo
     fiat_run_composition([source, lut_channels_in_colorspace, oil_paint, add_meme_text])
 
 

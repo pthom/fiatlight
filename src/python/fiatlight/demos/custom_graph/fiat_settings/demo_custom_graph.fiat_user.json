@@ -1,0 +1,117 @@
+{
+    "functions_graph": {
+        "functions_nodes": {
+            "float_source": {
+                "inputs": {
+                    "x": {
+                        "name": "x",
+                        "data": {
+                            "type": "Primitive",
+                            "value": 0.03545999899506569
+                        }
+                    }
+                },
+                "gui_options": {
+                    "inputs": {},
+                    "outputs": {},
+                    "internal_gui_options": {}
+                }
+            },
+            "sin": {
+                "inputs": {},
+                "gui_options": {
+                    "inputs": {},
+                    "outputs": {},
+                    "internal_gui_options": {}
+                }
+            },
+            "square": {
+                "inputs": {},
+                "gui_options": {
+                    "inputs": {},
+                    "outputs": {},
+                    "internal_gui_options": {}
+                }
+            },
+            "add": {
+                "inputs": {},
+                "gui_options": {
+                    "inputs": {},
+                    "outputs": {},
+                    "internal_gui_options": {}
+                }
+            }
+        }
+    },
+    "functions_gui_settings": {
+        "float_source": {
+            "_show_input_details": {
+                "x": true
+            },
+            "_inputs_expanded": true,
+            "_show_output_details": {
+                "0": true
+            },
+            "_outputs_expanded": true,
+            "_show_internals_details": {
+                "edges": false,
+                "dilated_edges": false,
+                "image_with_edges": false
+            },
+            "_internals_expanded": true,
+            "_internal_state_gui_expanded": true
+        },
+        "sin": {
+            "_show_input_details": {
+                "x": true
+            },
+            "_inputs_expanded": true,
+            "_show_output_details": {
+                "0": true
+            },
+            "_outputs_expanded": true,
+            "_show_internals_details": {
+                "edges": false,
+                "dilated_edges": false,
+                "image_with_edges": false
+            },
+            "_internals_expanded": true,
+            "_internal_state_gui_expanded": true
+        },
+        "square": {
+            "_show_input_details": {
+                "x": true
+            },
+            "_inputs_expanded": true,
+            "_show_output_details": {
+                "0": true
+            },
+            "_outputs_expanded": true,
+            "_show_internals_details": {
+                "edges": false,
+                "dilated_edges": false,
+                "image_with_edges": false
+            },
+            "_internals_expanded": true,
+            "_internal_state_gui_expanded": true
+        },
+        "add": {
+            "_show_input_details": {
+                "a": true,
+                "b": true
+            },
+            "_inputs_expanded": true,
+            "_show_output_details": {
+                "0": true
+            },
+            "_outputs_expanded": true,
+            "_show_internals_details": {
+                "edges": false,
+                "dilated_edges": false,
+                "image_with_edges": false
+            },
+            "_internals_expanded": true,
+            "_internal_state_gui_expanded": true
+        }
+    }
+}

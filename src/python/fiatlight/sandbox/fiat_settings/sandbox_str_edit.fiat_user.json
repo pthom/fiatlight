@@ -1,0 +1,69 @@
+{
+    "functions_graph": {
+        "functions_nodes": {
+            "str_stats": {
+                "inputs": {
+                    "s": {
+                        "name": "s",
+                        "data": {
+                            "type": "Primitive",
+                            "value": " x x\n\ncwwxc;:=;=:\n\ncw;x:=xc;:=\n\n\ncwx;:=c;:=\n\ncwx;:=c;:c\n\n\ncsww\n\n\n xwcwc xw\n\n\ncxwcvwxcvw\n\n\n"
+                        }
+                    }
+                },
+                "gui_options": {
+                    "inputs": {},
+                    "outputs": {}
+                }
+            },
+            "prompt_stats": {
+                "inputs": {
+                    "s": {
+                        "name": "s",
+                        "data": {
+                            "type": "Primitive",
+                            "value": ""
+                        }
+                    }
+                },
+                "gui_options": {
+                    "inputs": {},
+                    "outputs": {}
+                }
+            }
+        }
+    },
+    "functions_gui_settings": {
+        "str_stats": {
+            "_show_input_details": {
+                "s": true,
+                "i": true
+            },
+            "_inputs_expanded": true,
+            "_show_output_details": {
+                "0": true,
+                "1": true,
+                "2": true
+            },
+            "_outputs_expanded": true,
+            "_show_internals_details": {},
+            "_internals_expanded": true,
+            "_internal_state_gui_expanded": true
+        },
+        "prompt_stats": {
+            "_show_input_details": {
+                "s": true
+            },
+            "_inputs_expanded": true,
+            "_show_output_details": {
+                "0": true,
+                "1": true,
+                "2": true
+            },
+            "_outputs_expanded": true,
+            "_show_internals_details": {},
+            "_internals_expanded": true,
+            "_internal_state_gui_expanded": true
+        }
+    }
+}
