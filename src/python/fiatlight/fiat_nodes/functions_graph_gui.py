@@ -278,7 +278,7 @@ class FunctionsGraphGui:
             node_br = node_br * fbs
             # Add some margin
             margin = 3
-            node_tl -= ImVec2(margin, margin)
+            node_tl -= ImVec2(margin, margin)  # type: ignore
             node_br += ImVec2(margin, margin)
             # phew, done...
 

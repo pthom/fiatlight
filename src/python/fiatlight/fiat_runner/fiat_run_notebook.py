@@ -1,6 +1,7 @@
 from fiatlight.fiat_core import FunctionsGraph
 from fiatlight.fiat_runner.fiat_gui import FiatGuiParams, FiatGui
 from fiatlight.fiat_runner.fiat_gui import get_last_screenshot
+from fiatlight.fiat_kits.fiat_image import ImageU8_3
 import imgui_bundle
 from typing import Callable, Tuple, Optional
 
@@ -20,15 +21,15 @@ def _fiat_run_graph_nb(
     notebook_runner_params: NotebookRunnerParams | None,
 ) -> None:
     "fiatlight runner for jupyter notebook"
-    import cv2  # type: ignore
+    import cv2
     import PIL.Image  # pip install pillow
-    from IPython.display import display  # type: ignore
-    from IPython.core.display import HTML  # type: ignore
+    from IPython.display import display
+    from IPython.core.display import HTML
 
     if notebook_runner_params is None:
         notebook_runner_params = NotebookRunnerParams()
 
-    def run_app():
+    def run_app() -> None:
         nonlocal notebook_runner_params
         # @immapp.static(was_theme_set=False)
         # def gui_with_light_theme():
@@ -41,7 +42,7 @@ def _fiat_run_graph_nb(
         fiat_gui = FiatGui(functions_graph, params)
         fiat_gui.run()
 
-    def make_thumbnail(image):
+    def make_thumbnail(image: ImageU8_3) -> ImageU8_3:
         resize_ratio = 1.0
         if notebook_runner_params.thumbnail_ratio != 0.0:
             resize_ratio = notebook_runner_params.thumbnail_ratio
@@ -58,19 +59,21 @@ def _fiat_run_graph_nb(
             )
         else:
             thumbnail_image = image
-        return thumbnail_image
+        return thumbnail_image  # type: ignore
 
-    def display_image(image):
+    def display_image(image: ImageU8_3) -> None:
         pil_image = PIL.Image.fromarray(image)
-        display(pil_image)
+        display(pil_image)  # type: ignore
 
-    def run_app_and_display_thumb():
+    def run_app_and_display_thumb() -> None:
         run_app()
         app_image = get_last_screenshot()
+        if app_image is None:
+            return
         thumbnail = make_thumbnail(app_image)
         display_image(thumbnail)
 
-    def display_run_button():
+    def display_run_button() -> None:
         html_code = f"""
         <script>
         function btnClick_{notebook_runner_params.run_id}(btn) {{
@@ -83,9 +86,9 @@ def _fiat_run_graph_nb(
         </script>
         <button onClick="btnClick_{notebook_runner_params.run_id}(this)">Run</button>
         """
-        display(HTML(html_code))
+        display(HTML(html_code))  # type: ignore
 
-    def display_app_with_run_button(run_id):
+    def display_app_with_run_button(run_id: str) -> None:
         """Experiment displaying a "run" button in the notebook below the screenshot. Disabled as of now
         If using this, it would be possible to run the app only if the user clicks on the Run button
         (and not during normal cell execution).
@@ -102,3 +105,9 @@ def _fiat_run_graph_nb(
 
     # display_app_with_run_button(run_id)
     run_app_and_display_thumb()
+
+
+def display_markdown(md_string: str) -> None:
+    from IPython.display import display, Markdown
+
+    display(Markdown(md_string))  # type: ignore

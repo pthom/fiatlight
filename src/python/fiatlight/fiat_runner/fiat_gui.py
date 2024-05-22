@@ -19,11 +19,14 @@ from typing import List, Tuple
 from enum import Enum, auto
 
 
-def _is_running_in_notebook():
+def _is_running_in_notebook() -> bool:
     try:
-        from IPython import get_ipython
+        from IPython import get_ipython  # type: ignore  # noqa
 
-        if "IPKernelApp" in get_ipython().config:
+        ipython = get_ipython()  # type: ignore
+        if ipython is None:
+            return False
+        if "IPKernelApp" in get_ipython().config:  # type: ignore
             return True
     except ImportError:
         return False
@@ -213,6 +216,7 @@ class FiatGui:
         self._disable_idling_if_any_live_function()
 
     def _before_exit(self) -> None:
+        # print(f"settings file {self._user_settings_filename()} in {os.getcwd()}")
         self._store_final_app_window_screenshot()
         self._functions_graph_gui.on_exit()
         if self.params.customizable_graph:
@@ -252,11 +256,11 @@ class FiatGui:
         global _LAST_SCREENSHOT
         last_hello_imgui_image = hello_imgui.final_app_window_screenshot()
         nodes_boundings = self._functions_graph_gui._get_node_screenshot_boundings()  # noqa
-        last_nodes_image = last_hello_imgui_image[  # type: ignore
+        last_nodes_image = last_hello_imgui_image[
             int(nodes_boundings.min.y) : int(nodes_boundings.max.y),
             int(nodes_boundings.min.x) : int(nodes_boundings.max.x),
         ]
-        _LAST_SCREENSHOT = last_nodes_image
+        _LAST_SCREENSHOT = last_nodes_image  # type: ignore
 
     def _heartbeat(self) -> None:
         fiat_osd._render_all_osd()  # noqa
@@ -571,9 +575,11 @@ class FiatGui:
 
 def fiat_run_graph(functions_graph: FunctionsGraph, params: FiatGuiParams | None = None) -> None:
     if _is_running_in_notebook():
-        from fiatlight.fiat_runner.fiat_run_notebook import _fiat_run_graph_nb
+        from fiatlight.fiat_runner.fiat_run_notebook import _fiat_run_graph_nb, NotebookRunnerParams
 
-        _fiat_run_graph_nb(functions_graph, params, params)
+        notebook_runner_params = NotebookRunnerParams()
+
+        _fiat_run_graph_nb(functions_graph, params, notebook_runner_params)
     else:
         fiat_gui = FiatGui(functions_graph, params)
         fiat_gui.run()
