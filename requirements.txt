@@ -11,3 +11,4 @@ matplotlib
 scipy
 scikit-learn
 pyglfw
+IPython
