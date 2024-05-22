@@ -1,19 +1,4 @@
-"""FunctionWithGui: a class to wrap a function with a GUI presenting its inputs and outputs
-
-
-For a parameter named `param`, you can add attributes starting with `param__` (the double underscore is important):
-
-* `param__edit_type` (for float, int, bool params): the type of widget to use for the parameter.
-  - Possible values are for int are: `"slider"`, `"input"`, `"drag"`, `"knob"`, `"slider_and_minus_plus"`
-  - Possible values are for float are:  `"slider"`, `"input"`, `"drag"`, `"knob"` `"slider_float_any_range"`,`"slider_float_any_range_positive"`
-  - Possible values are for bool are: `"checkbox"`, "`toggle`"
-* `param__range` (for numeric params): a tuple (min, max) to restrict the range of the parameter
-* `param__format` (for numeric params): a format string to display the parameter value (e.g., `"%d"`, `"%0.2f"`, etc.)
-* `param__no_input` (for sliders and knobs): if set to `True`, no input field will be displayed beside the slider or knob
-* `knob_size_em` and `knob_steps` (for numeric params): for the knob widget, the size of the knob in em units and the number of steps
-* `width_em` (for numeric and str params): the width of the widget in em units (1 em is the width of the letter "m" in the default font)
-
-"""
+"""FunctionWithGui: a class to wrap a function with a GUI presenting its inputs and outputs"""
 
 from fiatlight.fiat_config import get_fiat_config
 from fiatlight.fiat_types import UnspecifiedValue, ErrorValue, JsonDict, GuiType, ScopeStorage
@@ -21,13 +6,155 @@ from fiatlight.fiat_core.any_data_with_gui import AnyDataWithGui
 from fiatlight.fiat_types.function_types import BoolFunction
 from fiatlight.fiat_core.param_with_gui import ParamWithGui, ParamKind
 from fiatlight.fiat_core.output_with_gui import OutputWithGui
-from typing import Any, List, final, Callable, Optional, Type, TypeAlias
+from typing import Any, List, final, Callable, Optional, Type, TypeAlias, Dict
 
 import logging
 
 
 class FunctionWithGui:
-    """Instantiate this class with your functions, to make them available in a graph"""
+    """FunctionWithGui: add GUI to a function
+
+    FunctionWithGui: add GUI to a function
+    ========================================
+
+     Introduction
+     ------------
+
+     `FunctionWithGui` is one of the core classes of FiatLight: it wraps a function with a GUI that presents its
+     inputs and its output(s).
+
+     Creating a FunctionWithGui object
+     ---------------------------------
+
+     For most functions, fiatlight will automatically create the GUI for the inputs and outputs of your functions.
+
+     ### Automatic creation example:
+     The code below will provide a GUI for the function `foo` where the user can enter an integer and a float, and
+     it will display the result of the function.
+
+         ```python
+         import fiatlight as ft
+         def foo(a: int, b: float) -> float:
+             return a + b
+         ft.fiat_run(foo)
+         ```
+
+     ### Manual creation example
+     If you want to create the GUI manually, you can use the `FunctionWithGui` class.
+     The previous example can be rewritten as follows:
+
+         ```python
+         import fiatlight as ft
+         def foo(a: int, b: float) -> float:
+             return a + b
+
+         foo_gui = ft.FunctionWithGui(foo)
+         # Method 1: directly run the function
+         # ft.fiat_run(foo_gui)
+         # Method 2: create a graph and run it
+         graph = ft.FunctionsGraph()
+         graph.add_function(foo_gui)
+         ft.fiat_run_graph(graph)
+         ```
+
+     Customizing the GUI for a given function
+     ----------------------------------------
+
+     As an example, let's consider the following function:
+
+         ```python
+         import fiatlight as ft
+
+         # Ideally, we would like to restrict the range of x to [-1, 1]
+         def my_asin(x: float = 0.5) -> float:
+             import math
+             return math.asin(x)
+
+         ft.fiat_run(my_asin)
+         ```
+
+     If you run this function with `fiat_run(my_asin)`, the GUI will allow the user to enter any float value for `x`.
+     Without further customization, the GUI will allow the user to input any float value, and the x parameter will be
+     presented using a widget that allows manual entry of a value for x.
+     This lets the user enter values that may not be valid for the function.
+
+
+     ### Customize the range of a parameter
+
+    It is possible to customize the GUI for parameters using function attributes:
+    below, we set the range for x inside [-1, 1]. As a consequence it will be displayed with a slider widget.
+
+        ```python
+        import fiatlight as ft
+        def my_asin(x: float = 0.5) -> float:
+            import math
+            return math.asin(x)
+
+        # Set the range of the x parameter: note the double "_" after the parameter name
+        my_asin.x__range = (-1, 1)
+
+        ft.fiat_run(my_asin)
+        ```
+
+    ### Available customization options
+
+     For a parameter named `param`, you can add attributes starting with `param__` (the double underscore is important):
+
+     * `param__edit_type`: the type of widget to use for the parameter
+        * for float, int, bool params):
+         - Possible values are for int are: `"slider"`, `"input"`, `"drag"`, `"knob"`, `"slider_and_minus_plus"`
+         - Possible values are for float are:  `"slider"`, `"input"`, `"drag"`, `"knob"` `"slider_float_any_range"`,`"slider_float_any_range_positive"`
+         - Possible values are for bool are: `"checkbox"`, "`toggle`"
+     * `param__range` (for numeric params): a tuple (min, max) to restrict the range of the parameter
+     * `param__format` (for numeric params): a format string to display the parameter value (e.g., `"%d"`, `"%0.2f"`, etc.)
+     * `param__no_input` (for sliders and knobs): if set to `True`, no input field will be displayed beside the slider or knob
+     * `knob_size_em` and `knob_steps` (for numeric params): for the knob widget, the size of the knob in em units and the number of steps
+     * `width_em` (for numeric and str params): the width of the widget in em units (1 em is the width of the letter "m" in the default font)
+
+    **A full example with custom attributes for function parameters**
+
+        ```python
+        import fiatlight
+        from matplotlib.figure import Figure
+
+        def interactive_histogram(
+            n_bars: int = 50, mu: float = 0, sigma: float = 1, average: float = 500, nb_data: int = 4000
+        ) -> Figure:
+            '''Generate an interactive histogram with adjustable number of bars, mean, and standard deviation.'''
+            import numpy as np
+            import matplotlib.pyplot as plt
+
+            data = np.random.normal(mu, sigma, int(nb_data)) + average
+            bins = np.linspace(np.min(data), np.max(data), n_bars)
+            fig, ax = plt.subplots()
+            ax.hist(data, bins=bins, color="blue", alpha=0.7)
+            return fig
+
+
+        # Edit the number of bars with a knob
+        interactive_histogram.n_bars__edit_type = "knob"
+        interactive_histogram.n_bars__range = (1, 300)
+        # Edit the mean with an input field
+        interactive_histogram.mu__edit_type = "input"
+        interactive_histogram.mu__range = (-5, 5)
+        # Edit the standard deviation with a drag
+        interactive_histogram.sigma__edit_type = "drag"
+        interactive_histogram.sigma__range = (0.1, 5)
+        # Edit the average with a slider for a float value with any range
+        # (the slider range will adapt interactively, when dragging far to the left or to the right)
+        interactive_histogram.average__edit_type = "slider_float_any_range"
+        # Edit the number of data points with a logarithmic slider
+        # Note: by default, you can ctrl+click on a slider to input a value directly,
+        #       this is disabled here with nb_data__slider_no_input
+        interactive_histogram.nb_data__edit_type = "slider"
+        interactive_histogram.nb_data__range = (100, 1_000_000)
+        interactive_histogram.nb_data__slider_logarithmic = True
+        interactive_histogram.nb_data__slider_no_input = True
+
+        fiatlight.fiat_run(interactive_histogram)
+        ```
+
+    """
 
     # --------------------------------------------------------------------------------------------
     #        Public Members
@@ -129,8 +256,8 @@ class FunctionWithGui:
 
         Advanced parameters:
         ********************
-        :param globals_dict, locals_dict: the globals/locals dictionary of the module where the function is defined
-                                          (if not provided, they are captured automatically)
+        :param scope_storage: the globals/locals dictionary of the module where the function is defined
+                              (if not provided, they are captured automatically)
 
         :param signature_string: a string representing the signature of the function
                                  used when the function signature cannot be retrieved automatically
@@ -205,6 +332,12 @@ class FunctionWithGui:
     @staticmethod
     def _Utilities_Section() -> None:  # Dummy function to create a section in the IDE # noqa
         pass
+
+    def __call__(self, *args: Any, **kwargs: Dict[str, Any]) -> Any:
+        """Call the function with the given arguments"""
+        if self._f_impl is None:
+            raise ValueError("FunctionWithGui: function self._f_impl is None")
+        return self._f_impl(*args, **kwargs)
 
     def is_dirty(self) -> bool:
         return self._dirty
@@ -451,7 +584,7 @@ class FunctionWithGui:
         for output_idx, output_option in output_options.items():
             output_idx = int(output_idx)
             if output_idx >= len(self._outputs_with_gui):
-                logging.warn(f"Output index {output_idx} out of range")
+                logging.warning(f"Output index {output_idx} out of range")
                 continue
             output_with_gui = self._outputs_with_gui[output_idx]
             callback_load = output_with_gui.data_with_gui.callbacks.load_gui_options_from_json
