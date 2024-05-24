@@ -1,9 +1,10 @@
 """In this example we add a custom presentation function to a function.
-   We also manually set the limits of a float parameter.
+We also manually set the limits of a float parameter.
 
-   Note: fiatlight include the type `FloatMatrix_Dim1` and `FloatMatrix_Dim2`
-         which can be automatically presented as a plot (see example demo_plot_array.py)
+Note: fiatlight include the type `FloatMatrix_Dim1` and `FloatMatrix_Dim2`
+      which can be automatically presented as a plot (see example demo_plot_array.py)
 """
+
 import math
 import numpy as np
 from numpy.typing import NDArray
@@ -61,7 +62,7 @@ def main() -> None:
     graph = FunctionsGraph.from_function_composition([make_range, make_sin])
 
     # present the output of make_sin as a plot (using the present_plot function)
-    graph.function_with_gui("make_sin").output().set_present_custom_callback(present_plot_draggable)
+    graph.function_with_gui_of_name("make_sin").output().set_present_custom_callback(present_plot_draggable)
     # graph.function_with_gui("make_sin").output().set_present_custom_callback(present_plot_standard)
 
     fiat_run_graph(graph)

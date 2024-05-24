@@ -158,7 +158,7 @@ class FunctionsGraph:
     def _Graph_Manipulation_Section() -> None:  # Dummy function to create a section in the IDE # noqa
         pass
 
-    def can_add_link(
+    def _can_add_link(
         self, src_function_node: FunctionNode, dst_function_node: FunctionNode, dst_input_name: str, src_output_idx: int
     ) -> Tuple[bool, str]:
         # 1. Check that the function nodes are in the graph
@@ -205,7 +205,7 @@ class FunctionsGraph:
 
         return True, ""
 
-    def add_link_from_function_nodes(
+    def _add_link_from_function_nodes(
         self,
         src_function_node: FunctionNode,
         dst_function_node: FunctionNode,
@@ -231,7 +231,7 @@ class FunctionsGraph:
                 raise ValueError(f"Function {dst_function_name} has no inputs!")
             dst_input_name = dst_function_node.function_with_gui.input_of_idx(0).name
 
-        can_add, fail_reason = self.can_add_link(
+        can_add, fail_reason = self._can_add_link(
             src_function_node, dst_function_node, dst_input_name=dst_input_name, src_output_idx=src_output_idx
         )
         if not can_add:
@@ -261,7 +261,7 @@ class FunctionsGraph:
         """
         src_function = self._function_node_with_unique_name(src_function_name)
         dst_function = self._function_node_with_unique_name(dst_function_name)
-        self.add_link_from_function_nodes(
+        self._add_link_from_function_nodes(
             src_function, dst_function, dst_input_name=dst_input_name, src_output_idx=src_output_idx
         )
 
@@ -269,7 +269,7 @@ class FunctionsGraph:
         self.functions_nodes.extend(other.functions_nodes)
         self.functions_nodes_links.extend(other.functions_nodes_links)
 
-    def function_with_gui(self, name: str | None = None) -> FunctionWithGui:
+    def function_with_gui_of_name(self, name: str | None = None) -> FunctionWithGui:
         if name is None:
             assert len(self.functions_nodes) == 1
             return self.functions_nodes[0].function_with_gui
@@ -309,14 +309,14 @@ class FunctionsGraph:
         path.remove(fn)  # Remove fn from path as we backtrack
         return False
 
-    def remove_link(self, link: FunctionNodeLink) -> None:
+    def _remove_link(self, link: FunctionNodeLink) -> None:
         self.functions_nodes_links.remove(link)
         link.src_function_node.output_links.remove(link)
         link.dst_function_node.input_links.remove(link)
 
-    def remove_function_node(self, function_node: FunctionNode) -> None:
+    def _remove_function_node(self, function_node: FunctionNode) -> None:
         for link in function_node.output_links:
-            self.remove_link(link)
+            self._remove_link(link)
             # for fn_node in self.functions_nodes:
             #     for link2 in fn_node.input_links:
             #         if link2 == link:
@@ -325,7 +325,7 @@ class FunctionsGraph:
             #         if link3 == link:
             #             fn_node.output_links.remove(link3)
         for link in function_node.input_links:
-            self.remove_link(link)
+            self._remove_link(link)
         self.functions_nodes.remove(function_node)
 
     # ================================================================================================================
@@ -429,22 +429,3 @@ class FunctionsGraph:
             self.add_link(
                 src_function_name, dst_function_name, dst_input_name=dst_input_name, src_output_idx=src_output_idx
             )
-
-
-def sandbox() -> None:
-    def add(a: int, b: int = 2) -> int:
-        return a + b
-
-    def mul2(a: int) -> int:
-        return a * 2
-
-    def div3(a: int) -> float:
-        return a / 3
-
-    fg = FunctionsGraph.from_function_composition([add, mul2, mul2, div3])
-    print(fg.functions_nodes)
-    print(fg.functions_nodes_links)
-
-
-if __name__ == "__main__":
-    sandbox()

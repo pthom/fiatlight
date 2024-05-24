@@ -159,7 +159,7 @@ class FunctionsGraphGui:
                 "Can not add link! Please link an output pin (Right) to an input pin (Left) of another function",
             )
 
-        ok, failure_reason = self.functions_graph.can_add_link(
+        ok, failure_reason = self.functions_graph._can_add_link(
             fn_output.get_function_node(), fn_input.get_function_node(), dst_param_name, src_output_idx
         )
         if not ok:
@@ -177,7 +177,7 @@ class FunctionsGraphGui:
         if fn_input is None or fn_output is None:
             return False
 
-        ok, _failure_reason = self.functions_graph.can_add_link(
+        ok, _failure_reason = self.functions_graph._can_add_link(
             fn_output.get_function_node(), fn_input.get_function_node(), dst_param_name, src_output_idx
         )
         if not ok:
@@ -187,7 +187,7 @@ class FunctionsGraphGui:
         # We need to add
         # - a link to self.functions_graph.functions_nodes_links
         # - and a link to self.functions_links_gui
-        function_node_link = self.functions_graph.add_link_from_function_nodes(
+        function_node_link = self.functions_graph._add_link_from_function_nodes(
             fn_output.get_function_node(), fn_input.get_function_node(), dst_param_name, src_output_idx
         )
         function_node_link_gui = FunctionNodeLinkGui(function_node_link, self.function_nodes_gui)
@@ -201,7 +201,7 @@ class FunctionsGraphGui:
         link = link_gui.function_node_link
 
         # 2. Remove the link from the lists
-        self.functions_graph.remove_link(link)
+        self.functions_graph._remove_link(link)
         self.functions_links_gui.remove(link_gui)
 
     def _remove_function_node(self, node_id: ed.NodeId) -> None:
@@ -210,7 +210,7 @@ class FunctionsGraphGui:
         fn = fn_gui.get_function_node()
 
         # 2. Remove the node from the lists
-        self.functions_graph.remove_function_node(fn)
+        self.functions_graph._remove_function_node(fn)
         self.function_nodes_gui.remove(fn_gui)
 
         # 3. Remove all links that are connected to this node
