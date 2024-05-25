@@ -24,14 +24,17 @@ class FunctionsGraph:
 
     _secret_key: str = "FunctionsGraph"
 
-    # ================================================================================================================
-    #                                            Construction (Empty)
-    # ================================================================================================================
     @staticmethod
     def _Construction_Section() -> None:  # Dummy function to create a section in the IDE # noqa
+        """
+        # ================================================================================================================
+        #                                            Construction (Empty)
+        # ================================================================================================================
+        """
         pass
 
     def __init__(self, secret_key: str = "FunctionsGraph") -> None:
+        """This class should not be instantiated directly. Use the factory methods instead."""
         if secret_key != self._secret_key:
             raise ValueError("This class should not be instantiated directly. Use the factory method instead.")
         self.functions_nodes = []
@@ -39,21 +42,41 @@ class FunctionsGraph:
 
     @staticmethod
     def create_empty() -> "FunctionsGraph":
+        """Create an empty FunctionsGraph"""
         return FunctionsGraph(secret_key=FunctionsGraph._secret_key)
 
-    # ================================================================================================================
-    #                                            Public API / Add functions
-    # ================================================================================================================
+    @staticmethod
+    def _Public_API_Add_Function_Section() -> None:  # Dummy function to create a section in the IDE # noqa
+        """
+        # ================================================================================================================
+        #                                            Public API / Add functions
+        #
+        # ---------------------------------------------------------------------------------------------------------------
+        # Notes:
+        #   You can add either Functions or FunctionWithGui
+        #     - If f is a FunctionWithGui, it will be added as is
+        #     - If f is a standard function:
+        #         - it will be wrapped in a FunctionWithGui
+        #         - the function signature *must* mention the types of the parameters and the return type
+        #
+        #   ScopeStorage (Advanced!):
+        #     - If you do not pass the scope_storage, it will be captured from the caller of the functions below
+        #       (i.e. we will capture the locals and globals of the caller, and benefit from all its available types)
+        #     - If you are calling these functions in a nested function, you may want to capture the scope where
+        #       the needed types are available. In this case, you can pass the scope_storage as an argument.
+        # ================================================================================================================
+        """
+        pass
+
     #
     # IMPORTANT: All user facing that add functions (not FunctionWithGui) should capture the locals and globals
     # of the caller, before passing them to the private _add_function method.
     # This should be done right after being called!
-    @staticmethod
-    def _Public_API_Add_Function_Section() -> None:  # Dummy function to create a section in the IDE # noqa
-        pass
+    #
 
     @staticmethod
     def from_function(f: Function | FunctionWithGui, scope_storage: ScopeStorage | None = None) -> "FunctionsGraph":
+        """Create a FunctionsGraph from a single function, either a standard function or a FunctionWithGui"""
         r = FunctionsGraph.create_empty()
         if isinstance(f, FunctionWithGui):
             r._add_function_with_gui(f)
@@ -67,9 +90,8 @@ class FunctionsGraph:
     def from_function_composition(
         functions: Sequence[Function | FunctionWithGui], scope_storage: ScopeStorage | None = None
     ) -> "FunctionsGraph":
-        """Create a FunctionsGraph from a list of PureFunctions([InputType] -> OutputType)
-        * They should all be pure functions
-        * The output[0] of one should be the input[0] of the next
+        """Create a FunctionsGraph from a list of functions that will be chained together
+        i.e. the output[0] of one function will be the input[0] of the next function
         """
         if scope_storage is None:
             scope_storage = _capture_scope_back_1()
@@ -78,12 +100,14 @@ class FunctionsGraph:
     def add_function_composition(
         self, functions: Sequence[Function | FunctionWithGui], scope_storage: ScopeStorage | None = None
     ) -> None:
+        """Add a list of functions that will be chained together"""
         if scope_storage is None:
             scope_storage = _capture_scope_back_1()
         composition = FunctionsGraph._create_from_function_composition(functions, scope_storage)
         self.merge_graph(composition)
 
     def add_function(self, f: Function | FunctionWithGui, scope_storage: ScopeStorage | None = None) -> FunctionNode:
+        """Add a function to the graph. It will not be linked to any other function. Returns the FunctionNode added."""
         if isinstance(f, FunctionWithGui):
             return self._add_function_with_gui(f)
         else:
@@ -91,11 +115,13 @@ class FunctionsGraph:
                 scope_storage = _capture_scope_back_1()
             return self._add_function(f, scope_storage)
 
-    # ================================================================================================================
-    #                                            Private API / Add functions
-    # ================================================================================================================
     @staticmethod
     def _Private_API_Add_Function_Section() -> None:  # Dummy function to create a section in the IDE # noqa
+        """
+        # ================================================================================================================
+        #                                            Private API / Add functions
+        # ================================================================================================================
+        """
         pass
 
     def _add_function_with_gui(self, f_gui: FunctionWithGui) -> FunctionNode:
@@ -130,7 +156,7 @@ class FunctionsGraph:
                 else:
                     r._add_function(f, scope_storage)
 
-        def fill_links() -> None:
+        def _fill_links() -> None:
             r.functions_nodes_links = []
             for i in range(len(r.functions_nodes) - 1):
                 fn = r.functions_nodes[i]
@@ -148,19 +174,22 @@ class FunctionsGraph:
 
         r = FunctionsGraph(secret_key=FunctionsGraph._secret_key)
         fill_functions_with_gui()
-        fill_links()
+        _fill_links()
         return r
 
-    # ================================================================================================================
-    #                                            Graph manipulation
-    # ================================================================================================================
     @staticmethod
     def _Graph_Manipulation_Section() -> None:  # Dummy function to create a section in the IDE # noqa
+        """
+        # ================================================================================================================
+        #                                            Graph manipulation
+        # ================================================================================================================
+        """
         pass
 
     def _can_add_link(
         self, src_function_node: FunctionNode, dst_function_node: FunctionNode, dst_input_name: str, src_output_idx: int
     ) -> Tuple[bool, str]:
+        """Check if a link can be added between two functions. (private)"""
         # 1. Check that the function nodes are in the graph
         if src_function_node not in self.functions_nodes:
             return False, f"Function {src_function_node.function_with_gui.name} not found in the graph"
@@ -212,6 +241,7 @@ class FunctionsGraph:
         dst_input_name: str | None = None,
         src_output_idx: int = 0,
     ) -> FunctionNodeLink:
+        """Add a link between two functions nodes (private)"""
         src_function_name = src_function_node.function_with_gui.name
         dst_function_name = dst_function_node.function_with_gui.name
 
@@ -256,8 +286,10 @@ class FunctionsGraph:
     def add_link(
         self, src_function_name: str, dst_function_name: str, dst_input_name: str | None = None, src_output_idx: int = 0
     ) -> None:
-        """Add a link between two functions
-        Returns the link that was created
+        """Add a link between two functions, which are identified by their *unique* names
+
+        If a graph reuses several times the same function "f",
+        the unique names for this functions will be "f_1", "f_2", "f_3", etc.
         """
         src_function = self._function_node_with_unique_name(src_function_name)
         dst_function = self._function_node_with_unique_name(dst_function_name)
@@ -266,10 +298,12 @@ class FunctionsGraph:
         )
 
     def merge_graph(self, other: "FunctionsGraph") -> None:
+        """Merge another FunctionsGraph into this one"""
         self.functions_nodes.extend(other.functions_nodes)
         self.functions_nodes_links.extend(other.functions_nodes_links)
 
     def function_with_gui_of_name(self, name: str | None = None) -> FunctionWithGui:
+        """Get the function with the given unique name"""
         if name is None:
             assert len(self.functions_nodes) == 1
             return self.functions_nodes[0].function_with_gui
@@ -279,6 +313,7 @@ class FunctionsGraph:
         raise ValueError(f"No function with the name {name}")
 
     def _would_add_cycle(self, new_link: FunctionNodeLink) -> bool:
+        """Check if adding a link would create a cycle (private)"""
         new_graph = FunctionsGraph.create_empty()
         new_graph.functions_nodes = copy.copy(self.functions_nodes)
         new_graph.functions_nodes_links = copy.copy(self.functions_nodes_links)
@@ -294,6 +329,7 @@ class FunctionsGraph:
         return False
 
     def _has_cycle_from_node(self, fn: FunctionNode, path: Set[FunctionNode] | None = None) -> bool:
+        """Check if there is a cycle starting from a given node (private)"""
         if path is None:
             path = set()
         path.add(fn)
@@ -310,11 +346,13 @@ class FunctionsGraph:
         return False
 
     def _remove_link(self, link: FunctionNodeLink) -> None:
+        """Remove a link between two functions (private)"""
         self.functions_nodes_links.remove(link)
         link.src_function_node.output_links.remove(link)
         link.dst_function_node.input_links.remove(link)
 
     def _remove_function_node(self, function_node: FunctionNode) -> None:
+        """Remove a function node from the graph (private)"""
         for link in function_node.output_links:
             self._remove_link(link)
             # for fn_node in self.functions_nodes:
@@ -328,15 +366,20 @@ class FunctionsGraph:
             self._remove_link(link)
         self.functions_nodes.remove(function_node)
 
-    # ================================================================================================================
-    #                                            Utilities
-    # ================================================================================================================
     @staticmethod
     def _Utilities_Section() -> None:  # Dummy function to create a section in the IDE # noqa
+        """
+        # ================================================================================================================
+        #                                            Utilities
+        # ================================================================================================================
+        """
         pass
 
     def function_node_unique_name(self, function_node: FunctionNode) -> str:
-        """Make sure all names are unique"""
+        """Return the unique name of a function node:
+        If a graph reuses several times the same function "f",
+        the unique names for this functions will be "f_1", "f_2", "f_3", etc.
+        """
         names = [fn.function_with_gui.name for fn in self.functions_nodes]
         duplicated_names = [name for name in names if names.count(name) > 1]
         if function_node.function_with_gui.name not in duplicated_names:
@@ -356,17 +399,21 @@ class FunctionsGraph:
         raise ValueError(f"No function with the name {function_name}")
 
     def _all_function_nodes_with_unique_names(self) -> Dict[str, FunctionNode]:
+        """Return a dict of all the function nodes, with their unique names as keys (private)"""
         return {self.function_node_unique_name(fn): fn for fn in self.functions_nodes}
 
     def shall_display_refresh_needed_label(self) -> bool:
+        """Returns True if any function node shall display a "Refresh needed" label"""
         r = any(fn.function_with_gui.shall_display_refresh_needed_label() for fn in self.functions_nodes)
         return r
 
-    # ================================================================================================================
-    #                                            Serialization
-    # ================================================================================================================
     @staticmethod
     def _Serialization_Section() -> None:  # Dummy function to create a section in the IDE # noqa
+        """
+        # ================================================================================================================
+        #                                            Serialization
+        # ================================================================================================================
+        """
         pass
 
     def save_user_inputs_to_json(self) -> JsonDict:
@@ -387,7 +434,9 @@ class FunctionsGraph:
             fn.load_user_inputs_from_json(fn_json)
 
     def save_graph_composition_to_json(self) -> JsonDict:
-        """Saves the graph composition to a json dict"""
+        """Saves the graph composition to a json dict.
+        Only used when the graph composition is editable.
+        """
 
         all_function_names: List[str]
         all_function_names = [fn.function_with_gui.name for fn in self.functions_nodes]
@@ -412,6 +461,7 @@ class FunctionsGraph:
     def load_graph_composition_from_json(
         self, json_data: JsonDict, function_factory: FunctionWithGuiFactoryFromName
     ) -> None:
+        """Loads the graph composition from a json dict."""
         self.functions_nodes = []
         self.functions_nodes_links = []
 

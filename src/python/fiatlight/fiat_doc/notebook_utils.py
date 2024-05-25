@@ -135,11 +135,17 @@ def _update_notebook_code_cells(notebook: NotebookNode, md_string: _CompositeMar
             notebook_cell = notebook.cells[i]
             if isinstance(item, _Code):
                 if notebook_cell.cell_type != "code":
-                    raise ValueError(f"Cell {i} is not a code cell.")
+                    # raise ValueError(f"Cell {i} is not a code cell.")
+                    logging.warning(f"Cell {i} is not a code cell, replacing!")
+                    notebook_cell = nbformat.v4.new_code_cell(item.value)  # type: ignore
+                    notebook.cells[i] = notebook_cell
                 notebook_cell.source = item.value
             if isinstance(item, _Markdown):
                 if notebook.cells[i].cell_type != "markdown":
-                    raise ValueError(f"Cell {i} is not a markdown cell.")
+                    # raise ValueError(f"Cell {i} is not a markdown cell.")
+                    logging.warning(f"Cell {i} is not a markdown cell, replacing!")
+                    notebook_cell = nbformat.v4.new_markdown_cell(item.value)  # type: ignore
+                    notebook.cells[i] = notebook_cell
                 notebook_cell.source = item.value
         else:
             if isinstance(item, _Code):
