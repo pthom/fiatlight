@@ -448,31 +448,29 @@ def enum_with_gui_registration(cls: Type[Enum]) -> Type[Enum]:
     return cls
 
 
-def register_dataclass(dataclass_type: Type[DataclassLikeType], param_attrs: dict[str, Any] | None = None) -> None:
+def register_dataclass(dataclass_type: Type[DataclassLikeType], **kwargs) -> None:  # type: ignore
     """Register a dataclass with its GUI implementation.
     Note: you can also use the dataclass_with_gui_registration decorator."""
     from fiatlight.fiat_togui.dataclass_gui import DataclassGui
 
     def factory() -> AnyDataWithGui[Any]:
-        r = DataclassGui(dataclass_type, param_attrs)
+        r = DataclassGui(dataclass_type, kwargs)
         return r
 
     gui_factories().register_type(dataclass_type, factory)
 
 
 # Decorators for registered dataclasses and pydantic models
-def dataclass_with_gui_registration(
-    param_attrs: dict[str, Any] | None = None,
-) -> Callable[[Type[DataType]], Type[DataType]]:
+def dataclass_with_gui_registration(**kwargs) -> Callable[[Type[DataType]], Type[DataType]]:  # type: ignore
     def actual_decorator(cls: Type[DataType]) -> Type[DataType]:
         cls = dataclasses.dataclass(cls)  # First, create the dataclass
-        register_dataclass(cls, param_attrs)
+        register_dataclass(cls, **kwargs)
         return cls
 
     return actual_decorator
 
 
-def register_base_model(base_model_type: Type[DataclassLikeType], param_attrs: dict[str, Any] | None = None) -> None:
+def register_base_model(base_model_type: Type[DataclassLikeType], **kwargs) -> None:  # type: ignore
     """Register a pydantic BaseModel with its GUI implementation.
     Note: you can also use the base_model_with_gui_registration decorator."""
     from fiatlight.fiat_togui.dataclass_gui import BaseModelGui
@@ -480,17 +478,15 @@ def register_base_model(base_model_type: Type[DataclassLikeType], param_attrs: d
     assert issubclass(base_model_type, pydantic.BaseModel)
 
     def factory() -> AnyDataWithGui[Any]:
-        r = BaseModelGui(base_model_type, param_attrs)
+        r = BaseModelGui(base_model_type, kwargs)
         return r
 
     gui_factories().register_type(base_model_type, factory)
 
 
-def base_model_with_gui_registration(
-    param_attrs: dict[str, Any] | None = None,
-) -> Callable[[Type[pydantic.BaseModel]], Type[pydantic.BaseModel]]:
+def base_model_with_gui_registration(**kwargs) -> Callable[[Type[pydantic.BaseModel]], Type[pydantic.BaseModel]]:  # type: ignore
     def actual_decorator(cls: Type[pydantic.BaseModel]) -> Type[pydantic.BaseModel]:
-        register_base_model(cls, param_attrs)
+        register_base_model(cls, **kwargs)
         return cls
 
     return actual_decorator

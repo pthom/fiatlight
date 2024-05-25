@@ -1,13 +1,12 @@
 {
     "functions_graph": {
         "functions_nodes": {
-            "open_audio_file": {
+            "float_source": {
                 "inputs": {
-                    "audio_path": {
-                        "name": "audio_path",
+                    "x": {
+                        "name": "x",
                         "data": {
-                            "type": "Primitive",
-                            "value": "/Users/pascal/dvp/OpenSource/ImGuiWork/_Bundle/fiatlight/priv_assets/audio/r.mp3"
+                            "type": "Unspecified"
                         }
                     }
                 },
@@ -17,7 +16,7 @@
                     "internal_gui_options": {}
                 }
             },
-            "Save audio file": {
+            "sin": {
                 "inputs": {},
                 "gui_options": {
                     "inputs": {},
@@ -25,34 +24,20 @@
                     "internal_gui_options": {}
                 }
             },
-            "readable_audio_file_to_sound_wave": {
+            "log": {
                 "inputs": {},
                 "gui_options": {
                     "inputs": {},
-                    "outputs": {
-                        "0": {
-                            "show_time_as_seconds": false,
-                            "can_select": false,
-                            "volume": 1.0,
-                            "plot_size_em": [
-                                29.866666793823242,
-                                16.46666717529297
-                            ],
-                            "selection": {
-                                "start": 57.031836734693876,
-                                "end": 171.09551020408162
-                            }
-                        }
-                    },
+                    "outputs": {},
                     "internal_gui_options": {}
                 }
             }
         }
     },
     "functions_gui_settings": {
-        "open_audio_file": {
+        "float_source": {
             "_show_input_details": {
-                "audio_path": true
+                "x": true
             },
             "_inputs_expanded": true,
             "_show_output_details": {
@@ -63,21 +48,22 @@
             "_internals_expanded": true,
             "_internal_state_gui_expanded": true
         },
-        "Save audio file": {
+        "sin": {
             "_show_input_details": {
-                "in_audio_file": false,
-                "audio_path": true
+                "x": false
             },
             "_inputs_expanded": true,
-            "_show_output_details": {},
+            "_show_output_details": {
+                "0": true
+            },
             "_outputs_expanded": true,
             "_show_internals_details": {},
             "_internals_expanded": true,
             "_internal_state_gui_expanded": true
         },
-        "readable_audio_file_to_sound_wave": {
+        "log": {
             "_show_input_details": {
-                "data": false
+                "x": false
             },
             "_inputs_expanded": true,
             "_show_output_details": {

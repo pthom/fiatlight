@@ -1,4 +1,4 @@
-import fiatlight
+import fiatlight as fl
 from fiatlight.fiat_runner.functions_collection import FunctionsCollection
 
 
@@ -16,11 +16,11 @@ def add_functions_to_collection(collection: FunctionsCollection) -> None:
 
 
 def main() -> None:
-    graph = fiatlight.FunctionsGraph.create_empty()
-    params = fiatlight.FiatGuiParams()
+    graph = fl.FunctionsGraph.create_empty()
+    params = fl.FiatGuiParams()
     params.customizable_graph = True
 
-    gui = fiatlight.fiat_runner.FiatGui(graph, params)
+    gui = fl.fiat_runner.FiatGui(graph, params)
 
     functions_collection = gui._functions_collection_gui.functions_collection
     add_functions_to_collection(functions_collection)

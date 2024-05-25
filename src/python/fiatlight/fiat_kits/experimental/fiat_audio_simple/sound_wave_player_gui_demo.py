@@ -4,9 +4,9 @@ import fiatlight
 from fiatlight.fiat_kits.experimental import fiat_audio_simple
 
 
-def sandbox_play_file() -> None:
-    fiatlight.fiat_run(fiat_audio_simple.sound_wave_from_file)
+def main() -> None:
+    fiatlight.fiat_run(fiat_audio_simple.sound_wave_from_file, app_name="Sound Wave Player Demo")
 
 
 if __name__ == "__main__":
-    sandbox_play_file()
+    main()

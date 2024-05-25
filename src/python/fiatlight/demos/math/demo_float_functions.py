@@ -43,9 +43,9 @@ float_source.x__edit_type = "slider_float_any_range"  # type: ignore
 
 
 def sandbox() -> None:
-    import fiatlight
+    import fiatlight as fl
 
-    fiatlight.fiat_run_composition([float_source, sin, log], app_name="sandbox_float_functions")
+    fl.fiat_run_composition([float_source, sin, log], app_name="sandbox_float_functions")
 
 
 def manual_sandbox() -> None:

@@ -25,15 +25,12 @@ def main_dataclass() -> None:
 def main_pydantic() -> None:
     from pydantic import BaseModel
 
+    @fiatlight.base_model_with_gui_registration()
     class MyParam(BaseModel):
-        image_in: ImagePath
+        image_in: ImagePath = "image.png"  # type: ignore
         image_out: ImagePath_Save = "save.png"  # type: ignore
         x: int | None = None
         y: str = "Hello"
-
-    from fiatlight.fiat_togui import register_dataclass
-
-    register_dataclass(MyParam)
 
     def f(param: MyParam) -> MyParam:
         return param

@@ -3,16 +3,22 @@
 We use FloatMatrix_Dim2 (which is an alias for np.ndarray[ShapeDim2, AnyFloat]) to represent a 2D array of floats.
 We instruct fiatlight to display 2D arrays as plots, by calling present_float2_arrays_as_plot().
 """
+
 from fiatlight.fiat_kits.fiat_array import FloatMatrix_Dim2
-from fiatlight.fiat_types import Float_0_100
-import fiatlight
+import fiatlight as fl
 
 
+@fl.with_custom_attrs(
+    radius_fixed_circle__range=(0.0, 100.0),
+    radius_moving_circle__range=(0.0, 100.0),
+    pen_offset__range=(0.0, 100.0),
+    nb_turns__range=(0.0, 100.0),
+)
 def make_spirograph_curve(
-    radius_fixed_circle: Float_0_100 = Float_0_100(10.84),
-    radius_moving_circle: Float_0_100 = Float_0_100(3.48),
-    pen_offset: Float_0_100 = Float_0_100(6.0),
-    nb_turns: Float_0_100 = Float_0_100(23.0),
+    radius_fixed_circle: float = 10.84,
+    radius_moving_circle: float = 3.48,
+    pen_offset: float = 6.0,
+    nb_turns: float = 23.0,
 ) -> FloatMatrix_Dim2:
     """a spirograph-like curve"""
     import numpy as np
@@ -28,7 +34,7 @@ def make_spirograph_curve(
 
 
 def main() -> None:
-    fiatlight.fiat_run(make_spirograph_curve)
+    fl.fiat_run(make_spirograph_curve)
 
 
 if __name__ == "__main__":

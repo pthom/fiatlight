@@ -195,11 +195,12 @@ class AnyDataWithGui(Generic[DataType]):
     @final
     def load_from_dict(self, json_data: JsonDict) -> DataType | Unspecified | Error:
         """Deserialize the value from a dictionary"""
-        if "type" not in json_data:
-            raise ValueError(f"Cannot deserialize {json_data}")
-        if json_data["type"] == "Unspecified":
+        if "type" not in json_data and self.callbacks.load_from_dict is None:
+            raise ValueError(f"Cannot deserialize {json_data}: missing 'type' key")
+
+        if "type" in json_data and json_data["type"] == "Unspecified":
             return UnspecifiedValue
-        elif json_data["type"] == "Error":
+        elif "type" in json_data and json_data["type"] == "Error":
             return ErrorValue
         elif self.callbacks.load_from_dict is not None:
             return self.callbacks.load_from_dict(json_data)

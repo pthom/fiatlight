@@ -38,9 +38,7 @@ class CameraFps(Enum):
     FPS_240 = 240
 
 
-@base_model_with_gui_registration(
-    {"device_number__range": (0, 5), "brightness__range": (0, 1), "contrast__range": (0, 1)}
-)
+@base_model_with_gui_registration(device_number__range=(0, 5), brightness__range=(0, 1), contrast__range=(0, 1))
 class CameraParams(BaseModel):
     device_number: int = 0
     camera_resolution: CameraResolution = CameraResolution.VGA_640_480

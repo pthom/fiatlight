@@ -160,7 +160,7 @@ def test_pydantic_with_enum() -> None:
 
 
 def test_base_model_with_custom_attributes() -> None:
-    @fiatlight.base_model_with_gui_registration({"rotation_degree__range": (-180, 180)})
+    @fiatlight.base_model_with_gui_registration(rotation_degree__range=(-180, 180))
     class ImageEffect(BaseModel):
         rotation_degree: int = 0
 
@@ -199,7 +199,7 @@ def test_base_model_with_custom_attributes() -> None:
 
 
 def test_dataclass_with_custom_attributes() -> None:
-    @fiatlight.dataclass_with_gui_registration({"rotation_degree__range": (-180, 180)})
+    @fiatlight.dataclass_with_gui_registration(rotation_degree__range=(-180, 180))
     class ImageEffect:
         rotation_degree: int = 0
 
@@ -216,7 +216,7 @@ def test_dataclass_with_custom_attributes() -> None:
 
 
 def test_dataclass_in_custom_function() -> None:
-    @fiatlight.base_model_with_gui_registration({"x__range": (0, 10)})
+    @fiatlight.base_model_with_gui_registration(x__range=(0, 10))
     class Foo(BaseModel):
         x: int = 3
 

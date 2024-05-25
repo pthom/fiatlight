@@ -47,7 +47,7 @@ class ReadableAudioFileWithGui(AnyDataWithGui[pedalboard.io.ReadableAudioFile]):
     _save_file_dialog: pfd.save_file | None = None
 
     def __init__(self) -> None:
-        super().__init__()
+        super().__init__(pedalboard.io.ReadableAudioFile)
         self.callbacks.present_str = self.present_str
         self.callbacks.present_custom = self.present_custom
 

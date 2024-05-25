@@ -20,8 +20,6 @@ from .file_types import (
     VideoPath_Save,
 )
 
-from .str_types import StrMultiline
-
 from .base_types import (
     DataType,
     GuiType,
@@ -80,8 +78,6 @@ __all__ = [
     "TextPath_Save",
     "AudioPath_Save",
     "VideoPath_Save",
-    # from str_types
-    "StrMultiline",
     # from base_types
     "JsonDict",
     "JsonPrimitive",

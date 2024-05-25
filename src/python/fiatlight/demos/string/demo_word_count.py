@@ -1,6 +1,6 @@
 """The word count problem.
 
-This is a simple example that provides a solution to a famous computer challenge:
+This is a simple example that provides a solution to a famous coding challenge:
     > Read a file of text, determine the n most frequently used words,
     > and print out a sorted list of those words along with their frequencies.
 
@@ -21,6 +21,7 @@ References:
 Here, the solution is implemented as a composition of functions, each of which is a step in the solution.
 With fiatlight, we can easily examine the intermediate results of each step.
 """
+
 from typing import List, Tuple
 from fiatlight.demos.string.str_functions import (
     text_from_file,
@@ -67,9 +68,9 @@ def filter_out_short_words(words: List[str], min_length: int = 4) -> List[str]:
 
 
 def main() -> None:
-    from fiatlight import fiat_run_composition
+    import fiatlight as fl
 
-    fiat_run_composition(
+    fl.fiat_run_composition(
         [
             text_from_file,
             str_lower,

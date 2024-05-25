@@ -6,8 +6,7 @@
                     "factor": {
                         "name": "factor",
                         "data": {
-                            "type": "Primitive",
-                            "value": 0.9850000143051147
+                            "type": "Unspecified"
                         }
                     }
                 },
@@ -34,12 +33,12 @@
                             "can_select": false,
                             "volume": 1.0,
                             "plot_size_em": [
-                                21.7005672454834,
-                                14.048970222473145
+                                20.0,
+                                10.0
                             ],
                             "selection": {
-                                "start": 0.4121541950113379,
-                                "end": 1.2364625850340136
+                                "start": 0.3570068027210884,
+                                "end": 1.0710204081632653
                             }
                         }
                     },
@@ -67,20 +66,20 @@
                             "can_select": false,
                             "volume": 1.0,
                             "plot_size_em": [
-                                21.7005672454834,
-                                14.048970222473145
+                                20.0,
+                                10.0
                             ],
                             "selection": {
-                                "start": 0.4121541950113379,
-                                "end": 1.2364625850340136
+                                "start": 0.3570068027210884,
+                                "end": 1.0710204081632653
                             }
                         }
                     },
                     "outputs": {
                         "0": {
                             "figure_size": {
-                                "x": 640.0,
-                                "y": 480.0
+                                "x": 512.0,
+                                "y": 285.0
                             }
                         }
                     },
@@ -96,20 +95,20 @@
                             "can_select": false,
                             "volume": 1.0,
                             "plot_size_em": [
-                                21.7005672454834,
-                                14.048970222473145
+                                20.0,
+                                10.0
                             ],
                             "selection": {
-                                "start": 0.4121541950113379,
-                                "end": 1.2364625850340136
+                                "start": 0.3570068027210884,
+                                "end": 1.0710204081632653
                             }
                         }
                     },
                     "outputs": {
                         "0": {
                             "figure_size": {
-                                "x": 616.0,
-                                "y": 313.0
+                                "x": 614.0,
+                                "y": 327.0
                             }
                         }
                     },
@@ -121,7 +120,7 @@
     "functions_gui_settings": {
         "set_pre_emphasis_factor": {
             "_show_input_details": {
-                "factor": true
+                "factor": false
             },
             "_inputs_expanded": true,
             "_show_output_details": {},

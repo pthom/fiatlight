@@ -20,9 +20,18 @@ classifiers = [
 keywords = ["code", "generator", "cpp", "c++", "srcml", "pybind11", "bindings"]
 
 dependencies = [
-    "imgui-bundle",
-    "opencv-contrib-python",
-    "opencv-python"
+#    "imgui-bundle",
+#    "opencv-contrib-python",
+    "opencv-python",
+    "pydantic",
+    "Pillow",
+    "types-Pillow",
+    "numpy",
+    "matplotlib",
+    "scipy",
+    "scikit-learn",
+    "pyglfw",
+    "IPython"
 ]
 
 [tool.hatch.build.targets.wheel]

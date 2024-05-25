@@ -1,0 +1,51 @@
+{
+    "functions_graph": {
+        "functions_nodes": {
+            "sound_wave_from_file": {
+                "inputs": {
+                    "file_path": {
+                        "name": "file_path",
+                        "data": {
+                            "type": "Primitive",
+                            "value": "/Users/pascal/dvp/OpenSource/ImGuiWork/_Bundle/fiatlight/priv_assets/audio/r.mp3"
+                        }
+                    }
+                },
+                "gui_options": {
+                    "inputs": {},
+                    "outputs": {
+                        "0": {
+                            "show_time_as_seconds": false,
+                            "can_select": false,
+                            "volume": 1.0,
+                            "plot_size_em": [
+                                20.0,
+                                10.0
+                            ],
+                            "selection": {
+                                "start": 57.02333333333333,
+                                "end": 171.07
+                            }
+                        }
+                    },
+                    "internal_gui_options": {}
+                }
+            }
+        }
+    },
+    "functions_gui_settings": {
+        "sound_wave_from_file": {
+            "_show_input_details": {
+                "file_path": true
+            },
+            "_inputs_expanded": true,
+            "_show_output_details": {
+                "0": true
+            },
+            "_outputs_expanded": true,
+            "_show_internals_details": {},
+            "_internals_expanded": true,
+            "_internal_state_gui_expanded": true
+        }
+    }
+}

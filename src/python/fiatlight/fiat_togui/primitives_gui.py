@@ -1,4 +1,4 @@
-from imgui_bundle import imgui, hello_imgui, imgui_knobs, imgui_toggle, ImVec2, imgui_ctx
+from imgui_bundle import imgui, hello_imgui, imgui_knobs, imgui_toggle, ImVec2, imgui_ctx, ImVec4
 from fiatlight.fiat_core import AnyDataWithGui
 from fiatlight.fiat_types.color_types import ColorRgb, ColorRgba
 from typing import Callable, TypeAlias
@@ -79,9 +79,10 @@ class IntWithGui(AnyDataWithGui[int]):
             ]
 
         has_unauthorized = any(k not in _authorized_custom_attrs() for k in self._custom_attrs)
+        unauthorized_attrs = ", ".join([k for k in self._custom_attrs if k not in _authorized_custom_attrs()])
         if has_unauthorized:
             msg = f"""
-            Encountered an unauthorized custom attribute for IntWithGui!
+            Encountered an unauthorized custom attribute for IntWithGui: {unauthorized_attrs}
                 Authorized attributes are: {_authorized_custom_attrs()}
                 Where type can be one of: {available_int_edit_types()}
 
@@ -310,9 +311,10 @@ class FloatWithGui(AnyDataWithGui[float]):
             ]
 
         has_unauthorized = any(k not in _authorized_custom_attrs() for k in self._custom_attrs)
+        unauthorized_attrs = ", ".join([k for k in self._custom_attrs if k not in _authorized_custom_attrs()])
         if has_unauthorized:
             msg = f"""
-            Encountered an unauthorized custom attribute for FloatWithGui!
+            Encountered an unauthorized custom attribute for FloatWithGui: {unauthorized_attrs}
                 Authorized attributes are: {_authorized_custom_attrs()}
                 Where type can be one of: {_available_float_edit_types()}
 
@@ -511,9 +513,10 @@ class BoolWithGui(AnyDataWithGui[bool]):
             return ["edit_type"]
 
         has_unauthorized = any(k not in _authorized_custom_attrs() for k in self._custom_attrs)
+        unauthorized_attrs = ", ".join([k for k in self._custom_attrs if k not in _authorized_custom_attrs()])
         if has_unauthorized:
             msg = f"""
-            Encountered an unauthorized custom attribute for BoolWithGui!
+            Encountered an unauthorized custom attribute for BoolWithGui: {unauthorized_attrs}
                 Authorized attributes are: {_authorized_custom_attrs()}
                 Where type can be one of: {_available_bool_edit_types()}
 
@@ -615,15 +618,29 @@ class ColorRgbaWithGui(AnyDataWithGui[ColorRgba]):
             raise ValueError(f"ColorRgbaWithGui expects a tuple, got: {type(value)}")
         if len(value) != 4:
             raise ValueError(f"ColorRgbaWithGui expects a tuple of 4 ints, got: {value}")
-        value_as_floats = [value[0] / 255.0, value[1] / 255.0, value[2] / 255.0, value[3] / 255.0]
-        changed, value_as_floats = imgui.color_edit4("##color", value_as_floats)
-        if changed:
+        value_as_imvec4 = ImVec4(value[0] / 255.0, value[1] / 255.0, value[2] / 255.0, value[3] / 255.0)
+
+        imgui.text("Edit")
+
+        picker_flags_std = imgui.ColorEditFlags_.no_side_preview.value | imgui.ColorEditFlags_.alpha_preview_half.value
+        picker_flags_wheel = (
+            imgui.ColorEditFlags_.picker_hue_wheel.value
+            | imgui.ColorEditFlags_.no_inputs.value
+            | imgui.ColorEditFlags_.alpha_preview_half.value
+        )
+
+        imgui.set_next_item_width(hello_imgui.em_size(8))
+        changed1, value_as_imvec4 = imgui.color_picker4("##color", value_as_imvec4, picker_flags_std)
+        imgui.same_line()
+        imgui.set_next_item_width(hello_imgui.em_size(8))
+        changed2, value_as_imvec4 = imgui.color_picker4("##color", value_as_imvec4, picker_flags_wheel)
+        if changed1 or changed2:
             value = ColorRgba(
                 (
-                    int(value_as_floats[0] * 255),
-                    int(value_as_floats[1] * 255),
-                    int(value_as_floats[2] * 255),
-                    int(value_as_floats[3] * 255),
+                    int(value_as_imvec4.x * 255),
+                    int(value_as_imvec4.y * 255),
+                    int(value_as_imvec4.z * 255),
+                    int(value_as_imvec4.w * 255),
                 )
             )
             return True, value

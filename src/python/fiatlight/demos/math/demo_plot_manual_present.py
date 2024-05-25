@@ -57,15 +57,15 @@ def present_plot_draggable(values: FloatArray) -> None:
 
 
 def main() -> None:
-    from fiatlight import FunctionsGraph, fiat_run_graph
+    import fiatlight as fl
 
-    graph = FunctionsGraph.from_function_composition([make_range, make_sin])
+    graph = fl.FunctionsGraph.from_function_composition([make_range, make_sin])
 
     # present the output of make_sin as a plot (using the present_plot function)
     graph.function_with_gui_of_name("make_sin").output().set_present_custom_callback(present_plot_draggable)
     # graph.function_with_gui("make_sin").output().set_present_custom_callback(present_plot_standard)
 
-    fiat_run_graph(graph)
+    fl.fiat_run_graph(graph)
 
 
 if __name__ == "__main__":
