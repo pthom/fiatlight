@@ -1,16 +1,10 @@
 from fiatlight import fiat_core, fiat_widgets, fiat_types, fiat_runner, fiat_config, fiat_kits, fiat_doc
-from fiatlight.fiat_core import (
-    AnyDataWithGui,
-    FunctionWithGui,
-    FunctionsGraph,
-)
+from fiatlight.fiat_core import AnyDataWithGui, FunctionWithGui, FunctionsGraph, with_custom_attrs
 from fiatlight.fiat_runner import fiat_run, fiat_run_composition, fiat_run_graph, FiatGuiParams
 from fiatlight.fiat_kits import fiat_image, fiat_array
 from fiatlight.fiat_widgets.fiat_osd import is_rendering_in_node, is_rendering_in_window
 from fiatlight.fiat_togui import (
     register_type,
-    register_bound_int,
-    register_bound_float,
     register_enum,
     enum_with_gui_registration,
     register_dataclass,
@@ -44,10 +38,9 @@ __all__ = [
     "FunctionsGraph",
     "AnyDataWithGui",
     "FunctionWithGui",
+    "with_custom_attrs",
     # from to_gui
     "register_type",
-    "register_bound_int",
-    "register_bound_float",
     "register_enum",
     "enum_with_gui_registration",
     "register_dataclass",

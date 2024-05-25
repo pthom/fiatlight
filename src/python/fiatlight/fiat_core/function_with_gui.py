@@ -107,12 +107,17 @@ with a range from -1 to 1.
 
     ```python
     import fiatlight as fl
+
+    # Use the `with_custom_attrs` decorator to set custom attributes for the function:
+    # Here, we set the range of the x parameter.
+    # Important: note the double underscore ("_") after the parameter name!
+    @fl.with_custom_attrs(x__range=(-1, 1))
     def my_asin(x: float = 0.5) -> float:
         import math
         return math.asin(x)
 
-    # Set the range of the x parameter: note the double underscore ("_") after the parameter name
-    my_asin.x__range = (-1, 1)
+    # Note: we could have obtained the same effect with the commented line below:
+    #    my_asin.x__range = (-1, 1)
 
     fl.fiat_run(my_asin, app_name="Range restriction")
     ```
@@ -143,6 +148,27 @@ with a range from -1 to 1.
     import fiatlight
     from matplotlib.figure import Figure
 
+    @fiatlight.with_custom_attrs(
+        # Edit the number of bars with a knob
+        n_bars__edit_type="knob",
+        n_bars__range=(1, 300),
+        # Edit the mean with an input field
+        mu__edit_type="input",
+        mu__range=(-5, 5),
+        # Edit the standard deviation with a drag
+        sigma__edit_type="drag",
+        sigma__range=(0.1, 5),
+        # Edit the average with a slider for a float value with any range
+        # (the slider range will adapt interactively, when dragging far to the left or to the right)
+        average__edit_type="slider_float_any_range",
+        # Edit the number of data points with a logarithmic slider
+        # Note: by default, you can ctrl+click on a slider to input a value directly,
+        #       this is disabled here with nb_data__slider_no_input
+        nb_data__edit_type="slider",
+        nb_data__range=(100, 1_000_000),
+        nb_data__slider_logarithmic=True,
+        nb_data__slider_no_input=True,
+    )
     def interactive_histogram(
         n_bars: int = 50, mu: float = 0, sigma: float = 1, average: float = 500, nb_data: int = 4000
     ) -> Figure:
@@ -155,27 +181,6 @@ with a range from -1 to 1.
         fig, ax = plt.subplots()
         ax.hist(data, bins=bins, color="blue", alpha=0.7)
         return fig
-
-
-    # Edit the number of bars with a knob
-    interactive_histogram.n_bars__edit_type = "knob"
-    interactive_histogram.n_bars__range = (1, 300)
-    # Edit the mean with an input field
-    interactive_histogram.mu__edit_type = "input"
-    interactive_histogram.mu__range = (-5, 5)
-    # Edit the standard deviation with a drag
-    interactive_histogram.sigma__edit_type = "drag"
-    interactive_histogram.sigma__range = (0.1, 5)
-    # Edit the average with a slider for a float value with any range
-    # (the slider range will adapt interactively, when dragging far to the left or to the right)
-    interactive_histogram.average__edit_type = "slider_float_any_range"
-    # Edit the number of data points with a logarithmic slider
-    # Note: by default, you can ctrl+click on a slider to input a value directly,
-    #       this is disabled here with nb_data__slider_no_input
-    interactive_histogram.nb_data__edit_type = "slider"
-    interactive_histogram.nb_data__range = (100, 1_000_000)
-    interactive_histogram.nb_data__slider_logarithmic = True
-    interactive_histogram.nb_data__slider_no_input = True
 
     fiatlight.fiat_run(interactive_histogram, app_name="Custom attributes")
     ```

@@ -104,7 +104,7 @@
                         "name": "font_size",
                         "data": {
                             "type": "Primitive",
-                            "value": 13
+                            "value": 16
                         }
                     },
                     "font_type": {

@@ -7,11 +7,10 @@ from .param_with_gui import (
 from .output_with_gui import OutputWithGui
 from .function_with_gui import (
     FunctionWithGui,
-    FunctionWithGuiFactoryFromName,
 )
 from .function_node import FunctionNode, FunctionNodeLink
 from .functions_graph import FunctionsGraph
-
+from .custom_attrs_decorator import with_custom_attrs
 
 __all__ = [
     # from any_data_gui_handlers
@@ -26,17 +25,11 @@ __all__ = [
     "ParamWithGui",
     # from output_with_gui
     "OutputWithGui",
-    # from to_gui
-    "GuiFactory",
-    "FunctionWithGuiFactory",
-    "FunctionWithGuiFactoryFromName",
-    "register_type",
-    "register_enum",
-    "register_bound_int",
-    "register_bound_float",
     # from function_node
     "FunctionNode",
     "FunctionNodeLink",
     # from functions_graph
     "FunctionsGraph",
+    # from custom_attrs_decorator
+    "with_custom_attrs",
 ]

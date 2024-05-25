@@ -15,7 +15,7 @@ def all_functions() -> FunctionList:
         overlay_alpha_image,
         add_meme_text,
     ]
-    return r  # type: ignore
+    return r
 
 
 __all__ = ["all_functions", "overlay_alpha_image", "add_toon_edges", "opencv_wrappers", "add_meme_text"]

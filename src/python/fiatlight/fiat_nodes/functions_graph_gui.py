@@ -2,7 +2,8 @@ from __future__ import annotations
 
 
 from fiatlight.fiat_types import JsonDict
-from fiatlight.fiat_core import FunctionsGraph, FunctionWithGui, FunctionWithGuiFactoryFromName
+from fiatlight.fiat_core import FunctionsGraph, FunctionWithGui
+from fiatlight.fiat_core.function_with_gui import FunctionWithGuiFactoryFromName
 from fiatlight.fiat_nodes.function_node_gui import FunctionNodeGui, FunctionNodeLinkGui
 from fiatlight.fiat_widgets import fiat_osd
 from imgui_bundle import imgui, imgui_node_editor as ed, hello_imgui, ImVec2, imgui_ctx

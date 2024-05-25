@@ -1,7 +1,6 @@
-import fiatlight
+import fiatlight as fl
 from fiatlight.fiat_kits.fiat_image import ImageU8
 from fiatlight.fiat_types import Float_0_1, ColorRgb
-from typing import NewType
 
 from PIL import Image, ImageDraw, ImageFont
 from enum import Enum
@@ -10,25 +9,18 @@ import numpy as np
 import os
 
 
-# A synonym for int, but with a font size, between 20 and 100
-# (this will create a slider in the GUI)
-FontSize = NewType("FontSize", int)
-fiatlight.register_bound_int(FontSize, (5, 200))
-
-
+@fl.enum_with_gui_registration
 class MemeFont(Enum):
     Stadium = "fonts/stadium/Stadium.ttf"
     Anton = "fonts/Anton/Anton-Regular.ttf"
     SaoTorpes = "fonts/sao_torpes/SaoTorpes.otf"
 
 
-fiatlight.register_enum(MemeFont)
-
-
+@fl.with_custom_attrs(font_size__range=(10, 100))
 def add_meme_text(
     image: ImageU8,
     text: str = "Hello!",
-    font_size: FontSize = FontSize(20),
+    font_size: int = 20,
     font_type: MemeFont = MemeFont.Anton,
     x: Float_0_1 = Float_0_1(0.35),
     y: Float_0_1 = Float_0_1(0.75),
@@ -88,9 +80,9 @@ def sandbox() -> None:
 
     use_stable_diffusion = True
     if use_stable_diffusion:
-        fiatlight.fiat_run_composition([invoke_sdxl_turbo, add_meme_text])
+        fl.fiat_run_composition([invoke_sdxl_turbo, add_meme_text])
     else:
-        fiatlight.fiat_run_composition([image_source, add_meme_text])
+        fl.fiat_run_composition([image_source, add_meme_text])
 
 
 if __name__ == "__main__":
