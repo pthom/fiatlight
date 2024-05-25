@@ -428,14 +428,7 @@ class FunctionWithGui:
     -----------------------------------------------
         ```python
         from fiatlight.fiat_doc import plantuml_magic
-        ```
-
-        ```python
-        %%plantuml_local
-
-        @startuml
-        !include class_diagrams/fiat_core.puml
-        @enduml
+        %plantuml_include class_diagrams/fiat_core.puml
         ```
 
     """

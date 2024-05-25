@@ -5,7 +5,7 @@
 import os
 import uuid
 import subprocess
-from IPython.core.magic import register_cell_magic
+from IPython.core.magic import register_cell_magic, register_line_magic
 from IPython.display import SVG
 
 
@@ -57,3 +57,13 @@ def plantuml_web(_magic_args: str, cell: str) -> SVG:
 @register_cell_magic  # type: ignore
 def plantuml_local(_magic_args: str, cell: str) -> SVG:
     return _plantuml(cell, use_local=True)
+
+
+@register_line_magic  # type: ignore
+def plantuml_include(_magic_args: str) -> SVG:
+    uml_code = f"""
+@startuml
+!include {_magic_args}
+@enduml
+    """
+    return _plantuml(uml_code, use_local=True)

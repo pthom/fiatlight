@@ -1,12 +1,19 @@
+"""Utilities to create and update Jupyter notebooks from Markdown strings.
+
+Note: in the future, consider also using
+https://myst-nb.readthedocs.io/en/latest/authoring/text-notebooks.html#authoring-text-notebooks
+"""
+
+import logging
+
 import nbformat
 from nbformat import NotebookNode
 import re
 import os
 from typing import List
-from fiatlight.fiat_doc import code_utils
 from dataclasses import dataclass
 import difflib
-
+from fiatlight.fiat_doc import code_utils
 
 THIS_DIR = os.path.dirname(__file__)
 DOC_DIR = os.path.abspath(f"{THIS_DIR}/../doc")
@@ -29,6 +36,7 @@ class _Markdown(_WrappedString):
 
 @dataclass
 class _Code(_WrappedString):
+    language: str
     pass
 
 
@@ -70,20 +78,37 @@ def _md_to_notebook_content_parts(md_string: _CompositeMarkdown) -> _NotebookCon
     # Create a new notebook
     notebook_content = _NotebookContentParts()
 
-    # Regular expression to match code blocks
-    code_block_re = re.compile(r"```python(.*?)```", re.DOTALL)
+    # Regular expression to match code blocks of any type
+    code_block_re = re.compile(r"```(.*?)\n(.*?)```", re.DOTALL)
 
     # Split the Markdown string into parts, separating code blocks and Markdown
     parts = code_block_re.split(md_string.value)
+    # The parts list will alternate between:
+    # parts[0]: Text before the first code block
+    # parts[1]: The code block language specifier (if any) for the first code block
+    # parts[2]: The content of the first code block
+    #
+    # parts[3]: Text after the first code block and before the second code block
 
-    for i, part in enumerate(parts):
-        part = code_utils.unindent_code(part, flag_strip_empty_lines=True)
-        is_code = i % 2 == 1
-        if is_code:
-            notebook_content.items.append(_Code(part))
-        else:
-            part_with_github_links = _replace_python_links_by_github_links(part)
+    # parts[4]: The code block language specifier (if any) for the second code block
+    # parts[5]: The content of the second code block
+    # And so on...
+
+    for i in range(0, len(parts), 3):
+        # parts[i] contains the text part (either before the first code block or between code blocks)
+        text_part = parts[i].strip()
+        if text_part:
+            part_with_github_links = _replace_python_links_by_github_links(text_part)
             notebook_content.items.append(_Markdown(part_with_github_links))
+
+        # Check if there is a subsequent code block
+        if i + 2 < len(parts):
+            # parts[i+2] contains the code block content
+            # parts[i+1] contains the code block language specifier (if any)
+            language = parts[i + 1].strip()
+            code_part = parts[i + 2]
+            code_part = code_utils.unindent_code(code_part, flag_strip_empty_lines=True)
+            notebook_content.items.append(_Code(code_part, language=language))
 
     return notebook_content
 
@@ -138,9 +163,12 @@ def _save_notebook_from_markdown(
     composite_markdown: _CompositeMarkdown, update_existing: bool, notebook_filename: str
 ) -> None:
     previous_notebook: NotebookNode | None = None
+
+    if update_existing and not os.path.exists(notebook_filename):
+        logging.warning(f"The notebook {notebook_filename} does not exist, cannot update it!")
+        update_existing = False
+
     if update_existing:
-        if not os.path.exists(notebook_filename):
-            raise ValueError(f"The notebook {notebook_filename} does not exist.")
         try:
             with open(notebook_filename) as f:
                 previous_notebook = nbformat.read(f, as_version=4)  # type: ignore
@@ -203,15 +231,6 @@ def save_notebook_from_markdown_file(md_filename: str, notebook_filename: str, u
         md_string = f.read()
     composite_markdown = _CompositeMarkdown(md_string)
     _save_notebook_from_markdown(composite_markdown, update_existing, notebook_filename)
-
-
-def look_at_python_code(obj: object) -> None:
-    """Display the Python code of a function or class in a notebook cell."""
-    import inspect
-    import IPython.display as display
-
-    code = inspect.getsource(obj)  # type: ignore  # noqa
-    display.display(display.Code(code, language="python"))  # type: ignore
 
 
 def display_markdown_from_file(md_filename: str) -> None:
