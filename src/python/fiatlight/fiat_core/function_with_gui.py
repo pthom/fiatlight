@@ -412,6 +412,8 @@ from fiatlight.demos.images.toon_edges import add_toon_edges
 fl.fiat_run_composition([image_source, add_toon_edges], app_name="Toon edges")
 ```
 
+-------------------------------------------------------------------------------
+
 FunctionWithGui signature
 -------------------------
 
@@ -425,8 +427,8 @@ Its full source code is [available online](../fiat_core/function_with_gui.py).
     %look_at_class_header fiatlight.fiat_core.FunctionWithGui
     ```
 
-architecture: fiat_core & FunctionWithGui
------------------------------------------
+Architecture
+------------
 
 Below is a PlantUML diagram showing the architecture of the `fiat_core` module.
 See the [architecture page](architecture) for the full architecture diagrams.

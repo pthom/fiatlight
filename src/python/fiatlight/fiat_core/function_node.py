@@ -43,6 +43,9 @@ class FunctionNode:
     It stores:
         - the FunctionWithGui
         - a list of FunctionNodeLink
+
+    It is able to invoke the function and propagate the outputs to the linked inputs of the other functions.
+    It will invoke the function either synchronously or asynchronously, depending on the invoke_async flag.
     """
 
     function_with_gui: FunctionWithGui
