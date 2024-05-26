@@ -37,7 +37,7 @@ def default_image_params() -> ImagePresenterParams:
 
 class _ImagePossibleAttributes(PossibleCustomAttributes):
     def __init__(self) -> None:
-        super().__init__()
+        super().__init__("fiat_image.ImageWithGui")
 
         def attr(name: str, type_: type, explanation: str, type_details: str | None = None) -> None:
             self.add_explained_attribute(name, type_, explanation, type_details=type_details)
@@ -127,16 +127,10 @@ class ImagePresenter:
         self.image_params = default_image_params()
 
     def handle_custom_attrs(self, custom_attrs: dict[str, Any]) -> None:
-        _IMAGE_POSSIBLE_ATTRIBUTES.raise_exception_if_bad_custom_attrs(custom_attrs, "fiat_image.ImageWithGui")
+        _IMAGE_POSSIBLE_ATTRIBUTES.raise_exception_if_bad_custom_attrs(custom_attrs)
 
         if "image_display_size" in custom_attrs:
             image_display_size = custom_attrs["image_display_size"]
-            if not isinstance(image_display_size, (tuple, list)):
-                raise ValueError("image_display_size should be a tuple or a list")
-            if len(image_display_size) != 2:
-                raise ValueError("image_display_size should have two elements")
-            if not isinstance(image_display_size[0], int) or not isinstance(image_display_size[1], int):
-                raise ValueError("image_display_size elements should be integers")
 
             # We only take into account the custom attribute if it was not already handled,
             # so that the user can resize the image with the mouse after setting the image_display_size
