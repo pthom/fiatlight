@@ -74,7 +74,7 @@ class ImagePresenter:
 
         # Cancel refresh_image at the end of the frame
         # We need to delay that in case there is an opened pop-up with the same widget.
-        def cancel_refresh_image():
+        def cancel_refresh_image() -> None:
             self.image_params.refresh_image = False
 
         if self.image_params.refresh_image:
