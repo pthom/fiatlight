@@ -12,7 +12,7 @@ def test_numeric_ranges() -> None:
     f_gui = fiatlight.FunctionWithGui(to_fahrenheit)
 
     celsius_gui = f_gui.input("celsius")
-    assert celsius_gui._custom_attrs["range"] == (-20, 60)
+    assert celsius_gui.custom_attrs["range"] == (-20, 60)
 
     # fiatlight.fiat_run(to_fahrenheit)
 
@@ -28,4 +28,4 @@ def test_custom_ranges_optional() -> None:
     f_gui = fiatlight.FunctionWithGui(to_fahrenheit)
 
     celsius_gui = f_gui.input("celsius")
-    assert celsius_gui._custom_attrs["range"] == (-20, 60)
+    assert celsius_gui.custom_attrs["range"] == (-20, 60)

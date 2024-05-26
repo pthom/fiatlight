@@ -78,8 +78,8 @@ class IntWithGui(AnyDataWithGui[int]):
                 "slider_logarithmic",
             ]
 
-        has_unauthorized = any(k not in _authorized_custom_attrs() for k in self._custom_attrs)
-        unauthorized_attrs = ", ".join([k for k in self._custom_attrs if k not in _authorized_custom_attrs()])
+        has_unauthorized = any(k not in _authorized_custom_attrs() for k in self.custom_attrs)
+        unauthorized_attrs = ", ".join([k for k in self.custom_attrs if k not in _authorized_custom_attrs()])
         if has_unauthorized:
             msg = f"""
             Encountered an unauthorized custom attribute for IntWithGui: {unauthorized_attrs}
@@ -99,8 +99,8 @@ class IntWithGui(AnyDataWithGui[int]):
 
     def _handle_custom_attrs(self) -> None:
         self._check_custom_attrs()
-        if "range" in self._custom_attrs:
-            range_ = self._custom_attrs["range"]
+        if "range" in self.custom_attrs:
+            range_ = self.custom_attrs["range"]
             if not isinstance(range_, tuple) or len(range_) != 2:
                 raise ValueError(f"range must be a tuple of two numbers, got: {range_}")
             if not all(isinstance(x, int) for x in range_):
@@ -109,48 +109,48 @@ class IntWithGui(AnyDataWithGui[int]):
             self.params.v_max = range_[1]
             self.params.edit_type = IntEditType.slider
 
-        if "edit_type" in self._custom_attrs:
-            edit_type_ = self._custom_attrs["edit_type"]
+        if "edit_type" in self.custom_attrs:
+            edit_type_ = self.custom_attrs["edit_type"]
             try:
                 edit_type = IntEditType[edit_type_]
                 self.params.edit_type = edit_type
             except KeyError:
                 raise ValueError(f"Unknown edit_type: {edit_type_}. Available types: {available_int_edit_types()}")
 
-        if "format" in self._custom_attrs:
-            self.params.format = self._custom_attrs["format"]
+        if "format" in self.custom_attrs:
+            self.params.format = self.custom_attrs["format"]
 
-        if "width_em" in self._custom_attrs:
-            if not isinstance(self._custom_attrs["width_em"], (int, float)):
-                raise ValueError(f"width_em must be a number, got: {self._custom_attrs['width_em']}")
-            self.params.width_em = self._custom_attrs["width_em"]
+        if "width_em" in self.custom_attrs:
+            if not isinstance(self.custom_attrs["width_em"], (int, float)):
+                raise ValueError(f"width_em must be a number, got: {self.custom_attrs['width_em']}")
+            self.params.width_em = self.custom_attrs["width_em"]
 
-        if "knob_size_em" in self._custom_attrs:
-            if not isinstance(self._custom_attrs["knob_size_em"], (int, float)):
-                raise ValueError(f"knob_size_em must be a number, got: {self._custom_attrs['knob_size_em']}")
-            self.params.knob_size_em = self._custom_attrs["knob_size_em"]
+        if "knob_size_em" in self.custom_attrs:
+            if not isinstance(self.custom_attrs["knob_size_em"], (int, float)):
+                raise ValueError(f"knob_size_em must be a number, got: {self.custom_attrs['knob_size_em']}")
+            self.params.knob_size_em = self.custom_attrs["knob_size_em"]
 
-        if "knob_steps" in self._custom_attrs:
-            if not isinstance(self._custom_attrs["knob_steps"], int):
-                raise ValueError(f"knob_steps must be an integer, got: {self._custom_attrs['knob_steps']}")
-            self.params.knob_steps = self._custom_attrs["knob_steps"]
+        if "knob_steps" in self.custom_attrs:
+            if not isinstance(self.custom_attrs["knob_steps"], int):
+                raise ValueError(f"knob_steps must be an integer, got: {self.custom_attrs['knob_steps']}")
+            self.params.knob_steps = self.custom_attrs["knob_steps"]
 
-        if "knob_no_input" in self._custom_attrs:
-            if not isinstance(self._custom_attrs["knob_no_input"], bool):
-                raise ValueError(f"knob_no_input must be a boolean, got: {self._custom_attrs['knob_no_input']}")
-            self.params.knob_no_input = self._custom_attrs["knob_no_input"]
+        if "knob_no_input" in self.custom_attrs:
+            if not isinstance(self.custom_attrs["knob_no_input"], bool):
+                raise ValueError(f"knob_no_input must be a boolean, got: {self.custom_attrs['knob_no_input']}")
+            self.params.knob_no_input = self.custom_attrs["knob_no_input"]
 
-        if "slider_no_input" in self._custom_attrs:
-            if not isinstance(self._custom_attrs["slider_no_input"], bool):
-                raise ValueError(f"slider_no_input must be a boolean, got: {self._custom_attrs['slider_no_input']}")
-            self.params.slider_no_input = self._custom_attrs["slider_no_input"]
+        if "slider_no_input" in self.custom_attrs:
+            if not isinstance(self.custom_attrs["slider_no_input"], bool):
+                raise ValueError(f"slider_no_input must be a boolean, got: {self.custom_attrs['slider_no_input']}")
+            self.params.slider_no_input = self.custom_attrs["slider_no_input"]
 
-        if "slider_logarithmic" in self._custom_attrs:
-            if not isinstance(self._custom_attrs["slider_logarithmic"], bool):
+        if "slider_logarithmic" in self.custom_attrs:
+            if not isinstance(self.custom_attrs["slider_logarithmic"], bool):
                 raise ValueError(
-                    f"slider_logarithmic must be a boolean, got: {self._custom_attrs['slider_logarithmic']}"
+                    f"slider_logarithmic must be a boolean, got: {self.custom_attrs['slider_logarithmic']}"
                 )
-            self.params.slider_logarithmic = self._custom_attrs["slider_logarithmic"]
+            self.params.slider_logarithmic = self.custom_attrs["slider_logarithmic"]
 
     def edit(self, value: int) -> tuple[bool, int]:
         if not isinstance(value, int):
@@ -310,8 +310,8 @@ class FloatWithGui(AnyDataWithGui[float]):
                 "slider_logarithmic",
             ]
 
-        has_unauthorized = any(k not in _authorized_custom_attrs() for k in self._custom_attrs)
-        unauthorized_attrs = ", ".join([k for k in self._custom_attrs if k not in _authorized_custom_attrs()])
+        has_unauthorized = any(k not in _authorized_custom_attrs() for k in self.custom_attrs)
+        unauthorized_attrs = ", ".join([k for k in self.custom_attrs if k not in _authorized_custom_attrs()])
         if has_unauthorized:
             msg = f"""
             Encountered an unauthorized custom attribute for FloatWithGui: {unauthorized_attrs}
@@ -332,8 +332,8 @@ class FloatWithGui(AnyDataWithGui[float]):
 
     def _handle_custom_attrs(self) -> None:
         self._check_custom_attrs()
-        if "range" in self._custom_attrs:
-            range_ = self._custom_attrs["range"]
+        if "range" in self.custom_attrs:
+            range_ = self.custom_attrs["range"]
             if not isinstance(range_, tuple) or len(range_) != 2:
                 raise ValueError(f"range must be a tuple of two numbers, got: {range_}")
             if not all(isinstance(x, (int, float)) for x in range_):
@@ -342,8 +342,8 @@ class FloatWithGui(AnyDataWithGui[float]):
             self.params.v_max = range_[1]
             self.params.edit_type = FloatEditType.slider
 
-        if "edit_type" in self._custom_attrs:
-            edit_type_ = self._custom_attrs["edit_type"]
+        if "edit_type" in self.custom_attrs:
+            edit_type_ = self.custom_attrs["edit_type"]
             try:
                 edit_type = FloatEditType[edit_type_]
                 self.params.edit_type = edit_type
@@ -352,40 +352,40 @@ class FloatWithGui(AnyDataWithGui[float]):
             except KeyError:
                 raise ValueError(f"Unknown edit_type: {edit_type_}. Available types: {_available_float_edit_types()}")
 
-        if "format" in self._custom_attrs:
-            self.params.format = self._custom_attrs["format"]
+        if "format" in self.custom_attrs:
+            self.params.format = self.custom_attrs["format"]
 
-        if "width_em" in self._custom_attrs:
-            if not isinstance(self._custom_attrs["width_em"], (int, float)):
-                raise ValueError(f"width_em must be a number, got: {self._custom_attrs['width_em']}")
-            self.params.width_em = self._custom_attrs["width_em"]
+        if "width_em" in self.custom_attrs:
+            if not isinstance(self.custom_attrs["width_em"], (int, float)):
+                raise ValueError(f"width_em must be a number, got: {self.custom_attrs['width_em']}")
+            self.params.width_em = self.custom_attrs["width_em"]
 
-        if "knob_size_em" in self._custom_attrs:
-            if not isinstance(self._custom_attrs["knob_size_em"], (int, float)):
-                raise ValueError(f"knob_size_em must be a number, got: {self._custom_attrs['knob_size_em']}")
-            self.params.knob_size_em = self._custom_attrs["knob_size_em"]
+        if "knob_size_em" in self.custom_attrs:
+            if not isinstance(self.custom_attrs["knob_size_em"], (int, float)):
+                raise ValueError(f"knob_size_em must be a number, got: {self.custom_attrs['knob_size_em']}")
+            self.params.knob_size_em = self.custom_attrs["knob_size_em"]
 
-        if "knob_steps" in self._custom_attrs:
-            if not isinstance(self._custom_attrs["knob_steps"], int):
-                raise ValueError(f"knob_steps must be an integer, got: {self._custom_attrs['knob_steps']}")
-            self.params.knob_steps = self._custom_attrs["knob_steps"]
+        if "knob_steps" in self.custom_attrs:
+            if not isinstance(self.custom_attrs["knob_steps"], int):
+                raise ValueError(f"knob_steps must be an integer, got: {self.custom_attrs['knob_steps']}")
+            self.params.knob_steps = self.custom_attrs["knob_steps"]
 
-        if "knob_no_input" in self._custom_attrs:
-            if not isinstance(self._custom_attrs["knob_no_input"], bool):
-                raise ValueError(f"knob_no_input must be a boolean, got: {self._custom_attrs['knob_no_input']}")
-            self.params.knob_no_input = self._custom_attrs["knob_no_input"]
+        if "knob_no_input" in self.custom_attrs:
+            if not isinstance(self.custom_attrs["knob_no_input"], bool):
+                raise ValueError(f"knob_no_input must be a boolean, got: {self.custom_attrs['knob_no_input']}")
+            self.params.knob_no_input = self.custom_attrs["knob_no_input"]
 
-        if "slider_no_input" in self._custom_attrs:
-            if not isinstance(self._custom_attrs["slider_no_input"], bool):
-                raise ValueError(f"slider_no_input must be a boolean, got: {self._custom_attrs['slider_no_input']}")
-            self.params.slider_no_input = self._custom_attrs["slider_no_input"]
+        if "slider_no_input" in self.custom_attrs:
+            if not isinstance(self.custom_attrs["slider_no_input"], bool):
+                raise ValueError(f"slider_no_input must be a boolean, got: {self.custom_attrs['slider_no_input']}")
+            self.params.slider_no_input = self.custom_attrs["slider_no_input"]
 
-        if "slider_logarithmic" in self._custom_attrs:
-            if not isinstance(self._custom_attrs["slider_logarithmic"], bool):
+        if "slider_logarithmic" in self.custom_attrs:
+            if not isinstance(self.custom_attrs["slider_logarithmic"], bool):
                 raise ValueError(
-                    f"slider_logarithmic must be a boolean, got: {self._custom_attrs['slider_logarithmic']}"
+                    f"slider_logarithmic must be a boolean, got: {self.custom_attrs['slider_logarithmic']}"
                 )
-            self.params.slider_logarithmic = self._custom_attrs["slider_logarithmic"]
+            self.params.slider_logarithmic = self.custom_attrs["slider_logarithmic"]
 
     def present_str(self, value: float) -> str:
         if self.params.nb_significant_digits >= 0:
@@ -512,8 +512,8 @@ class BoolWithGui(AnyDataWithGui[bool]):
         def _authorized_custom_attrs() -> list[str]:
             return ["edit_type"]
 
-        has_unauthorized = any(k not in _authorized_custom_attrs() for k in self._custom_attrs)
-        unauthorized_attrs = ", ".join([k for k in self._custom_attrs if k not in _authorized_custom_attrs()])
+        has_unauthorized = any(k not in _authorized_custom_attrs() for k in self.custom_attrs)
+        unauthorized_attrs = ", ".join([k for k in self.custom_attrs if k not in _authorized_custom_attrs()])
         if has_unauthorized:
             msg = f"""
             Encountered an unauthorized custom attribute for BoolWithGui: {unauthorized_attrs}
@@ -530,8 +530,8 @@ class BoolWithGui(AnyDataWithGui[bool]):
 
     def _handle_custom_attrs(self) -> None:
         self._check_custom_attrs()
-        if "edit_type" in self._custom_attrs:
-            edit_type_ = self._custom_attrs["edit_type"]
+        if "edit_type" in self.custom_attrs:
+            edit_type_ = self.custom_attrs["edit_type"]
             try:
                 edit_type = BoolEditType[edit_type_]
                 self.params.edit_type = edit_type
