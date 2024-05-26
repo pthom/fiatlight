@@ -1,6 +1,7 @@
 from fiatlight.fiat_togui.to_gui import _any_type_class_name_to_gui, to_data_with_gui, capture_current_scope
 from fiatlight.fiat_types import UnspecifiedValue, ErrorValue
 from fiatlight import FunctionWithGui
+from fiatlight.fiat_types import CustomAttributesDict
 
 from typing import Tuple, Optional
 
@@ -9,15 +10,18 @@ class Dummy:
     pass
 
 
+NO_CUSTOM_ATTRIBUTES: CustomAttributesDict = {}
+
+
 def test_any_typeclass_to_data_with_gui() -> None:
-    d = _any_type_class_name_to_gui("Dummy", capture_current_scope())
+    d = _any_type_class_name_to_gui("Dummy", capture_current_scope(), NO_CUSTOM_ATTRIBUTES)
     assert d.callbacks.edit is None
     assert d.callbacks.default_value_provider is None
     assert d.callbacks.default_value_provider is None
 
 
 def test_any_value_to_data_with_gui() -> None:
-    a = to_data_with_gui(1, capture_current_scope())
+    a = to_data_with_gui(1, capture_current_scope(), NO_CUSTOM_ATTRIBUTES)
     assert a.value == 1
 
 
@@ -144,7 +148,7 @@ def test_enum_gui() -> None:
         B = 2
 
     scope_storage = capture_current_scope()
-    my_enum_gui = _any_type_class_name_to_gui("<enum 'MyEnum'>", scope_storage)
+    my_enum_gui = _any_type_class_name_to_gui("<enum 'MyEnum'>", scope_storage, NO_CUSTOM_ATTRIBUTES)
     assert isinstance(my_enum_gui, EnumWithGui)
 
     def foo(a: MyEnum) -> int:

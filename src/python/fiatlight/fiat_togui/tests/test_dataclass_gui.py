@@ -12,7 +12,11 @@ from fiatlight import (
 )
 from dataclasses import dataclass
 from fiatlight.fiat_togui.to_gui import to_data_with_gui, capture_current_scope
+from fiatlight.fiat_types import CustomAttributesDict
 import copy
+
+
+NO_CUSTOM_ATTRIBUTES: CustomAttributesDict = {}
 
 
 def test_dataclass_like_gui() -> None:
@@ -152,7 +156,7 @@ def test_pydantic_with_enum() -> None:
     as_dict_base_model = my_param.model_dump(mode="json")
     assert as_dict_base_model == {"my_enum": 2, "x": 4}
 
-    my_param_gui = to_data_with_gui(my_param, current_scope)
+    my_param_gui = to_data_with_gui(my_param, current_scope, NO_CUSTOM_ATTRIBUTES)
     assert my_param_gui.value == my_param
 
     as_dict = my_param_gui.save_to_dict(my_param_gui.value)
@@ -172,7 +176,7 @@ def test_base_model_with_custom_attributes() -> None:
 
     # 2. When using fiatlight machinery
     current_scope = fiatlight.fiat_togui.to_gui.capture_current_scope()
-    gui2 = fiatlight.fiat_togui.to_type_with_gui(ImageEffect, current_scope)
+    gui2 = fiatlight.fiat_togui.to_type_with_gui(ImageEffect, current_scope, NO_CUSTOM_ATTRIBUTES)
     assert isinstance(gui2, BaseModelGui)
     rot_gui2 = gui2._parameters_with_gui[0].data_with_gui
     assert rot_gui2.custom_attrs["range"] == (-180, 180)
@@ -226,7 +230,7 @@ def test_dataclass_in_custom_function() -> None:
         def __init__(self) -> None:
             super().__init__(self.my_function)
             foo = Foo()
-            self.foo_gui = to_data_with_gui(foo, capture_current_scope())
+            self.foo_gui = to_data_with_gui(foo, capture_current_scope(), NO_CUSTOM_ATTRIBUTES)
             self.internal_state_gui = self._internal_state_gui
 
         def my_function(self) -> None:

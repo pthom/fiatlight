@@ -76,7 +76,7 @@ class AnyDataWithGui(Generic[DataType]):
     #             return x + y
     #        f.x__range = (0, 10)
     # custom_attrs["range"] will be (0, 10) for the parameter x.
-    custom_attrs: dict[str, Any]
+    _custom_attrs: dict[str, Any]
 
     # ------------------------------------------------------------------------------------------------------------------
     #            Initialization
@@ -85,7 +85,7 @@ class AnyDataWithGui(Generic[DataType]):
         """Initialize the AnyDataWithGui with a type, an unspecified value, and no callbacks."""
         self._type = data_type
         self.callbacks = AnyDataGuiCallbacks()
-        self.custom_attrs = {}
+        self._custom_attrs = {}
 
     @staticmethod
     def make_for_any() -> "AnyDataWithGui[Any]":
@@ -125,10 +125,16 @@ class AnyDataWithGui(Generic[DataType]):
         else:
             return self.value
 
+    @property
+    def custom_attrs(self) -> dict[str, Any]:
+        return self._custom_attrs
+
     def merge_custom_attrs(self, custom_attrs: dict[str, Any] | None = None) -> None:
         """Merge custom attributes with the existing ones. This is useful when we want to add custom attributes"""
         if custom_attrs is not None:
             self.custom_attrs.update(custom_attrs)
+        if self.callbacks.on_custom_attrs_changed is not None:
+            self.callbacks.on_custom_attrs_changed(self.custom_attrs)
 
     # ------------------------------------------------------------------------------------------------------------------
     #            Call the Callbacks

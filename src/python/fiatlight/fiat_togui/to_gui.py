@@ -3,7 +3,7 @@ from dataclasses import dataclass
 
 import pydantic
 
-from fiatlight.fiat_types import UnspecifiedValue, DataType
+from fiatlight.fiat_types import UnspecifiedValue, DataType, CustomAttributesDict
 from fiatlight.fiat_types.base_types import ScopeStorage, JsonDict
 from fiatlight.fiat_togui import primitives_gui
 from fiatlight.fiat_core.any_data_with_gui import AnyDataWithGui
@@ -122,17 +122,19 @@ def _extract_tuple_typeclasses(type_class_name: str) -> Tuple[bool, List[str]]:
     return False, []
 
 
-def _any_type_class_name_to_gui(type_class_name: str, scope_storage: ScopeStorage) -> AnyDataWithGui[Any]:
+def _any_type_class_name_to_gui(
+    type_class_name: str, scope_storage: ScopeStorage, custom_attributes: CustomAttributesDict
+) -> AnyDataWithGui[Any]:
     # logging.warning(f"any_typeclass_to_gui: {type_class_name}")
     if gui_factories().can_handle_typename(type_class_name):
-        return gui_factories().factor(type_class_name)
+        return gui_factories().factor(type_class_name, custom_attributes)
 
     # Remove the "<class '" and "'>", and retry
     # (this is suspicious)
     if type_class_name.startswith("<class '") and type_class_name.endswith("'>"):
         type_class_name = type_class_name[8:-2]
         if gui_factories().can_handle_typename(type_class_name):
-            return gui_factories().factor(type_class_name)
+            return gui_factories().factor(type_class_name, custom_attributes)
 
     is_optional, optional_inner_type_class_name = _extract_optional_typeclass(type_class_name)
     is_enum, enum_type_class_name = _extract_enum_typeclass(type_class_name, scope_storage)
@@ -141,7 +143,7 @@ def _any_type_class_name_to_gui(type_class_name: str, scope_storage: ScopeStorag
     if is_enum:
         try:
             if gui_factories().can_handle_typename(enum_type_class_name):
-                return gui_factories().factor(enum_type_class_name)
+                return gui_factories().factor(enum_type_class_name, custom_attributes)
             else:
                 # If you get an error here (NameError: name 'MyEnum' is not defined),
                 # you need to pass the globals and locals
@@ -153,10 +155,14 @@ def _any_type_class_name_to_gui(type_class_name: str, scope_storage: ScopeStorag
             return AnyDataWithGui.make_for_any()
 
     if is_optional:
-        inner_gui = _any_type_class_name_to_gui(optional_inner_type_class_name, scope_storage=scope_storage)
+        inner_gui = _any_type_class_name_to_gui(
+            optional_inner_type_class_name, scope_storage=scope_storage, custom_attributes=custom_attributes
+        )
         return OptionalWithGui(inner_gui)
     elif is_list:
-        inner_gui = _any_type_class_name_to_gui(list_inner_type_class_name, scope_storage=scope_storage)
+        inner_gui = _any_type_class_name_to_gui(
+            list_inner_type_class_name, scope_storage=scope_storage, custom_attributes=custom_attributes
+        )
         return ListWithGui(inner_gui)
 
     # if we reach this point, we have no GUI implementation for the type
@@ -166,37 +172,50 @@ def _any_type_class_name_to_gui(type_class_name: str, scope_storage: ScopeStorag
     return AnyDataWithGui.make_for_any()
 
 
-def _any_typeclass_to_gui_split_if_tuple(
-    type_class_name: str, scope_storage: ScopeStorage
+def _fn_outputs_with_gui(
+    type_class_name: str, scope_storage: ScopeStorage, fn_custom_attributes: CustomAttributesDict
 ) -> List[AnyDataWithGui[Any]]:
     r = []
     is_tuple, inner_type_classes = _extract_tuple_typeclasses(type_class_name)
     if is_tuple:
-        for inner_type_class in inner_type_classes:
-            r.append(_any_type_class_name_to_gui(inner_type_class, scope_storage=scope_storage))
+        for idx_output, inner_type_class in enumerate(inner_type_classes):
+            output_custom_attrs = get_output_custom_attributes(fn_custom_attributes, idx_output)
+            r.append(
+                _any_type_class_name_to_gui(
+                    inner_type_class, scope_storage=scope_storage, custom_attributes=output_custom_attrs
+                )
+            )
     else:
-        r.append(_any_type_class_name_to_gui(type_class_name, scope_storage=scope_storage))
+        output_custom_attrs = get_output_custom_attributes(fn_custom_attributes)
+        r.append(
+            _any_type_class_name_to_gui(
+                type_class_name, scope_storage=scope_storage, custom_attributes=output_custom_attrs
+            )
+        )
     return r
 
 
-def to_type_with_gui(type_: DataType, scope_storage: ScopeStorage) -> AnyDataWithGui[DataType]:
+def to_type_with_gui(
+    type_: DataType, scope_storage: ScopeStorage, custom_attributes: CustomAttributesDict
+) -> AnyDataWithGui[DataType]:
     typename = str(type_)
-    r = _any_type_class_name_to_gui(typename, scope_storage)
+    r = _any_type_class_name_to_gui(typename, scope_storage, custom_attributes)
     return r
 
 
 def to_data_with_gui(
     value: DataType,
     scope_storage: ScopeStorage,
+    custom_attributes: CustomAttributesDict,
 ) -> AnyDataWithGui[DataType]:
     type_class_name = str(type(value))
-    r = _any_type_class_name_to_gui(type_class_name, scope_storage)
+    r = _any_type_class_name_to_gui(type_class_name, scope_storage, custom_attributes)
     r.value = value
     return r
 
 
 def _to_param_with_gui(
-    name: str, param: inspect.Parameter, scope_storage: ScopeStorage, param_custom_attrs: JsonDict
+    name: str, param: inspect.Parameter, scope_storage: ScopeStorage, custom_attributes: CustomAttributesDict
 ) -> ParamWithGui[Any]:
     annotation = param.annotation
 
@@ -204,9 +223,7 @@ def _to_param_with_gui(
     if annotation is None or annotation is inspect.Parameter.empty:
         data_with_gui = AnyDataWithGui.make_for_any()
     else:
-        data_with_gui = _any_type_class_name_to_gui(str(annotation), scope_storage)
-
-    data_with_gui.merge_custom_attrs(param_custom_attrs)
+        data_with_gui = _any_type_class_name_to_gui(str(annotation), scope_storage, custom_attributes)
 
     param_kind = ParamKind.PositionalOrKeyword
     if param.kind is inspect.Parameter.POSITIONAL_ONLY:
@@ -270,7 +287,7 @@ def _get_calling_module_name() -> str:
         raise ValueError("No module found")
 
 
-def _get_input_param_custom_attributes(fn_dict: JsonDict, param_name: str) -> JsonDict:
+def _get_input_param_custom_attributes(fn_attributes: JsonDict, param_name: str) -> JsonDict:
     # Get the optional custom attributes for the parameter. For example:
     #     def f(x: float):
     #         return x
@@ -278,10 +295,34 @@ def _get_input_param_custom_attributes(fn_dict: JsonDict, param_name: str) -> Js
     #    f.x__range = (0, 1)
     #    f.x__type = "slider"
     #
+    # Or
+    #    @fl.with_custom_attrs(x__range=(0, 1), x__type="slider")
+    #    def f(x: float):
+    #        return x
+    #
     r = {}
-    for k, v in fn_dict.items():
+    for k, v in fn_attributes.items():
         if k.startswith(param_name + "__"):
             r[k[len(param_name) + 2 :]] = v
+    return r
+
+
+def get_output_custom_attributes(fn_attributes: JsonDict, idx_output: int = 0) -> JsonDict:
+    # Get the optional custom attributes for the return value. For example:
+    #     @with_custom_attrs(return__range=(0, 1))
+    #     def f() -> float:
+    #         return 1.0
+    r = {}
+
+    if idx_output == 0:
+        prefix = "return__"
+    else:
+        prefix = f"return_{idx_output}__"
+    prefix_len = len(prefix)
+
+    for k, v in fn_attributes.items():
+        if k.startswith(prefix):
+            r[k[prefix_len:]] = v
     return r
 
 
@@ -289,7 +330,7 @@ def _add_input_outputs_to_function_with_gui_globals_locals_captured(
     function_with_gui: FunctionWithGui,
     scope_storage: ScopeStorage,
     signature_string: str | None,
-    fn_dict: JsonDict,
+    custom_attributes: CustomAttributesDict,
 ) -> None:
     f = function_with_gui._f_impl  # noqa
     assert f is not None
@@ -300,18 +341,19 @@ def _add_input_outputs_to_function_with_gui_globals_locals_captured(
 
     params = sig.parameters
     for name, param in params.items():
-        param_custom_attrs = _get_input_param_custom_attributes(fn_dict, name)
+        param_custom_attrs = _get_input_param_custom_attributes(custom_attributes, name)
         function_with_gui._inputs_with_gui.append(_to_param_with_gui(name, param, scope_storage, param_custom_attrs))
 
     return_annotation = sig.return_annotation
     if return_annotation is inspect.Parameter.empty:
         output_with_gui = AnyDataWithGui.make_for_any()
+        output_with_gui.merge_custom_attrs(get_output_custom_attributes(custom_attributes))
         function_with_gui._outputs_with_gui.append(OutputWithGui(output_with_gui))
     else:
         return_annotation_str = str(return_annotation)
         if return_annotation_str != "None":
-            outputs_with_guis = _any_typeclass_to_gui_split_if_tuple(return_annotation_str, scope_storage)
-            for output_with_gui in outputs_with_guis:
+            outputs_with_guis = _fn_outputs_with_gui(return_annotation_str, scope_storage, custom_attributes)
+            for i, output_with_gui in enumerate(outputs_with_guis):
                 function_with_gui._outputs_with_gui.append(OutputWithGui(output_with_gui))
 
 
@@ -422,8 +464,10 @@ class GuiFactories:
 
         self.register_type(type_, factory)
 
-    def factor(self, typename: Typename) -> AnyDataWithGui[Any]:
-        return self.get_factory(typename)()
+    def factor(self, typename: Typename, custom_attributes: CustomAttributesDict) -> AnyDataWithGui[Any]:
+        r = self.get_factory(typename)()
+        r.merge_custom_attrs(custom_attributes)
+        return r
 
 
 _GUI_FACTORIES = GuiFactories()

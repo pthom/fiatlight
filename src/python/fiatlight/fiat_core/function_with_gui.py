@@ -594,7 +594,7 @@ class FunctionWithGui:
         *,
         scope_storage: ScopeStorage | None = None,
         signature_string: str | None = None,
-        fn_dict: dict[str, Any] | None = None,
+        custom_attributes: dict[str, Any] | None = None,
     ) -> None:
         """Create a FunctionWithGui object, with the given function as implementation
 
@@ -633,12 +633,15 @@ class FunctionWithGui:
         if fn is not None:
             if self.name == "":
                 self.name = fn.__name__ if hasattr(fn, "__name__") else ""
-            if fn_dict is None:
-                fn_dict = fn.__dict__ if hasattr(fn, "__dict__") else {}
+            if custom_attributes is None:
+                custom_attributes = fn.__dict__ if hasattr(fn, "__dict__") else {}
             if scope_storage is None:
                 scope_storage = _capture_scope_back_1()
             _add_input_outputs_to_function_with_gui_globals_locals_captured(
-                self, scope_storage=scope_storage, signature_string=signature_string, fn_dict=fn_dict
+                self,
+                scope_storage=scope_storage,
+                signature_string=signature_string,
+                custom_attributes=custom_attributes,
             )
 
             #

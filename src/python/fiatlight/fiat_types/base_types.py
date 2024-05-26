@@ -29,6 +29,9 @@ JsonPrimitive = str | int | float | bool | None
 JsonDict = dict[str, Any]
 JsonPrimitiveOrDict = JsonPrimitive | JsonDict
 
+# Type for custom attributes
+CustomAttributesDict = dict[str, Any]
+
 
 # Storage for globals and locals dictionaries
 @dataclass

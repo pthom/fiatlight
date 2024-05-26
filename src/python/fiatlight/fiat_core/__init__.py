@@ -1,5 +1,6 @@
 from .any_data_gui_callbacks import AnyDataGuiCallbacks
 from .any_data_with_gui import AnyDataWithGui
+from .possible_custom_attributes import PossibleCustomAttributes
 from .param_with_gui import (
     ParamKind,
     ParamWithGui,
@@ -32,4 +33,6 @@ __all__ = [
     "FunctionsGraph",
     # from custom_attrs_decorator
     "with_custom_attrs",
+    # from possible_custom_attributes
+    "PossibleCustomAttributes",
 ]

@@ -23,6 +23,7 @@ from .file_types import (
 from .base_types import (
     DataType,
     GuiType,
+    CustomAttributesDict,
     ExplainedValue,
     ExplainedValues,
     JsonDict,
@@ -82,6 +83,7 @@ __all__ = [
     "JsonDict",
     "JsonPrimitive",
     "JsonPrimitiveOrDict",
+    "CustomAttributesDict",
     "ScopeStorage",
     "ExplainedValue",
     "ExplainedValues",

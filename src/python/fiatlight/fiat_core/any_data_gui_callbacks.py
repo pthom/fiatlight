@@ -1,4 +1,4 @@
-from fiatlight.fiat_types.base_types import DataType, JsonDict
+from fiatlight.fiat_types.base_types import DataType, JsonDict, CustomAttributesDict
 from fiatlight.fiat_types.function_types import VoidFunction, BoolFunction
 from typing import Callable, Generic
 
@@ -113,6 +113,12 @@ class AnyDataGuiCallbacks(Generic[DataType]):
     # If provided, this function will be called at each heartbeat of the function node.
     # (before the value is drawn). It should return True if any change has been made to the data.
     on_heartbeat: BoolFunction | None = None
+
+    # on_custom_attrs_changed (Optional)
+    # if provided, this function will be called when the custom attributes of the data change.
+    # Used in more advanced cases, when the data presentation depends on custom attributes.
+    on_custom_attrs_changed: Callable[[CustomAttributesDict], None] | None = None
+
     # ---------------------------------------------------------------------------------------------
 
     #                        Serialization and deserialization
