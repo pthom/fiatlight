@@ -12,11 +12,7 @@ from .image_types import (
     ImageU8_3,
     ImageU8_4,
 )
-from .image_gui import (
-    ImageWithGui,
-    ImagePresenterParams,
-    image_source,
-)
+from .image_gui import ImageWithGui, ImagePresenterParams, image_source, image_custom_attributes_documentation
 from .cv_color_type import ColorType, ColorConversion
 from .cv_color_type_gui import ColorConversionWithGui
 from .lut_functions import (
@@ -63,6 +59,7 @@ __all__ = [
     "ImageWithGui",
     "ImagePresenterParams",
     "image_source",
+    "image_custom_attributes_documentation",
     # from cv_color_type
     "ColorConversion",
     "ColorType",

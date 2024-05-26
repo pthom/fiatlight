@@ -2,7 +2,7 @@ import fiatlight
 from fiatlight.fiat_types import JsonDict, ImagePath, Int_0_1000, CustomAttributesDict
 from fiatlight.fiat_core import AnyDataWithGui, PossibleCustomAttributes
 from fiatlight.fiat_kits.fiat_image.image_types import Image, ImageU8
-from imgui_bundle import immvision, imgui
+from imgui_bundle import immvision, imgui, ImVec2
 from imgui_bundle import portable_file_dialogs as pfd
 
 from typing import Optional, Sequence, TypeAlias, Any
@@ -102,12 +102,17 @@ class _ImagePossibleAttributes(PossibleCustomAttributes):
         attr("show_zoom_buttons", bool, "Show zoom buttons (default is True)")
         attr("show_options_panel", bool, "Show options panel (default is True)")
         attr("show_options_button", bool, "Show options button (default is True)")
+        attr(
+            "show_inspect_button",
+            bool,
+            "Show the inspect button, that enables to open a large version of image in the Image Inspector (default is True)",
+        )
 
 
 _IMAGE_POSSIBLE_ATTRIBUTES = _ImagePossibleAttributes()
 
 
-def image_possible_attributes_documentation() -> str:
+def image_custom_attributes_documentation() -> str:
     return _IMAGE_POSSIBLE_ATTRIBUTES.documentation()
 
 
@@ -120,11 +125,14 @@ class ImagePresenter:
     show_channels: bool = False
     channel_layout_vertically: bool = False
     only_display: bool = False
+    size_when_only_display: ImVec2
+    show_inspect_button: bool = True
 
     _was_image_size_custom_attr_handled: bool = False
 
     def __init__(self) -> None:
         self.image_params = default_image_params()
+        self.size_when_only_display = ImVec2(200, 0)
 
     def handle_custom_attrs(self, custom_attrs: dict[str, Any]) -> None:
         _IMAGE_POSSIBLE_ATTRIBUTES.raise_exception_if_bad_custom_attrs(custom_attrs)
@@ -140,6 +148,7 @@ class ImagePresenter:
                 shall_take_into_account = not self._was_image_size_custom_attr_handled
             if shall_take_into_account:
                 self.image_params.image_display_size = tuple(image_display_size)
+                self.size_when_only_display = ImVec2(image_display_size[0], image_display_size[1])
                 self._was_image_size_custom_attr_handled = True
 
         if "show_channels" in custom_attrs:
@@ -176,6 +185,8 @@ class ImagePresenter:
             self.image_params.show_options_panel = custom_attrs["show_options_panel"]
         if "show_options_button" in custom_attrs:
             self.image_params.show_options_button = custom_attrs["show_options_button"]
+        if "show_inspect_button" in custom_attrs:
+            self.show_inspect_button = custom_attrs["show_inspect_button"]
 
     def set_image(self, image: Image) -> None:
         self.image = image
@@ -187,11 +198,23 @@ class ImagePresenter:
         for i, image_channel in enumerate(self.image_channels):
             label = f"channel {i}"
             imgui.begin_group()
-            immvision.image(label, image_channel, self.image_params)
-            if imgui.small_button("Inspect"):
-                global _INSPECT_ID
-                immvision.inspector_add_image(image_channel, f"inspect {_INSPECT_ID} _ channel {i}")
-                _INSPECT_ID += 1
+            if self.only_display:
+                immvision.image_display_resizable(
+                    label_id=label,
+                    mat=image_channel,
+                    refresh_image=self.image_params.refresh_image,
+                    resizable=self.image_params.can_resize,
+                    size=self.size_when_only_display,
+                    is_bgr_or_bgra=self.image_params.is_color_order_bgr,
+                    show_options_button=False,
+                )
+            else:
+                immvision.image(label, image_channel, self.image_params)
+            if self.show_inspect_button and not self.only_display:
+                if imgui.small_button("Inspect"):
+                    global _INSPECT_ID
+                    immvision.inspector_add_image(image_channel, f"inspect {_INSPECT_ID} _ channel {i}")
+                    _INSPECT_ID += 1
             imgui.end_group()
             if not self.channel_layout_vertically:
                 imgui.same_line()
@@ -199,7 +222,18 @@ class ImagePresenter:
             imgui.new_line()
 
     def _gui_image(self) -> None:
-        immvision.image("##output", self.image, self.image_params)
+        if self.only_display:
+            immvision.image_display_resizable(
+                "##output",
+                self.image,
+                refresh_image=self.image_params.refresh_image,
+                resizable=self.image_params.can_resize,
+                size=self.size_when_only_display,
+                is_bgr_or_bgra=self.image_params.is_color_order_bgr,
+                show_options_button=False,
+            )
+        else:
+            immvision.image("##output", self.image, self.image_params)
 
         # Cancel refresh_image at the end of the frame
         # We need to delay that in case there is an opened pop-up with the same widget.
@@ -209,10 +243,11 @@ class ImagePresenter:
         if self.image_params.refresh_image:
             fiatlight.fire_once_at_frame_end(cancel_refresh_image)
 
-        if imgui.small_button("Inspect"):
-            global _INSPECT_ID
-            immvision.inspector_add_image(self.image, f"inspect {_INSPECT_ID}")
-            _INSPECT_ID += 1
+        if self.show_inspect_button and not self.only_display:
+            if imgui.small_button("Inspect"):
+                global _INSPECT_ID
+                immvision.inspector_add_image(self.image, f"inspect {_INSPECT_ID}")
+                _INSPECT_ID += 1
 
     def gui(self) -> None:
         assert self.image is not None

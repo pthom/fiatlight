@@ -124,25 +124,36 @@ with a range from -1 to 1.
 
 ### Available customization options
 
- For a parameter named "param", you can add attributes starting with `param__` (the double underscore is important).
+#### For int parameters:
 
- **For most parameters, you can set the following attributes**
+```python
+from fiatlight.fiat_togui.primitives_gui import int_custom_attributes_documentation
+print(int_custom_attributes_documentation())
+```
 
- * `param__edit_type`: the type of widget to use for the parameter.
-   The available types depend on the type of the parameter
-     - `int`: "slider", "input", "drag", "knob", "slider_and_minus_plus"
-     - `float`:  "slider", "input", "drag", "knob" "slider_float_any_range","slider_float_any_range_positive"
-     - `bool`: "checkbox", "toggle"
- * `width_em`: the width of the widget in em units. 1 em is the width of the letter "m" in the default font.
-               (width_em is accepted for some widgets like "input" and "slider")
+#### For float parameters:
 
- **For numeric parameters, you can also set the following attributes**
- * `param__range`: a tuple (min, max) to restrict the range of the parameter
- * `param__format`: a format string to display the parameter value, e.g., "%d", "%0.2f"
- * `param__no_input`: if set to `True`, no input field will be displayed beside the slider or knob (for sliders and knobs)
- * `knob_size_em` and `knob_steps`: for the knob widget, the size of the knob in em units and the number of steps
+```python
+from fiatlight.fiat_togui.primitives_gui import float_custom_attributes_documentation
+print(float_custom_attributes_documentation())
+```
 
-**A full example with custom attributes for function parameters**
+#### For bool parameters:
+
+```python
+from fiatlight.fiat_togui.primitives_gui import bool_custom_attributes_documentation
+print(bool_custom_attributes_documentation())
+```
+
+#### For images:
+
+```python
+from fiatlight.fiat_kits.fiat_image.image_gui import image_custom_attributes_documentation
+print(image_custom_attributes_documentation())
+```
+
+
+### A full example with custom attributes for function parameters
 
     ```python
     import fiatlight
@@ -328,8 +339,8 @@ You can see it in action with the following code:
 Look at the `CameraImageProviderGui` class that extends `FunctionWithGui`:
 
     ```python
-    import fiatlight
-    fiatlight.fiat_doc.look_at_python_code(fiatlight.fiat_kits.fiat_image.camera_image_provider.CameraImageProviderGui)
+    from fiatlight.fiat_doc import look_at_code
+    %look_at_python_code fiatlight.fiat_kits.fiat_image.camera_image_provider.CameraImageProviderGui
     ```
 
 Note: CameraImageProviderGui uses a `CameraImageProvider` class that provides images from a camera,
@@ -351,9 +362,7 @@ a GUI for the enums and the Pydantic model (note: `dataclass_with_gui_registrati
         FULL_HD_1920_1080 = [1920, 1080]
         VGA_640_480 = [640, 480]
 
-    @base_model_with_gui_registration(
-        {"device_number__range": (0, 5), "brightness__range": (0, 1), "contrast__range": (0, 1)}
-    )
+    @base_model_with_gui_registration(device_number__range= (0, 5), brightness__range= (0, 1), contrast__range= (0, 1))
     class CameraParams(BaseModel):
         device_number: int = 0
         brightness: float = 0.5

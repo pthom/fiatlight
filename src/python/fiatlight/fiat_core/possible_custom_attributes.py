@@ -15,6 +15,9 @@ class _ExplainedAttribute:
     type_details: str | None = None
 
     def is_value_ok(self, value: Any) -> bool:
+        # Special case for int that can be converted to float
+        if self.type_ == float and isinstance(value, int):
+            return True
         if not isinstance(value, self.type_):
             return False
         if self.type_details is None:
@@ -29,7 +32,7 @@ class _ExplainedAttribute:
         elif self.type_details == "(float, float)":
             if not isinstance(value, tuple) or len(value) != 2:
                 return False
-            if not all([isinstance(v, float) for v in value]):
+            if not all([isinstance(v, float) or isinstance(v, int) for v in value]):
                 return False
             return True
         else:
