@@ -3,6 +3,7 @@ from fiatlight.fiat_nodes.functions_graph_gui import FunctionsGraphGui
 from fiatlight.fiat_core import FunctionsGraph, FunctionWithGui
 from fiatlight.fiat_togui.to_gui import _capture_scope_back_1
 from fiatlight.fiat_types.base_types import ScopeStorage
+from fiatlight.fiat_types.function_types import VoidFunction
 from fiatlight.fiat_types.function_types import Function
 from fiatlight.fiat_widgets import fontawesome_6_ctx, icons_fontawesome_6, fiat_osd
 from fiatlight.fiat_utils import functional_utils
@@ -17,6 +18,44 @@ import logging
 import pathlib
 from typing import List, Tuple
 from enum import Enum, auto
+
+
+class _EnqueuedCallbacks:
+    frame_start: List[VoidFunction]
+    frame_end: List[VoidFunction]
+
+    def __init__(self) -> None:
+        self.frame_start = []
+        self.frame_end = []
+
+    def enqueue_frame_start_callback(self, callback: VoidFunction) -> None:
+        self.frame_start.append(callback)
+
+    def enqueue_frame_end_callback(self, callback: VoidFunction) -> None:
+        self.frame_end.append(callback)
+
+    def run_pre_frame_callbacks(self) -> None:
+        for callback in self.frame_start:
+            callback()
+        self.frame_start.clear()
+
+    def run_post_frame_callbacks(self) -> None:
+        for callback in self.frame_end:
+            callback()
+        self.frame_end.clear()
+
+
+_ENQUEUED_CALLBACKS = _EnqueuedCallbacks()
+
+
+def fire_once_at_frame_start(callback: VoidFunction) -> None:
+    """Register a function that will be called once (and only once) at the start of the next frame."""
+    _ENQUEUED_CALLBACKS.enqueue_frame_start_callback(callback)
+
+
+def fire_once_at_frame_end(callback: VoidFunction) -> None:
+    """Register a function that will be called once (and only once) at the end of the next frame."""
+    _ENQUEUED_CALLBACKS.enqueue_frame_end_callback(callback)
 
 
 def _is_running_in_notebook() -> bool:
@@ -251,6 +290,14 @@ class FiatGui:
             self._save_graph_composition(self._graph_composition_filename())
         self._save_user_inputs(self._user_settings_filename())
 
+    @staticmethod
+    def _pre_new_frame() -> None:
+        _ENQUEUED_CALLBACKS.run_pre_frame_callbacks()
+
+    @staticmethod
+    def _after_swap() -> None:
+        _ENQUEUED_CALLBACKS.run_post_frame_callbacks()
+
     def run(self) -> None:
         self.params.runner_params.docking_params.docking_splits += self._docking_splits()
         self.params.runner_params.docking_params.dockable_windows += self._dockable_windows()
@@ -262,6 +309,8 @@ class FiatGui:
         self.params.runner_params.callbacks.post_init = functional_utils.sequence_void_functions(
             self._post_init, self.params.runner_params.callbacks.post_init
         )
+        self.params.runner_params.callbacks.pre_new_frame = self._pre_new_frame
+        self.params.runner_params.callbacks.after_swap = self._after_swap
 
         from fiatlight.fiat_widgets.fontawesome6_ctx_utils import _load_font_awesome_6  # noqa
 
@@ -276,7 +325,7 @@ class FiatGui:
             options=top_toolbar_options,
         )
 
-        self.params.runner_params.callbacks.show_gui = self._heartbeat
+        self.params.runner_params.callbacks.post_render_dockable_windows = self._heartbeat_post_render_dockable_windows
 
         immapp.run(self.params.runner_params, self.params.addons)
 
@@ -290,7 +339,7 @@ class FiatGui:
         ]
         _LAST_SCREENSHOT = last_nodes_image  # type: ignore
 
-    def _heartbeat(self) -> None:
+    def _heartbeat_post_render_dockable_windows(self) -> None:
         fiat_osd._render_all_osd()  # noqa
         self._handle_file_dialogs()
         if self.params.customizable_graph:

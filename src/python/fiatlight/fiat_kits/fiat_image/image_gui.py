@@ -1,3 +1,4 @@
+import fiatlight
 from fiatlight.fiat_types import JsonDict, ImagePath, Int_0_1000
 from fiatlight.fiat_core import AnyDataWithGui
 from fiatlight.fiat_kits.fiat_image.image_types import Image, ImageU8
@@ -70,6 +71,15 @@ class ImagePresenter:
 
     def _gui_image(self) -> None:
         immvision.image("##output", self.image, self.image_params)
+
+        # Cancel refresh_image at the end of the frame
+        # We need to delay that in case there is an opened pop-up with the same widget.
+        def cancel_refresh_image():
+            self.image_params.refresh_image = False
+
+        if self.image_params.refresh_image:
+            fiatlight.fire_once_at_frame_end(cancel_refresh_image)
+
         if imgui.small_button("Inspect"):
             global _INSPECT_ID
             immvision.inspector_add_image(self.image, f"inspect {_INSPECT_ID}")
@@ -90,7 +100,6 @@ class ImagePresenter:
             self._gui_channels()
         else:
             self._gui_image()
-        self.image_params.refresh_image = False
 
     def save_gui_options_to_json(self) -> JsonDict:
         image_params = _save_image_params_to_json(self.image_params)
