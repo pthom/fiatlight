@@ -3,16 +3,13 @@
 FunctionWithGui
 ===============
 
- Introduction
- ------------
-
  `FunctionWithGui` is one of the core classes of FiatLight: it wraps a function with a GUI that presents its
  inputs and its output(s).
 
  See its full code [online](../fiat_core/function_with_gui.py).
 
- Creating a FunctionWithGui object
- ---------------------------------
+Creating a FunctionWithGui object
+=================================
 
  For most functions, fiatlight will automatically create the GUI for the inputs and outputs of your functions.
 
@@ -51,7 +48,8 @@ FunctionWithGui
      fl.fiat_run_graph(graph, app_name="Manual creation")
      ```
 
-### Use registered types
+Use registered types
+--------------------
 
 If you use registered types, the GUI will be automatically created for the parameters and outputs.
 In the example below:
@@ -80,8 +78,8 @@ In the example below:
     fl.fiat_run(words_length_histogram, app_name="Registered types")
     ```
 
- Customizing parameters GUI
- --------------------------
+Customizing parameters GUI
+==========================
 
  As an example, let's consider the function "my_asin" below: if you run this function with `fiat_run()`,
  the GUI will allow the user to enter any float value for x.
@@ -99,7 +97,8 @@ In the example below:
      ```
 
 
- ### Customize the range of a numeric parameter
+Customize the range of a numeric parameter
+------------------------------------------
 
 It is possible to customize the GUI for parameters using function attributes:
 below, we set the range for x. As a consequence it will be displayed with a slider widget
@@ -122,30 +121,31 @@ with a range from -1 to 1.
     fl.fiat_run(my_asin, app_name="Range restriction")
     ```
 
-### Available customization options
+Available customization options
+-------------------------------
 
-#### For int parameters:
+### For int parameters:
 
 ```python
 from fiatlight.fiat_togui.primitives_gui import int_custom_attributes_documentation
 print(int_custom_attributes_documentation())
 ```
 
-#### For float parameters:
+### For float parameters:
 
 ```python
 from fiatlight.fiat_togui.primitives_gui import float_custom_attributes_documentation
 print(float_custom_attributes_documentation())
 ```
 
-#### For bool parameters:
+### For bool parameters:
 
 ```python
 from fiatlight.fiat_togui.primitives_gui import bool_custom_attributes_documentation
 print(bool_custom_attributes_documentation())
 ```
 
-#### For images:
+### For images:
 
 ```python
 from fiatlight.fiat_kits.fiat_image.image_gui import image_custom_attributes_documentation
@@ -153,7 +153,8 @@ print(image_custom_attributes_documentation())
 ```
 
 
-### A full example with custom attributes for function parameters
+A full example with custom attributes for function parameters
+-------------------------------------------------------------
 
     ```python
     import fiatlight
@@ -196,7 +197,8 @@ print(image_custom_attributes_documentation())
     fiatlight.fiat_run(interactive_histogram, app_name="Custom attributes")
     ```
 
-### Customizing the GUI for a function parameter or output
+Customizing the GUI for a function parameter or output
+------------------------------------------------------
 
 You can also customize the GUI for a parameter or output by setting a custom callback function, using
 `set_present_custom_callback` or `set_edit_callback` on the parameter or output.
@@ -236,7 +238,7 @@ You can also customize the GUI for a parameter or output by setting a custom cal
 
 
 Control function behavior
--------------------------
+=========================
 
 By default, the function will be called only when one of its inputs has changed (either because the user
 entered a new value, or because an input is connected to another function that has changed).
@@ -307,8 +309,8 @@ fl.fiat_run(my_function, app_name="Manual invocation")
 ```
 
 
- Fully customizing a FunctionWithGui object
- ------------------------------------------
+Fully customizing a FunctionWithGui object
+==========================================
 
 By subclassing `FunctionWithGui`, you can fully customize the behavior of the function:
 - you can add a GUI for the internal state of the function (e.g. displaying a live plot of a sound signal)
@@ -377,8 +379,8 @@ a GUI for the enums and the Pydantic model (note: `dataclass_with_gui_registrati
         ...
     ```
 
- Debug function internals
- ------------------------
+Debug function internals
+========================
 
 fiatlight provides you with powerful tools to visually debug the intermediate states of your function.
 
@@ -429,7 +431,7 @@ fl.fiat_run_composition([image_source, add_toon_edges], app_name="Toon edges")
 -------------------------------------------------------------------------------
 
 FunctionWithGui signature
--------------------------
+=========================
 
 Below, you will find the "signature" of the `FunctionWithGui` class,
 with its main attributes and methods (but not their bodies)
@@ -442,7 +444,7 @@ Its full source code is [available online](../fiat_core/function_with_gui.py).
     ```
 
 Architecture
-------------
+============
 
 Below is a PlantUML diagram showing the architecture of the `fiat_core` module.
 See the [architecture page](architecture) for the full architecture diagrams.

@@ -3,16 +3,13 @@
 FunctionsGraph
 ==============
 
- Introduction
- ------------
-
  `FunctionsGraph` is one of the core classes of FiatLight: it represents a graph of functions,
  where the output of one function can be linked to the input of another function.
 
  See its full code [online](../fiat_core/functions_graph.py).
 
- Creating a FunctionsGraph
- -------------------------
+Creating a FunctionsGraph
+=========================
 
 ### When a FunctionsGraph can be created automatically
 
@@ -37,7 +34,8 @@ def g(x: int) -> int:
 fl.fiat_run_composition([f, g], app_name="Chained functions")
 ```
 
-### When you need to create a FunctionsGraph
+When you need to create a FunctionsGraph
+----------------------------------------
 
 For more complex cases, you can create a FunctionsGraph manually. This allows you to precisely control the links between
 the functions.
@@ -89,7 +87,7 @@ fl.fiat_run_graph(graph, app_name="Manual graph")
 -------------------------------------------------------------------------------
 
 FunctionsGraph signature
-------------------------
+========================
 
 Below, you will find the "signature" of the `FunctionsGraph` class,
 with its main attributes and methods (but not their bodies)
@@ -102,7 +100,7 @@ Its full source code is [available online](../fiat_core/functions_graph.py).
     ```
 
 Architecture
-------------
+============
 
 Below is a PlantUML diagram showing the architecture of the `fiat_core` module.
 See the [architecture page](architecture) for the full architecture diagrams.

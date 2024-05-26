@@ -15,11 +15,12 @@ fiatlight.register_type(DataType, DataTypeWithGui)`, where `DataType` is the typ
 
 
 Primitive types
----------------
+================
 
 The primitive types `int`, `float`, `str`, `bool` are registered by default.
 
-### Basic example
+Basic example
+-------------
 
 ```python
 import fiatlight as fl
@@ -32,7 +33,8 @@ def foo(a: float, b: float = 3.0, times_two: bool = False) -> float:
 fl.fiat_run(foo, app_name="Primitive Basic")
 ```
 
-### Example with custom GUI options
+Example with custom GUI options
+-------------------------------
 
 The GUI of primitive is extensively configurable via custom attributes.
 
@@ -48,7 +50,8 @@ def to_fahrenheit(celsius: float) -> float:
 fl.fiat_run(to_fahrenheit, app_name="Primitive Custom")
 ```
 
-### Bounded numeric types
+Range limited numeric types
+----------------------------
 
 As a convenience, Fiatlight includes those predefined types for which the GUI will take into account their boundings.
 
@@ -75,7 +78,7 @@ Int_0_10000 = NewType("Int_0_10000", int)  # 0 to 100
 ```
 
 File name types
----------------
+===============
 
 Several file types names are registered by default. They are synonyms for `str` and are used to specify file paths.
 They will be presented with a file dialog in the GUI.
@@ -106,7 +109,7 @@ fl.fiat_run_composition([read_text_file, save_lower_case_text_file], app_name="R
 ```
 
 Color types
------------
+===========
 
 Several color types are registered by default.
 
@@ -128,7 +131,7 @@ fl.fiat_run(color_chooser, app_name="Color Chooser")
 
 
 Optional types
---------------
+==============
 
 If a type is registered, its optional version is also registered.
 
@@ -147,7 +150,7 @@ fl.fiat_run(color_chooser, app_name="Optional Color")
 
 
 Lists
------
+=====
 
 A very basic support is provided for lists. It does not allow to edit the values.
 However, it can present a list of values using (all of them will be rendered as string using str() function).
@@ -165,7 +168,7 @@ fl.fiat_run(list_words_in_file, app_name="List Words in File")
 
 
 Enum classes
-------------
+============
 
 Enum classes can very easily be registered with their GUI.
 
@@ -189,7 +192,7 @@ fl.fiat_run(color_chooser, app_name="Enum Color")
 ```
 
 Dataclasses
------------
+===========
 
 Dataclasses can easily be registered with their GUI.
 
@@ -219,7 +222,7 @@ fl.fiat_run(greet, app_name="Dataclass Person")
 ```
 
 Pydantic models
----------------
+===============
 
 Pydantic models can easily be registered with their GUI.
 
@@ -284,14 +287,15 @@ fl.fiat_run(process_image, app_name="Pydantic Image Model")
 ```
 
 Custom types registration
--------------------------
+=========================
 
 By calling `fiatlight.register_type(DataType, DataTypeWithGui)`, it is possible to register a custom type with its GUI.
 
 For a given type's GUI, it is possible to customize many aspects. Basically all the callbacks and options inside [AnyDataGuiCallbacks](any_data_gui_callbacks.ipynb) can be customized.
 
 
-### Example 1: a customizable Normal Distribution type
+Example 1: a customizable Normal Distribution type
+--------------------------------------------------
 
 **Step 1: Define the Custom Type**
 
@@ -425,7 +429,8 @@ fl.fiat_run(f, app_name="Normal Distribution")
 ```
 
 
-### Example 2: a Length type with imperial units
+Example 2: a Length type with imperial units
+--------------------------------------------
 
 ```python
 # Step 1: Define the custom type for which we want to create a GUI
@@ -511,7 +516,8 @@ fiatlight.fiat_run(circle_perimeter, app_name="Circle Perimeter in banana units"
 ```
 
 
-### Example 3: a sound player
+Example 3: a sound player
+-------------------------
 
 The sound wave player also uses a custom type with a GUI.
 ```python
@@ -523,6 +529,6 @@ For more info, see its [source code](../fiat_kits/experimental/fiat_audio_simple
 
 
 Full code
----------
+=========
 
 Browse the [full code](../fiat_togui) of fiat_togui online.
