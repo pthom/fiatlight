@@ -44,9 +44,9 @@ class ImagePresenter:
     show_channels: bool = False
     channel_layout_vertically: bool = False
 
-    def __init__(self, image_params: ImagePresenterParams | None = None, show_channels: bool = False) -> None:
-        self.image_params = default_image_params() if image_params is None else image_params
-        self.show_channels = show_channels
+    def __init__(self) -> None:
+        self.image_params = default_image_params()
+        # self.show_channels = show_channels
 
     def set_image(self, image: Image) -> None:
         self.image = image
@@ -121,9 +121,9 @@ class ImageWithGui(AnyDataWithGui[Image]):
     image_presenter: ImagePresenter
     open_file_dialog: Optional[pfd.open_file]
 
-    def __init__(self, image_params: immvision.ImageParams | None = None, show_channels: bool = False) -> None:
+    def __init__(self) -> None:
         super().__init__(Image)  # type: ignore
-        self.image_presenter = ImagePresenter(image_params, show_channels)
+        self.image_presenter = ImagePresenter()
         self.open_file_dialog = None
         self.callbacks.edit = self.edit
         self.callbacks.present_custom = self.present_custom
@@ -169,13 +169,6 @@ class ImageWithGui(AnyDataWithGui[Image]):
 
     def load_gui_options_from_json(self, data: JsonDict) -> None:
         self.image_presenter.load_gui_options_from_json(data)
-
-
-class ImageChannelsWithGui(ImageWithGui):
-    """An ImageWithGui, used when we want to display the channels of an image as separate images (in the GUI)."""
-
-    def __init__(self) -> None:
-        super().__init__(show_channels=True)
 
 
 def image_source(image_file: ImagePath, max_image_size: Int_0_1000 | None = None) -> ImageU8:

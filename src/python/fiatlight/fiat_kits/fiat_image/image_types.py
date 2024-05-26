@@ -44,11 +44,6 @@ ImageU8_WithChannelsRoles = Union[ImageU8_RGB, ImageU8_RGBA, ImageU8_BGRA, Image
 # Generic type for any 8-bit image
 ImageU8 = Union[ImageU8_WithNbChannels, ImageU8_WithChannelsRoles]
 
-# ChannelsImageU8 is a synonym for ImageU8, used when we want to
-# display the channels of an image as separate images (in the GUI).
-# (beside the difference in the name, the two types are identical)
-ChannelsImageU8 = NewType("ChannelsImageU8", np.ndarray[ShapeHeightWidthChannels, UInt8])
-
 
 #
 # Float Images
@@ -75,10 +70,8 @@ Image = Union[ImageU8, ImageFloat]
 
 def _register_image_type_factories() -> None:
     from fiatlight.fiat_togui.to_gui import gui_factories
-    from fiatlight.fiat_kits.fiat_image.image_gui import ImageChannelsWithGui, ImageWithGui
+    from fiatlight.fiat_kits.fiat_image.image_gui import ImageWithGui
 
     prefix = "fiatlight.fiat_kits.fiat_image.image_types.Image"
     gui_factories().register_factory_name_start_with(prefix, ImageWithGui)
     gui_factories().register_factory_union(prefix, ImageWithGui)
-
-    gui_factories().register_type(ChannelsImageU8, ImageChannelsWithGui)

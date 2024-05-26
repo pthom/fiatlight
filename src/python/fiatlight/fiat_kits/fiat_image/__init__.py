@@ -2,7 +2,6 @@ from .image_types import (
     ImageU8,
     ImageFloat,
     Image,
-    ChannelsImageU8,
     ImageU8_RGB,
     ImageU8_RGBA,
     ImageU8_BGRA,
@@ -15,7 +14,6 @@ from .image_types import (
 )
 from .image_gui import (
     ImageWithGui,
-    ImageChannelsWithGui,
     ImagePresenterParams,
     image_source,
 )
@@ -52,7 +50,6 @@ __all__ = [
     "ImageU8",
     "ImageFloat",
     "Image",
-    "ChannelsImageU8",
     "ImageU8_RGB",
     "ImageU8_RGBA",
     "ImageU8_BGRA",
@@ -64,7 +61,6 @@ __all__ = [
     "ImageU8_4",
     # from image_gui
     "ImageWithGui",
-    "ImageChannelsWithGui",
     "ImagePresenterParams",
     "image_source",
     # from cv_color_type
