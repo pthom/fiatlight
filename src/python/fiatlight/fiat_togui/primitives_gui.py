@@ -1,6 +1,6 @@
 from imgui_bundle import imgui, hello_imgui, imgui_knobs, imgui_toggle, ImVec2, imgui_ctx, ImVec4
 from fiatlight.fiat_core import AnyDataWithGui, PossibleCustomAttributes
-from fiatlight.fiat_types.color_types import ColorRgb, ColorRgba
+from fiatlight.fiat_types.color_types import ColorRgb, ColorRgba, ColorRgbFloat, ColorRgbaFloat
 from fiatlight.fiat_types import CustomAttributesDict
 from typing import Callable, TypeAlias
 from dataclasses import dataclass
@@ -538,95 +538,134 @@ class BoolWithGui(AnyDataWithGui[bool]):
 ########################################################################################################################
 #                               ColorRbg and ColorRgba
 ########################################################################################################################
+
+
+def _edit_color_rgb_float(value: ColorRgbFloat) -> tuple[bool, ColorRgbFloat]:
+    if not isinstance(value, tuple):
+        raise ValueError(f"ColorRgbWithGui expects a tuple, got: {type(value)}")
+    if len(value) != 3:
+        raise ValueError(f"ColorRgbWithGui expects a tuple of 3 floats, got: {value}")
+
+    value_as_list = list(value)
+    picker_flags_std = imgui.ColorEditFlags_.no_side_preview.value
+    picker_flags_wheel = imgui.ColorEditFlags_.picker_hue_wheel.value | imgui.ColorEditFlags_.no_inputs.value
+
+    imgui.set_next_item_width(hello_imgui.em_size(8))
+    changed1, value_as_list = imgui.color_picker3("##color", value_as_list, picker_flags_std)
+    imgui.same_line()
+    imgui.set_next_item_width(hello_imgui.em_size(8))
+    changed2, value_as_list = imgui.color_picker3("##color", value_as_list, picker_flags_wheel)
+    changed = changed1 or changed2
+
+    if changed:
+        r: ColorRgbFloat = tuple(value_as_list)  # type: ignore
+        return True, r
+    else:
+        return False, value
+
+
+def _edit_color_rgb(value: ColorRgb) -> tuple[bool, ColorRgb]:
+    from fiatlight.fiat_types.color_types import color_rgb_to_color_rgb_float, color_rgb_float_to_color_rgb
+
+    as_float = color_rgb_to_color_rgb_float(value)
+    changed, as_float = _edit_color_rgb_float(as_float)
+    if changed:
+        r = color_rgb_float_to_color_rgb(as_float)
+        return True, r
+    else:
+        return False, value
+
+
+def _edit_color_rgba_float(value: ColorRgbaFloat) -> tuple[bool, ColorRgbaFloat]:
+    if not isinstance(value, tuple):
+        raise ValueError(f"ColorRgbaWithGui expects a tuple, got: {type(value)}")
+    if len(value) != 4:
+        raise ValueError(f"ColorRgbaWithGui expects a tuple of 4 floats, got: {value}")
+    value_as_imvec4 = ImVec4(value[0], value[1], value[2], value[3])
+
+    imgui.text("Edit")
+
+    picker_flags_std = imgui.ColorEditFlags_.no_side_preview.value | imgui.ColorEditFlags_.alpha_preview_half.value
+    picker_flags_wheel = (
+        imgui.ColorEditFlags_.picker_hue_wheel.value
+        | imgui.ColorEditFlags_.no_inputs.value
+        | imgui.ColorEditFlags_.alpha_preview_half.value
+    )
+
+    imgui.set_next_item_width(hello_imgui.em_size(8))
+    changed1, value_as_imvec4 = imgui.color_picker4("##color", value_as_imvec4, picker_flags_std)
+    imgui.same_line()
+    imgui.set_next_item_width(hello_imgui.em_size(8))
+    changed2, value_as_imvec4 = imgui.color_picker4("##color", value_as_imvec4, picker_flags_wheel)
+    if changed1 or changed2:
+        r: ColorRgbaFloat = (value_as_imvec4.x, value_as_imvec4.y, value_as_imvec4.z, value_as_imvec4.w)  # type: ignore  # noqa
+        return True, r
+    else:
+        return False, value
+
+
+def _edit_color_rgba(value: ColorRgba) -> tuple[bool, ColorRgba]:
+    from fiatlight.fiat_types.color_types import color_rgba_to_color_rgba_float, color_rgba_float_to_color_rgba
+
+    as_float = color_rgba_to_color_rgba_float(value)
+    changed, as_float = _edit_color_rgba_float(as_float)
+    if changed:
+        r = color_rgba_float_to_color_rgba(as_float)
+        return True, r
+    else:
+        return False, value
+
+
+def _present_color_rgb(value: ColorRgb) -> str:
+    return f"R: {value[0]}, G: {value[1]}, B: {value[2]}"
+
+
+def _present_color_rgba(value: ColorRgba) -> str:
+    return f"R: {value[0]}, G: {value[1]}, B: {value[2]}, A: {value[3]}"
+
+
+def _present_color_rgba_float(value: ColorRgbaFloat) -> str:
+    return f"R: {value[0]:.3f}, G: {value[1]:.3f}, B: {value[2]:.3f}, A: {value[3]:.3f}"
+
+
+def present_color_rgb_float(value: ColorRgbFloat) -> str:
+    return f"R: {value[0]:.3f}, G: {value[1]:.3f}, B: {value[2]:.3f}"
+
+
 class ColorRgbWithGui(AnyDataWithGui[ColorRgb]):
     def __init__(self) -> None:
         super().__init__(ColorRgb)
-        self.callbacks.edit = self.edit
-        self.callbacks.default_value_provider = lambda: ColorRgb((0, 0, 0))
-        self.callbacks.present_str = self.present_str
         self.callbacks.clipboard_copy_possible = True
-
-    @staticmethod
-    def edit(value: ColorRgb) -> tuple[bool, ColorRgb]:
-        if not isinstance(value, tuple):
-            raise ValueError(f"ColorRgbWithGui expects a tuple, got: {type(value)}")
-        if len(value) != 3:
-            raise ValueError(f"ColorRgbWithGui expects a tuple of 3 ints, got: {value}")
-        value_as_floats = [value[0] / 255.0, value[1] / 255.0, value[2] / 255.0]
-
-        imgui.text("Edit")
-
-        picker_flags_std = imgui.ColorEditFlags_.no_side_preview.value
-        picker_flags_wheel = imgui.ColorEditFlags_.picker_hue_wheel.value | imgui.ColorEditFlags_.no_inputs.value
-
-        imgui.set_next_item_width(hello_imgui.em_size(8))
-        changed1, value_as_floats = imgui.color_picker3("##color", value_as_floats, picker_flags_std)
-        imgui.same_line()
-        imgui.set_next_item_width(hello_imgui.em_size(8))
-        changed2, value_as_floats = imgui.color_picker3("##color", value_as_floats, picker_flags_wheel)
-        if changed1 or changed2:
-            value = ColorRgb(
-                (
-                    int(value_as_floats[0] * 255),
-                    int(value_as_floats[1] * 255),
-                    int(value_as_floats[2] * 255),
-                )
-            )
-            return True, value
-        else:
-            return False, value
-
-    @staticmethod
-    def present_str(value: ColorRgb) -> str:
-        return f"R: {value[0]}, G: {value[1]}, B: {value[2]}"
+        self.callbacks.default_value_provider = lambda: ColorRgb((0, 0, 0))
+        self.callbacks.present_str = _present_color_rgb
+        self.callbacks.edit = _edit_color_rgb
 
 
 class ColorRgbaWithGui(AnyDataWithGui[ColorRgba]):
     def __init__(self) -> None:
         super().__init__(ColorRgba)
-        self.callbacks.edit = self.edit
-        self.callbacks.default_value_provider = lambda: ColorRgba((0, 0, 0, 255))
-        self.callbacks.present_str = self.present_str
         self.callbacks.clipboard_copy_possible = True
+        self.callbacks.default_value_provider = lambda: ColorRgba((0, 0, 0, 255))
+        self.callbacks.present_str = _present_color_rgba
+        self.callbacks.edit = _edit_color_rgba
 
-    @staticmethod
-    def edit(value: ColorRgba) -> tuple[bool, ColorRgba]:
-        if not isinstance(value, tuple):
-            raise ValueError(f"ColorRgbaWithGui expects a tuple, got: {type(value)}")
-        if len(value) != 4:
-            raise ValueError(f"ColorRgbaWithGui expects a tuple of 4 ints, got: {value}")
-        value_as_imvec4 = ImVec4(value[0] / 255.0, value[1] / 255.0, value[2] / 255.0, value[3] / 255.0)
 
-        imgui.text("Edit")
+class ColorRgbaFloatWithGui(AnyDataWithGui[ColorRgbaFloat]):
+    def __init__(self) -> None:
+        super().__init__(ColorRgbaFloat)
+        self.callbacks.clipboard_copy_possible = True
+        self.callbacks.default_value_provider = lambda: ColorRgbaFloat((0.0, 0.0, 0.0, 1.0))
+        self.callbacks.present_str = _present_color_rgba_float
+        self.callbacks.edit = _edit_color_rgba_float
 
-        picker_flags_std = imgui.ColorEditFlags_.no_side_preview.value | imgui.ColorEditFlags_.alpha_preview_half.value
-        picker_flags_wheel = (
-            imgui.ColorEditFlags_.picker_hue_wheel.value
-            | imgui.ColorEditFlags_.no_inputs.value
-            | imgui.ColorEditFlags_.alpha_preview_half.value
-        )
 
-        imgui.set_next_item_width(hello_imgui.em_size(8))
-        changed1, value_as_imvec4 = imgui.color_picker4("##color", value_as_imvec4, picker_flags_std)
-        imgui.same_line()
-        imgui.set_next_item_width(hello_imgui.em_size(8))
-        changed2, value_as_imvec4 = imgui.color_picker4("##color", value_as_imvec4, picker_flags_wheel)
-        if changed1 or changed2:
-            value = ColorRgba(
-                (
-                    int(value_as_imvec4.x * 255),
-                    int(value_as_imvec4.y * 255),
-                    int(value_as_imvec4.z * 255),
-                    int(value_as_imvec4.w * 255),
-                )
-            )
-            return True, value
-        else:
-            return False, value
-
-    @staticmethod
-    def present_str(value: ColorRgba) -> str:
-        return f"R: {value[0]}, G: {value[1]}, B: {value[2]}, A: {value[3]}"
+class ColorRgbFloatWithGui(AnyDataWithGui[ColorRgbFloat]):
+    def __init__(self) -> None:
+        super().__init__(ColorRgbFloat)
+        self.callbacks.clipboard_copy_possible = True
+        self.callbacks.default_value_provider = lambda: ColorRgbFloat((0.0, 0.0, 0.0))
+        self.callbacks.present_str = present_color_rgb_float
+        self.callbacks.edit = _edit_color_rgb_float
 
 
 ########################################################################################################################
@@ -647,6 +686,8 @@ def __register_color_types() -> None:
 
     register_type(ColorRgb, ColorRgbWithGui)
     register_type(ColorRgba, ColorRgbaWithGui)
+    register_type(ColorRgbFloat, ColorRgbFloatWithGui)
+    register_type(ColorRgbaFloat, ColorRgbaFloatWithGui)
 
 
 def __register_custom_float_types() -> None:

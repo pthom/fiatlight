@@ -1,0 +1,77 @@
+{
+    "functions_graph": {
+        "functions_nodes": {
+            "f": {
+                "inputs": {
+                    "c3f": {
+                        "name": "c3f",
+                        "data": {
+                            "type": "Tuple",
+                            "value": [
+                                0.14950592815876007,
+                                0.2365942895412445,
+                                0.7927418947219849
+                            ]
+                        }
+                    },
+                    "c4f": {
+                        "name": "c4f",
+                        "data": {
+                            "type": "Tuple",
+                            "value": [
+                                0.8738919496536255,
+                                0.07915633916854858,
+                                0.1986369639635086,
+                                1.0
+                            ]
+                        }
+                    },
+                    "c3": {
+                        "name": "c3",
+                        "data": {
+                            "type": "Tuple",
+                            "value": [
+                                117,
+                                132,
+                                124
+                            ]
+                        }
+                    },
+                    "c4": {
+                        "name": "c4",
+                        "data": {
+                            "type": "Tuple",
+                            "value": [
+                                66,
+                                39,
+                                50,
+                                255
+                            ]
+                        }
+                    }
+                },
+                "gui_options": {
+                    "inputs": {},
+                    "outputs": {},
+                    "internal_gui_options": {}
+                }
+            }
+        }
+    },
+    "functions_gui_settings": {
+        "f": {
+            "_show_input_details": {
+                "c3f": true,
+                "c4f": true,
+                "c3": true,
+                "c4": true
+            },
+            "_inputs_expanded": true,
+            "_show_output_details": {},
+            "_outputs_expanded": true,
+            "_show_internals_details": {},
+            "_internals_expanded": true,
+            "_internal_state_gui_expanded": true
+        }
+    }
+}

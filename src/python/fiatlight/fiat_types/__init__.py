@@ -52,7 +52,17 @@ from .fiat_number_types import (
     TimeSeconds,
     format_time_seconds,
 )
-from .color_types import ColorRgb, ColorRgba
+from .color_types import (
+    ColorRgb,
+    ColorRgba,
+    ColorRgbaFloat,
+    ColorRgbFloat,
+    color_rgb_float_to_color_rgb,
+    color_rgb_to_color_rgb_float,
+    color_rgba_float_to_color_rgba,
+    color_rgba_to_color_rgba_float,
+    color_rgb_to_color_rgba,
+)
 
 __all__ = [
     # from error_types
@@ -111,4 +121,11 @@ __all__ = [
     # from color_types
     "ColorRgb",
     "ColorRgba",
+    "ColorRgbFloat",
+    "ColorRgbaFloat",
+    "color_rgb_float_to_color_rgb",
+    "color_rgb_to_color_rgb_float",
+    "color_rgba_float_to_color_rgba",
+    "color_rgba_to_color_rgba_float",
+    "color_rgb_to_color_rgba",
 ]
