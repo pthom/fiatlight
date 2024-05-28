@@ -74,11 +74,10 @@ def add_meme_text(
     return image_with_text  # type: ignore
 
 
-def sandbox() -> None:
+def main(use_stable_diffusion: bool) -> None:
     from fiatlight.fiat_kits.fiat_ai import invoke_sdxl_turbo
     from fiatlight.fiat_kits.fiat_image import image_source
 
-    use_stable_diffusion = False
     if use_stable_diffusion:
         fl.fiat_run_composition([invoke_sdxl_turbo, add_meme_text])
     else:
@@ -86,4 +85,4 @@ def sandbox() -> None:
 
 
 if __name__ == "__main__":
-    sandbox()
+    main(use_stable_diffusion=False)
