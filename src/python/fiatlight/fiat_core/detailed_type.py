@@ -4,15 +4,6 @@ from fiatlight.fiat_types.base_types import DataType
 from fiatlight.fiat_types.function_types import DataValidationFunction
 
 
-def typename_to_type(typename: str) -> Optional[type]:
-    """Converts a type name string to a type. Uses eval, so it is not secure."""
-    try:
-        return eval(typename)  # type: ignore
-    except Exception as e:
-        logging.error(f"typename_to_type: error parsing typename: {typename}: {e}")
-        return None
-
-
 def typename_to_type_secure(typename: str) -> Optional[type]:
     """Converts a type name string to a type. Only allows a few authorized types (int, float, str, bool)."""
     authorized_types = {
@@ -22,6 +13,13 @@ def typename_to_type_secure(typename: str) -> Optional[type]:
         "bool": bool,
     }
     return authorized_types.get(typename, None)
+
+
+def _permissive_is_instance(value: Any, type_: type) -> bool:
+    """Checks if the value is an instance of the type, but allows float to be an instance of int."""
+    if type_ == float and isinstance(value, int):
+        return True
+    return isinstance(value, type_)
 
 
 def parse_tuple_definition(tuple_definition: str) -> Optional[tuple[type, ...]]:
@@ -73,9 +71,7 @@ class DetailedType(Generic[DataType]):
 
     def is_value_ok(self, value: Any) -> bool:
         """Checks if the given value is valid according to the type and details."""
-        if self.type_ == float and isinstance(value, int):
-            return True
-        if not isinstance(value, self.type_):
+        if not _permissive_is_instance(value, self.type_):
             return False
         if self.type_details is None:
             return True
@@ -93,14 +89,14 @@ class DetailedType(Generic[DataType]):
         assert self._tuple_detailed_types is not None
         if len(value) != len(self._tuple_detailed_types):
             return False
-        return all(isinstance(v, t) for v, t in zip(value, self._tuple_detailed_types))
+        return all(_permissive_is_instance(v, t) for v, t in zip(value, self._tuple_detailed_types))
 
     def _check_if_value_matches_list_type(self, value: Any) -> bool:
         """Helper method to check list types."""
         if not isinstance(value, tuple) and not isinstance(value, list):
             return False
         assert self._list_inner_type is not None
-        return all(isinstance(v, self._list_inner_type) for v in value)
+        return all(_permissive_is_instance(v, self._list_inner_type) for v in value)
 
     def type_str(self) -> str:
         """Returns a string representation of the type."""
