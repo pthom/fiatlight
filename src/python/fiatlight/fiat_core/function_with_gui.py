@@ -458,6 +458,7 @@ See the [architecture page](architecture) for the full architecture diagrams.
 """
 
 from fiatlight.fiat_config import get_fiat_config
+from fiatlight.fiat_core.togui_exception import FiatToGuiException
 from fiatlight.fiat_types import UnspecifiedValue, ErrorValue, JsonDict, GuiType, ScopeStorage
 from fiatlight.fiat_core.any_data_with_gui import AnyDataWithGui
 from fiatlight.fiat_types.function_types import BoolFunction
@@ -664,6 +665,9 @@ class FunctionWithGui:
                 self.invoke_async = fn.invoke_async
             if hasattr(fn, "invoke_always_dirty"):
                 self.invoke_always_dirty = fn.invoke_always_dirty
+
+        if self.name == "":
+            raise FiatToGuiException("FunctionWithGui: function name is empty")
 
     def set_invoke_live(self) -> None:
         """Set flags to make this a live function (called automatically at each frame)"""

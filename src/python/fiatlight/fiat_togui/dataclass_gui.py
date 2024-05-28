@@ -44,6 +44,7 @@ from fiatlight.fiat_types import JsonDict, Unspecified, Error
 from fiatlight.fiat_togui import to_gui
 from fiatlight.fiat_config import get_fiat_config, FiatColorType
 from fiatlight.fiat_widgets import fiat_osd
+from fiatlight.fiat_core.togui_exception import FiatToGuiException
 from imgui_bundle import imgui, imgui_ctx, hello_imgui
 from typing import Type, Any, TypeVar, List
 from dataclasses import is_dataclass
@@ -288,7 +289,7 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
 class DataclassGui(DataclassLikeGui[DataclassLikeType]):
     def __init__(self, dataclass_type: Type[DataclassLikeType], param_attrs: dict[str, Any] | None = None) -> None:
         if not is_dataclass(dataclass_type):
-            raise ValueError(f"{dataclass_type} is not a dataclass")
+            raise FiatToGuiException(f"{dataclass_type} is not a dataclass")
 
         super().__init__(dataclass_type, param_attrs)  # type: ignore
 
@@ -296,7 +297,7 @@ class DataclassGui(DataclassLikeGui[DataclassLikeType]):
 class BaseModelGui(DataclassLikeGui[DataclassLikeType]):
     def __init__(self, dataclass_type: Type[DataclassLikeType], param_attrs: dict[str, Any] | None = None) -> None:
         if not issubclass(dataclass_type, BaseModel):
-            raise ValueError(f"{dataclass_type} is not a pydantic model")
+            raise FiatToGuiException(f"{dataclass_type} is not a pydantic model")
         super().__init__(dataclass_type, param_attrs)  # type: ignore
         self.callbacks.load_from_dict = self._load_from_dict
         self.callbacks.save_to_dict = self._save_to_dict

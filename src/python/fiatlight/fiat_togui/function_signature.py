@@ -1,3 +1,4 @@
+from fiatlight.fiat_core.togui_exception import FiatToGuiException
 from typing import Callable, Any
 import inspect
 
@@ -66,5 +67,5 @@ def get_function_signature(
         try:
             sig = inspect.signature(f)
         except ValueError as e:
-            raise ValueError(f"Function {f.__name__} has no type annotations") from e
+            raise FiatToGuiException(f"Function {f.__name__} has no type annotations") from e
     return sig

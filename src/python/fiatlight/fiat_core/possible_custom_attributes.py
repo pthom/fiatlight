@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from typing import Any
 from .detailed_type import DetailedVar
+from .togui_exception import FiatToGuiException
 
 
 @dataclass
@@ -73,7 +74,7 @@ class PossibleCustomAttributes:
             all_msg = [msg]
             all_msg.append(msg_documentation)
             msg = "\n".join(all_msg)
-            raise ValueError(msg)
+            raise FiatToGuiException(msg)
 
     def documentation(self) -> str:
         width = 80
