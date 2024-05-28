@@ -35,6 +35,7 @@ Usage example
 
     fiatlight.fiat_run(f)
 """
+
 import copy
 
 from fiatlight import fiat_widgets
@@ -58,7 +59,7 @@ def _draw_dataclass_member_name(member_name: str) -> None:
 
     # Draw param name (might be shortened if too long)
     cursor_pos_before_label = imgui.get_cursor_pos()
-    member_name_color = get_fiat_config().style.colors[FiatColorType.DataclassMemberName]
+    member_name_color = get_fiat_config().style.color_as_vec4(FiatColorType.DataclassMemberName)
     with imgui_ctx.push_style_color(imgui.Col_.text.value, member_name_color):
         member_name_short = member_name
         while imgui.calc_text_size(member_name_short).x > width_align_after:

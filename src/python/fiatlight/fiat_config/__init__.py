@@ -1,9 +1,9 @@
-from fiatlight.fiat_config.fiat_config_def import (
+from .fiat_config_def import (
     FiatConfig,
     get_fiat_config,
-    FiatStyle,
-    FiatColorType,
+    FiatRunConfig,
 )
+from .fiat_style_def import FiatColorType, FiatStyle
 
 
 def fiatlight_python_src_path() -> str:
@@ -20,11 +20,14 @@ def fiatlight_doc_path() -> str:
 
 
 __all__ = [
+    # from fiat_config_def.py
     "get_fiat_config",
     "FiatConfig",
-    "FiatColorType",
-    "FiatStyle",
+    "FiatRunConfig",
     # from here
     "fiatlight_python_src_path",
     "fiatlight_doc_path",
+    # to here
+    "FiatColorType",
+    "FiatStyle",
 ]

@@ -1,74 +1,102 @@
+from enum import Enum
+from typing import Dict, Any
+
+from pydantic import BaseModel, Field
+
+from fiatlight.fiat_types.color_types import ColorRgbaFloat
 from imgui_bundle import ImVec4
-from enum import Enum, auto
-from typing import Dict
 
 
 class FiatColorType(Enum):
     # Input Pins
-    InputPinNotLinked = auto()
-    InputPinLinked = auto()
+    InputPinNotLinked = "InputPinNotLinked"
+    InputPinLinked = "InputPinLinked"
 
     # Parameter value
-    ParameterValueWithError = auto()
-    ParameterValueLinked = auto()
-    ParameterValueUsingDefault = auto()
-    ParameterValueUserSpecified = auto()
-    ParameterValueUnspecified = auto()
+    ParameterValueWithError = "ParameterValueWithError"
+    ParameterValueLinked = "ParameterValueLinked"
+    ParameterValueUsingDefault = "ParameterValueUsingDefault"
+    ParameterValueUserSpecified = "ParameterValueUserSpecified"
+    ParameterValueUnspecified = "ParameterValueUnspecified"
 
     # Output Pins
-    OutputPinLinked = auto()
-    OutputPinNotLinked = auto()
+    OutputPinLinked = "OutputPinLinked"
+    OutputPinNotLinked = "OutputPinNotLinked"
 
     # Output value
-    OutputValueWithError = auto()
-    OutputValueDirty = auto()
-    OutputValueUnspecified = auto()
-    OutputValueOk = auto()
+    OutputValueWithError = "OutputValueWithError"
+    OutputValueDirty = "OutputValueDirty"
+    OutputValueUnspecified = "OutputValueUnspecified"
+    OutputValueOk = "OutputValueOk"
 
-    DataclassMemberName = auto()
+    DataclassMemberName = "DataclassMemberName"
 
     # Exception color
-    ExceptionError = auto()
+    ExceptionError = "ExceptionError"
 
 
-class FiatStyle:
-    colors: Dict[FiatColorType, ImVec4]
+orange = ColorRgbaFloat((1.0, 0.8, 0.4, 1.0))
+blue = ColorRgbaFloat((0.5, 0.7, 1.0, 1.0))
+grey_blue = ColorRgbaFloat((0.6, 0.6, 0.65, 1.0))
+green = ColorRgbaFloat((0.4, 0.8, 0.4, 1.0))
+red = ColorRgbaFloat((1.0, 0.4, 0.4, 1.0))
+grey = ColorRgbaFloat((0.5, 0.5, 0.5, 1.0))
+transparent_grey = ColorRgbaFloat((0.8, 0.8, 0.8, 0.4))
+white = ColorRgbaFloat((1.0, 1.0, 1.0, 1.0))
 
-    # Named colors for better readability
-    orange = ImVec4(1.0, 0.8, 0.4, 1.0)
-    blue = ImVec4(0.5, 0.7, 1.0, 1.0)
-    grey_blue = ImVec4(0.6, 0.6, 0.65, 1.0)
-    green = ImVec4(0.4, 0.8, 0.4, 1.0)
-    red = ImVec4(1.0, 0.4, 0.4, 1.0)
-    grey = ImVec4(0.5, 0.5, 0.5, 1.0)
-    transparent_grey = ImVec4(0.8, 0.8, 0.8, 0.4)
-    white = ImVec4(1.0, 1.0, 1.0, 1.0)
 
+class FiatStyle(BaseModel):
+    colors: Dict[FiatColorType, ColorRgbaFloat] = Field(default_factory=dict)
     node_minimum_width_em: float = 9.0
-
     list_maximum_elements_in_node: int = 10
 
-    def __init__(self) -> None:
-        self.colors = {
+    def __init__(self, **data: Any):
+        super().__init__(**data)
+        self.fill_with_default_style()
+
+    def fill_with_default_style(self) -> None:
+        default_colors = {
             # Input Pins
-            FiatColorType.InputPinLinked: self.blue,
-            FiatColorType.InputPinNotLinked: self.grey_blue,
+            FiatColorType.InputPinLinked: blue,
+            FiatColorType.InputPinNotLinked: grey_blue,
             # Parameters
-            FiatColorType.ParameterValueWithError: self.red,
-            FiatColorType.ParameterValueLinked: self.blue,
-            FiatColorType.ParameterValueUserSpecified: self.green,
-            FiatColorType.ParameterValueUnspecified: self.orange,
-            FiatColorType.ParameterValueUsingDefault: self.grey,
+            FiatColorType.ParameterValueWithError: red,
+            FiatColorType.ParameterValueLinked: blue,
+            FiatColorType.ParameterValueUsingDefault: grey,
+            FiatColorType.ParameterValueUserSpecified: green,
+            FiatColorType.ParameterValueUnspecified: orange,
             # Output Pins
-            FiatColorType.OutputPinLinked: self.blue,
-            FiatColorType.OutputPinNotLinked: self.grey_blue,
+            FiatColorType.OutputPinLinked: blue,
+            FiatColorType.OutputPinNotLinked: grey_blue,
             # When the output is dirty
-            FiatColorType.OutputValueDirty: self.orange,
-            FiatColorType.OutputValueWithError: self.red,
-            FiatColorType.OutputValueUnspecified: self.red,
-            FiatColorType.OutputValueOk: self.white,
-            # Exception color
-            FiatColorType.ExceptionError: self.red,
+            FiatColorType.OutputValueWithError: red,
+            FiatColorType.OutputValueDirty: orange,
+            FiatColorType.OutputValueUnspecified: red,
+            FiatColorType.OutputValueOk: white,
             # Dataclass member name
-            FiatColorType.DataclassMemberName: ImVec4(0.7, 0.8, 0.7, 1.0),
+            FiatColorType.DataclassMemberName: ColorRgbaFloat((0.7, 0.8, 0.7, 1.0)),
+            # Exception color
+            FiatColorType.ExceptionError: red,
         }
+
+        # fill missing colors
+        for color_type, color in default_colors.items():
+            if color_type not in self.colors:
+                self.colors[color_type] = color
+
+    def color_as_vec4(self, color_type: FiatColorType) -> ImVec4:
+        color = self.colors[color_type]
+        return ImVec4(color[0], color[1], color[2], color[3])
+
+
+def test_serialize_style() -> None:
+    style = FiatStyle()
+    style.colors[FiatColorType.OutputValueOk] = red
+
+    as_json = style.model_dump(mode="json")
+
+    style2 = FiatStyle.model_validate(as_json)
+    assert style == style2
+
+    print(style.colors[FiatColorType.OutputValueOk])
+    print(style2.colors[FiatColorType.OutputValueOk])

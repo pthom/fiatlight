@@ -305,7 +305,7 @@ class FunctionNodeGui:
         # Show one line value
         if header_elements.value_as_str is not None:
             with imgui_ctx.push_style_color(
-                imgui.Col_.text.value, get_fiat_config().style.colors[header_elements.value_color]
+                imgui.Col_.text.value, get_fiat_config().style.color_as_vec4(header_elements.value_color)
             ):
                 fiat_widgets.text_maybe_truncated(
                     header_elements.value_as_str,
@@ -329,7 +329,7 @@ class FunctionNodeGui:
         # Show colored pin with possible tooltip
         with imgui_ctx.push_style_color(
             imgui.Col_.text.value,
-            get_fiat_config().style.colors[header_elements.output_pin_color],
+            get_fiat_config().style.color_as_vec4(header_elements.output_pin_color),
         ):
             with ed_ctx.begin_pin(self._pins_output[idx_output], ed.PinKind.output):
                 ed.pin_pivot_alignment(ImVec2(1, 0.5))
@@ -345,7 +345,7 @@ class FunctionNodeGui:
         imgui.begin_horizontal("input")
         header_elements = self._input_param_header_elements(input_param)
         with imgui_ctx.push_style_color(
-            imgui.Col_.text.value, get_fiat_config().style.colors[header_elements.input_pin_color]
+            imgui.Col_.text.value, get_fiat_config().style.color_as_vec4(header_elements.input_pin_color)
         ):
             input_name = input_param.name
             with ed_ctx.begin_pin(self._pins_input[input_name], ed.PinKind.input):
@@ -365,7 +365,7 @@ class FunctionNodeGui:
 
         if header_elements.value_as_str is not None:
             with imgui_ctx.push_style_color(
-                imgui.Col_.text.value, get_fiat_config().style.colors[header_elements.param_value_color]
+                imgui.Col_.text.value, get_fiat_config().style.color_as_vec4(header_elements.param_value_color)
             ):
                 fiat_widgets.text_maybe_truncated(
                     header_elements.value_as_str,
@@ -564,7 +564,7 @@ class FunctionNodeGui:
 
     def _draw_function_inputs(self, unique_name: str) -> bool:
         shall_disable_input = (
-            self._function_node.is_running_async() and get_fiat_config().disable_input_during_execution
+            self._function_node.is_running_async() and get_fiat_config().run_config.disable_input_during_execution
         )
         if shall_disable_input:
             imgui.begin_disabled()
@@ -1022,7 +1022,7 @@ class FunctionNodeGui:
             "Exception:\n" + last_exception_message,
             max_width_pixels=exception_width,
             max_lines=3,
-            color=get_fiat_config().style.colors[FiatColorType.ExceptionError],
+            color=get_fiat_config().style.color_as_vec4(FiatColorType.ExceptionError),
         )
 
         # Raise the exception so that the user can debug it
@@ -1053,7 +1053,7 @@ class FunctionNodeGui:
 
                 imgui.text(msg)
                 if imgui.button("Yes, raise the exception"):
-                    get_fiat_config().catch_function_exceptions = False
+                    get_fiat_config().run_config.catch_function_exceptions = False
                     self._function_node.function_with_gui._dirty = True
                     self._function_node.function_with_gui.invoke()
                     imgui.close_current_popup()  # close the popup (which will never happen, we will crash)

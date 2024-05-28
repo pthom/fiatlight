@@ -413,7 +413,7 @@ class FiatGui:
 
         def ribbon_fn() -> None:
             btn_size = self._top_toolbar_btn_size()
-            dirty_color = get_fiat_config().style.colors[FiatColorType.OutputValueDirty]
+            dirty_color = get_fiat_config().style.color_as_vec4(FiatColorType.OutputValueDirty)
             with imgui_ctx.push_style_color(imgui.Col_.text.value, dirty_color):
                 if imgui.button(icons_fontawesome_6.ICON_FA_ROTATE, btn_size):
                     self._functions_graph_gui.invoke_all_functions(also_invoke_manual_function=True)
@@ -655,6 +655,12 @@ def fiat_run_graph(
     params: FiatGuiParams | None = None,
     app_name: str | None = None,
 ) -> None:
+    from fiatlight.fiat_config.fiat_config_def import load_user_default_fiat_run_config
+
+    # This will load the user default settings,
+    # from a file named .fiat_run_config.json in the current directory or one of its parents.
+    load_user_default_fiat_run_config()
+
     if _is_running_in_notebook():
         from fiatlight.fiat_runner.fiat_run_notebook import _fiat_run_graph_nb, NotebookRunnerParams
 
