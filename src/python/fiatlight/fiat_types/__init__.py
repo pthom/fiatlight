@@ -6,6 +6,7 @@ from .function_types import (
     BoolFunction,
     DataEditFunction,
     DataPresentFunction,
+    DataValidationFunction,
 )
 from .file_types import (
     FilePath,
@@ -68,6 +69,7 @@ __all__ = [
     "GuiType",
     "DataEditFunction",
     "DataPresentFunction",
+    "DataValidationFunction",
     # from file_types
     "FilePath",
     "ImagePath",

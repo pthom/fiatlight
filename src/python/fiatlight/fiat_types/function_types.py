@@ -18,3 +18,6 @@ DataEditFunction = Callable[[DataType], Tuple[bool, DataType]]
 
 # A function that takes a DataType value and returns nothing. Used mainly for "present" callbacks.
 DataPresentFunction = Callable[[DataType], None]
+
+# A function that validates a DataType value. Can be used when the user tries to set a value.
+DataValidationFunction = Callable[[DataType], bool]
