@@ -265,3 +265,15 @@ class AnyDataWithGui(Generic[DataType]):
         if isinstance(self.value, (Error, Unspecified)):
             return False
         return self.callbacks.present_custom is not None
+
+    def docstring_first_line(self) -> str | None:
+        """Return the first line of the docstring, if available"""
+        from fiatlight.fiat_utils.docstring_utils import docstring_first_line
+
+        doc = docstring_first_line(self)
+        if doc is None:
+            return None
+        # We are only interested in the docstring of subclasses.
+        if doc.startswith("AnyDataWithGui:"):
+            return None
+        return doc

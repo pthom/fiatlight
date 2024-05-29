@@ -1,5 +1,6 @@
 import dataclasses
 from dataclasses import dataclass
+from types import NoneType
 
 import pydantic
 
@@ -18,8 +19,7 @@ from enum import Enum
 
 import inspect
 import logging
-from typing import TypeAlias, Callable, Any, Tuple, List, Type
-
+from typing import TypeAlias, Callable, Any, Tuple, List, Type, Generic
 
 GuiFactory = Callable[[], AnyDataWithGui[DataType]]
 FunctionWithGuiFactory = Callable[[], FunctionWithGui]
@@ -441,22 +441,100 @@ def _make_union_matcher(typenames_prefix: str) -> FnTypenameMatcher:
     return union_matcher
 
 
-class GuiFactories:
-    @dataclass
-    class _GuiFactoryWithMatcher:
-        fn_matcher: FnTypenameMatcher
-        gui_factory: GuiFactory[Any]
+def _lower_case_match(s: str | None, query: str | None) -> bool:
+    if query is None:
+        return True
+    if s is None:
+        return False
+    return query.lower() in s.lower()
 
-    _factories: List[_GuiFactoryWithMatcher]
+
+@dataclass
+class _GuiFactoryWithMatcher(Generic[DataType]):
+    fn_matcher: FnTypenameMatcher
+    gui_factory: GuiFactory[Any]
+    datatype: Type[DataType]  # might be NoneType for special cases like unions, and typename_prefix
+    datatype_explanation: str | None = None
+
+    def info_string(self) -> str:
+        factored_gui = self.gui_factory()
+        factored_gui_typename = type(factored_gui).__name__
+        datatype_str: str
+        if self.datatype == NoneType:
+            if self.datatype_explanation is None:
+                raise ValueError("datatype_explanation is None when datatype is NoneType")
+            datatype_str = self.datatype_explanation
+        else:
+            datatype_str = str(self.datatype)
+            if self.datatype_explanation is not None:
+                datatype_str += " (" + self.datatype_explanation + ")"
+
+        gui_docstring = factored_gui.docstring_first_line()
+
+        r = f"{datatype_str} -> {factored_gui_typename}"
+        if gui_docstring is not None:
+            r += f"    ({gui_docstring})"
+        return r
+
+    def matches_type_search(
+        self,
+        data_typename_query: Typename | None = None,
+        gui_typename_query: Typename | None = None,
+        explanation_query: str | None = None,
+    ) -> bool:
+        factored_gui_typename = type(self.gui_factory()).__name__
+
+        matches_data_typename_query = _lower_case_match(str(self.datatype), data_typename_query)
+        matches_gui_typename_query = _lower_case_match(factored_gui_typename, gui_typename_query)
+        matches_explanation_query = _lower_case_match(self.datatype_explanation, explanation_query)
+
+        all_match = matches_data_typename_query and matches_gui_typename_query and matches_explanation_query
+        return all_match
+
+    def matches_query(self, query: str) -> bool:
+        factored_gui_typename = type(self.gui_factory()).__name__
+        matches_data_typename_query = _lower_case_match(str(self.datatype), query)
+        matches_gui_typename_query = _lower_case_match(factored_gui_typename, query)
+        matches_explanation_query = _lower_case_match(self.datatype_explanation, query)
+
+        any_match = matches_data_typename_query or matches_gui_typename_query or matches_explanation_query
+        return any_match
+
+
+class GuiFactories:
+    _factories: List[_GuiFactoryWithMatcher[Any]]
+
+    def _InitSection(self) -> None:  # dummy method to create a section in the IDE  # noqa
+        """
+        # ==================================================================================================================
+        #                        Construction
+        # ==================================================================================================================
+        """
 
     def __init__(self) -> None:
         self._factories = []
 
-    def can_handle_typename(self, typename: Typename) -> bool:
-        for matcher in self._factories:
-            if matcher.fn_matcher(typename):
-                return True
-        return False
+    def _InfoSection(self) -> None:  # dummy method to create a section in the IDE  # noqa
+        """
+        # ==================================================================================================================
+        #                        Info about the registry
+        # ==================================================================================================================
+        """
+
+    def info_factories(self, query: str | None = None) -> str:
+        if query is None:
+            factories = self._factories
+        else:
+            factories = [f for f in self._factories if f.matches_query(query)]
+        info_strings = [f.info_string() for f in factories]
+        return "\n".join(info_strings)
+
+    def _RegisterFactoriesSection(self) -> None:  # dummy method to create a section in the IDE  # noqa
+        """
+        # ==================================================================================================================
+        #                       Registering factories
+        # ==================================================================================================================
+        """
 
     def get_factory(self, typename: Typename) -> GuiFactory[Any]:
         # We reverse the list to give priority to the last registered factories
@@ -465,7 +543,9 @@ class GuiFactories:
                 return factory.gui_factory
         raise ValueError(f"No factory found for typename {typename}")
 
-    def register_type(self, type_: Type[Any], factory: GuiFactory[Any]) -> None:
+    def register_type(
+        self, type_: Type[Any], factory: GuiFactory[Any], datatype_explanation: str | None = None
+    ) -> None:
         full_typename = str(type_)
         full_typename_no_class = ""
         if full_typename.startswith("<class '") and full_typename.endswith("'>"):
@@ -480,19 +560,33 @@ class GuiFactories:
             if len(full_typename_no_class) > 0:
                 msg += f" (no class: {full_typename_no_class})"
             logging.debug(msg)
-        self.register_matcher_factory(matcher_function, factory)
+
+        self.register_matcher_factory(matcher_function, factory, type_, datatype_explanation)
 
     def register_factory_name_start_with(self, typename_prefix: Typename, factory: GuiFactory[Any]) -> None:
         def matcher_function(tested_typename: Typename) -> bool:
             return tested_typename.startswith(typename_prefix)
 
-        self._factories.append(self._GuiFactoryWithMatcher(matcher_function, factory))
+        self._factories.append(
+            _GuiFactoryWithMatcher(
+                matcher_function, factory, NoneType, "All types whose name starts with " + typename_prefix
+            )
+        )
 
     def register_factory_union(self, typename_prefix: Typename, factory: GuiFactory[Any]) -> None:
-        self.register_matcher_factory(_make_union_matcher(typename_prefix), factory)
+        union_matcher = _make_union_matcher(typename_prefix)
+        self.register_matcher_factory(
+            union_matcher, factory, NoneType, "Union of types whose name starts with " + typename_prefix
+        )
 
-    def register_matcher_factory(self, matcher: FnTypenameMatcher, factory: GuiFactory[Any]) -> None:
-        self._factories.append(self._GuiFactoryWithMatcher(matcher, factory))
+    def register_matcher_factory(
+        self,
+        matcher: FnTypenameMatcher,
+        factory: GuiFactory[Any],
+        datatype: Type[Any],
+        datatype_explanation: str | None = None,
+    ) -> None:
+        self._factories.append(_GuiFactoryWithMatcher(matcher, factory, datatype, datatype_explanation))
 
     def register_enum(self, enum_class: type[Enum]) -> None:
         def enum_gui_factory() -> EnumWithGui:
@@ -508,7 +602,7 @@ class GuiFactories:
             r.params.v_max = interval[1]
             return r
 
-        self.register_type(type_, factory)
+        self.register_type(type_, factory, f"float between {interval[0]} and {interval[1]}")
 
     def register_bound_int(self, type_: Type[Any], interval: IntInterval) -> None:
         def factory() -> primitives_gui.IntWithGui:
@@ -518,12 +612,25 @@ class GuiFactories:
             r.params.v_max = interval[1]
             return r
 
-        self.register_type(type_, factory)
+        self.register_type(type_, factory, f"int between {interval[0]} and {interval[1]}")
+
+    def _FactoringSection(self) -> None:  # dummy method to create a section in the IDE  # noqa
+        """
+        # ==================================================================================================================
+        #                       Factoring
+        # ==================================================================================================================
+        """
 
     def factor(self, typename: Typename, custom_attributes: CustomAttributesDict) -> AnyDataWithGui[Any]:
         r = self.get_factory(typename)()
         r.merge_custom_attrs(custom_attributes)
         return r
+
+    def can_handle_typename(self, typename: Typename) -> bool:
+        for matcher in self._factories:
+            if matcher.fn_matcher(typename):
+                return True
+        return False
 
 
 _GUI_FACTORIES = GuiFactories()

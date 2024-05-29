@@ -17,7 +17,7 @@ classifiers = [
     "Topic :: Software Development :: Libraries :: Python Modules",
     "Typing :: Typed"
 ]
-keywords = ["code", "generator", "cpp", "c++", "srcml", "pybind11", "bindings"]
+keywords = ["python"]
 
 dependencies = [
 #    "imgui-bundle",
@@ -31,7 +31,8 @@ dependencies = [
     "scipy",
     "scikit-learn",
     "pyglfw",
-    "IPython"
+    "IPython",
+    "fire",
 ]
 
 [tool.hatch.build.targets.wheel]
@@ -44,3 +45,6 @@ repository = "https://github.com/pthom/fiatlight/"
 
 [tool.ruff]
 line-length = 120
+
+[project.scripts]
+fiatlight = "fiatlight.fiat_cli.fiatlight:main"

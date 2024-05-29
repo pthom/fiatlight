@@ -18,9 +18,23 @@ class FiatRunConfig(BaseModel):
         {
             "catch_function_exceptions": true,
             "disable_input_during_execution": false
+            "disable_type_eval": false
         }
+
+    Members:
+        disable_type_eval: bool, default=False
+            Important! As part of this advanced introspection, fiatlight
+            may need to evaluate the types of the variables in the code
+
+        catch_function_exceptions: bool, default=True
+            If true, exceptions raised by FunctionWithGui nodes will be caught and shown in the function.
+            You can disable this by setting this to False.
+
+        disable_input_during_execution:
+            If true, the input will be disabled during execution, especially the execution of async functions.
     """
 
+    disable_type_eval: bool = False
     catch_function_exceptions: bool = True
     disable_input_during_execution: bool = False
 
