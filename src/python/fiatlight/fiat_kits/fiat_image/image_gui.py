@@ -39,8 +39,10 @@ class _ImagePossibleAttributes(PossibleCustomAttributes):
     def __init__(self) -> None:
         super().__init__("fiat_image.ImageWithGui")
 
-        def attr(name: str, type_: type, explanation: str, type_details: str | None = None) -> None:
-            self.add_explained_attribute(name, type_, explanation, type_details=type_details)
+        # def attr(name: str, type_: type, explanation: str, type_details: str | None = None) -> None:
+        #     self.add_explained_attribute(name, type_, explanation, type_details=type_details)
+
+        attr = self.add_explained_attribute
 
         # Main attributes
         self.add_explained_section("Main attributes for the image viewer")
@@ -49,7 +51,7 @@ class _ImagePossibleAttributes(PossibleCustomAttributes):
             "image_display_size",
             tuple,
             "Initial size of the displayed image (width, height). One of them can be 0 (default is (200, 0))",
-            type_details="(int, int)",
+            tuple_types=(int, int),
         )
         attr(
             "zoom_key",

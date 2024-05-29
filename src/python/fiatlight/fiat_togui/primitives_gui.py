@@ -20,7 +20,7 @@ ToggleConfig: TypeAlias = imgui_toggle.ToggleConfig
 class _PossibleIntAttributes(PossibleCustomAttributes):
     def __init__(self) -> None:
         super().__init__("IntWithGui")
-        self.add_explained_attribute("range", tuple, "Range of the integer", "(int, int)")
+        self.add_explained_attribute("range", tuple, "Range of the integer", tuple_types=(int, int))
         self.add_explained_attribute(
             "edit_type",
             str,
@@ -240,7 +240,7 @@ class IntWithGui(AnyDataWithGui[int]):
 class PossibleFloatAttributes(PossibleCustomAttributes):
     def __init__(self) -> None:
         super().__init__("FloatWithGui")
-        self.add_explained_attribute("range", tuple, "Range of the float", "(float, float)")
+        self.add_explained_attribute("range", tuple, "Range of the float", tuple_types=(float, float))
         self.add_explained_attribute(
             "edit_type",
             str,

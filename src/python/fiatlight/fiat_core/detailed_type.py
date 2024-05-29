@@ -46,41 +46,35 @@ class DetailedType(Generic[DataType]):
     """
 
     type_: type[DataType]
-    type_details: Optional[str]
-    _tuple_detailed_types: Optional[tuple[type, ...]]
-    _list_inner_type: Optional[type]
+    tuple_types: Optional[tuple[type, ...]]
+    list_inner_type: Optional[type]
 
-    def __init__(self, type_: type[DataType], type_details: Optional[str] = None) -> None:
+    def __init__(
+        self,
+        type_: type[DataType],
+        *,
+        tuple_types: Optional[tuple[type, ...]] = None,
+        list_inner_type: Optional[type] = None,
+    ) -> None:
         self.type_ = type_
-        self.type_details = type_details
-        self._tuple_detailed_types = None
-        self._list_inner_type = None
-
-        if type_details:
-            if type_details.startswith("(") and type_details.endswith(")"):
-                self._tuple_detailed_types = parse_tuple_definition(type_details)
-            elif type_details.startswith("[") and type_details.endswith("]"):
-                self._list_inner_type = typename_to_type_secure(type_details[1:-1])
-
-            if self._tuple_detailed_types is None and self._list_inner_type is None:
-                msg = f"""DetailedType: Invalid type details: {type_details}
-                Should be a tuple like "(int, int)" or a list like "[int]".
-                """
-                logging.error(msg)
-                raise ValueError(msg)
+        if tuple_types is not None and list_inner_type is not None:
+            raise ValueError("DetailedType: cannot have both tuple_types and list_inner_type")
+        if tuple_types is not None and type_ != tuple:
+            raise ValueError("DetailedType: tuple_types can only be set for tuple types")
+        if list_inner_type is not None and type_ != list:
+            raise ValueError("DetailedType: list_inner_type can only be set for list types")
+        self._tuple_detailed_types = tuple_types
+        self._list_inner_type = list_inner_type
 
     def is_value_ok(self, value: Any) -> bool:
         """Checks if the given value is valid according to the type and details."""
         if not _permissive_is_instance(value, self.type_):
             return False
-        if self.type_details is None:
-            return True
-
         if self._tuple_detailed_types is not None:
             return self._check_if_value_matches_tuple_type(value)
         if self._list_inner_type is not None:
             return self._check_if_value_matches_list_type(value)
-        raise ValueError(f"Invalid type details: {self.type_details}")
+        return True
 
     def _check_if_value_matches_tuple_type(self, value: Any) -> bool:
         """Helper method to check tuple types."""
@@ -100,7 +94,14 @@ class DetailedType(Generic[DataType]):
 
     def type_str(self) -> str:
         """Returns a string representation of the type."""
-        return self.type_.__name__ if self.type_details is None else self.type_details
+        if self.tuple_types is not None:
+            tuple_types_str = ", ".join(t.__name__ for t in self.tuple_types)
+            r = "tuple[" + tuple_types_str + "]"
+            return r
+        if self.list_inner_type is not None:
+            r = f"list[{self.list_inner_type.__name__}]"
+            return r
+        return self.type_.__name__
 
     def __str__(self) -> str:
         return self.type_str()
@@ -119,12 +120,14 @@ class DetailedVar(Generic[DataType]):
         name: str,
         type_: type[DataType],
         explanation: str,
-        type_details: Optional[str] = None,
+        *,
+        tuple_types: Optional[tuple[type, ...]] = None,
+        list_inner_type: Optional[type] = None,
         data_validation_function: Optional[DataValidationFunction[DataType]] = None,
     ) -> None:
         self.name = name
         self.explanation = explanation
-        self.type_ = DetailedType(type_, type_details)
+        self.type_ = DetailedType(type_, tuple_types=tuple_types, list_inner_type=list_inner_type)
         self.data_validation_function = data_validation_function
 
     def documentation(self, width_name_and_type: int) -> str:

@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, Optional
 from .detailed_type import DetailedVar
 from .togui_exception import FiatToGuiException
 
@@ -26,9 +26,23 @@ class PossibleCustomAttributes:
         self._explained_attributes_or_section.append(_ExplainedSection(explanation))
 
     def add_explained_attribute(
-        self, name: str, type_: type, explanation: str, type_details: str | None = None
+        self,
+        name: str,
+        type_: type,
+        explanation: str,
+        *,
+        tuple_types: Optional[tuple[type, ...]] = None,
+        list_inner_type: Optional[type] = None,
     ) -> None:
-        self._explained_attributes_or_section.append(DetailedVar(name, type_, explanation, type_details))
+        self._explained_attributes_or_section.append(
+            DetailedVar(
+                name,
+                type_,
+                explanation=explanation,
+                tuple_types=tuple_types,
+                list_inner_type=list_inner_type,
+            )
+        )
 
     def _get_explained_attribute(self, name: str) -> DetailedVar[Any] | None:
         for attr in self._explained_attributes():
