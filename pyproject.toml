@@ -33,6 +33,7 @@ dependencies = [
     "pyglfw",
     "IPython",
     "fire",
+    "tabulate",
 ]
 
 [tool.hatch.build.targets.wheel]

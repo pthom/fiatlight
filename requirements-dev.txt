@@ -4,3 +4,4 @@ pre-commit
 pytest
 jupyter
 nbformat
+types-tabulate

@@ -284,6 +284,8 @@ class ImagePresenter:
 
 
 class ImageWithGui(AnyDataWithGui[Image]):
+    """A highly sophisticated GUI for displaying and analysing images. Zoom/Pan, show channels, show pixel values, sync zoom accross images, etc."""
+
     image_presenter: ImagePresenter
     open_file_dialog: Optional[pfd.open_file]
 

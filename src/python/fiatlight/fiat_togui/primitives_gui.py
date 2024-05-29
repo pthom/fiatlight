@@ -81,6 +81,8 @@ class IntWithGuiParams:
 
 
 class IntWithGui(AnyDataWithGui[int]):
+    """A highly customizable int widget."""
+
     params: IntWithGuiParams
 
     def __init__(self, params: IntWithGuiParams | None = None) -> None:
@@ -302,6 +304,8 @@ class FloatWithGuiParams:
 
 
 class FloatWithGui(AnyDataWithGui[float]):
+    """A highly customizable float widget."""
+
     params: FloatWithGuiParams
 
     def __init__(self, params: FloatWithGuiParams | None = None) -> None:
@@ -496,6 +500,8 @@ class BoolWithGuiParams:
 
 
 class BoolWithGui(AnyDataWithGui[bool]):
+    """A bool widget. Can use a checkbox or a toggle."""
+
     params: BoolWithGuiParams
 
     def __init__(self, params: BoolWithGuiParams | None = None):
@@ -633,6 +639,8 @@ def present_color_rgb_float(value: ColorRgbFloat) -> str:
 
 
 class ColorRgbWithGui(AnyDataWithGui[ColorRgb]):
+    """A nice color picker for RGB colors (int)"""
+
     def __init__(self) -> None:
         super().__init__(ColorRgb)
         self.callbacks.clipboard_copy_possible = True
@@ -642,6 +650,8 @@ class ColorRgbWithGui(AnyDataWithGui[ColorRgb]):
 
 
 class ColorRgbaWithGui(AnyDataWithGui[ColorRgba]):
+    """A nice color picker for RGBA colors (int)"""
+
     def __init__(self) -> None:
         super().__init__(ColorRgba)
         self.callbacks.clipboard_copy_possible = True
@@ -651,6 +661,8 @@ class ColorRgbaWithGui(AnyDataWithGui[ColorRgba]):
 
 
 class ColorRgbaFloatWithGui(AnyDataWithGui[ColorRgbaFloat]):
+    """A nice color picker for RGBA colors (float)"""
+
     def __init__(self) -> None:
         super().__init__(ColorRgbaFloat)
         self.callbacks.clipboard_copy_possible = True
@@ -660,6 +672,8 @@ class ColorRgbaFloatWithGui(AnyDataWithGui[ColorRgbaFloat]):
 
 
 class ColorRgbFloatWithGui(AnyDataWithGui[ColorRgbFloat]):
+    """A nice color picker for RGB colors (float)"""
+
     def __init__(self) -> None:
         super().__init__(ColorRgbFloat)
         self.callbacks.clipboard_copy_possible = True

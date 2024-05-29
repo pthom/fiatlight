@@ -1,9 +1,16 @@
 from typing import NewType
 
 ColorRgb = NewType("ColorRgb", tuple[int, int, int])
+ColorRgb.__doc__ = "synonym for tuple[int, int, int] describing an RGB color, with values in [0, 255]"
+
 ColorRgba = NewType("ColorRgba", tuple[int, int, int, int])
+ColorRgba.__doc__ = "synonym for tuple[int, int, int, int] describing an RGBA color, with values in [0, 255]"
+
 ColorRgbFloat = NewType("ColorRgbFloat", tuple[float, float, float])
+ColorRgbFloat.__doc__ = "synonym for tuple[float, float, float] describing an RGB color, with values in [0, 1]"
+
 ColorRgbaFloat = NewType("ColorRgbaFloat", tuple[float, float, float, float])
+ColorRgbaFloat.__doc__ = "synonym for tuple[float, float, float, float] describing an RGBA color, with values in [0, 1]"
 
 
 def _int255_to_float(value: int) -> float:

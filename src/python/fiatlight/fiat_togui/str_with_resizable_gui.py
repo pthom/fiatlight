@@ -6,6 +6,8 @@ from imgui_bundle import imgui, imgui_ctx, hello_imgui, ImVec2
 
 
 class StrWithResizableGui(AnyDataWithGui[str]):
+    """A Gui for a string with resizable input text, with a popup for multiline editing."""
+
     _input_text_in_node: hello_imgui.InputTextData
     _input_text_in_popup: hello_imgui.InputTextData
 

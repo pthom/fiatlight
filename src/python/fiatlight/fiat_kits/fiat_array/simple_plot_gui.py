@@ -5,11 +5,19 @@ Internally, it uses ImPlot (https://github.com/epezent/implot)
 
 from fiatlight.fiat_core.any_data_with_gui import AnyDataWithGui
 from fiatlight.fiat_types.base_types import JsonDict
-from fiatlight.fiat_kits.fiat_array.array_types import FloatMatrix_Dim1, FloatMatrix_Dim2, present_array
+from fiatlight.fiat_kits.fiat_array.array_types import (
+    FloatMatrix_Dim1,
+    FloatMatrix_Dim2,
+    present_array,
+    FloatMatrix,
+)
 from dataclasses import dataclass
 from enum import Enum, auto
 from typing import List
 from imgui_bundle import implot, ImVec2, imgui_ctx, imgui, immapp
+
+
+FloatMatrix_Dim1_Or_2 = FloatMatrix_Dim1 | FloatMatrix_Dim2
 
 
 class SimplePlotType(Enum):
@@ -64,12 +72,12 @@ class SimplePlotParams:
 
 class SimplePlotPresenter:
     plot_params: SimplePlotParams
-    array: FloatMatrix_Dim1 | FloatMatrix_Dim2 | None = None
+    array: FloatMatrix_Dim1_Or_2 | None = None
 
     def __init__(self, array_params: SimplePlotParams | None = None) -> None:
         self.plot_params = SimplePlotParams() if array_params is None else array_params
 
-    def set_array(self, array: FloatMatrix_Dim1 | FloatMatrix_Dim2) -> None:
+    def set_array(self, array: FloatMatrix_Dim1_Or_2) -> None:
         if len(array.shape) == 1:
             self.array = array
             return
@@ -153,13 +161,13 @@ class SimplePlotPresenter:
         )
 
 
-class SimplePlotGui(AnyDataWithGui[FloatMatrix_Dim1]):
-    """A GUI for presenting 1D arrays with ImPlot."""
+class SimplePlotGui(AnyDataWithGui[FloatMatrix_Dim1_Or_2]):
+    """A GUI for presenting 1D or 2D arrays with ImPlot. Can present the array as a line, scatter (+ stairs, or bars plot, if the array is small enough)"""
 
     plot_presenter: SimplePlotPresenter
 
     def __init__(self, array_params: SimplePlotParams | None = None) -> None:
-        super().__init__(FloatMatrix_Dim1)
+        super().__init__(FloatMatrix)  # type: ignore
         self.plot_presenter = SimplePlotPresenter(array_params)
 
         self.callbacks.present_custom = self.present_custom
@@ -171,11 +179,11 @@ class SimplePlotGui(AnyDataWithGui[FloatMatrix_Dim1]):
         self.callbacks.save_gui_options_to_json = self.save_gui_options_to_json
         self.callbacks.load_gui_options_from_json = self.load_gui_options_from_json
 
-    def present_custom(self, _value: FloatMatrix_Dim1) -> None:
+    def present_custom(self, _value: FloatMatrix_Dim1_Or_2) -> None:
         # _value is not used, as the array is set with on_change
         self.plot_presenter.gui()
 
-    def on_change(self, value: FloatMatrix_Dim1) -> None:
+    def on_change(self, value: FloatMatrix_Dim1_Or_2) -> None:
         self.plot_presenter.set_array(value)
 
     def save_gui_options_to_json(self) -> JsonDict:

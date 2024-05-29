@@ -14,6 +14,7 @@ from fiatlight.fiat_core.output_with_gui import OutputWithGui
 from fiatlight.fiat_togui.composite_gui import OptionalWithGui, EnumWithGui, ListWithGui
 from fiatlight.fiat_togui.function_signature import get_function_signature
 from fiatlight.fiat_types.fiat_number_types import FloatInterval, IntInterval
+from fiatlight.fiat_utils import docstring_first_line
 from .dataclass_gui import DataclassLikeType
 from enum import Enum
 
@@ -456,25 +457,32 @@ class _GuiFactoryWithMatcher(Generic[DataType]):
     datatype: Type[DataType]  # might be NoneType for special cases like unions, and typename_prefix
     datatype_explanation: str | None = None
 
-    def info_string(self) -> str:
+    @staticmethod
+    def tabulate_info_headers() -> list[str]:
+        return ["Data Type", "Type Details", "Gui Type", "Gui Details"]
+
+    @staticmethod
+    def tabulate_max_widths() -> list[int | None]:
+        return [30, 30, 30, 30]
+
+    def info_cells(self) -> list[str | None]:
+        datatype_str = "None" if self.datatype == NoneType else str(self.datatype)
+
+        datatype_explanation = self.datatype_explanation
+        if datatype_explanation is None:
+            if self.datatype in (str, int, float, bool):
+                datatype_explanation = ""
+            else:
+                datatype_explanation = docstring_first_line(self.datatype) or ""
+                # Special case for NewType: we want invite the user to add a __doc__ to the NewType
+                if datatype_explanation.startswith("NewType creates simple"):  # extract from NewType docstring
+                    datatype_explanation = 'NewType(...). Add a docstring to the new type: MyType.__doc__ = "..."'
+
         factored_gui = self.gui_factory()
-        factored_gui_typename = type(factored_gui).__name__
-        datatype_str: str
-        if self.datatype == NoneType:
-            if self.datatype_explanation is None:
-                raise ValueError("datatype_explanation is None when datatype is NoneType")
-            datatype_str = self.datatype_explanation
-        else:
-            datatype_str = str(self.datatype)
-            if self.datatype_explanation is not None:
-                datatype_str += " (" + self.datatype_explanation + ")"
+        gui_typename = type(factored_gui).__name__
+        gui_docstring = factored_gui.docstring_first_line() or ""
 
-        gui_docstring = factored_gui.docstring_first_line()
-
-        r = f"{datatype_str} -> {factored_gui_typename}"
-        if gui_docstring is not None:
-            r += f"    ({gui_docstring})"
-        return r
+        return [datatype_str, datatype_explanation, gui_typename, gui_docstring]
 
     def matches_type_search(
         self,
@@ -526,8 +534,21 @@ class GuiFactories:
             factories = self._factories
         else:
             factories = [f for f in self._factories if f.matches_query(query)]
-        info_strings = [f.info_string() for f in factories]
-        return "\n".join(info_strings)
+        if len(factories) == 0:
+            return "No factories found"
+
+        import tabulate
+
+        headers = _GuiFactoryWithMatcher.tabulate_info_headers()
+        max_widths = _GuiFactoryWithMatcher.tabulate_max_widths()
+        cells = [f.info_cells() for f in factories]
+        r = tabulate.tabulate(
+            cells,
+            headers=headers,
+            maxcolwidths=max_widths,
+            tablefmt="grid",
+        )
+        return r
 
     def _RegisterFactoriesSection(self) -> None:  # dummy method to create a section in the IDE  # noqa
         """

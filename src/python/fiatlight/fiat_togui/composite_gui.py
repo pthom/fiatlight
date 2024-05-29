@@ -216,6 +216,8 @@ class ListWithGui(AnyDataWithGui[List[DataType]]):
 
 
 class EnumWithGui(AnyDataWithGui[Enum]):
+    """An automatic GUI for any Enum. Will show radio buttons for each enum value, on two columns"""
+
     enum_type: Type[Enum]
 
     def __init__(self, enum_type: Type[Enum]) -> None:

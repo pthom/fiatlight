@@ -8,6 +8,8 @@ from .prompt import Prompt
 
 
 class PromptWithGui(AnyDataWithGui[Prompt]):
+    """A Gui for a editing a prompt string, with a Submit button."""
+
     _str_with_resizable_gui: StrWithResizableGui
     _edited_prompt: Prompt  # not yet submitted
 

@@ -287,6 +287,8 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
 
 
 class DataclassGui(DataclassLikeGui[DataclassLikeType]):
+    """A sophisticated GUI for a dataclass type. Can edit and present all members of the dataclass. Can handle nested dataclasses."""
+
     def __init__(self, dataclass_type: Type[DataclassLikeType], param_attrs: dict[str, Any] | None = None) -> None:
         if not is_dataclass(dataclass_type):
             raise FiatToGuiException(f"{dataclass_type} is not a dataclass")
@@ -295,6 +297,8 @@ class DataclassGui(DataclassLikeGui[DataclassLikeType]):
 
 
 class BaseModelGui(DataclassLikeGui[DataclassLikeType]):
+    """A sophisticated GUI for a pydantic model. Can edit and present all members of the model. Can handle nested models."""
+
     def __init__(self, dataclass_type: Type[DataclassLikeType], param_attrs: dict[str, Any] | None = None) -> None:
         if not issubclass(dataclass_type, BaseModel):
             raise FiatToGuiException(f"{dataclass_type} is not a pydantic model")

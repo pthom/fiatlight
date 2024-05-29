@@ -10,6 +10,8 @@ CvColorConversionCode: TypeAlias = int
 
 
 class ColorType(enum.Enum):
+    """Color types for images (BGR, BGRA, RGB, RGBA, HSV, HLS, Lab, Luv, XYZ, Gray)."""
+
     BGR = enum.auto()
     BGRA = enum.auto()
     RGB = enum.auto()
@@ -80,6 +82,8 @@ class ColorType(enum.Enum):
 
 
 class ColorConversion:
+    """A color conversion from one color space to another (color spaces use the ColorType enum)."""
+
     src_color: ColorType
     dst_color: ColorType
 

@@ -23,6 +23,8 @@ _HACK_IMAGE = None
 
 @enum_with_gui_registration
 class CameraResolution(Enum):
+    """Some typical camera resolutions"""
+
     HD_1280_720 = [1280, 720]
     FULL_HD_1920_1080 = [1920, 1080]
     UHD_4K_3840_2160 = [3840, 2160]
@@ -32,6 +34,8 @@ class CameraResolution(Enum):
 
 @enum_with_gui_registration
 class CameraFps(Enum):
+    """Some typical camera frame rates"""
+
     FPS_30 = 30
     FPS_60 = 60
     FPS_120 = 120
@@ -40,6 +44,8 @@ class CameraFps(Enum):
 
 @base_model_with_gui_registration(device_number__range=(0, 5), brightness__range=(0, 1), contrast__range=(0, 1))
 class CameraParams(BaseModel):
+    """Parameters for the camera image provider"""
+
     device_number: int = 0
     camera_resolution: CameraResolution = CameraResolution.VGA_640_480
     brightness: float = 0.5
@@ -47,6 +53,8 @@ class CameraParams(BaseModel):
 
 
 class CameraImageProvider:
+    """A class to provide images from a camera"""
+
     camera_params: CameraParams
     previous_camera_params: Optional[CameraParams] = None
     cv_cap: cv2.VideoCapture | None = None
@@ -127,6 +135,8 @@ class CameraImageProvider:
 
 
 class CameraImageProviderGui(FunctionWithGui):
+    """A Gui for the camera image provider"""
+
     _camera_provider: CameraImageProvider
     _camera_params_gui: AnyDataWithGui[CameraParams]
 

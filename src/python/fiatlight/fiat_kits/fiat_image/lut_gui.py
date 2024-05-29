@@ -10,6 +10,8 @@ Point2d: TypeAlias = Tuple[float, float]
 
 
 class LutParamsWithGui(AnyDataWithGui[LutParams]):
+    """A GUI for LutParams, allowing to visually edit a curve representing Look-Up Table transformation."""
+
     _lut_graph: ImageU8
     _lut_graph_needs_refresh: bool = True
     _lut_graph_size_em: float = 3.5

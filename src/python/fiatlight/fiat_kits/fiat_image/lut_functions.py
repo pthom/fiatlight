@@ -9,6 +9,8 @@ LutTable: TypeAlias = NDArray[np.uint8]  # an array of 256 elements (LUT, aka Lo
 
 
 class LutParams(BaseModel):
+    """Simple parameters to create a LUT (Look-Up Table) transformation to an image"""
+
     pow_exponent: float = 1.0
     min_in: float = 0.0
     min_out: float = 0.0  # <=> 0

@@ -30,6 +30,8 @@ def gui_color_conversion(color_conversion: ColorConversion) -> Tuple[bool, Color
 
 
 class ColorConversionWithGui(AnyDataWithGui[ColorConversion]):
+    """A Gui for editing a ColorConversion object."""
+
     def __init__(self) -> None:
         super().__init__(ColorConversion)
         self.callbacks.edit = self.edit

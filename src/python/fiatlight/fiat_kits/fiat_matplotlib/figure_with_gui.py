@@ -9,6 +9,8 @@ from fiatlight.fiat_widgets import fontawesome_6_ctx, icons_fontawesome_6
 
 
 class FigureWithGui(AnyDataWithGui[Figure]):
+    """A Gui that can present a resizable matplotlib figure"""
+
     _figure_size: ImVec2
     should_refresh_fig: bool = False
     _save_file_dialog: pfd.save_file | None = None
