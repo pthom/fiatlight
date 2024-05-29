@@ -41,7 +41,6 @@ import copy
 from fiatlight import fiat_widgets
 from fiatlight.fiat_core import AnyDataWithGui, FunctionWithGui, ParamWithGui
 from fiatlight.fiat_types import JsonDict, Unspecified, Error
-from fiatlight.fiat_togui import to_gui
 from fiatlight.fiat_config import get_fiat_config, FiatColorType
 from fiatlight.fiat_widgets import fiat_osd
 from fiatlight.fiat_core.togui_exception import FiatToGuiException
@@ -87,8 +86,7 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
         if param_attrs is not None:
             self._custom_attrs = param_attrs
 
-        scope_storage = to_gui.capture_current_scope()
-        constructor_gui = FunctionWithGui(dataclass_type, scope_storage=scope_storage)
+        constructor_gui = FunctionWithGui(dataclass_type)
 
         self._parameters_with_gui = constructor_gui._inputs_with_gui
         self.fill_callbacks()

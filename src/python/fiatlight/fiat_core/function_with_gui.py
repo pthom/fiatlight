@@ -459,7 +459,7 @@ See the [architecture page](architecture) for the full architecture diagrams.
 
 from fiatlight.fiat_config import get_fiat_config
 from fiatlight.fiat_core.togui_exception import FiatToGuiException
-from fiatlight.fiat_types import UnspecifiedValue, ErrorValue, JsonDict, GuiType, ScopeStorage
+from fiatlight.fiat_types import UnspecifiedValue, ErrorValue, JsonDict, GuiType
 from fiatlight.fiat_core.any_data_with_gui import AnyDataWithGui
 from fiatlight.fiat_types.function_types import BoolFunction
 from fiatlight.fiat_core.param_with_gui import ParamWithGui, ParamKind
@@ -604,7 +604,6 @@ class FunctionWithGui:
         fn: Callable[..., Any] | None,
         fn_name: str | None = None,
         *,
-        scope_storage: ScopeStorage | None = None,
         signature_string: str | None = None,
         custom_attributes: dict[str, Any] | None = None,
     ) -> None:
@@ -626,15 +625,11 @@ class FunctionWithGui:
 
         Advanced parameters:
         ********************
-        :param scope_storage: the globals/locals dictionary of the module where the function is defined
-                              (if not provided, they are captured automatically)
-
         :param signature_string: a string representing the signature of the function
                                  used when the function signature cannot be retrieved automatically
         """
         from fiatlight.fiat_togui.to_gui import (
             _add_input_outputs_to_function_with_gui_globals_locals_captured,
-            _capture_scope_back_1,
         )
 
         self._inputs_with_gui = []
@@ -647,11 +642,8 @@ class FunctionWithGui:
                 self.name = fn.__name__ if hasattr(fn, "__name__") else ""
             if custom_attributes is None:
                 custom_attributes = fn.__dict__ if hasattr(fn, "__dict__") else {}
-            if scope_storage is None:
-                scope_storage = _capture_scope_back_1()
             _add_input_outputs_to_function_with_gui_globals_locals_captured(
                 self,
-                scope_storage=scope_storage,
                 signature_string=signature_string,
                 custom_attributes=custom_attributes,
             )

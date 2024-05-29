@@ -143,10 +143,10 @@ class CameraImageProviderGui(FunctionWithGui):
     def __init__(self) -> None:
         super().__init__(self.f, "CameraImageProviderGui")
 
-        from fiatlight.fiat_togui import to_data_with_gui, capture_current_scope
+        from fiatlight.fiat_togui import to_data_with_gui
 
         self._camera_provider = CameraImageProvider()
-        self._camera_params_gui = to_data_with_gui(self._camera_provider.camera_params, capture_current_scope(), {})
+        self._camera_params_gui = to_data_with_gui(self._camera_provider.camera_params, {})
 
         self.internal_state_gui = self._internal_state_gui
         self.save_internal_gui_options_to_json = self._save_internal_gui_options_to_json

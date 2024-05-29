@@ -1,8 +1,6 @@
 from fiatlight.fiat_nodes.function_node_gui import FunctionNodeGui
 from fiatlight.fiat_nodes.functions_graph_gui import FunctionsGraphGui
 from fiatlight.fiat_core import FunctionsGraph, FunctionWithGui
-from fiatlight.fiat_togui.to_gui import _capture_scope_back_1
-from fiatlight.fiat_types.base_types import ScopeStorage
 from fiatlight.fiat_types.function_types import VoidFunction
 from fiatlight.fiat_types.function_types import Function
 from fiatlight.fiat_widgets import fontawesome_6_ctx, icons_fontawesome_6, fiat_osd
@@ -683,11 +681,8 @@ def fiat_run(
     fn: Function | FunctionWithGui,
     params: FiatGuiParams | None = None,
     app_name: str | None = None,
-    scope_storage: ScopeStorage | None = None,
 ) -> None:
-    if scope_storage is None:
-        scope_storage = _capture_scope_back_1()
-    functions_graph = FunctionsGraph.from_function(fn, scope_storage)
+    functions_graph = FunctionsGraph.from_function(fn)
     fiat_run_graph(functions_graph, params=params, app_name=app_name)
 
 
@@ -695,14 +690,11 @@ def fiat_run_composition(
     composition: List[Function | FunctionWithGui],
     params: FiatGuiParams | None = None,
     app_name: str | None = None,
-    scope_storage: ScopeStorage | None = None,
 ) -> None:
     """Runs a composition of functions in the Fiat GUI.
     - app_name: will be displayed in the window title, and used to save/load the user inputs and graph composition.
                 if it is None, then the name of the calling module will be used.
                 Note: inside a notebook, specifying app_name is mandatory, since the module name is not available.
     """
-    if scope_storage is None:
-        scope_storage = _capture_scope_back_1()
-    functions_graph = FunctionsGraph.from_function_composition(composition, scope_storage)
+    functions_graph = FunctionsGraph.from_function_composition(composition)
     fiat_run_graph(functions_graph, params=params, app_name=app_name)

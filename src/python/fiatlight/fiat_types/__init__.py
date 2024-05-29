@@ -30,13 +30,11 @@ from .base_types import (
     JsonDict,
     JsonPrimitive,
     JsonPrimitiveOrDict,
-    ScopeStorage,
 )
 from .fiat_number_types import (
     FloatInterval,
     IntInterval,
     Float_0_1,
-    Float__1_1,
     PositiveFloat,
     Int_0_255,
     TimeSeconds,
@@ -86,7 +84,6 @@ __all__ = [
     "JsonPrimitive",
     "JsonPrimitiveOrDict",
     "CustomAttributesDict",
-    "ScopeStorage",
     "ExplainedValue",
     "ExplainedValues",
     # from fiat_number_types

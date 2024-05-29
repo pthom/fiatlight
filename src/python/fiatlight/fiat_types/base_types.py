@@ -31,10 +31,3 @@ JsonPrimitiveOrDict = JsonPrimitive | JsonDict
 
 # Type for custom attributes
 CustomAttributesDict = dict[str, Any]
-
-
-# Storage for globals and locals dictionaries
-@dataclass
-class ScopeStorage:
-    globals_: dict[str, Any]
-    locals_: dict[str, Any]
