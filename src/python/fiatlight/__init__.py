@@ -1,5 +1,5 @@
 from fiatlight import fiat_core, fiat_widgets, fiat_types, fiat_runner, fiat_config, fiat_kits
-from fiatlight.fiat_core import AnyDataWithGui, FunctionWithGui, FunctionsGraph, with_custom_attrs
+from fiatlight.fiat_core import AnyDataWithGui, FunctionWithGui, FunctionsGraph
 from fiatlight.fiat_runner import (
     fiat_run,
     fiat_run_composition,
@@ -19,6 +19,7 @@ from fiatlight.fiat_togui import (
     register_base_model,
     base_model_with_gui_registration,
 )
+from fiatlight.fiat_utils import with_custom_attrs
 from fiatlight.fiat_config import get_fiat_config
 
 
@@ -70,4 +71,6 @@ __all__ = [
     "is_rendering_in_window",
     # from fiat_config
     "get_fiat_config",
+    # from fiat_utils
+    "with_custom_attrs",
 ]

@@ -1,5 +1,5 @@
-import fiatlight
-from fiatlight.fiat_types import JsonDict, ImagePath, Int_0_1000, CustomAttributesDict
+from fiatlight.fiat_utils.custom_attrs_decorator import with_custom_attrs
+from fiatlight.fiat_types import JsonDict, ImagePath, CustomAttributesDict
 from fiatlight.fiat_core import AnyDataWithGui, PossibleCustomAttributes
 from fiatlight.fiat_kits.fiat_image.image_types import Image, ImageU8
 from imgui_bundle import immvision, imgui, ImVec2
@@ -241,7 +241,9 @@ class ImagePresenter:
             self.image_params.refresh_image = False
 
         if self.image_params.refresh_image:
-            fiatlight.fire_once_at_frame_end(cancel_refresh_image)
+            from fiatlight.fiat_runner.fiat_gui import fire_once_at_frame_end
+
+            fire_once_at_frame_end(cancel_refresh_image)
 
         if self.show_inspect_button and not self.only_display:
             if imgui.small_button("Inspect"):
@@ -339,7 +341,8 @@ class ImageWithGui(AnyDataWithGui[Image]):
         self.image_presenter.load_gui_options_from_json(data)
 
 
-def image_source(image_file: ImagePath, max_image_size: Int_0_1000 | None = None) -> ImageU8:
+@with_custom_attrs(max_image_size__range=(0, 3000))
+def image_source(image_file: ImagePath, max_image_size: int | None = None) -> ImageU8:
     """A simple function that reads an image from a file and optionally resizes it if it is too large.
 
     Since image_file is of type ImagePath, it will be displayed as a file picker in the GUI

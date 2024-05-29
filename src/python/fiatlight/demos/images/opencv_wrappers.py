@@ -1,6 +1,6 @@
-import fiatlight
+import fiatlight as fl
 from fiatlight.fiat_kits.fiat_image import ImageU8, ImageU8_GRAY
-from fiatlight.fiat_types import PositiveFloat, Float_0_10, Int_0_10
+from fiatlight.fiat_types import PositiveFloat
 from enum import Enum
 
 import cv2
@@ -12,13 +12,14 @@ class CannyApertureSize(Enum):
     APERTURE_7 = 7
 
 
+@fl.with_custom_attrs(blur_sigma__range=(0.0, 10.0))
 def canny(
     image: ImageU8,
     t_lower: PositiveFloat = PositiveFloat(1000.0),
     t_upper: PositiveFloat = PositiveFloat(5000.0),
     aperture_size: CannyApertureSize = CannyApertureSize.APERTURE_5,
     l2_gradient: bool = True,
-    blur_sigma: Float_0_10 = Float_0_10(0.0),
+    blur_sigma: float = 0.0,
 ) -> ImageU8_GRAY:
     """
     :param image: Image: Input image to which Canny filter will be applied
@@ -35,20 +36,19 @@ def canny(
     return r  # type: ignore
 
 
+@fl.enum_with_gui_registration
 class MorphShape(Enum):
     MORPH_RECT = cv2.MORPH_RECT
     MORPH_CROSS = cv2.MORPH_CROSS
     MORPH_ELLIPSE = cv2.MORPH_ELLIPSE
 
 
-fiatlight.register_enum(MorphShape)
-
-
+@fl.with_custom_attrs(kernel_size__range=(1, 10), iterations__range=(1, 10))
 def dilate(
     image: ImageU8_GRAY,
-    kernel_size: Int_0_10 = Int_0_10(2),
+    kernel_size: int = 2,
     morph_shape: MorphShape = MorphShape.MORPH_ELLIPSE,
-    iterations: Int_0_10 = Int_0_10(1),
+    iterations: int = 1,
 ) -> ImageU8_GRAY:
     """Dilate the image using the specified kernel shape and size
 
@@ -60,7 +60,8 @@ def dilate(
     return r  # type: ignore
 
 
-def oil_paint(image: ImageU8, size: Int_0_10 = Int_0_10(1), dynRatio: Int_0_10 = Int_0_10(3)) -> ImageU8:
+@fl.with_custom_attrs(size__range=(1, 10), dynRatio__range=(1, 10))
+def oil_paint(image: ImageU8, size: int = 1, dynRatio: int = 3) -> ImageU8:
     """Applies oil painting effect to an image, using the OpenCV xphoto module."""
     return cv2.xphoto.oilPainting(image, size, dynRatio, cv2.COLOR_BGR2HSV)  # type: ignore
 
@@ -71,7 +72,7 @@ all_functions = [canny, dilate, oil_paint]
 def main() -> None:
     from fiatlight.fiat_kits.fiat_image import image_source
 
-    fiatlight.fiat_run_composition([image_source, canny, dilate])
+    fl.fiat_run_composition([image_source, canny, dilate])
 
 
 if __name__ == "__main__":

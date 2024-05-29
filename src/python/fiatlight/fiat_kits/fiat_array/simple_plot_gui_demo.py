@@ -6,9 +6,8 @@ This example demonstrates
 - how to create a spirograph-like curve using ImPlot.
 """
 
-import fiatlight
 from fiatlight import fiat_array
-from fiatlight.fiat_types import Float_0_100
+import fiatlight as fl
 import numpy as np
 import math
 import time
@@ -34,11 +33,17 @@ def sin_wave(phase: float, amplitude: float = 1.0) -> fiat_array.FloatMatrix_Dim
     return r  # type: ignore
 
 
+@fl.with_custom_attrs(
+    radius_fixed_circle__range=(0.0, 100.0),
+    radius_moving_circle__range=(0.0, 100.0),
+    pen_offset__range=(0.0, 100.0),
+    nb_turns__range=(0.0, 100.0),
+)
 def make_spirograph_curve(
-    radius_fixed_circle: Float_0_100 = Float_0_100(10.84),
-    radius_moving_circle: Float_0_100 = Float_0_100(3.48),
-    pen_offset: Float_0_100 = Float_0_100(6.0),
-    nb_turns: Float_0_100 = Float_0_100(23.0),
+    radius_fixed_circle: float = 10.84,
+    radius_moving_circle: float = 3.48,
+    pen_offset: float = 6.0,
+    nb_turns: float = 23.0,
 ) -> fiat_array.FloatMatrix_Dim2:
     """a spirograph-like curve"""
     import numpy as np
@@ -61,7 +66,7 @@ def get_simple_values(x: float) -> fiat_array.FloatMatrix_Dim1:
 
 
 def main() -> None:
-    graph = fiatlight.FunctionsGraph()
+    graph = fl.FunctionsGraph()
     graph.add_function(make_spirograph_curve)
     graph.add_function(get_simple_values)
 
@@ -71,7 +76,7 @@ def main() -> None:
     graph.add_link("time_seconds", "phase_from_time_seconds")
     graph.add_link("phase_from_time_seconds", "sin_wave")
 
-    fiatlight.fiat_run_graph(graph, app_name="Demo ImPlot")
+    fl.fiat_run_graph(graph, app_name="Demo ImPlot")
 
 
 if __name__ == "__main__":

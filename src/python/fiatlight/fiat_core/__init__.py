@@ -11,7 +11,6 @@ from .function_with_gui import (
 )
 from .function_node import FunctionNode, FunctionNodeLink
 from .functions_graph import FunctionsGraph
-from .custom_attrs_decorator import with_custom_attrs
 from .togui_exception import FiatToGuiException
 
 __all__ = [
@@ -32,8 +31,6 @@ __all__ = [
     "FunctionNodeLink",
     # from functions_graph
     "FunctionsGraph",
-    # from custom_attrs_decorator
-    "with_custom_attrs",
     # from possible_custom_attributes
     "PossibleCustomAttributes",
     # from togui_exception

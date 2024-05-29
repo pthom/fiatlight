@@ -108,10 +108,10 @@ def test_pydantic_serialization() -> None:
 def test_type_storage() -> None:
     scope_storage = capture_current_scope()
 
-    assert to_type_with_gui(int, scope_storage)._type == int  # type: ignore
-    assert to_type_with_gui(float, scope_storage)._type == float  # type: ignore
-    assert to_type_with_gui(str, scope_storage)._type == str  # type: ignore
-    assert to_type_with_gui(bool, scope_storage)._type == bool  # type: ignore
+    assert to_type_with_gui(int, scope_storage, NO_CUSTOM_ATTRIBUTES)._type == int  # type: ignore
+    assert to_type_with_gui(float, scope_storage, NO_CUSTOM_ATTRIBUTES)._type == float  # type: ignore
+    assert to_type_with_gui(str, scope_storage, NO_CUSTOM_ATTRIBUTES)._type == str  # type: ignore
+    assert to_type_with_gui(bool, scope_storage, NO_CUSTOM_ATTRIBUTES)._type == bool  # type: ignore
 
     ListInt = List[int]
     li = to_type_with_gui(ListInt, scope_storage, NO_CUSTOM_ATTRIBUTES)
