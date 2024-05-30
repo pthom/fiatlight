@@ -712,12 +712,26 @@ class GuiFactories:
             )
         self.register_matcher_factory(matcher_function, factory, type_, new_type_doc)
 
-    def register_type(
+    def register_real_type(
         self, type_: Type[Any], factory: GuiFactory[Any], datatype_explanation: str | None = None
     ) -> None:
         """Registers a factory for a type."""
         assert isinstance(type_, type)
         full_typename = fully_qualified_typename(type_)
+
+        def matcher_function(tested_typename: Typename) -> bool:
+            return full_typename == tested_typename
+
+        self.register_matcher_factory(matcher_function, factory, type_, datatype_explanation)
+
+    def register_type(
+        self, type_: Type[Any], factory: GuiFactory[Any], datatype_explanation: str | None = None
+    ) -> None:
+        """Registers a factory for a type (real type or NewType)."""
+        if isinstance(type_, type):
+            full_typename = fully_qualified_typename(type_)
+        else:
+            full_typename = fully_qualified_complex_typename(type_)
 
         def matcher_function(tested_typename: Typename) -> bool:
             return full_typename == tested_typename
@@ -759,7 +773,7 @@ class GuiFactories:
         def enum_gui_factory() -> EnumWithGui:
             return EnumWithGui(enum_class)
 
-        self.register_type(enum_class, enum_gui_factory)
+        self.register_real_type(enum_class, enum_gui_factory)
 
     def register_bound_float(self, type_: Type[Any], interval: FloatInterval) -> None:
         """Registers a float type inside an interval (will use FloatWithGui)"""
@@ -819,6 +833,11 @@ def register_type(type_: Type[Any], factory: GuiFactory[Any]) -> None:
     gui_factories().register_type(type_, factory)
 
 
+def register_real_type(type_: Type[Any], factory: GuiFactory[Any]) -> None:
+    """Register a real type with its GUI implementation."""
+    gui_factories().register_real_type(type_, factory)
+
+
 def register_typing_new_type(type_: Any, factory: GuiFactory[Any]) -> None:
     """Register a type created with typing.NewType with its GUI implementation."""
     gui_factories().register_typing_new_type(type_, factory)
@@ -845,7 +864,7 @@ def register_dataclass(dataclass_type: Type[DataclassLikeType], **kwargs) -> Non
         r = DataclassGui(dataclass_type, kwargs)
         return r
 
-    gui_factories().register_type(dataclass_type, factory)
+    gui_factories().register_real_type(dataclass_type, factory)
 
 
 # Decorators for registered dataclasses and pydantic models
@@ -871,7 +890,7 @@ def register_base_model(base_model_type: Type[DataclassLikeType], **kwargs) -> N
         r = BaseModelGui(base_model_type, kwargs)
         return r
 
-    gui_factories().register_type(base_model_type, factory)
+    gui_factories().register_real_type(base_model_type, factory)
 
 
 def base_model_with_gui_registration(**kwargs) -> Callable[[Type[pydantic.BaseModel]], Type[pydantic.BaseModel]]:  # type: ignore
