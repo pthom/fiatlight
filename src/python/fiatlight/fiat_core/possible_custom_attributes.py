@@ -42,7 +42,7 @@ class PossibleCustomAttributes:
         self._explained_attributes_or_section.append(
             DetailedVar(
                 name,
-                type_,
+                type_,  # noqa
                 explanation=explanation,
                 default_value=default_value,
                 tuple_types=tuple_types,
@@ -67,7 +67,7 @@ class PossibleCustomAttributes:
             if explained_attr is None:
                 unwanted_keys.append(attr_name)
             elif not explained_attr.type_.is_value_type_ok(value):
-                msg = f"Attribute {attr_name} should be of type {explained_attr.type_.type_str()}, but it is {type(value)}"
+                msg = f"Attribute {attr_name} should be of type {explained_attr.type_.type_str()}, but it is {type(value)}"  # noqa
                 attributes_with_wrong_type_msgs.append(msg)
             elif explained_attr.data_validation_function is not None:
                 data_validation = explained_attr.data_validation_function(value)
@@ -105,7 +105,7 @@ class PossibleCustomAttributes:
             msg += "-" * 80 + "\n"
             msg_documentation = self.documentation()
 
-            all_msg = [msg]
+            all_msg = [msg]  # noqa
             all_msg.append(msg_documentation)
             msg = "\n".join(all_msg)
             raise FiatToGuiException(msg)
