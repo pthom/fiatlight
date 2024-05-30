@@ -75,6 +75,13 @@ def test_custom_attr_doc() -> None:
         """
     Available custom attributes for Foo:
     --------------------------------------------------------------------------------
+
+    Validation
+    --------------------------------------------------------------------------------
+    validate_value (object)            : Function to validate a parameter value (should return DataValidationResult.ok() .error() (default: None)
+
+    Custom attributes
+    --------------------------------------------------------------------------------
     xrange (tuple[int, int])           : Range for xrange (default: (0, 5))
 
     Validated attributes
@@ -83,14 +90,17 @@ def test_custom_attr_doc() -> None:
     """,
     )
 
-    example_usage = possible_custom_attrs.example_usage()
+    example_usage = possible_custom_attrs.example_usage("param")
     # print(example_usage)
     code_utils.assert_are_codes_equal(
         example_usage,
         """
-        xrange = (0, 5),
+        #  Validation
+        param__validate_value = None,
+        #  Custom attributes
+        param__xrange = (0, 5),
         #  Validated attributes
-        m = 3
+        param__m = 3
     """,
     )
 

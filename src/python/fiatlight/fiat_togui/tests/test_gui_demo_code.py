@@ -15,15 +15,18 @@ import typing
 import fiatlight
 
 @fiatlight.with_custom_attrs(
-    range = (0, 10),
-    edit_type = "input",
-    format = "%d",
-    width_em = 9.0,
-    knob_size_em = 2.5,
-    knob_steps = 10,
-    knob_no_input = True,
-    slider_no_input = False,
-    slider_logarithmic = False)
+    #  Validation
+    int_param__validate_value = None,
+    #  Custom attributes
+    int_param__range = (0, 10),
+    int_param__edit_type = "input",
+    int_param__format = "%d",
+    int_param__width_em = 9.0,
+    int_param__knob_size_em = 2.5,
+    int_param__knob_steps = 10,
+    int_param__knob_no_input = True,
+    int_param__slider_no_input = False,
+    int_param__slider_logarithmic = False)
 def f(int_param: int) -> int:
     return int_param
 
