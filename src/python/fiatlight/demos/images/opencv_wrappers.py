@@ -6,6 +6,7 @@ from enum import Enum
 import cv2
 
 
+@fl.enum_with_gui_registration
 class CannyApertureSize(Enum):
     APERTURE_3 = 3
     APERTURE_5 = 5
