@@ -14,7 +14,7 @@ NO_CUSTOM_ATTRIBUTES: CustomAttributesDict = {}
 
 
 def test_creation() -> None:
-    a: AnyDataWithGui[int] = _any_type_class_name_to_gui("int", NO_CUSTOM_ATTRIBUTES)
+    a: AnyDataWithGui[int] = _any_type_class_name_to_gui("builtins.int", NO_CUSTOM_ATTRIBUTES)
     assert a.callbacks.edit is not None
     assert a.callbacks.default_value_provider is not None
     assert a.callbacks.default_value_provider() == 0

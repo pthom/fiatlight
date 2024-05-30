@@ -524,23 +524,33 @@ class GuiFactories:
                 return factory.gui_factory
         raise ValueError(f"No factory found for typename {typename}")
 
+    def register_typing_new_type(self, type_: Any, factory: GuiFactory[Any]) -> None:
+        """Registers a factory for a type created with typing.NewType."""
+        full_typename = str(type_)
+
+        def matcher_function(tested_typename: Typename) -> bool:
+            return full_typename == tested_typename
+
+        new_type_doc = type_.__doc__
+        if new_type_doc.startswith("NewType creates simple"):
+            raise ValueError(
+                f"""
+            Please add a docstring to the NewType {full_typename}
+            Example:
+                {full_typename}.__doc__ = "MyType is a synonym for ... (NewType)"
+            """
+            )
+        self.register_matcher_factory(matcher_function, factory, type_, new_type_doc)
+
     def register_type(
         self, type_: Type[Any], factory: GuiFactory[Any], datatype_explanation: str | None = None
     ) -> None:
-        full_typename = str(type_)
-        full_typename_no_class = ""
-        if full_typename.startswith("<class '") and full_typename.endswith("'>"):
-            full_typename_no_class = full_typename[8:-2]
+        """Registers a factory for a type."""
+        assert isinstance(type_, type)
+        full_typename = fully_qualified_typename(type_)
 
         def matcher_function(tested_typename: Typename) -> bool:
-            return full_typename == tested_typename or full_typename_no_class == tested_typename
-
-        debug = False
-        if debug:
-            msg = f"register_type: {full_typename}"
-            if len(full_typename_no_class) > 0:
-                msg += f" (no class: {full_typename_no_class})"
-            logging.debug(msg)
+            return full_typename == tested_typename
 
         self.register_matcher_factory(matcher_function, factory, type_, datatype_explanation)
 
@@ -583,7 +593,7 @@ class GuiFactories:
             r.params.v_max = interval[1]
             return r
 
-        self.register_type(type_, factory)
+        self.register_typing_new_type(type_, factory)
 
     def register_bound_int(self, type_: Type[Any], interval: IntInterval) -> None:
         def factory() -> primitives_gui.IntWithGui:
@@ -593,7 +603,7 @@ class GuiFactories:
             r.params.v_max = interval[1]
             return r
 
-        self.register_type(type_, factory)
+        self.register_typing_new_type(type_, factory)
 
     def _FactoringSection(self) -> None:  # dummy method to create a section in the IDE  # noqa
         """
@@ -623,6 +633,10 @@ def gui_factories() -> GuiFactories:
 
 def register_type(type_: Type[Any], factory: GuiFactory[Any]) -> None:
     gui_factories().register_type(type_, factory)
+
+
+def register_typing_new_type(type_: Any, factory: GuiFactory[Any]) -> None:
+    gui_factories().register_typing_new_type(type_, factory)
 
 
 def register_enum(enum_class: type[Enum]) -> None:

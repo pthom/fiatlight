@@ -192,18 +192,18 @@ class VideoPathSaveWithGui(FilePathSaveWithGui):
 #                               Register all types
 ########################################################################################################################
 def _register_file_paths_types() -> None:
-    from fiatlight.fiat_togui.to_gui import register_type
+    from fiatlight.fiat_togui.to_gui import register_typing_new_type
 
-    register_type(FilePath, FilePathWithGui)
-    register_type(TextPath, TextPathWithGui)
-    register_type(ImagePath, ImagePathWithGui)
-    register_type(AudioPath, AudioPathWithGui)
-    register_type(VideoPath, VideoPathWithGui)
-    register_type(FilePath_Save, FilePathSaveWithGui)
-    register_type(TextPath_Save, TextPathSaveWithGui)
-    register_type(ImagePath_Save, ImagePathSaveWithGui)
-    register_type(AudioPath_Save, AudioPathSaveWithGui)
-    register_type(VideoPath_Save, VideoPathSaveWithGui)
+    register_typing_new_type(FilePath, FilePathWithGui)
+    register_typing_new_type(TextPath, TextPathWithGui)
+    register_typing_new_type(ImagePath, ImagePathWithGui)
+    register_typing_new_type(AudioPath, AudioPathWithGui)
+    register_typing_new_type(VideoPath, VideoPathWithGui)
+    register_typing_new_type(FilePath_Save, FilePathSaveWithGui)
+    register_typing_new_type(TextPath_Save, TextPathSaveWithGui)
+    register_typing_new_type(ImagePath_Save, ImagePathSaveWithGui)
+    register_typing_new_type(AudioPath_Save, AudioPathSaveWithGui)
+    register_typing_new_type(VideoPath_Save, VideoPathSaveWithGui)
 
 
 def text_from_file(path: TextPath) -> str | None:

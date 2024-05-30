@@ -197,15 +197,15 @@ def present_float1_arrays_as_plot() -> None:
     """Will cause FloatMatrix_Dim1 to be presented as a line plot of a 1D array in the GUI.
     This uses SimplePlotGui and ImPlot. If the array is small, scatter, stairs, and bars plots are also available
     """
-    from fiatlight.fiat_togui.to_gui import register_type
+    from fiatlight.fiat_togui.to_gui import register_typing_new_type
 
-    register_type(FloatMatrix_Dim1, SimplePlotGui)
+    register_typing_new_type(FloatMatrix_Dim1, SimplePlotGui)
 
 
 def present_float2_arrays_as_plot() -> None:
     """Will cause FloatMatrix_Dim2 to be presented as a line plot of a 2D array in the GUI.
     This uses SimplePlotGui and ImPlot. If the array is small, scatter and stairs plots are also available
     """
-    from fiatlight.fiat_togui.to_gui import register_type
+    from fiatlight.fiat_togui.to_gui import register_typing_new_type
 
-    register_type(FloatMatrix_Dim2, SimplePlotGui)
+    register_typing_new_type(FloatMatrix_Dim2, SimplePlotGui)
