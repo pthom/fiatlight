@@ -6,7 +6,8 @@ from fiatlight.fiat_types.base_types import (
 )
 from fiatlight.fiat_types.error_types import Error, ErrorValue, Unspecified, UnspecifiedValue
 from fiatlight.fiat_types.function_types import DataPresentFunction, DataEditFunction  # noqa
-from fiatlight.fiat_core.any_data_gui_callbacks import AnyDataGuiCallbacks
+from .any_data_gui_callbacks import AnyDataGuiCallbacks
+from .possible_custom_attributes import PossibleCustomAttributes
 from imgui_bundle import imgui
 from typing import Generic, Any, Type, final
 import logging
@@ -40,13 +41,16 @@ class AnyDataWithGui(Generic[DataType]):
     # Note: when using Optional[any registered type], this flag is automatically set to True.
     can_be_none: bool = False
 
+    Property:
+    ---------
     # Custom attributes that can be set by the user, to give hints to the GUI.
     # For example, with this function declaration,
     #         def f(x: int, y: int) -> int:
     #             return x + y
     #        f.x__range = (0, 10)
     # custom_attrs["range"] will be (0, 10) for the parameter x.
-    custom_attrs: dict[str, Any]
+    @property
+    custom_attrs -> dict[str, Any]
 
     """
 
@@ -78,9 +82,15 @@ class AnyDataWithGui(Generic[DataType]):
     # custom_attrs["range"] will be (0, 10) for the parameter x.
     _custom_attrs: dict[str, Any]
 
-    # ------------------------------------------------------------------------------------------------------------------
-    #            Initialization
-    # ------------------------------------------------------------------------------------------------------------------
+    @staticmethod
+    def _Init_Section() -> None:  # Dummy function to create a section in the IDE # noqa
+        """
+        # ------------------------------------------------------------------------------------------------------------------
+        #            Initialization
+        # ------------------------------------------------------------------------------------------------------------------
+        """
+        pass
+
     def __init__(self, data_type: Type[DataType]) -> None:
         """Initialize the AnyDataWithGui with a type, an unspecified value, and no callbacks."""
         self._type = data_type
@@ -88,16 +98,14 @@ class AnyDataWithGui(Generic[DataType]):
         self._custom_attrs = {}
 
     @staticmethod
-    def make_for_any() -> "AnyDataWithGui[Any]":
-        """Create an AnyDataWithGui for Any.
-        Use sparingly, as such a data type cannot do much, and is not very useful.
+    def _Value_Section() -> None:  # Dummy function to create a section in the IDE # noqa
         """
-        r = AnyDataWithGui[Any](type(Any))
-        return r
+        # ------------------------------------------------------------------------------------------------------------------
+        #            Value getter and setter + get_actual_value (which returns a DataType or raises an exception)
+        # ------------------------------------------------------------------------------------------------------------------
+        """
+        pass
 
-    # ------------------------------------------------------------------------------------------------------------------
-    #            Value getter and setter + get_actual_value (which returns a DataType or raises an exception)
-    # ------------------------------------------------------------------------------------------------------------------
     @property
     def value(self) -> DataType | Unspecified | Error:
         """The value of the data, accessed through the value property.
@@ -125,20 +133,64 @@ class AnyDataWithGui(Generic[DataType]):
         else:
             return self.value
 
+    @staticmethod
+    def _CustomAttributes_Section() -> None:  # Dummy function to create a section in the IDE # noqa
+        """
+        # ------------------------------------------------------------------------------------------------------------------
+        #            Custom Attributes
+        # ------------------------------------------------------------------------------------------------------------------
+        """
+        pass
+
+    @staticmethod
+    def possible_custom_attributes() -> PossibleCustomAttributes | None:
+        """Return the possible custom attributes for this type, if available.
+        Should be overridden in subclasses, when custom attributes are available.
+
+        It is strongly advised to return a class variable, or a global variable
+        to avoid creating a new instance each time this method is called.
+        """
+        return None
+
     @property
     def custom_attrs(self) -> dict[str, Any]:
         return self._custom_attrs
 
-    def merge_custom_attrs(self, custom_attrs: dict[str, Any] | None = None) -> None:
-        """Merge custom attributes with the existing ones. This is useful when we want to add custom attributes"""
-        if custom_attrs is not None:
-            self.custom_attrs.update(custom_attrs)
+    def merge_custom_attrs(self, custom_attrs: dict[str, Any]) -> None:
+        """Merge custom attributes with the existing ones"""
+        if len(custom_attrs) == 0:
+            return
+        possible_custom_attrs = self.possible_custom_attributes()
+        if possible_custom_attrs is None:
+            raise ValueError(
+                f'''
+            Cannot set custom attributes for {self._type} in class {self.__class__}
+                Please override the possible_custom_attributes() method in the class {self.__class__}
+                with the following signature:
+
+                    @staticmethod
+                    def possible_custom_attributes() -> PossibleCustomAttributes | None:
+                        """Return the possible custom attributes for this type, if available.
+
+                        It is strongly advised to return a class variable, or a global variable
+                        to avoid creating a new instance each time this method is called.
+                        """
+                        return None
+            '''
+            )
+
+        possible_custom_attrs.raise_exception_if_bad_custom_attrs(custom_attrs)
+        self.custom_attrs.update(custom_attrs)
         if self.callbacks.on_custom_attrs_changed is not None:
             self.callbacks.on_custom_attrs_changed(self.custom_attrs)
 
-    # ------------------------------------------------------------------------------------------------------------------
-    #            Call the Callbacks
-    # ------------------------------------------------------------------------------------------------------------------
+    def _Callbacks_Section(self) -> None:  # Dummy function to create a section in the IDE # noqa
+        """
+        # ------------------------------------------------------------------------------------------------------------------
+        #            Callbacks sections
+        # ------------------------------------------------------------------------------------------------------------------
+        """
+
     def call_edit(self) -> bool:
         """Call the edit callback. Returns True if the value has changed
         If the value is Unspecified or Error, it will return False and display a message in the GUI
@@ -155,9 +207,6 @@ class AnyDataWithGui(Generic[DataType]):
         else:
             return False
 
-    # ------------------------------------------------------------------------------------------------------------------
-    #            Callback utility functions: add callbacks from free functions
-    # ------------------------------------------------------------------------------------------------------------------
     def set_edit_callback(self, edit_callback: DataEditFunction[DataType]) -> None:
         """Helper function to set the edit callback from a free function"""
         self.callbacks.edit = edit_callback
@@ -170,9 +219,13 @@ class AnyDataWithGui(Generic[DataType]):
         if present_custom_popup_required is not None:
             self.callbacks.present_custom_popup_required = present_custom_popup_required
 
-    # ------------------------------------------------------------------------------------------------------------------
-    #            Serialization and deserialization
-    # ------------------------------------------------------------------------------------------------------------------
+    def _Serialization_Section(self) -> None:
+        """
+        # ------------------------------------------------------------------------------------------------------------------
+        #            Serialization and deserialization
+        # ------------------------------------------------------------------------------------------------------------------
+        """
+
     @final
     def save_to_dict(self, value: DataType | Unspecified | Error) -> JsonDict:
         """Serialize the value to a dictionary
@@ -226,9 +279,13 @@ class AnyDataWithGui(Generic[DataType]):
         else:
             raise ValueError(f"Cannot deserialize {json_data}")
 
-    # ------------------------------------------------------------------------------------------------------------------
-    #            Utilities
-    # ------------------------------------------------------------------------------------------------------------------
+    def _Utilities_Section(self) -> None:
+        """
+        # ------------------------------------------------------------------------------------------------------------------
+        #            Utilities
+        # ------------------------------------------------------------------------------------------------------------------
+        """
+
     def datatype_value_to_str(self, value: DataType) -> str:
         """Convert the value to a string
         Uses either the present_str callback, or the default str conversion
@@ -277,3 +334,16 @@ class AnyDataWithGui(Generic[DataType]):
         if doc.startswith("AnyDataWithGui:"):
             return None
         return doc
+
+
+class AnyDataWithGui_UnregisteredType(AnyDataWithGui[Any]):
+    """AnyDataWithGui_UnregisteredType: a GUI associated to a type that is not registered in the Fiatlight framework.
+
+    Use sparingly, as such a data type cannot do much, and is not very useful.
+    """
+
+    unregistered_typename: str
+
+    def __init__(self, typename: str) -> None:
+        super().__init__(type(Any))
+        self.unregistered_typename = typename

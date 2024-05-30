@@ -1,7 +1,7 @@
 """A simple example of plotting a curve using fiatlight
 
 We use FloatMatrix_Dim2 (which is an alias for np.ndarray[ShapeDim2, AnyFloat]) to represent a 2D array of floats.
-We instruct fiatlight to display 2D arrays as plots, by calling present_float2_arrays_as_plot().
+It will be presented as a plot with ImPlot / SimplePlotGui in the GUI.
 """
 
 from fiatlight.fiat_kits.fiat_array import FloatMatrix_Dim2

@@ -10,14 +10,14 @@ class _ExplainedSection:
 
 
 class PossibleCustomAttributes:
-    """PossibleCustomAttributes: a collection of possible custom attributes for a data type"""
+    """PossibleCustomAttributes: a collection of possible custom attributes for a AnyDataWithGui descendant type"""
 
+    parent_name: str  # name of the AnyDataWithGui descendant type
     _explained_attributes_or_section: list[DetailedVar[Any] | _ExplainedSection]
-    _widget_description: str
 
-    def __init__(self, widget_description: str) -> None:
+    def __init__(self, parent_name: str) -> None:
         self._explained_attributes_or_section = []
-        self._widget_description = widget_description
+        self.parent_name = parent_name
 
     def _explained_attributes(self) -> list[DetailedVar[Any]]:
         return [attr for attr in self._explained_attributes_or_section if isinstance(attr, DetailedVar)]
@@ -79,7 +79,7 @@ class PossibleCustomAttributes:
         error_message = self._get_error_message(custom_attrs)
 
         if error_message is not None:
-            msg = f"Encountered incorrect attributes for {self._widget_description} !\n"
+            msg = f"Encountered incorrect attributes for {self.parent_name} !\n"
             msg += "-" * 80 + "\n"
             msg += error_message + "\n"
             msg += "-" * 80 + "\n"
@@ -95,7 +95,7 @@ class PossibleCustomAttributes:
         width_name_and_type = 35
 
         lines = []  # noqa
-        lines.append(f"Here are the available custom attributes for {self._widget_description}:\n\n")
+        lines.append(f"Available custom attributes for {self.parent_name}:\n\n")
         lines.append("-" * width)
         for attr in self._explained_attributes_or_section:
             if isinstance(attr, _ExplainedSection):

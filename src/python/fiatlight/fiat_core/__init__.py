@@ -1,5 +1,5 @@
 from .any_data_gui_callbacks import AnyDataGuiCallbacks
-from .any_data_with_gui import AnyDataWithGui
+from .any_data_with_gui import AnyDataWithGui, AnyDataWithGui_UnregisteredType
 from .possible_custom_attributes import PossibleCustomAttributes
 from .param_with_gui import (
     ParamKind,
@@ -18,6 +18,7 @@ __all__ = [
     "AnyDataGuiCallbacks",
     # from any_data_with_gui
     "AnyDataWithGui",
+    "AnyDataWithGui_UnregisteredType",
     # from function_with_gui
     "OutputWithGui",
     "FunctionWithGui",

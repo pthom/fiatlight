@@ -7,7 +7,7 @@ import pydantic
 from fiatlight.fiat_types import UnspecifiedValue, DataType, CustomAttributesDict
 from fiatlight.fiat_types.base_types import JsonDict
 from fiatlight.fiat_togui import primitives_gui
-from fiatlight.fiat_core.any_data_with_gui import AnyDataWithGui
+from fiatlight.fiat_core.any_data_with_gui import AnyDataWithGui, AnyDataWithGui_UnregisteredType
 from fiatlight.fiat_core.param_with_gui import ParamKind, ParamWithGui
 from fiatlight.fiat_core.function_with_gui import FunctionWithGui
 from fiatlight.fiat_core.output_with_gui import OutputWithGui
@@ -245,7 +245,7 @@ def _any_typename_to_gui(typename: str, custom_attributes: CustomAttributesDict)
             return gui_factories().factor(enum_type_class_name, custom_attributes)
         else:
             logging.warning(f"Enum {typename}: enum not found in globals and locals")
-            return AnyDataWithGui.make_for_any()
+            return AnyDataWithGui_UnregisteredType(enum_type_class_name)
 
     if is_optional:
         inner_gui = _any_typename_to_gui(optional_inner_type_class_name, custom_attributes=custom_attributes)
@@ -256,7 +256,7 @@ def _any_typename_to_gui(typename: str, custom_attributes: CustomAttributesDict)
 
     # if we reach this point, we have no GUI implementation for the type
     _TO_GUI_CONTEXT.add_missing_gui_factory(typename)
-    return AnyDataWithGui.make_for_any()
+    return AnyDataWithGui_UnregisteredType(typename)
 
 
 def any_type_to_gui(type_: Type[Any], custom_attributes: CustomAttributesDict) -> AnyDataWithGui[Any]:
@@ -325,7 +325,7 @@ def _to_param_with_gui(
 
     data_with_gui: AnyDataWithGui[Any]
     if annotation is None or annotation is inspect.Parameter.empty:
-        data_with_gui = AnyDataWithGui.make_for_any()
+        data_with_gui = AnyDataWithGui_UnregisteredType(fully_qualified_annotation(annotation))
     else:
         param_typename = fully_qualified_annotation(annotation)
         data_with_gui = _any_typename_to_gui(param_typename, custom_attributes)
@@ -431,15 +431,15 @@ def _add_input_outputs_to_function_with_gui_globals_locals_captured(
 
     return_annotation = sig.return_annotation
     if return_annotation is inspect.Parameter.empty:
-        output_with_gui = AnyDataWithGui.make_for_any()
+        output_with_gui = AnyDataWithGui_UnregisteredType("inspect.Parameter.empty")
         output_with_gui.merge_custom_attrs(get_output_custom_attributes(custom_attributes))
         function_with_gui._outputs_with_gui.append(OutputWithGui(output_with_gui))
     else:
         return_annotation_str = fully_qualified_annotation(return_annotation)
         if return_annotation_str != "None":
             outputs_with_guis = _fn_outputs_with_gui(return_annotation_str, custom_attributes)
-            for i, output_with_gui in enumerate(outputs_with_guis):
-                function_with_gui._outputs_with_gui.append(OutputWithGui(output_with_gui))
+            for i, numbered_output_with_gui in enumerate(outputs_with_guis):
+                function_with_gui._outputs_with_gui.append(OutputWithGui(numbered_output_with_gui))
 
 
 # ----------------------------------------------------------------------------------------------------------------------

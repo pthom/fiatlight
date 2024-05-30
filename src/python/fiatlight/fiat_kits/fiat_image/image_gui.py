@@ -137,8 +137,6 @@ class ImagePresenter:
         self.size_when_only_display = ImVec2(200, 0)
 
     def handle_custom_attrs(self, custom_attrs: dict[str, Any]) -> None:
-        _IMAGE_POSSIBLE_ATTRIBUTES.raise_exception_if_bad_custom_attrs(custom_attrs)
-
         if "image_display_size" in custom_attrs:
             image_display_size = custom_attrs["image_display_size"]
 
@@ -304,6 +302,10 @@ class ImageWithGui(AnyDataWithGui[Image]):
         self.callbacks.load_gui_options_from_json = self.load_gui_options_from_json
         self.callbacks.present_custom_popup_possible = True
         self.callbacks.on_custom_attrs_changed = self.on_custom_attrs_changed
+
+    @staticmethod
+    def possible_custom_attributes() -> PossibleCustomAttributes | None:
+        return _IMAGE_POSSIBLE_ATTRIBUTES
 
     def on_custom_attrs_changed(self, custom_attrs: CustomAttributesDict) -> None:
         self.image_presenter.handle_custom_attrs(custom_attrs)

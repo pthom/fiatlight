@@ -93,8 +93,11 @@ class IntWithGui(AnyDataWithGui[int]):
         self.callbacks.clipboard_copy_possible = True
         self.callbacks.on_custom_attrs_changed = self._handle_custom_attrs
 
+    @staticmethod
+    def possible_custom_attributes() -> PossibleCustomAttributes | None:
+        return _POSSIBLE_INT_ATTRIBUTES
+
     def _handle_custom_attrs(self, custom_attrs: CustomAttributesDict) -> None:
-        _POSSIBLE_INT_ATTRIBUTES.raise_exception_if_bad_custom_attrs(custom_attrs)
         if "range" in self.custom_attrs:
             range_ = self.custom_attrs["range"]
             self.params.v_min = range_[0]
@@ -317,8 +320,11 @@ class FloatWithGui(AnyDataWithGui[float]):
         self.callbacks.present_str = self.present_str
         self.callbacks.on_custom_attrs_changed = self._handle_custom_attrs
 
+    @staticmethod
+    def possible_custom_attributes() -> PossibleCustomAttributes | None:
+        return _POSSIBLE_FLOAT_ATTRIBUTES
+
     def _handle_custom_attrs(self, custom_attrs: CustomAttributesDict) -> None:
-        _POSSIBLE_FLOAT_ATTRIBUTES.raise_exception_if_bad_custom_attrs(custom_attrs)
         if "range" in self.custom_attrs:
             range_ = self.custom_attrs["range"]
             if not isinstance(range_, tuple) or len(range_) != 2:
@@ -512,8 +518,11 @@ class BoolWithGui(AnyDataWithGui[bool]):
         self.callbacks.clipboard_copy_possible = True
         self.callbacks.on_custom_attrs_changed = self._handle_custom_attrs
 
+    @staticmethod
+    def possible_custom_attributes() -> PossibleCustomAttributes | None:
+        return _POSSIBLE_BOOL_ATTRIBUTES
+
     def _handle_custom_attrs(self, custom_attrs: CustomAttributesDict) -> None:
-        _POSSIBLE_BOOL_ATTRIBUTES.raise_exception_if_bad_custom_attrs(custom_attrs)
         if "edit_type" in self.custom_attrs:
             edit_type_ = self.custom_attrs["edit_type"]
             try:
