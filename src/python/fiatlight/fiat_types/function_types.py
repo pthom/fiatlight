@@ -58,3 +58,6 @@ class DataValidationResult:
 
 # A function that validates a DataType value. Can be used when the user tries to set a value.
 DataValidationFunction = Callable[[DataType], DataValidationResult]
+
+# DataValidationFunction with Any type
+DataValidationFunctionAny = Callable[[Any], DataValidationResult]

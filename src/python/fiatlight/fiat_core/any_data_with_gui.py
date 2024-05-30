@@ -4,7 +4,7 @@ from fiatlight.fiat_types.base_types import (
     JsonDict,
     DataType,
 )
-from fiatlight.fiat_types.error_types import Error, ErrorValue, Unspecified, UnspecifiedValue
+from fiatlight.fiat_types.error_types import Error, ErrorValue, Unspecified, UnspecifiedValue, InvalidValue
 from fiatlight.fiat_types.function_types import DataPresentFunction, DataEditFunction  # noqa
 from .any_data_gui_callbacks import AnyDataGuiCallbacks
 from .possible_custom_attributes import PossibleCustomAttributes
@@ -62,7 +62,7 @@ class AnyDataWithGui(Generic[DataType]):
 
     # The value of the data - can be a DataType, Unspecified, or Error
     # It is accessed through the value property, which triggers the on_change callback (if set)
-    _value: DataType | Unspecified | Error = UnspecifiedValue
+    _value: DataType | Unspecified | Error | InvalidValue[DataType] = UnspecifiedValue
 
     # Callbacks for the GUI
     # This is the heart of FiatLight: the GUI is defined by the callbacks.
@@ -107,7 +107,7 @@ class AnyDataWithGui(Generic[DataType]):
         pass
 
     @property
-    def value(self) -> DataType | Unspecified | Error:
+    def value(self) -> DataType | Unspecified | Error | InvalidValue[DataType]:
         """The value of the data, accessed through the value property.
         Warning: it might be an instance of `Unspecified` (user did not enter any value) or `Error` (an error was triggered)
         """
@@ -117,9 +117,24 @@ class AnyDataWithGui(Generic[DataType]):
     def value(self, new_value: DataType | Unspecified | Error) -> None:
         """Set the value of the data. This triggers the on_change callback (if set)"""
         self._value = new_value
-        if not isinstance(new_value, (Unspecified, Error)):
-            if self.callbacks.on_change is not None:
-                self.callbacks.on_change(new_value)
+        if isinstance(new_value, (Unspecified, Error)):
+            return
+
+        # Run validators and return if the value is invalid
+        if len(self.callbacks.validate_value) > 0:
+            error_messages = []
+            for validate_value in self.callbacks.validate_value:
+                validation_result = validate_value(new_value)
+                if not validation_result.is_valid:
+                    error_messages.append(validation_result.error_message)
+            if len(error_messages) > 0:
+                all_error_messages = " - ".join(error_messages)
+                self._value = InvalidValue(error_message=all_error_messages, invalid_value=new_value)
+                return
+
+        # Call on_change callback if everything is fine
+        if self.callbacks.on_change is not None:
+            self.callbacks.on_change(new_value)
 
     def get_actual_value(self) -> DataType:
         """Returns the actual value of the data, or raises an exception if the value is Unspecified or Error.
@@ -130,6 +145,8 @@ class AnyDataWithGui(Generic[DataType]):
             raise ValueError("Cannot get value of Unspecified")
         elif isinstance(self.value, Error):
             raise ValueError("Cannot get value of Error")
+        elif isinstance(self.value, InvalidValue):
+            raise ValueError(f"Invalid value: {self.value} ({self.value.error_message})")
         else:
             return self.value
 
@@ -200,9 +217,14 @@ class AnyDataWithGui(Generic[DataType]):
             imgui.text("Cannot edit Unspecified or Error")
             return False
         if self.callbacks.edit is not None:
+            if isinstance(self.value, InvalidValue):
+                changed, new_value = self.callbacks.edit(self.value.invalid_value)
+                if changed:
+                    self.value = new_value  # this will call the setter and trigger the validation
+                return changed
             changed, new_value = self.callbacks.edit(self.value)
             if changed:
-                self.value = new_value
+                self.value = new_value  # this will call the setter and trigger the validation
             return changed
         else:
             return False
@@ -227,7 +249,7 @@ class AnyDataWithGui(Generic[DataType]):
         """
 
     @final
-    def save_to_dict(self, value: DataType | Unspecified | Error) -> JsonDict:
+    def save_to_dict(self, value: DataType | Unspecified | Error | InvalidValue[DataType]) -> JsonDict:
         """Serialize the value to a dictionary
 
         Will call the save_to_dict callback if set, otherwise will use the default serialization, when available.
@@ -235,7 +257,9 @@ class AnyDataWithGui(Generic[DataType]):
 
         (This is how fiatlight saves the data to a JSON file)
         """
-        if isinstance(value, Unspecified):
+        if isinstance(value, (Unspecified, InvalidValue)):
+            # We do not save Unspecified or InvalidValue,
+            # and we do not differentiate between them in the saved JSON
             return {"type": "Unspecified"}
         elif isinstance(value, Error):
             return {"type": "Error"}

@@ -1,4 +1,4 @@
-from .error_types import Error, ErrorValue, Unspecified, UnspecifiedValue
+from .error_types import Error, ErrorValue, Unspecified, UnspecifiedValue, InvalidValue
 from .function_types import (
     Function,
     FunctionList,
@@ -7,6 +7,7 @@ from .function_types import (
     DataEditFunction,
     DataPresentFunction,
     DataValidationFunction,
+    DataValidationFunctionAny,
     DataValidationResult,
 )
 from .file_types import (
@@ -59,6 +60,7 @@ __all__ = [
     "ErrorValue",
     "Unspecified",
     "UnspecifiedValue",
+    "InvalidValue",
     # from function_types
     "Function",
     "FunctionList",
@@ -69,6 +71,7 @@ __all__ = [
     "DataEditFunction",
     "DataPresentFunction",
     "DataValidationFunction",
+    "DataValidationFunctionAny",
     "DataValidationResult",
     # from file_types
     "FilePath",

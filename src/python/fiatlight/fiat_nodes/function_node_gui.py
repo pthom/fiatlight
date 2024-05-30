@@ -30,7 +30,7 @@ Notes:
 
 from __future__ import annotations
 
-from fiatlight.fiat_types import Error, Unspecified, UnspecifiedValue, BoolFunction, JsonDict, ErrorValue
+from fiatlight.fiat_types import Error, Unspecified, UnspecifiedValue, BoolFunction, JsonDict, ErrorValue, InvalidValue
 from fiatlight.fiat_core import FunctionNode, FunctionNodeLink, AnyDataWithGui
 from fiatlight.fiat_config import FiatColorType, get_fiat_config
 from fiatlight.fiat_core.param_with_gui import ParamWithGui
@@ -789,11 +789,20 @@ class FunctionNodeGui:
             def fn_edit() -> bool:
                 changed = False
                 if data_callbacks.edit is not None:
-                    changed, new_value = data_callbacks.edit(value)
+                    if isinstance(value, InvalidValue):
+                        changed, new_value = data_callbacks.edit(value.invalid_value)
+                    else:
+                        changed, new_value = data_callbacks.edit(value)
                     if changed:
                         input_param.data_with_gui.value = new_value
                 else:
                     imgui.text("No editor")
+
+                if isinstance(value, InvalidValue):
+                    imgui.text_colored(
+                        get_fiat_config().style.color_as_vec4(FiatColorType.InvalidValue), value.info_error()
+                    )
+
                 return changed
 
             return fn_edit

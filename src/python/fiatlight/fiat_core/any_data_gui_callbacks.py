@@ -1,5 +1,5 @@
 from fiatlight.fiat_types.base_types import DataType, JsonDict, CustomAttributesDict
-from fiatlight.fiat_types.function_types import VoidFunction, BoolFunction
+from fiatlight.fiat_types.function_types import VoidFunction, BoolFunction, DataValidationResult
 from typing import Callable, Generic
 
 
@@ -104,6 +104,12 @@ class AnyDataGuiCallbacks(Generic[DataType]):
     # or other side effects.
     on_change: Callable[[DataType], None] | None = None
 
+    # validate_value (Optional)
+    # if provided, these functions will be called when the user tries to set a value.
+    # They should return a DataValidationResult.ok() if the value is valid,
+    # or a DataValidationResult.error() with an error message.
+    validate_value: list[Callable[[DataType], DataValidationResult]]
+
     # on_exit (Optional)
     # if provided, this function will be called when the application is closed.
     # Used in more advanced cases, typically when some resources need to be released.
@@ -155,3 +161,6 @@ class AnyDataGuiCallbacks(Generic[DataType]):
     # If False, the user can not copy the data to the clipboard
     clipboard_copy_possible: bool = False
     # ---------------------------------------------------------------------------------------------
+
+    def __init__(self) -> None:
+        self.validate_value = []

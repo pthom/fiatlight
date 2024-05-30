@@ -34,6 +34,8 @@ class FiatColorType(Enum):
     # Exception color
     ExceptionError = "ExceptionError"
 
+    InvalidValue = "InvalidValue"
+
 
 orange = ColorRgbaFloat((1.0, 0.8, 0.4, 1.0))
 blue = ColorRgbaFloat((0.5, 0.7, 1.0, 1.0))
@@ -43,6 +45,7 @@ red = ColorRgbaFloat((1.0, 0.4, 0.4, 1.0))
 grey = ColorRgbaFloat((0.5, 0.5, 0.5, 1.0))
 transparent_grey = ColorRgbaFloat((0.8, 0.8, 0.8, 0.4))
 white = ColorRgbaFloat((1.0, 1.0, 1.0, 1.0))
+yellow = ColorRgbaFloat((1.0, 1.0, 0.0, 1.0))
 
 
 class FiatStyle(BaseModel):
@@ -77,6 +80,8 @@ class FiatStyle(BaseModel):
             FiatColorType.DataclassMemberName: ColorRgbaFloat((0.7, 0.8, 0.7, 1.0)),
             # Exception color
             FiatColorType.ExceptionError: red,
+            # Invalid value
+            FiatColorType.InvalidValue: yellow,
         }
 
         # fill missing colors

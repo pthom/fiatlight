@@ -460,11 +460,12 @@ See the [architecture page](architecture) for the full architecture diagrams.
 from fiatlight.fiat_config import get_fiat_config
 from fiatlight.fiat_core.togui_exception import FiatToGuiException
 from fiatlight.fiat_types import UnspecifiedValue, ErrorValue, JsonDict, GuiType
+from fiatlight.fiat_types.error_types import Unspecified, Error, InvalidValue
 from fiatlight.fiat_core.any_data_with_gui import AnyDataWithGui
 from fiatlight.fiat_types.function_types import BoolFunction
 from fiatlight.fiat_core.param_with_gui import ParamWithGui, ParamKind
 from fiatlight.fiat_core.output_with_gui import OutputWithGui
-from typing import Any, List, final, Callable, Optional, Type, TypeAlias, Dict
+from typing import Any, List, final, Callable, Optional, Type, TypeAlias
 
 import logging
 
@@ -698,11 +699,18 @@ class FunctionWithGui:
         """
         pass
 
-    def __call__(self, *args: Any, **kwargs: Dict[str, Any]) -> Any:
-        """Call the function with the given arguments"""
-        if self._f_impl is None:
-            raise ValueError("FunctionWithGui: function self._f_impl is None")
-        return self._f_impl(*args, **kwargs)
+    # There is intentionally no __call__ function!
+    # To call the function, set its params via set_param_value, then call the invoke() function
+
+    def call_for_tests(self, **params: Any) -> Any:
+        """Call the function with the given parameters, for testing purposes"""
+        self._dirty = True
+        for name, value in params.items():
+            self.set_param_value(name, value)
+        self.invoke()
+        if self.nb_outputs() == 1:
+            return self.output().value
+        return tuple([output.data_with_gui.value for output in self._outputs_with_gui])
 
     def is_dirty(self) -> bool:
         """Return True if the function needs to be called, because the inputs have changed since the last call"""
@@ -792,6 +800,20 @@ class FunctionWithGui:
                 return param
         raise ValueError(f"Parameter {name} not found")
 
+    def param_gui(self, name: str) -> AnyDataWithGui[Any]:
+        """Return the input with the given name as a AnyDataWithGui[Any]"""
+        return self.param(name).data_with_gui
+
+    def set_param_value(self, name: str, value: Any) -> None:
+        """Set the value of the input with the given name
+        This is useful to set the value of an input programmatically, for example in tests.
+        """
+        for param in self._inputs_with_gui:
+            if param.name == name:
+                param.data_with_gui.value = value
+                return
+        raise ValueError(f"Parameter {name} not found")
+
     @staticmethod
     def _Outputs_Section() -> None:  # Dummy function to create a section in the IDE # noqa
         """
@@ -876,7 +898,7 @@ class FunctionWithGui:
 
         # if any of the inputs is an error or unspecified, we do not call the function
         all_params = positional_only_values + list(keyword_values.values())
-        if any(value is ErrorValue or value is UnspecifiedValue for value in all_params):
+        if any(isinstance(value, (Error, Unspecified, InvalidValue)) for value in all_params):
             for output_with_gui in self._outputs_with_gui:
                 output_with_gui.data_with_gui.value = UnspecifiedValue
             self._dirty = False

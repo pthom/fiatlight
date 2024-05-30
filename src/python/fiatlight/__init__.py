@@ -19,9 +19,9 @@ from fiatlight.fiat_togui import (
     register_base_model,
     base_model_with_gui_registration,
 )
-from fiatlight.fiat_utils import with_custom_attrs
 from fiatlight.fiat_utils import with_custom_attrs, add_custom_attrs
 from fiatlight.fiat_config import get_fiat_config
+from fiatlight.fiat_types import DataValidationResult
 
 
 def demo_assets_dir() -> str:
@@ -75,4 +75,6 @@ __all__ = [
     # from fiat_utils
     "with_custom_attrs",
     "add_custom_attrs",
+    # from fiat_types
+    "DataValidationResult",
 ]

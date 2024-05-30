@@ -1,5 +1,5 @@
 from fiatlight.fiat_config import get_fiat_config
-from fiatlight.fiat_types import DataType, Unspecified, Error, JsonDict
+from fiatlight.fiat_types import DataType, Unspecified, Error, JsonDict, InvalidValue
 from fiatlight.fiat_core import AnyDataWithGui
 from fiatlight.fiat_widgets import fiat_osd
 from imgui_bundle import hello_imgui, imgui, imgui_node_editor as ed  # noqa
@@ -119,7 +119,7 @@ class OptionalWithGui(AnyDataWithGui[DataType | None]):
                 return None
             else:
                 r = self.inner_gui.load_from_dict(json_data["value"])
-                assert not isinstance(r, (Unspecified, Error))
+                assert not isinstance(r, (Unspecified, Error, InvalidValue))
                 return r
         else:
             raise ValueError("Invalid JSON data for OptionalWithGui")

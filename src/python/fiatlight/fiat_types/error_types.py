@@ -1,3 +1,9 @@
+from dataclasses import dataclass
+
+from fiatlight.fiat_types.base_types import DataType
+from typing import Generic
+
+
 class Unspecified:
     """A marker for an unspecified value, used as a default value for AnyDataWithGui.
     It is akin to None, but it is used to signal that the value has not been set yet.
@@ -28,3 +34,21 @@ class Error:
 
 
 ErrorValue = Error(42)
+
+
+@dataclass
+class InvalidValue(Generic[DataType]):
+    """A marker for an invalid value, used as a default value for AnyDataWithGui.
+    It is akin to None, but it is used to differentiate between a None value
+    and a value that has been set to an invalid value by the user,
+    after a failed validation by a DataValidationFunction.
+    """
+
+    error_message: str
+    invalid_value: DataType
+
+    def info_error(self) -> str:
+        return self.error_message
+
+    def __str__(self) -> str:
+        return f"{self.invalid_value} (Invalid)"

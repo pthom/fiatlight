@@ -22,6 +22,16 @@ class PossibleCustomAttributes:
         self._explained_attributes_or_section = []
         self.parent_name = parent_name
 
+        # Add custom attributes for validation
+        self.add_explained_section("Validation")
+        self.add_explained_attribute(
+            name="validate_value",
+            explanation="Function to validate a parameter value (should return DataValidationResult.ok() .error()",
+            type_=object,  # Should be (Callable[[DataTYpe], DataValidationResult])
+            default_value=None,
+        )
+        self.add_explained_section("Custom attributes")
+
     def _explained_attributes(self) -> list[DetailedVar[Any]]:
         return [attr for attr in self._explained_attributes_or_section if isinstance(attr, DetailedVar)]
 
@@ -126,7 +136,7 @@ class PossibleCustomAttributes:
                 lines.append(attr.documentation(width_name_and_type))
         return "\n".join(lines)
 
-    def example_usage(self) -> str:
+    def example_usage(self, param_name: str) -> str:
         lines = []  # noqa
         for i, attr in enumerate(self._explained_attributes_or_section):
             if isinstance(attr, _ExplainedSection):
@@ -135,7 +145,7 @@ class PossibleCustomAttributes:
                 attr_default_value = str(attr.default_value)
                 if isinstance(attr.default_value, str):
                     attr_default_value = f'"{attr_default_value}"'
-                code = f"    {attr.name} = {attr_default_value}"
+                code = f"    {param_name}__{attr.name} = {attr_default_value}"
                 if i < len(self._explained_attributes_or_section) - 1:
                     code += ","
                 lines.append(code)

@@ -1,6 +1,6 @@
 from fiatlight.fiat_types.base_types import DataType
 from fiatlight.fiat_core.any_data_with_gui import AnyDataWithGui
-from fiatlight.fiat_types.error_types import Error, ErrorValue, Unspecified
+from fiatlight.fiat_types.error_types import Error, ErrorValue, Unspecified, InvalidValue
 from fiatlight.fiat_types.base_types import JsonDict
 
 from enum import Enum
@@ -32,11 +32,13 @@ class ParamWithGui(Generic[DataType]):
         if "data" in json_data:
             self.data_with_gui.value = self.data_with_gui.load_from_dict(json_data["data"])
 
-    def get_value_or_default(self) -> DataType | Unspecified | Error:
+    def get_value_or_default(self) -> DataType | Unspecified | Error | InvalidValue[DataType]:
         param_value = self.data_with_gui.value
         if isinstance(param_value, Error):
             return ErrorValue
         elif isinstance(param_value, Unspecified):
             return self.default_value
-        else:
-            return self.data_with_gui.value
+        elif isinstance(param_value, InvalidValue):
+            return param_value
+        else:  # if isinstance(param_value, DataType):
+            return param_value
