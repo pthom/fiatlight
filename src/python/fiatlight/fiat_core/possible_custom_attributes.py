@@ -128,13 +128,16 @@ class PossibleCustomAttributes:
 
     def example_usage(self) -> str:
         lines = []  # noqa
-        lines.append("(")
-        for attr in self._explained_attributes_or_section:
+        for i, attr in enumerate(self._explained_attributes_or_section):
             if isinstance(attr, _ExplainedSection):
                 lines.append(f"    #  {attr.explanation}")
             else:
-                code = f"    {attr.name} = {attr.default_value},"
+                attr_default_value = str(attr.default_value)
+                if isinstance(attr.default_value, str):
+                    attr_default_value = f'"{attr_default_value}"'
+                code = f"    {attr.name} = {attr_default_value}"
+                if i < len(self._explained_attributes_or_section) - 1:
+                    code += ","
                 lines.append(code)
-        lines.append(")")
         r = "\n".join(lines)
         return r

@@ -84,15 +84,13 @@ def test_custom_attr_doc() -> None:
     )
 
     example_usage = possible_custom_attrs.example_usage()
-    print(example_usage)
+    # print(example_usage)
     code_utils.assert_are_codes_equal(
         example_usage,
         """
-    (
         xrange = (0, 5),
         #  Validated attributes
-        m = 3,
-    )
+        m = 3
     """,
     )
 

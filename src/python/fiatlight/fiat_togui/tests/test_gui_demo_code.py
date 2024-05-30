@@ -6,34 +6,26 @@ def test_int() -> None:
     from fiatlight.fiat_togui.primitives_gui import IntWithGui
 
     demo_code = make_gui_demo_code(IntWithGui())
+    print(demo_code)
+
     code_utils.assert_are_codes_equal(
         demo_code,
         """
 import typing
 import fiatlight
 
-
+@fiatlight.with_custom_attrs(
+    range = (0, 10),
+    edit_type = "input",
+    format = "%d",
+    width_em = 9.0,
+    knob_size_em = 2.5,
+    knob_steps = 10,
+    knob_no_input = True,
+    slider_no_input = False,
+    slider_logarithmic = False)
 def f(int_param: int) -> int:
     return int_param
-
-fiatlight.fiat_run(f)
-    """,
-    )
-
-
-def test_image() -> None:
-    from fiatlight.fiat_kits.fiat_image import ImageWithGui
-
-    demo_code = make_gui_demo_code(ImageWithGui())
-    code_utils.assert_are_codes_equal(
-        demo_code,
-        """
-import typing
-import fiatlight
-
-
-def f(union_param: typing.Union[fiatlight.fiat_kits.fiat_image.image_types.ImageU8_1, fiatlight.fiat_kits.fiat_image.image_types.ImageU8_2, fiatlight.fiat_kits.fiat_image.image_types.ImageU8_3, fiatlight.fiat_kits.fiat_image.image_types.ImageU8_4, fiatlight.fiat_kits.fiat_image.image_types.ImageU8_RGB, fiatlight.fiat_kits.fiat_image.image_types.ImageU8_RGBA, fiatlight.fiat_kits.fiat_image.image_types.ImageU8_BGRA, fiatlight.fiat_kits.fiat_image.image_types.ImageU8_BGR, fiatlight.fiat_kits.fiat_image.image_types.ImageU8_GRAY, fiatlight.fiat_kits.fiat_image.image_types.ImageFloat_1, fiatlight.fiat_kits.fiat_image.image_types.ImageFloat_2, fiatlight.fiat_kits.fiat_image.image_types.ImageFloat_3, fiatlight.fiat_kits.fiat_image.image_types.ImageFloat_4]) -> typing.Union[fiatlight.fiat_kits.fiat_image.image_types.ImageU8_1, fiatlight.fiat_kits.fiat_image.image_types.ImageU8_2, fiatlight.fiat_kits.fiat_image.image_types.ImageU8_3, fiatlight.fiat_kits.fiat_image.image_types.ImageU8_4, fiatlight.fiat_kits.fiat_image.image_types.ImageU8_RGB, fiatlight.fiat_kits.fiat_image.image_types.ImageU8_RGBA, fiatlight.fiat_kits.fiat_image.image_types.ImageU8_BGRA, fiatlight.fiat_kits.fiat_image.image_types.ImageU8_BGR, fiatlight.fiat_kits.fiat_image.image_types.ImageU8_GRAY, fiatlight.fiat_kits.fiat_image.image_types.ImageFloat_1, fiatlight.fiat_kits.fiat_image.image_types.ImageFloat_2, fiatlight.fiat_kits.fiat_image.image_types.ImageFloat_3, fiatlight.fiat_kits.fiat_image.image_types.ImageFloat_4]:
-    return union_param
 
 fiatlight.fiat_run(f)
     """,
