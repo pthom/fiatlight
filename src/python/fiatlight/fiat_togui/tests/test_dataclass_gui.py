@@ -173,7 +173,7 @@ def test_base_model_with_custom_attributes() -> None:
     assert rot_gui.custom_attrs["range"] == (-180, 180)
 
     # 2. When using fiatlight machinery
-    gui2 = fiatlight.fiat_togui.to_type_with_gui(ImageEffect, NO_CUSTOM_ATTRIBUTES)
+    gui2 = fiatlight.fiat_togui.any_type_to_gui(ImageEffect, NO_CUSTOM_ATTRIBUTES)
     assert isinstance(gui2, BaseModelGui)
     rot_gui2 = gui2._parameters_with_gui[0].data_with_gui
     assert rot_gui2.custom_attrs["range"] == (-180, 180)

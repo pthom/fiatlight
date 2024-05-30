@@ -16,7 +16,7 @@ from .to_gui import (
     # Convert a type or data to a GUI
     # ===============================
     to_data_with_gui,
-    to_type_with_gui,
+    any_type_to_gui,
     # ==============================================
     # Factory used when dealing with editable graphs
     # ==============================================
@@ -25,6 +25,7 @@ from .to_gui import (
 from .explained_value_gui import edit_explained_value, make_explained_value_edit_callback
 from .file_types_gui import text_from_file, TextToFileGui
 from .file_types_gui import _register_file_paths_types
+from . import dataclass_examples  # noqa (this will register an example dataclass and BaseModel)
 
 _register_file_paths_types()
 
@@ -39,7 +40,7 @@ __all__ = [
     "register_base_model",
     "base_model_with_gui_registration",
     "to_data_with_gui",
-    "to_type_with_gui",
+    "any_type_to_gui",
     "FunctionWithGuiFactory",
     # from explained_value_gui
     "edit_explained_value",

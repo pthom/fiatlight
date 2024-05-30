@@ -1,9 +1,12 @@
-from fiatlight.fiat_togui.to_gui import _any_type_class_name_to_gui, to_data_with_gui
+import pytest
+
+from fiatlight.fiat_togui import to_gui
 from fiatlight.fiat_types import UnspecifiedValue, ErrorValue
 from fiatlight import FunctionWithGui
 from fiatlight.fiat_types import CustomAttributesDict
 
-from typing import Tuple, Optional
+from typing import Tuple, Optional, NewType
+import typing
 
 
 class Dummy:
@@ -13,15 +16,106 @@ class Dummy:
 NO_CUSTOM_ATTRIBUTES: CustomAttributesDict = {}
 
 
+def test_fully_qualified_name_to_gui() -> None:
+    assert to_gui.fully_qualified_typename(int) == "int"
+    assert to_gui.fully_qualified_typename(str) == "str"
+    assert to_gui.fully_qualified_typename(list) == "list"
+    from fiatlight.fiat_togui.tests.sample_enum import SampleEnumNotRegistered
+
+    assert (
+        to_gui.fully_qualified_typename(SampleEnumNotRegistered)
+        == "fiatlight.fiat_togui.tests.sample_enum.SampleEnumNotRegistered"
+    )
+
+    with pytest.raises(AssertionError):
+        to_gui.fully_qualified_typename(int | None)  # type: ignore
+
+
+def test_register_new_type() -> None:
+    from fiatlight.fiat_togui.primitives_gui import IntWithGui
+
+    EvenInt = NewType("EvenInt", int)
+
+    with pytest.raises(ValueError):
+        # fiatlight requires that the type is documented
+        to_gui.register_typing_new_type(EvenInt, IntWithGui)
+
+    EvenInt.__doc__ = "Even integer (synonym for int) (NewType)"
+    to_gui.register_typing_new_type(EvenInt, IntWithGui)
+
+
+def test_type_member_simple() -> None:
+    assert to_gui.any_type_to_gui(int, NO_CUSTOM_ATTRIBUTES)._type == int
+    assert to_gui.any_type_to_gui(float, NO_CUSTOM_ATTRIBUTES)._type == float
+    assert to_gui.any_type_to_gui(str, NO_CUSTOM_ATTRIBUTES)._type == str
+    assert to_gui.any_type_to_gui(bool, NO_CUSTOM_ATTRIBUTES)._type == bool
+
+
+def test_type_member_composed() -> None:
+    with pytest.raises(ValueError):
+        # We should not call any_composed_type_to_gui with a simple type
+        to_gui.any_composed_type_to_gui(int, NO_CUSTOM_ATTRIBUTES)
+
+    from fiatlight.fiat_togui.composite_gui import OptionalWithGui, ListWithGui
+
+    OptionalInt = Optional[int]
+    oi = to_gui.any_composed_type_to_gui(OptionalInt, NO_CUSTOM_ATTRIBUTES)
+    assert oi._type == typing.Optional[int]
+    assert isinstance(oi, OptionalWithGui)
+    assert oi.inner_gui._type == int
+
+    OptionalInt2 = int | None
+    oi2 = to_gui.any_composed_type_to_gui(OptionalInt2, NO_CUSTOM_ATTRIBUTES)
+    assert oi2._type == typing.Optional[int]
+    assert isinstance(oi2, OptionalWithGui)
+    assert oi2.inner_gui._type == int
+
+    ListInt = typing.List[int]
+    li = to_gui.any_composed_type_to_gui(ListInt, NO_CUSTOM_ATTRIBUTES)
+    assert li._type == typing.List[int]
+    assert isinstance(li, ListWithGui)
+    assert li.inner_gui._type == int
+
+    ListInt2 = list[int]
+    li2 = to_gui.any_composed_type_to_gui(ListInt2, NO_CUSTOM_ATTRIBUTES)
+    assert li2._type == typing.List[int]
+    assert isinstance(li2, ListWithGui)
+    assert li2.inner_gui._type == int
+
+    ListOptionalInt = list[int | None]
+    loi = to_gui.any_composed_type_to_gui(ListOptionalInt, NO_CUSTOM_ATTRIBUTES)
+    assert loi._type == typing.List[typing.Optional[int]]
+    assert isinstance(loi, ListWithGui)
+    assert loi.inner_gui._type == typing.Optional[int]
+
+
+def test_image_new_type_to_gui() -> None:
+    # Complex case:
+    # Images are handled by a Gui that can handle multiple types defined by NewType
+    from fiatlight.fiat_kits.fiat_image import ImageU8_3, ImageWithGui
+
+    gi = to_gui.any_typing_new_type_to_gui(ImageU8_3, NO_CUSTOM_ATTRIBUTES)
+
+    # gi._type is equal to
+    #    typing.Union[
+    #    fiatlight.fiat_kits.fiat_image.image_types.ImageU8_1,
+    #    fiatlight.fiat_kits.fiat_image.image_types.ImageU8_2,
+    #    fiatlight.fiat_kits.fiat_image.image_types.ImageU8_3,
+    #    fiatlight.fiat_kits.fiat_image.image_types.ImageU8_4,
+    #    ...]
+
+    assert isinstance(gi, ImageWithGui)
+
+
 def test_any_typeclass_to_data_with_gui() -> None:
-    d = _any_type_class_name_to_gui("Dummy", NO_CUSTOM_ATTRIBUTES)
+    d = to_gui._any_typename_to_gui("Dummy", NO_CUSTOM_ATTRIBUTES)
     assert d.callbacks.edit is None
     assert d.callbacks.default_value_provider is None
     assert d.callbacks.default_value_provider is None
 
 
 def test_any_value_to_data_with_gui() -> None:
-    a = to_data_with_gui(1, NO_CUSTOM_ATTRIBUTES)
+    a = to_gui.to_data_with_gui(1, NO_CUSTOM_ATTRIBUTES)
     assert a.value == 1
 
 

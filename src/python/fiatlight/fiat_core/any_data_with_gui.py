@@ -23,7 +23,7 @@ class AnyDataWithGui(Generic[DataType]):
 
     Members:
     --------
-    # The type of the data
+    # The type of the data, e.g. int, str, typing.List[int], typing.Tuple[int, str], typing.Optional[int], etc.
     _type: Type[DataType]
 
     # The value of the data - can be a DataType, Unspecified, or Error
@@ -53,7 +53,7 @@ class AnyDataWithGui(Generic[DataType]):
     # ------------------------------------------------------------------------------------------------------------------
     #            Members
     # ------------------------------------------------------------------------------------------------------------------
-    # The type of the data
+    # The type of the data, e.g. int, str, List[int], Tuple[int, str], Optional[int], etc.
     _type: Type[DataType]
 
     # The value of the data - can be a DataType, Unspecified, or Error

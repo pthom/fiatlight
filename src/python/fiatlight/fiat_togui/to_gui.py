@@ -84,12 +84,47 @@ def to_gui_context_info() -> str:
 
 
 def fully_qualified_typename(type_: Type[Any]) -> str:
+    """Returns the fully qualified name of a type.
+    For example:
+        fiatlight.fiat_kits.fiat_image.lut_functions.LutParams
+    """
     assert isinstance(type_, type)
     full_typename = f"{type_.__module__}.{type_.__qualname__}"
+    if full_typename.startswith("builtins."):
+        full_typename = full_typename[len("builtins.") :]
     return full_typename
 
 
-def _wip_extract_union_list(type_class_name: str) -> List[str]:
+def fully_qualified_complex_typename(type_: DataType) -> str:
+    """Returns the fully qualified name of a complex type (tuple, list, NewType, etc.)"""
+    assert not isinstance(type_, type)
+    return str(type_)
+
+
+def fully_qualified_typename_or_str(type_: DataType) -> str:
+    """Returns the fully qualified name of a type,
+    or the string representation of a complex type (tuple, list, NewType, etc.)"""
+    if isinstance(type_, type):
+        return fully_qualified_typename(type_)
+    else:
+        return fully_qualified_complex_typename(type_)
+
+
+def fully_qualified_annotation(annotation: Any) -> str:
+    """Returns the fully qualified name of an annotation, when possible"""
+    annotation_str = str(annotation)
+    uses_inner_type = "[" in annotation_str
+    if hasattr(annotation, "__module__") and hasattr(annotation, "__qualname__") and not uses_inner_type:
+        r = f"{annotation.__module__}.{annotation.__qualname__}"
+        if r.startswith("builtins."):
+            r = r[len("builtins.") :]
+        return r
+    else:
+        return str(annotation)
+
+
+def _extract_union_list(type_class_name: str) -> List[str]:
+    """Extract the list of types in a Union type."""
     if type_class_name.startswith("typing.Union[") and type_class_name.endswith("]"):
         inner_type_str = type_class_name[len("typing.Union[") : -1]
         # inner_type_strs = _parse_typeclasses_list(inner_type_str)
@@ -99,13 +134,14 @@ def _wip_extract_union_list(type_class_name: str) -> List[str]:
 
 
 def _extract_optional_typeclass(type_class_name: str) -> Tuple[bool, str]:
+    """Extract the inner type of an Optional type."""
     if type_class_name.startswith("typing.Optional[") and type_class_name.endswith("]"):
         return True, type_class_name[16:-1]
     if type_class_name.endswith(" | None"):
         return True, type_class_name[:-7]
 
     # If the type is a union of multiple types, and one of them is NoneType, we can convert it to Optional
-    union_list = _wip_extract_union_list(type_class_name)
+    union_list = _extract_union_list(type_class_name)
     if len(union_list) >= 2 and "NoneType" in union_list:
         union_list.remove("NoneType")
         union_str = ", ".join(union_list)
@@ -116,6 +152,7 @@ def _extract_optional_typeclass(type_class_name: str) -> Tuple[bool, str]:
 
 
 def _extract_enum_typeclass(type_class_name: str) -> Tuple[bool, str]:
+    """Extract the name of an enum type. Probably not useful anymore, since enum are registered manually."""
     # An enum type will be displayed as
     #     <enum 'EnumName'>
     # or
@@ -130,6 +167,7 @@ def _extract_enum_typeclass(type_class_name: str) -> Tuple[bool, str]:
 
 
 def _extract_list_typeclass(type_class_name: str) -> Tuple[bool, str]:
+    """Extract the inner type of a List type."""
     if type_class_name.startswith("typing.List[") and type_class_name.endswith("]"):
         return True, type_class_name[12:-1]
     elif type_class_name.startswith("List[") and type_class_name.endswith("]"):
@@ -167,6 +205,7 @@ def _parse_typeclasses_list(type_class_name: str) -> List[str]:
 
 
 def _extract_tuple_typeclasses(type_class_name: str) -> Tuple[bool, List[str]]:
+    """Extract the inner types of a Tuple type."""
     possible_tuple_names = ["typing.Tuple[", "Tuple[", "tuple["]
     for tuple_name in possible_tuple_names:
         if type_class_name.startswith(tuple_name) and type_class_name.endswith("]"):
@@ -176,65 +215,94 @@ def _extract_tuple_typeclasses(type_class_name: str) -> Tuple[bool, List[str]]:
     return False, []
 
 
-def _any_type_class_name_to_gui(type_class_name: str, custom_attributes: CustomAttributesDict) -> AnyDataWithGui[Any]:
-    global _TO_GUI_CONTEXT
-    _TO_GUI_CONTEXT.enqueue_typename(type_class_name)
+def _any_typename_to_gui(typename: str, custom_attributes: CustomAttributesDict) -> AnyDataWithGui[Any]:
+    """Central function to convert a type name to a GUI representation.
+    It handles simple types, enum, optional, list, tuple, etc.
+    """
 
-    # logging.warning(f"any_typeclass_to_gui: {type_class_name}")
-    if gui_factories().can_handle_typename(type_class_name):
-        return gui_factories().factor(type_class_name, custom_attributes)
+    # Note: typename can be a string like "int", "float", "str", "typing.List[int]", "typing.Optional[int]", etc.
+    # i.e. it can be a type name, or a composite type name (which is not really a type for Python runtime)
+    global _TO_GUI_CONTEXT
+    _TO_GUI_CONTEXT.enqueue_typename(typename)
+
+    # logging.warning(f"any_typeclass_to_gui: {typename}")
+    if gui_factories().can_handle_typename(typename):
+        return gui_factories().factor(typename, custom_attributes)
 
     # Remove the "<class '" and "'>", and retry
-    # (this is suspicious)
-    if type_class_name.startswith("<class '") and type_class_name.endswith("'>"):
-        type_class_name = type_class_name[8:-2]
+    # (this is suspicious, but we sometimes receive type names like "<class 'int'>")
+    if typename.startswith("<class '") and typename.endswith("'>"):
+        type_class_name = typename[8:-2]
         if gui_factories().can_handle_typename(type_class_name):
             return gui_factories().factor(type_class_name, custom_attributes)
 
-    is_optional, optional_inner_type_class_name = _extract_optional_typeclass(type_class_name)
-    is_enum, enum_type_class_name = _extract_enum_typeclass(type_class_name)
-    is_list, list_inner_type_class_name = _extract_list_typeclass(type_class_name)
+    is_optional, optional_inner_type_class_name = _extract_optional_typeclass(typename)
+    is_enum, enum_type_class_name = _extract_enum_typeclass(typename)
+    is_list, list_inner_type_class_name = _extract_list_typeclass(typename)
 
     if is_enum:
         if gui_factories().can_handle_typename(enum_type_class_name):
             return gui_factories().factor(enum_type_class_name, custom_attributes)
         else:
-            logging.warning(f"Enum {type_class_name}: enum not found in globals and locals")
+            logging.warning(f"Enum {typename}: enum not found in globals and locals")
             return AnyDataWithGui.make_for_any()
 
     if is_optional:
-        inner_gui = _any_type_class_name_to_gui(optional_inner_type_class_name, custom_attributes=custom_attributes)
+        inner_gui = _any_typename_to_gui(optional_inner_type_class_name, custom_attributes=custom_attributes)
         return OptionalWithGui(inner_gui)
     elif is_list:
-        inner_gui = _any_type_class_name_to_gui(list_inner_type_class_name, custom_attributes=custom_attributes)
+        inner_gui = _any_typename_to_gui(list_inner_type_class_name, custom_attributes=custom_attributes)
         return ListWithGui(inner_gui)
 
     # if we reach this point, we have no GUI implementation for the type
-    _TO_GUI_CONTEXT.add_missing_gui_factory(type_class_name)
+    _TO_GUI_CONTEXT.add_missing_gui_factory(typename)
     return AnyDataWithGui.make_for_any()
 
 
-def _any_type_class_to_gui(type_: type[Any], custom_attributes: CustomAttributesDict) -> AnyDataWithGui[Any]:
-    type_class_name = fully_qualified_typename(type_)
-    return _any_type_class_name_to_gui(type_class_name, custom_attributes)
+def any_type_to_gui(type_: Type[Any], custom_attributes: CustomAttributesDict) -> AnyDataWithGui[Any]:
+    """Converts a type to a GUI representation."""
+    typename = fully_qualified_typename(type_)
+    return _any_typename_to_gui(typename, custom_attributes)
+
+
+def any_composed_type_to_gui(type_: DataType, custom_attributes: CustomAttributesDict) -> AnyDataWithGui[Any]:
+    """Converts a complex type to a GUI representation.
+    By composed we mean a type composed of multiple types like:
+        - Optional[int]
+        - int | None
+        - List[int]
+        - Tuple[int, float]
+        - Union[int, float]
+        - int | float
+        etc.
+    """
+    if isinstance(type_, type):
+        raise ValueError("Use any_type_to_gui for simple types")
+    composed_typename = fully_qualified_complex_typename(type_)
+    r = _any_typename_to_gui(composed_typename, custom_attributes)
+    return r
+
+
+def any_typing_new_type_to_gui(type_: DataType, custom_attributes: CustomAttributesDict) -> AnyDataWithGui[Any]:
+    """Converts a type created with typing.NewType to a GUI representation."""
+    if isinstance(type_, type):
+        raise ValueError("Use any_type_to_gui for simple types")
+    composed_typename = fully_qualified_complex_typename(type_)
+    r = _any_typename_to_gui(composed_typename, custom_attributes)
+    return r
 
 
 def _fn_outputs_with_gui(type_class_name: str, fn_custom_attributes: CustomAttributesDict) -> List[AnyDataWithGui[Any]]:
+    """Convert the return type of a function to a (list of) GUI representation."""
     r = []
     is_tuple, inner_type_classes = _extract_tuple_typeclasses(type_class_name)
     if is_tuple:
         for idx_output, inner_type_class in enumerate(inner_type_classes):
             output_custom_attrs = get_output_custom_attributes(fn_custom_attributes, idx_output)
-            r.append(_any_type_class_name_to_gui(inner_type_class, custom_attributes=output_custom_attrs))
+            r.append(_any_typename_to_gui(inner_type_class, custom_attributes=output_custom_attrs))
     else:
         output_custom_attrs = get_output_custom_attributes(fn_custom_attributes)
-        r.append(_any_type_class_name_to_gui(type_class_name, custom_attributes=output_custom_attrs))
-    return r
-
-
-def to_type_with_gui(type_: DataType, custom_attributes: CustomAttributesDict) -> AnyDataWithGui[DataType]:
-    typename = str(type_)
-    r = _any_type_class_name_to_gui(typename, custom_attributes)
+        r.append(_any_typename_to_gui(type_class_name, custom_attributes=output_custom_attrs))
     return r
 
 
@@ -242,8 +310,9 @@ def to_data_with_gui(
     value: DataType,
     custom_attributes: CustomAttributesDict,
 ) -> AnyDataWithGui[DataType]:
-    type_class_name = str(type(value))
-    r = _any_type_class_name_to_gui(type_class_name, custom_attributes)
+    """Convert a value to a GUI representation."""
+    type_class_name = fully_qualified_typename_or_str(type(value))
+    r = _any_typename_to_gui(type_class_name, custom_attributes)
     r.value = value
     return r
 
@@ -251,13 +320,15 @@ def to_data_with_gui(
 def _to_param_with_gui(
     name: str, param: inspect.Parameter, custom_attributes: CustomAttributesDict
 ) -> ParamWithGui[Any]:
+    """Convert a function parameter to a GUI representation."""
     annotation = param.annotation
 
     data_with_gui: AnyDataWithGui[Any]
     if annotation is None or annotation is inspect.Parameter.empty:
         data_with_gui = AnyDataWithGui.make_for_any()
     else:
-        data_with_gui = _any_type_class_name_to_gui(str(annotation), custom_attributes)
+        param_typename = fully_qualified_annotation(annotation)
+        data_with_gui = _any_typename_to_gui(param_typename, custom_attributes)
 
     param_kind = ParamKind.PositionalOrKeyword
     if param.kind is inspect.Parameter.POSITIONAL_ONLY:
@@ -292,18 +363,21 @@ def _get_calling_module_name() -> str:
 
 
 def _get_input_param_custom_attributes(fn_attributes: JsonDict, param_name: str) -> JsonDict:
-    # Get the optional custom attributes for the parameter. For example:
-    #     def f(x: float):
-    #         return x
-    #
-    #    f.x__range = (0, 1)
-    #    f.x__type = "slider"
-    #
-    # Or
-    #    @fl.with_custom_attrs(x__range=(0, 1), x__type="slider")
-    #    def f(x: float):
-    #        return x
-    #
+    """Get the optional custom attributes for the parameter.
+    Those parameters are defined in the function attributes, and may be passed:
+
+    * either by manually adding attributes some time after the function definition:
+        def f(x: float):
+            return x
+
+       f.x__range = (0, 1)
+       f.x__type = "slider"
+
+    * or by using the with_custom_attrs decorator:
+       @fl.with_custom_attrs(x__range=(0, 1), x__type="slider")
+       def f(x: float):
+           return x
+    """
     r = {}
     for k, v in fn_attributes.items():
         if k.startswith(param_name + "__"):
@@ -312,10 +386,12 @@ def _get_input_param_custom_attributes(fn_attributes: JsonDict, param_name: str)
 
 
 def get_output_custom_attributes(fn_attributes: JsonDict, idx_output: int = 0) -> JsonDict:
-    # Get the optional custom attributes for the return value. For example:
-    #     @with_custom_attrs(return__range=(0, 1))
-    #     def f() -> float:
-    #         return 1.0
+    """Get the optional custom attributes for the return value.
+    For example:
+        @with_custom_attrs(return__range=(0, 1))
+        def f() -> float:
+            return 1.0
+    """
     r = {}
 
     if idx_output == 0:
@@ -335,6 +411,11 @@ def _add_input_outputs_to_function_with_gui_globals_locals_captured(
     signature_string: str | None,
     custom_attributes: CustomAttributesDict,
 ) -> None:
+    """Central function that is called by FunctionWithGui.__init__ to add the inputs and outputs to the function.
+
+    It analyzes the signature of the function, and adds the inputs and outputs to the function_with_gui.
+    """
+
     _TO_GUI_CONTEXT.enqueue_function(function_with_gui.name)
     f = function_with_gui._f_impl  # noqa
     assert f is not None
@@ -354,7 +435,7 @@ def _add_input_outputs_to_function_with_gui_globals_locals_captured(
         output_with_gui.merge_custom_attrs(get_output_custom_attributes(custom_attributes))
         function_with_gui._outputs_with_gui.append(OutputWithGui(output_with_gui))
     else:
-        return_annotation_str = str(return_annotation)
+        return_annotation_str = fully_qualified_annotation(return_annotation)
         if return_annotation_str != "None":
             outputs_with_guis = _fn_outputs_with_gui(return_annotation_str, custom_attributes)
             for i, output_with_gui in enumerate(outputs_with_guis):
@@ -399,10 +480,27 @@ def _lower_case_match(s: str | None, query: str | None) -> bool:
 
 @dataclass
 class _GuiFactoryWithMatcher(Generic[DataType]):
+    """_GuiFactoryWithMatcher represents the items that are stored by the Gui registry
+    It is conceptually a dataclass, but possesses methods that are used
+    to display the registry content as a nice table.
+    """
+
     fn_matcher: FnTypenameMatcher
     gui_factory: GuiFactory[Any]
     datatype: Type[DataType]  # might be NoneType for special cases like unions, and typename_prefix
     datatype_explanation: str | None = None
+
+    def sort_key_by_parent_module_then_name(self) -> tuple[str, str]:
+        # a sort key (unused at the moment)
+        def extract_module_and_name(typename: str) -> Tuple[str, str]:
+            parts = typename.rsplit(".", 1)
+            if len(parts) == 1:
+                return "", parts[0]
+            return parts[0], parts[1]
+
+        typename = str(self.datatype)
+        parent_module, type_name = extract_module_and_name(typename)
+        return (parent_module, type_name)
 
     def get_datatype_explanation(self) -> str:
         r = self.datatype_explanation
@@ -424,10 +522,21 @@ class _GuiFactoryWithMatcher(Generic[DataType]):
         ]
 
     def info_cells(self) -> list[str | None]:
-        datatype_str = "None" if self.datatype == NoneType else str(self.datatype)
+        factored_gui = self.gui_factory()
+
+        datatype_str = "None" if self.datatype == NoneType else fully_qualified_typename_or_str(self.datatype)
+        try:
+            if issubclass(self.datatype, Enum):
+                datatype_str = "(Enum) " + datatype_str
+            if issubclass(self.datatype, pydantic.BaseModel):
+                datatype_str = "(BaseModel) " + datatype_str
+            if dataclasses.is_dataclass(self.datatype):
+                datatype_str = "(dataclass) " + datatype_str
+        except TypeError:
+            pass
+
         datatype_explanation = self.get_datatype_explanation()
 
-        factored_gui = self.gui_factory()
         gui_typename = type(factored_gui).__name__
         gui_explanation = factored_gui.docstring_first_line() or ""
 
@@ -446,24 +555,9 @@ class _GuiFactoryWithMatcher(Generic[DataType]):
 
         return [cell1, cell2]
 
-    def matches_type_search(
-        self,
-        data_typename_query: Typename | None = None,
-        gui_typename_query: Typename | None = None,
-        explanation_query: str | None = None,
-    ) -> bool:
-        factored_gui_typename = type(self.gui_factory()).__name__
-
-        matches_data_typename_query = _lower_case_match(str(self.datatype), data_typename_query)
-        matches_gui_typename_query = _lower_case_match(factored_gui_typename, gui_typename_query)
-        matches_explanation_query = _lower_case_match(self.datatype_explanation, explanation_query)
-
-        all_match = matches_data_typename_query and matches_gui_typename_query and matches_explanation_query
-        return all_match
-
     def matches_query(self, query: str) -> bool:
         factored_gui_typename = type(self.gui_factory()).__name__
-        matches_data_typename_query = _lower_case_match(str(self.datatype), query)
+        matches_data_typename_query = _lower_case_match(fully_qualified_typename_or_str(self.datatype), query)
         matches_gui_typename_query = _lower_case_match(factored_gui_typename, query)
         matches_explanation_query = _lower_case_match(self.datatype_explanation, query)
 
@@ -472,6 +566,8 @@ class _GuiFactoryWithMatcher(Generic[DataType]):
 
 
 class GuiFactories:
+    """GuiFactories is the registry of all the factories that can convert a type to a GUI representation."""
+
     _factories: List[_GuiFactoryWithMatcher[Any]]
 
     def _InitSection(self) -> None:  # dummy method to create a section in the IDE  # noqa
@@ -492,12 +588,15 @@ class GuiFactories:
         """
 
     def info_factories(self, query: str | None = None) -> str:
+        """Returns a nice table listing detailed info about the factories in the registry."""
         if query is None:
             factories = self._factories
         else:
             factories = [f for f in self._factories if f.matches_query(query)]
         if len(factories) == 0:
             return "No factories found"
+
+        # factories = sorted(factories, key=_GuiFactoryWithMatcher.sort_by_parent_module_then_name)
 
         import tabulate
 
@@ -518,6 +617,7 @@ class GuiFactories:
         """
 
     def get_factory(self, typename: Typename) -> GuiFactory[Any]:
+        """Returns the factory that can convert a type to a GUI representation."""
         # We reverse the list to give priority to the last registered factories
         for factory in reversed(self._factories):
             if factory.fn_matcher(typename):
@@ -526,7 +626,7 @@ class GuiFactories:
 
     def register_typing_new_type(self, type_: Any, factory: GuiFactory[Any]) -> None:
         """Registers a factory for a type created with typing.NewType."""
-        full_typename = str(type_)
+        full_typename = fully_qualified_complex_typename(type_)
 
         def matcher_function(tested_typename: Typename) -> bool:
             return full_typename == tested_typename
@@ -555,6 +655,8 @@ class GuiFactories:
         self.register_matcher_factory(matcher_function, factory, type_, datatype_explanation)
 
     def register_factory_name_start_with(self, typename_prefix: Typename, factory: GuiFactory[Any]) -> None:
+        """Registers a factory for all types whose name starts with the given prefix."""
+
         def matcher_function(tested_typename: Typename) -> bool:
             return tested_typename.startswith(typename_prefix)
 
@@ -565,6 +667,7 @@ class GuiFactories:
         )
 
     def register_factory_union(self, typename_prefix: Typename, factory: GuiFactory[Any]) -> None:
+        """Registers a factory for a union of types whose name starts with the given prefix."""
         union_matcher = _make_union_matcher(typename_prefix)
         self.register_matcher_factory(
             union_matcher, factory, NoneType, "Union of types whose name starts with " + typename_prefix
@@ -577,15 +680,20 @@ class GuiFactories:
         datatype: Type[Any],
         datatype_explanation: str | None = None,
     ) -> None:
+        """Registers a factory for a type, with a custom matcher function."""
         self._factories.append(_GuiFactoryWithMatcher(matcher, factory, datatype, datatype_explanation))
 
     def register_enum(self, enum_class: type[Enum]) -> None:
+        """Registers an enum with an autogenerated GUI implementation."""
+
         def enum_gui_factory() -> EnumWithGui:
             return EnumWithGui(enum_class)
 
         self.register_type(enum_class, enum_gui_factory)
 
     def register_bound_float(self, type_: Type[Any], interval: FloatInterval) -> None:
+        """Registers a float type inside an interval (will use FloatWithGui)"""
+
         def factory() -> primitives_gui.FloatWithGui:
             r = primitives_gui.FloatWithGui()
             r.params.edit_type = primitives_gui.FloatEditType.slider
@@ -596,6 +704,8 @@ class GuiFactories:
         self.register_typing_new_type(type_, factory)
 
     def register_bound_int(self, type_: Type[Any], interval: IntInterval) -> None:
+        """Registers an int type inside an interval (will use IntWithGui)"""
+
         def factory() -> primitives_gui.IntWithGui:
             r = primitives_gui.IntWithGui()
             r.params.edit_type = primitives_gui.IntEditType.slider
@@ -613,11 +723,13 @@ class GuiFactories:
         """
 
     def factor(self, typename: Typename, custom_attributes: CustomAttributesDict) -> AnyDataWithGui[Any]:
+        """Converts a type name to a GUI representation."""
         r = self.get_factory(typename)()
         r.merge_custom_attrs(custom_attributes)
         return r
 
     def can_handle_typename(self, typename: Typename) -> bool:
+        """Returns True if the registry can handle the given type name."""
         for matcher in self._factories:
             if matcher.fn_matcher(typename):
                 return True
@@ -628,14 +740,17 @@ _GUI_FACTORIES = GuiFactories()
 
 
 def gui_factories() -> GuiFactories:
+    """Returns the global registry of factories that can convert a type to a GUI representation."""
     return _GUI_FACTORIES
 
 
 def register_type(type_: Type[Any], factory: GuiFactory[Any]) -> None:
+    """Register a type with its GUI implementation."""
     gui_factories().register_type(type_, factory)
 
 
 def register_typing_new_type(type_: Any, factory: GuiFactory[Any]) -> None:
+    """Register a type created with typing.NewType with its GUI implementation."""
     gui_factories().register_typing_new_type(type_, factory)
 
 
@@ -646,12 +761,13 @@ def register_enum(enum_class: type[Enum]) -> None:
 
 
 def enum_with_gui_registration(cls: Type[Enum]) -> Type[Enum]:
+    """Decorator to register an enum with its GUI implementation."""
     register_enum(cls)
     return cls
 
 
 def register_dataclass(dataclass_type: Type[DataclassLikeType], **kwargs) -> None:  # type: ignore
-    """Register a dataclass with its GUI implementation.
+    """Register a dataclass with its autogenerated GUI implementation.
     Note: you can also use the dataclass_with_gui_registration decorator."""
     from fiatlight.fiat_togui.dataclass_gui import DataclassGui
 
@@ -664,6 +780,8 @@ def register_dataclass(dataclass_type: Type[DataclassLikeType], **kwargs) -> Non
 
 # Decorators for registered dataclasses and pydantic models
 def dataclass_with_gui_registration(**kwargs) -> Callable[[Type[DataType]], Type[DataType]]:  # type: ignore
+    """Decorator to register a dataclass with its autogenerated GUI implementation."""
+
     def actual_decorator(cls: Type[DataType]) -> Type[DataType]:
         cls = dataclasses.dataclass(cls)  # First, create the dataclass
         register_dataclass(cls, **kwargs)
@@ -673,7 +791,7 @@ def dataclass_with_gui_registration(**kwargs) -> Callable[[Type[DataType]], Type
 
 
 def register_base_model(base_model_type: Type[DataclassLikeType], **kwargs) -> None:  # type: ignore
-    """Register a pydantic BaseModel with its GUI implementation.
+    """Register a pydantic BaseModel with its autogenerated GUI implementation.
     Note: you can also use the base_model_with_gui_registration decorator."""
     from fiatlight.fiat_togui.dataclass_gui import BaseModelGui
 
@@ -687,6 +805,8 @@ def register_base_model(base_model_type: Type[DataclassLikeType], **kwargs) -> N
 
 
 def base_model_with_gui_registration(**kwargs) -> Callable[[Type[pydantic.BaseModel]], Type[pydantic.BaseModel]]:  # type: ignore
+    """Decorator to register a pydantic BaseModel with its autogenerated GUI implementation."""
+
     def actual_decorator(cls: Type[pydantic.BaseModel]) -> Type[pydantic.BaseModel]:
         register_base_model(cls, **kwargs)
         return cls
@@ -695,10 +815,12 @@ def base_model_with_gui_registration(**kwargs) -> Callable[[Type[pydantic.BaseMo
 
 
 def register_bound_float(type_: Type[Any], interval: FloatInterval) -> None:
+    """Registers a float type inside an interval (will use FloatWithGui)"""
     gui_factories().register_bound_float(type_, interval)
 
 
 def register_bound_int(type_: Type[Any], interval: IntInterval) -> None:
+    """Registers an int type inside an interval (will use IntWithGui)"""
     gui_factories().register_bound_int(type_, interval)
 
 
@@ -706,6 +828,9 @@ def register_bound_int(type_: Type[Any], interval: IntInterval) -> None:
 #       register primitive types
 # ----------------------------------------------------------------------------------------------------------------------
 def _register_base_types() -> None:
+    """Registers the base types (int, float, str, etc.) with their GUI implementations.
+    This is called by default when importing this module.
+    """
     from fiatlight.fiat_types import fiat_number_types
     from fiatlight.fiat_togui import primitives_gui
 

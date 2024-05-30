@@ -1,11 +1,9 @@
-from typing import List, Optional
-
 from fiatlight.fiat_types import UnspecifiedValue
 from fiatlight.fiat_core import ParamKind, ParamWithGui, AnyDataWithGui
 from fiatlight.fiat_togui.to_gui import (
     to_data_with_gui,
-    _any_type_class_name_to_gui,
-    to_type_with_gui,
+    _any_typename_to_gui,
+    any_type_to_gui,
 )
 from fiatlight.fiat_types import CustomAttributesDict
 
@@ -14,7 +12,7 @@ NO_CUSTOM_ATTRIBUTES: CustomAttributesDict = {}
 
 
 def test_creation() -> None:
-    a: AnyDataWithGui[int] = _any_type_class_name_to_gui("builtins.int", NO_CUSTOM_ATTRIBUTES)
+    a: AnyDataWithGui[int] = _any_typename_to_gui("int", NO_CUSTOM_ATTRIBUTES)
     assert a.callbacks.edit is not None
     assert a.callbacks.default_value_provider is not None
     assert a.callbacks.default_value_provider() == 0
@@ -62,7 +60,7 @@ def test_pydantic_serialization() -> None:
     as_dict = a_gui.save_to_dict(a_gui.value)
     assert as_dict == {"type": "Pydantic", "value": {"x": 1, "y": "hello"}}
 
-    a2_gui = to_type_with_gui(A, NO_CUSTOM_ATTRIBUTES)
+    a2_gui = any_type_to_gui(A, NO_CUSTOM_ATTRIBUTES)
     a2_gui.value = a2_gui.load_from_dict(as_dict)
     assert isinstance(a2_gui.value, A)
     assert a2_gui.value == a
@@ -80,32 +78,8 @@ def test_pydantic_serialization() -> None:
     as_dict = b_gui.save_to_dict(b_gui.value)
     assert as_dict == {"type": "Pydantic", "value": {"a": {"x": 1, "y": "hello"}, "z": 3.14}}
 
-    b2_gui = to_type_with_gui(B, NO_CUSTOM_ATTRIBUTES)
+    b2_gui = any_type_to_gui(B, NO_CUSTOM_ATTRIBUTES)
     assert b2_gui.value is UnspecifiedValue
     b2_gui.value = b2_gui.load_from_dict(as_dict)
     assert isinstance(b2_gui.value, B)
     assert b2_gui.value == b
-
-
-def test_type_storage() -> None:
-    assert to_type_with_gui(int, NO_CUSTOM_ATTRIBUTES)._type == int  # type: ignore
-    assert to_type_with_gui(float, NO_CUSTOM_ATTRIBUTES)._type == float  # type: ignore
-    assert to_type_with_gui(str, NO_CUSTOM_ATTRIBUTES)._type == str  # type: ignore
-    assert to_type_with_gui(bool, NO_CUSTOM_ATTRIBUTES)._type == bool  # type: ignore
-
-    ListInt = List[int]
-    li = to_type_with_gui(ListInt, NO_CUSTOM_ATTRIBUTES)
-    assert li._type == ListInt  # type: ignore
-
-    OptionalInt = Optional[int]
-    oi = to_type_with_gui(OptionalInt, NO_CUSTOM_ATTRIBUTES)
-    assert oi._type == OptionalInt  # type: ignore
-
-    OptionalInt2 = int | None
-    oi2 = to_type_with_gui(OptionalInt2, NO_CUSTOM_ATTRIBUTES)
-    assert oi2._type == OptionalInt2  # type: ignore
-
-    from fiatlight.fiat_kits.fiat_image import ImageU8_3, Image
-
-    gi = to_type_with_gui(ImageU8_3, NO_CUSTOM_ATTRIBUTES)
-    assert gi._type == Image  # type: ignore
