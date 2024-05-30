@@ -14,3 +14,6 @@ priv_assets/
 .ipynb_checkpoints
 /fiatlight.*.json
 /*.ini
+.vscode/launch.json
+src/python/fiatlight/fiat_togui/tests/truc.py
+*.webp
