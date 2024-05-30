@@ -6,7 +6,7 @@ def test_int() -> None:
     from fiatlight.fiat_togui.primitives_gui import IntWithGui
 
     demo_code = make_gui_demo_code(IntWithGui())
-    print(demo_code)
+    # print(demo_code)
 
     code_utils.assert_are_codes_equal(
         demo_code,

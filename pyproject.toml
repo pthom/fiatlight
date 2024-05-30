@@ -48,4 +48,4 @@ repository = "https://github.com/pthom/fiatlight/"
 line-length = 120
 
 [project.scripts]
-fiatlight = "fiatlight.fiat_cli.fiatlight:main"
+fiatlight = "fiatlight.fiat_cli.fiatlight_cli:main"

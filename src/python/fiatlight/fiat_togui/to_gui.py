@@ -609,6 +609,21 @@ class GuiFactories:
         )
         return r
 
+    def run_gui_demo(self, gui_typename: str) -> None:
+        """Returns the info about a GUI type."""
+
+        for factory in self._factories:
+            factored_gui = factory.gui_factory()
+            if type(factored_gui).__name__ != gui_typename:
+                continue
+            else:
+                from fiatlight.fiat_togui.make_gui_demo_code import make_gui_demo_code
+
+                code = make_gui_demo_code(factored_gui)
+                print(code)
+                exec(code)
+                break
+
     def get_gui_info(self, gui_typename: str) -> str:
         """Returns the info about a GUI type."""
         from fiatlight.fiat_doc import code_utils

@@ -18,11 +18,17 @@ def gui_info(gui_typename: str) -> None:
     print(info)
 
 
+def run_gui_demo(gui_typename: str) -> None:
+    """Tries to run a GUI demo for a given type, with default custom attributes"""
+    _GUI_FACTORIES.run_gui_demo(gui_typename)
+
+
 def main() -> None:
     fire.Fire(
         {
             "types": types,
             "gui_info": gui_info,
+            "gui_demo": run_gui_demo,
         }
     )
 
