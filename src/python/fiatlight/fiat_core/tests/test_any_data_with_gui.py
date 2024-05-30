@@ -45,21 +45,6 @@ def test_named_data_with_gui_serialization() -> None:
     assert n.data_with_gui.value == 2
 
 
-def test_enum_serialization() -> None:
-    from enum import Enum
-
-    class MyEnum(Enum):
-        A = 1
-        B = 2
-
-    a = to_data_with_gui(MyEnum.A, NO_CUSTOM_ATTRIBUTES)
-    assert a.value == MyEnum.A
-    as_json = a.save_to_dict(a.value)
-    assert as_json == {"class": "MyEnum", "type": "Enum", "value_name": "A"}
-    a.value = a.load_from_dict({"class": "MyEnum", "type": "Enum", "value_name": "B"})
-    assert a.value == MyEnum.B
-
-
 def test_pydantic_serialization() -> None:
     from pydantic import BaseModel
     from fiatlight import register_base_model

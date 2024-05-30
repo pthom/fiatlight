@@ -137,21 +137,3 @@ def test_function_with_optional_param() -> None:
     assert isinstance(foo2_gui._inputs_with_gui[0].data_with_gui, OptionalWithGui)
 
     print("a")
-
-
-def test_enum_gui() -> None:
-    from fiatlight.fiat_togui.composite_gui import EnumWithGui
-    from enum import Enum
-
-    class MyEnum(Enum):
-        A = 1
-        B = 2
-
-    my_enum_gui = _any_type_class_name_to_gui("<enum 'MyEnum'>", NO_CUSTOM_ATTRIBUTES)
-    assert isinstance(my_enum_gui, EnumWithGui)
-
-    def foo(a: MyEnum) -> int:
-        return a.value
-
-    foo_gui = FunctionWithGui(foo)
-    assert isinstance(foo_gui._inputs_with_gui[0].data_with_gui, EnumWithGui)

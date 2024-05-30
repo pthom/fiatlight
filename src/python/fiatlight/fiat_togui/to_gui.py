@@ -83,6 +83,12 @@ def to_gui_context_info() -> str:
     return _TO_GUI_CONTEXT.info()
 
 
+def fully_qualified_typename(type_: Type[Any]) -> str:
+    assert isinstance(type_, type)
+    full_typename = f"{type_.__module__}.{type_.__qualname__}"
+    return full_typename
+
+
 def _wip_extract_union_list(type_class_name: str) -> List[str]:
     if type_class_name.startswith("typing.Union[") and type_class_name.endswith("]"):
         inner_type_str = type_class_name[len("typing.Union[") : -1]
@@ -206,6 +212,11 @@ def _any_type_class_name_to_gui(type_class_name: str, custom_attributes: CustomA
     # if we reach this point, we have no GUI implementation for the type
     _TO_GUI_CONTEXT.add_missing_gui_factory(type_class_name)
     return AnyDataWithGui.make_for_any()
+
+
+def _any_type_class_to_gui(type_: type[Any], custom_attributes: CustomAttributesDict) -> AnyDataWithGui[Any]:
+    type_class_name = fully_qualified_typename(type_)
+    return _any_type_class_name_to_gui(type_class_name, custom_attributes)
 
 
 def _fn_outputs_with_gui(type_class_name: str, fn_custom_attributes: CustomAttributesDict) -> List[AnyDataWithGui[Any]]:
@@ -393,32 +404,47 @@ class _GuiFactoryWithMatcher(Generic[DataType]):
     datatype: Type[DataType]  # might be NoneType for special cases like unions, and typename_prefix
     datatype_explanation: str | None = None
 
-    @staticmethod
-    def tabulate_info_headers() -> list[str]:
-        return ["Data Type", "Type Details", "Gui Type", "Gui Details"]
+    def get_datatype_explanation(self) -> str:
+        r = self.datatype_explanation
+        if r is None:
+            if self.datatype in (str, int, float, bool):
+                r = ""
+            else:
+                r = docstring_first_line(self.datatype) or ""
+                # Special case for NewType: we want invite the user to add a __doc__ to the NewType
+                if r.startswith("NewType creates simple"):  # extract from NewType docstring
+                    r = 'NewType(...). Add a docstring to the new type: MyType.__doc__ = "..."'
+        return r
 
     @staticmethod
-    def tabulate_max_widths() -> list[int | None]:
-        return [30, 30, 30, 30]
+    def tabulate_info_headers() -> list[str]:
+        return [
+            "Data Type",
+            "Gui Type",
+        ]
 
     def info_cells(self) -> list[str | None]:
         datatype_str = "None" if self.datatype == NoneType else str(self.datatype)
-
-        datatype_explanation = self.datatype_explanation
-        if datatype_explanation is None:
-            if self.datatype in (str, int, float, bool):
-                datatype_explanation = ""
-            else:
-                datatype_explanation = docstring_first_line(self.datatype) or ""
-                # Special case for NewType: we want invite the user to add a __doc__ to the NewType
-                if datatype_explanation.startswith("NewType creates simple"):  # extract from NewType docstring
-                    datatype_explanation = 'NewType(...). Add a docstring to the new type: MyType.__doc__ = "..."'
+        datatype_explanation = self.get_datatype_explanation()
 
         factored_gui = self.gui_factory()
         gui_typename = type(factored_gui).__name__
-        gui_docstring = factored_gui.docstring_first_line() or ""
+        gui_explanation = factored_gui.docstring_first_line() or ""
 
-        return [datatype_str, datatype_explanation, gui_typename, gui_docstring]
+        cell1 = datatype_str
+        if len(datatype_explanation) > 0:
+            cell1 += "\n  " + datatype_explanation
+
+        cell2 = gui_typename
+        if len(gui_explanation) > 0:
+            cell2 += "\n  " + gui_explanation
+
+        from fiatlight.fiat_utils.str_utils import text_wrap_preserve_eol
+
+        cell1 = text_wrap_preserve_eol(cell1, 60)
+        cell2 = text_wrap_preserve_eol(cell2, 60)
+
+        return [cell1, cell2]
 
     def matches_type_search(
         self,
@@ -476,12 +502,10 @@ class GuiFactories:
         import tabulate
 
         headers = _GuiFactoryWithMatcher.tabulate_info_headers()
-        max_widths = _GuiFactoryWithMatcher.tabulate_max_widths()
         cells = [f.info_cells() for f in factories]
         r = tabulate.tabulate(
             cells,
             headers=headers,
-            maxcolwidths=max_widths,
             tablefmt="grid",
         )
         return r
@@ -559,7 +583,7 @@ class GuiFactories:
             r.params.v_max = interval[1]
             return r
 
-        self.register_type(type_, factory, f"float between {interval[0]} and {interval[1]}")
+        self.register_type(type_, factory)
 
     def register_bound_int(self, type_: Type[Any], interval: IntInterval) -> None:
         def factory() -> primitives_gui.IntWithGui:
@@ -569,7 +593,7 @@ class GuiFactories:
             r.params.v_max = interval[1]
             return r
 
-        self.register_type(type_, factory, f"int between {interval[0]} and {interval[1]}")
+        self.register_type(type_, factory)
 
     def _FactoringSection(self) -> None:  # dummy method to create a section in the IDE  # noqa
         """

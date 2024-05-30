@@ -6,21 +6,21 @@ IntInterval: TypeAlias = Tuple[int, int]
 
 # Float types with specific ranges (bounds included)
 Float_0_1 = NewType("Float_0_1", float)  # 0 to 1
-Float_0_1.__doc__ = "synonym for float in [0, 1]"
+Float_0_1.__doc__ = "synonym for float in [0, 1] (NewType)"
 
 Float__1_1 = NewType("Float__1_1", float)  # -1 to 1
-Float__1_1.__doc__ = "synonym for float in [-1, 1]"
+Float__1_1.__doc__ = "synonym for float in [-1, 1] (NewType)"
 
 PositiveFloat = NewType("PositiveFloat", float)  # Any positive float ( strictly greater than 0)
-PositiveFloat.__doc__ = "synonym for float > 0 (strictly greater than 0)"
+PositiveFloat.__doc__ = "synonym for float > 0 (strictly greater than 0) (NewType)"
 
 # Int types with specific ranges (bounds included)
 Int_0_255 = NewType("Int_0_255", int)  # 0 to 255
-Int_0_255.__doc__ = "synonym for int in [0, 255]"
+Int_0_255.__doc__ = "synonym for int in [0, 255] (NewType)"
 
 # Time
 TimeSeconds = NewType("TimeSeconds", float)  # Time in seconds
-TimeSeconds.__doc__ = "Time in seconds (synonym for float)"
+TimeSeconds.__doc__ = "Time in seconds (synonym for float) (NewType)"
 
 
 def format_time_seconds(time_seconds: TimeSeconds, show_centiseconds: bool = False) -> str:

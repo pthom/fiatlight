@@ -1,14 +1,11 @@
 from imgui_bundle import implot, hello_imgui, imgui_knobs
 
 import numpy as np
-from typing import Any, Tuple
-
-# Type aliases for numpy arrays
-OneDim = Tuple[Any]  # Synonym for a 1D numpy array
-OneDimIntArray = np.ndarray[OneDim, np.dtype[np.int64]]  # Synonym for a 1D numpy array of integers
+from typing import Tuple
+from numpy.typing import NDArray
 
 
-def random_binomial(n: int = 50, p: float = 0.1) -> OneDimIntArray:
+def random_binomial(n: int = 50, p: float = 0.1) -> NDArray[np.int32]:
     """
     Make a binomial distribution.
 
@@ -20,7 +17,7 @@ def random_binomial(n: int = 50, p: float = 0.1) -> OneDimIntArray:
     return r
 
 
-def present_histogram(values: OneDimIntArray) -> None:
+def present_histogram(values: NDArray[np.int32]) -> None:
     if implot.begin_plot("Binomial distribution", hello_imgui.em_to_vec2(40, 25)):
         implot.plot_histogram("Binomial", values, bins=50)
         implot.end_plot()
