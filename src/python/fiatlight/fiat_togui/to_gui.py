@@ -537,7 +537,7 @@ class _GuiFactoryWithMatcher(Generic[DataType]):
 
         datatype_explanation = self.get_datatype_explanation()
 
-        gui_typename = type(factored_gui).__name__
+        gui_typename = fully_qualified_typename(type(factored_gui))
         gui_explanation = factored_gui.docstring_first_line() or ""
 
         cell1 = datatype_str
@@ -550,8 +550,8 @@ class _GuiFactoryWithMatcher(Generic[DataType]):
 
         from fiatlight.fiat_utils.str_utils import text_wrap_preserve_eol
 
-        cell1 = text_wrap_preserve_eol(cell1, 60)
-        cell2 = text_wrap_preserve_eol(cell2, 60)
+        cell1 = text_wrap_preserve_eol(cell1, 50)
+        cell2 = text_wrap_preserve_eol(cell2, 70)
 
         return [cell1, cell2]
 
@@ -632,6 +632,15 @@ class GuiFactories:
                 r += "\n"
                 r += code_utils.indent_code(doc_attr, 2)
                 r += "\n"
+
+            from fiatlight.fiat_togui.make_gui_demo_code import make_gui_demo_code
+
+            r += "\n"
+            r += "Code to test this GUI type:\n"
+            r += "----------------------------\n"
+            r += "```python\n"
+            r += make_gui_demo_code(factored_gui)
+            r += "```\n"
 
             return r
 
