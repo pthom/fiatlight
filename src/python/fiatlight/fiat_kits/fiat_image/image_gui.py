@@ -46,68 +46,75 @@ class _ImagePossibleAttributes(PossibleCustomAttributes):
 
         # Main attributes
         self.add_explained_section("Main attributes for the image viewer")
-        attr("only_display", bool, "Only display the image, no info displayed, no zoom, no pan (default is False)")
+        attr("only_display", bool, "Only display the image, no info displayed, no zoom, no pan", default_value=False)
         attr(
             "image_display_size",
             tuple,
-            "Initial size of the displayed image (width, height). One of them can be 0 (default is (200, 0))",
+            "Initial size of the displayed image (width, height). One of them can be 0",
+            default_value=(200, 0),
             tuple_types=(int, int),
         )
         attr(
             "zoom_key",
             str,
-            'Key to zoom in the image. All images with the same zoom key will be zoomed together (default is "z")',
+            "Key to zoom in the image. All images with the same zoom key will be zoomed together",
+            default_value="z",
         )
         attr(
             "is_color_order_bgr",
             bool,
             "Color order is BGR (default is True). OpenCV uses BGR by default, unfortunately.",
+            default_value=True,
         )
         attr(
             "can_resize",
             bool,
-            "Can resize the image by dragging the mouse at the bottom right corner (default is True)",
+            "Can resize the image by dragging the mouse at the bottom right corner",
+            default_value=True,
         )
 
         # Channels
         self.add_explained_section("Channels")
-        attr("show_channels", bool, "Show channels (default is False)")
-        attr("channel_layout_vertically", bool, "Layout channels vertically (default is False)")
+        attr("show_channels", bool, "Show channels", default_value=False)
+        attr("channel_layout_vertically", bool, "Layout channels vertically", default_value=False)
 
         # Zoom & Pan
         self.add_explained_section("Zoom & Pan")
-        attr("pan_with_mouse", bool, "Pan with mouse (default is True)")
-        attr("zoom_with_mouse_wheel", bool, "Zoom with mouse wheel (default is True)")
+        attr("pan_with_mouse", bool, "Pan with mouse", default_value=True)
+        attr("zoom_with_mouse_wheel", bool, "Zoom with mouse wheel", default_value=True)
 
         # Info on Image
         self.add_explained_section("Info displayed on image")
         attr(
             "show_school_paper_background",
             bool,
-            "Show school paper background, when the image is unzoomed (default is True)",
+            "Show school paper background, when the image is unzoomed",
+            default_value=True,
         )
-        attr("show_alpha_channel_checkerboard", bool, "Show alpha channel checkerboard (default is True)")
-        attr("show_grid", bool, "Show grid with the zoom level is high (default is True)")
-        attr("draw_values_on_zoomed_pixels", bool, "Draw values on pixels, when the zoom is high (default is True)")
+        attr("show_alpha_channel_checkerboard", bool, "Show alpha channel checkerboard", default_value=True)
+        attr("show_grid", bool, "Show grid with the zoom level is high", default_value=True)
+        attr("draw_values_on_zoomed_pixels", bool, "Draw values on pixels, when the zoom is high", default_value=True)
 
         # Info displayed under the image
         self.add_explained_section("Info displayed under the image")
-        attr("show_image_info", bool, "Show image info, i.e image size and type (default is True)")
+        attr("show_image_info", bool, "Show image info, i.e image size and type", default_value=True)
         attr(
             "show_pixel_info",
             bool,
-            "Show pixel info, i.e. show pixel value and position under the mouse (default is True)",
+            "Show pixel info, i.e. show pixel value and position under the mouse",
+            default_value=True,
         )
 
         # Control buttons under the image
         self.add_explained_section("Control buttons under the image")
-        attr("show_zoom_buttons", bool, "Show zoom buttons (default is True)")
-        attr("show_options_panel", bool, "Show options panel (default is True)")
-        attr("show_options_button", bool, "Show options button (default is True)")
+        attr("show_zoom_buttons", bool, "Show zoom buttons", default_value=True)
+        attr("show_options_panel", bool, "Show options panel", default_value=True)
+        attr("show_options_button", bool, "Show options button", default_value=True)
         attr(
             "show_inspect_button",
             bool,
-            "Show the inspect button, that enables to open a large version of image in the Image Inspector (default is True)",
+            "Show the inspect button, that enables to open a large version of image in the Image Inspector",
+            default_value=True,
         )
 
 

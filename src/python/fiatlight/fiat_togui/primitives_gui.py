@@ -20,19 +20,26 @@ ToggleConfig: TypeAlias = imgui_toggle.ToggleConfig
 class _PossibleIntAttributes(PossibleCustomAttributes):
     def __init__(self) -> None:
         super().__init__("IntWithGui")
-        self.add_explained_attribute("range", tuple, "Range of the integer", tuple_types=(int, int))
+        self.add_explained_attribute(
+            "range", tuple, "Range of the integer", tuple_types=(int, int), default_value=(0, 10)
+        )
         self.add_explained_attribute(
             "edit_type",
             str,
             "Type of the edit widget. Possible values: slider, input, drag, knob, slider_and_minus_plus",
+            default_value="input",
         )
-        self.add_explained_attribute("format", str, "Format string for the value")
-        self.add_explained_attribute("width_em", float, "Width of the widget in em")
-        self.add_explained_attribute("knob_size_em", float, "Size of the knob in em")
-        self.add_explained_attribute("knob_steps", int, "Number of steps in the knob")
-        self.add_explained_attribute("knob_no_input", bool, "Disable text input on knobs and sliders")
-        self.add_explained_attribute("slider_no_input", bool, "Disable text input on sliders")
-        self.add_explained_attribute("slider_logarithmic", bool, "Use a logarithmic scale for sliders")
+        self.add_explained_attribute("format", str, "Format string for the value", default_value="%d")
+        self.add_explained_attribute("width_em", float, "Width of the widget in em", default_value=9.0)
+        self.add_explained_attribute("knob_size_em", float, "Size of the knob in em", default_value=2.5)
+        self.add_explained_attribute("knob_steps", int, "Number of steps in the knob", default_value=10)
+        self.add_explained_attribute(
+            "knob_no_input", bool, "Disable text input on knobs and sliders", default_value=True
+        )
+        self.add_explained_attribute("slider_no_input", bool, "Disable text input on sliders", default_value=False)
+        self.add_explained_attribute(
+            "slider_logarithmic", bool, "Use a logarithmic scale for sliders", default_value=False
+        )
 
 
 _POSSIBLE_INT_ATTRIBUTES = _PossibleIntAttributes()
@@ -243,19 +250,26 @@ class IntWithGui(AnyDataWithGui[int]):
 class PossibleFloatAttributes(PossibleCustomAttributes):
     def __init__(self) -> None:
         super().__init__("FloatWithGui")
-        self.add_explained_attribute("range", tuple, "Range of the float", tuple_types=(float, float))
+        self.add_explained_attribute(
+            "range", tuple, "Range of the float", tuple_types=(float, float), default_value=(0.0, 10.0)
+        )
         self.add_explained_attribute(
             "edit_type",
             str,
             "Type of the edit widget. Possible values: slider, input, drag, knob, slider_float_any_range, slider_float_any_range_positive",
+            default_value="input",
         )
-        self.add_explained_attribute("format", str, "Format string for the value")
-        self.add_explained_attribute("width_em", float, "Width of the widget in em")
-        self.add_explained_attribute("knob_size_em", float, "Size of the knob in em")
-        self.add_explained_attribute("knob_steps", int, "Number of steps in the knob")
-        self.add_explained_attribute("knob_no_input", bool, "Disable text input on knobs and sliders")
-        self.add_explained_attribute("slider_no_input", bool, "Disable text input on sliders")
-        self.add_explained_attribute("slider_logarithmic", bool, "Use a logarithmic scale for sliders")
+        self.add_explained_attribute("format", str, "Format string for the value", default_value="%.3f")
+        self.add_explained_attribute("width_em", float, "Width of the widget in em", default_value=9.0)
+        self.add_explained_attribute("knob_size_em", float, "Size of the knob in em", default_value=2.5)
+        self.add_explained_attribute("knob_steps", int, "Number of steps in the knob", default_value=10)
+        self.add_explained_attribute(
+            "knob_no_input", bool, "Disable text input on knobs and sliders", default_value=False
+        )
+        self.add_explained_attribute("slider_no_input", bool, "Disable text input on sliders", default_value=False)
+        self.add_explained_attribute(
+            "slider_logarithmic", bool, "Use a logarithmic scale for sliders", default_value=False
+        )
 
 
 _POSSIBLE_FLOAT_ATTRIBUTES = PossibleFloatAttributes()
@@ -479,7 +493,9 @@ def make_positive_float_with_gui() -> AnyDataWithGui[float]:
 class _PossibleBoolAttributes(PossibleCustomAttributes):
     def __init__(self) -> None:
         super().__init__("BoolWithGui")
-        self.add_explained_attribute("edit_type", str, "Type of the edit widget. Possible values: checkbox, toggle")
+        self.add_explained_attribute(
+            "edit_type", str, "Type of the edit widget. Possible values: checkbox, toggle", default_value="checkbox"
+        )
 
 
 _POSSIBLE_BOOL_ATTRIBUTES = _PossibleBoolAttributes()

@@ -7,6 +7,7 @@ from .function_types import (
     DataEditFunction,
     DataPresentFunction,
     DataValidationFunction,
+    DataValidationResult,
 )
 from .file_types import (
     FilePath,
@@ -68,6 +69,7 @@ __all__ = [
     "DataEditFunction",
     "DataPresentFunction",
     "DataValidationFunction",
+    "DataValidationResult",
     # from file_types
     "FilePath",
     "ImagePath",

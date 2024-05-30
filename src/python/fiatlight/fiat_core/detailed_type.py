@@ -1,5 +1,7 @@
 from typing import Any, Generic, Optional
 import logging
+
+from fiatlight.fiat_types import Unspecified, UnspecifiedValue
 from fiatlight.fiat_types.base_types import DataType
 from fiatlight.fiat_types.function_types import DataValidationFunction
 
@@ -66,7 +68,7 @@ class DetailedType(Generic[DataType]):
         self.tuple_types = tuple_types
         self.list_inner_type = list_inner_type
 
-    def is_value_ok(self, value: Any) -> bool:
+    def is_value_type_ok(self, value: Any) -> bool:
         """Checks if the given value is valid according to the type and details."""
         if not _permissive_is_instance(value, self.type_):
             return False
@@ -113,6 +115,7 @@ class DetailedVar(Generic[DataType]):
     name: str
     type_: DetailedType[DataType]
     explanation: str
+    default_value: DataType | Unspecified = UnspecifiedValue
     data_validation_function: Optional[DataValidationFunction[DataType]]
 
     def __init__(
@@ -120,6 +123,7 @@ class DetailedVar(Generic[DataType]):
         name: str,
         type_: type[DataType],
         explanation: str,
+        default_value: DataType | Unspecified,
         *,
         tuple_types: Optional[tuple[type, ...]] = None,
         list_inner_type: Optional[type] = None,
@@ -127,6 +131,7 @@ class DetailedVar(Generic[DataType]):
     ) -> None:
         self.name = name
         self.explanation = explanation
+        self.default_value = default_value
         self.type_ = DetailedType(type_, tuple_types=tuple_types, list_inner_type=list_inner_type)
         self.data_validation_function = data_validation_function
 
@@ -134,14 +139,15 @@ class DetailedVar(Generic[DataType]):
         """Generates documentation for the variable."""
         name_and_type = f"{self.name} ({self.type_.type_str()})"
         name_and_type_padded = name_and_type.ljust(width_name_and_type)
-        return f"{name_and_type_padded}: {self.explanation}"
+        return f"{name_and_type_padded}: {self.explanation} (default: {self.default_value})"
 
     def is_value_ok(self, value: Any) -> bool:
         """Checks if the given value is valid."""
-        if not self.type_.is_value_ok(value):
+        if not self.type_.is_value_type_ok(value):
             return False
         if self.data_validation_function is not None:
-            return self.data_validation_function(value)
+            data_validation = self.data_validation_function(value)
+            return data_validation.is_valid
         return True
 
 
