@@ -609,6 +609,34 @@ class GuiFactories:
         )
         return r
 
+    def get_gui_info(self, gui_typename: str) -> str:
+        """Returns the info about a GUI type."""
+        from fiatlight.fiat_doc import code_utils
+
+        for factory in self._factories:
+            factored_gui = factory.gui_factory()
+            if type(factored_gui).__name__ != gui_typename:
+                continue
+
+            doc = factored_gui.__doc__
+
+            r = f"GUI type: {gui_typename}\n"
+            r += "=" * len(r) + "\n"
+            if doc is not None:
+                r += code_utils.indent_code(doc, 2)
+                r += "\n"
+
+            possible_custom_attributes = factored_gui.possible_custom_attributes()
+            if possible_custom_attributes is not None:
+                doc_attr = possible_custom_attributes.documentation()
+                r += "\n"
+                r += code_utils.indent_code(doc_attr, 2)
+                r += "\n"
+
+            return r
+
+        return f"No GUI found for {gui_typename}"
+
     def _RegisterFactoriesSection(self) -> None:  # dummy method to create a section in the IDE  # noqa
         """
         # ==================================================================================================================

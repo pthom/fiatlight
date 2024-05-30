@@ -63,16 +63,16 @@ class DetailedType(Generic[DataType]):
             raise ValueError("DetailedType: tuple_types can only be set for tuple types")
         if list_inner_type is not None and type_ != list:
             raise ValueError("DetailedType: list_inner_type can only be set for list types")
-        self._tuple_detailed_types = tuple_types
-        self._list_inner_type = list_inner_type
+        self.tuple_types = tuple_types
+        self.list_inner_type = list_inner_type
 
     def is_value_ok(self, value: Any) -> bool:
         """Checks if the given value is valid according to the type and details."""
         if not _permissive_is_instance(value, self.type_):
             return False
-        if self._tuple_detailed_types is not None:
+        if self.tuple_types is not None:
             return self._check_if_value_matches_tuple_type(value)
-        if self._list_inner_type is not None:
+        if self.list_inner_type is not None:
             return self._check_if_value_matches_list_type(value)
         return True
 
@@ -80,17 +80,17 @@ class DetailedType(Generic[DataType]):
         """Helper method to check tuple types."""
         if not isinstance(value, tuple) and not isinstance(value, list):
             return False
-        assert self._tuple_detailed_types is not None
-        if len(value) != len(self._tuple_detailed_types):
+        assert self.tuple_types is not None
+        if len(value) != len(self.tuple_types):
             return False
-        return all(_permissive_is_instance(v, t) for v, t in zip(value, self._tuple_detailed_types))
+        return all(_permissive_is_instance(v, t) for v, t in zip(value, self.tuple_types))
 
     def _check_if_value_matches_list_type(self, value: Any) -> bool:
         """Helper method to check list types."""
         if not isinstance(value, tuple) and not isinstance(value, list):
             return False
-        assert self._list_inner_type is not None
-        return all(_permissive_is_instance(v, self._list_inner_type) for v in value)
+        assert self.list_inner_type is not None
+        return all(_permissive_is_instance(v, self.list_inner_type) for v in value)
 
     def type_str(self) -> str:
         """Returns a string representation of the type."""

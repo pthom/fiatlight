@@ -95,7 +95,7 @@ class PossibleCustomAttributes:
         width_name_and_type = 35
 
         lines = []  # noqa
-        lines.append(f"Available custom attributes for {self.parent_name}:\n\n")
+        lines.append(f"Available custom attributes for {self.parent_name}:")
         lines.append("-" * width)
         for attr in self._explained_attributes_or_section:
             if isinstance(attr, _ExplainedSection):

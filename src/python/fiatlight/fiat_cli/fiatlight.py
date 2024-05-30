@@ -12,10 +12,17 @@ def types(query: str | None = None) -> None:
     print(info)
 
 
+def gui_info(gui_typename: str) -> None:
+    """Print the GUI info for a given type"""
+    info = _GUI_FACTORIES.get_gui_info(gui_typename)
+    print(info)
+
+
 def main() -> None:
     fire.Fire(
         {
             "types": types,
+            "gui_info": gui_info,
         }
     )
 
