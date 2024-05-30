@@ -24,6 +24,12 @@ def with_custom_attrs(**kwargs: Any) -> Callable[[FunctionType], FunctionType]:
     return decorator
 
 
+def add_custom_attrs(func: FunctionType, **kwargs: Any) -> FunctionType:
+    for key, value in kwargs.items():
+        setattr(func, key, value)
+    return func
+
+
 def test_fiatlight_custom_attrs() -> None:
     @with_custom_attrs(x__range=(0, 10), y__range=(0, 20))
     def f(x: int, y: int) -> int:

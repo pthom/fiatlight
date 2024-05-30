@@ -20,6 +20,7 @@ from fiatlight.fiat_togui import (
     base_model_with_gui_registration,
 )
 from fiatlight.fiat_utils import with_custom_attrs
+from fiatlight.fiat_utils import with_custom_attrs, add_custom_attrs
 from fiatlight.fiat_config import get_fiat_config
 
 
@@ -73,4 +74,5 @@ __all__ = [
     "get_fiat_config",
     # from fiat_utils
     "with_custom_attrs",
+    "add_custom_attrs",
 ]
