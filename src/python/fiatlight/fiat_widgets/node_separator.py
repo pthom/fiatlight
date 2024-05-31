@@ -12,8 +12,6 @@ GuiFunction = Callable[[], None]
 class NodeSeparatorParams:
     """Parameters for the node separator."""
 
-    # The parent node
-    parent_node: ed.NodeId | None = None
     # The text to display
     text: str = ""
     # Whether to show the collapse button
@@ -23,6 +21,9 @@ class NodeSeparatorParams:
     expanded: bool = True
     # Whether to show a button to toggle the collapse state of all inputs/outputs
     show_toggle_collapse_all_button: bool = False
+
+    # The parent node
+    parent_node: ed.NodeId | None = None
 
 
 @dataclass
@@ -34,12 +35,34 @@ class NodeSeparatorOutput:
     was_toggle_collapse_all_clicked: bool = False
 
 
+def node_separator_2(
+    text: str = "",
+    show_collapse_button: bool = False,
+    expanded: bool = True,
+    show_toggle_collapse_all_button: bool = False,
+    parent_node: ed.NodeId | None = None,
+) -> NodeSeparatorOutput:
+    params = NodeSeparatorParams(
+        text=text,
+        show_collapse_button=show_collapse_button,
+        expanded=expanded,
+        show_toggle_collapse_all_button=show_toggle_collapse_all_button,
+        parent_node=parent_node,
+    )
+    return node_separator(params)
+
+
 def node_separator(params: NodeSeparatorParams) -> NodeSeparatorOutput:
     """Create a separator, possibly with a collapse button and a button to toggle the collapse state of all inputs/outputs.
     :return: tuple(was_expand_state_changed, is_expanded)
     """
     from fiatlight.fiat_widgets import icons_fontawesome_6, fontawesome_6_ctx
     from fiatlight.fiat_widgets import fiat_osd
+
+    if params.parent_node is None:
+        from fiatlight.fiat_nodes.function_node_gui import get_current_function_node_id
+
+        params.parent_node = get_current_function_node_id()
 
     assert params.parent_node is not None
 

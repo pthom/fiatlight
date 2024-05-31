@@ -50,6 +50,13 @@ from typing import Dict, List, Any
 from dataclasses import dataclass
 
 
+_CURRENT_FUNCTION_NODE_ID: ed.NodeId | None = None
+
+
+def get_current_function_node_id() -> ed.NodeId | None:
+    return _CURRENT_FUNCTION_NODE_ID
+
+
 class FunctionNodeGui:
     """The GUI representation as a visual node for a FunctionNode
 
@@ -218,10 +225,12 @@ class FunctionNodeGui:
         pass
 
     def draw_node(self, unique_name: str) -> bool:
+        global _CURRENT_FUNCTION_NODE_ID
         inputs_changed: bool
         needs_refresh_for_heartbeat = self._heartbeat()
         with imgui_ctx.push_obj_id(self._function_node):
             with ed_ctx.begin_node(self._node_id):
+                _CURRENT_FUNCTION_NODE_ID = self._node_id
                 with imgui_ctx.begin_vertical("node_content"):
                     # Title and doc
                     with imgui_ctx.begin_horizontal("Title"):
