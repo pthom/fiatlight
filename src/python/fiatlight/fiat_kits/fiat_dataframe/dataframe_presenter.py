@@ -5,7 +5,7 @@ import pandas as pd
 from fiatlight.fiat_core.possible_custom_attributes import PossibleCustomAttributes
 from fiatlight.fiat_types import CustomAttributesDict, JsonDict
 from fiatlight.fiat_widgets.fontawesome6_ctx_utils import fontawesome_6_ctx, icons_fontawesome_6
-from imgui_bundle import imgui, imgui_ctx, hello_imgui
+from imgui_bundle import imgui, imgui_ctx, hello_imgui, immapp, imgui_node_editor as ed
 from typing import List
 
 
@@ -31,7 +31,8 @@ class DataFramePresenterParams(BaseModel):
     visible_columns: list[str] = Field(default_factory=list)
 
     # List defining the order in which columns should be displayed. If empty, the default order is used.
-    column_order: list[str] = Field(default_factory=list)
+    # Disabled: ImGui does not communicate back this info after reordering columns.
+    # column_order: list[str] = Field(default_factory=list)
 
     # Flag to enable or disable pagination.
     enable_pagination: bool = True
@@ -69,7 +70,7 @@ class DataFramePresenterParams(BaseModel):
         valid_columns = set(dataframe.columns)
 
         new_params.visible_columns = [col for col in self.visible_columns if col in valid_columns]
-        new_params.column_order = [col for col in self.column_order if col in valid_columns]
+        # new_params.column_order = [col for col in self.column_order if col in valid_columns]
         new_params.column_widths_em = {}
         for col, width in self.column_widths_em.items():
             if col in valid_columns:
@@ -82,7 +83,7 @@ class DataFramePresenterParams(BaseModel):
 
         if changed:
             self.visible_columns = new_params.visible_columns
-            self.column_order = new_params.column_order
+            # self.column_order = new_params.column_order
             self.column_widths_em = new_params.column_widths_em
             self.sort_by = new_params.sort_by
             self.filters = new_params.filters
@@ -155,12 +156,12 @@ class DataFramePresenter:
         paginated_dataframe = sorted_dataframe.iloc[start_idx:end_idx]
 
         # Begin the table
-        def show_table():
+        def show_table() -> None:
             # a lambda function to show the table, so that we can pass it to the widget_with_resize_handle
             table_outer_size = hello_imgui.em_to_vec2(*self.params.widget_size_em)
             table_flags = (
-                0  # imgui.TableFlags_.resizable.value | imgui.TableFlags_.sortable | imgui.TableFlags_.reorderable ?
-            )
+                imgui.TableFlags_.resizable.value | imgui.TableFlags_.reorderable.value
+            )  # | imgui.TableFlags_.sortable
             table_inner_width = 0.0  # Use the full width of the table
             if imgui.begin_table(
                 str_id="DataFrameTable",
@@ -185,11 +186,31 @@ class DataFramePresenter:
                         imgui.table_next_column()
                         imgui.text(str(row[col]))
 
+                # Extract column order and sizes from the ImGui Table, and save them to params
+                # column_order = []
+                column_widths = {}
+                for column_index in range(len(displayed_columns)):
+                    imgui.table_set_column_index(column_index)
+                    column_name = imgui.table_get_column_name(column_index)
+                    column_width = imgui.get_column_width(column_index)
+                    # column_order.append(column_name)
+                    column_widths[column_name] = column_width
+                # Save the extracted order and sizes to params
+                # self.params.column_order = column_order
+                self.params.column_widths_em = column_widths
+                # logging.warning(f"column_order: {column_order}")
+
                 # End the table
                 imgui.end_table()
 
+                if imgui.is_item_hovered():
+                    # logging.warning("disable_user_input_this_frame")
+                    ed.disable_user_input_this_frame()
+                # else:
+                #     logging.warning("enable_user_input_this_frame")
+
         # Draw the table lambda, with a resize handle
-        new_table_size_pixels = hello_imgui.widget_with_resize_handle("DataFrameTable", widget_gui_function=show_table)
+        new_table_size_pixels = immapp.widget_with_resize_handle_in_node_editor("DataFrameTable", show_table)  # type: ignore  #  noqa
         # update the widget size in em
         new_table_size_em = hello_imgui.pixels_to_em(new_table_size_pixels)
         self.params.widget_size_em = (new_table_size_em.x, new_table_size_em.y)
@@ -202,6 +223,8 @@ class DataFramePresenter:
 
                     # A spring to align the rest of the controls to the right
                     imgui.spring()
+
+                    imgui.push_button_repeat(True)
 
                     # Backward buttons
                     previous_button_enabled = start_idx > 0
@@ -227,6 +250,8 @@ class DataFramePresenter:
                     if imgui.button(icons_fontawesome_6.ICON_FA_FORWARD_FAST) and end_idx < total_rows:
                         self.params.current_page_start_idx = total_rows - self.params.rows_per_page
                     imgui.end_disabled()
+
+                    imgui.pop_button_repeat()
 
     def save_gui_options_to_json(self) -> JsonDict:
         # Here we should save the params to a JSON dict
