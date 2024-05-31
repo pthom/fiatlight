@@ -5,7 +5,7 @@ import pandas as pd
 from fiatlight.fiat_core.possible_custom_attributes import PossibleCustomAttributes
 from fiatlight.fiat_types import CustomAttributesDict, JsonDict
 from fiatlight.fiat_widgets.fontawesome6_ctx_utils import fontawesome_6_ctx, icons_fontawesome_6
-from imgui_bundle import imgui, imgui_ctx, hello_imgui, immapp, imgui_node_editor as ed
+from imgui_bundle import imgui, imgui_ctx, hello_imgui, immapp
 from fiatlight.fiat_widgets.fiat_osd import is_rendering_in_window  # noqa
 
 
@@ -28,11 +28,11 @@ class DataFramePresenterParams(BaseModel):
     column_widths_em: dict[str, float] = Field(default_factory=dict)
 
     # List of column names to be displayed. If empty, all columns are shown.
-    # Disabled / Postponed
+    # Postponed/disabled
     # visible_columns: list[str] = Field(default_factory=list)
 
     # List defining the order in which columns should be displayed. If empty, the default order is used.
-    # Postponed/disabled: ImGui does not communicate back this info after reordering columns.
+    # Postponed/disabled: ImGui does not seem to communicate back this info after reordering columns.
     # column_order: list[str] = Field(default_factory=list)
 
     # Number of rows to display per page when pagination is enabled.
@@ -111,6 +111,7 @@ class DataFramePresenter:
     # A cached version of the DataFrame to present
     # (I'm not sure that we need this cache, since present_custom receives the DataFrame as an argument)
     dataframe: pd.DataFrame
+    dataframe_original: pd.DataFrame  # unsorted, unfiltered, etc.
 
     def __init__(self) -> None:
         self.params = DataFramePresenterParams()
@@ -131,9 +132,10 @@ class DataFramePresenter:
         )
 
     def on_change(self, value: pd.DataFrame) -> None:
-        # We create a copy because we might change settings in the data frame
-        # (ordering, filtering, etc.)
-        self.dataframe = copy.copy(value)
+        # Remember the original data frame (this one won't be modified)
+        self.dataframe_original = value
+        # We create a copy because we might change settings in the data frame (ordering, filtering, etc.)
+        self.dataframe = copy.copy(self.dataframe_original)
 
     def on_custom_attrs_changed(self, custom_attrs: CustomAttributesDict) -> None:
         # Update the params with the custom attributes
@@ -197,12 +199,48 @@ class DataFramePresenter:
 
                     imgui.pop_button_repeat()
 
+    def _handle_table_sorting(self) -> None:
+        # Get the sort specs
+        sort_specs = imgui.table_get_sort_specs()
+        displayed_columns = self.dataframe.columns.tolist()
+        if sort_specs is not None:
+            if sort_specs.specs_dirty:
+                # Update the sort order
+                sort_order = []
+                for spec_idx in range(sort_specs.specs_count):
+                    spec = sort_specs.get_specs(spec_idx)
+                    col_name = displayed_columns[spec.column_index]
+                    ascending = spec.get_sort_direction() == imgui.SortDirection_.ascending.value
+                    no_sort = spec.get_sort_direction() == imgui.SortDirection_.none.value
+                    if not no_sort:
+                        sort_order.append((col_name, ascending))
+                self.params.sort_by = sort_order
+
+                # Sort the dataframe
+                if len(sort_order) > 0:
+                    self.dataframe.sort_values(
+                        by=[col for col, _ in sort_order], ascending=[asc for _, asc in sort_order], inplace=True
+                    )
+                else:
+                    # go back to the original order
+                    self.dataframe = copy.copy(self.dataframe_original)
+
+                sort_specs.specs_dirty = False
+
     def _show_table(self) -> None:
         displayed_columns = self.dataframe.columns.tolist()
 
         # a lambda function to show the table, so that we can pass it to the widget_with_resize_handle
         table_outer_size = hello_imgui.em_to_vec2(*self.params.widget_size_em)
-        table_flags = imgui.TableFlags_.resizable.value
+        table_flags = (
+            imgui.TableFlags_.resizable.value
+            | imgui.TableFlags_.hideable.value
+            | imgui.TableFlags_.context_menu_in_body.value
+            | imgui.TableFlags_.row_bg.value
+            | imgui.TableFlags_.sort_multi.value  # can sort on multiple columns
+            | imgui.TableFlags_.sort_tristate.value  # can come back to no sort
+            | imgui.TableFlags_.sortable.value
+        )
         # | imgui.TableFlags_.sortable | imgui.TableFlags_.reorderable.value
         table_inner_width = 0.0  # Use the full width of the table
         if imgui.begin_table(
@@ -216,7 +254,11 @@ class DataFramePresenter:
             for col in displayed_columns:
                 column_label = col
                 column_width = self.params.column_widths_em.get(col, 0.0)
-                imgui.table_setup_column(column_label, imgui.TableColumnFlags_.width_fixed.value, column_width)
+
+                column_flags = 0
+                column_flags |= imgui.TableColumnFlags_.width_fixed.value
+
+                imgui.table_setup_column(column_label, column_flags, column_width)
 
             # Create headers
             imgui.table_headers_row()
@@ -243,14 +285,14 @@ class DataFramePresenter:
             self.params.column_widths_em = column_widths
             # logging.warning(f"column_order: {column_order}")
 
+            # Handle sorting
+            self._handle_table_sorting()
+
             # End the table
             imgui.end_table()
 
-            if imgui.is_item_hovered():
-                # logging.warning("disable_user_input_this_frame")
-                ed.disable_user_input_this_frame()
-            # else:
-            #     logging.warning("enable_user_input_this_frame")
+            # if imgui.is_item_hovered():
+            #     ed.disable_user_input_this_frame()
 
     def _show_resizable_table(self) -> None:
         # Draw the table lambda, with a resize handle
