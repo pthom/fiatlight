@@ -1,5 +1,5 @@
 import fiatlight
-from fiatlight.fiat_togui.str_with_resizable_gui import StrWithGui  # noqa
+from fiatlight.fiat_togui.str_with_gui import StrWithGui  # noqa
 
 
 def main() -> None:

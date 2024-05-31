@@ -712,7 +712,7 @@ class ColorRgbFloatWithGui(AnyDataWithGui[ColorRgbFloat]):
 ########################################################################################################################
 def __register_python_types() -> None:
     from fiatlight.fiat_togui.to_gui import register_type
-    from .str_with_resizable_gui import StrWithGui
+    from .str_with_gui import StrWithGui
 
     register_type(int, IntWithGui)
     register_type(float, FloatWithGui)

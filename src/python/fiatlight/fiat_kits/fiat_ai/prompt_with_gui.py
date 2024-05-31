@@ -2,7 +2,7 @@ import fiatlight
 from fiatlight.fiat_types import JsonDict
 from fiatlight.fiat_core import AnyDataWithGui
 from fiatlight.fiat_widgets import fiat_osd, icons_fontawesome_6, fontawesome_6_ctx  # noqa
-from fiatlight.fiat_togui.str_with_resizable_gui import StrWithGui
+from fiatlight.fiat_togui.str_with_gui import StrWithGui
 from imgui_bundle import imgui, imgui_ctx
 from .prompt import Prompt
 
