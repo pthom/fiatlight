@@ -153,3 +153,10 @@ class PossibleCustomAttributes:
                 lines.append(code)
         r = "\n".join(lines)
         return r
+
+
+_DEFAULT_CUSTOM_ATTRS = PossibleCustomAttributes("")
+
+
+def default_custom_attrs() -> PossibleCustomAttributes:
+    return _DEFAULT_CUSTOM_ATTRS

@@ -14,7 +14,7 @@ def make_gui_demo_code(gui_instance: AnyDataWithGui[Any]) -> str:
     param_name = datatype_basename.lower() + "_param"
 
     def compute_custom_attrs_code() -> str:
-        possible_custom_attrs = gui_instance.possible_custom_attributes()
+        possible_custom_attrs = gui_instance.possible_custom_attributes_with_generic()
         if possible_custom_attrs is None:
             return ""
 

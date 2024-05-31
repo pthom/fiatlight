@@ -169,6 +169,16 @@ class AnyDataWithGui(Generic[DataType]):
         """
         return None
 
+    @final
+    def possible_custom_attributes_with_generic(self) -> PossibleCustomAttributes:
+        descendant_attrs = self.possible_custom_attributes()
+        if descendant_attrs is not None:
+            return descendant_attrs
+        else:
+            from fiatlight.fiat_core.possible_custom_attributes import default_custom_attrs
+
+            return default_custom_attrs()
+
     @property
     def custom_attrs(self) -> dict[str, Any]:
         return self._custom_attrs
@@ -177,7 +187,7 @@ class AnyDataWithGui(Generic[DataType]):
         """Merge custom attributes with the existing ones"""
         if len(custom_attrs) == 0:
             return
-        possible_custom_attrs = self.possible_custom_attributes()
+        possible_custom_attrs = self.possible_custom_attributes_with_generic()
         if possible_custom_attrs is None:
             raise ValueError(
                 f'''

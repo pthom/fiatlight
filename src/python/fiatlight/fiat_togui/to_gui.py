@@ -659,7 +659,7 @@ class GuiFactories:
                 r += code_utils.indent_code(doc, 2)
                 r += "\n"
 
-            possible_custom_attributes = factored_gui.possible_custom_attributes()
+            possible_custom_attributes = factored_gui.possible_custom_attributes_with_generic()
             if possible_custom_attributes is not None:
                 doc_attr = possible_custom_attributes.documentation()
                 r += "\n"
