@@ -172,12 +172,20 @@ class AnyDataWithGui(Generic[DataType]):
     @final
     def possible_custom_attributes_with_generic(self) -> PossibleCustomAttributes:
         descendant_attrs = self.possible_custom_attributes()
-        if descendant_attrs is not None:
-            return descendant_attrs
-        else:
+        if descendant_attrs is None:
             from fiatlight.fiat_core.possible_custom_attributes import default_custom_attrs
 
-            return default_custom_attrs()
+            descendant_attrs = default_custom_attrs()
+
+        # Add generic attributes (for all types)
+        descendant_attrs.add_explained_section("Generic attributes")
+        descendant_attrs.add_explained_attribute(
+            name="validate_value",
+            explanation="Function to validate a parameter value (should return DataValidationResult.ok() .error()",
+            type_=object,  # Should be (Callable[[DataTYpe], DataValidationResult])
+            default_value=None,
+        )
+        return descendant_attrs
 
     @property
     def custom_attrs(self) -> dict[str, Any]:

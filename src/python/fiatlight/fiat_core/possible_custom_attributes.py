@@ -22,16 +22,6 @@ class PossibleCustomAttributes:
         self._explained_attributes_or_section = []
         self.parent_name = parent_name
 
-        # Add custom attributes for validation
-        self.add_explained_section("Validation")
-        self.add_explained_attribute(
-            name="validate_value",
-            explanation="Function to validate a parameter value (should return DataValidationResult.ok() .error()",
-            type_=object,  # Should be (Callable[[DataTYpe], DataValidationResult])
-            default_value=None,
-        )
-        self.add_explained_section("Custom attributes")
-
     def _explained_attributes(self) -> list[DetailedVar[Any]]:
         return [attr for attr in self._explained_attributes_or_section if isinstance(attr, DetailedVar)]
 
