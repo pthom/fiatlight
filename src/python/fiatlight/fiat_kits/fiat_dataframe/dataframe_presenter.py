@@ -28,7 +28,7 @@ class DataFramePresenterParams(BaseModel):
     column_widths_em: dict[str, float] = Field(default_factory=dict)
 
     # List of column names to be displayed. If empty, all columns are shown.
-    visible_columns: list[str] = Field(default_factory=list)
+    # visible_columns: list[str] = Field(default_factory=list)
 
     # List defining the order in which columns should be displayed. If empty, the default order is used.
     # Disabled: ImGui does not communicate back this info after reordering columns.
@@ -69,7 +69,7 @@ class DataFramePresenterParams(BaseModel):
 
         valid_columns = set(dataframe.columns)
 
-        new_params.visible_columns = [col for col in self.visible_columns if col in valid_columns]
+        # new_params.visible_columns = [col for col in self.visible_columns if col in valid_columns]
         # new_params.column_order = [col for col in self.column_order if col in valid_columns]
         new_params.column_widths_em = {}
         for col, width in self.column_widths_em.items():
@@ -82,7 +82,7 @@ class DataFramePresenterParams(BaseModel):
         changed = new_params.dict() != self.dict()
 
         if changed:
-            self.visible_columns = new_params.visible_columns
+            # self.visible_columns = new_params.visible_columns
             # self.column_order = new_params.column_order
             self.column_widths_em = new_params.column_widths_em
             self.sort_by = new_params.sort_by
@@ -135,10 +135,11 @@ class DataFramePresenter:
 
         # Compute displayed columns
         displayed_columns: List[str]
-        if len(self.params.visible_columns) > 0:
-            displayed_columns = self.params.visible_columns
-        else:
-            displayed_columns = self.data_frame.columns.tolist()  # Convert to list
+        # if len(self.params.visible_columns) > 0:
+        #     displayed_columns = self.params.visible_columns
+        # else:
+        #     displayed_columns = self.data_frame.columns.tolist()
+        displayed_columns = self.data_frame.columns.tolist()
 
         # Apply sorting
         sorted_dataframe = self.data_frame
