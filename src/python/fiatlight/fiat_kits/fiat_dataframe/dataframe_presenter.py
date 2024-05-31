@@ -6,7 +6,7 @@ from fiatlight.fiat_core.possible_custom_attributes import PossibleCustomAttribu
 from fiatlight.fiat_types import CustomAttributesDict, JsonDict
 from fiatlight.fiat_widgets.fontawesome6_ctx_utils import fontawesome_6_ctx, icons_fontawesome_6
 from imgui_bundle import imgui, imgui_ctx, hello_imgui, immapp, imgui_node_editor as ed
-from typing import List
+from fiatlight.fiat_widgets.fiat_osd import is_rendering_in_window  # noqa
 
 
 class DataFramePossibleCustomAttributes(PossibleCustomAttributes):
@@ -22,23 +22,23 @@ _DATAFRAME_POSSIBLE_CUSTOM_ATTRIBUTES = DataFramePossibleCustomAttributes()
 
 class DataFramePresenterParams(BaseModel):
     # Widget size in em
-    widget_size_em: tuple[float, float] = (20.0, 20.0)
+    widget_size_em: tuple[float, float] = (50.0, 15.0)
 
     # Dictionary to specify custom widths for individual columns, identified by column name.
     column_widths_em: dict[str, float] = Field(default_factory=dict)
 
     # List of column names to be displayed. If empty, all columns are shown.
+    # Disabled / Postponed
     # visible_columns: list[str] = Field(default_factory=list)
 
     # List defining the order in which columns should be displayed. If empty, the default order is used.
-    # Disabled: ImGui does not communicate back this info after reordering columns.
+    # Postponed/disabled: ImGui does not communicate back this info after reordering columns.
     # column_order: list[str] = Field(default_factory=list)
 
-    # Flag to enable or disable pagination.
-    enable_pagination: bool = True
-
     # Number of rows to display per page when pagination is enabled.
-    rows_per_page: int = 20
+    rows_per_page_node: int = 10
+    # Number of rows to display per page when pagination is enabled in the popup.
+    rows_per_page_popup: int = 10
 
     # Index of the first row on the current page, used for pagination.
     current_page_start_idx: int = 0
@@ -90,6 +90,18 @@ class DataFramePresenterParams(BaseModel):
 
         return changed
 
+    @property
+    def rows_per_page(self) -> int:
+        return self.rows_per_page_popup if is_rendering_in_window() else self.rows_per_page_node
+
+    # setter for rows_per_page
+    @rows_per_page.setter
+    def rows_per_page(self, value: int) -> None:
+        if is_rendering_in_window():
+            self.rows_per_page_popup = value
+        else:
+            self.rows_per_page_node = value
+
 
 class DataFramePresenter:
     # class responsible for presenting a DataFrame as table,
@@ -98,7 +110,7 @@ class DataFramePresenter:
 
     # A cached version of the DataFrame to present
     # (I'm not sure that we need this cache, since present_custom receives the DataFrame as an argument)
-    data_frame: pd.DataFrame
+    dataframe: pd.DataFrame
 
     def __init__(self) -> None:
         self.params = DataFramePresenterParams()
@@ -121,109 +133,32 @@ class DataFramePresenter:
     def on_change(self, value: pd.DataFrame) -> None:
         # We create a copy because we might change settings in the data frame
         # (ordering, filtering, etc.)
-        self.data_frame = copy.copy(value)
+        self.dataframe = copy.copy(value)
 
     def on_custom_attrs_changed(self, custom_attrs: CustomAttributesDict) -> None:
         # Update the params with the custom attributes
         pass
 
-    def present_custom(self, _value: pd.DataFrame) -> None:
-        # We ignore the value parameter since the data frame is cached inside self.data_frame
-        if len(self.data_frame.columns) == 0:
-            imgui.text("DataFrame: Empty")
-            return
+    def _paginated_dataframe(self) -> pd.DataFrame:
+        start_idx = self.params.current_page_start_idx
+        end_idx = start_idx + self.params.rows_per_page
+        paginated_dataframe = self.dataframe.iloc[start_idx:end_idx]
+        return paginated_dataframe
 
-        # Compute displayed columns
-        displayed_columns: List[str]
-        # if len(self.params.visible_columns) > 0:
-        #     displayed_columns = self.params.visible_columns
-        # else:
-        #     displayed_columns = self.data_frame.columns.tolist()
-        displayed_columns = self.data_frame.columns.tolist()
-
-        # Apply sorting
-        sorted_dataframe = self.data_frame
-        for col, ascending in reversed(self.params.sort_by):
-            sorted_dataframe = sorted_dataframe.sort_values(by=col, ascending=ascending)
-
+    # Add pagination controls
+    def _show_pagination_controls(self) -> None:
         # Calculate pagination
-        total_rows = len(sorted_dataframe)
+        total_rows = len(self.dataframe)
         total_pages = (total_rows + self.params.rows_per_page - 1) // self.params.rows_per_page
         current_page = self.params.current_page_start_idx // self.params.rows_per_page + 1
 
-        # Apply pagination
         start_idx = self.params.current_page_start_idx
         end_idx = start_idx + self.params.rows_per_page
-        paginated_dataframe = sorted_dataframe.iloc[start_idx:end_idx]
 
-        # Begin the table
-        def show_table() -> None:
-            # a lambda function to show the table, so that we can pass it to the widget_with_resize_handle
-            table_outer_size = hello_imgui.em_to_vec2(*self.params.widget_size_em)
-            table_flags = (
-                imgui.TableFlags_.resizable.value | imgui.TableFlags_.reorderable.value
-            )  # | imgui.TableFlags_.sortable
-            table_inner_width = 0.0  # Use the full width of the table
-            if imgui.begin_table(
-                str_id="DataFrameTable",
-                column=len(displayed_columns),
-                flags=table_flags,
-                outer_size=table_outer_size,
-                inner_width=table_inner_width,
-            ):
-                # Setup columns
-                for col in displayed_columns:
-                    column_label = col
-                    column_width = self.params.column_widths_em.get(col, 0.0)
-                    imgui.table_setup_column(column_label, imgui.TableColumnFlags_.width_fixed.value, column_width)
-
-                # Create headers
-                imgui.table_headers_row()
-
-                # Populate rows and cells
-                for idx, row in paginated_dataframe.iterrows():
-                    imgui.table_next_row()
-                    for col in displayed_columns:
-                        imgui.table_next_column()
-                        imgui.text(str(row[col]))
-
-                # Extract column order and sizes from the ImGui Table, and save them to params
-                # column_order = []
-                column_widths = {}
-                for column_index in range(len(displayed_columns)):
-                    imgui.table_set_column_index(column_index)
-                    column_name = imgui.table_get_column_name(column_index)
-                    column_width = imgui.get_column_width(column_index)
-                    # column_order.append(column_name)
-                    column_widths[column_name] = column_width
-                # Save the extracted order and sizes to params
-                # self.params.column_order = column_order
-                self.params.column_widths_em = column_widths
-                # logging.warning(f"column_order: {column_order}")
-
-                # End the table
-                imgui.end_table()
-
-                if imgui.is_item_hovered():
-                    # logging.warning("disable_user_input_this_frame")
-                    ed.disable_user_input_this_frame()
-                # else:
-                #     logging.warning("enable_user_input_this_frame")
-
-        # Draw the table lambda, with a resize handle
-        new_table_size_pixels = immapp.widget_with_resize_handle_in_node_editor("DataFrameTable", show_table)  # type: ignore  #  noqa
-        # update the widget size in em
-        new_table_size_em = hello_imgui.pixels_to_em(new_table_size_pixels)
-        self.params.widget_size_em = (new_table_size_em.x, new_table_size_em.y)
-
-        # Add pagination controls
-        if total_pages > 1 and self.params.enable_pagination:
+        if total_pages > 1:
             with imgui_ctx.begin_horizontal("DataFramePagination"):
                 with fontawesome_6_ctx():
                     page_label = f"{current_page} / {total_pages}"
-
-                    # A spring to align the rest of the controls to the right
-                    imgui.spring()
 
                     imgui.push_button_repeat(True)
 
@@ -231,7 +166,7 @@ class DataFramePresenter:
                     previous_button_enabled = start_idx > 0
                     imgui.begin_disabled(not previous_button_enabled)
                     # first page button
-                    if imgui.button(icons_fontawesome_6.ICON_FA_BACKWARD_FAST) and start_idx > 0:
+                    if imgui.button(icons_fontawesome_6.ICON_FA_CARET_LEFT) and start_idx > 0:
                         self.params.current_page_start_idx = 0
                     # previous page button
                     if imgui.button(icons_fontawesome_6.ICON_FA_BACKWARD) and start_idx > 0:
@@ -244,7 +179,7 @@ class DataFramePresenter:
                     # Forward buttons
                     next_button_enabled = end_idx < total_rows
                     imgui.begin_disabled(not next_button_enabled)
-                    if imgui.button(icons_fontawesome_6.ICON_FA_FORWARD) and end_idx < total_rows:
+                    if imgui.button(icons_fontawesome_6.ICON_FA_CARET_RIGHT) and end_idx < total_rows:
                         self.params.current_page_start_idx = min(
                             total_rows - self.params.rows_per_page, start_idx + self.params.rows_per_page
                         )
@@ -252,7 +187,86 @@ class DataFramePresenter:
                         self.params.current_page_start_idx = total_rows - self.params.rows_per_page
                     imgui.end_disabled()
 
+                    # Rows per page
+                    imgui.spring()
+                    imgui.text("Rows per page:")
+                    imgui.set_next_item_width(hello_imgui.em_size(6.0))
+                    _, self.params.rows_per_page = imgui.slider_int(
+                        "##Rows per page", self.params.rows_per_page, 5, 100
+                    )
+
                     imgui.pop_button_repeat()
+
+    def _show_table(self) -> None:
+        displayed_columns = self.dataframe.columns.tolist()
+
+        # a lambda function to show the table, so that we can pass it to the widget_with_resize_handle
+        table_outer_size = hello_imgui.em_to_vec2(*self.params.widget_size_em)
+        table_flags = imgui.TableFlags_.resizable.value
+        # | imgui.TableFlags_.sortable | imgui.TableFlags_.reorderable.value
+        table_inner_width = 0.0  # Use the full width of the table
+        if imgui.begin_table(
+            str_id="DataFrameTable",
+            column=len(displayed_columns),
+            flags=table_flags,
+            outer_size=table_outer_size,
+            inner_width=table_inner_width,
+        ):
+            # Setup columns
+            for col in displayed_columns:
+                column_label = col
+                column_width = self.params.column_widths_em.get(col, 0.0)
+                imgui.table_setup_column(column_label, imgui.TableColumnFlags_.width_fixed.value, column_width)
+
+            # Create headers
+            imgui.table_headers_row()
+
+            # Populate rows and cells
+            paginated_dataframe = self._paginated_dataframe()
+            for idx, row in paginated_dataframe.iterrows():
+                imgui.table_next_row()
+                for col in displayed_columns:
+                    imgui.table_next_column()
+                    imgui.text(str(row[col]))
+
+            # Extract column order and sizes from the ImGui Table, and save them to params
+            # column_order = []
+            column_widths = {}
+            for column_index in range(len(displayed_columns)):
+                imgui.table_set_column_index(column_index)
+                column_name = imgui.table_get_column_name(column_index)
+                column_width = imgui.get_column_width(column_index)
+                # column_order.append(column_name)
+                column_widths[column_name] = column_width
+            # Save the extracted order and sizes to params
+            # self.params.column_order = column_order
+            self.params.column_widths_em = column_widths
+            # logging.warning(f"column_order: {column_order}")
+
+            # End the table
+            imgui.end_table()
+
+            if imgui.is_item_hovered():
+                # logging.warning("disable_user_input_this_frame")
+                ed.disable_user_input_this_frame()
+            # else:
+            #     logging.warning("enable_user_input_this_frame")
+
+    def _show_resizable_table(self) -> None:
+        # Draw the table lambda, with a resize handle
+        new_table_size_pixels = immapp.widget_with_resize_handle_in_node_editor("DataFrameTable", self._show_table)  # type: ignore  #  noqa
+        # update the widget size in em
+        new_table_size_em = hello_imgui.pixels_to_em(new_table_size_pixels)
+        self.params.widget_size_em = (new_table_size_em.x, new_table_size_em.y)
+
+    def present_custom(self, _value: pd.DataFrame) -> None:
+        # We ignore the value parameter since the data frame is cached inside self.dataframe
+        if len(self.dataframe.columns) == 0:
+            imgui.text("DataFrame: Empty")
+            return
+
+        self._show_pagination_controls()
+        self._show_resizable_table()
 
     def save_gui_options_to_json(self) -> JsonDict:
         # Here we should save the params to a JSON dict
