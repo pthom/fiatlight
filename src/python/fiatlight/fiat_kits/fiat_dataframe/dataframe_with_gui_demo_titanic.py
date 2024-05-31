@@ -53,7 +53,7 @@ def show_titanic_db(
     return dataframe
 
 
-def main():
+def main() -> None:
     fl.fiat_run(show_titanic_db)
 
 

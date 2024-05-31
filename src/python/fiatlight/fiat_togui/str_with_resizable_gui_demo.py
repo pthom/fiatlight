@@ -1,5 +1,5 @@
 import fiatlight
-from fiatlight.fiat_togui.str_with_resizable_gui import StrWithResizableGui  # noqa
+from fiatlight.fiat_togui.str_with_resizable_gui import StrWithGui  # noqa
 
 
 def main() -> None:
@@ -7,7 +7,7 @@ def main() -> None:
         return s
 
     f_gui = fiatlight.FunctionWithGui(f)
-    f_gui.set_input_gui("s", StrWithResizableGui())
+    f_gui.set_input_gui("s", StrWithGui())
 
     fiatlight.fiat_run(f_gui)
 

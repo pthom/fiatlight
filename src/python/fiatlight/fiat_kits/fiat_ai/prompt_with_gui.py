@@ -2,7 +2,7 @@ import fiatlight
 from fiatlight.fiat_types import JsonDict
 from fiatlight.fiat_core import AnyDataWithGui
 from fiatlight.fiat_widgets import fiat_osd, icons_fontawesome_6, fontawesome_6_ctx  # noqa
-from fiatlight.fiat_togui.str_with_resizable_gui import StrWithResizableGui
+from fiatlight.fiat_togui.str_with_resizable_gui import StrWithGui
 from imgui_bundle import imgui, imgui_ctx
 from .prompt import Prompt
 
@@ -10,12 +10,12 @@ from .prompt import Prompt
 class PromptWithGui(AnyDataWithGui[Prompt]):
     """A Gui for a editing a prompt string, with a Submit button."""
 
-    _str_with_resizable_gui: StrWithResizableGui
+    _str_with_resizable_gui: StrWithGui
     _edited_prompt: Prompt  # not yet submitted
 
     def __init__(self) -> None:
         super().__init__(Prompt)
-        self._str_with_resizable_gui = StrWithResizableGui()
+        self._str_with_resizable_gui = StrWithGui()
         self._edited_prompt = Prompt("")
         self.callbacks.on_change = self.on_change
         self.callbacks.edit = self.edit

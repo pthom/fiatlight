@@ -5,7 +5,7 @@ from fiatlight.fiat_widgets import fiat_osd, icons_fontawesome_6, fontawesome_6_
 from imgui_bundle import imgui, imgui_ctx, hello_imgui, ImVec2
 
 
-class StrWithResizableGui(AnyDataWithGui[str]):
+class StrWithGui(AnyDataWithGui[str]):
     """A Gui for a string with resizable input text, with a popup for multiline editing."""
 
     _input_text_in_node: hello_imgui.InputTextData
