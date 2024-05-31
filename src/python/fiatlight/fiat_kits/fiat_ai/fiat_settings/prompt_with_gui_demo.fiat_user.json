@@ -7,7 +7,14 @@
                         "name": "prompt",
                         "data": {
                             "type": "Primitive",
-                            "value": "abcdcxwcx  cddd"
+                            "value": "A toy car on a mountain road"
+                        }
+                    },
+                    "s": {
+                        "name": "s",
+                        "data": {
+                            "type": "Primitive",
+                            "value": "aaacwc"
                         }
                     }
                 },
@@ -15,18 +22,18 @@
                     "inputs": {
                         "prompt": {
                             "_str_with_resizable_gui": {
-                                "_input_text_in_node_size": {
-                                    "x": 15.0,
-                                    "y": 0.0
-                                },
-                                "_input_text_in_popup_size": {
-                                    "x": 37.0,
-                                    "y": 15.0
-                                }
+                                "width_em": 15.0
                             }
+                        },
+                        "s": {
+                            "width_em": 15.0
                         }
                     },
-                    "outputs": {},
+                    "outputs": {
+                        "0": {
+                            "width_em": 15.0
+                        }
+                    },
                     "internal_gui_options": {}
                 }
             }
@@ -35,10 +42,13 @@
     "functions_gui_settings": {
         "f": {
             "_show_input_details": {
-                "prompt": true
+                "prompt": true,
+                "s": true
             },
             "_inputs_expanded": true,
-            "_show_output_details": {},
+            "_show_output_details": {
+                "0": true
+            },
             "_outputs_expanded": true,
             "_show_internals_details": {},
             "_internals_expanded": true,

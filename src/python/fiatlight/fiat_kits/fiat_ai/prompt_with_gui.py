@@ -8,7 +8,7 @@ from .prompt import Prompt
 
 
 class PromptWithGui(AnyDataWithGui[Prompt]):
-    """A Gui for a editing a prompt string, with a Submit button."""
+    """A Gui to edit a prompt, with a Submit button, and a multiline edit in a popup."""
 
     _str_with_resizable_gui: StrWithGui
     _edited_prompt: Prompt  # not yet submitted
@@ -16,6 +16,9 @@ class PromptWithGui(AnyDataWithGui[Prompt]):
     def __init__(self) -> None:
         super().__init__(Prompt)
         self._str_with_resizable_gui = StrWithGui()
+        self._str_with_resizable_gui.params.hint = "Enter a prompt"
+        self._str_with_resizable_gui.params.allow_multiline = True
+
         self._edited_prompt = Prompt("")
         self.callbacks.on_change = self.on_change
         self.callbacks.edit = self.edit
