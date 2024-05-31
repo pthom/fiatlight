@@ -16,6 +16,39 @@ class DataFramePossibleCustomAttributes(PossibleCustomAttributes):
     def __init__(self) -> None:
         super().__init__("DataFrameWithGui")
 
+        self.add_explained_attribute(
+            name="widget_size_em",
+            explanation="Widget size in em units",
+            type_=tuple,
+            default_value=(50.0, 15.0),
+            tuple_types=(float, float),
+        )
+        self.add_explained_attribute(
+            name="column_widths_em",
+            explanation="Dictionary to specify custom widths for individual columns, identified by column name",
+            type_=dict,
+            default_value={},
+            dict_types=(str, float),
+        )
+        self.add_explained_attribute(
+            name="rows_per_page_node",
+            explanation="Number of rows to display per page (when displayed in a function node)",
+            type_=int,
+            default_value=10,
+        )
+        self.add_explained_attribute(
+            name="rows_per_page_popup",
+            explanation="Number of rows to display per page (when displayed in a pop-up)",
+            type_=int,
+            default_value=20,
+        )
+        self.add_explained_attribute(
+            name="current_page_start_idx",
+            explanation="Index of the first row on the current page, used for pagination",
+            type_=int,
+            default_value=0,
+        )
+
 
 _DATAFRAME_POSSIBLE_CUSTOM_ATTRIBUTES = DataFramePossibleCustomAttributes()
 
@@ -35,10 +68,10 @@ class DataFramePresenterParams(BaseModel):
     # Postponed/disabled: ImGui does not seem to communicate back this info after reordering columns.
     # column_order: list[str] = Field(default_factory=list)
 
-    # Number of rows to display per page when pagination is enabled.
+    # Number of rows to display per page
     rows_per_page_node: int = 10
-    # Number of rows to display per page when pagination is enabled in the popup.
-    rows_per_page_popup: int = 10
+    # Number of rows to display per page
+    rows_per_page_popup: int = 20
 
     # Index of the first row on the current page, used for pagination.
     current_page_start_idx: int = 0
@@ -46,21 +79,6 @@ class DataFramePresenterParams(BaseModel):
     # List of tuples specifying columns to sort by and the sort order.
     # Each tuple contains a column name and a boolean indicating ascending order.
     sort_by: list[tuple[str, bool]] = Field(default_factory=list)  # (column_name, ascending)
-
-    # Dictionary to define filters for specific columns.
-    # Each key is a column name, and the value is another dictionary specifying the condition and value for filtering.
-    # Example: {"column_name": {"condition": "value"}}
-    # Conditions could be equality, greater than, less than, etc.
-    # Example:
-    #     filters = {
-    #         "age": {"gt": "30"},  # Filter rows where the age column value is greater than 30
-    #         "fare": {"lt": "50"},  # Filter rows where the fare column value is less than 50
-    #         "name": {"contains": "Smith"}  # Filter rows where the name column contains "Smith"
-    #     }
-    filters: dict[str, dict[str, str]] = Field(default_factory=dict)
-
-    # Global search term to filter rows based on any column.
-    search_query: str = ""
 
     def validate_params(self, dataframe: pd.DataFrame) -> bool:
         # Validate the params based on the DataFrame
@@ -76,7 +94,6 @@ class DataFramePresenterParams(BaseModel):
             if col in valid_columns:
                 new_params.column_widths_em[col] = width
         new_params.sort_by = [(col, asc) for col, asc in self.sort_by if col in valid_columns]
-        new_params.filters = {col: cond for col, cond in self.filters.items() if col in valid_columns}
 
         # Use dict() method to convert models to dictionaries for comparison
         changed = new_params.dict() != self.dict()
@@ -86,7 +103,6 @@ class DataFramePresenterParams(BaseModel):
             # self.column_order = new_params.column_order
             self.column_widths_em = new_params.column_widths_em
             self.sort_by = new_params.sort_by
-            self.filters = new_params.filters
 
         return changed
 
@@ -139,7 +155,9 @@ class DataFramePresenter:
 
     def on_custom_attrs_changed(self, custom_attrs: CustomAttributesDict) -> None:
         # Update the params with the custom attributes
-        pass
+        for key, value in custom_attrs.items():
+            if hasattr(self.params, key):
+                setattr(self.params, key, value)
 
     def _paginated_dataframe(self) -> pd.DataFrame:
         start_idx = self.params.current_page_start_idx
@@ -253,7 +271,8 @@ class DataFramePresenter:
             # Setup columns
             for col in displayed_columns:
                 column_label = col
-                column_width = self.params.column_widths_em.get(col, 0.0)
+                column_width_em = self.params.column_widths_em.get(col, 0.0)
+                column_width = hello_imgui.em_size(column_width_em)
 
                 column_flags = 0
                 column_flags |= imgui.TableColumnFlags_.width_fixed.value
@@ -273,16 +292,16 @@ class DataFramePresenter:
 
             # Extract column order and sizes from the ImGui Table, and save them to params
             # column_order = []
-            column_widths = {}
+            column_widths_em = {}
             for column_index in range(len(displayed_columns)):
                 imgui.table_set_column_index(column_index)
                 column_name = imgui.table_get_column_name(column_index)
                 column_width = imgui.get_column_width(column_index)
                 # column_order.append(column_name)
-                column_widths[column_name] = column_width
+                column_widths_em[column_name] = hello_imgui.pixel_size_to_em(column_width)
             # Save the extracted order and sizes to params
             # self.params.column_order = column_order
-            self.params.column_widths_em = column_widths
+            self.params.column_widths_em = column_widths_em
             # logging.warning(f"column_order: {column_order}")
 
             # Handle sorting
@@ -317,3 +336,8 @@ class DataFramePresenter:
     def load_gui_options_from_json(self, json_dict: JsonDict) -> None:
         # Here we should load params options from a JSON dict
         self.params = DataFramePresenterParams.model_validate(json_dict)
+
+    def clipboard_copy_str(self, _value: pd.DataFrame) -> str:
+        # We ignore the value parameter since the data frame is cached inside self.dataframe
+        # (and potentially reordered by the user)
+        return self.dataframe.to_csv(index=False, sep="\t")

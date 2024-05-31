@@ -22,8 +22,18 @@ class Sex(Enum):
     Woman = "female"
 
 
-@fl.with_custom_attrs(age_min__range=(0, 100), age_max__range=(0, 100))
-def f(
+@fl.with_custom_attrs(
+    # define the custom attributes for the function parameters
+    age_min__range=(0, 100),
+    age_max__range=(0, 100),
+    # define custom attributes for the function output
+    # (i.e. the presentation options for the DataFrame)
+    return__widget_size_em=(55.0, 15.0),
+    return__rows_per_page_node=10,
+    return__rows_per_page_popup=20,
+    return__column_widths_em={"Name": 5},
+)
+def show_titanic_db(
     name_query: str = "", sex_query: Sex | None = None, age_min: int | None = None, age_max: int | None = None
 ) -> pd.DataFrame:
     dataframe = make_titanic_df()
@@ -33,17 +43,19 @@ def f(
     # filter dataframe
     if name_query:
         dataframe = dataframe[dataframe["Name"].str.contains(name_query, case=False)]
-
     if sex_query:
         dataframe = dataframe[dataframe["Sex"] == sex_query.value]
-
     if age_min is not None:
         dataframe = dataframe[dataframe["Age"] >= age_min]
-
     if age_max is not None:
         dataframe = dataframe[dataframe["Age"] <= age_max]
 
     return dataframe
 
 
-fl.fiat_run(f)
+def main():
+    fl.fiat_run(show_titanic_db)
+
+
+if __name__ == "__main__":
+    main()

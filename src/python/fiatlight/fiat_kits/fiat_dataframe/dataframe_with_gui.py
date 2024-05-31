@@ -8,6 +8,8 @@ from fiatlight.fiat_kits.fiat_dataframe.dataframe_presenter import DataFramePres
 
 
 class DataFrameWithGui(AnyDataWithGui[pd.DataFrame]):
+    """A class to present a pandas DataFrame in the GUI, with pagination and other features. Open in a pop-up for more features"""
+
     dataframe_presenter: DataFramePresenter
 
     def __init__(self) -> None:
@@ -167,7 +169,7 @@ class DataFrameWithGui(AnyDataWithGui[pd.DataFrame]):
 
     def clipboard_copy_str(self, value: pd.DataFrame) -> str:
         # Is there an easy way to export a clipboard-friendly version of the data frame?
-        return value.to_string()
+        return self.dataframe_presenter.clipboard_copy_str(value)
 
 
 def register_gui() -> None:

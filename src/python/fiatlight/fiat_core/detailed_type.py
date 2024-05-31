@@ -50,6 +50,7 @@ class DetailedType(Generic[DataType]):
     type_: type[DataType]
     tuple_types: Optional[tuple[type, ...]]
     list_inner_type: Optional[type]
+    dict_types: Optional[tuple[type, type]]
 
     def __init__(
         self,
@@ -57,6 +58,7 @@ class DetailedType(Generic[DataType]):
         *,
         tuple_types: Optional[tuple[type, ...]] = None,
         list_inner_type: Optional[type] = None,
+        dict_types: Optional[tuple[type, type]] = None,
     ) -> None:
         self.type_ = type_
         if tuple_types is not None and list_inner_type is not None:
@@ -67,6 +69,7 @@ class DetailedType(Generic[DataType]):
             raise ValueError("DetailedType: list_inner_type can only be set for list types")
         self.tuple_types = tuple_types
         self.list_inner_type = list_inner_type
+        self.dict_types = dict_types
 
     def is_value_type_ok(self, value: Any) -> bool:
         """Checks if the given value is valid according to the type and details."""
@@ -76,6 +79,8 @@ class DetailedType(Generic[DataType]):
             return self._check_if_value_matches_tuple_type(value)
         if self.list_inner_type is not None:
             return self._check_if_value_matches_list_type(value)
+        if self.dict_types is not None:
+            return self._check_if_value_matches_dict_type(value)
         return True
 
     def _check_if_value_matches_tuple_type(self, value: Any) -> bool:
@@ -93,6 +98,16 @@ class DetailedType(Generic[DataType]):
             return False
         assert self.list_inner_type is not None
         return all(_permissive_is_instance(v, self.list_inner_type) for v in value)
+
+    def _check_if_value_matches_dict_type(self, value: Any) -> bool:
+        """Helper method to check dict types."""
+        if not isinstance(value, dict):
+            return False
+        assert self.dict_types is not None
+        key_type, value_type = self.dict_types
+        return all(
+            _permissive_is_instance(k, key_type) and _permissive_is_instance(v, value_type) for k, v in value.items()
+        )
 
     def type_str(self) -> str:
         """Returns a string representation of the type."""
@@ -127,12 +142,15 @@ class DetailedVar(Generic[DataType]):
         *,
         tuple_types: Optional[tuple[type, ...]] = None,
         list_inner_type: Optional[type] = None,
+        dict_types: Optional[tuple[type, type]] = None,
         data_validation_function: Optional[DataValidationFunction[DataType]] = None,
     ) -> None:
         self.name = name
         self.explanation = explanation
         self.default_value = default_value
-        self.type_ = DetailedType(type_, tuple_types=tuple_types, list_inner_type=list_inner_type)
+        self.type_ = DetailedType(
+            type_, tuple_types=tuple_types, list_inner_type=list_inner_type, dict_types=dict_types
+        )
         self.data_validation_function = data_validation_function
 
     def documentation(self, width_name_and_type: int) -> str:

@@ -47,6 +47,7 @@ class PossibleCustomAttributes:
         *,
         tuple_types: Optional[tuple[type, ...]] = None,
         list_inner_type: Optional[type] = None,
+        dict_types: Optional[tuple[type, type]] = None,
         data_validation_function: Optional[DataValidationFunction[DataType]] = None,
     ) -> None:
         self._explained_attributes_or_section.append(
@@ -57,6 +58,7 @@ class PossibleCustomAttributes:
                 default_value=default_value,
                 tuple_types=tuple_types,
                 list_inner_type=list_inner_type,
+                dict_types=dict_types,
                 data_validation_function=data_validation_function,
             )
         )
