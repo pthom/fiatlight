@@ -256,6 +256,8 @@ class AnyDataWithGui(Generic[DataType]):
         A default serialization is available for primitive types, tuples, and Pydantic models.
 
         (This is how fiatlight saves the data to a JSON file)
+
+        Do not override these methods in descendant classes!
         """
         if isinstance(value, (Unspecified, InvalidValue)):
             # We do not save Unspecified or InvalidValue,
@@ -277,7 +279,9 @@ class AnyDataWithGui(Generic[DataType]):
 
     @final
     def load_from_dict(self, json_data: JsonDict) -> DataType | Unspecified | Error:
-        """Deserialize the value from a dictionary"""
+        """Deserialize the value from a dictionary
+        Do not override these methods in descendant classes!
+        """
         if "type" not in json_data and self.callbacks.load_from_dict is None:
             raise ValueError(f"Cannot deserialize {json_data}: missing 'type' key")
 

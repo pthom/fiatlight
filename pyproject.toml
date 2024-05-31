@@ -34,6 +34,8 @@ dependencies = [
     "IPython",
     "fire",
     "tabulate",
+    "pandas",
+    "pandas-stubs"
 ]
 
 [tool.hatch.build.targets.wheel]
