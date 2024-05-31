@@ -168,10 +168,10 @@ class DataFramePresenter:
                     previous_button_enabled = start_idx > 0
                     imgui.begin_disabled(not previous_button_enabled)
                     # first page button
-                    if imgui.button(icons_fontawesome_6.ICON_FA_CARET_LEFT) and start_idx > 0:
+                    if imgui.button(icons_fontawesome_6.ICON_FA_BACKWARD_FAST) and start_idx > 0:
                         self.params.current_page_start_idx = 0
                     # previous page button
-                    if imgui.button(icons_fontawesome_6.ICON_FA_BACKWARD) and start_idx > 0:
+                    if imgui.button(icons_fontawesome_6.ICON_FA_CARET_LEFT) and start_idx > 0:
                         self.params.current_page_start_idx = max(0, start_idx - self.params.rows_per_page)
                     imgui.end_disabled()
 
