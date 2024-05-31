@@ -1,5 +1,5 @@
 from fiatlight import fiat_core, fiat_widgets, fiat_types, fiat_runner, fiat_config, fiat_kits
-from fiatlight.fiat_core import AnyDataWithGui, FunctionWithGui, FunctionsGraph
+from fiatlight.fiat_core import AnyDataWithGui, FunctionWithGui, FunctionsGraph, FiatToGuiException
 from fiatlight.fiat_runner import (
     fiat_run,
     fiat_run_composition,
@@ -46,7 +46,7 @@ __all__ = [
     "FunctionsGraph",
     "AnyDataWithGui",
     "FunctionWithGui",
-    "with_custom_attrs",
+    "FiatToGuiException",
     # from to_gui
     "register_type",
     "register_enum",

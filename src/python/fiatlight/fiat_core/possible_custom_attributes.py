@@ -59,7 +59,12 @@ class PossibleCustomAttributes:
                 return attr
         return None
 
-    def validate_custom_attrs(self, custom_attrs: dict[str, Any]) -> DataValidationResult:
+    def merge_attributes(self, other: "PossibleCustomAttributes") -> None:
+        self._explained_attributes_or_section += other._explained_attributes_or_section
+
+    def validate_custom_attrs(
+        self, custom_attrs: dict[str, Any], accept_wrong_keys: bool = False
+    ) -> DataValidationResult:
         unwanted_keys = []
         attributes_with_wrong_type_msgs = []
         attributes_with_failed_validation: dict[str, str] = {}
@@ -77,7 +82,7 @@ class PossibleCustomAttributes:
                     attributes_with_failed_validation[attr_name] = data_validation.error_message
 
         if (
-            len(unwanted_keys) > 0
+            (len(unwanted_keys) > 0 and not accept_wrong_keys)
             or len(attributes_with_wrong_type_msgs) > 0
             or len(attributes_with_failed_validation) > 0
         ):
@@ -97,8 +102,10 @@ class PossibleCustomAttributes:
 
         return DataValidationResult.ok()
 
-    def raise_exception_if_bad_custom_attrs(self, custom_attrs: dict[str, Any]) -> None:
-        validation_result = self.validate_custom_attrs(custom_attrs)
+    def raise_exception_if_bad_custom_attrs(
+        self, custom_attrs: dict[str, Any], accept_wrong_keys: bool = False
+    ) -> None:
+        validation_result = self.validate_custom_attrs(custom_attrs, accept_wrong_keys=accept_wrong_keys)
 
         if not validation_result.is_valid:
             msg = f"Encountered incorrect attributes for {self.parent_name} !\n"
@@ -145,8 +152,8 @@ class PossibleCustomAttributes:
         return r
 
 
-_DEFAULT_CUSTOM_ATTRS = PossibleCustomAttributes("")
+_EMPTY_CUSTOM_ATTRS = PossibleCustomAttributes("")
 
 
-def default_custom_attrs() -> PossibleCustomAttributes:
-    return _DEFAULT_CUSTOM_ATTRS
+def empty_custom_attrs() -> PossibleCustomAttributes:
+    return _EMPTY_CUSTOM_ATTRS

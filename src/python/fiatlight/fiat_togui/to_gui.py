@@ -659,12 +659,20 @@ class GuiFactories:
                 r += code_utils.indent_code(doc, 2)
                 r += "\n"
 
-            possible_custom_attributes = factored_gui.possible_custom_attributes_with_generic()
+            (
+                possible_custom_attributes,
+                generic_custom_attributes,
+            ) = factored_gui.possible_custom_attributes_with_generic()
             if possible_custom_attributes is not None:
                 doc_attr = possible_custom_attributes.documentation()
                 r += "\n"
                 r += code_utils.indent_code(doc_attr, 2)
                 r += "\n"
+
+            generic_attr_doc = generic_custom_attributes.documentation()
+            r += "\n"
+            r += code_utils.indent_code(generic_attr_doc, 2)
+            r += "\n"
 
             from fiatlight.fiat_togui.make_gui_demo_code import make_gui_demo_code
 

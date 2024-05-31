@@ -15,9 +15,6 @@ import typing
 import fiatlight
 
 @fiatlight.with_custom_attrs(
-    #  Validation
-    int_param__validate_value = None,
-    #  Custom attributes
     int_param__range = (0, 10),
     int_param__edit_type = "input",
     int_param__format = "%d",
@@ -26,7 +23,9 @@ import fiatlight
     int_param__knob_steps = 10,
     int_param__knob_no_input = True,
     int_param__slider_no_input = False,
-    int_param__slider_logarithmic = False)
+    int_param__slider_logarithmic = False,
+    #  Generic attributes
+    int_param__validate_value = None)
 def f(int_param: int) -> int:
     return int_param
 

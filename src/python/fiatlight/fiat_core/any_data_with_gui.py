@@ -1,3 +1,5 @@
+import copy
+
 import pydantic
 
 from fiatlight.fiat_types.base_types import (
@@ -6,11 +8,27 @@ from fiatlight.fiat_types.base_types import (
 )
 from fiatlight.fiat_types.error_types import Error, ErrorValue, Unspecified, UnspecifiedValue, InvalidValue
 from fiatlight.fiat_types.function_types import DataPresentFunction, DataEditFunction  # noqa
+from fiatlight.fiat_core.togui_exception import FiatToGuiException
 from .any_data_gui_callbacks import AnyDataGuiCallbacks
 from .possible_custom_attributes import PossibleCustomAttributes
 from imgui_bundle import imgui
 from typing import Generic, Any, Type, final
 import logging
+
+
+class AnyDataWithGuiGenericPossibleCustomAttributes(PossibleCustomAttributes):
+    def __init__(self) -> None:
+        super().__init__("AnyDataWithGui Generic attributes")
+        self.add_explained_section("Generic attributes")
+        self.add_explained_attribute(
+            name="validate_value",
+            type_=object,
+            explanation="Function to validate a parameter value (should return DataValidationResult.ok() .error()",
+            default_value=None,
+        )
+
+
+_ANYDATAWITHGUI_GENERIC_POSSIBLE_CUSTOM_ATTRIBUTES = AnyDataWithGuiGenericPossibleCustomAttributes()
 
 
 class AnyDataWithGui(Generic[DataType]):
@@ -170,22 +188,11 @@ class AnyDataWithGui(Generic[DataType]):
         return None
 
     @final
-    def possible_custom_attributes_with_generic(self) -> PossibleCustomAttributes:
+    def possible_custom_attributes_with_generic(
+        self,
+    ) -> tuple[PossibleCustomAttributes | None, PossibleCustomAttributes]:
         descendant_attrs = self.possible_custom_attributes()
-        if descendant_attrs is None:
-            from fiatlight.fiat_core.possible_custom_attributes import default_custom_attrs
-
-            descendant_attrs = default_custom_attrs()
-
-        # Add generic attributes (for all types)
-        descendant_attrs.add_explained_section("Generic attributes")
-        descendant_attrs.add_explained_attribute(
-            name="validate_value",
-            explanation="Function to validate a parameter value (should return DataValidationResult.ok() .error()",
-            type_=object,  # Should be (Callable[[DataTYpe], DataValidationResult])
-            default_value=None,
-        )
-        return descendant_attrs
+        return descendant_attrs, _ANYDATAWITHGUI_GENERIC_POSSIBLE_CUSTOM_ATTRIBUTES
 
     @property
     def custom_attrs(self) -> dict[str, Any]:
@@ -195,26 +202,32 @@ class AnyDataWithGui(Generic[DataType]):
         """Merge custom attributes with the existing ones"""
         if len(custom_attrs) == 0:
             return
-        possible_custom_attrs = self.possible_custom_attributes_with_generic()
-        if possible_custom_attrs is None:
-            raise ValueError(
-                f'''
-            Cannot set custom attributes for {self._type} in class {self.__class__}
-                Please override the possible_custom_attributes() method in the class {self.__class__}
-                with the following signature:
+        possible_custom_attrs, _generic_custom_attrs = self.possible_custom_attributes_with_generic()
 
-                    @staticmethod
-                    def possible_custom_attributes() -> PossibleCustomAttributes | None:
-                        """Return the possible custom attributes for this type, if available.
+        # Create a version that holds all custom attributes
+        all_custom_attrs = copy.deepcopy(_generic_custom_attrs)
+        if possible_custom_attrs is not None:
+            all_custom_attrs.merge_attributes(copy.copy(possible_custom_attrs))
 
-                        It is strongly advised to return a class variable, or a global variable
-                        to avoid creating a new instance each time this method is called.
-                        """
-                        return None
-            '''
-            )
+        try:
+            all_custom_attrs.raise_exception_if_bad_custom_attrs(custom_attrs)
+        except FiatToGuiException as e:
+            msg_error = f'''
+                Cannot set custom attributes for {self._type} in class {self.__class__}
+                    Please override the possible_custom_attributes() method in the class {self.__class__}
+                    with the following signature:
 
-        possible_custom_attrs.raise_exception_if_bad_custom_attrs(custom_attrs)
+                        @staticmethod
+                        def possible_custom_attributes() -> PossibleCustomAttributes | None:
+                            """Return the possible custom attributes for this type, if available.
+
+                            It is advised to return a global variable, to avoid creating
+                            a new instance each time this method is called.
+                            """
+                            ...
+                '''
+            raise FiatToGuiException(msg_error) from e
+
         self.custom_attrs.update(custom_attrs)
         if self.callbacks.on_custom_attrs_changed is not None:
             self.callbacks.on_custom_attrs_changed(self.custom_attrs)

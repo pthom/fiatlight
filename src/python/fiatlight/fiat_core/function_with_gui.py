@@ -465,9 +465,56 @@ from fiatlight.fiat_core.any_data_with_gui import AnyDataWithGui
 from fiatlight.fiat_types.function_types import BoolFunction
 from fiatlight.fiat_core.param_with_gui import ParamWithGui, ParamKind
 from fiatlight.fiat_core.output_with_gui import OutputWithGui
+from fiatlight.fiat_core.possible_custom_attributes import PossibleCustomAttributes
+from fiatlight.fiat_types.base_types import CustomAttributesDict
 from typing import Any, List, final, Callable, Optional, Type, TypeAlias
 
 import logging
+
+
+class FunctionPossibleCustomAttributes(PossibleCustomAttributes):
+    def __init__(self) -> None:
+        super().__init__("FunctionWithGui")
+
+        self.add_explained_section("Behavioral Flags")
+        self.add_explained_attribute(
+            "invoke_async",
+            bool,
+            "If True, the function shall be called asynchronously",
+            False,
+        )
+        self.add_explained_attribute(
+            "invoke_manually",
+            bool,
+            "If True, the function will be called only if the user clicks on the 'invoke' button",
+            False,
+        )
+        self.add_explained_attribute(
+            "invoke_always_dirty",
+            bool,
+            "If True, the function output will always be considered out of date, and "
+            "  - if invoke_manually is True, the 'Refresh needed' label will be displayed"
+            "  - if invoke_manually is False, the function will be called at each frame",
+            False,
+        )
+        self.add_explained_attribute(
+            "doc_display",
+            bool,
+            "If True, the doc string is displayed in the GUI",
+            False,
+        )
+        self.add_explained_attribute(
+            "doc_markdown",
+            bool,
+            "If True, the doc string is in Markdown format",
+            True,
+        )
+        self.add_explained_attribute(
+            "doc_string", str, "The documentation string. If not provided, the function docstring will be used", ""
+        )
+
+
+_FUNCTION_POSSIBLE_CUSTOM_ATTRIBUTES = FunctionPossibleCustomAttributes()
 
 
 class FunctionWithGui:
@@ -496,6 +543,14 @@ class FunctionWithGui:
     #   - if invoke_manually is false, the function will be called at each frame
     # Note: a "live" function is thus a function with invoke_manually=False and invoke_always_dirty=True
     invoke_always_dirty: bool = False
+
+    # Optional user documentation to be displayed in the GUI
+    #     - doc_display: if True, the doc string is displayed in the GUI (default: False)
+    #     - doc_is_markdown: if True, the doc string is in Markdown format (default: True)
+    #     - doc_string: the documentation string. If not provided, the function docstring will be used
+    doc_display: bool = False
+    doc_markdown: bool = True
+    doc_string: str = ""
 
     #
     # Internal state GUI
@@ -546,6 +601,14 @@ class FunctionWithGui:
     #   - if invoke_manually is false, the function will be called at each frame
     # Note: a "live" function is thus a function with invoke_manually=False and invoke_always_dirty=True
     invoke_always_dirty: bool = False
+
+    # Optional user documentation to be displayed in the GUI
+    #     - doc_display: if True, the doc string is displayed in the GUI (default: False)
+    #     - doc_is_markdown: if True, the doc string is in Markdown format (default: True)
+    #     - doc_string: the documentation string. If not provided, the function docstring will be used
+    doc_display: bool = False
+    doc_markdown: bool = True
+    doc_string: str = ""
 
     #
     # Internal state GUI
@@ -606,7 +669,7 @@ class FunctionWithGui:
         fn_name: str | None = None,
         *,
         signature_string: str | None = None,
-        custom_attributes: dict[str, Any] | None = None,
+        custom_attributes: CustomAttributesDict | None = None,
     ) -> None:
         """Create a FunctionWithGui object, with the given function as implementation
 
@@ -649,18 +712,56 @@ class FunctionWithGui:
                 custom_attributes=custom_attributes,
             )
 
-            #
-            # Customization by adding attributes to the function
-            #
-            if hasattr(fn, "invoke_manually"):
-                self.invoke_manually = fn.invoke_manually
-            if hasattr(fn, "invoke_async"):
-                self.invoke_async = fn.invoke_async
-            if hasattr(fn, "invoke_always_dirty"):
-                self.invoke_always_dirty = fn.invoke_always_dirty
+            if custom_attributes is not None:
+                self._handle_custom_attributes(custom_attributes)
 
         if self.name == "":
             raise FiatToGuiException("FunctionWithGui: function name is empty")
+
+    def _handle_custom_attributes(self, custom_attributes: dict[str, Any]) -> None:
+        """Handle custom attributes for the function"""
+        # Filter out the custom attributes for parameters and outputs
+        # (they contain a double underscore "__" in their name)
+        fn_custom_attributes = {key: value for key, value in custom_attributes.items() if "__" not in key}
+        # We accept wrong keys, because other libraries, such as Pydantic, may add custom attributes
+        # that would not be recognized by FiatLight
+        _FUNCTION_POSSIBLE_CUSTOM_ATTRIBUTES.raise_exception_if_bad_custom_attrs(
+            fn_custom_attributes, accept_wrong_keys=True
+        )
+
+        # Check that there are no custom attributes for a non-existing parameter or output
+        params_custom_attributes = [key for key in custom_attributes if "__" in key and not key.startswith("__")]
+        for custom_attribute in params_custom_attributes:
+            assert "__" in custom_attribute
+            param_name = custom_attribute.split("__")[0]
+            if custom_attribute.startswith("return__"):
+                if len(self._outputs_with_gui) == 0:
+                    raise FiatToGuiException(
+                        f"""
+                        FunctionWithGui({self.name}): custom attribute '{custom_attribute}' invalid. The function has no output!
+                        """
+                    )
+            else:
+                if not self.has_param(param_name):
+                    raise FiatToGuiException(
+                        f"""
+                        FunctionWithGui({self.name}): custom attribute '{custom_attribute}' is associated to a parameter {param_name} that does not exist!
+                        """
+                    )
+
+        # Set the custom attributes for the function
+        if "invoke_async" in fn_custom_attributes:
+            self.invoke_async = fn_custom_attributes["invoke_async"]
+        if "invoke_manually" in fn_custom_attributes:
+            self.invoke_manually = fn_custom_attributes["invoke_manually"]
+        if "invoke_always_dirty" in fn_custom_attributes:
+            self.invoke_always_dirty = fn_custom_attributes["invoke_always_dirty"]
+        if "doc_display" in fn_custom_attributes:
+            self.doc_display = fn_custom_attributes["doc_display"]
+        if "doc_markdown" in fn_custom_attributes:
+            self.doc_markdown = fn_custom_attributes["doc_markdown"]
+        if "doc_string" in fn_custom_attributes:
+            self.doc_string = fn_custom_attributes["doc_string"]
 
     def set_invoke_live(self) -> None:
         """Set flags to make this a live function (called automatically at each frame)"""
@@ -792,6 +893,10 @@ class FunctionWithGui:
                 param.data_with_gui = gui
                 return
         raise ValueError(f"Parameter {name} not found")
+
+    def has_param(self, name: str) -> bool:
+        """Return True if the function has a parameter with the given name"""
+        return any(param.name == name for param in self._inputs_with_gui)
 
     def param(self, name: str) -> ParamWithGui[Any]:
         """Return the input with the given name as a ParamWithGui[Any]"""

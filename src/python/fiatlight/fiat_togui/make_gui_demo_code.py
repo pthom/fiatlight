@@ -1,3 +1,5 @@
+import copy
+
 from fiatlight.fiat_core.any_data_with_gui import AnyDataWithGui
 from fiatlight.fiat_togui.to_gui import fully_qualified_typename_or_str
 from typing import Any
@@ -14,11 +16,14 @@ def make_gui_demo_code(gui_instance: AnyDataWithGui[Any]) -> str:
     param_name = datatype_basename.lower() + "_param"
 
     def compute_custom_attrs_code() -> str:
-        possible_custom_attrs = gui_instance.possible_custom_attributes_with_generic()
+        possible_custom_attrs, generic_custom_attributes = gui_instance.possible_custom_attributes_with_generic()
         if possible_custom_attrs is None:
-            return ""
+            possible_plus_generic = generic_custom_attributes
+        else:
+            possible_plus_generic = copy.deepcopy(possible_custom_attrs)
+            possible_plus_generic.merge_attributes(generic_custom_attributes)
 
-        example_usage = possible_custom_attrs.example_usage(param_name)
+        example_usage = possible_plus_generic.example_usage(param_name)
         example_usage = code_utils.indent_code(example_usage, indent_size=4)
         r = "@fiatlight.with_custom_attrs(\n"
         r += example_usage
