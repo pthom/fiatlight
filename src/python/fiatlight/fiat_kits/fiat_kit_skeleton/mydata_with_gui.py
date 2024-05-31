@@ -173,3 +173,13 @@ class MydataWithGui(AnyDataWithGui[Mydata]):
 
     def clipboard_copy_str(self, value: Mydata) -> str:
         return "Mydata: clipboard_copy_str() not implemented yet"
+
+
+def register_gui() -> None:
+    from fiatlight.fiat_togui.to_gui import register_type
+
+    register_type(Mydata, MydataWithGui)
+
+
+# Register the GUI at startup
+register_gui()

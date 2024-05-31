@@ -1,19 +1,10 @@
-from fiatlight.fiat_core.possible_custom_attributes import PossibleCustomAttributes
 from fiatlight.fiat_types import CustomAttributesDict, JsonDict
 from fiatlight.fiat_core.any_data_with_gui import AnyDataWithGui
-from imgui_bundle import imgui
+from fiatlight.fiat_core.possible_custom_attributes import PossibleCustomAttributes
+from fiatlight.fiat_kits.fiat_dataframe.dataframe_presenter import _DATAFRAME_POSSIBLE_CUSTOM_ATTRIBUTES
 import pandas as pd
 
 from fiatlight.fiat_kits.fiat_dataframe.dataframe_presenter import DataFramePresenter
-
-
-class DataFramePossibleCustomAttributes(PossibleCustomAttributes):
-    # Here we will add all the possible custom attributes for presentation and other options.
-    def __init__(self) -> None:
-        super().__init__("DataFrameWithGui")
-
-
-_DATAFRAME_POSSIBLE_CUSTOM_ATTRIBUTES = DataFramePossibleCustomAttributes()
 
 
 class DataFrameWithGui(AnyDataWithGui[pd.DataFrame]):
@@ -61,11 +52,10 @@ class DataFrameWithGui(AnyDataWithGui[pd.DataFrame]):
         pass
 
     def present_str(self, value: pd.DataFrame) -> str:
-        return f"DataFrame: {len(value)} rows, {len(value.columns)} columns"
+        return self.dataframe_presenter.present_str(value)
 
     def present_custom(self, value: pd.DataFrame) -> None:
-        imgui.text("present_custom")
-        # We should probably use a distinct class such as DataFramePresenter here
+        self.dataframe_presenter.present_custom(value)
 
     @staticmethod
     def _EditCallbacksSection() -> None:
@@ -91,9 +81,16 @@ class DataFrameWithGui(AnyDataWithGui[pd.DataFrame]):
 
     @staticmethod
     def default_value_provider() -> pd.DataFrame:
-        # As for the edit section, we will probably not do anything sophisticated here.
-        # We could maybe create an example data frame with example data so that new users can quickly try the widget.
-        return pd.DataFrame()
+        # Here, we provide an example data frame to the user,
+        # using the Titanic dataset from the Data Science Dojo repository.
+        # (widely used in data science tutorials)
+        url = "https://raw.githubusercontent.com/datasciencedojo/datasets/master/titanic.csv"
+        try:
+            df = pd.read_csv(url)
+        except Exception as e:
+            print(f"Error loading sample dataset: {e}")
+            df = pd.DataFrame()  # Return an empty DataFrame in case of failure
+        return df
 
     @staticmethod
     def _OnChangeSection() -> None:
@@ -105,9 +102,7 @@ class DataFrameWithGui(AnyDataWithGui[pd.DataFrame]):
         pass
 
     def on_change(self, value: pd.DataFrame) -> None:
-        # Here we should transmit the new data frame to the presenter
-        # (if we use a separate presenter)
-        pass
+        self.dataframe_presenter.on_change(value)
 
     def on_heartbeat(self) -> bool:
         # Probably nothing to do here.
@@ -128,8 +123,7 @@ class DataFrameWithGui(AnyDataWithGui[pd.DataFrame]):
         return _DATAFRAME_POSSIBLE_CUSTOM_ATTRIBUTES
 
     def on_custom_attrs_changed(self, custom_attrs: CustomAttributesDict) -> None:
-        # Here we should update the presenter with the new custom attributes
-        pass
+        self.dataframe_presenter.on_custom_attrs_changed(custom_attrs)
 
     @staticmethod
     def _SerializationAndDeserializationSection() -> None:
@@ -144,13 +138,13 @@ class DataFrameWithGui(AnyDataWithGui[pd.DataFrame]):
         # Here we should save the GUI presentation options to a JSON dict
         # (columns width, etc.)
         # This will ask the presenter to save DataFramePresenterParams
-        return {}
+        return self.dataframe_presenter.save_gui_options_to_json()
 
     def load_gui_options_from_json(self, json_dict: JsonDict) -> None:
         # Here we should load the GUI presentation options from a JSON dict
         # (columns width, etc.)
         # This will ask the presenter to load DataFramePresenterParams
-        pass
+        self.dataframe_presenter.load_gui_options_from_json(json_dict)
 
     def _save_to_dict(self, value: pd.DataFrame) -> JsonDict:
         # Here we could save the data frame to a JSON dict,
@@ -174,3 +168,13 @@ class DataFrameWithGui(AnyDataWithGui[pd.DataFrame]):
     def clipboard_copy_str(self, value: pd.DataFrame) -> str:
         # Is there an easy way to export a clipboard-friendly version of the data frame?
         return value.to_string()
+
+
+def register_gui() -> None:
+    from fiatlight.fiat_togui.to_gui import register_type
+
+    register_type(pd.DataFrame, DataFrameWithGui)
+
+
+# Register the GUI at startup
+register_gui()
