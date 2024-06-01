@@ -13,6 +13,19 @@ fiatlight.register_type(DataType, DataTypeWithGui)`, where `DataType` is the typ
 
 `DataTypeWithGui` must inherit from `AnyDataWithGui` and implement the necessary callbacks.
 
+Explore the registry
+=====================
+
+The `fiatlight` command line utility is a powerful tool that allows you to explore the available widgets and types in Fiatlight. It can be used to list the available types, to print the GUI info for a given type, and to run a GUI demo for a given type.
+
+Here is the help message for the `fiatlight` command line utility:
+
+```bash
+%%bash
+fiatlight --help
+```
+
+See the page [Tutorials/fiatlight command line utility](tutorials_cli.ipynb) for more information.
 
 Primitive types
 ================

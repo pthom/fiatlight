@@ -97,9 +97,10 @@ def _md_to_notebook_content_parts(md_string: _CompositeMarkdown) -> _NotebookCon
     for i in range(0, len(parts), 3):
         # parts[i] contains the text part (either before the first code block or between code blocks)
         text_part = parts[i].strip()
-        if text_part:
-            part_with_github_links = _replace_python_links_by_github_links(text_part)
-            notebook_content.items.append(_Markdown(part_with_github_links))
+        # if text_part:
+        #     part_with_github_links = _replace_python_links_by_github_links(text_part)
+        #     notebook_content.items.append(_Markdown(part_with_github_links))
+        notebook_content.items.append(_Markdown(text_part))
 
         # Check if there is a subsequent code block
         if i + 2 < len(parts):

@@ -1,19 +1,9 @@
-from fiatlight.fiat_core.possible_custom_attributes import PossibleCustomAttributes
 from fiatlight.fiat_types import CustomAttributesDict, JsonDict
 from fiatlight.fiat_core.any_data_with_gui import AnyDataWithGui
 from imgui_bundle import imgui
 from fiatlight.fiat_kits.fiat_kit_skeleton.mydata import Mydata
 
-from fiatlight.fiat_kits.fiat_kit_skeleton.mydata_presenter import MydataPresenter
-
-
-class DataFramePossibleCustomAttributes(PossibleCustomAttributes):
-    # Here we will add all the possible custom attributes for presentation and other options.
-    def __init__(self) -> None:
-        super().__init__("DataFrameWithGui")
-
-
-_DATAFRAME_POSSIBLE_CUSTOM_ATTRIBUTES = DataFramePossibleCustomAttributes()
+from fiatlight.fiat_kits.fiat_kit_skeleton.mydata_presenter import MydataPresenter, MydataPossibleCustomAttributes
 
 
 class MydataWithGui(AnyDataWithGui[Mydata]):
@@ -123,9 +113,8 @@ class MydataWithGui(AnyDataWithGui[Mydata]):
         pass
 
     @staticmethod
-    def possible_custom_attributes() -> PossibleCustomAttributes | None:
-        # This is a method which we inherit from AnyDataWithGui.
-        return _DATAFRAME_POSSIBLE_CUSTOM_ATTRIBUTES
+    def possible_custom_attributes() -> MydataPossibleCustomAttributes | None:
+        return MydataPresenter.possible_custom_attributes()
 
     def on_custom_attrs_changed(self, custom_attrs: CustomAttributesDict) -> None:
         # Here we should update the presenter with the new custom attributes

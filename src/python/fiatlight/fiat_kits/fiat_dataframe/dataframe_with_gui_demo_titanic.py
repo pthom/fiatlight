@@ -54,7 +54,7 @@ def show_titanic_db(
 
 
 def main() -> None:
-    fl.fiat_run(show_titanic_db)
+    fl.fiat_run(show_titanic_db, app_name="dataframe_with_gui_demo_titanic")
 
 
 if __name__ == "__main__":

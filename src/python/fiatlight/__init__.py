@@ -32,6 +32,13 @@ def demo_assets_dir() -> str:
     return assets_dir
 
 
+def fiatlight_dir() -> str:
+    import os
+
+    this_dir = os.path.dirname(__file__)
+    return this_dir
+
+
 __all__ = [
     # sub packages
     "fiat_core",
@@ -64,6 +71,7 @@ __all__ = [
     "fire_once_at_frame_start",
     # from here
     "demo_assets_dir",
+    "fiatlight_dir",
     # fiat_kits subpackages
     "fiat_image",
     "fiat_array",
