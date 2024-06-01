@@ -552,7 +552,7 @@ class FunctionWithGui:
     #     - doc_is_markdown: if True, the doc string is in Markdown format (default: True)
     #     - doc_user: the documentation string. If not provided, the function docstring will be used
     #     - doc_show_source: if True, the source code of the function will be displayed in the GUI
-    doc_display: bool = False
+    doc_display: bool = True
     doc_markdown: bool = True
     doc_user: str = ""
     doc_show_source: bool = False
@@ -612,7 +612,7 @@ class FunctionWithGui:
     #     - doc_is_markdown: if True, the doc string is in Markdown format (default: True)
     #     - doc_user: the documentation string. If not provided, the function docstring will be used
     #     - doc_show_source: if True, the source code of the function will be displayed in the GUI
-    doc_display: bool = False
+    doc_display: bool = True
     doc_markdown: bool = True
     doc_user: str = ""
     doc_show_source: bool = False
