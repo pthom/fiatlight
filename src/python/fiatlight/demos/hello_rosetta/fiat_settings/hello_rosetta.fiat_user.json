@@ -1,0 +1,52 @@
+{
+    "functions_graph": {
+        "functions_nodes": {
+            "hello_rosetta": {
+                "inputs": {
+                    "name": {
+                        "name": "name",
+                        "data": {
+                            "type": "Unspecified"
+                        }
+                    },
+                    "age": {
+                        "name": "age",
+                        "data": {
+                            "type": "Primitive",
+                            "value": 28
+                        }
+                    }
+                },
+                "gui_options": {
+                    "inputs": {
+                        "name": {
+                            "width_em": 15.0
+                        }
+                    },
+                    "outputs": {
+                        "0": {
+                            "width_em": 15.0
+                        }
+                    },
+                    "internal_gui_options": {}
+                }
+            }
+        }
+    },
+    "functions_gui_settings": {
+        "hello_rosetta": {
+            "_show_input_details": {
+                "name": true,
+                "age": true
+            },
+            "_inputs_expanded": true,
+            "_show_output_details": {
+                "0": true
+            },
+            "_outputs_expanded": true,
+            "_show_internals_details": {},
+            "_internals_expanded": true,
+            "_internal_state_gui_expanded": true
+        }
+    }
+}

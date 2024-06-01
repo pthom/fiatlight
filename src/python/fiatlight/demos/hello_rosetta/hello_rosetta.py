@@ -23,7 +23,7 @@ User documentation:
 
 
 def hello_rosetta(name: str, age: int) -> str:
-    """`hello_rosetta`: A function that greets a person by name and age.
+    """hello_rosetta: A function that greets a person by name and age
     ====================================================================
     Args
     ----
@@ -34,11 +34,10 @@ def hello_rosetta(name: str, age: int) -> str:
     * `str`        : A greeting message, with a special welcome message for newcomers.
 
     *Rosetta is an old-fashioned lady, and can only understand non-accentuated latin letters,
-    spaces, and "-".
+    spaces, and "-". Her memory is failing, and she cannot remember more than 10 characters.
+    Her keyboard is broken, and she can only type one time the letter 'a' or 'A' per day.*
 
-    Her memory is failing, and she cannot remember more than 10 characters.
-    Her keyboard is broken, and she can only type one time the letter 'a' or 'A' per day.
-    Poor Rosetta!*
+    Poor Rosetta!
     """
 
     # Check input, Rosetta is intransigent
@@ -63,10 +62,31 @@ def hello_rosetta(name: str, age: int) -> str:
         return f"Hello, {name}, you are {age} years old."
 
 
-def main() -> None:
-    import fiatlight as fl
+# ======================================================================================================
 
-    fl.add_custom_attrs(
-        hello_rosetta,
-        age__range=(0, 125),
-    )
+import fiatlight as fl  # noqa
+
+
+def validate_name(name: str) -> fl.DataValidationResult:
+    if len(name) == 0:
+        return fl.DataValidationResult.error("Please enter your name.")
+    if len(name) > 10:
+        return fl.DataValidationResult.error("No more than 10 characters, please")
+    if not name.isalpha():
+        return fl.DataValidationResult.error("Only non-accentuated latin letters are allowed")
+    letters_a = list(filter(lambda x: x == "a" or x == "A", name))
+    if len(letters_a) > 1:
+        return fl.DataValidationResult.error("Only one 'a' or 'A' is allowed")
+
+    return fl.DataValidationResult.ok()
+
+
+fl.add_custom_attrs(
+    hello_rosetta,
+    age__range=(0, 125),
+    name__hint="Enter your name",
+    name__validate_value=validate_name,
+    doc_display=True,
+)
+
+fl.fiat_run(hello_rosetta)
