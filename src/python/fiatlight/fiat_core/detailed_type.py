@@ -159,6 +159,26 @@ class DetailedVar(Generic[DataType]):
         name_and_type_padded = name_and_type.ljust(width_name_and_type)
         return f"{name_and_type_padded}: {self.explanation} (default: {self.default_value})"
 
+    @staticmethod
+    def documentation_header() -> list[str]:
+        """Generates the header for the documentation."""
+        return ["Name", "Type", "Default", "Explanation"]
+
+    def documentation_cells(self) -> list[str]:
+        """Generates documentation for the variable, as a list of cells."""
+        from textwrap import wrap
+
+        def with_max_width(txt: str, width: int) -> str:
+            lines = wrap(txt, width=width)
+            return "\n".join(lines)
+
+        return [
+            with_max_width(self.name, width=32),
+            with_max_width(self.type_.type_str(), width=22),
+            with_max_width(str(self.default_value), width=20),
+            with_max_width(self.explanation, width=46),
+        ]
+
     def is_value_ok(self, value: Any) -> bool:
         """Checks if the given value is valid."""
         if not self.type_.is_value_type_ok(value):

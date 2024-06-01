@@ -121,19 +121,31 @@ class PossibleCustomAttributes:
 
     def documentation(self) -> str:
         width = 80
-        width_name_and_type = 35
 
-        lines = []  # noqa
-        lines.append(f"Available custom attributes for {self.parent_name}:")
-        lines.append("-" * width)
+        intro = f"Available custom attributes for {self.parent_name}:"
+        intro += "\n" + "-" * width
+
+        # Nice table with tabulate
+        from tabulate import tabulate, SEPARATING_LINE  # noqa
+        from textwrap import wrap  # noqa
+
+        tabulate_cells: list[list[str]] = []
         for attr in self._explained_attributes_or_section:
+            row_cells: list[str] = []
             if isinstance(attr, _ExplainedSection):
-                lines.append("")
-                lines.append(attr.explanation)
-                lines.append("-" * width)
+
+                def with_max_width(txt: str, width: int) -> str:
+                    lines = wrap(txt, width=width)
+                    return "\n".join(lines)
+
+                row_cells = ["", "", "", with_max_width(f"**{attr.explanation}**", 46)]
             else:
-                lines.append(attr.documentation(width_name_and_type))
-        return "\n".join(lines)
+                row_cells = attr.documentation_cells()
+            tabulate_cells.append(row_cells)
+
+        table = tabulate(tabulate_cells, headers=DetailedVar.documentation_header(), tablefmt="grid")
+        r = intro + "\n" + table
+        return r
 
     def example_usage(self, param_name: str) -> str:
         lines = []  # noqa

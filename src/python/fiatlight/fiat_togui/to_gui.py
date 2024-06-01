@@ -685,7 +685,15 @@ class GuiFactories:
 
             return r
 
-        return f"No GUI found for {gui_typename}"
+        # Failure, list all gui types
+        r = f'No GUI found for "{gui_typename}"\n'
+        r += "===============================\n"
+        r += "List of all GUI types:\n"
+        for factory in self._factories:
+            factored_gui = factory.gui_factory()
+            gui_typename = type(factored_gui).__name__
+            r += f"    {gui_typename}\n"
+        return r
 
     def _RegisterFactoriesSection(self) -> None:  # dummy method to create a section in the IDE  # noqa
         """
