@@ -47,7 +47,7 @@ def test_function_attributes() -> None:
         invoke_always_dirty=True,
         doc_display=True,
         doc_markdown=False,
-        doc_string="This is a test",
+        doc_user="This is a test",
     )
     def f(x: int) -> int:
         return x
@@ -58,7 +58,7 @@ def test_function_attributes() -> None:
     assert _f_gui.invoke_always_dirty
     assert _f_gui.doc_display
     assert not _f_gui.doc_markdown
-    assert _f_gui.doc_string == "This is a test"
+    assert _f_gui.doc_user == "This is a test"
 
 
 def test_function_attributes_wrong_type() -> None:

@@ -510,7 +510,10 @@ class FunctionPossibleCustomAttributes(PossibleCustomAttributes):
             True,
         )
         self.add_explained_attribute(
-            "doc_string", str, "The documentation string. If not provided, the function docstring will be used", ""
+            "doc_user", str, "The documentation string. If not provided, the function docstring will be used", ""
+        )
+        self.add_explained_attribute(
+            "doc_show_source", bool, "If True, the source code of the function will be displayed in the GUI", False
         )
 
 
@@ -547,10 +550,12 @@ class FunctionWithGui:
     # Optional user documentation to be displayed in the GUI
     #     - doc_display: if True, the doc string is displayed in the GUI (default: False)
     #     - doc_is_markdown: if True, the doc string is in Markdown format (default: True)
-    #     - doc_string: the documentation string. If not provided, the function docstring will be used
+    #     - doc_user: the documentation string. If not provided, the function docstring will be used
+    #     - doc_show_source: if True, the source code of the function will be displayed in the GUI
     doc_display: bool = False
     doc_markdown: bool = True
-    doc_string: str = ""
+    doc_user: str = ""
+    doc_show_source: bool = False
 
     #
     # Internal state GUI
@@ -605,10 +610,12 @@ class FunctionWithGui:
     # Optional user documentation to be displayed in the GUI
     #     - doc_display: if True, the doc string is displayed in the GUI (default: False)
     #     - doc_is_markdown: if True, the doc string is in Markdown format (default: True)
-    #     - doc_string: the documentation string. If not provided, the function docstring will be used
+    #     - doc_user: the documentation string. If not provided, the function docstring will be used
+    #     - doc_show_source: if True, the source code of the function will be displayed in the GUI
     doc_display: bool = False
     doc_markdown: bool = True
-    doc_string: str = ""
+    doc_user: str = ""
+    doc_show_source: bool = False
 
     #
     # Internal state GUI
@@ -760,8 +767,10 @@ class FunctionWithGui:
             self.doc_display = fn_custom_attributes["doc_display"]
         if "doc_markdown" in fn_custom_attributes:
             self.doc_markdown = fn_custom_attributes["doc_markdown"]
-        if "doc_string" in fn_custom_attributes:
-            self.doc_string = fn_custom_attributes["doc_string"]
+        if "doc_user" in fn_custom_attributes:
+            self.doc_user = fn_custom_attributes["doc_user"]
+        if "doc_show_source" in fn_custom_attributes:
+            self.doc_show_source = fn_custom_attributes["doc_show_source"]
 
     def set_invoke_live(self) -> None:
         """Set flags to make this a live function (called automatically at each frame)"""
@@ -1142,109 +1151,36 @@ class FunctionWithGui:
         # --------------------------------------------------------------------------------------------
         pass
 
-    def has_doc(self) -> bool:
-        """Return True if the function has a docstring"""
-        return self.get_function_doc() is not None
+    def get_function_userdoc(self) -> str | None:
+        """Return the user documentation of the function"""
+        from fiatlight.fiat_utils import docstring_utils
 
-    def get_function_doc(self) -> str | None:
+        if not self.doc_display:
+            return ""
+        if self.doc_user:
+            r = self.doc_user
+            r = docstring_utils.unindent_docstring(r)
+            return r
+        return self._get_function_docstring()
+
+    def _get_function_docstring(self) -> str | None:
         """Return the docstring of the function"""
+        from fiatlight.fiat_utils import docstring_utils
+
         if self._f_impl is None:
             return None
         if hasattr(self._f_impl, "__doc__"):
-            return self._f_impl.__doc__
+            docstring = self._f_impl.__doc__
+            if docstring is None:
+                return None
+            docstring = docstring_utils.unindent_docstring(docstring)
+            return docstring
         return None
-
-    def get_function_doc_as_markdown(self) -> str | None:
-        """Not implemented"""
-        raise NotImplementedError("This method is not implemented yet")
-        # Here be dragons...
-        #
-        # * PEP 257:
-        #     is quite short and specifies that docstring should look like this:
-        #     """Return an int (short one-liner info)
-        #
-        #     Optional additional description or example
-        #     (More details in several lines)
-        #
-        #     Args:
-        #     ...
-        #     """
-        #
-        # Google style guide (https://google.github.io/styleguide/pyguide.html):
-        #     specifies that docstring should look like this:
-        #
-        #    """Connects to the next available port.
-        #
-        #        Args:
-        #          minimum: A port value greater or equal to 1024.
-        #
-        #       Returns:
-        #         The new minimum port.
-        #     """
-        #
-        # Sphinx (https://sphinx-rtd-tutorial.readthedocs.io/en/latest/docstrings.html)
-        #    specifies that docstring should look like this:
-        #
-        #    """[Summary]
-        #
-        #       :param [ParamName]: [ParamDescription], defaults to [DefaultParamVal]
-        #       :type [ParamName]: [ParamType](, optional)
-        #       ...
-        #       :raises [ErrorType]: [ErrorDescription]
-        #       ...
-        #       :return: [ReturnDescription]
-        #       :rtype: [ReturnType]
-        # """
-
-        doc = self.get_function_doc()
-        if doc is None:
-            return None
-
-        # remove leading and trailing whitespace
-        doc = doc.strip()
-
-        has_multiple_lines = "\n" in doc
-        if not has_multiple_lines:
-            return doc
-
-        lines = doc.split("\n")
-        first_line = lines[0]
-
-        remaining_lines = lines[1:]
-        remaining_lines = [line.strip() for line in remaining_lines]
-        remaining_text = "\n".join(remaining_lines)
-
-        # Search for first occurrence of "Args:" or "Returns:" or "Raises:" or ":params:"
-        # and split the docstring at that point into
-        #     detailed description
-        #     parameters_description
-        params_markers = ["Args:", "Returns:", "Raises:", ":param"]
-        detailed_description = ""
-        parameters_description = ""
-        could_split = False
-        for marker in params_markers:
-            if marker in remaining_text:
-                pos = remaining_text.index(marker)
-                detailed_description = remaining_text[:pos]
-                parameters_description = remaining_text[pos:]
-                could_split = True
-                break
-        if not could_split:
-            parameters_description = remaining_text
-
-        # create markdown docstring
-        markdown_doc = ""
-        markdown_doc += f"## {first_line}\n\n"
-        markdown_doc += f"{detailed_description}\n\n"
-        markdown_doc += "### Parameters\n\n"
-        markdown_doc += "```"
-        markdown_doc += f"{parameters_description}\n\n"
-        markdown_doc += "```"
-
-        return markdown_doc
 
     def get_function_source_code(self) -> str | None:
         """Return the source code of the function"""
+        if not self.doc_show_source:
+            return None
         if self._f_impl is None:
             return None
         import inspect

@@ -130,7 +130,7 @@ class FunctionNodeGui:
 
         self._show_output_details = {i: True for i in range(self._function_node.function_with_gui.nb_outputs())}
 
-        self._fill_function_doc()
+        self._fill_function_docstring_and_source()
         self._fiat_internals_with_gui = {}
 
     # ==================================================================================================================
@@ -155,16 +155,11 @@ class FunctionNodeGui:
     def _Doc_Section() -> None:  # Dummy function to create a section in the IDE # noqa
         pass
 
-    def _fill_function_doc(self) -> None:
+    def _fill_function_docstring_and_source(self) -> None:
         self._function_doc = _FunctionDocElements()
-        fn_doc = self._function_node.function_with_gui.get_function_doc()
-        if fn_doc is not None:
-            first_line = fn_doc.split("\n")[0]
-            title_line = self._function_node.function_with_gui.name + "(): " + first_line
-            remaining_text = fn_doc[len(first_line) :]  # noqa
-            self._function_doc.title = title_line
-            self._function_doc.doc = remaining_text
         self._function_doc.source_code = self._function_node.function_with_gui.get_function_source_code()
+        self._function_doc.userdoc = self._function_node.function_with_gui.get_function_userdoc()
+        self._function_doc.userdoc_is_markdown = self._function_node.function_with_gui.doc_markdown
 
     def _has_doc(self) -> bool:
         return self._function_doc.has_info()
@@ -265,10 +260,6 @@ class FunctionNodeGui:
     def _draw_title(self, unique_name: str) -> None:
         fn_name = self._function_node.function_with_gui.name
         imgui.text(fn_name)
-        doc_title = self._function_doc.title
-        if doc_title is not None:
-            imgui.text(icons_fontawesome_6.ICON_FA_CIRCLE_INFO)
-            fiat_osd.set_widget_tooltip(doc_title)
         if unique_name != fn_name:
             imgui.text(f" (id: {unique_name})")
 
@@ -1089,14 +1080,22 @@ class FunctionNodeGui:
         def show_doc() -> None:
             from imgui_bundle import imgui_md
 
-            if self._function_doc.title is not None:
-                imgui_md.render("## " + self._function_doc.title)
-            if self._function_doc.doc is not None:
-                imgui.text_wrapped(self._function_doc.doc)
-            if self._function_doc.source_code is not None:
-                md = "### Source code\n\n"
-                md += f"```python\n{self._function_doc.source_code}\n```"
-                imgui_md.render(md)
+            with imgui_ctx.begin_vertical("function_doc"):
+                if self._function_doc.userdoc is not None:
+                    with imgui_ctx.begin_horizontal("header"):
+                        imgui.spring()
+                        imgui.text("User documentation")
+
+                    if self._function_doc.userdoc_is_markdown:
+                        imgui_md.render(self._function_doc.userdoc)
+                    else:
+                        imgui.text_wrapped(self._function_doc.userdoc)
+                    imgui.separator()
+
+                if self._function_doc.source_code is not None:
+                    md = "### Source code\n\n"
+                    md += f"```python\n{self._function_doc.source_code}\n```"
+                    imgui_md.render(md)
 
         with fontawesome_6_ctx():
             imgui.spring()
@@ -1206,12 +1205,12 @@ class _OutputHeaderLineElements:
 
 @dataclass
 class _FunctionDocElements:
-    title: str | None = None
-    doc: str | None = None
     source_code: str | None = None
+    userdoc: str | None = None
+    userdoc_is_markdown: bool = False
 
     def has_info(self) -> bool:
-        return self.title is not None or self.doc is not None or self.source_code is not None
+        return self.source_code is not None or self.userdoc is not None
 
 
 # ==================================================================================================================
