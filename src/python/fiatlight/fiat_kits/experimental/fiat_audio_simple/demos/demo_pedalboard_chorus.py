@@ -30,7 +30,7 @@ def sandbox() -> None:
     graph.add_function(add_chorus_effect)
     graph.add_link("MicrophoneGui", "add_chorus_effect")
 
-    fiatlight.fiat_run_graph(graph)
+    fiatlight.run(graph)
 
 
 if __name__ == "__main__":

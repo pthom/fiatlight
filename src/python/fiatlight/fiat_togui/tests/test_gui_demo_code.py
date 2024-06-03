@@ -29,6 +29,6 @@ import fiatlight
 def f(int_param: int) -> int:
     return int_param
 
-fiatlight.fiat_run(f)
+fiatlight.run(f)
     """,
     )

@@ -23,7 +23,7 @@ def main() -> None:
     graph = FunctionsGraph()
     graph.add_function(str_stats)
     graph.add_function(prompt_stats)
-    fiatlight.fiat_run_graph(graph)
+    fiatlight.run(graph)
 
 
 if __name__ == "__main__":

@@ -62,7 +62,7 @@ def main() -> None:
     graph.add_function(show_image_different_zoom_key)
     graph.add_function(show_image_only_display)
 
-    fl.fiat_run_graph(graph, app_name="fiat_image_custom_attrs_demo")
+    fl.run(graph, app_name="fiat_image_custom_attrs_demo")
 
 
 if __name__ == "__main__":

@@ -203,7 +203,7 @@ def sandbox() -> None:
 
     import fiatlight
 
-    fiatlight.fiat_run(f)
+    fiatlight.run(f)
 
 
 if __name__ == "__main__":

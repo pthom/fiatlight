@@ -1,6 +1,7 @@
 from fiatlight import fiat_core, fiat_widgets, fiat_types, fiat_runner, fiat_config, fiat_kits
 from fiatlight.fiat_core import AnyDataWithGui, FunctionWithGui, FunctionsGraph, FiatToGuiException
 from fiatlight.fiat_runner import (
+    run,
     fiat_run,
     fiat_run_composition,
     fiat_run_graph,
@@ -63,6 +64,7 @@ __all__ = [
     "register_base_model",
     "base_model_with_gui_registration",
     # from fiat_runner
+    "run",
     "fiat_run",
     "fiat_run_composition",
     "fiat_run_graph",

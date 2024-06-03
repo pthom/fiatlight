@@ -76,7 +76,7 @@ def main() -> None:
     graph.add_link("time_seconds", "phase_from_time_seconds")
     graph.add_link("phase_from_time_seconds", "sin_wave")
 
-    fl.fiat_run_graph(graph, app_name="Demo ImPlot")
+    fl.run(graph, app_name="Demo ImPlot")
 
 
 if __name__ == "__main__":

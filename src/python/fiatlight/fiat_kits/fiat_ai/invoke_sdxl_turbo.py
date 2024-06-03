@@ -109,7 +109,7 @@ invoke_sdxl_turbo.seed__edit_type = "slider_and_minus_plus"  # type: ignore
 def main_test_sdxl() -> None:
     import fiatlight
 
-    fiatlight.fiat_run(invoke_sdxl_turbo)
+    fiatlight.run(invoke_sdxl_turbo)
 
 
 if __name__ == "__main__":

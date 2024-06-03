@@ -28,7 +28,7 @@ Victor Hugo, extrait du recueil «Les Contemplations» (1856)
 
     f_gui = fiatlight.FunctionWithGui(f)
 
-    fiatlight.fiat_run(f_gui)
+    fiatlight.run(f_gui)
 
 
 if __name__ == "__main__":

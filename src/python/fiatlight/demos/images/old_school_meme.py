@@ -79,9 +79,9 @@ def main(use_stable_diffusion: bool) -> None:
     from fiatlight.fiat_kits.fiat_image import image_source
 
     if use_stable_diffusion:
-        fl.fiat_run_composition([invoke_sdxl_turbo, add_meme_text])
+        fl.run([invoke_sdxl_turbo, add_meme_text])
     else:
-        fl.fiat_run_composition([image_source, add_meme_text])
+        fl.run([image_source, add_meme_text])
 
 
 if __name__ == "__main__":

@@ -20,7 +20,7 @@ def usability_unexpected_none_output() -> None:
     def g(x: int) -> int:
         return x + 3
 
-    fiatlight.fiat_run_composition([f, g])
+    fiatlight.run([f, g])
 
 
 def usability_unexpected_none_input() -> None:
@@ -41,7 +41,7 @@ def usability_unexpected_none_input() -> None:
     def g(x: int) -> int:
         return x + 3
 
-    fiatlight.fiat_run_composition([f, g])
+    fiatlight.run([f, g])
 
 
 def usability_unexpected_none_input_with_change_callback() -> None:
@@ -67,7 +67,7 @@ def usability_unexpected_none_input_with_change_callback() -> None:
 
     g_gui.input("x").callbacks.on_change = on_change
 
-    fiatlight.fiat_run_composition([f, g_gui])
+    fiatlight.run([f, g_gui])
 
 
 def usability_expected_none() -> None:
@@ -86,7 +86,7 @@ def usability_expected_none() -> None:
             return 1000
         return x + 3
 
-    fiatlight.fiat_run_composition([f, g])
+    fiatlight.run([f, g])
 
 
 if __name__ == "__main__":

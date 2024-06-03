@@ -73,7 +73,7 @@ all_functions = [canny, dilate, oil_paint]
 def main() -> None:
     from fiatlight.fiat_kits.fiat_image import image_source
 
-    fl.fiat_run_composition([image_source, canny, dilate])
+    fl.run([image_source, canny, dilate])
 
 
 if __name__ == "__main__":

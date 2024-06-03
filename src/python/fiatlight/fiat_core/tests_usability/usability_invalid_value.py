@@ -12,4 +12,4 @@ def f(odd_int: int) -> int:
     return odd_int + 1
 
 
-fl.fiat_run(f)
+fl.run(f)

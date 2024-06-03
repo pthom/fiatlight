@@ -19,7 +19,7 @@ def main_dataclass() -> None:
     def f(param: MyParam) -> MyParam:
         return param
 
-    fiatlight.fiat_run(f)
+    fiatlight.run(f)
 
 
 def main_pydantic() -> None:
@@ -35,7 +35,7 @@ def main_pydantic() -> None:
     def f(param: MyParam) -> MyParam:
         return param
 
-    fiatlight.fiat_run(f)
+    fiatlight.run(f)
 
 
 if __name__ == "__main__":

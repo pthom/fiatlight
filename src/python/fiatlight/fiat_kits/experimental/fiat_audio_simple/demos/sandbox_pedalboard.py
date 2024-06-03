@@ -102,7 +102,7 @@ def main() -> None:
     graph.add_link("open_audio_file", "Save audio file")
     graph.add_link("open_audio_file", "readable_audio_file_to_sound_wave")
 
-    fiatlight.fiat_run_graph(graph)
+    fiatlight.run(graph)
 
 
 if __name__ == "__main__":

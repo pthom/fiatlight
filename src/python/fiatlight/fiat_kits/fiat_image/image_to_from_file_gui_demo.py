@@ -7,8 +7,8 @@ import fiatlight
 
 
 def main() -> None:
-    fiatlight.fiat_run_composition([image_from_file, lut_channels_in_colorspace, ImageToFileGui()])
-    # fiatlight.fiat_run_composition([image_from_file])
+    fiatlight.run([image_from_file, lut_channels_in_colorspace, ImageToFileGui()])
+    # fiatlight.run([image_from_file])
 
 
 if __name__ == "__main__":

@@ -12,7 +12,7 @@ def main() -> None:
     def f(s: str = "") -> str:
         return s
 
-    fl.fiat_run(f)
+    fl.run(f)
 
 
 if __name__ == "__main__":

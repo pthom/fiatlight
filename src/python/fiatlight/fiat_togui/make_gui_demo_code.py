@@ -40,7 +40,7 @@ def make_gui_demo_code(gui_instance: AnyDataWithGui[Any]) -> str:
     def f({param_name}: {datatype_str}) -> {datatype_str}:
         return {param_name}
 
-    fiatlight.fiat_run(f)
+    fiatlight.run(f)
     """[1:]
     code = code_utils.unindent_code(code)
     return code

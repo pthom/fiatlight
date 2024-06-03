@@ -43,7 +43,7 @@ def foo(a: float, b: float = 3.0, times_two: bool = False) -> float:
 # Run an app that displays the GUI for the function
 # where the user can input the values of the parameters
 # (or use the default values)
-fl.fiat_run(foo, app_name="Primitive Basic")
+fl.run(foo, app_name="Primitive Basic")
 ```
 
 Example with custom GUI options
@@ -60,7 +60,7 @@ import fiatlight as fl
 def to_fahrenheit(celsius: float) -> float:
     return celsius * 9 / 5 + 32
 
-fl.fiat_run(to_fahrenheit, app_name="Primitive Custom")
+fl.run(to_fahrenheit, app_name="Primitive Custom")
 ```
 
 Range limited numeric types
@@ -118,7 +118,7 @@ def save_lower_case_text_file(text: str, filename: TextPath_Save | None = None) 
     with open(filename, "w") as f:
         f.write(text.lower())
 
-fl.fiat_run_composition([read_text_file, save_lower_case_text_file], app_name="Read and Save Text File")
+fl.run([read_text_file, save_lower_case_text_file], app_name="Read and Save Text File")
 ```
 
 Color types
@@ -139,7 +139,7 @@ from fiatlight.fiat_types import ColorRgb, ColorRgba
 def color_chooser(color1: ColorRgb, color2: ColorRgba) -> str:
     return f"You selected: {color1=}, {color2=}"
 
-fl.fiat_run(color_chooser, app_name="Color Chooser")
+fl.run(color_chooser, app_name="Color Chooser")
 ```
 
 
@@ -158,7 +158,7 @@ from fiatlight.fiat_types import ColorRgb, ColorRgba
 def color_chooser(color: ColorRgb | None = None) -> str:
     return f"You selected: {color=}"
 
-fl.fiat_run(color_chooser, app_name="Optional Color")
+fl.run(color_chooser, app_name="Optional Color")
 ```
 
 
@@ -176,7 +176,7 @@ def list_words_in_file(filenames: TextPath) -> list[str]:
     with open(filenames) as f:
         return f.read().split()
 
-fl.fiat_run(list_words_in_file, app_name="List Words in File")
+fl.run(list_words_in_file, app_name="List Words in File")
 ```
 
 
@@ -201,7 +201,7 @@ class Color(Enum):
 def color_chooser(color: Color) -> str:
     return f"You selected: {color.name}"
 
-fl.fiat_run(color_chooser, app_name="Enum Color")
+fl.run(color_chooser, app_name="Enum Color")
 ```
 
 Dataclasses
@@ -231,7 +231,7 @@ def greet(person: Person) -> str:
     return f"Hello {person.name}, you are {person.age} years old."
 
 # Note: this app *will not* remember the values of the dataclass fields between runs
-fl.fiat_run(greet, app_name="Dataclass Person")
+fl.run(greet, app_name="Dataclass Person")
 ```
 
 Pydantic models
@@ -296,7 +296,7 @@ def process_image(image: TrainingImage) -> tuple[str, ImageU8_3]:
     return basename, img
 
 # Note: this app *will* remember the values of the Pydantic model fields between runs
-fl.fiat_run(process_image, app_name="Pydantic Image Model")
+fl.run(process_image, app_name="Pydantic Image Model")
 ```
 
 Custom types registration
@@ -438,7 +438,7 @@ In the screenshot, you can see the "edit" callback in action in the Param editio
 def f(distribution: NormalDistribution) -> NormalDistribution:
     return distribution
 
-fl.fiat_run(f, app_name="Normal Distribution")
+fl.run(f, app_name="Normal Distribution")
 ```
 
 
@@ -525,7 +525,7 @@ def circle_perimeter(radius: Length) -> Length:
     return Length(2 * 3.14159 * radius)
 
 # Run the function with the GUI
-fiatlight.fiat_run(circle_perimeter, app_name="Circle Perimeter in banana units")
+fiatlight.run(circle_perimeter, app_name="Circle Perimeter in banana units")
 ```
 
 

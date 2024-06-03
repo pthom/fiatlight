@@ -5,7 +5,7 @@ from fiatlight.fiat_kits.experimental import fiat_audio_simple
 
 
 def main() -> None:
-    fiatlight.fiat_run(fiat_audio_simple.sound_wave_from_file, app_name="Sound Wave Player Demo")
+    fiatlight.run(fiat_audio_simple.sound_wave_from_file, app_name="Sound Wave Player Demo")
 
 
 if __name__ == "__main__":

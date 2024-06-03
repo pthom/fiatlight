@@ -128,7 +128,7 @@ def main() -> None:
     graph.add_function(phase_from_time_seconds)
     graph.add_link("time_seconds", "phase_from_time_seconds", "time_")
     graph.add_link("phase_from_time_seconds", "interactive_sine_wave", "phase")
-    fiatlight.fiat_run_graph(graph, app_name="figure_with_gui_demo")
+    fiatlight.run(graph, app_name="figure_with_gui_demo")
 
 
 if __name__ == "__main__":

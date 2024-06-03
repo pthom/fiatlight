@@ -76,7 +76,7 @@ def add_toon_edges(
 
 def main() -> None:
     graph = fiatlight.FunctionsGraph.from_function_composition([image_source, add_toon_edges])
-    fiatlight.fiat_run_graph(graph)
+    fiatlight.run(graph)
 
 
 if __name__ == "__main__":

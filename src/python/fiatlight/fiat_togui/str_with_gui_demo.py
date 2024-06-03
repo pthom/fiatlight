@@ -21,7 +21,7 @@ def greet(name: str = "") -> str:
 
 
 def main() -> None:
-    fl.fiat_run(greet)
+    fl.run(greet)
 
 
 if __name__ == "__main__":

@@ -2,7 +2,7 @@ from enum import Enum
 
 
 def sandbox_optional() -> None:
-    from fiatlight import fiat_run_graph, FunctionsGraph
+    import fiatlight as fl
 
     def foo(x: int | None) -> int:
         if x is None:
@@ -10,12 +10,12 @@ def sandbox_optional() -> None:
         else:
             return x + 2
 
-    graph = FunctionsGraph.from_function_composition([foo])
-    fiat_run_graph(graph)
+    graph = fl.FunctionsGraph.from_function_composition([foo])
+    fl.run(graph)
 
 
 def sandbox_enum() -> None:
-    from fiatlight import fiat_run_graph, FunctionsGraph
+    import fiatlight as fl
 
     class MyEnum(Enum):
         A = 1
@@ -25,8 +25,8 @@ def sandbox_enum() -> None:
     def foo(x: MyEnum) -> int:
         return x.value
 
-    graph = FunctionsGraph.from_function_composition([foo])
-    fiat_run_graph(graph)
+    graph = fl.FunctionsGraph.from_function_composition([foo])
+    fl.run(graph)
 
 
 if __name__ == "__main__":

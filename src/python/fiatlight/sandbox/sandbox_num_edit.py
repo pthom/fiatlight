@@ -18,7 +18,7 @@ def main() -> None:
     graph.add_function(int_times_2)
     graph.add_function(float_times_2)
 
-    fiatlight.fiat_run_graph(graph)
+    fiatlight.run(graph)
 
 
 if __name__ == "__main__":

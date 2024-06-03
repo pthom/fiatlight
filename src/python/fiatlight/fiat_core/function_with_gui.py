@@ -21,8 +21,8 @@ Creating a FunctionWithGui object
      import fiatlight as fl
      def foo(a: int, b: float = 1.5) -> float:
          return a + b
-     # When invoking fiat_run, fiatlight will automatically wrap the function into a FunctionWithGui object
-     fl.fiat_run(foo, app_name="Automatic creation")
+     # When invoking run, fiatlight will automatically wrap the function into a FunctionWithGui object
+     fl.run(foo, app_name="Automatic creation")
      ```
 
      *Note: fiatlight handles the default values of the parameters, so the user can leave the float parameter empty,
@@ -40,12 +40,12 @@ Creating a FunctionWithGui object
      foo_gui = fl.FunctionWithGui(foo)
 
      # Method 1: directly run the function
-     # fl.fiat_run(foo_gui)
+     # fl.run(foo_gui)
 
      # Method 2: create a graph and run it
      graph = fl.FunctionsGraph()
      graph.add_function(foo_gui)
-     fl.fiat_run_graph(graph, app_name="Manual creation")
+     fl.run(graph, app_name="Manual creation")
      ```
 
 Use registered types
@@ -75,13 +75,13 @@ In the example below:
         return fig
 
 
-    fl.fiat_run(words_length_histogram, app_name="Registered types")
+    fl.run(words_length_histogram, app_name="Registered types")
     ```
 
 Customizing parameters GUI
 ==========================
 
- As an example, let's consider the function "my_asin" below: if you run this function with `fiat_run()`,
+ As an example, let's consider the function "my_asin" below: if you run this function with `run()`,
  the GUI will allow the user to enter any float value for x.
  This lets the user enter values that may not be valid for the function.
 
@@ -93,7 +93,7 @@ Customizing parameters GUI
          import math
          return math.asin(x)
 
-     fl.fiat_run(my_asin, app_name="No range restriction")
+     fl.run(my_asin, app_name="No range restriction")
      ```
 
 
@@ -118,7 +118,7 @@ with a range from -1 to 1.
     # Note: we could have obtained the same effect with the commented line below:
     #    my_asin.x__range = (-1, 1)
 
-    fl.fiat_run(my_asin, app_name="Range restriction")
+    fl.run(my_asin, app_name="Range restriction")
     ```
 
 Available customization options
@@ -194,7 +194,7 @@ A full example with custom attributes for function parameters
         ax.hist(data, bins=bins, color="blue", alpha=0.7)
         return fig
 
-    fiatlight.fiat_run(interactive_histogram, app_name="Custom attributes")
+    fiatlight.run(interactive_histogram, app_name="Custom attributes")
     ```
 
 Customizing the GUI for a function parameter or output
@@ -233,7 +233,7 @@ You can also customize the GUI for a parameter or output by setting a custom cal
     fahrenheit_to_celsius_gui.output(0).set_present_custom_callback(present_temperature)
     fahrenheit_to_celsius_gui.input("fahrenheit").set_edit_callback(edit_temperature)
 
-    fl.fiat_run(fahrenheit_to_celsius_gui, app_name="Custom callbacks")
+    fl.run(fahrenheit_to_celsius_gui, app_name="Custom callbacks")
     ```
 
 
@@ -273,7 +273,7 @@ def get_camera_image() -> ImageU8_3 | None:
 # Set flags to make this a live function (called automatically at each frame)
 get_camera_image.invoke_always_dirty = True
 
-fl.fiat_run(get_camera_image, app_name="Live camera image")
+fl.run(get_camera_image, app_name="Live camera image")
 ```
 
 **Example: an async function**
@@ -290,7 +290,7 @@ def slow_function() -> int:
     return 42
 
 slow_function.invoke_async = True
-fl.fiat_run(slow_function, app_name="Async function")
+fl.run(slow_function, app_name="Async function")
 ```
 
 **Example: a function that needs to be called manually**
@@ -305,7 +305,7 @@ def my_function(a: int, b: float) -> float:
     return a + b
 
 my_function.invoke_manually = True
-fl.fiat_run(my_function, app_name="Manual invocation")
+fl.run(my_function, app_name="Manual invocation")
 ```
 
 
@@ -333,7 +333,7 @@ You can see it in action with the following code:
         return cv2.warpAffine(image, transform, (image.shape[1], image.shape[0]))  # type: ignore
 
     camera_provider_gui = CameraImageProviderGui()
-    fl.fiat_run_composition([camera_provider_gui, rotate_45], app_name="Camera provider with rotation")
+    fl.run([camera_provider_gui, rotate_45], app_name="Camera provider with rotation")
     ```
 
 **Commented extracts of [camera_image_provider.py](../fiat_kits/fiat_image/camera_image_provider.py)**
@@ -425,7 +425,7 @@ import fiatlight as fl
 from fiatlight.fiat_kits.fiat_image import ImageU8_GRAY, ImageU8_3, image_source
 from fiatlight.demos.images.toon_edges import add_toon_edges
 
-fl.fiat_run_composition([image_source, add_toon_edges], app_name="Toon edges")
+fl.run([image_source, add_toon_edges], app_name="Toon edges")
 ```
 
 -------------------------------------------------------------------------------

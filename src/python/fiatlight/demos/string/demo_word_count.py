@@ -70,7 +70,7 @@ def filter_out_short_words(words: List[str], min_length: int = 4) -> List[str]:
 def main() -> None:
     import fiatlight as fl
 
-    fl.fiat_run_composition(
+    fl.run(
         [
             text_from_file,
             str_lower,

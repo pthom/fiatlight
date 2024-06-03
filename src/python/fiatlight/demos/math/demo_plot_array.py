@@ -34,7 +34,7 @@ def make_spirograph_curve(
 
 
 def main() -> None:
-    fl.fiat_run(make_spirograph_curve)
+    fl.run(make_spirograph_curve)
 
 
 if __name__ == "__main__":

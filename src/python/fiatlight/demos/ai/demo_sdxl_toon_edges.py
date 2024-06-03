@@ -5,9 +5,7 @@ from fiatlight.fiat_kits.fiat_image import lut_channels_in_colorspace
 
 
 def main() -> None:
-    fl.fiat_run_composition(
-        [invoke_sdxl_turbo, lut_channels_in_colorspace, add_toon_edges], app_name="demo_sdxl_toon_edges"
-    )
+    fl.run([invoke_sdxl_turbo, lut_channels_in_colorspace, add_toon_edges], app_name="demo_sdxl_toon_edges")
 
 
 if __name__ == "__main__":

@@ -4,7 +4,7 @@ from fiatlight.fiat_kits.experimental import fiat_audio_simple
 
 def main() -> None:
     fn = fiat_audio_simple.MicrophoneGui()
-    fiatlight.fiat_run(fn)
+    fiatlight.run(fn)
 
 
 if __name__ == "__main__":

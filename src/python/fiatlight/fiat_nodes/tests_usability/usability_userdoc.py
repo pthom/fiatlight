@@ -13,7 +13,7 @@ def usability_with_md_docstring() -> None:
         """
         return x + 1
 
-    fl.fiat_run(f)
+    fl.run(f)
 
 
 def usability_with_md_doc_user() -> None:
@@ -29,7 +29,7 @@ def usability_with_md_doc_user() -> None:
     def f2(x: int) -> int:
         return x + 1
 
-    fl.fiat_run(f2)
+    fl.run(f2)
 
 
 if __name__ == "__main__":

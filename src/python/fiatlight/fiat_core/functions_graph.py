@@ -21,7 +21,7 @@ FunctionsGraph. See the examples below.
 import fiatlight as fl
 def f(x: int) -> int:
     return x + 1
-fl.fiat_run(f, app_name="Single function")
+fl.run(f, app_name="Single function")
 ```
 
 *Chained functions*:
@@ -31,7 +31,7 @@ def f(x: int) -> int:
     return x + 1
 def g(x: int) -> int:
     return x * 2
-fl.fiat_run_composition([f, g], app_name="Chained functions")
+fl.run([f, g], app_name="Chained functions")
 ```
 
 When you need to create a FunctionsGraph
@@ -81,7 +81,7 @@ graph.add_link("square_2", "add", dst_input_name="y")
 
 
 # 4. Run the graph
-fl.fiat_run_graph(graph, app_name="Manual graph")
+fl.run(graph, app_name="Manual graph")
 ```
 
 -------------------------------------------------------------------------------

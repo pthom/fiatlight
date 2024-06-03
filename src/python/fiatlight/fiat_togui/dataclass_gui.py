@@ -33,7 +33,7 @@ Usage example
     def f(param: MyParam) -> MyParam:
         return param
 
-    fiatlight.fiat_run(f)
+    fiatlight.run(f)
 """
 
 import copy

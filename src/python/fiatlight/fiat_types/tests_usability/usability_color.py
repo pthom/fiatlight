@@ -6,4 +6,4 @@ def f(c3f: ColorRgbFloat, c4f: ColorRgbaFloat, c3: ColorRgb, c4: ColorRgba) -> N
     pass
 
 
-fl.fiat_run(f)
+fl.run(f)

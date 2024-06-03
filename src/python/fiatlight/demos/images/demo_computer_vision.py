@@ -14,7 +14,7 @@ def main() -> None:
     graph.add_function_composition([canny, dilate])
     graph.add_link("image_source", "canny")
 
-    fl.fiat_run_graph(graph, app_name="demo_computer_vision")
+    fl.run(graph, app_name="demo_computer_vision")
 
 
 if __name__ == "__main__":

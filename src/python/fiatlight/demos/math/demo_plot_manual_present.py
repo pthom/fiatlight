@@ -65,7 +65,7 @@ def main() -> None:
     graph.function_with_gui_of_name("make_sin").output().set_present_custom_callback(present_plot_draggable)
     # graph.function_with_gui("make_sin").output().set_present_custom_callback(present_plot_standard)
 
-    fl.fiat_run_graph(graph)
+    fl.run(graph)
 
 
 if __name__ == "__main__":

@@ -89,4 +89,4 @@ fl.add_custom_attrs(
     doc_display=True,
 )
 
-fl.fiat_run(hello_rosetta)
+fl.run(hello_rosetta)

@@ -10,7 +10,7 @@ def to_lower(text: str) -> str:
 
 
 def main() -> None:
-    fiatlight.fiat_run_composition([text_from_file, to_lower, TextToFileGui()])
+    fiatlight.run([text_from_file, to_lower, TextToFileGui()])
 
 
 if __name__ == "__main__":

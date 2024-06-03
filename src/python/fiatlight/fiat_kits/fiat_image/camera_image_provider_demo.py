@@ -31,7 +31,7 @@ def apply_image_effect(image: ImageU8_3, effect: Optional[ImageEffect] = None) -
 
 def main() -> None:
     camera_gui = CameraImageProviderGui()
-    fiatlight.fiat_run_composition([camera_gui, apply_image_effect, add_meme_text])
+    fiatlight.run([camera_gui, apply_image_effect, add_meme_text])
 
 
 if __name__ == "__main__":

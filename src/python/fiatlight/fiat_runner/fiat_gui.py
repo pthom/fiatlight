@@ -698,3 +698,24 @@ def fiat_run_composition(
     """
     functions_graph = FunctionsGraph.from_function_composition(composition)
     fiat_run_graph(functions_graph, params=params, app_name=app_name)
+
+
+def run(
+    fn: Function | FunctionWithGui | List[Function | FunctionWithGui] | FunctionsGraph,
+    params: FiatGuiParams | None = None,
+    app_name: str | None = None,
+) -> None:
+    """Runs a function, a composition of functions, or a functions graph in the Fiat GUI.
+
+    - app_name: will be displayed in the window title, and used to save/load the user inputs and graph composition.
+                if it is None, then the name of the calling module will be used.
+                Note: inside a notebook, specifying app_name is mandatory, since the module name is not available.
+    """
+    if isinstance(fn, FunctionsGraph):
+        fiat_run_graph(fn, params=params, app_name=app_name)
+    elif isinstance(fn, list):
+        fiat_run_composition(fn, params=params, app_name=app_name)
+    elif isinstance(fn, FunctionWithGui):
+        fiat_run(fn, params=params, app_name=app_name)
+    else:
+        fiat_run(fn, params=params, app_name=app_name)

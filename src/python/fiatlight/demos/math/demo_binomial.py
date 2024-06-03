@@ -42,7 +42,7 @@ def main() -> None:
     random_binomial_gui.input("p").set_edit_callback(edit_probability)
     random_binomial_gui.input("n").set_edit_callback(edit_n)
 
-    fl.fiat_run(random_binomial_gui)
+    fl.run(random_binomial_gui)
 
 
 if __name__ == "__main__":

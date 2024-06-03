@@ -160,7 +160,7 @@ def main() -> None:
     graph.add_link("MicrophoneGui", "show_fundamental_freq_graph")
     graph.add_link("MicrophoneGui", "show_harmonic_percussive_graph")
 
-    fiatlight.fiat_run_graph(graph, app_name="demo_audio_processing")
+    fiatlight.run(graph, app_name="demo_audio_processing")
 
 
 if __name__ == "__main__":
