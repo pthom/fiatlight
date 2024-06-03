@@ -8,7 +8,6 @@ from fiatlight.fiat_types.base_types import (
 )
 from fiatlight.fiat_types.error_types import Error, ErrorValue, Unspecified, UnspecifiedValue, InvalidValue
 from fiatlight.fiat_types.function_types import DataPresentFunction, DataEditFunction  # noqa
-from fiatlight.fiat_core.togui_exception import FiatToGuiException
 from .any_data_gui_callbacks import AnyDataGuiCallbacks
 from .possible_custom_attributes import PossibleCustomAttributes
 from imgui_bundle import imgui
@@ -209,24 +208,23 @@ class AnyDataWithGui(Generic[DataType]):
         if possible_custom_attrs is not None:
             all_custom_attrs.merge_attributes(copy.copy(possible_custom_attrs))
 
-        try:
-            all_custom_attrs.raise_exception_if_bad_custom_attrs(custom_attrs)
-        except FiatToGuiException as e:
-            msg_error = f'''
-                Cannot set custom attributes for {self._type} in class {self.__class__}
-                    Please override the possible_custom_attributes() method in the class {self.__class__}
-                    with the following signature:
-
-                        @staticmethod
-                        def possible_custom_attributes() -> PossibleCustomAttributes | None:
-                            """Return the possible custom attributes for this type, if available.
-
-                            It is advised to return a global variable, to avoid creating
-                            a new instance each time this method is called.
-                            """
-                            ...
-                '''
-            raise FiatToGuiException(msg_error) from e
+        all_custom_attrs.raise_exception_if_bad_custom_attrs(custom_attrs)
+        # except FiatToGuiException as e:
+        #     msg_error = f'''
+        #         Cannot set custom attributes for {self._type} in class {self.__class__}
+        #             Please override the possible_custom_attributes() method in the class {self.__class__}
+        #             with the following signature:
+        #
+        #                 @staticmethod
+        #                 def possible_custom_attributes() -> PossibleCustomAttributes | None:
+        #                     """Return the possible custom attributes for this type, if available.
+        #
+        #                     It is advised to return a global variable, to avoid creating
+        #                     a new instance each time this method is called.
+        #                     """
+        #                     ...
+        #         '''
+        #     raise FiatToGuiException(msg_error) from e
 
         self.custom_attrs.update(custom_attrs)
         if self.callbacks.on_custom_attrs_changed is not None:
