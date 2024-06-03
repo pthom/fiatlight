@@ -44,6 +44,7 @@ from fiatlight.fiat_types import JsonDict, Unspecified, Error
 from fiatlight.fiat_config import get_fiat_config, FiatColorType
 from fiatlight.fiat_widgets import fiat_osd
 from fiatlight.fiat_core.togui_exception import FiatToGuiException
+from fiatlight.fiat_types.base_types import CustomAttributesDict
 from imgui_bundle import imgui, imgui_ctx, hello_imgui
 from typing import Type, Any, TypeVar, List
 from dataclasses import is_dataclass
@@ -81,7 +82,9 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
 
     _parameters_with_gui: List[ParamWithGui[Any]]
 
-    def __init__(self, dataclass_type: Type[DataclassLikeType], param_attrs: dict[str, Any] | None = None) -> None:
+    def __init__(
+        self, dataclass_type: Type[DataclassLikeType], param_attrs: CustomAttributesDict | None = None
+    ) -> None:
         super().__init__(dataclass_type)
         if param_attrs is not None:
             self._custom_attrs = param_attrs
@@ -297,7 +300,9 @@ class DataclassGui(DataclassLikeGui[DataclassLikeType]):
 class BaseModelGui(DataclassLikeGui[DataclassLikeType]):
     """A sophisticated GUI for a pydantic model. Can edit and present all members of the model. Can handle nested models."""
 
-    def __init__(self, dataclass_type: Type[DataclassLikeType], param_attrs: dict[str, Any] | None = None) -> None:
+    def __init__(
+        self, dataclass_type: Type[DataclassLikeType], param_attrs: CustomAttributesDict | None = None
+    ) -> None:
         if not issubclass(dataclass_type, BaseModel):
             raise FiatToGuiException(f"{dataclass_type} is not a pydantic model")
         super().__init__(dataclass_type, param_attrs)  # type: ignore
