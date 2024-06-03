@@ -1,41 +1,8 @@
-from typing import Tuple, TypeAlias, Optional
-from numpy.typing import NDArray
+from typing import Tuple, Optional
 import cv2
 import numpy as np
 from fiatlight.fiat_kits.fiat_image import ImageU8, ColorType, ColorConversion
-from pydantic import BaseModel
-
-LutTable: TypeAlias = NDArray[np.uint8]  # an array of 256 elements (LUT, aka Look-Up Table values)
-
-
-class LutParams(BaseModel):
-    """Simple parameters to create a LUT (Look-Up Table) transformation to an image"""
-
-    pow_exponent: float = 1.0
-    min_in: float = 0.0
-    min_out: float = 0.0  # <=> 0
-    max_in: float = 1.0  # <=> 255
-    max_out: float = 1.0
-
-    def to_table(self) -> LutTable:
-        x = np.arange(0.0, 1.0, 1.0 / 256.0)
-        y = (x - self.min_in) / (self.max_in - self.min_in)
-        y = np.clip(y, 0.0, 1.0)
-        y = np.power(y, self.pow_exponent)
-        y = np.clip(y, 0.0, 1.0)
-        y = self.min_out + (self.max_out - self.min_out) * y
-        y = np.clip(y, 0.0, 1.0)
-        lut_uint8 = (y * 255.0).astype(np.uint8)
-        return lut_uint8
-
-    def is_default(self) -> bool:
-        return (
-            self.pow_exponent == 1.0
-            and self.min_in == 0.0
-            and self.min_out == 0.0
-            and self.max_in == 1.0
-            and self.max_out == 1.0
-        )
+from .lut_types import LutParams, LutTable
 
 
 def lut_with_params(image: ImageU8, params: LutParams) -> ImageU8:
@@ -82,10 +49,10 @@ def lut_channels_in_colorspace(
     and the image is converted back to the original color space (color_space_src).
     """
 
-    image_color_conversion_1 = ColorConversion(color_space_src, color_space_lut)
+    image_color_conversion_1 = ColorConversion(src_color=color_space_src, dst_color=color_space_lut)
     if image_color_conversion_1.conversion_code() is None:
         raise ValueError(f"Conversion from {color_space_src} to {color_space_lut} is not available")
-    image_color_conversion_2 = ColorConversion(color_space_lut, color_space_src)
+    image_color_conversion_2 = ColorConversion(src_color=color_space_lut, dst_color=color_space_src)
     if image_color_conversion_2.conversion_code() is None:
         raise ValueError(f"Conversion from {color_space_lut} to {color_space_src} is not available")
 

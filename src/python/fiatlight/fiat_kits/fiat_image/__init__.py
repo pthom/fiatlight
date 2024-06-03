@@ -14,14 +14,12 @@ from .image_types import (
 )
 from .image_gui import ImageWithGui, ImagePresenterParams, image_source, image_custom_attributes_documentation
 from .cv_color_type import ColorType, ColorConversion
-from .cv_color_type_gui import ColorConversionWithGui
 from .lut_functions import (
-    LutParams,
-    LutTable,
     lut_with_params,
     lut_channels_with_params,
     lut_channels_in_colorspace,
 )
+from .lut_types import LutParams, LutTable
 from .lut_gui import LutParamsWithGui
 from .overlay_alpha_image import overlay_alpha_image
 from .image_to_from_file_gui import image_from_file, ImageToFileGui
@@ -33,7 +31,6 @@ def _register_factories() -> None:
     from fiatlight.fiat_togui.to_gui import register_type, register_enum
 
     _register_image_type_factories()
-    register_type(ColorConversion, ColorConversionWithGui)
     register_type(LutParams, LutParamsWithGui)
     register_enum(ColorType)
 

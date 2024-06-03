@@ -2,7 +2,7 @@ from typing import Tuple, Optional, TypeAlias
 import math
 from fiatlight.fiat_core import AnyDataWithGui
 from fiatlight.fiat_kits.fiat_image import ImageU8
-from fiatlight.fiat_kits.fiat_image.lut_functions import LutParams, LutTable
+from fiatlight.fiat_kits.fiat_image.lut_types import LutParams, LutTable
 from imgui_bundle import immapp, imgui, immvision
 
 

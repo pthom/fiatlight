@@ -4,6 +4,8 @@ import cv2
 from typing import TypeAlias, Any
 from numpy.typing import NDArray
 from fiatlight.fiat_kits.fiat_image.image_types import ImageU8
+from fiatlight.fiat_togui.to_gui import base_model_with_gui_registration
+from pydantic import BaseModel
 
 
 CvColorConversionCode: TypeAlias = int
@@ -40,14 +42,14 @@ class ColorType(enum.Enum):
         if conversion_code is None:
             return None
         else:
-            return ColorConversion(self, ColorType.BGR)
+            return ColorConversion(src_color=self, dst_color=ColorType.BGR)
 
     def color_conversion_from_bgr(self) -> Optional["ColorConversion"]:
         conversion_code = _optional_cv_color_conversion_code_between(ColorType.BGR, self)
         if conversion_code is None:
             return None
         else:
-            return ColorConversion(ColorType.BGR, self)
+            return ColorConversion(src_color=ColorType.BGR, dst_color=self)
 
     @staticmethod
     def available_color_types_for_image(image: NDArray[Any]) -> List["ColorType"]:
@@ -81,15 +83,12 @@ class ColorType(enum.Enum):
         return _optional_cv_color_conversion_code_between(self, dst_color)
 
 
-class ColorConversion:
+@base_model_with_gui_registration()
+class ColorConversion(BaseModel):
     """A color conversion from one color space to another (color spaces use the ColorType enum)."""
 
-    src_color: ColorType
-    dst_color: ColorType
-
-    def __init__(self, src_color: ColorType = ColorType.RGB, dst_color: ColorType = ColorType.BGR) -> None:
-        self.src_color = src_color
-        self.dst_color = dst_color
+    src_color: ColorType = ColorType.RGB
+    dst_color: ColorType = ColorType.BGR
 
     def conversion_code(self) -> Optional[CvColorConversionCode]:
         return self.src_color.conversion_code(self.dst_color)
