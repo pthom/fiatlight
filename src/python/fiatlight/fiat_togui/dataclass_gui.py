@@ -95,6 +95,12 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
         self.fill_callbacks()
         self._apply_param_attrs()
 
+    def param_of_name(self, name: str) -> ParamWithGui[Any]:
+        for param_gui in self._parameters_with_gui:
+            if param_gui.name == name:
+                return param_gui
+        raise ValueError(f"Parameter {name} not found")
+
     def _apply_param_attrs(self) -> None:
         if self._custom_attrs is None:
             return
@@ -301,13 +307,25 @@ class BaseModelGui(DataclassLikeGui[DataclassLikeType]):
     """A sophisticated GUI for a pydantic model. Can edit and present all members of the model. Can handle nested models."""
 
     def __init__(
-        self, dataclass_type: Type[DataclassLikeType], param_attrs: CustomAttributesDict | None = None
+        self, basemodel_type: Type[DataclassLikeType], param_attrs: CustomAttributesDict | None = None
     ) -> None:
-        if not issubclass(dataclass_type, BaseModel):
-            raise FiatToGuiException(f"{dataclass_type} is not a pydantic model")
-        super().__init__(dataclass_type, param_attrs)  # type: ignore
+        if not issubclass(basemodel_type, BaseModel):
+            raise FiatToGuiException(f"{basemodel_type} is not a pydantic model")
+        super().__init__(basemodel_type, param_attrs)  # type: ignore
         self.callbacks.load_from_dict = self._load_from_dict
         self.callbacks.save_to_dict = self._save_to_dict
+
+        # Look for fields with default_factory
+        self._initialize_fields()
+
+    def _initialize_fields(self) -> None:
+        basemodel_type = self._type
+        assert issubclass(basemodel_type, BaseModel)
+        for field_name, model_field in basemodel_type.model_fields.items():
+            param = self.param_of_name(field_name)
+            if model_field.default_factory:
+                param.default_value = model_field.default_factory()
+                param.data_with_gui.callbacks.default_value_provider = model_field.default_factory
 
     @staticmethod
     def _save_to_dict(value: DataclassLikeType) -> JsonDict:

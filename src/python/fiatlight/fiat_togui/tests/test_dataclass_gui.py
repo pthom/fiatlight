@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 import fiatlight
 from fiatlight.fiat_togui.dataclass_gui import DataclassGui, DataclassLikeGui, BaseModelGui
@@ -104,6 +104,38 @@ def test_base_model_gui() -> None:
     assert f_gui_param_gui._type == MyParam
     assert len(f_gui_param_gui._parameters_with_gui) == 3
     assert f_gui_param_gui._parameters_with_gui[0].name == "x"
+
+
+def test_base_model_with_field_default() -> None:
+    class MyParam(BaseModel):
+        x: list[int] = Field(default=[3])
+
+    register_base_model(MyParam)
+    my_param_gui = BaseModelGui(MyParam)
+    assert my_param_gui._type == MyParam
+    assert my_param_gui.callbacks.default_value_provider is not None
+    default_value = my_param_gui.callbacks.default_value_provider()
+    assert default_value.x == [3]
+
+
+def test_base_model_with_field_default_factory() -> None:
+    class Foo(BaseModel):
+        a: int = 0
+
+    class MyParam(BaseModel):
+        foo: Foo = Field(default_factory=Foo)
+        x: int = Field(default=3)
+
+    register_base_model(Foo)
+    register_base_model(MyParam)
+
+    my_param_gui = BaseModelGui(MyParam)
+    assert my_param_gui._type == MyParam
+    assert isinstance(my_param_gui.value, fiatlight.fiat_types.Unspecified)
+    assert my_param_gui.callbacks.default_value_provider is not None
+    default_value = my_param_gui.callbacks.default_value_provider()
+    assert isinstance(default_value.foo, Foo)
+    assert default_value.x == 3
 
 
 def test_decorators() -> None:
