@@ -29,6 +29,7 @@ def image_from_file(path: ImagePath, convert_bgr_to_rgb: bool = False) -> ImageU
 class ImageToFileGui(FunctionWithGui):
     _save_dialog: pfd.save_file | None = None
     _image: ImageU8_3 | None = None
+    _exception_message: str | None = None
 
     def __init__(self) -> None:
         super().__init__(self.f, "ImageToFile")
@@ -48,7 +49,10 @@ class ImageToFileGui(FunctionWithGui):
         import cv2
 
         assert self._image is not None
-        cv2.imwrite(path, self._image)
+        try:
+            cv2.imwrite(path, self._image)
+        except Exception:
+            self._exception_message = f"Failed to write image to file {path}"
 
     def _internal_state_gui(self) -> bool:
         if self._image is None:
@@ -59,4 +63,10 @@ class ImageToFileGui(FunctionWithGui):
             selected_file = self._save_dialog.result()
             self.do_write(selected_file)  # type: ignore
             self._save_dialog = None
+        if self._exception_message is not None:
+            from fiatlight import fiat_config as fc
+
+            color = fc.get_fiat_config().style.color_as_vec4(fc.FiatColorType.ExceptionError)
+            imgui.text_colored(color, self._exception_message)
+            return False
         return False
