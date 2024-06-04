@@ -33,7 +33,6 @@ class MemeTextParams(BaseModel):
     is_image_bgr: bool = True
 
 
-@fl.with_custom_attrs(font_size__range=(10, 100))
 def add_meme_text(image: ImageU8, params: MemeTextParams) -> ImageU8:
     """Add text to an image, with a look that is reminiscent of old-school memes.
 

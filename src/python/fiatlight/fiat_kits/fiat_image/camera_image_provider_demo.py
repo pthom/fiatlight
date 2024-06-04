@@ -1,37 +1,134 @@
-from fiatlight.demos.images import add_meme_text
-from fiatlight.fiat_kits.fiat_image.camera_image_provider import CameraImageProviderGui
-from fiatlight.fiat_kits.fiat_image import ImageU8_3
-import fiatlight
+from fiatlight.fiat_kits import fiat_image as fi
+from fiatlight.demos.images.old_school_meme import MemeTextParams, add_meme_text
+import fiatlight as fl
 from pydantic import BaseModel
 import cv2
+import numpy as np
 from typing import Optional
+from abc import ABC, abstractmethod
 
 
-@fiatlight.base_model_with_gui_registration(rotation_degree__range=(0, 360))
-class ImageEffect(BaseModel):
-    rotation_degree: int = 0
-    flip_horizontal: bool = False
-    flip_vertical: bool = False
+class ImageProcessor(BaseModel, ABC):
+    """Base class for image processors."""
+
+    @abstractmethod
+    def process(self, image: fi.ImageU8_3) -> fi.ImageU8_3:
+        pass
 
 
-def apply_image_effect(image: ImageU8_3, effect: Optional[ImageEffect] = None) -> ImageU8_3:
-    if effect is None:
+@fl.base_model_with_gui_registration(
+    rot_degree__range=(0, 360),
+    rot_degree__edit_type="knob",
+    flip_v__edit_type="toggle",
+    flip_h__edit_type="toggle",
+)
+class GeometricTransformation(ImageProcessor):
+    """Geometric transformation of an image (rotation, flip)."""
+
+    rot_degree: int = 0
+    flip_h: bool = False
+    flip_v: bool = False
+
+    def process(self, image: fi.ImageU8_3) -> fi.ImageU8_3:
+        if self.rot_degree != 0:
+            height, width = image.shape[:2]
+            center = (width / 2, height / 2)
+            rotation_matrix = cv2.getRotationMatrix2D(center, self.rot_degree, 1.0)
+            image = cv2.warpAffine(image, rotation_matrix, (width, height))  # type: ignore
+        if self.flip_h:
+            image = cv2.flip(image, 1)  # type: ignore
+        if self.flip_v:
+            image = cv2.flip(image, 0)  # type: ignore
         return image
-    if effect.rotation_degree != 0:
-        height, width = image.shape[:2]
-        center = (width / 2, height / 2)
-        rotation_matrix = cv2.getRotationMatrix2D(center, effect.rotation_degree, 1.0)
-        image = cv2.warpAffine(image, rotation_matrix, (width, height))  # type: ignore
-    if effect.flip_horizontal:
-        image = cv2.flip(image, 1)  # type: ignore
-    if effect.flip_vertical:
-        image = cv2.flip(image, 0)  # type: ignore
-    return image
+
+
+@fl.base_model_with_gui_registration()
+class ColorProcessing(ImageProcessor):
+    """Color processing of an image (LUT curves on channels, with an option color conversion in between)"""
+
+    lut_0: Optional[fi.LutParams] = None
+    lut_1: Optional[fi.LutParams] = None
+    lut_2: Optional[fi.LutParams] = None
+    lut_3: Optional[fi.LutParams] = None
+    src_color: fi.ColorType = fi.ColorType.BGR
+    lut_color: fi.ColorType = fi.ColorType.HSV
+
+    def process(self, image: fi.ImageU8_3) -> fi.ImageU8_3:
+        image_color_conversion_1 = fi.ColorConversion(src_color=self.src_color, dst_color=self.lut_color)
+        image_color_conversion_2 = fi.ColorConversion(src_color=self.lut_color, dst_color=self.src_color)
+        image_color = image_color_conversion_1.convert_image(image)
+        image_color_lut = fi.lut_channels_with_params(image_color, self.lut_0, self.lut_1, self.lut_2, self.lut_3)
+        image_lut = image_color_conversion_2.convert_image(image_color_lut)
+        return image_lut  # type: ignore
+
+
+@fl.base_model_with_gui_registration(
+    blur_radius__range=(0.0, 10.0),
+    sharpen__edit_type="toggle",
+)
+class ImageFilters(BaseModel):
+    blur_radius: float = 0.0
+    sharpen: bool = False
+
+    def process(self, image: fi.ImageU8_3) -> fi.ImageU8_3:
+        if self.blur_radius:
+            image = cv2.GaussianBlur(image, (0, 0), self.blur_radius)  # type: ignore
+        if self.sharpen:
+            kernel = np.array([[0, -1, 0], [-1, 5, -1], [0, -1, 0]])
+            image = cv2.filter2D(image, -1, kernel)  # type: ignore
+        return image
+
+
+@fl.base_model_with_gui_registration()
+class AddTitleOnImage(ImageProcessor):
+    params: MemeTextParams
+
+    def process(self, image: fi.ImageU8_3) -> fi.ImageU8_3:
+        return add_meme_text(image, self.params)  # type: ignore
+
+
+@fl.base_model_with_gui_registration()
+class ImageEffect(BaseModel):
+    geo_transf: Optional[GeometricTransformation] = None
+    color_filter: Optional[ColorProcessing] = None
+    image_filters: Optional[ImageFilters] = None
+    title_text: Optional[AddTitleOnImage] = None
+
+    def process(self, image: fi.ImageU8_3) -> fi.ImageU8_3:
+        if self.geo_transf:
+            image = self.geo_transf.process(image)
+        if self.color_filter:
+            image = self.color_filter.process(image)
+        if self.image_filters:
+            image = self.image_filters.process(image)
+        if self.title_text:
+            image = self.title_text.process(image)
+        return image
+
+
+def apply_image_effect(image: fi.ImageU8_3, effect: ImageEffect) -> fi.ImageU8_3:
+    return effect.process(image)
+
+
+def rotate_image(image: fi.ImageU8_3, rot_degree: int) -> fi.ImageU8_3:
+    height, width = image.shape[:2]
+    center = (width / 2, height / 2)
+    rotation_matrix = cv2.getRotationMatrix2D(center, rot_degree, 1.0)
+    return cv2.warpAffine(image, rotation_matrix, (width, height))  # type: ignore
+
+
+def apply_geo_transf(image: fi.ImageU8_3, geo_transf: GeometricTransformation) -> fi.ImageU8_3:
+    return geo_transf.process(image)
 
 
 def main() -> None:
-    camera_gui = CameraImageProviderGui()
-    fiatlight.run([camera_gui, apply_image_effect, add_meme_text])
+    # camera_gui = fi.CameraImageProviderGui()
+    image_to_file = fi.ImageToFileGui()
+    # fl.run([camera_gui, apply_image_effect, image_to_file])
+
+    fl.run([fi.image_from_file, apply_image_effect, image_to_file])
+    # fl.run([fi.image_from_file, rotate_image])
+    # fl.run([fi.image_from_file, apply_geo_transf])
 
 
 if __name__ == "__main__":

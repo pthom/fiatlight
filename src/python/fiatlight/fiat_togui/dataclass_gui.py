@@ -299,7 +299,6 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
                     fn_gui_collapsed=param_gui_.data_with_gui.gui_present_str_one_line,
                 )
                 self._param_expanded[param_gui_.name] = expand_result.expanded
-                changed = expand_result.changed
                 if expand_result.changed:
                     changed = True
 
@@ -311,7 +310,7 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
 
     def save_gui_options_to_json(self) -> JsonDict:
         # We only save the GUI options, not the data!
-        r = {}
+        r = {"param_expanded": self._param_expanded}
         for param_gui in self._parameters_with_gui:
             save_gui_options_to_json = param_gui.data_with_gui.callbacks.save_gui_options_to_json
             if save_gui_options_to_json is not None:
@@ -320,6 +319,8 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
 
     def load_gui_options_from_json(self, json: JsonDict) -> None:
         # We only load the GUI options, not the data!
+        if "param_expanded" in json:
+            self._param_expanded = json["param_expanded"]
         for param_gui in self._parameters_with_gui:
             if param_gui.name in json:
                 load_gui_options_from_json = param_gui.data_with_gui.callbacks.load_gui_options_from_json
