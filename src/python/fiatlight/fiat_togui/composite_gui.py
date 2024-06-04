@@ -63,7 +63,8 @@ class OptionalWithGui(AnyDataWithGui[DataType | None]):
         if value is None:
             imgui.text("Optional: None")
         else:
-            self.inner_gui.value = value
+            if id(self.inner_gui.value) != id(value):
+                self.inner_gui.value = value
             self.inner_gui.callbacks.present_custom(value)
 
     def edit(self, value: DataType | None) -> tuple[bool, DataType | None]:
