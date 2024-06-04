@@ -8,6 +8,8 @@ from matplotlib.figure import Figure
 import numpy as np
 from enum import Enum
 import time
+import fiatlight as fl
+
 
 # Initialize the start time
 _start_time = time.time()
@@ -38,14 +40,18 @@ def interactive_sine_wave(freq: float = 1.0, phase: float = 0.0, amplitude: floa
 
 
 # Set ranges and edit types for the sine wave parameters
-interactive_sine_wave.freq__range = (0.1, 3)  # type: ignore
-interactive_sine_wave.phase__range = (-np.pi, np.pi)  # type: ignore
-interactive_sine_wave.amplitude__range = (0.1, 2)  # type: ignore
-interactive_sine_wave.freq__edit_type = "knob"  # type: ignore
-interactive_sine_wave.phase__edit_type = "knob"  # type: ignore
-interactive_sine_wave.amplitude__edit_type = "knob"  # type: ignore
+fl.add_custom_attrs(
+    interactive_sine_wave,
+    freq__range=(0.1, 3),
+    phase__range=(-np.pi, np.pi),
+    amplitude__range=(0.1, 2),
+    freq__edit_type="knob",
+    phase__edit_type="knob",
+    amplitude__edit_type="knob",
+)
 
 
+@fl.enum_with_gui_registration
 class ColorMap(Enum):
     VIRIDIS = "viridis"
     PLASMA = "plasma"
@@ -54,6 +60,11 @@ class ColorMap(Enum):
     CIVIDIS = "cividis"
 
 
+@fl.with_custom_attrs(
+    mean__range=(-5, 5),
+    variance__range=(0.1, 5),
+    levels__range=(1, 20),
+)
 def gaussian_heatmap(
     mean: float = 0, variance: float = 1, colormap: ColorMap = ColorMap.VIRIDIS, levels: int = 10
 ) -> Figure:
@@ -67,12 +78,7 @@ def gaussian_heatmap(
     return fig
 
 
-# Set ranges for the Gaussian heatmap parameters
-gaussian_heatmap.mean__range = (-5, 5)  # type: ignore
-gaussian_heatmap.variance__range = (0.1, 5)  # type: ignore
-gaussian_heatmap.levels__range = (1, 20)  # type: ignore
-
-
+@fl.with_custom_attrs(window_size__range=(1, 40))
 def data_smoothing(window_size: int = 5) -> Figure:
     """Demonstrates data smoothing using a moving average filter."""
     x = np.linspace(0, 15, 300)
@@ -83,10 +89,6 @@ def data_smoothing(window_size: int = 5) -> Figure:
     ax.plot(x, y_smooth, label="Smoothed")
     ax.legend()
     return fig
-
-
-# Set range for the data smoothing window size
-data_smoothing.window_size__range = (1, 40)  # type: ignore
 
 
 def interactive_histogram(
@@ -101,17 +103,20 @@ def interactive_histogram(
 
 
 # Set interactive parameters for the histogram
-interactive_histogram.n_bars__edit_type = "knob"  # type: ignore
-interactive_histogram.n_bars__range = (1, 300)  # type: ignore
-interactive_histogram.mu__edit_type = "input"  # type: ignore
-interactive_histogram.mu__range = (-5, 5)  # type: ignore
-interactive_histogram.sigma__edit_type = "drag"  # type: ignore
-interactive_histogram.sigma__range = (0.1, 5)  # type: ignore
-interactive_histogram.average__edit_type = "slider_float_any_range"  # type: ignore
-interactive_histogram.nb_data__edit_type = "slider"  # type: ignore
-interactive_histogram.nb_data__range = (100, 1_000_000)  # type: ignore
-interactive_histogram.nb_data__slider_logarithmic = True  # type: ignore
-interactive_histogram.nb_data__slider_no_input = True  # type: ignore
+fl.add_custom_attrs(
+    interactive_histogram,
+    n_bars__edit_type="knob",
+    n_bars__range=(1, 300),
+    mu__edit_type="input",
+    mu__range=(-5, 5),
+    sigma__edit_type="drag",
+    sigma__range=(0.1, 5),
+    average__edit_type="slider_float_any_range",
+    nb_data__edit_type="slider",
+    nb_data__range=(100, 1_000_000),
+    nb_data__slider_logarithmic=True,
+    nb_data__slider_no_input=True,
+)
 
 
 def main() -> None:
