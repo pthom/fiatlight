@@ -10,6 +10,8 @@ from pydantic import BaseModel
 
 CvColorConversionCode: TypeAlias = int
 
+NO_COLOR_CONVERSION_CODE: CvColorConversionCode = -123456789
+
 
 class ColorType(enum.Enum):
     """Color types for images (BGR, BGRA, RGB, RGBA, HSV, HLS, Lab, Luv, XYZ, Gray)."""
@@ -88,13 +90,20 @@ class ColorConversion(BaseModel):
     """A color conversion from one color space to another (color spaces use the ColorType enum)."""
 
     src_color: ColorType = ColorType.RGB
-    dst_color: ColorType = ColorType.BGR
+    dst_color: ColorType = ColorType.RGB
+
+    def __init__(self, **data: Any):
+        super().__init__(**data)
+        if self.conversion_code() is None:
+            raise ValueError(f"Conversion from {self.src_color} to {self.dst_color} is not available")
 
     def conversion_code(self) -> Optional[CvColorConversionCode]:
         return self.src_color.conversion_code(self.dst_color)
 
     def convert_image(self, image: ImageU8) -> ImageU8:
         conversion_code = self.conversion_code()
+        if conversion_code == NO_COLOR_CONVERSION_CODE:
+            return image
         assert conversion_code is not None
         return cv2.cvtColor(image, conversion_code)  # type: ignore
 
@@ -108,6 +117,8 @@ def color_convert(image: ImageU8, color_conversion: ColorConversion) -> ImageU8:
 
 def _optional_cv_color_conversion_code_between(type1: ColorType, type2: ColorType) -> CvColorConversionCode | None:
     conversions: Dict[ColorType, CvColorConversionCode]
+    if type1 == type2:
+        return NO_COLOR_CONVERSION_CODE
     if type1 == ColorType.BGR:
         conversions = {
             ColorType.BGRA: cv2.COLOR_BGR2BGRA,
