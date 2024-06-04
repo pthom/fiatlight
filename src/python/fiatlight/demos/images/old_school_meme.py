@@ -4,6 +4,7 @@ from fiatlight.fiat_types import Float_0_1, ColorRgb
 
 from PIL import Image, ImageDraw, ImageFont
 from enum import Enum
+from pydantic import BaseModel
 
 import numpy as np
 import os
@@ -16,17 +17,24 @@ class MemeFont(Enum):
     SaoTorpes = "fonts/sao_torpes/SaoTorpes.otf"
 
 
+@fl.base_model_with_gui_registration(
+    x__range=(0, 1),
+    y__range=(0, 1),
+    font_size__range=(10, 100),
+)
+class MemeTextParams(BaseModel):
+    text: str = "Hello!"
+    font_size: int = 20
+    font_type: MemeFont = MemeFont.Anton
+    x: Float_0_1 = Float_0_1(0.35)
+    y: Float_0_1 = Float_0_1(0.75)
+    text_color: ColorRgb = ColorRgb((255, 255, 255))
+    outline_color: ColorRgb = ColorRgb((0, 0, 0))
+    is_image_bgr: bool = True
+
+
 @fl.with_custom_attrs(font_size__range=(10, 100))
-def add_meme_text(
-    image: ImageU8,
-    text: str = "Hello!",
-    font_size: int = 20,
-    font_type: MemeFont = MemeFont.Anton,
-    x: Float_0_1 = Float_0_1(0.35),
-    y: Float_0_1 = Float_0_1(0.75),
-    text_color: ColorRgb = (255, 255, 255),  # type: ignore
-    outline_color: ColorRgb = (0, 0, 0),  # type: ignore
-) -> ImageU8:
+def add_meme_text(image: ImageU8, params: MemeTextParams) -> ImageU8:
     """Add text to an image, with a look that is reminiscent of old-school memes.
 
     :param image: The image to which the text will be added.
@@ -44,27 +52,27 @@ def add_meme_text(
     image_pil = Image.fromarray(image)
 
     this_dir = os.path.dirname(os.path.abspath(__file__))
-    font_path = this_dir + "/" + font_type.value
-    font = ImageFont.truetype(font_path, font_size * 4)
+    font_path = this_dir + "/" + params.font_type.value
+    font = ImageFont.truetype(font_path, params.font_size * 4)
 
     draw = ImageDraw.Draw(image_pil)
 
     position = (10, 10)  # Change this to where you want the text to be on the image
 
     # Argh, OpenCV uses BGR and our color is RGB
-    text_color_bgr = (text_color[2], text_color[1], text_color[0])
-    outline_color_bgr = (outline_color[2], outline_color[1], outline_color[0])
+    text_color_bgr = (params.text_color[2], params.text_color[1], params.text_color[0])
+    outline_color_bgr = (params.outline_color[2], params.outline_color[1], params.outline_color[0])
 
     # Draw text on image
     # Center it around x, y
-    text_size = draw.textbbox(position, text, font=font)
-    position = (int(x * image_pil.width - text_size[0] / 2), int(y * image_pil.height - text_size[1] / 2))
+    text_size = draw.textbbox(position, params.text, font=font)
+    position = (int(params.x * image_pil.width - text_size[0] / 2), int(params.y * image_pil.height - text_size[1] / 2))
     draw.text(
         position,
-        text,
+        params.text,
         font=font,
         fill=text_color_bgr,
-        stroke_width=font_size // 10,
+        stroke_width=params.font_size // 10,
         stroke_fill=outline_color_bgr,
         align="center",
     )
