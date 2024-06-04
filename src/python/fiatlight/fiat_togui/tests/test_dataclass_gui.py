@@ -266,7 +266,7 @@ def test_dataclass_in_custom_function() -> None:
             return
 
         def _internal_state_gui(self) -> bool:
-            changed = self.foo_gui.call_edit()
+            changed = self.foo_gui.gui_edit()
             return changed
 
     my_function = MyFunction()

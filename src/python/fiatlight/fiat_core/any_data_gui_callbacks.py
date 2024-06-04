@@ -41,6 +41,14 @@ class AnyDataGuiCallbacks(Generic[DataType]):
     #       (as opposed to rendering a larger version in a detached window).
     present_custom: Callable[[DataType], None] | None = None
 
+    # present_custom_collapsible:
+    # Set this to False if your custom presentation is small and fits in one line
+    # (i.e. it does not need to be collapsible)
+    # If True, the gui presentation will either:
+    #     - show the first characters of present_str (with "..." and a tooltip)
+    #     - show the custom presentation in a collapsible area
+    present_custom_collapsible: bool = True
+
     # present_custom_popup_required (Optional: leave to False in most cases)
     # If True, the present_custom function needs to be called in a popup window.
     # This is due to a limitation of the node editor, which cannot render complex widgets
@@ -69,6 +77,14 @@ class AnyDataGuiCallbacks(Generic[DataType]):
     # Note: Some widgets cannot be presented in a Node (e.g., a multiline text input, a child window, etc.)!
     #       You can query `fiatlight.is_rendering_in_node()` or its opposite `fiatlight.is_rendering_in_window()`
     edit: Callable[[DataType], tuple[bool, DataType]] | None = None
+
+    # edit_collapsible:
+    # Set this to False if your custom edition is small and fits in one line
+    # (i.e. it does not need to be collapsible)
+    # If True, the gui edition will either:
+    #     - show the first characters of present_str (with "..." and a tooltip)
+    #     - show the custom edition in a collapsible area
+    edit_collapsible: bool = True
 
     # edit_popup_required (Optional: leave to False in most cases)
     # If True, the edit function needs to be called in a popup window.

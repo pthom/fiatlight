@@ -38,16 +38,17 @@ Usage example
 
 import copy
 
-from fiatlight import fiat_widgets
 from fiatlight.fiat_core import AnyDataWithGui, FunctionWithGui, ParamWithGui
 from fiatlight.fiat_types import JsonDict, Unspecified, Error
 from fiatlight.fiat_config import get_fiat_config, FiatColorType
 from fiatlight.fiat_widgets import fiat_osd
+from fiatlight.fiat_widgets.fontawesome6_ctx_utils import fontawesome_6_ctx
+from fiatlight.fiat_widgets import icons_fontawesome_6
 from fiatlight.fiat_core.togui_exception import FiatToGuiException
 from fiatlight.fiat_types.base_types import CustomAttributesDict
 from imgui_bundle import imgui, imgui_ctx, hello_imgui
-from typing import Type, Any, TypeVar, List
-from dataclasses import is_dataclass
+from typing import Type, Any, TypeVar, List, Callable
+from dataclasses import is_dataclass, dataclass
 from pydantic import BaseModel
 
 
@@ -55,7 +56,20 @@ from pydantic import BaseModel
 DataclassLikeType = TypeVar("DataclassLikeType")
 
 
-def _draw_dataclass_member_name(member_name: str) -> None:
+@dataclass
+class _DrawExpandableMemberResult:
+    expanded: bool
+    changed: bool
+
+
+def _draw_expandable_member(
+    member_name: str,
+    *,
+    expanded: bool,
+    collapsable: bool,
+    fn_gui_expanded: Callable[[], bool] | Callable[[], None],
+    fn_gui_collapsed: Callable[[], bool] | Callable[[], None],
+) -> _DrawExpandableMemberResult:
     width_align_after = hello_imgui.em_size(5)
 
     # Draw param name (might be shortened if too long)
@@ -76,11 +90,35 @@ def _draw_dataclass_member_name(member_name: str) -> None:
     cursor_pos_after_label.x += width_align_after
     imgui.set_cursor_pos(cursor_pos_after_label)
 
+    # Draw expand/collapse button
+    if collapsable:
+        with fontawesome_6_ctx():
+            icon = icons_fontawesome_6.ICON_FA_CARET_DOWN if expanded else icons_fontawesome_6.ICON_FA_CARET_RIGHT
+            if imgui.button(icon):
+                expanded = not expanded
+        imgui.same_line()
+
+    imgui.begin_group()
+    if not collapsable:
+        changed_or_none = fn_gui_expanded()
+    else:
+        changed_or_none = fn_gui_expanded() if expanded else fn_gui_collapsed()
+    imgui.end_group()
+
+    changed = changed_or_none if isinstance(changed_or_none, bool) else False
+
+    return _DrawExpandableMemberResult(expanded=expanded, changed=changed)
+
 
 class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
     """Base GUI class for a dataclass or a pydantic model"""
 
     _parameters_with_gui: List[ParamWithGui[Any]]
+
+    # user settings:
+    #   Flags that indicate whether the details of the params are shown or not
+    #   (those settings are saved in the user settings file)
+    _param_expanded: dict[str, bool] = {}
 
     def __init__(
         self, dataclass_type: Type[DataclassLikeType], param_attrs: CustomAttributesDict | None = None
@@ -94,6 +132,10 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
         self._parameters_with_gui = constructor_gui._inputs_with_gui
         self.fill_callbacks()
         self._apply_param_attrs()
+
+        self._param_expanded = {}
+        for param_gui in self._parameters_with_gui:
+            self._param_expanded[param_gui.name] = True
 
     def param_of_name(self, name: str) -> ParamWithGui[Any]:
         for param_gui in self._parameters_with_gui:
@@ -215,33 +257,21 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
         # the parameter is not used, because we have the data in self._parameters_with_gui
         with imgui_ctx.begin_vertical("##CompositeGui_present_custom"):
             for param_gui in self._parameters_with_gui:
-                param_value = param_gui.data_with_gui.value
-
-                present_custom = param_gui.data_with_gui.callbacks.present_custom
-                present_str = param_gui.data_with_gui.callbacks.present_str
-
-                def fn_present_param() -> None:
-                    if present_custom is not None:
-                        present_custom(param_value)
-                    else:
-                        as_str: str
-                        if present_str is not None:
-                            as_str = present_str(param_value)
-                        else:
-                            as_str = str(param_value)
-                        max_width_pixels = hello_imgui.em_size(40)
-                        fiat_widgets.text_maybe_truncated(as_str, max_lines=1, max_width_pixels=max_width_pixels)
-
-                _draw_dataclass_member_name(param_gui.name)
-                imgui.begin_group()
-                fn_present_param()
-                imgui.end_group()
+                with imgui_ctx.push_obj_id(param_gui):
+                    expand_result = _draw_expandable_member(
+                        param_gui.name,
+                        collapsable=param_gui.data_with_gui.callbacks.present_custom_collapsible,
+                        expanded=self._param_expanded[param_gui.name],
+                        fn_gui_expanded=param_gui.data_with_gui.gui_present_custom,
+                        fn_gui_collapsed=param_gui.data_with_gui.gui_present_str_one_line,
+                    )
+                    self._param_expanded[param_gui.name] = expand_result.expanded
 
     def edit(self, value: DataclassLikeType) -> tuple[bool, DataclassLikeType]:
         changed = False
 
         for param_gui_ in self._parameters_with_gui:
-            with imgui_ctx.push_id(param_gui_.name):
+            with imgui_ctx.push_obj_id(param_gui_):
                 if not hasattr(value, param_gui_.name):
                     raise ValueError(f"Object does not have attribute {param_gui_.name}")
                 param_gui_.data_with_gui.value = getattr(value, param_gui_.name)
@@ -251,22 +281,26 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
                 param_name = param_gui_.name  # copy to avoid being bound to the loop variable
 
                 def fn_edit_param() -> bool:
-                    if param_edit is not None:
-                        changed_in_edit, new_value = param_edit(param_value)
-                        if changed_in_edit:
-                            param_gui_.data_with_gui.value = new_value
-                            setattr(value, param_name, new_value)
-                        return changed_in_edit
-                    else:
+                    if param_edit is None:
                         imgui.text("No editor")
                         return False
+                    with imgui_ctx.push_obj_id(param_gui_):
+                        changed_in_edit, new_value = param_edit(param_value)
+                    if changed_in_edit:
+                        param_gui_.data_with_gui.value = new_value
+                        setattr(value, param_name, new_value)
+                    return changed_in_edit
 
-                _draw_dataclass_member_name(param_name)
-                imgui.begin_group()
-                param_changed = fn_edit_param()
-                imgui.end_group()
-
-                if param_changed:
+                expand_result = _draw_expandable_member(
+                    param_gui_.name,
+                    expanded=self._param_expanded[param_gui_.name],
+                    collapsable=param_gui_.data_with_gui.callbacks.edit_collapsible,
+                    fn_gui_expanded=fn_edit_param,
+                    fn_gui_collapsed=param_gui_.data_with_gui.gui_present_str_one_line,
+                )
+                self._param_expanded[param_gui_.name] = expand_result.expanded
+                changed = expand_result.changed
+                if expand_result.changed:
                     changed = True
 
         if changed:

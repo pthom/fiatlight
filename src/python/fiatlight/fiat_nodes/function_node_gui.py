@@ -226,7 +226,7 @@ class FunctionNodeGui:
         with imgui_ctx.push_obj_id(self._function_node):
             with ed_ctx.begin_node(self._node_id):
                 _CURRENT_FUNCTION_NODE_ID = self._node_id
-                with imgui_ctx.begin_vertical("node_content"):
+                with imgui_ctx.begin_vertical("node_content" + unique_name):
                     # Title and doc
                     with imgui_ctx.begin_horizontal("Title"):
                         self._draw_title(unique_name)
@@ -420,13 +420,13 @@ class FunctionNodeGui:
         # fill r.value_color, and r.value_tooltip
         is_dirty = self._function_node.function_with_gui.is_dirty()
         if isinstance(value, Error):
-            r.value_color = FiatColorType.OutputValueWithError
+            r.value_color = FiatColorType.ValueWithError
             r.value_tooltip = "Error!"
         elif is_dirty:
             r.value_color = FiatColorType.OutputValueDirty
             r.value_tooltip = "This output is outdated! Please refresh the function."
         elif isinstance(value, Unspecified):
-            r.value_color = FiatColorType.OutputValueUnspecified
+            r.value_color = FiatColorType.ValueUnspecified
             r.value_tooltip = "Unspecified!"
         else:
             r.value_color = FiatColorType.OutputValueOk

@@ -1,0 +1,62 @@
+{
+    "functions_graph": {
+        "functions_nodes": {
+            "f": {
+                "inputs": {
+                    "param": {
+                        "name": "param",
+                        "data": {
+                            "type": "Pydantic",
+                            "value": {
+                                "inner1": {
+                                    "c": 0,
+                                    "d": 0,
+                                    "sub": {
+                                        "a": 0,
+                                        "b": 0
+                                    }
+                                },
+                                "inner2": {
+                                    "x": 0,
+                                    "y": 0
+                                }
+                            }
+                        }
+                    }
+                },
+                "gui_options": {
+                    "inputs": {
+                        "param": {
+                            "inner1": {
+                                "sub": {}
+                            }
+                        }
+                    },
+                    "outputs": {
+                        "0": {
+                            "inner1": {
+                                "sub": {}
+                            }
+                        }
+                    },
+                    "internal_gui_options": {}
+                }
+            }
+        }
+    },
+    "functions_gui_settings": {
+        "f": {
+            "_show_input_details": {
+                "param": true
+            },
+            "_inputs_expanded": true,
+            "_show_output_details": {
+                "0": true
+            },
+            "_outputs_expanded": true,
+            "_show_internals_details": {},
+            "_internals_expanded": true,
+            "_internal_state_gui_expanded": true
+        }
+    }
+}

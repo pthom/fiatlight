@@ -230,14 +230,49 @@ class AnyDataWithGui(Generic[DataType]):
         if self.callbacks.on_custom_attrs_changed is not None:
             self.callbacks.on_custom_attrs_changed(self.custom_attrs)
 
-    def _Callbacks_Section(self) -> None:  # Dummy function to create a section in the IDE # noqa
+    def _Gui_Section(self) -> None:  # Dummy function to create a section in the IDE # noqa
         """
         # ------------------------------------------------------------------------------------------------------------------
-        #            Callbacks sections
+        #            Gui sections
+        #      (If you want to use the Gui outside a function Node)
         # ------------------------------------------------------------------------------------------------------------------
         """
 
-    def call_edit(self) -> bool:
+    def gui_present_str_one_line(self) -> None:
+        """Present the value as a string in one line (plus a tooltip if the string is too long)"""
+        from fiatlight.fiat_config import get_fiat_config, FiatColorType
+        from fiatlight import fiat_widgets
+
+        if isinstance(self.value, Unspecified):
+            color = get_fiat_config().style.color_as_vec4(FiatColorType.ValueUnspecified)
+            imgui.text_colored(color, "Unspecified")
+        elif isinstance(self.value, Error):
+            color = get_fiat_config().style.color_as_vec4(FiatColorType.ValueWithError)
+            imgui.text_colored(color, "Error")
+        elif isinstance(self.value, InvalidValue):
+            color = get_fiat_config().style.color_as_vec4(FiatColorType.InvalidValue)
+            fiat_widgets.text_maybe_truncated(
+                f"Invalid: {self.value.error_message}",
+                color=color,
+                max_width_chars=40,
+                max_lines=1,
+                info_tooltip=self.value.error_message,
+            )
+        else:
+            as_str = self.datatype_value_to_str(self.value)
+            fiat_widgets.text_maybe_truncated(as_str, max_width_chars=40, max_lines=1, info_tooltip=as_str)
+
+    def gui_present_custom(self) -> None:
+        """Present the value using the present_custom callback"""
+        if isinstance(self.value, (Unspecified, Error, InvalidValue)):
+            self.gui_present_str_one_line()
+        else:
+            if self.callbacks.present_custom is not None:
+                self.callbacks.present_custom(self.value)
+            else:
+                self.gui_present_str_one_line()
+
+    def gui_edit(self) -> bool:
         """Call the edit callback. Returns True if the value has changed
         If the value is Unspecified or Error, it will return False and display a message in the GUI
         (this method should not be called in this case)
@@ -257,6 +292,13 @@ class AnyDataWithGui(Generic[DataType]):
             return changed
         else:
             return False
+
+    def _Callbacks_Section(self) -> None:  # Dummy function to create a section in the IDE # noqa
+        """
+        # ------------------------------------------------------------------------------------------------------------------
+        #            Callbacks sections
+        # ------------------------------------------------------------------------------------------------------------------
+        """
 
     def set_edit_callback(self, edit_callback: DataEditFunction[DataType]) -> None:
         """Helper function to set the edit callback from a free function"""

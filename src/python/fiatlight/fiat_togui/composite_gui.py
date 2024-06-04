@@ -106,6 +106,11 @@ class OptionalWithGui(AnyDataWithGui[DataType | None]):
     def on_change(self, value: DataType | None) -> None:
         if value is not None:
             self.inner_gui.value = value
+            self.callbacks.edit_collapsible = self.inner_gui.callbacks.edit_collapsible
+            self.callbacks.present_custom_collapsible = self.inner_gui.callbacks.present_custom_collapsible
+        else:
+            self.callbacks.edit_collapsible = False
+            self.callbacks.present_custom_collapsible = False
 
     def _save_to_dict(self, value: DataType | None) -> JsonDict:
         if value is None:

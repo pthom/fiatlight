@@ -24,9 +24,9 @@ class FiatColorType(Enum):
     OutputPinNotLinked = "OutputPinNotLinked"
 
     # Output value
-    OutputValueWithError = "OutputValueWithError"
+    ValueWithError = "ValueWithError"
     OutputValueDirty = "OutputValueDirty"
-    OutputValueUnspecified = "OutputValueUnspecified"
+    ValueUnspecified = "ValueUnspecified"
     OutputValueOk = "OutputValueOk"
 
     DataclassMemberName = "DataclassMemberName"
@@ -72,9 +72,9 @@ class FiatStyle(BaseModel):
             FiatColorType.OutputPinLinked: blue,
             FiatColorType.OutputPinNotLinked: grey_blue,
             # When the output is dirty
-            FiatColorType.OutputValueWithError: red,
+            FiatColorType.ValueWithError: red,
             FiatColorType.OutputValueDirty: orange,
-            FiatColorType.OutputValueUnspecified: red,
+            FiatColorType.ValueUnspecified: red,
             FiatColorType.OutputValueOk: white,
             # Dataclass member name
             FiatColorType.DataclassMemberName: ColorRgbaFloat((0.7, 0.8, 0.7, 1.0)),
