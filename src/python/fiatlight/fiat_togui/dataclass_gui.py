@@ -293,7 +293,7 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
 
                 expand_result = _draw_expandable_member(
                     param_gui_.name,
-                    expanded=self._param_expanded[param_gui_.name],
+                    expanded=self._param_expanded.get(param_gui_.name, True),
                     collapsable=param_gui_.data_with_gui.callbacks.edit_collapsible,
                     fn_gui_expanded=fn_edit_param,
                     fn_gui_collapsed=param_gui_.data_with_gui.gui_present_str_one_line,
