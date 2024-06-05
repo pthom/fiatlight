@@ -148,11 +148,13 @@ class FunctionNodeGui:
         assert self._node_size is not None
         return self._node_size
 
-    # ==================================================================================================================
-    #                                            Doc
-    # ==================================================================================================================
     @staticmethod
     def _Doc_Section() -> None:  # Dummy function to create a section in the IDE # noqa
+        """
+        # ==================================================================================================================
+        #                                            Doc
+        # ==================================================================================================================
+        """
         pass
 
     def _fill_function_docstring_and_source(self) -> None:
@@ -164,11 +166,13 @@ class FunctionNodeGui:
     def _has_doc(self) -> bool:
         return self._function_doc.has_info()
 
-    # ------------------------------------------------------------------------------------------------------------------
-    #  Utilities
-    # ------------------------------------------------------------------------------------------------------------------
     @staticmethod
     def _Utilities_Section() -> None:  # Dummy function to create a section in the IDE # noqa
+        """
+        # ------------------------------------------------------------------------------------------------------------------
+        #  Utilities
+        # ------------------------------------------------------------------------------------------------------------------
+        """
         pass
 
     def _heartbeat(self) -> bool:
@@ -211,12 +215,14 @@ class FunctionNodeGui:
     def invoke(self) -> None:
         self._function_node.call_invoke_async_or_not()
 
-    # ==================================================================================================================
-    #                                            Draw the node
-    #         This is the heart of the class, with `draw_node` being the main function
-    # ==================================================================================================================
     @staticmethod
     def _Draw_Node_Section() -> None:  # Dummy function to create a section in the IDE # noqa
+        """
+        # ==================================================================================================================
+        #                                            Draw the node
+        #         This is the heart of the class, with `draw_node` being the main function
+        # ==================================================================================================================
+        """
         pass
 
     def draw_node(self, unique_name: str) -> bool:
@@ -250,11 +256,13 @@ class FunctionNodeGui:
             self._node_size = ed.get_node_size(self._node_id)
         return inputs_changed
 
-    # ------------------------------------------------------------------------------------------------------------------
-    #  Draw title and header lines
-    # ------------------------------------------------------------------------------------------------------------------
     @staticmethod
     def _Draw_Title_Section() -> None:  # Dummy function to create a section in the IDE # noqa
+        """
+        # ------------------------------------------------------------------------------------------------------------------
+        #  Draw title and header lines
+        # ------------------------------------------------------------------------------------------------------------------
+        """
         pass
 
     def _draw_title(self, unique_name: str) -> None:
@@ -522,45 +530,14 @@ class FunctionNodeGui:
 
         return r
 
-    # ------------------------------------------------------------------------------------------------------------------
-    #       Draw inputs
-    # ------------------------------------------------------------------------------------------------------------------
     @staticmethod
     def _Draw_Inputs_Section() -> None:  # Dummy function to create a section in the IDE # noqa
+        """
+        # ------------------------------------------------------------------------------------------------------------------
+        #       Draw inputs
+        # ------------------------------------------------------------------------------------------------------------------
+        """
         pass
-
-    def _draw_function_internal_state(self, unique_name: str) -> bool:
-        fn_with_gui = self._function_node.function_with_gui
-        internal_state_fn = fn_with_gui.internal_state_gui
-        if internal_state_fn is None:
-            return False
-
-        #
-        # Draw the separator
-        #
-        node_separator_params = fiat_widgets.NodeSeparatorParams()
-        node_separator_params.parent_node = self._node_id
-        # expanded state
-        node_separator_params.expanded = self._internal_state_gui_expanded
-        # Separator text
-        node_separator_params.text = "Function internal state"
-        # Separator collapse button
-        node_separator_params.show_collapse_button = True
-        # Separator collapse all button
-        node_separator_params.show_toggle_collapse_all_button = False
-        # Draw the separator
-        node_separator_output = fiat_widgets.node_separator(node_separator_params)
-        # Update the expanded state
-        self._internal_state_gui_expanded = node_separator_output.expanded
-
-        #
-        # Invoke the internal state gui
-        #
-        if self._internal_state_gui_expanded:
-            result = internal_state_fn()
-            return result
-        else:
-            return False
 
     def _draw_function_inputs(self, unique_name: str) -> bool:
         shall_disable_input = (
@@ -821,11 +798,13 @@ class FunctionNodeGui:
                 changed = True
         return changed
 
-    # ------------------------------------------------------------------------------------------------------------------
-    #       Draw outputs
-    # ------------------------------------------------------------------------------------------------------------------
     @staticmethod
     def _Draw_Outputs_Section() -> None:  # Dummy function to create a section in the IDE # noqa
+        """
+        # ------------------------------------------------------------------------------------------------------------------
+        #       Draw outputs
+        # ------------------------------------------------------------------------------------------------------------------
+        """
         pass
 
     def _draw_function_outputs(self, unique_name: str) -> None:
@@ -935,12 +914,47 @@ class FunctionNodeGui:
                     imgui.text(icons_fontawesome_6.ICON_FA_CHECK)
                     fiat_osd.set_widget_tooltip("Up to date!")
 
-    # ------------------------------------------------------------------------------------------------------------------
-    #      Draw Internals
-    # ------------------------------------------------------------------------------------------------------------------
     @staticmethod
     def _Draw_Internals_Section() -> None:  # Dummy function to create a section in the IDE # noqa
+        """
+        # ------------------------------------------------------------------------------------------------------------------
+        #      Draw function Internal State and fiat_internals (debug help)
+        # ------------------------------------------------------------------------------------------------------------------
+        """
         pass
+
+    def _draw_function_internal_state(self, unique_name: str) -> bool:
+        fn_with_gui = self._function_node.function_with_gui
+        internal_state_fn = fn_with_gui.internal_state_gui
+        if internal_state_fn is None:
+            return False
+
+        #
+        # Draw the separator
+        #
+        node_separator_params = fiat_widgets.NodeSeparatorParams()
+        node_separator_params.parent_node = self._node_id
+        # expanded state
+        node_separator_params.expanded = self._internal_state_gui_expanded
+        # Separator text
+        node_separator_params.text = "Function internal state"
+        # Separator collapse button
+        node_separator_params.show_collapse_button = True
+        # Separator collapse all button
+        node_separator_params.show_toggle_collapse_all_button = False
+        # Draw the separator
+        node_separator_output = fiat_widgets.node_separator(node_separator_params)
+        # Update the expanded state
+        self._internal_state_gui_expanded = node_separator_output.expanded
+
+        #
+        # Invoke the internal state gui
+        #
+        if self._internal_state_gui_expanded:
+            result = internal_state_fn()
+            return result
+        else:
+            return False
 
     def _draw_fiat_internals(self) -> None:
         fn = self._function_node.function_with_gui._f_impl  # noqa
@@ -1103,11 +1117,13 @@ class FunctionNodeGui:
             btn_text = icons_fontawesome_6.ICON_FA_BOOK
             fiat_osd.show_void_detached_window_button(btn_text, popup_label, show_doc)
 
-    # ==================================================================================================================
-    # Save and load user settings
-    # ==================================================================================================================
     @staticmethod
     def _Save_Load_User_Settings_Section() -> None:  # Dummy function to create a section in the IDE # noqa
+        """
+        # ==================================================================================================================
+        # Save and load user settings
+        # ==================================================================================================================
+        """
         pass
 
     def save_gui_options_to_json(self) -> JsonDict:

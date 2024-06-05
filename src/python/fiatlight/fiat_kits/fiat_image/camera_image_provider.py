@@ -17,8 +17,8 @@ from typing import Optional
 
 
 # hack, used when building documentation: we replace the camera image with a static image
-# _HACK_IMAGE: ImageU8_3 = cv2.imread(os.path.dirname(__file__) + "/paris.jpg")  # type: ignore
-_HACK_IMAGE = None
+_HACK_IMAGE: ImageU8_3 = cv2.imread(os.path.dirname(__file__) + "/paris.jpg")  # type: ignore
+# _HACK_IMAGE = None
 
 
 @enum_with_gui_registration
@@ -74,7 +74,7 @@ class CameraImageProvider:
             return None
         if frame.shape[0] == 0 or frame.shape[1] == 0:
             return None
-        return frame  # type: ignore
+        return frame
 
     def apply_params(self, params: CameraParams) -> None:
         if self.previous_camera_params is not None and params == self.previous_camera_params:
