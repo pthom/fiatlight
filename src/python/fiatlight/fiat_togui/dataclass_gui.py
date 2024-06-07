@@ -66,7 +66,7 @@ def _draw_expandable_member(
     member_name: str,
     *,
     expanded: bool,
-    collapsable: bool,
+    collapsible: bool,
     fn_gui_expanded: Callable[[], bool] | Callable[[], None],
     fn_gui_collapsed: Callable[[], bool] | Callable[[], None],
 ) -> _DrawExpandableMemberResult:
@@ -91,7 +91,7 @@ def _draw_expandable_member(
     imgui.set_cursor_pos(cursor_pos_after_label)
 
     # Draw expand/collapse button
-    if collapsable:
+    if collapsible:
         with fontawesome_6_ctx():
             icon = icons_fontawesome_6.ICON_FA_CARET_DOWN if expanded else icons_fontawesome_6.ICON_FA_CARET_RIGHT
             if imgui.button(icon):
@@ -99,7 +99,7 @@ def _draw_expandable_member(
         imgui.same_line()
 
     imgui.begin_group()
-    if not collapsable:
+    if not collapsible:
         changed_or_none = fn_gui_expanded()
     else:
         changed_or_none = fn_gui_expanded() if expanded else fn_gui_collapsed()
@@ -260,10 +260,10 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
                 with imgui_ctx.push_obj_id(param_gui):
                     expand_result = _draw_expandable_member(
                         param_gui.name,
-                        collapsable=param_gui.data_with_gui.callbacks.present_custom_collapsible,
+                        collapsible=param_gui.data_with_gui.callbacks.present_custom_collapsible,
                         expanded=self._param_expanded[param_gui.name],
                         fn_gui_expanded=param_gui.data_with_gui.gui_present_custom,
-                        fn_gui_collapsed=param_gui.data_with_gui.gui_present_str_one_line,
+                        fn_gui_collapsed=lambda: param_gui.data_with_gui._gui_present_header_line(bypass_collapse=True),
                     )
                     self._param_expanded[param_gui.name] = expand_result.expanded
 
@@ -294,9 +294,9 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
                 expand_result = _draw_expandable_member(
                     param_gui_.name,
                     expanded=self._param_expanded.get(param_gui_.name, True),
-                    collapsable=param_gui_.data_with_gui.callbacks.edit_collapsible,
+                    collapsible=param_gui_.data_with_gui.callbacks.edit_collapsible,
                     fn_gui_expanded=fn_edit_param,
-                    fn_gui_collapsed=param_gui_.data_with_gui.gui_present_str_one_line,
+                    fn_gui_collapsed=lambda: param_gui_.data_with_gui._gui_present_header_line(bypass_collapse=True),
                 )
                 self._param_expanded[param_gui_.name] = expand_result.expanded
                 if expand_result.changed:
