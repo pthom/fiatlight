@@ -242,6 +242,7 @@ class EnumWithGui(AnyDataWithGui[Enum]):
         self.callbacks.save_to_dict = self._save_to_dict
         self.callbacks.load_from_dict = self._load_from_dict
         self.callbacks.on_heartbeat = None
+        self.callbacks.present_custom_collapsible = False
 
         self._check_can_edit_one_line()
 

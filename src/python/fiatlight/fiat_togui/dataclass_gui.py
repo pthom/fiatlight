@@ -36,19 +36,13 @@ Usage example
     fiatlight.run(f)
 """
 
-import copy
-
 from fiatlight.fiat_core import AnyDataWithGui, FunctionWithGui, ParamWithGui
 from fiatlight.fiat_types import JsonDict, Unspecified, Error
-from fiatlight.fiat_config import get_fiat_config, FiatColorType
-from fiatlight.fiat_widgets import fiat_osd
-from fiatlight.fiat_widgets.fontawesome6_ctx_utils import fontawesome_6_ctx
-from fiatlight.fiat_widgets import icons_fontawesome_6
 from fiatlight.fiat_core.togui_exception import FiatToGuiException
 from fiatlight.fiat_types.base_types import CustomAttributesDict
-from imgui_bundle import imgui, imgui_ctx, hello_imgui
-from typing import Type, Any, TypeVar, List, Callable
-from dataclasses import is_dataclass, dataclass
+from imgui_bundle import imgui_ctx, ImVec4
+from typing import Type, Any, TypeVar, List
+from dataclasses import is_dataclass
 from pydantic import BaseModel
 
 
@@ -56,69 +50,10 @@ from pydantic import BaseModel
 DataclassLikeType = TypeVar("DataclassLikeType")
 
 
-@dataclass
-class _DrawExpandableMemberResult:
-    expanded: bool
-    changed: bool
-
-
-def _draw_expandable_member(
-    member_name: str,
-    *,
-    expanded: bool,
-    collapsible: bool,
-    fn_gui_expanded: Callable[[], bool] | Callable[[], None],
-    fn_gui_collapsed: Callable[[], bool] | Callable[[], None],
-) -> _DrawExpandableMemberResult:
-    width_align_after = hello_imgui.em_size(5)
-
-    # Draw param name (might be shortened if too long)
-    cursor_pos_before_label = imgui.get_cursor_pos()
-    member_name_color = get_fiat_config().style.color_as_vec4(FiatColorType.DataclassMemberName)
-    with imgui_ctx.push_style_color(imgui.Col_.text.value, member_name_color):
-        member_name_short = member_name
-        while imgui.calc_text_size(member_name_short).x > width_align_after:
-            member_name_short = member_name_short[:-1]
-        is_too_long = len(member_name_short) < len(member_name)
-        if is_too_long:
-            member_name_short = member_name_short[:-1] + "..."
-        imgui.text(member_name_short)
-        if is_too_long:
-            fiat_osd.set_widget_tooltip(member_name)
-
-    cursor_pos_after_label = copy.copy(cursor_pos_before_label)
-    cursor_pos_after_label.x += width_align_after
-    imgui.set_cursor_pos(cursor_pos_after_label)
-
-    # Draw expand/collapse button
-    if collapsible:
-        with fontawesome_6_ctx():
-            icon = icons_fontawesome_6.ICON_FA_CARET_DOWN if expanded else icons_fontawesome_6.ICON_FA_CARET_RIGHT
-            if imgui.button(icon):
-                expanded = not expanded
-        imgui.same_line()
-
-    imgui.begin_group()
-    if not collapsible:
-        changed_or_none = fn_gui_expanded()
-    else:
-        changed_or_none = fn_gui_expanded() if expanded else fn_gui_collapsed()
-    imgui.end_group()
-
-    changed = changed_or_none if isinstance(changed_or_none, bool) else False
-
-    return _DrawExpandableMemberResult(expanded=expanded, changed=changed)
-
-
 class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
     """Base GUI class for a dataclass or a pydantic model"""
 
     _parameters_with_gui: List[ParamWithGui[Any]]
-
-    # user settings:
-    #   Flags that indicate whether the details of the params are shown or not
-    #   (those settings are saved in the user settings file)
-    _param_expanded: dict[str, bool] = {}
 
     def __init__(
         self, dataclass_type: Type[DataclassLikeType], param_attrs: CustomAttributesDict | None = None
@@ -132,10 +67,6 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
         self._parameters_with_gui = constructor_gui._inputs_with_gui
         self.fill_callbacks()
         self._apply_param_attrs()
-
-        self._param_expanded = {}
-        for param_gui in self._parameters_with_gui:
-            self._param_expanded[param_gui.name] = True
 
     def param_of_name(self, name: str) -> ParamWithGui[Any]:
         for param_gui in self._parameters_with_gui:
@@ -172,6 +103,9 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
                 self.callbacks.edit_popup_possible = True
             if param_gui.data_with_gui.callbacks.edit_popup_required:
                 self.callbacks.edit_popup_required = True
+
+        self.callbacks.edit_collapsible = True
+        self.callbacks.present_custom_collapsible = True
 
         self.callbacks.edit = self.edit
         self.callbacks.on_change = self.on_change
@@ -258,48 +192,26 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
         with imgui_ctx.begin_vertical("##CompositeGui_present_custom"):
             for param_gui in self._parameters_with_gui:
                 with imgui_ctx.push_obj_id(param_gui):
-                    expand_result = _draw_expandable_member(
+                    param_gui.data_with_gui.gui_present_custom(
                         param_gui.name,
-                        collapsible=param_gui.data_with_gui.callbacks.present_custom_collapsible,
-                        expanded=self._param_expanded[param_gui.name],
-                        fn_gui_expanded=param_gui.data_with_gui.gui_present_custom,
-                        fn_gui_collapsed=lambda: param_gui.data_with_gui._gui_present_header_line(bypass_collapse=True),
+                        label_color=self._member_label_color(),
                     )
-                    self._param_expanded[param_gui.name] = expand_result.expanded
 
     def edit(self, value: DataclassLikeType) -> tuple[bool, DataclassLikeType]:
         changed = False
 
-        for param_gui_ in self._parameters_with_gui:
-            with imgui_ctx.push_obj_id(param_gui_):
-                if not hasattr(value, param_gui_.name):
-                    raise ValueError(f"Object does not have attribute {param_gui_.name}")
-                param_gui_.data_with_gui.value = getattr(value, param_gui_.name)
-
-                param_value = param_gui_.data_with_gui.value
-                param_edit = param_gui_.data_with_gui.callbacks.edit
-                param_name = param_gui_.name  # copy to avoid being bound to the loop variable
-
-                def fn_edit_param() -> bool:
-                    if param_edit is None:
-                        imgui.text("No editor")
-                        return False
-                    with imgui_ctx.push_obj_id(param_gui_):
-                        changed_in_edit, new_value = param_edit(param_value)
-                    if changed_in_edit:
-                        param_gui_.data_with_gui.value = new_value
-                        setattr(value, param_name, new_value)
-                    return changed_in_edit
-
-                expand_result = _draw_expandable_member(
-                    param_gui_.name,
-                    expanded=self._param_expanded.get(param_gui_.name, True),
-                    collapsible=param_gui_.data_with_gui.callbacks.edit_collapsible,
-                    fn_gui_expanded=fn_edit_param,
-                    fn_gui_collapsed=lambda: param_gui_.data_with_gui._gui_present_header_line(bypass_collapse=True),
+        for param_gui in self._parameters_with_gui:
+            with imgui_ctx.push_obj_id(param_gui):
+                if not hasattr(value, param_gui.name):
+                    raise ValueError(f"Object does not have attribute {param_gui.name}")
+                param_gui.data_with_gui.value = getattr(value, param_gui.name)
+                changed_in_edit = param_gui.data_with_gui.gui_edit(
+                    param_gui.name,
+                    label_color=self._member_label_color(),
                 )
-                self._param_expanded[param_gui_.name] = expand_result.expanded
-                if expand_result.changed:
+                if changed_in_edit:
+                    new_value = param_gui.data_with_gui.value
+                    setattr(value, param_gui.name, new_value)
                     changed = True
 
         if changed:
@@ -308,9 +220,15 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
         else:
             return False, value
 
+    def _member_label_color(self) -> ImVec4:
+        from fiatlight.fiat_config import get_fiat_config, FiatColorType
+
+        r = get_fiat_config().style.color_as_vec4(FiatColorType.DataclassMemberName)
+        return r
+
     def save_gui_options_to_json(self) -> JsonDict:
         # We only save the GUI options, not the data!
-        r = {"param_expanded": self._param_expanded}
+        r = {}
         for param_gui in self._parameters_with_gui:
             save_gui_options_to_json = param_gui.data_with_gui.callbacks.save_gui_options_to_json
             if save_gui_options_to_json is not None:
@@ -319,8 +237,6 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
 
     def load_gui_options_from_json(self, json: JsonDict) -> None:
         # We only load the GUI options, not the data!
-        if "param_expanded" in json:
-            self._param_expanded = json["param_expanded"]
         for param_gui in self._parameters_with_gui:
             if param_gui.name in json:
                 load_gui_options_from_json = param_gui.data_with_gui.callbacks.load_gui_options_from_json

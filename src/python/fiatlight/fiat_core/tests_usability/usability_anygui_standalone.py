@@ -1,19 +1,26 @@
 from typing import Any
 
 from imgui_bundle import immapp, hello_imgui, imgui, ImVec2, imgui_ctx  # noqa
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field  # noqa
+from enum import Enum
 import fiatlight as fl
 import logging
 
 
+@fl.enum_with_gui_registration
+class MyEnum(Enum):
+    A = "A"
+    B = "B"
+    C = "C"
+
+
 @fl.base_model_with_gui_registration(
-    a__range=(0, 10),
-    c__range=(0, 10),
+    i_c__range=(0, 10),
 )
 class InnerParam(BaseModel):
-    a: int = 1
-    b: str = "World"
-    c: float = 2.71
+    i_enum: MyEnum = MyEnum.A
+    i_b: str = "World"
+    i_c: float = 2.71
 
 
 @fl.base_model_with_gui_registration(
@@ -27,14 +34,19 @@ class MyParam(BaseModel):
     z: float = 3.14
 
 
-def edit_value_with_gui(value_with_gui: fl.AnyDataWithGui[Any]) -> bool:
+def edit_value_with_gui(label: str, value_with_gui: fl.AnyDataWithGui[Any]) -> bool:
     with imgui_ctx.push_obj_id(value_with_gui):
-        _, value_with_gui._can_set_unspecified = imgui.checkbox(
-            "_can_set_unspecified", value_with_gui._can_set_unspecified
-        )
-        changed = value_with_gui.gui_edit()
+        # _, value_with_gui._can_set_unspecified = imgui.checkbox(
+        #     "_can_set_unspecified", value_with_gui._can_set_unspecified
+        # )
+        imgui.text("Edit " + label)
+        changed = value_with_gui.gui_edit(label)
         if changed:
             logging.info("changed")
+        imgui.text("-------------")
+        imgui.text("Present " + label)
+        value_with_gui.gui_present_custom(label)
+        imgui.separator()
         return changed
 
 
@@ -69,14 +81,11 @@ def usability_int_with_gui() -> None:
     )
 
     def gui() -> None:
-        with imgui_ctx.begin_vertical("main", ImVec2(500, 1)):
+        with imgui_ctx.begin_vertical("main"):
             imgui.dummy(ImVec2(500, 10))
-            imgui.text("IntWithGui")
-            edit_value_with_gui(int_with_gui)
-            imgui.text("StrWithGui")
-            edit_value_with_gui(str_with_gui)
-            imgui.text("MyParam")
-            edit_value_with_gui(my_param_with_gui)
+            edit_value_with_gui("int_with_gui", int_with_gui)
+            edit_value_with_gui("str_with_gui", str_with_gui)
+            edit_value_with_gui("my_param_with_gui", my_param_with_gui)
 
     hello_imgui.run(gui)
 

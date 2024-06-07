@@ -10,7 +10,7 @@ from fiatlight.fiat_types.error_types import Error, ErrorValue, Unspecified, Uns
 from fiatlight.fiat_types.function_types import DataPresentFunction, DataEditFunction, DataValidationResult  # noqa
 from .any_data_gui_callbacks import AnyDataGuiCallbacks
 from .possible_custom_attributes import PossibleCustomAttributes
-from imgui_bundle import imgui, imgui_ctx
+from imgui_bundle import imgui, imgui_ctx, ImVec4, hello_imgui, ImVec2
 from fiatlight.fiat_config import get_fiat_config, FiatColorType
 from fiatlight.fiat_widgets.fontawesome6_ctx_utils import icons_fontawesome_6, fontawesome_6_ctx
 from fiatlight.fiat_widgets.fiat_osd import set_widget_tooltip
@@ -261,6 +261,11 @@ class AnyDataWithGui(Generic[DataType]):
         # ------------------------------------------------------------------------------------------------------------------
         """
 
+    def _show_collapse_button(self) -> None:
+        icon = icons_fontawesome_6.ICON_FA_CARET_DOWN if self._expanded else icons_fontawesome_6.ICON_FA_CARET_RIGHT
+        if imgui.button(icon):
+            self._expanded = not self._expanded
+
     def can_collapse_present(self) -> bool:
         if isinstance(self.value, (Unspecified, Error)):
             return False
@@ -295,154 +300,175 @@ class AnyDataWithGui(Generic[DataType]):
             and is_datatype_or_invalid
         )
 
-    def _gui_present_header_line(self, bypass_collapse: bool = False) -> None:
+    def _gui_present_header_line(self, label: str, label_color: ImVec4) -> None:
         """Present the value as a string in one line, or as a widget if it fits on one line"""
-        #
-        # Left side: value or error or gui_present_custom (if fits one line)
-        #
-        if isinstance(self.value, Unspecified):
-            imgui.text_colored(get_fiat_config().style.color_as_vec4(FiatColorType.ValueUnspecified), "Unspecified")
-        elif isinstance(self.value, Error):
-            imgui.text_colored(get_fiat_config().style.color_as_vec4(FiatColorType.ValueWithError), "Error")
-        else:  # if isinstance(self.value, (InvalidValue, DataType))
-            value = self.get_actual_or_invalid_value()
-            can_present_custom_on_header_line = self.can_present_custom_on_header_line()
-            if can_present_custom_on_header_line:
-                assert self.callbacks.present_custom is not None  # make mypy happy
-                with imgui_ctx.begin_vertical(
-                    "callback_present_custom"
-                ):  # Some widgets expect a standard vertical layout
-                    self.callbacks.present_custom(value)
-            else:
-                as_str = self.datatype_value_to_str(value)
-                text_maybe_truncated(as_str, max_width_chars=40, max_lines=1)
+        with imgui_ctx.begin_horizontal("present_header_line"):
+            # Label
+            imgui.text_colored(label_color, label)
+            # Expand button
+            if self.can_collapse_present():
+                self._show_collapse_button()
 
-        #
-        # Right Side: toggle expand state + invalid value info
-        #
-        if isinstance(self.value, InvalidValue):
-            text_maybe_truncated(
-                icons_fontawesome_6.ICON_FA_TRIANGLE_EXCLAMATION + " " + self.value.error_message,
-                color=get_fiat_config().style.color_as_vec4(FiatColorType.InvalidValue),
-                max_lines=1,
-                max_width_chars=40,
-            )
-        imgui.spring()
-        if self.can_collapse_present() and not bypass_collapse:
-            icon = icons_fontawesome_6.ICON_FA_CARET_DOWN if self._expanded else icons_fontawesome_6.ICON_FA_CARET_RIGHT
-            if imgui.button(icon):
-                self._expanded = not self._expanded
+            # Value as string or widget
+            if isinstance(self.value, Unspecified):
+                imgui.text_colored(get_fiat_config().style.color_as_vec4(FiatColorType.ValueUnspecified), "Unspecified")
+            elif isinstance(self.value, Error):
+                imgui.text_colored(get_fiat_config().style.color_as_vec4(FiatColorType.ValueWithError), "Error")
+            else:  # if isinstance(self.value, (InvalidValue, DataType))
+                value = self.get_actual_or_invalid_value()
+                can_present_custom_on_header_line = self.can_present_custom_on_header_line()
+                if can_present_custom_on_header_line:
+                    assert self.callbacks.present_custom is not None  # make mypy happy
+                    with imgui_ctx.begin_vertical(
+                        "callback_present_custom"
+                    ):  # Some widgets expect a standard vertical layout
+                        self.callbacks.present_custom(value)
+                else:
+                    as_str = self.datatype_value_to_str(value)
+                    text_maybe_truncated(as_str, max_width_chars=40, max_lines=1)
 
-    def _gui_edit_header_line(self, bypass_collapse: bool = False) -> bool:
+            # invalid value info
+            if isinstance(self.value, InvalidValue):
+                text_maybe_truncated(
+                    icons_fontawesome_6.ICON_FA_TRIANGLE_EXCLAMATION + " " + self.value.error_message,
+                    color=get_fiat_config().style.color_as_vec4(FiatColorType.InvalidValue),
+                    max_lines=1,
+                    max_width_chars=40,
+                )
+
+    def _gui_edit_header_line(self, label: str, label_color: ImVec4) -> bool:
         changed = False
         can_set_unspecified = False
         can_set_default_value = False
         warn_no_default_provider = False
 
-        #
-        # Left side: value or error or gui_edit (if fits one line)
-        #
-        if isinstance(self.value, Unspecified):
-            imgui.text_colored(get_fiat_config().style.color_as_vec4(FiatColorType.ValueUnspecified), "Unspecified")
-            # if unspecified, provide "+" to set to default provider value
-            if self.callbacks.default_value_provider is not None:
-                can_set_default_value = True
-            else:
-                warn_no_default_provider = True
+        with imgui_ctx.begin_horizontal("edit_header_line"):
+            #
+            # Left side: label, expand button, value or error or gui_edit (if fits one line), invalid value info
+            #
+            imgui.text_colored(label_color, label)
+            if self.can_collapse_edit():
+                self._show_collapse_button()
 
-        elif isinstance(self.value, Error):
-            imgui.text_colored(get_fiat_config().style.color_as_vec4(FiatColorType.ValueWithError), "Error")
+            if isinstance(self.value, Unspecified):
+                imgui.text_colored(get_fiat_config().style.color_as_vec4(FiatColorType.ValueUnspecified), "Unspecified")
+                # if unspecified, provide "+" to set to default provider value
+                if self.callbacks.default_value_provider is not None:
+                    can_set_default_value = True
+                else:
+                    warn_no_default_provider = True
 
-        else:  # if isinstance(self.value, (InvalidValue, DataType))
-            value = self.get_actual_or_invalid_value()
-            can_edit_on_header_line = self.can_edit_on_header_line()
-            if can_edit_on_header_line:
-                assert self.callbacks.edit is not None  # make mypy happy
-                with imgui_ctx.begin_vertical("callback_edit"):  # Some widgets expect a standard vertical layout
-                    changed, new_value = self.callbacks.edit(value)
-                if changed:
-                    self.value = new_value  # this will call the setter and trigger the validation
-            else:
-                as_str = self.datatype_value_to_str(value)
-                text_maybe_truncated(as_str, max_width_chars=40, max_lines=1)
+            elif isinstance(self.value, Error):
+                imgui.text_colored(get_fiat_config().style.color_as_vec4(FiatColorType.ValueWithError), "Error")
 
-            if self._can_set_unspecified:
-                can_set_unspecified = True
+            else:  # if isinstance(self.value, (InvalidValue, DataType))
+                value = self.get_actual_or_invalid_value()
+                can_edit_on_header_line = self.can_edit_on_header_line()
+                if can_edit_on_header_line:
+                    assert self.callbacks.edit is not None  # make mypy happy
+                    with imgui_ctx.begin_vertical("callback_edit"):  # Some widgets expect a standard vertical layout
+                        changed, new_value = self.callbacks.edit(value)
+                    if changed:
+                        self.value = new_value  # this will call the setter and trigger the validation
+                else:
+                    as_str = self.datatype_value_to_str(value)
+                    text_maybe_truncated(as_str, max_width_chars=40, max_lines=1)
 
-        #
-        # Right Side: Reset to unspecified + toggle expand state + invalid value info
-        #
-        if isinstance(self.value, InvalidValue):
-            text_maybe_truncated(
-                icons_fontawesome_6.ICON_FA_TRIANGLE_EXCLAMATION + " " + self.value.error_message,
-                color=get_fiat_config().style.color_as_vec4(FiatColorType.InvalidValue),
-                max_lines=1,
-                max_width_chars=40,
-            )
-        imgui.spring()  # Align the rest to the right
-        if can_set_unspecified:
-            if imgui.button(icons_fontawesome_6.ICON_FA_SQUARE_MINUS):
-                self.value = UnspecifiedValue
-                changed = True
-            set_widget_tooltip("Reset to unspecified")
-        if can_set_default_value:
-            if imgui.button(icons_fontawesome_6.ICON_FA_SQUARE_PLUS):
-                assert self.callbacks.default_value_provider is not None
-                self.value = self.callbacks.default_value_provider()
-            set_widget_tooltip("Set to default value")
-        if warn_no_default_provider:
-            imgui.text_colored(
-                get_fiat_config().style.color_as_vec4(FiatColorType.InvalidValue),
-                icons_fontawesome_6.ICON_FA_TRIANGLE_EXCLAMATION,
-            )
-            set_widget_tooltip("No default value provider")
+                if self._can_set_unspecified:
+                    can_set_unspecified = True
 
-        if self.can_collapse_edit() and not bypass_collapse:
-            icon = icons_fontawesome_6.ICON_FA_CARET_DOWN if self._expanded else icons_fontawesome_6.ICON_FA_CARET_RIGHT
-            if imgui.button(icon):
-                self._expanded = not self._expanded
+            # invalid value info
+            if isinstance(self.value, InvalidValue):
+                text_maybe_truncated(
+                    icons_fontawesome_6.ICON_FA_TRIANGLE_EXCLAMATION + " " + self.value.error_message,
+                    color=get_fiat_config().style.color_as_vec4(FiatColorType.InvalidValue),
+                    max_lines=1,
+                    max_width_chars=40,
+                )
+
+            #
+            # Right Side: Reset to unspecified or to default value
+            #
+            imgui.spring()  # Align the rest to the right
+            if can_set_unspecified:
+                if imgui.button(icons_fontawesome_6.ICON_FA_SQUARE_MINUS):
+                    self.value = UnspecifiedValue
+                    changed = True
+                set_widget_tooltip("Reset to unspecified")
+            if can_set_default_value:
+                if imgui.button(icons_fontawesome_6.ICON_FA_SQUARE_PLUS):
+                    assert self.callbacks.default_value_provider is not None
+                    self.value = self.callbacks.default_value_provider()
+                set_widget_tooltip("Set to default value")
+            if warn_no_default_provider:
+                imgui.text_colored(
+                    get_fiat_config().style.color_as_vec4(FiatColorType.InvalidValue),
+                    icons_fontawesome_6.ICON_FA_TRIANGLE_EXCLAMATION,
+                )
+                set_widget_tooltip("No default value provider")
 
         return changed
 
-    def gui_present_custom(self) -> None:
+    def _gui_edit_next_lines(self) -> bool:
+        # Line 2 and beyond: edit (if one line present is impossible)
+        changed = False
+        if self.can_edit_on_next_lines():
+            assert self.callbacks.edit is not None
+            with imgui_ctx.begin_horizontal("left_margin_edit"):
+                margin_size = hello_imgui.em_size(1.5)
+                imgui.dummy(ImVec2(margin_size, 0))
+                value = self.get_actual_or_invalid_value()
+                with imgui_ctx.begin_vertical("callback_edit"):
+                    changed, new_value = self.callbacks.edit(value)
+                    if changed:
+                        self.value = new_value  # this will call the setter and trigger the validation
+        return changed
+
+    def _gui_present_custom_next_lines(self) -> None:
+        # Line 2 and beyond: present (if one line present is impossible)
+        if self.can_present_on_next_lines():
+            assert self.callbacks.present_custom is not None
+            with imgui_ctx.begin_horizontal("left_margin_present"):
+                margin_size = hello_imgui.em_size(1.5)
+                imgui.dummy(ImVec2(margin_size, 0))
+                value = self.get_actual_or_invalid_value()
+                with imgui_ctx.begin_vertical("callback_present"):
+                    self.callbacks.present_custom(value)
+
+    def gui_present_custom(
+        self,
+        label: str,
+        label_color: ImVec4 | None = None,
+    ) -> None:
         """Present the value using either the present_custom callback or the default str conversion
         May present on one line (if possible) or on multiple lines with an expand button
         """
+        if label_color is None:
+            label_color = imgui.get_style().color_(imgui.Col_.text.value)
         with imgui_ctx.push_obj_id(self):
             with fontawesome_6_ctx():
-                with imgui_ctx.begin_vertical("gui_edit"):
-                    # Line 1: header line
-                    with imgui_ctx.begin_horizontal("present_header_line"):
-                        self._gui_present_header_line()
-                    # Line 2 and beyond: present (if one line present is impossible)
-                    if self.can_present_on_next_lines():
-                        assert self.callbacks.present_custom is not None
-                        value = self.get_actual_or_invalid_value()
-                        with imgui_ctx.begin_vertical("callback_present"):
-                            self.callbacks.present_custom(value)
+                self._gui_present_header_line(label, label_color)
+                self._gui_present_custom_next_lines()
 
-    def gui_edit(self) -> bool:
+    def gui_edit(
+        self,
+        label: str,
+        label_color: ImVec4 | None = None,
+    ) -> bool:
         """Call the edit callback. Returns True if the value has changed
         May edit on one line (if possible) or on multiple lines with an expand button
         """
-        changed = False
+        if label_color is None:
+            label_color = imgui.get_style().color_(imgui.Col_.text.value)
+        changed = False  # noqa
         with imgui_ctx.push_obj_id(self):
             with fontawesome_6_ctx():
-                with imgui_ctx.begin_vertical("gui_edit"):
-                    # Line 1: header line
-                    with imgui_ctx.begin_horizontal("edit_header_line"):
-                        if self._gui_edit_header_line():
-                            changed = True
-                    # Line 2 and beyond: edit (if one line edit is impossible)
-                    if self.can_edit_on_next_lines():
-                        assert self.callbacks.edit is not None
-                        value = self.get_actual_or_invalid_value()
-                        with imgui_ctx.begin_vertical("callback_edit"):
-                            changed, new_value = self.callbacks.edit(value)
-                            if changed:
-                                self.value = new_value  # this will call the setter and trigger the validation
+                if self._gui_edit_header_line(label, label_color):
+                    changed = True
+                if self._gui_edit_next_lines():
+                    changed = True
 
-            return changed
+        return changed
 
     def _Callbacks_Section(self) -> None:  # Dummy function to create a section in the IDE # noqa
         """
