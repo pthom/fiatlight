@@ -22,7 +22,7 @@ from fiatlight.fiat_togui import (
 )
 from fiatlight.fiat_utils import with_custom_attrs, add_custom_attrs
 from fiatlight.fiat_config import get_fiat_config
-from fiatlight.fiat_types import DataValidationResult
+from fiatlight.fiat_types import DataValidationResult, Error, Unspecified, InvalidValue, ErrorValue, UnspecifiedValue
 
 
 def demo_assets_dir() -> str:
@@ -87,4 +87,9 @@ __all__ = [
     "add_custom_attrs",
     # from fiat_types
     "DataValidationResult",
+    "Error",
+    "Unspecified",
+    "InvalidValue",
+    "ErrorValue",
+    "UnspecifiedValue",
 ]
