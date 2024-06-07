@@ -319,7 +319,7 @@ class FunctionNodeGui:
                     header_elements.value_as_str,
                     max_width_chars=40,
                     max_lines=1,
-                    info_tooltip=header_elements.value_tooltip,
+                    additional_tooltip=header_elements.value_tooltip,
                 )
 
         # Align to the right
@@ -379,7 +379,7 @@ class FunctionNodeGui:
                     header_elements.value_as_str,
                     max_width_chars=40,
                     max_lines=1,
-                    info_tooltip=header_elements.param_value_tooltip,
+                    additional_tooltip=header_elements.param_value_tooltip,
                 )
 
         imgui.spring()

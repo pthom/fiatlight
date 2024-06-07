@@ -59,7 +59,7 @@ def text_maybe_truncated(
     max_width_pixels: float | None = None,
     max_width_chars: int | None = None,
     max_lines: int | None = None,
-    info_tooltip: str | None = None,
+    additional_tooltip: str | None = None,
 ) -> None:
     def output_text(s: str) -> None:
         if color is not None:
@@ -78,8 +78,8 @@ def text_maybe_truncated(
 
     # Tooltip
     tooltip_str = ""
-    if info_tooltip is not None:
-        tooltip_str = info_tooltip
+    if additional_tooltip is not None:
+        tooltip_str = additional_tooltip
     if is_truncated:
         if len(tooltip_str) > 0:
             tooltip_str += "\n\n" + msg
