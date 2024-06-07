@@ -29,7 +29,7 @@ def is_rendering_in_node() -> bool:
     return not _IS_PRESENTLY_IN_DETACHED_WINDOW
 
 
-def is_rendering_in_window() -> bool:
+def is_rendering_in_fiatlight_detached_window() -> bool:
     """Check if we are currently rendering inside a regular ImGui window.
     You may want to check this value when implementing `present_custom` or `edit`
     callbacks inside `AnyDataGuiCallbacks` for several possible reasons:
@@ -39,6 +39,8 @@ def is_rendering_in_window() -> bool:
     - When inside a Node, you may want to render a smaller version, to save space
       (as opposed to rendering a larger version in a detached window).
     """
+    if imgui_node_editor.get_current_editor() is None:
+        return False
     return _IS_PRESENTLY_IN_DETACHED_WINDOW
 
 

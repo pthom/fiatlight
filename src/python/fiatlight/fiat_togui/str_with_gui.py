@@ -116,7 +116,7 @@ class StrWithGui(AnyDataWithGui[str]):
 
     @staticmethod
     def present_custom(text_value: str) -> None:
-        if fiatlight.is_rendering_in_window():
+        if fiatlight.is_rendering_in_fiatlight_detached_window():
             text_edit_size = ImVec2(
                 imgui.get_window_width() - hello_imgui.em_size(1), imgui.get_window_height() - hello_imgui.em_size(5)
             )

@@ -10,7 +10,7 @@ from fiatlight.fiat_runner import (
     fire_once_at_frame_start,
 )
 from fiatlight.fiat_kits import fiat_image, fiat_array
-from fiatlight.fiat_widgets.fiat_osd import is_rendering_in_node, is_rendering_in_window
+from fiatlight.fiat_widgets.fiat_osd import is_rendering_in_node, is_rendering_in_fiatlight_detached_window
 from fiatlight.fiat_togui import (
     register_type,
     register_enum,
@@ -79,7 +79,7 @@ __all__ = [
     "fiat_array",
     # from fiat_widgets
     "is_rendering_in_node",
-    "is_rendering_in_window",
+    "is_rendering_in_fiatlight_detached_window",
     # from fiat_config
     "get_fiat_config",
     # from fiat_utils
