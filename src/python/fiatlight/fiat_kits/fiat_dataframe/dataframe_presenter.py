@@ -6,7 +6,7 @@ from fiatlight.fiat_core.possible_custom_attributes import PossibleCustomAttribu
 from fiatlight.fiat_types import CustomAttributesDict, JsonDict
 from fiatlight.fiat_widgets.fontawesome6_ctx_utils import fontawesome_6_ctx, icons_fontawesome_6
 from imgui_bundle import imgui, imgui_ctx, hello_imgui, immapp
-from fiatlight.fiat_widgets.fiat_osd import is_rendering_in_window  # noqa
+from fiatlight.fiat_widgets.fiat_osd import is_rendering_in_node
 
 
 class DataFramePossibleCustomAttributes(PossibleCustomAttributes):
@@ -37,7 +37,7 @@ class DataFramePossibleCustomAttributes(PossibleCustomAttributes):
             default_value=10,
         )
         self.add_explained_attribute(
-            name="rows_per_page_popup",
+            name="rows_per_page_classic",
             explanation="Number of rows to display per page (when displayed in a pop-up)",
             type_=int,
             default_value=20,
@@ -68,10 +68,10 @@ class DataFramePresenterParams(BaseModel):
     # Postponed/disabled: ImGui does not seem to communicate back this info after reordering columns.
     # column_order: list[str] = Field(default_factory=list)
 
-    # Number of rows to display per page
+    # Number of rows to display per page (when displayed in a function node)
     rows_per_page_node: int = 10
-    # Number of rows to display per page
-    rows_per_page_popup: int = 20
+    # Number of rows to display per page (when displayed elsewhere)
+    rows_per_page_classic: int = 20
 
     # Index of the first row on the current page, used for pagination.
     current_page_start_idx: int = 0
@@ -108,15 +108,15 @@ class DataFramePresenterParams(BaseModel):
 
     @property
     def rows_per_page(self) -> int:
-        return self.rows_per_page_popup if is_rendering_in_window() else self.rows_per_page_node
+        return self.rows_per_page_node if is_rendering_in_node() else self.rows_per_page_classic
 
     # setter for rows_per_page
     @rows_per_page.setter
     def rows_per_page(self, value: int) -> None:
-        if is_rendering_in_window():
-            self.rows_per_page_popup = value
-        else:
+        if is_rendering_in_node():
             self.rows_per_page_node = value
+        else:
+            self.rows_per_page_classic = value
 
 
 class DataFramePresenter:
