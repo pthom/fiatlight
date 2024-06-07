@@ -44,7 +44,7 @@ from imgui_bundle import (
     imspinner,
 )
 from imgui_bundle import ImColor
-from fiatlight.fiat_widgets import icons_fontawesome_6, fontawesome_6_ctx, fiat_osd, collapsible_button
+from fiatlight.fiat_widgets import icons_fontawesome_6, fontawesome_6_ctx, fiat_osd
 from fiatlight import fiat_widgets
 from typing import Dict, List, Any
 from dataclasses import dataclass
@@ -90,11 +90,8 @@ class FunctionNodeGui:
     # user settings:
     #   Flags that indicate whether the details of the inputs/outputs/internals are shown or not
     #   (those settings are saved in the user settings file)
-    _show_input_details: Dict[str, bool] = {}
     _inputs_expanded: bool = True
-    _show_output_details: Dict[int, bool] = {}
     _outputs_expanded: bool = True
-    _show_internals_details: Dict[str, bool] = {}  # This is for the function's debug internals
     _internals_expanded: bool = True
     _internal_state_gui_expanded: bool = True  # This is for the function's internal state gui
 
@@ -118,17 +115,10 @@ class FunctionNodeGui:
         for i in range(self._function_node.function_with_gui.nb_outputs()):
             self._pins_output[i] = ed.PinId.create()
 
-        self._show_input_details = {}
         for input_name in self._function_node.function_with_gui.all_inputs_names():
             param = self._function_node.function_with_gui.param(input_name)
-            show_input_details = False
-            if not self._function_node.has_input_link(input_name):
-                has_default_value = param.default_value is not UnspecifiedValue
-                show_input_details = not has_default_value
-            self._show_input_details[input_name] = show_input_details
-            # self._show_input_details[input_name] = False
-
-        self._show_output_details = {i: True for i in range(self._function_node.function_with_gui.nb_outputs())}
+            if self._function_node.has_input_link(input_name):
+                param.data_with_gui._expanded = False  # No need to expand linked field by default
 
         self._fill_function_docstring_and_source()
         self._fiat_internals_with_gui = {}
@@ -328,12 +318,6 @@ class FunctionNodeGui:
         # Copy to clipboard button
         self._show_copy_to_clipboard_button(self._function_node.function_with_gui.output(idx_output))
 
-        # Show present button, if a custom present callback is available
-        if header_elements.show_details_button:
-            self._show_output_details[idx_output] = collapsible_button(
-                self._show_output_details[idx_output], header_elements.details_button_tooltip
-            )
-
         # Show colored pin with possible tooltip
         with imgui_ctx.push_style_color(
             imgui.Col_.text.value,
@@ -387,11 +371,6 @@ class FunctionNodeGui:
         # Copy to clipboard button
         self._show_copy_to_clipboard_button(input_param.data_with_gui)
 
-        if header_elements.show_details_button:
-            self._show_input_details[input_name] = collapsible_button(
-                self._show_input_details[input_name], header_elements.details_button_tooltip
-            )
-
         imgui.end_horizontal()
 
     def _output_header_elements(self, output_idx: int) -> _OutputHeaderLineElements:
@@ -439,12 +418,6 @@ class FunctionNodeGui:
         else:
             r.value_color = FiatColorType.OutputValueOk
             r.value_tooltip = "This output is up-to-date"
-
-        # fill r.show_details_button and r.details_button_tooltip
-        can_present = output_with_gui.can_present_custom()
-        if can_present:
-            r.show_details_button = True
-            r.details_button_tooltip = "output details"
 
         return r
 
@@ -517,17 +490,6 @@ class FunctionNodeGui:
         # fill param_name and param_name_tooltip
         r.param_name = input_param.name
 
-        # fill show_details_button and details_button_tooltip
-        has_link = self._function_node.has_input_link(input_param.name)
-        if has_link:
-            can_present = input_param.data_with_gui.can_present_custom()
-            if can_present:
-                r.show_details_button = True
-                r.details_button_tooltip = "linked input details"
-        else:
-            r.show_details_button = True
-            r.details_button_tooltip = "edit input"
-
         return r
 
     @staticmethod
@@ -578,10 +540,7 @@ class FunctionNodeGui:
 
         # Update the inputs expanded state
         if node_separator_output.was_toggle_collapse_all_clicked:
-            has_one_visible_input = any(self._show_input_details[input_name] for input_name in self._show_input_details)
-            new_state = not has_one_visible_input
-            for input_name, expanded in self._show_input_details.items():
-                self._show_input_details[input_name] = new_state
+            self._function_node.function_with_gui.toggle_expand_inputs()
 
         #
         # Draw the inputs
@@ -605,9 +564,6 @@ class FunctionNodeGui:
                 return False
 
             self._draw_input_header_line(input_param)
-
-            if not self._show_input_details[input_name]:
-                return False
 
             shall_show_edit = not self._function_node.has_input_link(input_name)
             if shall_show_edit:
@@ -839,10 +795,7 @@ class FunctionNodeGui:
         self._outputs_expanded = node_separator_output.expanded
         # If the collapse all button was clicked, we update the state of all outputs
         if node_separator_output.was_toggle_collapse_all_clicked:
-            has_one_visible_output = any(self._show_output_details[i] for i in range(nb_outputs))
-            new_state = not has_one_visible_output
-            for i in range(nb_outputs):
-                self._show_output_details[i] = new_state
+            self._function_node.function_with_gui.toggle_expand_outputs()
 
         # Invoke options
         self._draw_invoke_options()
@@ -861,7 +814,7 @@ class FunctionNodeGui:
             with imgui_ctx.begin_horizontal("outputH"):
                 self._draw_output_header_line(idx_output)
             can_present = output_param.can_present_custom()
-            if can_present and self._show_output_details[idx_output]:
+            if can_present and output_param._expanded:
                 # capture the output_param for the lambda
                 # (otherwise, the lambda would capture the last output_param in the loop)
                 output_param_captured = output_param
@@ -991,10 +944,10 @@ class FunctionNodeGui:
 
         # Update the internals expanded state
         if node_separator_output.was_toggle_collapse_all_clicked:
-            has_one_visible_internal = any(self._show_internals_details[name] for name in self._show_internals_details)
-            new_state = not has_one_visible_internal
-            for name, expanded in self._show_internals_details.items():
-                self._show_internals_details[name] = new_state
+            from fiatlight.fiat_core.any_data_with_gui import toggle_expanded_state_on_guis
+
+            guis = [gui for _name, gui in fn_fiat_internals.items()]
+            toggle_expanded_state_on_guis(guis)
 
         # remove old internals
         new_fiat_internals_with_gui = {}
@@ -1011,21 +964,15 @@ class FunctionNodeGui:
             if name not in self._fiat_internals_with_gui:
                 self._fiat_internals_with_gui[name] = data_with_gui
             with imgui_ctx.push_obj_id(data_with_gui):
-                with imgui_ctx.begin_horizontal("internal_header"):
-                    imgui.text(name)
-                    imgui.spring()
-                    self._show_internals_details[name] = collapsible_button(
-                        self._show_internals_details.get(name, False), "internal details"
-                    )
-                if self._show_internals_details[name]:
-                    if data_with_gui.can_present_custom():
-                        assert data_with_gui.callbacks.present_custom is not None
-                        data_with_gui_value = data_with_gui.value
-                        assert not isinstance(data_with_gui_value, (Unspecified, Error))
-                        data_with_gui.callbacks.present_custom(data_with_gui_value)
-                    else:
-                        as_str = data_with_gui.datatype_value_to_str(data_with_gui.value)
-                        imgui.text(as_str)
+                imgui.text(name)
+                if data_with_gui.can_present_custom():
+                    assert data_with_gui.callbacks.present_custom is not None
+                    data_with_gui_value = data_with_gui.value
+                    assert not isinstance(data_with_gui_value, (Unspecified, Error))
+                    data_with_gui.callbacks.present_custom(data_with_gui_value)
+                else:
+                    as_str = data_with_gui.datatype_value_to_str(data_with_gui.value)
+                    imgui.text(as_str)
 
     # ------------------------------------------------------------------------------------------------------------------
     #      Draw misc elements
@@ -1128,32 +1075,14 @@ class FunctionNodeGui:
 
     def save_gui_options_to_json(self) -> JsonDict:
         r = {
-            "_show_input_details": self._show_input_details,
             "_inputs_expanded": self._inputs_expanded,
-            "_show_output_details": self._show_output_details,
             "_outputs_expanded": self._outputs_expanded,
-            "_show_internals_details": self._show_internals_details,
             "_internals_expanded": self._internals_expanded,
             "_internal_state_gui_expanded": self._internal_state_gui_expanded,
         }
         return r
 
     def load_gui_options_from_json(self, json_data: JsonDict) -> None:
-        show_input_details_as_dict_str_bool = json_data.get("_show_input_details")
-        if show_input_details_as_dict_str_bool is not None:
-            for k, v in show_input_details_as_dict_str_bool.items():
-                self._show_input_details[k] = v
-
-        show_output_details_as_dict_str_bool = json_data.get("_show_output_details")
-        if show_output_details_as_dict_str_bool is not None:
-            for k, v in show_output_details_as_dict_str_bool.items():
-                self._show_output_details[int(k)] = v
-
-        show_internals_details_as_dict_str_bool = json_data.get("_show_internals_details")
-        if show_internals_details_as_dict_str_bool is not None:
-            for k, v in show_internals_details_as_dict_str_bool.items():
-                self._show_internals_details[k] = v
-
         self._inputs_expanded = json_data.get("_inputs_expanded", True)
         self._outputs_expanded = json_data.get("_outputs_expanded", True)
         self._internals_expanded = json_data.get("_internals_expanded", True)
@@ -1199,9 +1128,6 @@ class _InputParamHeaderLineElements:
 
     value_as_str: str | None = None
 
-    show_details_button: bool = False
-    details_button_tooltip: str = ""
-
 
 class _OutputHeaderLineElements:
     """Data to be presented in a header line"""
@@ -1214,9 +1140,6 @@ class _OutputHeaderLineElements:
     value_as_str: str | None = None
     value_color: FiatColorType = FiatColorType.OutputValueOk
     value_tooltip: str | None = None
-
-    show_details_button: bool = False
-    details_button_tooltip: str = ""
 
 
 @dataclass

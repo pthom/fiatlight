@@ -461,7 +461,7 @@ from fiatlight.fiat_config import get_fiat_config
 from fiatlight.fiat_core.togui_exception import FiatToGuiException
 from fiatlight.fiat_types import UnspecifiedValue, ErrorValue, JsonDict, GuiType
 from fiatlight.fiat_types.error_types import Unspecified, Error, InvalidValue
-from fiatlight.fiat_core.any_data_with_gui import AnyDataWithGui
+from fiatlight.fiat_core.any_data_with_gui import AnyDataWithGui, toggle_expanded_state_on_guis
 from fiatlight.fiat_types.function_types import BoolFunction
 from fiatlight.fiat_core.param_with_gui import ParamWithGui, ParamKind
 from fiatlight.fiat_core.output_with_gui import OutputWithGui
@@ -895,6 +895,12 @@ class FunctionWithGui:
             raise TypeError(f"Expected type {gui_type.__name__}, got {type(r).__name__} instead.")
         return r
 
+    def inputs_guis(self) -> List[AnyDataWithGui[Any]]:
+        r = []
+        for i in self._inputs_with_gui:
+            r.append(i.data_with_gui)
+        return r
+
     def set_input_gui(self, name: str, gui: AnyDataWithGui[Any]) -> None:
         """Set the GUI for the input with the given name"""
         for param in self._inputs_with_gui:
@@ -927,6 +933,12 @@ class FunctionWithGui:
                 param.data_with_gui.value = value
                 return
         raise ValueError(f"Parameter {name} not found")
+
+    def toggle_expand_inputs(self) -> None:
+        toggle_expanded_state_on_guis(self.inputs_guis())
+
+    def toggle_expand_outputs(self) -> None:
+        toggle_expanded_state_on_guis(self.outputs_guis())
 
     @staticmethod
     def _Outputs_Section() -> None:  # Dummy function to create a section in the IDE # noqa
@@ -965,6 +977,12 @@ class FunctionWithGui:
         r = self._outputs_with_gui[output_idx].data_with_gui
         if not isinstance(r, gui_type):
             raise TypeError(f"Expected type {gui_type.__name__}, got {type(r).__name__} instead.")
+        return r
+
+    def outputs_guis(self) -> List[AnyDataWithGui[Any]]:
+        r = []
+        for i in self._outputs_with_gui:
+            r.append(i.data_with_gui)
         return r
 
     @staticmethod
