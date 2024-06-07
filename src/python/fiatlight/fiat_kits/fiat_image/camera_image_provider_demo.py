@@ -122,11 +122,11 @@ def apply_geo_transf(image: fi.ImageU8_3, geo_transf: GeometricTransformation) -
 
 
 def main() -> None:
-    # camera_gui = fi.CameraImageProviderGui()
+    camera_gui = fi.CameraImageProviderGui()
     image_to_file = fi.ImageToFileGui()
-    # fl.run([camera_gui, apply_image_effect, image_to_file])
+    fl.run([camera_gui, apply_image_effect, image_to_file])
 
-    fl.run([fi.image_from_file, apply_image_effect, image_to_file])
+    # fl.run([fi.image_from_file, apply_image_effect, image_to_file])
     # fl.run([fi.image_from_file, rotate_image])
     # fl.run([fi.image_from_file, apply_geo_transf])
 
