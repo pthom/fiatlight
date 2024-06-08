@@ -265,6 +265,8 @@ class BaseModelGui(DataclassLikeGui[DataclassLikeType]):
         super().__init__(basemodel_type, param_attrs)  # type: ignore
         self.callbacks.load_from_dict = self._load_from_dict
         self.callbacks.save_to_dict = self._save_to_dict
+        self.callbacks.clipboard_copy_possible = True
+        self.callbacks.clipboard_copy_str = self.clipboard_copy_str
 
         # Look for fields with default_factory
         self._initialize_fields()
@@ -292,3 +294,7 @@ class BaseModelGui(DataclassLikeGui[DataclassLikeType]):
         r = self._type.model_validate(json_data["value"])
         assert isinstance(r, self._type)
         return r  # type: ignore
+
+    def clipboard_copy_str(self, value: DataclassLikeType) -> str:
+        assert isinstance(value, BaseModel)
+        return value.model_dump_json(indent=2)

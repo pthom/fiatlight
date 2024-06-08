@@ -266,6 +266,17 @@ class AnyDataWithGui(Generic[DataType]):
         if imgui.button(icon):
             self._expanded = not self._expanded
 
+    def _show_copy_to_clipboard_button(self) -> None:
+        if not self.callbacks.clipboard_copy_possible:
+            return
+        if self.value is UnspecifiedValue or self.value is ErrorValue:
+            return
+        with fontawesome_6_ctx():
+            if imgui.button(icons_fontawesome_6.ICON_FA_COPY):
+                clipboard_str = self.datatype_value_to_clipboard_str()
+                imgui.set_clipboard_text(clipboard_str)
+            set_widget_tooltip("Copy value to clipboard")
+
     def can_collapse_present(self) -> bool:
         if isinstance(self.value, (Unspecified, Error)):
             return False
@@ -300,9 +311,17 @@ class AnyDataWithGui(Generic[DataType]):
             and is_datatype_or_invalid
         )
 
-    def _gui_present_header_line(self, label: str, label_color: ImVec4) -> None:
+    def _gui_present_header_line(
+        self,
+        label: str,
+        label_color: ImVec4,
+        value_tooltip: str | None = None,
+    ) -> None:
         """Present the value as a string in one line, or as a widget if it fits on one line"""
         with imgui_ctx.begin_horizontal("present_header_line"):
+            #
+            # Left side: label, expand button, value or error or gui_edit (if fits one line), invalid value info
+            #
             # Label
             imgui.text_colored(label_color, label)
             # Expand button
@@ -336,31 +355,34 @@ class AnyDataWithGui(Generic[DataType]):
                     max_width_chars=40,
                 )
 
-    def _gui_edit_header_line(self, label: str, label_color: ImVec4) -> bool:
+            # Tooltip
+            if value_tooltip is not None:
+                set_widget_tooltip(value_tooltip)
+
+            #
+            # Right Side: clipboard button
+            #
+            imgui.spring()  # Align the rest to the right
+            self._show_copy_to_clipboard_button()
+
+    def _gui_edit_header_line(self, label: str, label_color: ImVec4, value_tooltip: str | None = None) -> bool:
         changed = False
-        can_set_unspecified = False
-        can_set_default_value = False
-        warn_no_default_provider = False
 
         with imgui_ctx.begin_horizontal("edit_header_line"):
             #
             # Left side: label, expand button, value or error or gui_edit (if fits one line), invalid value info
             #
+            # Label
             imgui.text_colored(label_color, label)
+            # Expand button
             if self.can_collapse_edit():
                 self._show_collapse_button()
 
+            # Value as string or widget
             if isinstance(self.value, Unspecified):
                 imgui.text_colored(get_fiat_config().style.color_as_vec4(FiatColorType.ValueUnspecified), "Unspecified")
-                # if unspecified, provide "+" to set to default provider value
-                if self.callbacks.default_value_provider is not None:
-                    can_set_default_value = True
-                else:
-                    warn_no_default_provider = True
-
             elif isinstance(self.value, Error):
                 imgui.text_colored(get_fiat_config().style.color_as_vec4(FiatColorType.ValueWithError), "Error")
-
             else:  # if isinstance(self.value, (InvalidValue, DataType))
                 value = self.get_actual_or_invalid_value()
                 can_edit_on_header_line = self.can_edit_on_header_line()
@@ -374,8 +396,9 @@ class AnyDataWithGui(Generic[DataType]):
                     as_str = self.datatype_value_to_str(value)
                     text_maybe_truncated(as_str, max_width_chars=40, max_lines=1)
 
-                if self._can_set_unspecified:
-                    can_set_unspecified = True
+                # After drawing on one line, display the tooltip
+                if value_tooltip is not None:
+                    set_widget_tooltip(value_tooltip)
 
             # invalid value info
             if isinstance(self.value, InvalidValue):
@@ -387,25 +410,45 @@ class AnyDataWithGui(Generic[DataType]):
                 )
 
             #
-            # Right Side: Reset to unspecified or to default value
+            # Right Side: Clipboard, Reset to unspecified or to default value
             #
             imgui.spring()  # Align the rest to the right
-            if can_set_unspecified:
-                if imgui.button(icons_fontawesome_6.ICON_FA_SQUARE_MINUS):
-                    self.value = UnspecifiedValue
-                    changed = True
-                set_widget_tooltip("Reset to unspecified")
-            if can_set_default_value:
-                if imgui.button(icons_fontawesome_6.ICON_FA_SQUARE_PLUS):
-                    assert self.callbacks.default_value_provider is not None
-                    self.value = self.callbacks.default_value_provider()
-                set_widget_tooltip("Set to default value")
-            if warn_no_default_provider:
-                imgui.text_colored(
-                    get_fiat_config().style.color_as_vec4(FiatColorType.InvalidValue),
-                    icons_fontawesome_6.ICON_FA_TRIANGLE_EXCLAMATION,
-                )
-                set_widget_tooltip("No default value provider")
+            self._show_copy_to_clipboard_button()
+            if self._show_set_unset_button():
+                changed = True
+
+        return changed
+
+    def _show_set_unset_button(self) -> bool:
+        can_set_default_value = False
+        warn_no_default_provider = False
+        can_set_unspecified = False
+        if isinstance(self.value, Unspecified):
+            # if unspecified, provide "+" to set to default provider value
+            if self.callbacks.default_value_provider is not None:
+                can_set_default_value = True
+            else:
+                warn_no_default_provider = True
+        if not isinstance(self.value, (Error, Unspecified)):
+            can_set_unspecified = True
+
+        changed = False
+        if can_set_unspecified:
+            if imgui.button(icons_fontawesome_6.ICON_FA_SQUARE_MINUS):
+                self.value = UnspecifiedValue
+                changed = True
+            set_widget_tooltip("Reset to unspecified")
+        if can_set_default_value:
+            if imgui.button(icons_fontawesome_6.ICON_FA_SQUARE_PLUS):
+                assert self.callbacks.default_value_provider is not None
+                self.value = self.callbacks.default_value_provider()
+            set_widget_tooltip("Set to default value")
+        if warn_no_default_provider:
+            imgui.text_colored(
+                get_fiat_config().style.color_as_vec4(FiatColorType.InvalidValue),
+                icons_fontawesome_6.ICON_FA_TRIANGLE_EXCLAMATION,
+            )
+            set_widget_tooltip("No default value provider")
 
         return changed
 
@@ -594,7 +637,7 @@ class AnyDataWithGui(Generic[DataType]):
         elif isinstance(self.value, Error):
             return "Error"
         else:
-            actual_value = self.get_actual_value()
+            actual_value = self.get_actual_or_invalid_value()
             if self.callbacks.clipboard_copy_str is not None:
                 return self.callbacks.clipboard_copy_str(actual_value)
             else:

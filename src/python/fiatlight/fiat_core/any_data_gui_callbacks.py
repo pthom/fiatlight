@@ -175,7 +175,7 @@ class AnyDataGuiCallbacks(Generic[DataType]):
     # clipboard_copy_possible (Optional)
     # True by default
     # If False, the user can not copy the data to the clipboard
-    clipboard_copy_possible: bool = False
+    clipboard_copy_possible: bool = True
     # ---------------------------------------------------------------------------------------------
 
     def __init__(self) -> None:
