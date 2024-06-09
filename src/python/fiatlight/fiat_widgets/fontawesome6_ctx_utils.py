@@ -1,6 +1,5 @@
 from imgui_bundle import imgui, hello_imgui
 from imgui_bundle import icons_fontawesome_6
-import logging
 
 
 _FONT_AWESOME_6: imgui.ImFont | None = None
@@ -30,12 +29,8 @@ class PushFontAwesome6:
             imgui.push_font(_FONT_AWESOME_6)
 
     def __exit__(self, exc_type, exc_val, exc_tb) -> None:  # type: ignore
-        try:
-            if _FONT_AWESOME_6 is not None:
-                imgui.pop_font()
-        finally:
-            if exc_type is not None:
-                logging.error("Exception occurred in _BeginEnd context", exc_info=(exc_type, exc_val, exc_tb))
+        if _FONT_AWESOME_6 is not None:
+            imgui.pop_font()
 
 
 def fontawesome_6_ctx() -> PushFontAwesome6:
