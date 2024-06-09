@@ -23,12 +23,18 @@ class Inner2(BaseModel):
 
 @fl.base_model_with_gui_registration()
 class Outer(BaseModel):
-    inner1: Inner1 = Field(default_factory=Inner1)
-    inner2: Inner2 | None = None
+    p: int = 0
+    # inner1: Inner1 = Field(default_factory=Inner1)
+    # inner2: Inner2 | None = None
 
 
 def f(param: Outer) -> Outer:
     return param
 
 
-fl.run(f, app_name="nested_base_model")
+def main() -> None:
+    fl.run(f, app_name="nested_base_model")
+
+
+if __name__ == "__main__":
+    main()

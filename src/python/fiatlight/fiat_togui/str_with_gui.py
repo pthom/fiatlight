@@ -80,16 +80,21 @@ class StrWithGui(AnyDataWithGui[str]):
         self.callbacks.edit_popup_possible = False
         self.callbacks.present_custom = self.present_custom
         self.callbacks.present_custom_popup_possible = True
-        self.callbacks.present_custom_collapsible = False
-        self.callbacks.edit_collapsible = False
         self.callbacks.default_value_provider = lambda: ""
         self.callbacks.save_gui_options_to_json = self.save_gui_options_to_json
         self.callbacks.load_gui_options_from_json = self.load_gui_options_from_json
         self.callbacks.on_custom_attrs_changed = self.on_custom_attrs_changed
 
+        self.callbacks.present_custom_collapsible = False
+        self.callbacks.edit_collapsible = False
+
     def on_change(self, value: str) -> None:
         self._input_text_in_node.text = value
         self._input_text_classic.text = value
+
+        nb_lines = value.count("\n") + 1
+        if nb_lines >= 2:
+            self.callbacks.present_custom_collapsible = True
 
     def on_custom_attrs_changed(self, custom_attrs: CustomAttributesDict) -> None:
         if "width_em" in custom_attrs:
@@ -132,7 +137,11 @@ class StrWithGui(AnyDataWithGui[str]):
             text_edit_size = ImVec2(
                 imgui.get_window_width() - hello_imgui.em_size(1), imgui.get_window_height() - hello_imgui.em_size(5)
             )
-            imgui.input_text_multiline("##str", text_value, text_edit_size, imgui.InputTextFlags_.read_only.value)
+            nb_lines = text_value.count("\n") + 1
+            if nb_lines > 5:
+                imgui.input_text_multiline("##str", text_value, text_edit_size, imgui.InputTextFlags_.read_only.value)
+            else:
+                imgui.text(text_value)
         else:
             text_maybe_truncated(
                 text_value,

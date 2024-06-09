@@ -21,6 +21,11 @@ class ParamWithGui(Generic[DataType]):
     param_kind: ParamKind
     default_value: DataType | Unspecified
 
+    def __post_init__(self) -> None:
+        default_value = self.default_value
+        if not isinstance(default_value, Unspecified):
+            self.data_with_gui.callbacks.default_value_provider = lambda: default_value
+
     def save_self_value_to_dict(self) -> JsonDict:
         data_json = self.data_with_gui.save_to_dict(self.data_with_gui.value)
         data_dict = {"name": self.name, "data": data_json}

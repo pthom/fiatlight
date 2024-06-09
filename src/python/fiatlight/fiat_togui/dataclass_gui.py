@@ -37,6 +37,7 @@ Usage example
 """
 
 from fiatlight.fiat_core import AnyDataWithGui, FunctionWithGui, ParamWithGui
+from fiatlight.fiat_core.any_data_with_gui import GuiHeaderLineParams
 from fiatlight.fiat_types import JsonDict, Unspecified, Error
 from fiatlight.fiat_core.togui_exception import FiatToGuiException
 from fiatlight.fiat_types.base_types import CustomAttributesDict
@@ -62,9 +63,17 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
         if param_attrs is not None:
             self._custom_attrs = param_attrs
 
+        # In order to find the members of the dataclass, we
+        # create a FunctionWithGui instance with the dataclass type
+        # so that FunctionWithGui can find the members of the dataclass
+        # and associate them with GUI
         constructor_gui = FunctionWithGui(dataclass_type)
-
         self._parameters_with_gui = constructor_gui._inputs_with_gui
+
+        # We set the _can_set_unspecified_or_default to False for all parameters
+        for parameters_with_gui in self._parameters_with_gui:
+            parameters_with_gui.data_with_gui._can_set_unspecified_or_default = False
+
         self.fill_callbacks()
         self._apply_param_attrs()
 
@@ -90,17 +99,16 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
         self.callbacks.present_str = self.present_str
         self.callbacks.present_custom = self.present_custom
 
+        # It is always possible to present and edit a dataclass in a popup
+        self.callbacks.edit_popup_possible = True
+        self.callbacks.present_custom_popup_possible = True
+
+        # A popup is required only if any of the parameters require a popup
         self.callbacks.present_custom_popup_required = False
-        self.callbacks.present_custom_popup_required = False
-        self.callbacks.edit_popup_possible = False
         self.callbacks.edit_popup_required = False
         for param_gui in self._parameters_with_gui:
             if param_gui.data_with_gui.callbacks.present_custom_popup_required:
                 self.callbacks.present_custom_popup_required = True
-            if param_gui.data_with_gui.callbacks.present_custom_popup_possible:
-                self.callbacks.present_custom_popup_possible = True
-            if param_gui.data_with_gui.callbacks.edit_popup_possible:
-                self.callbacks.edit_popup_possible = True
             if param_gui.data_with_gui.callbacks.edit_popup_required:
                 self.callbacks.edit_popup_required = True
 
@@ -192,9 +200,12 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
         with imgui_ctx.begin_vertical("##CompositeGui_present_custom"):
             for param_gui in self._parameters_with_gui:
                 with imgui_ctx.push_obj_id(param_gui):
-                    param_gui.data_with_gui.gui_present_custom(
-                        param_gui.name,
-                        label_color=self._member_label_color(),
+                    param_gui.data_with_gui.gui_present_customizable(
+                        GuiHeaderLineParams(
+                            label_color=self._member_label_color(),
+                            label=param_gui.name,
+                            show_clipboard_button=False,
+                        )
                     )
 
     def edit(self, value: DataclassLikeType) -> tuple[bool, DataclassLikeType]:
@@ -205,9 +216,12 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
                 if not hasattr(value, param_gui.name):
                     raise ValueError(f"Object does not have attribute {param_gui.name}")
                 param_gui.data_with_gui.value = getattr(value, param_gui.name)
-                changed_in_edit = param_gui.data_with_gui.gui_edit(
-                    param_gui.name,
-                    label_color=self._member_label_color(),
+                changed_in_edit = param_gui.data_with_gui.gui_edit_customizable(
+                    GuiHeaderLineParams(
+                        label_color=self._member_label_color(),
+                        label=param_gui.name,
+                        show_clipboard_button=False,
+                    )
                 )
                 if changed_in_edit:
                     new_value = param_gui.data_with_gui.value

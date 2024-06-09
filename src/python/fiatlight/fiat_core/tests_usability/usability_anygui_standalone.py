@@ -36,8 +36,8 @@ class MyParam(BaseModel):
 
 def edit_value_with_gui(label: str, value_with_gui: fl.AnyDataWithGui[Any]) -> bool:
     with imgui_ctx.push_obj_id(value_with_gui):
-        # _, value_with_gui._can_set_unspecified = imgui.checkbox(
-        #     "_can_set_unspecified", value_with_gui._can_set_unspecified
+        # _, value_with_gui._can_set_unspecified_or_default = imgui.checkbox(
+        #     "_can_set_unspecified_or_default", value_with_gui._can_set_unspecified_or_default
         # )
         imgui.text("Edit " + label)
         changed = value_with_gui.gui_edit(label)
@@ -51,17 +51,17 @@ def edit_value_with_gui(label: str, value_with_gui: fl.AnyDataWithGui[Any]) -> b
 
 
 def usability_int_with_gui() -> None:
-    from fiatlight.fiat_togui import IntWithGui, StrWithGui
+    from fiatlight.fiat_togui import any_type_to_gui
 
-    int_with_gui = IntWithGui()
-    int_with_gui._can_set_unspecified = True
+    int_with_gui = any_type_to_gui(int, {})
+    int_with_gui._can_set_unspecified_or_default = True
     int_with_gui.value = 2
     int_with_gui.add_validate_value_callback(
         lambda x: (fl.DataValidationResult.ok() if x % 2 == 0 else fl.DataValidationResult.error("Must be even"))
     )
 
-    str_with_gui = StrWithGui()
-    str_with_gui._can_set_unspecified = True
+    str_with_gui = any_type_to_gui(str, {})
+    str_with_gui._can_set_unspecified_or_default = True
     # str_with_gui.value = "Hello"
     str_with_gui.add_validate_value_callback(
         lambda x: (
@@ -72,7 +72,7 @@ def usability_int_with_gui() -> None:
     )
 
     my_param_with_gui = fl.fiat_togui.any_type_to_gui(MyParam, {})
-    my_param_with_gui._can_set_unspecified = True
+    my_param_with_gui._can_set_unspecified_or_default = True
     # my_param_with_gui.value = MyParam()
     my_param_with_gui.add_validate_value_callback(
         lambda x: (

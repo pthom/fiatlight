@@ -723,7 +723,7 @@ class FunctionWithGui:
                 self._handle_custom_attributes(custom_attributes)
 
             for input_with_gui in self._inputs_with_gui:
-                input_with_gui.data_with_gui._can_set_unspecified = True
+                input_with_gui.data_with_gui._can_set_unspecified_or_default = True
 
         if self.name == "":
             raise FiatToGuiException("FunctionWithGui: function name is empty")

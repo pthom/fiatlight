@@ -1,4 +1,5 @@
 import copy
+from dataclasses import dataclass
 
 import pydantic
 
@@ -13,7 +14,7 @@ from .possible_custom_attributes import PossibleCustomAttributes
 from imgui_bundle import imgui, imgui_ctx, ImVec4, hello_imgui, ImVec2
 from fiatlight.fiat_config import get_fiat_config, FiatColorType
 from fiatlight.fiat_widgets.fontawesome6_ctx_utils import icons_fontawesome_6, fontawesome_6_ctx
-from fiatlight.fiat_widgets.fiat_osd import set_widget_tooltip
+from fiatlight.fiat_widgets import fiat_osd
 from fiatlight.fiat_widgets.misc_widgets import text_maybe_truncated
 from typing import Generic, Any, Type, final, Callable
 import logging
@@ -32,6 +33,20 @@ class AnyDataWithGuiGenericPossibleCustomAttributes(PossibleCustomAttributes):
 
 
 _ANYDATAWITHGUI_GENERIC_POSSIBLE_CUSTOM_ATTRIBUTES = AnyDataWithGuiGenericPossibleCustomAttributes()
+
+
+@dataclass
+class GuiHeaderLineParams(Generic[DataType]):
+    label: str = ""
+    label_color: ImVec4 | None = None
+    label_tooltip: str | None = None
+    show_clipboard_button: bool = True
+    prefix_gui: Callable[[], None] | None = None
+    suffix_gui: Callable[[], None] | None = None
+    default_value_if_unspecified: DataType | Unspecified = UnspecifiedValue
+    #
+    popup_allow: bool = False
+    popup_title: str = ""
 
 
 class AnyDataWithGui(Generic[DataType]):
@@ -109,7 +124,7 @@ class AnyDataWithGui(Generic[DataType]):
     # If True, a GUI to set the value as Unspecified is provided
     # This is useful in Function Nodes.
     # Unspecified stands for a function parameter that has not been set by the user
-    _can_set_unspecified: bool = False
+    _can_set_unspecified_or_default: bool = False
 
     @staticmethod
     def _Init_Section() -> None:  # Dummy function to create a section in the IDE # noqa
@@ -263,8 +278,10 @@ class AnyDataWithGui(Generic[DataType]):
 
     def _show_collapse_button(self) -> None:
         icon = icons_fontawesome_6.ICON_FA_CARET_DOWN if self._expanded else icons_fontawesome_6.ICON_FA_CARET_RIGHT
+        tooltip = "Collapse" if self._expanded else "Expand"
         if imgui.button(icon):
             self._expanded = not self._expanded
+        fiat_osd.set_widget_tooltip(tooltip)
 
     def _show_copy_to_clipboard_button(self) -> None:
         if not self.callbacks.clipboard_copy_possible:
@@ -275,7 +292,7 @@ class AnyDataWithGui(Generic[DataType]):
             if imgui.button(icons_fontawesome_6.ICON_FA_COPY):
                 clipboard_str = self.datatype_value_to_clipboard_str()
                 imgui.set_clipboard_text(clipboard_str)
-            set_widget_tooltip("Copy value to clipboard")
+            fiat_osd.set_widget_tooltip("Copy value to clipboard")
 
     def can_collapse_present(self) -> bool:
         if isinstance(self.value, (Unspecified, Error)):
@@ -293,58 +310,81 @@ class AnyDataWithGui(Generic[DataType]):
     def can_present_custom_on_header_line(self) -> bool:
         return self.callbacks.present_custom is not None and not self.callbacks.present_custom_collapsible
 
-    def can_edit_on_next_lines(self) -> bool:
+    def _can_edit_on_next_lines_if_expanded(self) -> bool:
         is_datatype_or_invalid = not isinstance(self.value, (Unspecified, Error))
-        return (
-            self.callbacks.edit is not None
-            and self.callbacks.edit_collapsible
-            and self._expanded
-            and is_datatype_or_invalid
-        )
+        return self.callbacks.edit is not None and self.callbacks.edit_collapsible and is_datatype_or_invalid
 
-    def can_present_on_next_lines(self) -> bool:
+    def _can_present_on_next_lines_if_expanded(self) -> bool:
         is_datatype_or_invalid = not isinstance(self.value, (Unspecified, Error))
         return (
             self.callbacks.present_custom is not None
             and self.callbacks.present_custom_collapsible
-            and self._expanded
             and is_datatype_or_invalid
         )
 
-    def _gui_present_header_line(
-        self,
-        label: str,
-        label_color: ImVec4,
-        value_tooltip: str | None = None,
-    ) -> None:
+    def _is_editing_on_next_lines(self) -> bool:
+        return self._expanded and self._can_edit_on_next_lines_if_expanded()
+
+    def _is_presenting_on_next_lines(self) -> bool:
+        return self._expanded and self._can_present_on_next_lines_if_expanded()
+
+    def _gui_present_header_line(self, params: GuiHeaderLineParams[DataType]) -> None:
         """Present the value as a string in one line, or as a widget if it fits on one line"""
+
+        # can_present_in_node = not self.callbacks.present_custom_popup_required
+        can_present_in_popup = params.popup_allow and (
+            self.callbacks.present_custom_popup_required or self.callbacks.present_custom_popup_possible
+        )
+
         with imgui_ctx.begin_horizontal("present_header_line"):
             #
-            # Left side: label, expand button, value or error or gui_edit (if fits one line), invalid value info
-            #
+            # Left side:
+            #   * prefix_gui  (might contain a node input pin when used in a function node)
+            #   * label
+            #   * expand button (if collapsible)
+            #   * if not expanded: value or error or gui_edit (if fits one line)
+            #   * invalid value info
+            if params.prefix_gui is not None:
+                params.prefix_gui()
             # Label
-            imgui.text_colored(label_color, label)
+            label_color = (
+                imgui.get_style().color_(imgui.Col_.text.value) if params.label_color is None else params.label_color
+            )
+            imgui.text_colored(label_color, params.label)
+            if params.label_tooltip is not None:
+                fiat_osd.set_widget_tooltip(params.label_tooltip)
             # Expand button
             if self.can_collapse_present():
                 self._show_collapse_button()
 
             # Value as string or widget
-            if isinstance(self.value, Unspecified):
-                imgui.text_colored(get_fiat_config().style.color_as_vec4(FiatColorType.ValueUnspecified), "Unspecified")
-            elif isinstance(self.value, Error):
-                imgui.text_colored(get_fiat_config().style.color_as_vec4(FiatColorType.ValueWithError), "Error")
-            else:  # if isinstance(self.value, (InvalidValue, DataType))
-                value = self.get_actual_or_invalid_value()
-                can_present_custom_on_header_line = self.can_present_custom_on_header_line()
-                if can_present_custom_on_header_line:
-                    assert self.callbacks.present_custom is not None  # make mypy happy
-                    with imgui_ctx.begin_vertical(
-                        "callback_present_custom"
-                    ):  # Some widgets expect a standard vertical layout
-                        self.callbacks.present_custom(value)
-                else:
-                    as_str = self.datatype_value_to_str(value)
-                    text_maybe_truncated(as_str, max_width_chars=40, max_lines=1)
+            if not self._is_presenting_on_next_lines():
+                if isinstance(self.value, Unspecified):
+                    if isinstance(params.default_value_if_unspecified, Unspecified):
+                        imgui.text_colored(
+                            get_fiat_config().style.color_as_vec4(FiatColorType.ValueUnspecified), "Unspecified"
+                        )
+                    else:
+                        imgui.text_colored(
+                            get_fiat_config().style.color_as_vec4(FiatColorType.ParameterValueUsingDefault),
+                            "Default value: ",
+                        )
+                        as_str = self.datatype_value_to_str(params.default_value_if_unspecified)
+                        text_maybe_truncated(as_str, max_width_chars=40, max_lines=1)
+                elif isinstance(self.value, Error):
+                    imgui.text_colored(get_fiat_config().style.color_as_vec4(FiatColorType.ValueWithError), "Error")
+                else:  # if isinstance(self.value, (InvalidValue, DataType))
+                    value = self.get_actual_or_invalid_value()
+                    can_present_custom_on_header_line = self.can_present_custom_on_header_line()
+                    if can_present_custom_on_header_line:
+                        assert self.callbacks.present_custom is not None  # make mypy happy
+                        with imgui_ctx.begin_vertical(
+                            "callback_present_custom"
+                        ):  # Some widgets expect a standard vertical layout
+                            self.callbacks.present_custom(value)
+                    else:
+                        as_str = self.datatype_value_to_str(value)
+                        text_maybe_truncated(as_str, max_width_chars=40, max_lines=1)
 
             # invalid value info
             if isinstance(self.value, InvalidValue):
@@ -355,50 +395,87 @@ class AnyDataWithGui(Generic[DataType]):
                     max_width_chars=40,
                 )
 
-            # Tooltip
-            if value_tooltip is not None:
-                set_widget_tooltip(value_tooltip)
-
             #
-            # Right Side: clipboard button
-            #
+            # Right Side:
+            #   * open in popup button
+            #   * clipboard button
+            #   * suffix_gui (might contain a node output pin when used in a function node)
             imgui.spring()  # Align the rest to the right
-            self._show_copy_to_clipboard_button()
+            # popup button
+            if can_present_in_popup:
+                btn_label = "##present_custom_in_popup"  # This will be our popup id (with the imgui id context)
+                popup_label = params.popup_title + "##" + str(id(self))
 
-    def _gui_edit_header_line(self, label: str, label_color: ImVec4, value_tooltip: str | None = None) -> bool:
+                def gui_present_in_popup() -> None:
+                    self._gui_present_custom_next_lines(in_popup=True)
+
+                fiat_osd.show_void_detached_window_button(btn_label, popup_label, gui_present_in_popup)
+            # clipboard button
+            if params.show_clipboard_button:
+                self._show_copy_to_clipboard_button()
+            # suffix_gui
+            if params.suffix_gui is not None:
+                params.suffix_gui()
+
+    def _gui_edit_header_line(self, params: GuiHeaderLineParams[DataType]) -> bool:
+        # can_edit_in_node = not self.callbacks.edit_popup_required
+        can_edit_in_popup = params.popup_allow and (
+            self.callbacks.edit_popup_required or self.callbacks.edit_popup_possible
+        )
+
         changed = False
 
         with imgui_ctx.begin_horizontal("edit_header_line"):
             #
             # Left side: label, expand button, value or error or gui_edit (if fits one line), invalid value info
-            #
+            #   * prefix_gui  (might contain a node input pin when used in a function node)
+            #   * label
+            #   * expand button (if collapsible)
+            #   * if not expanded: value or error or gui_edit (if fits one line)
+            #   * invalid value info
+            if params.prefix_gui is not None:
+                params.prefix_gui()
             # Label
-            imgui.text_colored(label_color, label)
+            label_color = (
+                imgui.get_style().color_(imgui.Col_.text.value) if params.label_color is None else params.label_color
+            )
+            imgui.text_colored(label_color, params.label)
+            if params.label_tooltip is not None:
+                fiat_osd.set_widget_tooltip(params.label_tooltip)
             # Expand button
             if self.can_collapse_edit():
                 self._show_collapse_button()
 
             # Value as string or widget
-            if isinstance(self.value, Unspecified):
-                imgui.text_colored(get_fiat_config().style.color_as_vec4(FiatColorType.ValueUnspecified), "Unspecified")
-            elif isinstance(self.value, Error):
-                imgui.text_colored(get_fiat_config().style.color_as_vec4(FiatColorType.ValueWithError), "Error")
-            else:  # if isinstance(self.value, (InvalidValue, DataType))
-                value = self.get_actual_or_invalid_value()
-                can_edit_on_header_line = self.can_edit_on_header_line()
-                if can_edit_on_header_line:
-                    assert self.callbacks.edit is not None  # make mypy happy
-                    with imgui_ctx.begin_vertical("callback_edit"):  # Some widgets expect a standard vertical layout
-                        changed, new_value = self.callbacks.edit(value)
-                    if changed:
-                        self.value = new_value  # this will call the setter and trigger the validation
-                else:
-                    as_str = self.datatype_value_to_str(value)
-                    text_maybe_truncated(as_str, max_width_chars=40, max_lines=1)
-
-                # After drawing on one line, display the tooltip
-                if value_tooltip is not None:
-                    set_widget_tooltip(value_tooltip)
+            if not self._is_editing_on_next_lines():
+                if isinstance(self.value, Unspecified):
+                    if isinstance(params.default_value_if_unspecified, Unspecified):
+                        imgui.text_colored(
+                            get_fiat_config().style.color_as_vec4(FiatColorType.ValueUnspecified), "Unspecified"
+                        )
+                    else:
+                        imgui.text_colored(
+                            get_fiat_config().style.color_as_vec4(FiatColorType.ParameterValueUsingDefault),
+                            "Default value: ",
+                        )
+                        as_str = self.datatype_value_to_str(params.default_value_if_unspecified)
+                        text_maybe_truncated(as_str, max_width_chars=40, max_lines=1)
+                elif isinstance(self.value, Error):
+                    imgui.text_colored(get_fiat_config().style.color_as_vec4(FiatColorType.ValueWithError), "Error")
+                else:  # if isinstance(self.value, (InvalidValue, DataType))
+                    value = self.get_actual_or_invalid_value()
+                    can_edit_on_header_line = self.can_edit_on_header_line()
+                    if can_edit_on_header_line:
+                        assert self.callbacks.edit is not None  # make mypy happy
+                        with imgui_ctx.begin_vertical(
+                            "callback_edit"
+                        ):  # Some widgets expect a standard vertical layout
+                            changed, new_value = self.callbacks.edit(value)
+                        if changed:
+                            self.value = new_value  # this will call the setter and trigger the validation
+                    else:
+                        as_str = self.datatype_value_to_str(value)
+                        text_maybe_truncated(as_str, max_width_chars=40, max_lines=1)
 
             # invalid value info
             if isinstance(self.value, InvalidValue):
@@ -410,16 +487,51 @@ class AnyDataWithGui(Generic[DataType]):
                 )
 
             #
-            # Right Side: Clipboard, Reset to unspecified or to default value
-            #
+            # Right Side:
+            #   * open in popup button
+            #   * Clipboard
+            #   * Reset to unspecified or to default value
             imgui.spring()  # Align the rest to the right
-            self._show_copy_to_clipboard_button()
-            if self._show_set_unset_button():
-                changed = True
+            # popup button
+            if can_edit_in_popup:
+                btn_label = (
+                    "##edit_in_popup" + "##" + str(id(self))
+                )  # This will be our popup id (with the imgui id context)
+                popup_label = params.popup_title + "##" + str(id(self))
+
+                def gui_edit_in_popup() -> bool:
+                    if isinstance(self.value, Unspecified):
+                        # If unspecified, set to default value before editing in popup
+                        if self.callbacks.default_value_provider is not None:
+                            logging.warning(
+                                "Value unspecified: setting to default_value_provider() before editing in popup"
+                            )
+                            self.value = self.callbacks.default_value_provider()
+                    # Edit in popup
+                    changed = self._gui_edit_next_lines(in_popup=True)
+
+                    return changed
+
+                fiat_osd.show_bool_detached_window_button(btn_label, popup_label, gui_edit_in_popup)
+
+                # If the user edits the input value in a detached window
+                if fiat_osd.get_detached_window_bool_return(btn_label):
+                    changed = True
+
+            # clipboard button
+            if params.show_clipboard_button:
+                self._show_copy_to_clipboard_button()
+            # Reset to unspecified or to default value
+            if self._can_set_unspecified_or_default:
+                if self._show_set_unspecified_or_default_button():
+                    changed = True
+            # suffix_gui
+            if params.suffix_gui is not None:
+                params.suffix_gui()
 
         return changed
 
-    def _show_set_unset_button(self) -> bool:
+    def _show_set_unspecified_or_default_button(self) -> bool:
         can_set_default_value = False
         warn_no_default_provider = False
         can_set_unspecified = False
@@ -437,25 +549,27 @@ class AnyDataWithGui(Generic[DataType]):
             if imgui.button(icons_fontawesome_6.ICON_FA_SQUARE_MINUS):
                 self.value = UnspecifiedValue
                 changed = True
-            set_widget_tooltip("Reset to unspecified")
+            fiat_osd.set_widget_tooltip("Reset to unspecified")
         if can_set_default_value:
             if imgui.button(icons_fontawesome_6.ICON_FA_SQUARE_PLUS):
                 assert self.callbacks.default_value_provider is not None
                 self.value = self.callbacks.default_value_provider()
-            set_widget_tooltip("Set to default value")
+                changed = True
+            fiat_osd.set_widget_tooltip("Set to default value")
         if warn_no_default_provider:
             imgui.text_colored(
                 get_fiat_config().style.color_as_vec4(FiatColorType.InvalidValue),
                 icons_fontawesome_6.ICON_FA_TRIANGLE_EXCLAMATION,
             )
-            set_widget_tooltip("No default value provider")
+            fiat_osd.set_widget_tooltip("No default value provider")
 
         return changed
 
-    def _gui_edit_next_lines(self) -> bool:
+    def _gui_edit_next_lines(self, in_popup: bool) -> bool:
         # Line 2 and beyond: edit (if one line present is impossible)
         changed = False
-        if self.can_edit_on_next_lines():
+        can_edit = self._is_editing_on_next_lines() if not in_popup else self._can_edit_on_next_lines_if_expanded()
+        if can_edit:
             assert self.callbacks.edit is not None
             with imgui_ctx.begin_horizontal("left_margin_edit"):
                 margin_size = hello_imgui.em_size(1.5)
@@ -467,9 +581,12 @@ class AnyDataWithGui(Generic[DataType]):
                         self.value = new_value  # this will call the setter and trigger the validation
         return changed
 
-    def _gui_present_custom_next_lines(self) -> None:
+    def _gui_present_custom_next_lines(self, in_popup: bool) -> None:
         # Line 2 and beyond: present (if one line present is impossible)
-        if self.can_present_on_next_lines():
+        can_present = (
+            self._is_presenting_on_next_lines() if not in_popup else self._can_present_on_next_lines_if_expanded()
+        )
+        if can_present:
             assert self.callbacks.present_custom is not None
             with imgui_ctx.begin_horizontal("left_margin_present"):
                 margin_size = hello_imgui.em_size(1.5)
@@ -478,40 +595,36 @@ class AnyDataWithGui(Generic[DataType]):
                 with imgui_ctx.begin_vertical("callback_present"):
                     self.callbacks.present_custom(value)
 
-    def gui_present_custom(
-        self,
-        label: str,
-        label_color: ImVec4 | None = None,
-    ) -> None:
+    def gui_present_customizable(self, params: GuiHeaderLineParams[DataType]) -> None:
         """Present the value using either the present_custom callback or the default str conversion
         May present on one line (if possible) or on multiple lines with an expand button
         """
-        if label_color is None:
-            label_color = imgui.get_style().color_(imgui.Col_.text.value)
         with imgui_ctx.push_obj_id(self):
             with fontawesome_6_ctx():
-                self._gui_present_header_line(label, label_color)
-                self._gui_present_custom_next_lines()
+                self._gui_present_header_line(params)
+                self._gui_present_custom_next_lines(in_popup=False)
 
-    def gui_edit(
-        self,
-        label: str,
-        label_color: ImVec4 | None = None,
-    ) -> bool:
+    def gui_present_custom(self, label: str) -> None:
+        params = GuiHeaderLineParams[DataType](label=label)
+        self.gui_present_customizable(params)
+
+    def gui_edit_customizable(self, params: GuiHeaderLineParams[DataType]) -> bool:
         """Call the edit callback. Returns True if the value has changed
         May edit on one line (if possible) or on multiple lines with an expand button
         """
-        if label_color is None:
-            label_color = imgui.get_style().color_(imgui.Col_.text.value)
         changed = False  # noqa
         with imgui_ctx.push_obj_id(self):
             with fontawesome_6_ctx():
-                if self._gui_edit_header_line(label, label_color):
+                if self._gui_edit_header_line(params):
                     changed = True
-                if self._gui_edit_next_lines():
+                if self._gui_edit_next_lines(in_popup=False):
                     changed = True
 
         return changed
+
+    def gui_edit(self, label: str) -> bool:
+        params = GuiHeaderLineParams[DataType](label=label)
+        return self.gui_edit_customizable(params)
 
     def _Callbacks_Section(self) -> None:  # Dummy function to create a section in the IDE # noqa
         """

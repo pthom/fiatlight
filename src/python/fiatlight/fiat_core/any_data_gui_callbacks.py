@@ -22,7 +22,7 @@ class AnyDataGuiCallbacks(Generic[DataType]):
     # Provide a function that returns a short string info about the data content
     # This string will be presented as a short description of the data in the GUI
     #
-    # If possible, it should be short enough to fit in a single line inside a node (20 chars max).
+    # If possible, it should be short enough to fit in a single line inside a node (40 chars max).
     # If the result string is too long, or occupies more than one line, it will be truncated and followed by "..."
     # (and the rest of the string will be displayed in a tooltip)
     # For example, on complex types such as images, return something like "128x128x3 uint8"
@@ -35,8 +35,7 @@ class AnyDataGuiCallbacks(Generic[DataType]):
     # If not provided, the data will be presented using present_str
     #
     # Note: Some widgets cannot be presented in a Node (e.g., a multiline text input, a child window, etc.)!
-    #       You can query `fiatlight.is_rendering_in_node()` or its opposite `fiatlight.is_rendering_in_window()`
-    #       to know if you are rendering in a node.
+    #       You can query `fiatlight.is_rendering_in_node()` to know if you are rendering in a node.
     #       Also, when inside a Node, you may want to render a smaller version, to save space
     #       (as opposed to rendering a larger version in a detached window).
     present_custom: Callable[[DataType], None] | None = None
@@ -75,7 +74,7 @@ class AnyDataGuiCallbacks(Generic[DataType]):
     #     (False, old_value) if not changed
     # If not provided, the data will be presented as read-only
     # Note: Some widgets cannot be presented in a Node (e.g., a multiline text input, a child window, etc.)!
-    #       You can query `fiatlight.is_rendering_in_node()` or its opposite `fiatlight.is_rendering_in_window()`
+    #       You can query `fiatlight.is_rendering_in_node()` to know if you are rendering in a node.
     edit: Callable[[DataType], tuple[bool, DataType]] | None = None
 
     # edit_collapsible:

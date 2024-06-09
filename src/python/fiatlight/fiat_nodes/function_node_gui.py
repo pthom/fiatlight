@@ -30,8 +30,10 @@ Notes:
 
 from __future__ import annotations
 
-from fiatlight.fiat_types import Error, Unspecified, UnspecifiedValue, BoolFunction, JsonDict, InvalidValue
+import fiatlight
+from fiatlight.fiat_types import Error, Unspecified, UnspecifiedValue, JsonDict
 from fiatlight.fiat_core import FunctionNode, FunctionNodeLink, AnyDataWithGui
+from fiatlight.fiat_core.any_data_with_gui import GuiHeaderLineParams
 from fiatlight.fiat_config import FiatColorType, get_fiat_config
 from fiatlight.fiat_core.param_with_gui import ParamWithGui
 from imgui_bundle import (
@@ -271,31 +273,9 @@ class FunctionNodeGui:
             )
             fiat_osd.set_widget_tooltip("Running...")
 
-    def _draw_output_header_line(self, idx_output: int) -> None:
-        header_elements = self._output_header_elements(idx_output)
-
-        # If multiple outputs, show "Output X:"
-        if self._function_node.function_with_gui.nb_outputs() > 1:
-            imgui.text(f"Output {idx_output}:")
-
-        # Show one line value
-        # if header_elements.value_as_str is not None:
-        #     with imgui_ctx.push_style_color(
-        #         imgui.Col_.text.value, get_fiat_config().style.color_as_vec4(header_elements.value_color)
-        #     ):
-        #         fiat_widgets.text_maybe_truncated(
-        #             header_elements.value_as_str,
-        #             max_width_chars=40,
-        #             max_lines=1,
-        #             additional_tooltip=header_elements.value_tooltip,
-        #         )
-        output_with_gui = self._function_node.function_with_gui.output(idx_output)
-        output_with_gui._gui_present_header_line(
-            label=f"Output {idx_output}:",
-            label_color=get_fiat_config().style.color_as_vec4(header_elements.value_color),
-            value_tooltip=header_elements.value_tooltip,
-        )
-
+    def _draw_output_pin(self, header_elements: _OutputHeaderLineElements, idx_output: int) -> None:
+        if not fiatlight.is_rendering_in_node():
+            return
         # Show colored pin with possible tooltip
         with imgui_ctx.push_style_color(
             imgui.Col_.text.value,
@@ -311,13 +291,13 @@ class FunctionNodeGui:
                             if tooltip_str != "":
                                 fiat_osd.set_widget_tooltip(tooltip_str)
 
-    def _draw_input_header_line(self, input_param: ParamWithGui[Any]) -> None:
-        imgui.begin_horizontal("input")
-        header_elements = self._input_param_header_elements(input_param)
+    def _draw_input_pin(self, header_elements: _InputParamHeaderLineElements) -> None:
+        if not fiatlight.is_rendering_in_node():
+            return
         with imgui_ctx.push_style_color(
             imgui.Col_.text.value, get_fiat_config().style.color_as_vec4(header_elements.input_pin_color)
         ):
-            input_name = input_param.name
+            input_name = header_elements.param_name
             with ed_ctx.begin_pin(self._pins_input[input_name], ed.PinKind.input):
                 ed.pin_pivot_alignment(ImVec2(0, 0.5))
                 with fontawesome_6_ctx():
@@ -328,37 +308,6 @@ class FunctionNodeGui:
                             tooltip_str = "\n".join(header_elements.status_icon_tooltips)
                             if tooltip_str != "":
                                 fiat_osd.set_widget_tooltip(tooltip_str)
-
-                    # Param name
-                    if header_elements.param_name is not None:
-                        imgui.text(header_elements.param_name)
-
-        # if header_elements.value_as_str is not None:
-        #     with imgui_ctx.push_style_color(
-        #         imgui.Col_.text.value, get_fiat_config().style.color_as_vec4(header_elements.param_label_color)
-        #     ):
-        #         fiat_widgets.text_maybe_truncated(
-        #             header_elements.value_as_str,
-        #             max_width_chars=40,
-        #             max_lines=1,
-        #             additional_tooltip=header_elements.param_value_tooltip,
-        #         )
-
-        has_link = self._function_node.has_input_link(input_param.name)
-        if not has_link:
-            input_param.data_with_gui._gui_edit_header_line(
-                label=header_elements.param_name,
-                label_color=get_fiat_config().style.color_as_vec4(header_elements.param_label_color),
-                value_tooltip=header_elements.param_value_tooltip,
-            )
-        else:
-            input_param.data_with_gui._gui_present_header_line(
-                label=header_elements.param_name,
-                label_color=get_fiat_config().style.color_as_vec4(header_elements.param_label_color),
-                value_tooltip=header_elements.param_value_tooltip,
-            )
-
-        imgui.end_horizontal()
 
     def _output_header_elements(self, output_idx: int) -> _OutputHeaderLineElements:
         """Return the elements to be presented in a header line"""
@@ -385,7 +334,7 @@ class FunctionNodeGui:
         else:
             r.output_pin_color = FiatColorType.OutputPinNotLinked
 
-        # fill r.value_color, and r.value_tooltip
+        # fill r.value_color, and r.label_tooltip
         is_dirty = self._function_node.function_with_gui.is_dirty()
         if isinstance(value, Error):
             r.value_color = FiatColorType.ValueWithError
@@ -438,30 +387,30 @@ class FunctionNodeGui:
         else:
             r.input_pin_color = FiatColorType.InputPinNotLinked
 
-        # fill r.param_label_color and param_value_tooltip
+        # fill r.param_label_color and param_label_tooltip
         if isinstance(input_param.data_with_gui.value, Error):
             r.param_label_color = FiatColorType.ParameterValueWithError
             if has_link:
-                r.param_value_tooltip = "Caller transmitted an error!"
+                r.param_label_tooltip = "Caller transmitted an error!"
             else:
-                r.param_value_tooltip = "Error!"
+                r.param_label_tooltip = "Error!"
         elif has_link:
             if isinstance(input_param.data_with_gui.value, Unspecified):
                 r.param_label_color = FiatColorType.ParameterValueUnspecified
-                r.param_value_tooltip = "Caller transmitted an unspecified value!"
+                r.param_label_tooltip = "Caller transmitted an unspecified value!"
             else:
                 r.param_label_color = FiatColorType.ParameterValueLinked
-                r.param_value_tooltip = "Received from link"
+                r.param_label_tooltip = "Received from link"
         elif isinstance(input_param.data_with_gui.value, Unspecified):
             if input_param.default_value is not UnspecifiedValue:
                 r.param_label_color = FiatColorType.ParameterValueUsingDefault
-                r.param_value_tooltip = "Using default value"
+                r.param_label_tooltip = "Using default value"
             else:
                 r.param_label_color = FiatColorType.ParameterValueUnspecified
-                r.param_value_tooltip = "This parameter needs to be specified!"
+                r.param_label_tooltip = "This parameter needs to be specified!"
         else:
             r.param_label_color = FiatColorType.ParameterValueUserSpecified
-            r.param_value_tooltip = "User specified value"
+            r.param_label_tooltip = "User specified value"
 
         # fill param_name and param_name_tooltip
         r.param_name = input_param.name
@@ -539,194 +488,25 @@ class FunctionNodeGui:
             if not has_link and not self._inputs_expanded:
                 return False
 
-            self._draw_input_header_line(input_param)
+            can_edit = not has_link
 
-            shall_show_edit_next_lines = (
-                not self._function_node.has_input_link(input_name)
-                and input_param.data_with_gui.can_edit_on_next_lines()
-            )
-            if shall_show_edit_next_lines:
-                return self._draw_one_input_edit_next_lines(input_param, unique_name)
-            else:
-                if input_param.data_with_gui.can_present_on_next_lines():
-                    self._draw_one_input_present_custom_next_lines(input_param, unique_name)
-                return False
+            header_elements = self._input_param_header_elements(input_param)
 
-    @staticmethod
-    def _edit_input_in_popup_set_if_unspecified(
-        input_param: ParamWithGui[Any],
-        edit_input: BoolFunction,
-    ) -> BoolFunction:
-        def edit_input_set_if_unspecified() -> bool:
-            is_unspecified = isinstance(input_param.data_with_gui.value, Unspecified)
-            if is_unspecified:
-                default_provider = input_param.data_with_gui.callbacks.default_value_provider
-                if default_provider is not None:
-                    input_param.data_with_gui.value = default_provider()
-                    return True
-                else:
-                    imgui.text("No default value provider!")
-                    return False
-            else:
-                return edit_input()
+            header_params = GuiHeaderLineParams[Any]()
+            header_params.label = header_elements.param_name
+            header_params.label_color = get_fiat_config().style.color_as_vec4(header_elements.param_label_color)
+            header_params.label_tooltip = header_elements.param_label_tooltip
+            header_params.prefix_gui = lambda: self._draw_input_pin(header_elements)
+            header_params.default_value_if_unspecified = input_param.default_value
+            header_params.popup_allow = True
+            header_params.popup_title = f"detached view - {unique_name}: param {input_param.name}"
 
-        return edit_input_set_if_unspecified
-
-    def _draw_one_input_edit_next_lines(self, input_param: ParamWithGui[Any], unique_name: str) -> bool:
-        changed = False
-        # capture the input_param for the lambda
-        # (otherwise, the lambda would capture the last input_param in the loop)
-        input_param_captured = input_param
-        is_specified = not isinstance(input_param.data_with_gui.value, Unspecified)
-
-        def edit_input() -> bool:
-            # Edit input can be called either directly in this window or in a detached window
-            return input_param_captured.data_with_gui._gui_edit_next_lines()
-
-        callbacks = input_param.data_with_gui.callbacks
-        can_edit_in_node = not callbacks.edit_popup_required
-        can_edit_in_popup = (callbacks.edit_popup_required or callbacks.edit_popup_possible) and is_specified
-        btn_label = "" if can_edit_in_node else "edit"
-
-        if can_edit_in_popup:
-            with imgui_ctx.begin_horizontal("editH2"):
-                popup_label = f"detached view - {unique_name}(): edit input '{input_param.name}'"
-                popup_callback = self._edit_input_in_popup_set_if_unspecified(input_param, edit_input)
-                fiat_osd.show_bool_detached_window_button(btn_label, popup_label, popup_callback)
-
-                if fiat_osd.get_detached_window_bool_return(btn_label):
-                    # If the user edits the input value in a detached window
-                    changed = True
-
-        if can_edit_in_node and edit_input():
-            # If the user edits the input value in this window
-            changed = True
-
-        return changed
-
-    def _draw_one_input_present_custom_next_lines(self, input_param: ParamWithGui[Any], unique_name: str) -> None:
-        # capture the input_param for the lambda
-        # with a different name for the captured variable, because of
-        # python weird scoping rules
-        input_param_captured_2 = input_param
-
-        def present_input() -> None:
-            # Present input can be called either directly in this window or in a detached window
-            input_param_captured_2.data_with_gui._gui_present_custom_next_lines()
-
-        callbacks = input_param.data_with_gui.callbacks
-        can_present_custom_in_node = not callbacks.present_custom_popup_required
-        can_present_custom_in_popup = callbacks.present_custom_popup_required or callbacks.present_custom_popup_possible
-
-        if can_present_custom_in_popup:
-            popup_label = f"detached view - {unique_name}() - input '{input_param.name}'"
-            fiat_osd.show_void_detached_window_button("", popup_label, present_input)
-
-        if can_present_custom_in_node:
-            present_input()
-
-    # @staticmethod
-    # def _input_param_set_unset_gui(input_param: ParamWithGui[Any]) -> BoolFunction:
-    #     """Return a gui function that sets or unsets the value of an input parameter."""
-    #     value = input_param.data_with_gui.value
-    #     default_param_value = input_param.default_value
-    #     data_callbacks = input_param.data_with_gui.callbacks
-    #
-    #     if not isinstance(value, (Error, Unspecified)):
-    #         # For specified values
-    #         def fn_set_unset_specified_value() -> bool:
-    #             with fontawesome_6_ctx():
-    #                 set_changed = False
-    #                 if imgui.button(icons_fontawesome_6.ICON_FA_SQUARE_MINUS):
-    #                     input_param.data_with_gui.value = UnspecifiedValue
-    #                     set_changed = True
-    #                 fiat_osd.set_widget_tooltip("Unset this parameter.")
-    #                 return set_changed
-    #
-    #         return fn_set_unset_specified_value
-    #     else:
-    #         # For Error or Unspecified values
-    #         value_to_create: Unspecified | Any = UnspecifiedValue
-    #         value_to_create_tooltip = ""
-    #         if not isinstance(default_param_value, Unspecified):
-    #             value_to_create = default_param_value
-    #             value_to_create_tooltip = "Create using default param value."
-    #         else:
-    #             if data_callbacks.default_value_provider is not None:
-    #                 value_to_create = data_callbacks.default_value_provider()
-    #                 value_to_create_tooltip = "Create using default value provider for this type."
-    #
-    #         if not isinstance(value_to_create, Unspecified):
-    #             # For Error or Unspecified values, when a default value is available
-    #             def fn_set_unset_with_default_value() -> bool:
-    #                 with fontawesome_6_ctx():
-    #                     set_changed = False
-    #                     if imgui.button(icons_fontawesome_6.ICON_FA_SQUARE_PLUS):
-    #                         input_param.data_with_gui.value = value_to_create
-    #                         set_changed = True
-    #                     fiat_osd.set_widget_tooltip(value_to_create_tooltip)
-    #                 return set_changed
-    #
-    #             return fn_set_unset_with_default_value
-    #
-    #         else:
-    #             # For Error or Unspecified values, when no default value is available
-    #             def fn_set_unset_with_no_provider() -> bool:
-    #                 with fontawesome_6_ctx():
-    #                     imgui.button(icons_fontawesome_6.ICON_FA_TRIANGLE_EXCLAMATION)
-    #                     fiat_osd.set_widget_tooltip("No default value provider!")
-    #                     return False
-    #
-    #             return fn_set_unset_with_no_provider
-
-    @staticmethod
-    def _input_param_edit_gui(input_param: ParamWithGui[Any]) -> BoolFunction:
-        value = input_param.data_with_gui.value
-        data_callbacks = input_param.data_with_gui.callbacks
-        if isinstance(value, (Error, Unspecified)):
-
-            def fn_display_error() -> bool:
-                imgui.text(str(value))
-                return False
-
-            return fn_display_error
-        else:
-
-            def fn_edit() -> bool:
-                changed = False
-                if data_callbacks.edit is not None:
-                    if isinstance(value, InvalidValue):
-                        changed, new_value = data_callbacks.edit(value.invalid_value)
-                    else:
-                        changed, new_value = data_callbacks.edit(value)
-                    if changed:
-                        input_param.data_with_gui.value = new_value
-                else:
-                    imgui.text("No editor")
-
-                if isinstance(value, InvalidValue):
-                    imgui.text_colored(
-                        get_fiat_config().style.color_as_vec4(FiatColorType.InvalidValue), value.info_error()
-                    )
-
+            if can_edit:
+                changed = input_param.data_with_gui.gui_edit_customizable(header_params)
                 return changed
-
-            return fn_edit
-
-    # def _call_gui_edit(self, input_param: ParamWithGui[Any]) -> bool:
-    #     # input_param.data_with_gui._
-    #     # fn_set_unset = self._input_param_set_unset_gui(input_param)
-    #     # fn_edit = self._input_param_edit_gui(input_param)
-    #     #
-    #     # changed = False
-    #     # with imgui_ctx.begin_horizontal("editH"):
-    #     #     with imgui_ctx.begin_vertical("editV"):
-    #     #         if fn_edit():
-    #     #             changed = True
-    #     #     imgui.spring()
-    #     #     if fn_set_unset():
-    #     #         changed = True
-    #     # return changed
+            else:
+                input_param.data_with_gui.gui_present_customizable(header_params)
+                return False
 
     @staticmethod
     def _Draw_Outputs_Section() -> None:  # Dummy function to create a section in the IDE # noqa
@@ -784,29 +564,18 @@ class FunctionNodeGui:
 
     def _draw_one_output(self, idx_output: int, unique_name: str) -> None:
         output_param = self._function_node.function_with_gui.output(idx_output)
-        with imgui_ctx.push_obj_id(output_param):
-            with imgui_ctx.begin_horizontal("outputH"):
-                self._draw_output_header_line(idx_output)
-            can_present = output_param.can_present_custom()
-            if can_present and output_param._expanded:
 
-                def present_output() -> None:
-                    # Present output can be called either directly in this window or in a detached window
-                    output_param._gui_present_custom_next_lines()
+        bof_header_elements = self._output_header_elements(idx_output)
 
-                callbacks = output_param.callbacks
-                can_present_custom_in_node = not callbacks.present_custom_popup_required
-                can_present_custom_in_popup = (
-                    callbacks.present_custom_popup_required or callbacks.present_custom_popup_possible
-                )
+        header_params = GuiHeaderLineParams[Any]()
+        header_params.suffix_gui = lambda: self._draw_output_pin(bof_header_elements, idx_output)
+        header_params.label = f"Output {idx_output}:"
+        # header_params.label_color = ...
+        header_params.label_tooltip = bof_header_elements.value_tooltip
+        header_params.popup_allow = True
+        header_params.popup_title = f"detached view - {unique_name}: output {idx_output}"
 
-                if can_present_custom_in_popup:
-                    btn_label = "##present_custom_in_popup"  # This will be our popup id (with the imgui id context)
-                    popup_label = f"detached view - {unique_name}: output {idx_output}"
-                    fiat_osd.show_void_detached_window_button(btn_label, popup_label, present_output)
-
-                if can_present_custom_in_node:
-                    present_output()
+        output_param.gui_present_customizable(header_params)
 
     def _draw_invoke_options(self) -> None:
         fn_with_gui = self._function_node.function_with_gui
@@ -1095,7 +864,7 @@ class _InputParamHeaderLineElements:
 
     param_name: str = ""
     param_label_color: FiatColorType = FiatColorType.ParameterValueUsingDefault
-    param_value_tooltip: str | None = None
+    param_label_tooltip: str | None = None
 
 
 class _OutputHeaderLineElements:
