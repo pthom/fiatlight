@@ -16,7 +16,7 @@ _IS_PRESENTLY_IN_DETACHED_WINDOW = False
 def is_rendering_in_node() -> bool:
     """Check if we are currently rendering inside a Node.
 
-    You may want to check this value when implementing `present_custom` or `edit`
+    You may want to check this value when implementing `present` or `edit`
     callbacks inside `AnyDataGuiCallbacks` for several possible reasons:
 
         - Some widgets cannot be presented in a Node (e.g., a multiline text input),
@@ -31,7 +31,7 @@ def is_rendering_in_node() -> bool:
 
 def is_rendering_in_fiatlight_detached_window() -> bool:
     """Check if we are currently rendering inside a regular ImGui window.
-    You may want to check this value when implementing `present_custom` or `edit`
+    You may want to check this value when implementing `present` or `edit`
     callbacks inside `AnyDataGuiCallbacks` for several possible reasons:
 
     - Some widgets cannot be presented in a Node (e.g., a multiline text input),

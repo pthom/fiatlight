@@ -125,7 +125,7 @@ class DataFramePresenter:
     params: DataFramePresenterParams
 
     # A cached version of the DataFrame to present
-    # (I'm not sure that we need this cache, since present_custom receives the DataFrame as an argument)
+    # (I'm not sure that we need this cache, since present receives the DataFrame as an argument)
     dataframe: pd.DataFrame
     dataframe_original: pd.DataFrame  # unsorted, unfiltered, etc.
 
@@ -320,7 +320,7 @@ class DataFramePresenter:
         new_table_size_em = hello_imgui.pixels_to_em(new_table_size_pixels)
         self.params.widget_size_em = (new_table_size_em.x, new_table_size_em.y)
 
-    def present_custom(self, _value: pd.DataFrame) -> None:
+    def present(self, _value: pd.DataFrame) -> None:
         # We ignore the value parameter since the data frame is cached inside self.dataframe
         if len(self.dataframe.columns) == 0:
             imgui.text("DataFrame: Empty")

@@ -15,9 +15,9 @@ class MydataWithGui(AnyDataWithGui[Mydata]):
 
         # present callbacks
         self.callbacks.present_str = self.present_str
-        self.callbacks.present_custom = self.present_custom
-        self.callbacks.present_custom_popup_required = False
-        self.callbacks.present_custom_popup_possible = True
+        self.callbacks.present = self.present
+        self.callbacks.present_popup_required = False
+        self.callbacks.present_popup_possible = True
         # edit callbacks
         self.callbacks.edit = self.edit
         self.callbacks.edit_popup_required = False
@@ -53,8 +53,8 @@ class MydataWithGui(AnyDataWithGui[Mydata]):
     def present_str(self, value: Mydata) -> str:
         return f"Mydata: {value}"
 
-    def present_custom(self, value: Mydata) -> None:
-        imgui.text("present_custom")
+    def present(self, value: Mydata) -> None:
+        imgui.text("present")
         # We should probably use a distinct class such as DataFramePresenter here
 
     @staticmethod

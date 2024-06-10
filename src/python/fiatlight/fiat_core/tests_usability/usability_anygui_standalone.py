@@ -45,7 +45,7 @@ def edit_value_with_gui(label: str, value_with_gui: fl.AnyDataWithGui[Any]) -> b
             logging.info("changed")
         imgui.text("-------------")
         imgui.text("Present " + label)
-        value_with_gui.gui_present_custom(label)
+        value_with_gui.gui_present(label)
         imgui.separator()
         return changed
 

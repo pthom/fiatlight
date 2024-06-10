@@ -23,7 +23,7 @@ class PromptWithGui(AnyDataWithGui[Prompt]):
         self.callbacks.on_change = self.on_change
         self.callbacks.edit = self.edit
         self.callbacks.edit_popup_possible = True
-        self.callbacks.present_custom = self.present_custom
+        self.callbacks.present = self.present
         self.callbacks.default_value_provider = lambda: Prompt("")
         self.callbacks.save_gui_options_to_json = self.save_gui_options_to_json
         self.callbacks.load_gui_options_from_json = self.load_gui_options_from_json
@@ -42,8 +42,8 @@ class PromptWithGui(AnyDataWithGui[Prompt]):
         if "_str_with_resizable_gui" in json:
             self._str_with_resizable_gui.load_gui_options_from_json(json["_str_with_resizable_gui"])
 
-    def present_custom(self, prompt: Prompt) -> None:
-        self._str_with_resizable_gui.present_custom(prompt)
+    def present(self, prompt: Prompt) -> None:
+        self._str_with_resizable_gui.present(prompt)
 
     def edit(self, prompt: Prompt) -> tuple[bool, Prompt]:
         fire_change = False

@@ -297,7 +297,7 @@ class AnyDataWithGui(Generic[DataType]):
     def can_collapse_present(self) -> bool:
         if isinstance(self.value, (Unspecified, Error)):
             return False
-        return self.callbacks.present_custom_collapsible
+        return self.callbacks.present_collapsible
 
     def can_collapse_edit(self) -> bool:
         if isinstance(self.value, (Unspecified, Error)):
@@ -307,8 +307,8 @@ class AnyDataWithGui(Generic[DataType]):
     def can_edit_on_header_line(self) -> bool:
         return self.callbacks.edit is not None and not self.callbacks.edit_collapsible
 
-    def can_present_custom_on_header_line(self) -> bool:
-        return self.callbacks.present_custom is not None and not self.callbacks.present_custom_collapsible
+    def can_present_on_header_line(self) -> bool:
+        return self.callbacks.present is not None and not self.callbacks.present_collapsible
 
     def _can_edit_on_next_lines_if_expanded(self) -> bool:
         is_datatype_or_invalid = not isinstance(self.value, (Unspecified, Error))
@@ -316,11 +316,7 @@ class AnyDataWithGui(Generic[DataType]):
 
     def _can_present_on_next_lines_if_expanded(self) -> bool:
         is_datatype_or_invalid = not isinstance(self.value, (Unspecified, Error))
-        return (
-            self.callbacks.present_custom is not None
-            and self.callbacks.present_custom_collapsible
-            and is_datatype_or_invalid
-        )
+        return self.callbacks.present is not None and self.callbacks.present_collapsible and is_datatype_or_invalid
 
     def _is_editing_on_next_lines(self) -> bool:
         return self._expanded and self._can_edit_on_next_lines_if_expanded()
@@ -331,9 +327,9 @@ class AnyDataWithGui(Generic[DataType]):
     def _gui_present_header_line(self, params: GuiHeaderLineParams[DataType]) -> None:
         """Present the value as a string in one line, or as a widget if it fits on one line"""
 
-        # can_present_in_node = not self.callbacks.present_custom_popup_required
+        # can_present_in_node = not self.callbacks.present_popup_required
         can_present_in_popup = params.popup_allow and (
-            self.callbacks.present_custom_popup_required or self.callbacks.present_custom_popup_possible
+            self.callbacks.present_popup_required or self.callbacks.present_popup_possible
         )
 
         with imgui_ctx.begin_horizontal("present_header_line"):
@@ -375,13 +371,13 @@ class AnyDataWithGui(Generic[DataType]):
                     imgui.text_colored(get_fiat_config().style.color_as_vec4(FiatColorType.ValueWithError), "Error")
                 else:  # if isinstance(self.value, (InvalidValue, DataType))
                     value = self.get_actual_or_invalid_value()
-                    can_present_custom_on_header_line = self.can_present_custom_on_header_line()
-                    if can_present_custom_on_header_line:
-                        assert self.callbacks.present_custom is not None  # make mypy happy
+                    can_present_on_header_line = self.can_present_on_header_line()
+                    if can_present_on_header_line:
+                        assert self.callbacks.present is not None  # make mypy happy
                         with imgui_ctx.begin_vertical(
-                            "callback_present_custom"
+                            "callback_present"
                         ):  # Some widgets expect a standard vertical layout
-                            self.callbacks.present_custom(value)
+                            self.callbacks.present(value)
                     else:
                         as_str = self.datatype_value_to_str(value)
                         text_maybe_truncated(as_str, max_width_chars=40, max_lines=1)
@@ -403,11 +399,11 @@ class AnyDataWithGui(Generic[DataType]):
             imgui.spring()  # Align the rest to the right
             # popup button
             if can_present_in_popup:
-                btn_label = "##present_custom_in_popup"  # This will be our popup id (with the imgui id context)
+                btn_label = "##present_in_popup"  # This will be our popup id (with the imgui id context)
                 popup_label = params.popup_title + "##" + str(id(self))
 
                 def gui_present_in_popup() -> None:
-                    self._gui_present_custom_next_lines(in_popup=True)
+                    self._gui_present_next_lines(in_popup=True)
 
                 fiat_osd.show_void_detached_window_button(btn_label, popup_label, gui_present_in_popup)
             # clipboard button
@@ -581,30 +577,30 @@ class AnyDataWithGui(Generic[DataType]):
                         self.value = new_value  # this will call the setter and trigger the validation
         return changed
 
-    def _gui_present_custom_next_lines(self, in_popup: bool) -> None:
+    def _gui_present_next_lines(self, in_popup: bool) -> None:
         # Line 2 and beyond: present (if one line present is impossible)
         can_present = (
             self._is_presenting_on_next_lines() if not in_popup else self._can_present_on_next_lines_if_expanded()
         )
         if can_present:
-            assert self.callbacks.present_custom is not None
+            assert self.callbacks.present is not None
             with imgui_ctx.begin_horizontal("left_margin_present"):
                 margin_size = hello_imgui.em_size(1.5)
                 imgui.dummy(ImVec2(margin_size, 0))
                 value = self.get_actual_or_invalid_value()
                 with imgui_ctx.begin_vertical("callback_present"):
-                    self.callbacks.present_custom(value)
+                    self.callbacks.present(value)
 
     def gui_present_customizable(self, params: GuiHeaderLineParams[DataType]) -> None:
-        """Present the value using either the present_custom callback or the default str conversion
+        """Present the value using either the present callback or the default str conversion
         May present on one line (if possible) or on multiple lines with an expand button
         """
         with imgui_ctx.push_obj_id(self):
             with fontawesome_6_ctx():
                 self._gui_present_header_line(params)
-                self._gui_present_custom_next_lines(in_popup=False)
+                self._gui_present_next_lines(in_popup=False)
 
-    def gui_present_custom(self, label: str) -> None:
+    def gui_present(self, label: str) -> None:
         params = GuiHeaderLineParams[DataType](label=label)
         self.gui_present_customizable(params)
 
@@ -637,13 +633,13 @@ class AnyDataWithGui(Generic[DataType]):
         """Helper function to set the edit callback from a free function"""
         self.callbacks.edit = edit_callback
 
-    def set_present_custom_callback(
-        self, present_callback: DataPresentFunction[DataType], present_custom_popup_required: bool | None = None
+    def set_present_callback(
+        self, present_callback: DataPresentFunction[DataType], present_popup_required: bool | None = None
     ) -> None:
         """Helper function to set the present custom callback from a free function"""
-        self.callbacks.present_custom = present_callback
-        if present_custom_popup_required is not None:
-            self.callbacks.present_custom_popup_required = present_custom_popup_required
+        self.callbacks.present = present_callback
+        if present_popup_required is not None:
+            self.callbacks.present_popup_required = present_popup_required
 
     def add_validate_value_callback(self, cb: Callable[[DataType], DataValidationResult]) -> None:
         self.callbacks.validate_value.append(cb)
@@ -756,13 +752,13 @@ class AnyDataWithGui(Generic[DataType]):
             else:
                 return self.datatype_value_to_str(actual_value)
 
-    def can_present_custom(self) -> bool:
-        """Returns True if the present_custom callback can be called
-        i.e. if the value is not Unspecified or Error, and the present_custom callback is set
+    def can_present(self) -> bool:
+        """Returns True if the present callback can be called
+        i.e. if the value is not Unspecified or Error, and the present callback is set
         """
         if isinstance(self.value, (Error, Unspecified)):
             return False
-        return self.callbacks.present_custom is not None
+        return self.callbacks.present is not None
 
     def docstring_first_line(self) -> str | None:
         """Return the first line of the docstring, if available"""

@@ -336,7 +336,6 @@ It will handle:
 - Serialization and deserialization of the custom type
 - A default value provider
 
-
 ```python
 import fiatlight as fl
 from imgui_bundle import imgui, imgui_fig
@@ -356,7 +355,7 @@ class NormalDistributionWithGui(fl.AnyDataWithGui[NormalDistribution]):
 
         # Edit and present callbacks
         self.callbacks.edit = self._edit_gui
-        self.callbacks.present_custom = self._present_gui
+        self.callbacks.present = self._present_gui
         self.callbacks.present_str = lambda value: f"Normal Distrib: Mean={value.mean:.2f}, StdDev={value.stddev:.2f}"
 
         # Default value provider
@@ -432,7 +431,7 @@ any function that uses NormalDistribution as a parameter or as a return type wil
 **Step 4: Use the custom type in a function**
 
 In this example, our function simply returns the NormalDistribution instance that was passed to it.
-In the screenshot, you can see the "edit" callback in action in the Param edition section, and the "present_custom" callback in the Output section.
+In the screenshot, you can see the "edit" callback in action in the Param edition section, and the "present" callback in the Output section.
 
 ```python
 def f(distribution: NormalDistribution) -> NormalDistribution:
@@ -449,8 +448,8 @@ Example 2: a Length type with imperial units
 # Step 1: Define the custom type for which we want to create a GUI
 # =================================================================
 from typing import NewType
-Length = NewType("Length", float)
 
+Length = NewType("Length", float)
 
 # Step 2: Create a class to handle the custom type
 # ================================================
@@ -460,6 +459,7 @@ from fiatlight.fiat_widgets import fontawesome_6_ctx, icons_fontawesome_6
 from typing import NewType, Any, Dict
 from imgui_bundle import imgui, hello_imgui, imgui_ctx, ImVec4
 
+
 # The specific GUI for our custom type
 class LengthWithGui(AnyDataWithGui[Length]):
     use_imperial_units: bool = False
@@ -467,7 +467,7 @@ class LengthWithGui(AnyDataWithGui[Length]):
     def __init__(self) -> None:
         super().__init__(Length)
         self.callbacks.edit = self._edit  # A custom callback for editing the data
-        self.callbacks.present_custom = self._present_custom  # A custom callback for presenting the data
+        self.callbacks.present = self._present  # A custom callback for presenting the data
         self.callbacks.present_str = self._present_str  # A custom callback for presenting the data as a short string
         self.callbacks.default_value_provider = lambda: Length(1.0)  # A custom callback for providing a default value
         # custom callback for saving the GUI options (here, we save the imperial units option)
@@ -492,7 +492,7 @@ class LengthWithGui(AnyDataWithGui[Length]):
         return f"Length: {value:.2f} m"
 
     @staticmethod
-    def _present_custom(value: Length) -> None:
+    def _present(value: Length) -> None:
         with fontawesome_6_ctx():
             yd = int(Length(value * 1.09361))
             inches = int((Length(value * 1.09361 - yd) * 36))
@@ -523,6 +523,7 @@ register_type(Length, LengthWithGui)
 # A function that uses our custom type
 def circle_perimeter(radius: Length) -> Length:
     return Length(2 * 3.14159 * radius)
+
 
 # Run the function with the GUI
 fiatlight.run(circle_perimeter, app_name="Circle Perimeter in banana units")

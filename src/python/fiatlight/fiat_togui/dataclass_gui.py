@@ -97,23 +97,23 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
 
     def fill_callbacks(self) -> None:
         self.callbacks.present_str = self.present_str
-        self.callbacks.present_custom = self.present_custom
+        self.callbacks.present = self.present
 
         # It is always possible to present and edit a dataclass in a popup
         self.callbacks.edit_popup_possible = True
-        self.callbacks.present_custom_popup_possible = True
+        self.callbacks.present_popup_possible = True
 
         # A popup is required only if any of the parameters require a popup
-        self.callbacks.present_custom_popup_required = False
+        self.callbacks.present_popup_required = False
         self.callbacks.edit_popup_required = False
         for param_gui in self._parameters_with_gui:
-            if param_gui.data_with_gui.callbacks.present_custom_popup_required:
-                self.callbacks.present_custom_popup_required = True
+            if param_gui.data_with_gui.callbacks.present_popup_required:
+                self.callbacks.present_popup_required = True
             if param_gui.data_with_gui.callbacks.edit_popup_required:
                 self.callbacks.edit_popup_required = True
 
         self.callbacks.edit_collapsible = True
-        self.callbacks.present_custom_collapsible = True
+        self.callbacks.present_collapsible = True
 
         self.callbacks.edit = self.edit
         self.callbacks.on_change = self.on_change
@@ -195,9 +195,9 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
         r = f"{self._type.__name__}({joined_strs})"
         return r
 
-    def present_custom(self, _: DataclassLikeType) -> None:
+    def present(self, _: DataclassLikeType) -> None:
         # the parameter is not used, because we have the data in self._parameters_with_gui
-        with imgui_ctx.begin_vertical("##CompositeGui_present_custom"):
+        with imgui_ctx.begin_vertical("##CompositeGui_present"):
             for param_gui in self._parameters_with_gui:
                 with imgui_ctx.push_obj_id(param_gui):
                     param_gui.data_with_gui.gui_present_customizable(

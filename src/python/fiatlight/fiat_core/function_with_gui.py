@@ -201,7 +201,7 @@ Customizing the GUI for a function parameter or output
 ------------------------------------------------------
 
 You can also customize the GUI for a parameter or output by setting a custom callback function, using
-`set_present_custom_callback` or `set_edit_callback` on the parameter or output.
+`set_present_callback` or `set_edit_callback` on the parameter or output.
 
     ```python
     import fiatlight as fl
@@ -230,7 +230,7 @@ You can also customize the GUI for a parameter or output by setting a custom cal
 
 
     fahrenheit_to_celsius_gui = fl.FunctionWithGui(fahrenheit_to_celsius)
-    fahrenheit_to_celsius_gui.output(0).set_present_custom_callback(present_temperature)
+    fahrenheit_to_celsius_gui.output(0).set_present_callback(present_temperature)
     fahrenheit_to_celsius_gui.input("fahrenheit").set_edit_callback(edit_temperature)
 
     fl.run(fahrenheit_to_celsius_gui, app_name="Custom callbacks")

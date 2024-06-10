@@ -37,7 +37,7 @@ def main() -> None:
     import fiatlight as fl
 
     random_binomial_gui = fl.FunctionWithGui(random_binomial)
-    random_binomial_gui.output().set_present_custom_callback(present_histogram)
+    random_binomial_gui.output().set_present_callback(present_histogram)
 
     random_binomial_gui.input("p").set_edit_callback(edit_probability)
     random_binomial_gui.input("n").set_edit_callback(edit_n)

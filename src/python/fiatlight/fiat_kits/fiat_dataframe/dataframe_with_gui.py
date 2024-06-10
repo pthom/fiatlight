@@ -18,9 +18,9 @@ class DataFrameWithGui(AnyDataWithGui[pd.DataFrame]):
 
         # present callbacks
         self.callbacks.present_str = self.present_str
-        self.callbacks.present_custom = self.present_custom
-        self.callbacks.present_custom_popup_required = False
-        self.callbacks.present_custom_popup_possible = True
+        self.callbacks.present = self.present
+        self.callbacks.present_popup_required = False
+        self.callbacks.present_popup_possible = True
         # edit callbacks
         self.callbacks.edit = self.edit
         self.callbacks.edit_popup_required = False
@@ -56,8 +56,8 @@ class DataFrameWithGui(AnyDataWithGui[pd.DataFrame]):
     def present_str(self, value: pd.DataFrame) -> str:
         return self.dataframe_presenter.present_str(value)
 
-    def present_custom(self, value: pd.DataFrame) -> None:
-        self.dataframe_presenter.present_custom(value)
+    def present(self, value: pd.DataFrame) -> None:
+        self.dataframe_presenter.present(value)
 
     @staticmethod
     def _EditCallbacksSection() -> None:

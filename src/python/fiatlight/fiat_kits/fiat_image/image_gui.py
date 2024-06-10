@@ -301,13 +301,13 @@ class ImageWithGui(AnyDataWithGui[Image]):
         self.image_presenter = ImagePresenter()
         self.open_file_dialog = None
         self.callbacks.edit = self.edit
-        self.callbacks.present_custom = self.present_custom
+        self.callbacks.present = self.present
         self.callbacks.on_change = self.on_change
         self.callbacks.default_value_provider = lambda: np.zeros((1, 1, 3), dtype=np.uint8)  # type: ignore
         self.callbacks.present_str = self.present_str
         self.callbacks.save_gui_options_to_json = self.save_gui_options_to_json
         self.callbacks.load_gui_options_from_json = self.load_gui_options_from_json
-        self.callbacks.present_custom_popup_possible = True
+        self.callbacks.present_popup_possible = True
         self.callbacks.on_custom_attrs_changed = self.on_custom_attrs_changed
 
     @staticmethod
@@ -334,7 +334,7 @@ class ImageWithGui(AnyDataWithGui[Image]):
             self.open_file_dialog = None
         return changed, value
 
-    def present_custom(self, _image: Image) -> None:
+    def present(self, _image: Image) -> None:
         # _image is not used, as the image is set with on_change
         self.image_presenter.gui()
 

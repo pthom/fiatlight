@@ -34,7 +34,7 @@ class FilePathWithGui(AnyDataWithGui[FilePath]):
         self.callbacks.present_str = self.present_str
         self.callbacks.clipboard_copy_str = lambda x: str(x)
         self.callbacks.clipboard_copy_possible = True
-        self.callbacks.present_custom_collapsible = False
+        self.callbacks.present_collapsible = False
         self.callbacks.edit_collapsible = False
         self.filters = []
 
@@ -87,7 +87,7 @@ class FilePathSaveWithGui(AnyDataWithGui[FilePath_Save]):
         self.callbacks.present_str = self.present_str
         self.callbacks.clipboard_copy_str = lambda x: str(x)
         self.callbacks.clipboard_copy_possible = True
-        self.callbacks.present_custom_collapsible = False
+        self.callbacks.present_collapsible = False
         self.callbacks.edit_collapsible = False
         self.filters = []
 

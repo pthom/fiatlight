@@ -29,7 +29,7 @@ class AnyDataGuiCallbacks(Generic[DataType]):
     # If not provided, the data will be presented using str()
     present_str: Callable[[DataType], str] | None = None
 
-    # present_custom: (Optional)
+    # present: (Optional)
     # a function that provides a more complex, custom GUI representation of the data. Used for detailed views.
     # It will be presented when a function param is in "expanded" mode, and can use imgui widgets on several lines.
     # If not provided, the data will be presented using present_str
@@ -38,32 +38,32 @@ class AnyDataGuiCallbacks(Generic[DataType]):
     #       You can query `fiatlight.is_rendering_in_node()` to know if you are rendering in a node.
     #       Also, when inside a Node, you may want to render a smaller version, to save space
     #       (as opposed to rendering a larger version in a detached window).
-    present_custom: Callable[[DataType], None] | None = None
+    present: Callable[[DataType], None] | None = None
 
-    # present_custom_collapsible:
+    # present_collapsible:
     # Set this to False if your custom presentation is small and fits in one line
     # (i.e. it does not need to be collapsible)
     # If True, the gui presentation will either:
     #     - show the first characters of present_str (with "..." and a tooltip)
     #     - show the custom presentation in a collapsible area
-    present_custom_collapsible: bool = True
+    present_collapsible: bool = True
 
-    # present_custom_popup_required (Optional: leave to False in most cases)
-    # If True, the present_custom function needs to be called in a popup window.
+    # present_popup_required (Optional: leave to False in most cases)
+    # If True, the present function needs to be called in a popup window.
     # This is due to a limitation of the node editor, which cannot render complex widgets
     # in the node itself.
     # By complex widgets, we mean widgets that require a scrollable area, or a child window, such as:
     #      - imgui.input_text_multiline
     #      - imgui.combo
     #      - imgui.begin_child
-    present_custom_popup_required: bool = False
+    present_popup_required: bool = False
 
-    # present_custom_popup_possible (Optional: leave to False in most cases)
-    # If True, the present_custom function can be called in a popup window.
+    # present_popup_possible (Optional: leave to False in most cases)
+    # If True, the present function can be called in a popup window.
     # Only used if you want to allow the user to see the data in a popup window
     # (for example, to provide more space for a large text input, or for an image viewer)
-    # Note: if present_custom_popup_required is True, this flag is ignored
-    present_custom_popup_possible: bool = False
+    # Note: if present_popup_required is True, this flag is ignored
+    present_popup_possible: bool = False
     # ---------------------------------------------------------------------------------------------
 
     #                        Edition
@@ -115,7 +115,7 @@ class AnyDataGuiCallbacks(Generic[DataType]):
     # on_change (Optional)
     # if provided, this function will be called when the value changes.
     # Can be used in more advanced cases,
-    # for example when `present_custom` has an internal cache that needs to be updated,
+    # for example when `present` has an internal cache that needs to be updated,
     # or other side effects.
     on_change: Callable[[DataType], None] | None = None
 

@@ -190,7 +190,7 @@ class FunctionNodeGui:
         r = 0
         nb_outputs = self._function_node.function_with_gui.nb_outputs()
         for i in range(nb_outputs):
-            if self._function_node.function_with_gui.output(i).can_present_custom():
+            if self._function_node.function_with_gui.output(i).can_present():
                 r += 1
         return r
 
@@ -705,11 +705,11 @@ class FunctionNodeGui:
                 self._fiat_internals_with_gui[name] = data_with_gui
             with imgui_ctx.push_obj_id(data_with_gui):
                 imgui.text(name)
-                if data_with_gui.can_present_custom():
-                    assert data_with_gui.callbacks.present_custom is not None
+                if data_with_gui.can_present():
+                    assert data_with_gui.callbacks.present is not None
                     data_with_gui_value = data_with_gui.value
                     assert not isinstance(data_with_gui_value, (Unspecified, Error))
-                    data_with_gui.callbacks.present_custom(data_with_gui_value)
+                    data_with_gui.callbacks.present(data_with_gui_value)
                 else:
                     as_str = data_with_gui.datatype_value_to_str(data_with_gui.value)
                     imgui.text(as_str)

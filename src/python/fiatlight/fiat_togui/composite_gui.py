@@ -21,13 +21,13 @@ class OptionalWithGui(AnyDataWithGui[DataType | None]):
         self.callbacks.default_value_provider = self.default_provider
         self.callbacks.clipboard_copy_possible = inner_gui.callbacks.clipboard_copy_possible
 
-        self.callbacks.present_custom_popup_possible = inner_gui.callbacks.present_custom_popup_possible
-        self.callbacks.present_custom_popup_required = inner_gui.callbacks.present_custom_popup_required
+        self.callbacks.present_popup_possible = inner_gui.callbacks.present_popup_possible
+        self.callbacks.present_popup_required = inner_gui.callbacks.present_popup_required
         self.callbacks.edit_popup_possible = inner_gui.callbacks.edit_popup_possible
         self.callbacks.edit_popup_required = inner_gui.callbacks.edit_popup_required
 
-        if self.inner_gui.callbacks.present_custom is not None:
-            self.callbacks.present_custom = self.present_custom
+        if self.inner_gui.callbacks.present is not None:
+            self.callbacks.present = self.present
 
         self.callbacks.save_to_dict = self._save_to_dict
         self.callbacks.load_from_dict = self._load_from_dict
@@ -58,14 +58,14 @@ class OptionalWithGui(AnyDataWithGui[DataType | None]):
             return r
         return False
 
-    def present_custom(self, value: DataType | None) -> None:
-        assert self.inner_gui.callbacks.present_custom is not None
+    def present(self, value: DataType | None) -> None:
+        assert self.inner_gui.callbacks.present is not None
         if value is None:
             imgui.text("Optional: None")
         else:
             if id(self.inner_gui.value) != id(value):
                 self.inner_gui.value = value
-            self.inner_gui.callbacks.present_custom(value)
+            self.inner_gui.callbacks.present(value)
 
     def edit(self, value: DataType | None) -> tuple[bool, DataType | None]:
         assert not isinstance(value, (Unspecified, Error))
@@ -108,10 +108,10 @@ class OptionalWithGui(AnyDataWithGui[DataType | None]):
         if value is not None:
             self.inner_gui.value = value
             self.callbacks.edit_collapsible = self.inner_gui.callbacks.edit_collapsible
-            self.callbacks.present_custom_collapsible = self.inner_gui.callbacks.present_custom_collapsible
+            self.callbacks.present_collapsible = self.inner_gui.callbacks.present_collapsible
         else:
             self.callbacks.edit_collapsible = False
-            self.callbacks.present_custom_collapsible = False
+            self.callbacks.present_collapsible = False
 
     def _save_to_dict(self, value: DataType | None) -> JsonDict:
         if value is None:
@@ -143,7 +143,7 @@ class ListWithGui(AnyDataWithGui[List[DataType]]):
         self.callbacks.present_str = self.present_str
         self.callbacks.edit = self.edit
         self.callbacks.default_value_provider = lambda: []
-        self.callbacks.present_custom = self.present_custom
+        self.callbacks.present = self.present
         self.callbacks.clipboard_copy_str = self.clipboard_copy_str
         self.callbacks.clipboard_copy_possible = inner_gui.callbacks.clipboard_copy_possible
         self.callbacks.save_to_dict = self._save_to_dict
@@ -192,7 +192,7 @@ class ListWithGui(AnyDataWithGui[List[DataType]]):
             if imgui.button("Show more"):
                 self.popup_max_elements += 300
 
-    def present_custom(self, value: List[DataType]) -> None:
+    def present(self, value: List[DataType]) -> None:
         max_elements = get_fiat_config().style.list_maximum_elements_in_node
 
         def popup_details_value() -> None:
@@ -242,7 +242,7 @@ class EnumWithGui(AnyDataWithGui[Enum]):
         self.callbacks.save_to_dict = self._save_to_dict
         self.callbacks.load_from_dict = self._load_from_dict
         self.callbacks.on_heartbeat = None
-        self.callbacks.present_custom_collapsible = False
+        self.callbacks.present_collapsible = False
 
         self._check_can_edit_one_line()
 

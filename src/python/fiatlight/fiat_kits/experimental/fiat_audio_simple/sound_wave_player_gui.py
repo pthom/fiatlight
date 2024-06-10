@@ -2,6 +2,7 @@
 
 This version might be refactored in the future since it mixes the sound source and the play & display part.
 """
+
 import logging
 from dataclasses import dataclass
 
@@ -85,7 +86,7 @@ class SoundWavePlayerGui(AnyDataWithGui[SoundWave]):
     def __init__(self) -> None:
         super().__init__(SoundWave)
         self.params = SoundWaveGuiParams()
-        self.callbacks.present_custom = self.present_custom
+        self.callbacks.present = self.present
         self.callbacks.on_change = self._on_change
         self.callbacks.on_exit = self._on_exit
         self.callbacks.save_gui_options_to_json = self.save_gui_options_to_json
@@ -264,7 +265,7 @@ class SoundWavePlayerGui(AnyDataWithGui[SoundWave]):
 
         implot.plot_line("##Waveform", sound_wave.time_array(), sound_wave.wave)
 
-    def present_custom(self, sound_wave: SoundWave) -> None:
+    def present(self, sound_wave: SoundWave) -> None:
         imgui.text(f"Duration: {sound_wave.duration():.2f} s, Sample Rate: {sound_wave.sample_rate} Hz")
         imgui.set_next_item_width(hello_imgui.em_size(10))
         _, self.params.volume = imgui.slider_float("Volume", self.params.volume, 0.0, SoundWavePlayer.VOLUME_MAX)

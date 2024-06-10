@@ -49,7 +49,7 @@ class ReadableAudioFileWithGui(AnyDataWithGui[pedalboard.io.ReadableAudioFile]):
     def __init__(self) -> None:
         super().__init__(pedalboard.io.ReadableAudioFile)
         self.callbacks.present_str = self.present_str
-        self.callbacks.present_custom = self.present_custom
+        self.callbacks.present = self.present
 
     @staticmethod
     def present_str(data: pedalboard.io.ReadableAudioFile) -> str:
@@ -58,7 +58,7 @@ class ReadableAudioFileWithGui(AnyDataWithGui[pedalboard.io.ReadableAudioFile]):
         r = f"{filename} - {duration_str}"
         return r
 
-    def present_custom(self, data: pedalboard.io.ReadableAudioFile) -> None:
+    def present(self, data: pedalboard.io.ReadableAudioFile) -> None:
         info = f"{data.samplerate/1000}kHz - {data.num_channels} channels"
         imgui.text(info)
 

@@ -18,13 +18,13 @@ class FigureWithGui(AnyDataWithGui[Figure]):
     def __init__(self) -> None:
         super().__init__(Figure)
         self._figure_size = ImVec2(0, 0)
-        self.callbacks.present_custom = self._present_custom
+        self.callbacks.present = self._present
 
         self.callbacks.save_gui_options_to_json = self._save_gui_options_to_json
         self.callbacks.load_gui_options_from_json = self._load_gui_options_from_json
         self.callbacks.on_change = self._on_change
 
-    def _present_custom(self, figure: Figure) -> None:
+    def _present(self, figure: Figure) -> None:
         imgui_fig.fig("##Figure", figure, self._figure_size, refresh_image=self.should_refresh_fig)
         self.should_refresh_fig = False
 

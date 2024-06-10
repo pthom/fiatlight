@@ -78,14 +78,14 @@ class StrWithGui(AnyDataWithGui[str]):
         self.callbacks.on_change = self.on_change
         self.callbacks.edit = self.edit
         self.callbacks.edit_popup_possible = False
-        self.callbacks.present_custom = self.present_custom
-        self.callbacks.present_custom_popup_possible = True
+        self.callbacks.present = self.present
+        self.callbacks.present_popup_possible = True
         self.callbacks.default_value_provider = lambda: ""
         self.callbacks.save_gui_options_to_json = self.save_gui_options_to_json
         self.callbacks.load_gui_options_from_json = self.load_gui_options_from_json
         self.callbacks.on_custom_attrs_changed = self.on_custom_attrs_changed
 
-        self.callbacks.present_custom_collapsible = False
+        self.callbacks.present_collapsible = False
         self.callbacks.edit_collapsible = False
 
     def on_change(self, value: str) -> None:
@@ -94,7 +94,7 @@ class StrWithGui(AnyDataWithGui[str]):
 
         nb_lines = value.count("\n") + 1
         if nb_lines >= 2:
-            self.callbacks.present_custom_collapsible = True
+            self.callbacks.present_collapsible = True
 
     def on_custom_attrs_changed(self, custom_attrs: CustomAttributesDict) -> None:
         if "width_em" in custom_attrs:
@@ -103,7 +103,7 @@ class StrWithGui(AnyDataWithGui[str]):
             self.params.hint = custom_attrs["hint"]
         if "allow_multiline" in custom_attrs:
             self.params.allow_multiline = custom_attrs["allow_multiline"]
-            self.callbacks.present_custom_collapsible = self.params.allow_multiline
+            self.callbacks.present_collapsible = self.params.allow_multiline
             self.callbacks.edit_collapsible = self.params.allow_multiline
         if "resizable" in custom_attrs:
             self.params.resizable = custom_attrs["resizable"]
@@ -132,7 +132,7 @@ class StrWithGui(AnyDataWithGui[str]):
             self._update_internal_state_from_params()
 
     @staticmethod
-    def present_custom(text_value: str) -> None:
+    def present(text_value: str) -> None:
         if fiatlight.is_rendering_in_fiatlight_detached_window():
             text_edit_size = ImVec2(
                 imgui.get_window_width() - hello_imgui.em_size(1), imgui.get_window_height() - hello_imgui.em_size(5)
