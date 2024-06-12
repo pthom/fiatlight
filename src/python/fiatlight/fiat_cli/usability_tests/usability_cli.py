@@ -1,8 +1,8 @@
 from fiatlight.fiat_cli import fiatlight_cli
 
 
-def usability_run_gui_demo() -> None:
-    fiatlight_cli.run_gui_demo("IntWithGui")
+def usability_gui_info() -> None:
+    fiatlight_cli.gui_info("int")
 
 
-usability_run_gui_demo()
+usability_gui_info()

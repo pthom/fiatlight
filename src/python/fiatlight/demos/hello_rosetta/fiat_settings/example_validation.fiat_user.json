@@ -1,35 +1,23 @@
 {
     "user_inputs": {
         "functions_nodes": {
-            "hello_rosetta": {
-                "name": {
-                    "name": "name",
+            "f": {
+                "s": {
+                    "name": "s",
                     "data": {
-                        "type": "Primitive",
-                        "value": "Carnivorou"
-                    }
-                },
-                "age": {
-                    "name": "age",
-                    "data": {
-                        "type": "Primitive",
-                        "value": 30
+                        "type": "Unspecified"
                     }
                 }
             }
         }
     },
     "gui_options": {
-        "hello_rosetta": {
+        "f": {
             "inputs": {
-                "name": {
+                "s": {
                     "cb_options": {
                         "width_em": 15.0
                     },
-                    "expanded": true
-                },
-                "age": {
-                    "cb_options": {},
                     "expanded": true
                 }
             },

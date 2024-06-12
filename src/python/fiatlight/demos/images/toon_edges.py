@@ -1,4 +1,4 @@
-import fiatlight
+import fiatlight as fl
 from fiatlight.fiat_types import PositiveFloat
 from fiatlight.fiat_kits.fiat_image import ImageU8_GRAY, ImageU8_3, image_source
 from fiatlight.demos.images.opencv_wrappers import canny, dilate, MorphShape, CannyApertureSize
@@ -7,7 +7,7 @@ import numpy as np
 import cv2
 
 
-@fiatlight.with_custom_attrs(edges_intensity__range=(0.0, 1.0))
+@fl.with_custom_attrs(edges_intensity__range=(0.0, 1.0))
 def merge_toon_edges(image: ImageU8_3, edges_images: ImageU8_GRAY, edges_intensity: float = 0.7) -> ImageU8_3:
     """Add toon edges to the image.
     :param image: Image: Input image
@@ -29,7 +29,7 @@ def merge_toon_edges(image: ImageU8_3, edges_images: ImageU8_GRAY, edges_intensi
     return r
 
 
-@fiatlight.with_custom_attrs(
+@fl.with_custom_attrs(
     canny_blur_sigma__range=(0.0, 10.0),
     dilate_kernel_size__range=(0, 10),
     dilate_iterations__range=(0, 10),
@@ -75,8 +75,7 @@ def add_toon_edges(
 
 
 def main() -> None:
-    graph = fiatlight.FunctionsGraph.from_function_composition([image_source, add_toon_edges])
-    fiatlight.run(graph)
+    fl.run([image_source, add_toon_edges])
 
 
 if __name__ == "__main__":

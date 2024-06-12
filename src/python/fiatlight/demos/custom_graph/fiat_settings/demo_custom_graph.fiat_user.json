@@ -1,117 +1,84 @@
 {
-    "functions_graph": {
+    "user_inputs": {
         "functions_nodes": {
             "float_source": {
-                "inputs": {
-                    "x": {
-                        "name": "x",
-                        "data": {
-                            "type": "Primitive",
-                            "value": 0.03545999899506569
-                        }
+                "x": {
+                    "name": "x",
+                    "data": {
+                        "type": "Primitive",
+                        "value": 29.700000762939453
                     }
-                },
-                "gui_options": {
-                    "inputs": {},
-                    "outputs": {},
-                    "internal_gui_options": {}
                 }
             },
-            "sin": {
-                "inputs": {},
-                "gui_options": {
-                    "inputs": {},
-                    "outputs": {},
-                    "internal_gui_options": {}
-                }
-            },
-            "square": {
-                "inputs": {},
-                "gui_options": {
-                    "inputs": {},
-                    "outputs": {},
-                    "internal_gui_options": {}
-                }
-            },
-            "add": {
-                "inputs": {},
-                "gui_options": {
-                    "inputs": {},
-                    "outputs": {},
-                    "internal_gui_options": {}
-                }
-            }
+            "sin": {},
+            "square": {},
+            "add": {}
         }
     },
-    "functions_gui_settings": {
+    "gui_options": {
         "float_source": {
-            "_show_input_details": {
-                "x": true
+            "inputs": {
+                "x": {
+                    "cb_options": {},
+                    "expanded": true
+                }
             },
-            "_inputs_expanded": true,
-            "_show_output_details": {
-                "0": true
+            "outputs": {
+                "0": {
+                    "cb_options": {},
+                    "expanded": true
+                }
             },
-            "_outputs_expanded": true,
-            "_show_internals_details": {
-                "edges": false,
-                "dilated_edges": false,
-                "image_with_edges": false
-            },
-            "_internals_expanded": true,
-            "_internal_state_gui_expanded": true
+            "internal_gui_options": {}
         },
         "sin": {
-            "_show_input_details": {
-                "x": true
+            "inputs": {
+                "x": {
+                    "cb_options": {},
+                    "expanded": false
+                }
             },
-            "_inputs_expanded": true,
-            "_show_output_details": {
-                "0": true
+            "outputs": {
+                "0": {
+                    "cb_options": {},
+                    "expanded": true
+                }
             },
-            "_outputs_expanded": true,
-            "_show_internals_details": {
-                "edges": false,
-                "dilated_edges": false,
-                "image_with_edges": false
-            },
-            "_internals_expanded": true,
-            "_internal_state_gui_expanded": true
+            "internal_gui_options": {}
         },
         "square": {
-            "_show_input_details": {
-                "x": true
+            "inputs": {
+                "x": {
+                    "cb_options": {},
+                    "expanded": false
+                }
             },
-            "_inputs_expanded": true,
-            "_show_output_details": {
-                "0": true
+            "outputs": {
+                "0": {
+                    "cb_options": {},
+                    "expanded": true
+                }
             },
-            "_outputs_expanded": true,
-            "_show_internals_details": {
-                "edges": false,
-                "dilated_edges": false,
-                "image_with_edges": false
-            },
-            "_internals_expanded": true,
-            "_internal_state_gui_expanded": true
+            "internal_gui_options": {}
         },
         "add": {
-            "_show_input_details": {
-                "a": true,
-                "b": true
+            "inputs": {
+                "a": {
+                    "cb_options": {},
+                    "expanded": false
+                },
+                "b": {
+                    "cb_options": {},
+                    "expanded": false
+                }
             },
-            "_inputs_expanded": true,
-            "_show_output_details": {
-                "0": true
+            "outputs": {
+                "0": {
+                    "cb_options": {},
+                    "expanded": true
+                }
             },
-            "_outputs_expanded": true,
-            "_show_internals_details": {
-                "edges": false,
-                "dilated_edges": false,
-                "image_with_edges": false
-            },
-            "_internals_expanded": true,
-            "_internal_state_gui_expanded": true
+            "internal_gui_options": {}
         }
     }
 }
