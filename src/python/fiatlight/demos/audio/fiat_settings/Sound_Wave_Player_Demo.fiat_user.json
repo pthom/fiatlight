@@ -1,51 +1,44 @@
 {
-    "functions_graph": {
+    "user_inputs": {
         "functions_nodes": {
             "sound_wave_from_file": {
-                "inputs": {
-                    "file_path": {
-                        "name": "file_path",
-                        "data": {
-                            "type": "Primitive",
-                            "value": "/Users/pascal/dvp/OpenSource/ImGuiWork/_Bundle/fiatlight/priv_assets/audio/r.mp3"
-                        }
+                "file_path": {
+                    "name": "file_path",
+                    "data": {
+                        "type": "Primitive",
+                        "value": "/Users/pascal/dvp/OpenSource/ImGuiWork/_Bundle/fiatlight/priv_assets/audio/6 - Libera me.mp3"
                     }
-                },
-                "gui_options": {
-                    "inputs": {},
-                    "outputs": {
-                        "0": {
-                            "show_time_as_seconds": false,
-                            "can_select": false,
-                            "volume": 1.0,
-                            "plot_size_em": [
-                                20.0,
-                                10.0
-                            ],
-                            "selection": {
-                                "start": 57.02333333333333,
-                                "end": 171.07
-                            }
-                        }
-                    },
-                    "internal_gui_options": {}
                 }
             }
         }
     },
-    "functions_gui_settings": {
+    "gui_options": {
         "sound_wave_from_file": {
-            "_show_input_details": {
-                "file_path": true
+            "inputs": {
+                "file_path": {
+                    "cb_options": {},
+                    "expanded": true
+                }
             },
-            "_inputs_expanded": true,
-            "_show_output_details": {
-                "0": true
+            "outputs": {
+                "0": {
+                    "cb_options": {
+                        "show_time_as_seconds": false,
+                        "can_select": false,
+                        "volume": 1.0,
+                        "plot_size_em": [
+                            41.46666717529297,
+                            21.733333587646484
+                        ],
+                        "selection": {
+                            "start": 81.70448979591836,
+                            "end": 245.1134693877551
+                        }
+                    },
+                    "expanded": true
+                }
             },
-            "_outputs_expanded": true,
-            "_show_internals_details": {},
-            "_internals_expanded": true,
-            "_internal_state_gui_expanded": true
+            "internal_gui_options": {}
         }
     }
 }

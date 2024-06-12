@@ -72,6 +72,8 @@ class _SdxlTurboWrapper:
             guidance_scale=guidance_scale,
             generator=self.generator,
         )
+        if len(prompt) == 0:
+            raise ValueError("Prompt must not be empty")
         image = r.images[0]
         as_array = np.array(image)
         as_array = cv2.cvtColor(as_array, cv2.COLOR_RGB2BGR)

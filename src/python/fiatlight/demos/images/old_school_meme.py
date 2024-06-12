@@ -20,7 +20,7 @@ class MemeFont(Enum):
 @fl.base_model_with_gui_registration(
     x__range=(0, 1),
     y__range=(0, 1),
-    font_size__range=(10, 100),
+    font_size__range=(5, 100),
 )
 class MemeTextParams(BaseModel):
     text: str = "Hello!"

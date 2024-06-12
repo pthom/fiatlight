@@ -1,0 +1,19 @@
+{
+    "user_inputs": {
+        "functions_nodes": {
+            "MicrophoneGui": {}
+        }
+    },
+    "gui_options": {
+        "MicrophoneGui": {
+            "inputs": {},
+            "outputs": {
+                "0": {
+                    "cb_options": {},
+                    "expanded": true
+                }
+            },
+            "internal_gui_options": {}
+        }
+    }
+}
