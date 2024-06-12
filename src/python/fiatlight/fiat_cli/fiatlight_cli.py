@@ -12,23 +12,22 @@ def types(query: str | None = None) -> None:
     print(info)
 
 
-def gui_info(gui_typename: str) -> None:
+def gui_info(gui_or_data_typename: str) -> None:
     """Print the GUI info for a given type. Add the GUI type name as an argument (if not provided, all Gui widgets names are printed)"""
-    info = _GUI_FACTORIES.get_gui_info(gui_typename)
+    info = _GUI_FACTORIES.get_gui_info(gui_or_data_typename)
     print(info)
 
 
-def run_gui_demo(gui_typename: str) -> None:
-    """Tries to run a GUI demo for a given type. Add the GUI type name as an argument."""
-    _GUI_FACTORIES.run_gui_demo(gui_typename)
+# def run_gui_demo(gui_or_data_typename: str) -> None:
+#     """Tries to run a GUI demo for a given type. Add the GUI type name as an argument."""
+#     _GUI_FACTORIES.run_gui_demo(gui_or_data_typename)
 
 
 def main() -> None:
     fire.Fire(
         {
             "types": types,
-            "gui_info": gui_info,
-            "gui_demo": run_gui_demo,
+            "gui": gui_info,
         }
     )
 

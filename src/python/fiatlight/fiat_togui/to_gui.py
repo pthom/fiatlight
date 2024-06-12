@@ -25,6 +25,8 @@ from typing import TypeAlias, Callable, Any, Tuple, List, Type, Generic
 GuiFactory = Callable[[], AnyDataWithGui[DataType]]
 FunctionWithGuiFactory = Callable[[], FunctionWithGui]
 
+_ErrorMessage = str
+
 
 class _ToGuiContext(pydantic.BaseModel):
     last_typenames_handled: list[str] = pydantic.Field(default_factory=list)
@@ -627,39 +629,75 @@ class GuiFactories:
         )
         return r
 
-    def run_gui_demo(self, gui_typename: str) -> None:
-        """Returns the info about a GUI type."""
+    def _cli_search_gui_type(self, typename_gui_or_data: str) -> AnyDataWithGui[Any] | _ErrorMessage:
+        matching_guis: List[AnyDataWithGui[Any]] = []
 
+        def add_gui_type(gui_type: AnyDataWithGui[Any]) -> None:
+            # check if already present
+            for existing_gui_type in matching_guis:
+                if type(existing_gui_type) is type(gui_type):
+                    return
+            matching_guis.append(gui_type)
+
+        # Search for a GUI type
         for factory in self._factories:
             factored_gui = factory.gui_factory()
-            if type(factored_gui).__name__ != gui_typename:
-                continue
+            if type(factored_gui).__name__ == typename_gui_or_data:
+                add_gui_type(factored_gui)
+
+        # Search for a data type
+        for factory in self._factories:
+            datatype_qualified_name = fully_qualified_typename_or_str(factory.datatype)
+            if datatype_qualified_name == typename_gui_or_data:
+                add_gui_type(factory.gui_factory())
             else:
-                from fiatlight.fiat_togui.make_gui_demo_code import make_gui_demo_code
+                if "." in datatype_qualified_name:
+                    datatype_name = datatype_qualified_name.split(".")[-1]
+                    if datatype_name == typename_gui_or_data:
+                        add_gui_type(factory.gui_factory())
 
-                code = make_gui_demo_code(factored_gui)
-                print(code)
-                exec(code)
-                break
-
-    def get_gui_info(self, typename: str) -> str:
-        """Returns the info about a GUI type."""
-        from fiatlight.fiat_doc import code_utils
-
-        if not self.can_handle_typename(typename):
-            r = f"This typename ({typename}) is not handled"
-            # Failure, list all gui types
+        if len(matching_guis) == 0:
+            r = f"This typename ({typename_gui_or_data}) is not handled\n"
             r += "===============================\n"
             r += "List of all GUI types:\n"
             for factory in self._factories:
                 factored_gui = factory.gui_factory()
                 typename = type(factored_gui).__name__
                 r += f"    {typename}\n"
+            return r
+        elif len(matching_guis) > 1:
+            r = "Multiple GUI types found for this typename:\n"
+            for gui_type in matching_guis:
+                r += f"    {type(gui_type).__name__}\n"
+            r += "Please refine your search\n"
+            return r
+        else:
+            return matching_guis[0]
 
-        factored_gui = self.factor(typename, {})
+    # def run_gui_demo(self, gui_or_data_typename: str) -> None:
+    #     """Returns the info about a GUI type."""
+    #
+    #     factored_gui = self._cli_search_gui_type(gui_or_data_typename)
+    #     if isinstance(factored_gui, _ErrorMessage):
+    #         return factored_gui
+    #
+    #     from fiatlight.fiat_togui.make_gui_demo_code import make_gui_demo_code
+    #
+    #     code = make_gui_demo_code(factored_gui)
+    #     print(code)
+    #     exec(code)
+
+    def get_gui_info(self, gui_or_data_typename: str) -> str:
+        """Returns the info about a GUI type."""
+        from fiatlight.fiat_doc import code_utils
+
+        factored_gui = self._cli_search_gui_type(gui_or_data_typename)
+        if isinstance(factored_gui, _ErrorMessage):
+            return factored_gui
+
         doc = factored_gui.__doc__
 
-        r = f"GUI type: {typename}\n"
+        r = f"GUI type: {gui_or_data_typename}\n"
         r += "=" * len(r) + "\n"
         if doc is not None:
             r += code_utils.indent_code(doc, 2)
