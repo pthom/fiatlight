@@ -521,6 +521,9 @@ class FunctionsGraph:
         """
         # ================================================================================================================
         #                                            Serialization
+        # Note:  save_gui_options_to_json() and load_gui_options_from_json()
+        #        are intentionally not implemented here
+        #        See FunctionsGraphGui (which does deals with the GUI)
         # ================================================================================================================
         """
         pass
@@ -541,17 +544,6 @@ class FunctionsGraph:
         for unique_name, fn_json in fn_data.items():
             fn = self._function_node_with_unique_name(unique_name)
             fn.load_user_inputs_from_json(fn_json)
-
-    def save_gui_options_to_json(self) -> JsonDict:
-        function_gui_settings_dict = {}
-        for name, fn in self.all_function_nodes_with_unique_names().items():
-            function_gui_settings_dict[name] = fn.save_gui_options_to_json()
-        return function_gui_settings_dict
-
-    def load_gui_options_from_json(self, json_dict: JsonDict) -> None:
-        for name, fn in self.all_function_nodes_with_unique_names().items():
-            if name in json_dict:
-                fn.load_gui_options_from_json(json_dict[name])
 
     def save_graph_composition_to_json(self) -> JsonDict:
         """Saves the graph composition to a json dict.

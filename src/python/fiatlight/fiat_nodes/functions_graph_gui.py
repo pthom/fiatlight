@@ -380,10 +380,20 @@ class FunctionsGraphGui:
         self.functions_graph.load_user_inputs_from_json(json_data)
 
     def save_gui_options_to_json(self) -> JsonDict:
-        return self.functions_graph.save_gui_options_to_json()
+        function_gui_settings_dict = {}
+        for name, fn_node_with_gui in self.all_function_nodes_with_unique_names().items():
+            function_gui_settings_dict[name] = {
+                "function_node_with_gui": fn_node_with_gui.save_gui_options_to_json(),
+                "function_node": fn_node_with_gui.get_function_node().save_gui_options_to_json(),
+            }
+        return function_gui_settings_dict
 
     def load_gui_options_from_json(self, json_dict: JsonDict) -> None:
-        self.functions_graph.load_gui_options_from_json(json_dict)
+        for name, fn_node_with_gui in self.all_function_nodes_with_unique_names().items():
+            if name in json_dict:
+                json_data = json_dict[name]
+                fn_node_with_gui.load_gui_options_from_json(json_data["function_node_with_gui"])
+                fn_node_with_gui.get_function_node().load_gui_options_from_json(json_data["function_node"])
 
     def save_graph_composition_to_json(self) -> JsonDict:
         return self.functions_graph.save_graph_composition_to_json()
