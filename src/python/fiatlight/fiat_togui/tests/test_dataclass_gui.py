@@ -189,7 +189,7 @@ def test_pydantic_with_enum() -> None:
     my_param_gui = to_data_with_gui(my_param, NO_CUSTOM_ATTRIBUTES)
     assert my_param_gui.value == my_param
 
-    as_dict = my_param_gui.save_to_dict(my_param_gui.value)
+    as_dict = my_param_gui.call_save_to_dict(my_param_gui.value)
     assert as_dict == {"type": "Pydantic", "value": {"my_enum": 2, "x": 4}}
 
 

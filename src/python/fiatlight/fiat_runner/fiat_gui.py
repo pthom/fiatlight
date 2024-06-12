@@ -1,3 +1,5 @@
+import traceback
+
 from fiatlight.fiat_nodes.function_node_gui import FunctionNodeGui
 from fiatlight.fiat_nodes.functions_graph_gui import FunctionsGraphGui
 from fiatlight.fiat_core import FunctionsGraph, FunctionWithGui
@@ -572,7 +574,10 @@ class FiatGui:
 
         json_data = {}
         if save_type == _SaveType.UserInputs:
-            json_data = self._functions_graph_gui.save_user_inputs_to_json()
+            json_data = {
+                "user_inputs": self._functions_graph_gui.save_user_inputs_to_json(),
+                "gui_options": self._functions_graph_gui.save_gui_options_to_json(),
+            }
         elif save_type == _SaveType.GraphComposition:
             json_data = self._functions_graph_gui.save_graph_composition_to_json()
         try:
@@ -602,7 +607,8 @@ class FiatGui:
             return False
         try:
             if save_type == _SaveType.UserInputs:
-                self._functions_graph_gui.load_user_inputs_from_json(json_data)
+                self._functions_graph_gui.load_user_inputs_from_json(json_data["user_inputs"])
+                self._functions_graph_gui.load_gui_options_from_json(json_data["gui_options"])
             elif save_type == _SaveType.GraphComposition:
 
                 def factor_function_from_name(name: str) -> Any:
@@ -615,9 +621,14 @@ class FiatGui:
                 Error loading state file {self._user_settings_filename()}:
                 (while invoking load_user_inputs_from_json: the nodes may have changed)
                 ========================================
-                {e}
+                Exception: {e}
+                ========================================
+                Traceback
+                {traceback.format_exc()}
                 """
             )
+            # log traceback
+
             return False
 
         return True

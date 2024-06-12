@@ -374,26 +374,16 @@ class FunctionsGraphGui:
         pass
 
     def save_user_inputs_to_json(self) -> JsonDict:
-        function_graph_dict = self.functions_graph.save_user_inputs_to_json()
-
-        function_gui_settings_dict = {}
-        for name, fn in self.all_function_nodes_with_unique_names().items():
-            function_gui_settings_dict[name] = fn.save_gui_options_to_json()
-
-        r = {
-            "functions_graph": function_graph_dict,
-            "functions_gui_settings": function_gui_settings_dict,
-        }
-        return r
+        return self.functions_graph.save_user_inputs_to_json()
 
     def load_user_inputs_from_json(self, json_data: JsonDict) -> None:
-        self.functions_graph.load_user_inputs_from_json(json_data["functions_graph"])
+        self.functions_graph.load_user_inputs_from_json(json_data)
 
-        if "functions_gui_settings" in json_data:
-            function_gui_settings_dict = json_data["functions_gui_settings"]
-            for name, fn in self.all_function_nodes_with_unique_names().items():
-                if name in function_gui_settings_dict:
-                    fn.load_gui_options_from_json(function_gui_settings_dict[name])
+    def save_gui_options_to_json(self) -> JsonDict:
+        return self.functions_graph.save_gui_options_to_json()
+
+    def load_gui_options_from_json(self, json_dict: JsonDict) -> None:
+        self.functions_graph.load_gui_options_from_json(json_dict)
 
     def save_graph_composition_to_json(self) -> JsonDict:
         return self.functions_graph.save_graph_composition_to_json()

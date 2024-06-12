@@ -21,8 +21,8 @@ def test_creation() -> None:
 def test_primitive_serialization() -> None:
     a = to_data_with_gui(1, NO_CUSTOM_ATTRIBUTES)
     assert a.value == 1
-    assert a.save_to_dict(a.value) == {"type": "Primitive", "value": 1}
-    a.value = a.load_from_dict({"type": "Primitive", "value": 2})
+    assert a.call_save_to_dict(a.value) == {"type": "Primitive", "value": 1}
+    a.value = a.call_load_from_dict({"type": "Primitive", "value": 2})
     assert a.value == 2
 
 
@@ -57,11 +57,11 @@ def test_pydantic_serialization() -> None:
     a_gui = to_data_with_gui(a, NO_CUSTOM_ATTRIBUTES)
     assert a_gui.value == a
 
-    as_dict = a_gui.save_to_dict(a_gui.value)
+    as_dict = a_gui.call_save_to_dict(a_gui.value)
     assert as_dict == {"type": "Pydantic", "value": {"x": 1, "y": "hello"}}
 
     a2_gui = any_type_to_gui(A, NO_CUSTOM_ATTRIBUTES)
-    a2_gui.value = a2_gui.load_from_dict(as_dict)
+    a2_gui.value = a2_gui.call_load_from_dict(as_dict)
     assert isinstance(a2_gui.value, A)
     assert a2_gui.value == a
 
@@ -75,11 +75,11 @@ def test_pydantic_serialization() -> None:
     b_gui = to_data_with_gui(b, NO_CUSTOM_ATTRIBUTES)
     assert b_gui.value == b
 
-    as_dict = b_gui.save_to_dict(b_gui.value)
+    as_dict = b_gui.call_save_to_dict(b_gui.value)
     assert as_dict == {"type": "Pydantic", "value": {"a": {"x": 1, "y": "hello"}, "z": 3.14}}
 
     b2_gui = any_type_to_gui(B, NO_CUSTOM_ATTRIBUTES)
     assert b2_gui.value is UnspecifiedValue
-    b2_gui.value = b2_gui.load_from_dict(as_dict)
+    b2_gui.value = b2_gui.call_load_from_dict(as_dict)
     assert isinstance(b2_gui.value, B)
     assert b2_gui.value == b

@@ -805,10 +805,13 @@ class FunctionNodeGui:
             fiat_osd.show_void_detached_window_button(btn_text, popup_label, show_doc)
 
     @staticmethod
-    def _Save_Load_User_Settings_Section() -> None:  # Dummy function to create a section in the IDE # noqa
+    def _Serialization_Section() -> None:  # Dummy function to create a section in the IDE # noqa
         """
         # ==================================================================================================================
         # Save and load user settings
+        # Note:
+        #     save_user_inputs_to_json & load_user_inputs_from_json are not implemented here:
+        #     you should use FunctionNode.save_user_inputs_to_json & FunctionNode.load_user_inputs_from_json
         # ==================================================================================================================
         """
         pass
@@ -819,6 +822,7 @@ class FunctionNodeGui:
             "_outputs_expanded": self._outputs_expanded,
             "_internals_expanded": self._internals_expanded,
             "_internal_state_gui_expanded": self._internal_state_gui_expanded,
+            "_function_node": self._function_node.save_gui_options_to_json(),
         }
         return r
 
@@ -826,8 +830,8 @@ class FunctionNodeGui:
         self._inputs_expanded = json_data.get("_inputs_expanded", True)
         self._outputs_expanded = json_data.get("_outputs_expanded", True)
         self._internals_expanded = json_data.get("_internals_expanded", True)
-
         self._internal_state_gui_expanded = json_data.get("_internal_state_gui_expanded", True)
+        self._function_node.load_gui_options_from_json(json_data["_function_node"])
 
 
 class FunctionNodeLinkGui:

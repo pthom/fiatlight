@@ -27,7 +27,7 @@ class ParamWithGui(Generic[DataType]):
             self.data_with_gui.callbacks.default_value_provider = lambda: default_value
 
     def save_self_value_to_dict(self) -> JsonDict:
-        data_json = self.data_with_gui.save_to_dict(self.data_with_gui.value)
+        data_json = self.data_with_gui.call_save_to_dict(self.data_with_gui.value)
         data_dict = {"name": self.name, "data": data_json}
         return data_dict
 
@@ -35,7 +35,7 @@ class ParamWithGui(Generic[DataType]):
         if json_data["name"] != self.name:
             raise ValueError(f"Expected name {self.name}, got {json_data['name']}")
         if "data" in json_data:
-            self.data_with_gui.value = self.data_with_gui.load_from_dict(json_data["data"])
+            self.data_with_gui.value = self.data_with_gui.call_load_from_dict(json_data["data"])
 
     def get_value_or_default(self) -> DataType | Unspecified | Error | InvalidValue[DataType]:
         param_value = self.data_with_gui.value

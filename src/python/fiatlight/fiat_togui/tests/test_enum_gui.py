@@ -44,7 +44,7 @@ def test_enum_serialization() -> None:
 
     a = to_gui.to_data_with_gui(MyEnum.A, NO_CUSTOM_ATTRIBUTES)
     assert a.value == MyEnum.A
-    as_json = a.save_to_dict(a.value)
+    as_json = a.call_save_to_dict(a.value)
     assert as_json == {"class": "MyEnum", "type": "Enum", "value_name": "A"}
-    a.value = a.load_from_dict({"class": "MyEnum", "type": "Enum", "value_name": "B"})
+    a.value = a.call_load_from_dict({"class": "MyEnum", "type": "Enum", "value_name": "B"})
     assert a.value == MyEnum.B

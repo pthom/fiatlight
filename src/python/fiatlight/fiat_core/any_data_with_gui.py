@@ -652,7 +652,7 @@ class AnyDataWithGui(Generic[DataType]):
         """
 
     @final
-    def save_to_dict(self, value: DataType | Unspecified | Error | InvalidValue[DataType]) -> JsonDict:
+    def call_save_to_dict(self, value: DataType | Unspecified | Error | InvalidValue[DataType]) -> JsonDict:
         """Serialize the value to a dictionary
 
         Will call the save_to_dict callback if set, otherwise will use the default serialization, when available.
@@ -681,7 +681,7 @@ class AnyDataWithGui(Generic[DataType]):
             return {"type": "Error"}
 
     @final
-    def load_from_dict(self, json_data: JsonDict) -> DataType | Unspecified | Error:
+    def call_load_from_dict(self, json_data: JsonDict) -> DataType | Unspecified | Error:
         """Deserialize the value from a dictionary
         Do not override these methods in descendant classes!
         """
@@ -710,10 +710,15 @@ class AnyDataWithGui(Generic[DataType]):
         else:
             raise ValueError(f"Cannot deserialize {json_data}")
 
-    def save_gui_options_to_json(self) -> JsonDict:
-        return {"expanded": self._expanded}
+    @final
+    def call_save_gui_options_to_json(self) -> JsonDict:
+        callbacks_options = self.callbacks.save_gui_options_to_json() if self.callbacks.save_gui_options_to_json else {}
+        return {"cb_options": callbacks_options, "expanded": self._expanded}
 
-    def load_gui_options_from_json(self, json_data: JsonDict) -> None:
+    @final
+    def call_load_gui_options_from_json(self, json_data: JsonDict) -> None:
+        if self.callbacks.load_gui_options_from_json is not None:
+            self.callbacks.load_gui_options_from_json(json_data["cb_options"])
         self._expanded = json_data.get("expanded", True)
 
     def _Utilities_Section(self) -> None:

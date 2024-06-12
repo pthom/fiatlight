@@ -117,14 +117,14 @@ class OptionalWithGui(AnyDataWithGui[DataType | None]):
         if value is None:
             return {"type": "Optional", "value": None}
         else:
-            return {"type": "Optional", "value": self.inner_gui.save_to_dict(value)}
+            return {"type": "Optional", "value": self.inner_gui.call_save_to_dict(value)}
 
     def _load_from_dict(self, json_data: JsonDict) -> DataType | None:
         if json_data["type"] == "Optional":
             if json_data["value"] is None:
                 return None
             else:
-                r = self.inner_gui.load_from_dict(json_data["value"])
+                r = self.inner_gui.call_load_from_dict(json_data["value"])
                 assert not isinstance(r, (Unspecified, Error, InvalidValue))
                 return r
         else:
@@ -209,12 +209,12 @@ class ListWithGui(AnyDataWithGui[List[DataType]]):
         imgui.text(txt)
 
     def _save_to_dict(self, value: List[DataType]) -> JsonDict:
-        r = {"type": "List", "value": [self.inner_gui.save_to_dict(v) for v in value]}
+        r = {"type": "List", "value": [self.inner_gui.call_save_to_dict(v) for v in value]}
         return r
 
     def _load_from_dict(self, json_data: JsonDict) -> List[DataType]:
         if json_data["type"] == "List":
-            r = [self.inner_gui.load_from_dict(v) for v in json_data["value"]]
+            r = [self.inner_gui.call_load_from_dict(v) for v in json_data["value"]]
             assert not any(isinstance(v, (Unspecified, Error)) for v in r)
             return r  # type: ignore
         else:

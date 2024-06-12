@@ -242,20 +242,15 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
 
     def save_gui_options_to_json(self) -> JsonDict:
         # We only save the GUI options, not the data!
-        r = {}
-        for param_gui in self._parameters_with_gui:
-            save_gui_options_to_json = param_gui.data_with_gui.callbacks.save_gui_options_to_json
-            if save_gui_options_to_json is not None:
-                r[param_gui.name] = save_gui_options_to_json()
-        return r
+        return {
+            param_gui.name: param_gui.data_with_gui.call_save_gui_options_to_json()
+            for param_gui in self._parameters_with_gui
+        }
 
     def load_gui_options_from_json(self, json: JsonDict) -> None:
         # We only load the GUI options, not the data!
         for param_gui in self._parameters_with_gui:
-            if param_gui.name in json:
-                load_gui_options_from_json = param_gui.data_with_gui.callbacks.load_gui_options_from_json
-                if load_gui_options_from_json is not None:
-                    load_gui_options_from_json(json[param_gui.name])
+            param_gui.data_with_gui.call_load_gui_options_from_json(json[param_gui.name])
 
 
 class DataclassGui(DataclassLikeGui[DataclassLikeType]):

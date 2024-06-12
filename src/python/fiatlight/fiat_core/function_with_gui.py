@@ -1114,19 +1114,29 @@ class FunctionWithGui:
         """
         pass
 
-    def _save_gui_options_to_json(self) -> JsonDict:
+    def save_user_inputs_to_json(self) -> JsonDict:
+        # This method is redefined in FunctionNode, where it saves only the unlinked inputs
+        user_inputs = {}
+        for input_param in self._inputs_with_gui:
+            user_inputs[input_param.name] = input_param.save_self_value_to_dict()
+        return user_inputs
+
+    def load_user_inputs_from_json(self, json_data: JsonDict) -> None:
+        # This method is redefined in FunctionNode, where it loads only the unlinked inputs
+        for input_param in self._inputs_with_gui:
+            input_param.load_self_value_from_dict(json_data[input_param.name])
+
+    def save_gui_options_to_json(self) -> JsonDict:
         """Save the GUI options to a JSON file
         (i.e. any presentation options of the inputs and outputs, as well as of the internal GUI)
         """
         input_options = {}
         for input_with_gui in self._inputs_with_gui:
-            if input_with_gui.data_with_gui.callbacks.save_gui_options_to_json is not None:
-                input_options[input_with_gui.name] = input_with_gui.data_with_gui.callbacks.save_gui_options_to_json()
+            input_options[input_with_gui.name] = input_with_gui.data_with_gui.call_save_gui_options_to_json()
 
         output_options = {}
         for i, output_with_gui in enumerate(self._outputs_with_gui):
-            if output_with_gui.data_with_gui.callbacks.save_gui_options_to_json is not None:
-                output_options[i] = output_with_gui.data_with_gui.callbacks.save_gui_options_to_json()
+            output_options[str(i)] = output_with_gui.data_with_gui.call_save_gui_options_to_json()
 
         internal_gui_options = {}
         if self.save_internal_gui_options_to_json is not None:
@@ -1139,26 +1149,15 @@ class FunctionWithGui:
         }
         return r
 
-    def _load_gui_options_from_json(self, json_data: JsonDict) -> None:
+    def load_gui_options_from_json(self, json_data: JsonDict) -> None:
         """Load the GUI options from a JSON file"""
         input_options = json_data.get("inputs", {})
-        for input_name, input_option in input_options.items():
-            for input_with_gui in self._inputs_with_gui:
-                callback_load = input_with_gui.data_with_gui.callbacks.load_gui_options_from_json
-                if input_with_gui.name == input_name and callback_load is not None:
-                    callback_load(input_option)
-                    break
+        for input_with_gui in self._inputs_with_gui:
+            input_with_gui.data_with_gui.call_load_gui_options_from_json(input_options[input_with_gui.name])
 
         output_options = json_data.get("outputs", {})
-        for output_idx, output_option in output_options.items():
-            output_idx = int(output_idx)
-            if output_idx >= len(self._outputs_with_gui):
-                logging.warning(f"Output index {output_idx} out of range")
-                continue
-            output_with_gui = self._outputs_with_gui[output_idx]
-            callback_load = output_with_gui.data_with_gui.callbacks.load_gui_options_from_json
-            if callback_load is not None:
-                callback_load(output_option)
+        for i, output_with_gui in enumerate(self._outputs_with_gui):
+            output_with_gui.data_with_gui.call_load_gui_options_from_json(output_options[str(i)])
 
         internal_gui_options = json_data.get("internal_gui_options", {})
         if self.load_internal_gui_options_from_json is not None:
