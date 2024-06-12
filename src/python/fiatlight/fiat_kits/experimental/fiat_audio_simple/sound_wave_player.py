@@ -101,7 +101,9 @@ class SoundWavePlayer:
         try:
             if self._stream is not None:
                 self._stream.close()
-            self._stream = sd.OutputStream(samplerate=self.sound_wave.sample_rate, channels=1, callback=self._callback)
+            self._stream = sd.OutputStream(
+                samplerate=self.sound_wave.sample_rate, channels=1, callback=self._callback, blocksize=1024 * 64
+            )
         except Exception as e:
             logging.error(f"Error initializing the stream: {str(e)}")
             raise RuntimeError("Stream initialization failed") from e
@@ -118,6 +120,7 @@ class SoundWavePlayer:
 
         # Safeguard to ensure we don't exceed the buffer size
         if outdata.shape[0] < chunksize:
+            logging.warning(f"SoundWavePlayer._callback: Buffer size too small: {outdata.shape[0]=} < {chunksize=}")
             chunksize = outdata.shape[0]
 
         if chunksize <= 0:
