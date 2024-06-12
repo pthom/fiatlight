@@ -18,13 +18,13 @@ def merge_toon_edges(
     """Add toon edges to the image.
     :param image: Image: Input image
     :param edges_images: binary image with edges detected using Canny filter
-    :param blur_edges_sigma: Optional sigma value for Gaussian Blur applied to edges (skip if 0)
+    :param blur_sigma: Optional sigma value for Gaussian Blur applied to edges (skip if 0)
     :param edges_intensity: Intensity of the edges
     :param edges_color: Color of the edges
     """
 
     # Create a RGBA image that will be overlayed on the original image
-    # Its color will be constant (edges_color) and its alpha channel will be the edges_images
+    # Its color will be constant (color) and its alpha channel will be the edges_images
     overlay_rgba = np.zeros((*image.shape[:2], 4), dtype=np.uint8)
     overlay_rgba[:, :, :3] = edges_color
     overlay_rgba[:, :, 3] = (edges_images * edges_intensity).astype(np.uint8)
@@ -36,40 +36,40 @@ def merge_toon_edges(
 
 
 @fl.base_model_with_gui_registration(
-    canny_blur_sigma__range=(0.0, 10.0),
+    blur_sigma__range=(0.0, 10.0),
 )
 class ToonCannyParams(BaseModel):
-    canny_t_lower: PositiveFloat = PositiveFloat(1000.0)
-    canny_t_upper: PositiveFloat = PositiveFloat(5000.0)
-    canny_l2_gradient: bool = True
-    canny_blur_sigma: float = 0.0
-    canny_aperture_size: CannyApertureSize = CannyApertureSize.APERTURE_5
+    t_lower: PositiveFloat = PositiveFloat(1000.0)
+    t_upper: PositiveFloat = PositiveFloat(5000.0)
+    l2_gradient: bool = True
+    blur_sigma: float = 0.0
+    aperture_size: CannyApertureSize = CannyApertureSize.APERTURE_5
 
 
 @fl.base_model_with_gui_registration(
-    dilate_kernel_size__range=(0, 10),
-    dilate_iterations__range=(0, 10),
+    kernel_size__range=(0, 10),
+    iterations__range=(0, 10),
 )
 class ToonDilateParams(BaseModel):
-    dilate_kernel_size: int = 2
-    dilate_morph_shape: MorphShape = MorphShape.MORPH_ELLIPSE
-    dilate_iterations: int = 2
+    kernel_size: int = 2
+    morph_shape: MorphShape = MorphShape.MORPH_ELLIPSE
+    iterations: int = 2
 
 
 @fl.base_model_with_gui_registration(
-    blur_edges_sigma__range=(0.0, 10.0),
-    edges_intensity__range=(0.0, 1.0),
+    blur_sigma__range=(0.0, 10.0),
+    intensity__range=(0.0, 1.0),
 )
 class ToonEdgesAppearance(BaseModel):
-    blur_edges_sigma: float = 0.0
-    edges_intensity: float = 0.8
-    edges_color: ColorRgb = ColorRgb((0, 0, 0))
+    blur_sigma: float = 0.0
+    intensity: float = 0.8
+    color: ColorRgb = ColorRgb((0, 0, 0))
 
 
 @fl.base_model_with_gui_registration()
 class ToonEdgesParams(BaseModel):
-    canny_params: ToonCannyParams = ToonCannyParams()
-    dilate_params: ToonDilateParams = ToonDilateParams()
+    canny: ToonCannyParams = ToonCannyParams()
+    dilate: ToonDilateParams = ToonDilateParams()
     appearance: ToonEdgesAppearance = ToonEdgesAppearance()
 
 
@@ -77,25 +77,23 @@ def add_toon_edges(image: ImageU8_3, params: ToonEdgesParams) -> ImageU8_3:
     # ) -> ToonEdgesOutput:
     edges = canny(
         image,
-        params.canny_params.canny_t_lower,
-        params.canny_params.canny_t_upper,
-        params.canny_params.canny_aperture_size,
-        params.canny_params.canny_l2_gradient,
-        params.canny_params.canny_blur_sigma,
+        params.canny.t_lower,
+        params.canny.t_upper,
+        params.canny.aperture_size,
+        params.canny.l2_gradient,
+        params.canny.blur_sigma,
     )
     dilated_edges = dilate(
         edges,
-        params.dilate_params.dilate_kernel_size,
-        params.dilate_params.dilate_morph_shape,
-        params.dilate_params.dilate_iterations,
+        params.dilate.kernel_size,
+        params.dilate.morph_shape,
+        params.dilate.iterations,
     )
-    if params.appearance.blur_edges_sigma > 0:
+    if params.appearance.blur_sigma > 0:
         dilated_edges = cv2.GaussianBlur(
-            dilated_edges, (0, 0), sigmaX=params.appearance.blur_edges_sigma, sigmaY=params.appearance.blur_edges_sigma
+            dilated_edges, (0, 0), sigmaX=params.appearance.blur_sigma, sigmaY=params.appearance.blur_sigma
         )  # type: ignore
-    image_with_edges = merge_toon_edges(
-        image, dilated_edges, params.appearance.edges_intensity, params.appearance.edges_color
-    )
+    image_with_edges = merge_toon_edges(image, dilated_edges, params.appearance.intensity, params.appearance.color)
 
     # Add internals for debugging
     from fiatlight.fiat_kits.fiat_image import ImageWithGui
