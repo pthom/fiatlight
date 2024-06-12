@@ -1,71 +1,67 @@
 {
-    "functions_graph": {
+    "user_inputs": {
         "functions_nodes": {
             "make_range": {
-                "inputs": {
-                    "start": {
-                        "name": "start",
-                        "data": {
-                            "type": "Unspecified"
-                        }
-                    },
-                    "stop": {
-                        "name": "stop",
-                        "data": {
-                            "type": "Unspecified"
-                        }
-                    },
-                    "step": {
-                        "name": "step",
-                        "data": {
-                            "type": "Unspecified"
-                        }
+                "start": {
+                    "name": "start",
+                    "data": {
+                        "type": "Unspecified"
                     }
                 },
-                "gui_options": {
-                    "inputs": {},
-                    "outputs": {},
-                    "internal_gui_options": {}
+                "stop": {
+                    "name": "stop",
+                    "data": {
+                        "type": "Unspecified"
+                    }
+                },
+                "step": {
+                    "name": "step",
+                    "data": {
+                        "type": "Unspecified"
+                    }
                 }
             },
-            "make_sin": {
-                "inputs": {},
-                "gui_options": {
-                    "inputs": {},
-                    "outputs": {},
-                    "internal_gui_options": {}
-                }
-            }
+            "make_sin": {}
         }
     },
-    "functions_gui_settings": {
+    "gui_options": {
         "make_range": {
-            "_show_input_details": {
-                "start": false,
-                "stop": false,
-                "step": false
+            "inputs": {
+                "start": {
+                    "cb_options": {},
+                    "expanded": true
+                },
+                "stop": {
+                    "cb_options": {},
+                    "expanded": true
+                },
+                "step": {
+                    "cb_options": {},
+                    "expanded": true
+                }
             },
-            "_inputs_expanded": true,
-            "_show_output_details": {
-                "0": true
+            "outputs": {
+                "0": {
+                    "cb_options": {},
+                    "expanded": true
+                }
             },
-            "_outputs_expanded": true,
-            "_show_internals_details": {},
-            "_internals_expanded": true,
-            "_internal_state_gui_expanded": true
+            "internal_gui_options": {}
         },
         "make_sin": {
-            "_show_input_details": {
-                "x": false
+            "inputs": {
+                "x": {
+                    "cb_options": {},
+                    "expanded": false
+                }
             },
-            "_inputs_expanded": true,
-            "_show_output_details": {
-                "0": true
+            "outputs": {
+                "0": {
+                    "cb_options": {},
+                    "expanded": true
+                }
             },
-            "_outputs_expanded": true,
-            "_show_internals_details": {},
-            "_internals_expanded": true,
-            "_internal_state_gui_expanded": true
+            "internal_gui_options": {}
         }
     }
 }

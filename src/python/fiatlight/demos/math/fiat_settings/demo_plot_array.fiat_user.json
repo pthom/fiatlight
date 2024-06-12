@@ -1,71 +1,69 @@
 {
-    "functions_graph": {
+    "user_inputs": {
         "functions_nodes": {
             "make_spirograph_curve": {
-                "inputs": {
-                    "radius_fixed_circle": {
-                        "name": "radius_fixed_circle",
-                        "data": {
-                            "type": "Primitive",
-                            "value": 71.03299713134766
-                        }
-                    },
-                    "radius_moving_circle": {
-                        "name": "radius_moving_circle",
-                        "data": {
-                            "type": "Primitive",
-                            "value": 21.631000518798828
-                        }
-                    },
-                    "pen_offset": {
-                        "name": "pen_offset",
-                        "data": {
-                            "type": "Primitive",
-                            "value": 16.298999786376953
-                        }
-                    },
-                    "nb_turns": {
-                        "name": "nb_turns",
-                        "data": {
-                            "type": "Primitive",
-                            "value": 21.20599937438965
-                        }
+                "radius_fixed_circle": {
+                    "name": "radius_fixed_circle",
+                    "data": {
+                        "type": "Unspecified"
                     }
                 },
-                "gui_options": {
-                    "inputs": {},
-                    "outputs": {
-                        "0": {
-                            "_plot_type_str": "line",
-                            "plot_size_em": [
-                                58.70035934448242,
-                                48.48395919799805
-                            ],
-                            "small_array_threshold": 100,
-                            "auto_fit": true
-                        }
-                    },
-                    "internal_gui_options": {}
+                "radius_moving_circle": {
+                    "name": "radius_moving_circle",
+                    "data": {
+                        "type": "Unspecified"
+                    }
+                },
+                "pen_offset": {
+                    "name": "pen_offset",
+                    "data": {
+                        "type": "Unspecified"
+                    }
+                },
+                "nb_turns": {
+                    "name": "nb_turns",
+                    "data": {
+                        "type": "Unspecified"
+                    }
                 }
             }
         }
     },
-    "functions_gui_settings": {
+    "gui_options": {
         "make_spirograph_curve": {
-            "_show_input_details": {
-                "radius_fixed_circle": true,
-                "radius_moving_circle": true,
-                "pen_offset": true,
-                "nb_turns": true
+            "inputs": {
+                "radius_fixed_circle": {
+                    "cb_options": {},
+                    "expanded": true
+                },
+                "radius_moving_circle": {
+                    "cb_options": {},
+                    "expanded": true
+                },
+                "pen_offset": {
+                    "cb_options": {},
+                    "expanded": true
+                },
+                "nb_turns": {
+                    "cb_options": {},
+                    "expanded": true
+                }
             },
-            "_inputs_expanded": true,
-            "_show_output_details": {
-                "0": true
+            "outputs": {
+                "0": {
+                    "cb_options": {
+                        "_plot_type_str": "line",
+                        "plot_size_em": [
+                            36.11482620239258,
+                            34.58565902709961
+                        ],
+                        "small_array_threshold": 100,
+                        "auto_fit": true
+                    },
+                    "expanded": true
+                }
             },
-            "_outputs_expanded": true,
-            "_show_internals_details": {},
-            "_internals_expanded": true,
-            "_internal_state_gui_expanded": true
+            "internal_gui_options": {}
         }
     }
 }

@@ -1,288 +1,194 @@
 {
-    "functions_graph": {
+    "user_inputs": {
         "functions_nodes": {
             "text_from_file": {
-                "inputs": {
-                    "text_file": {
-                        "name": "text_file",
-                        "data": {
-                            "type": "Primitive",
-                            "value": "/Users/pascal/dvp/OpenSource/ImGuiWork/_Bundle/fiatlight/priv_assets/text/hamlet_Shakespeare.txt"
-                        }
+                "text_file": {
+                    "name": "text_file",
+                    "data": {
+                        "type": "Primitive",
+                        "value": "/Users/pascal/dvp/OpenSource/ImGuiWork/_Bundle/fiatlight/priv_assets/text/hamlet_Shakespeare.txt"
                     }
-                },
-                "gui_options": {
-                    "inputs": {},
-                    "outputs": {
-                        "0": {
-                            "_input_text_in_node_size": {
-                                "x": 15.0,
-                                "y": 0.0
-                            },
-                            "_input_text_in_popup_size": {
-                                "x": 60.0,
-                                "y": 15.0
-                            }
-                        }
-                    },
-                    "internal_gui_options": {}
                 }
             },
-            "str_lower": {
-                "inputs": {},
-                "gui_options": {
-                    "inputs": {
-                        "s": {
-                            "_input_text_in_node_size": {
-                                "x": 15.0,
-                                "y": 0.0
-                            },
-                            "_input_text_in_popup_size": {
-                                "x": 60.0,
-                                "y": 15.0
-                            }
-                        }
-                    },
-                    "outputs": {
-                        "0": {
-                            "_input_text_in_node_size": {
-                                "x": 15.0,
-                                "y": 0.0
-                            },
-                            "_input_text_in_popup_size": {
-                                "x": 60.0,
-                                "y": 15.0
-                            }
-                        }
-                    },
-                    "internal_gui_options": {}
-                }
-            },
-            "remove_non_letters": {
-                "inputs": {},
-                "gui_options": {
-                    "inputs": {
-                        "s": {
-                            "_input_text_in_node_size": {
-                                "x": 15.0,
-                                "y": 0.0
-                            },
-                            "_input_text_in_popup_size": {
-                                "x": 60.0,
-                                "y": 15.0
-                            }
-                        }
-                    },
-                    "outputs": {
-                        "0": {
-                            "_input_text_in_node_size": {
-                                "x": 15.0,
-                                "y": 0.0
-                            },
-                            "_input_text_in_popup_size": {
-                                "x": 60.0,
-                                "y": 15.0
-                            }
-                        }
-                    },
-                    "internal_gui_options": {}
-                }
-            },
-            "split_words": {
-                "inputs": {},
-                "gui_options": {
-                    "inputs": {
-                        "s": {
-                            "_input_text_in_node_size": {
-                                "x": 15.0,
-                                "y": 0.0
-                            },
-                            "_input_text_in_popup_size": {
-                                "x": 60.0,
-                                "y": 15.0
-                            }
-                        }
-                    },
-                    "outputs": {},
-                    "internal_gui_options": {}
-                }
-            },
+            "str_lower": {},
+            "remove_non_letters": {},
+            "split_words": {},
             "filter_out_short_words": {
-                "inputs": {
-                    "min_length": {
-                        "name": "min_length",
-                        "data": {
-                            "type": "Primitive",
-                            "value": 4
-                        }
+                "min_length": {
+                    "name": "min_length",
+                    "data": {
+                        "type": "Unspecified"
                     }
-                },
-                "gui_options": {
-                    "inputs": {},
-                    "outputs": {},
-                    "internal_gui_options": {}
                 }
             },
-            "remove_empty_words": {
-                "inputs": {},
-                "gui_options": {
-                    "inputs": {},
-                    "outputs": {},
-                    "internal_gui_options": {}
-                }
-            },
+            "remove_empty_words": {},
             "sort_words": {
-                "inputs": {
-                    "reverse": {
-                        "name": "reverse",
-                        "data": {
-                            "type": "Unspecified"
-                        }
+                "reverse": {
+                    "name": "reverse",
+                    "data": {
+                        "type": "Unspecified"
                     }
-                },
-                "gui_options": {
-                    "inputs": {},
-                    "outputs": {},
-                    "internal_gui_options": {}
                 }
             },
-            "run_length_encode": {
-                "inputs": {},
-                "gui_options": {
-                    "inputs": {},
-                    "outputs": {},
-                    "internal_gui_options": {}
-                }
-            },
-            "sort_word_with_counts": {
-                "inputs": {},
-                "gui_options": {
-                    "inputs": {},
-                    "outputs": {},
-                    "internal_gui_options": {}
-                }
-            }
+            "run_length_encode": {},
+            "sort_word_with_counts": {}
         }
     },
-    "functions_gui_settings": {
+    "gui_options": {
         "text_from_file": {
-            "_show_input_details": {
-                "text_file": true
+            "inputs": {
+                "text_file": {
+                    "cb_options": {},
+                    "expanded": true
+                }
             },
-            "_inputs_expanded": true,
-            "_show_output_details": {
-                "0": true
+            "outputs": {
+                "0": {
+                    "cb_options": {
+                        "width_em": 15.0
+                    },
+                    "expanded": true
+                }
             },
-            "_outputs_expanded": true,
-            "_show_internals_details": {},
-            "_internals_expanded": true,
-            "_internal_state_gui_expanded": true
+            "internal_gui_options": {}
         },
         "str_lower": {
-            "_show_input_details": {
-                "s": false
+            "inputs": {
+                "s": {
+                    "cb_options": {
+                        "width_em": 15.0
+                    },
+                    "expanded": false
+                }
             },
-            "_inputs_expanded": true,
-            "_show_output_details": {
-                "0": true
+            "outputs": {
+                "0": {
+                    "cb_options": {
+                        "width_em": 15.0
+                    },
+                    "expanded": true
+                }
             },
-            "_outputs_expanded": true,
-            "_show_internals_details": {},
-            "_internals_expanded": true,
-            "_internal_state_gui_expanded": true
+            "internal_gui_options": {}
         },
         "remove_non_letters": {
-            "_show_input_details": {
-                "s": false
+            "inputs": {
+                "s": {
+                    "cb_options": {
+                        "width_em": 15.0
+                    },
+                    "expanded": false
+                }
             },
-            "_inputs_expanded": true,
-            "_show_output_details": {
-                "0": true
+            "outputs": {
+                "0": {
+                    "cb_options": {
+                        "width_em": 15.0
+                    },
+                    "expanded": true
+                }
             },
-            "_outputs_expanded": true,
-            "_show_internals_details": {},
-            "_internals_expanded": true,
-            "_internal_state_gui_expanded": true
+            "internal_gui_options": {}
         },
         "split_words": {
-            "_show_input_details": {
-                "s": false
+            "inputs": {
+                "s": {
+                    "cb_options": {
+                        "width_em": 15.0
+                    },
+                    "expanded": false
+                }
             },
-            "_inputs_expanded": true,
-            "_show_output_details": {
-                "0": true
+            "outputs": {
+                "0": {
+                    "cb_options": {},
+                    "expanded": true
+                }
             },
-            "_outputs_expanded": true,
-            "_show_internals_details": {},
-            "_internals_expanded": true,
-            "_internal_state_gui_expanded": true
+            "internal_gui_options": {}
         },
         "filter_out_short_words": {
-            "_show_input_details": {
-                "words": false,
-                "min_length": true
+            "inputs": {
+                "words": {
+                    "cb_options": {},
+                    "expanded": false
+                },
+                "min_length": {
+                    "cb_options": {},
+                    "expanded": true
+                }
             },
-            "_inputs_expanded": true,
-            "_show_output_details": {
-                "0": true
+            "outputs": {
+                "0": {
+                    "cb_options": {},
+                    "expanded": true
+                }
             },
-            "_outputs_expanded": true,
-            "_show_internals_details": {},
-            "_internals_expanded": true,
-            "_internal_state_gui_expanded": true
+            "internal_gui_options": {}
         },
         "remove_empty_words": {
-            "_show_input_details": {
-                "words": false
+            "inputs": {
+                "words": {
+                    "cb_options": {},
+                    "expanded": false
+                }
             },
-            "_inputs_expanded": true,
-            "_show_output_details": {
-                "0": true
+            "outputs": {
+                "0": {
+                    "cb_options": {},
+                    "expanded": true
+                }
             },
-            "_outputs_expanded": true,
-            "_show_internals_details": {},
-            "_internals_expanded": true,
-            "_internal_state_gui_expanded": true
+            "internal_gui_options": {}
         },
         "sort_words": {
-            "_show_input_details": {
-                "words": false,
-                "reverse": false
+            "inputs": {
+                "words": {
+                    "cb_options": {},
+                    "expanded": false
+                },
+                "reverse": {
+                    "cb_options": {},
+                    "expanded": true
+                }
             },
-            "_inputs_expanded": true,
-            "_show_output_details": {
-                "0": true
+            "outputs": {
+                "0": {
+                    "cb_options": {},
+                    "expanded": true
+                }
             },
-            "_outputs_expanded": true,
-            "_show_internals_details": {},
-            "_internals_expanded": true,
-            "_internal_state_gui_expanded": true
+            "internal_gui_options": {}
         },
         "run_length_encode": {
-            "_show_input_details": {
-                "input_list": false
+            "inputs": {
+                "input_list": {
+                    "cb_options": {},
+                    "expanded": false
+                }
             },
-            "_inputs_expanded": true,
-            "_show_output_details": {
-                "0": true
+            "outputs": {
+                "0": {
+                    "cb_options": {},
+                    "expanded": true
+                }
             },
-            "_outputs_expanded": true,
-            "_show_internals_details": {},
-            "_internals_expanded": true,
-            "_internal_state_gui_expanded": true
+            "internal_gui_options": {}
         },
         "sort_word_with_counts": {
-            "_show_input_details": {
-                "words": false
+            "inputs": {
+                "words": {
+                    "cb_options": {},
+                    "expanded": false
+                }
             },
-            "_inputs_expanded": true,
-            "_show_output_details": {
-                "0": true
+            "outputs": {
+                "0": {
+                    "cb_options": {},
+                    "expanded": true
+                }
             },
-            "_outputs_expanded": true,
-            "_show_internals_details": {},
-            "_internals_expanded": true,
-            "_internal_state_gui_expanded": true
+            "internal_gui_options": {}
         }
     }
 }

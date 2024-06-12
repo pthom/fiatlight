@@ -1,45 +1,41 @@
 {
-    "functions_graph": {
+    "user_inputs": {
         "functions_nodes": {
             "random_binomial": {
-                "inputs": {
-                    "n": {
-                        "name": "n",
-                        "data": {
-                            "type": "Primitive",
-                            "value": 50
-                        }
-                    },
-                    "p": {
-                        "name": "p",
-                        "data": {
-                            "type": "Primitive",
-                            "value": 0.1
-                        }
+                "n": {
+                    "name": "n",
+                    "data": {
+                        "type": "Unspecified"
                     }
                 },
-                "gui_options": {
-                    "inputs": {},
-                    "outputs": {},
-                    "internal_gui_options": {}
+                "p": {
+                    "name": "p",
+                    "data": {
+                        "type": "Unspecified"
+                    }
                 }
             }
         }
     },
-    "functions_gui_settings": {
+    "gui_options": {
         "random_binomial": {
-            "_show_input_details": {
-                "n": true,
-                "p": true
+            "inputs": {
+                "n": {
+                    "cb_options": {},
+                    "expanded": true
+                },
+                "p": {
+                    "cb_options": {},
+                    "expanded": true
+                }
             },
-            "_inputs_expanded": true,
-            "_show_output_details": {
-                "0": true
+            "outputs": {
+                "0": {
+                    "cb_options": {},
+                    "expanded": true
+                }
             },
-            "_outputs_expanded": true,
-            "_show_internals_details": {},
-            "_internals_expanded": true,
-            "_internal_state_gui_expanded": true
+            "internal_gui_options": {}
         }
     }
 }
