@@ -35,6 +35,35 @@ class AnyDataWithGuiGenericPossibleCustomAttributes(PossibleCustomAttributes):
 _ANYDATAWITHGUI_GENERIC_POSSIBLE_CUSTOM_ATTRIBUTES = AnyDataWithGuiGenericPossibleCustomAttributes()
 
 
+def _draw_label_with_max_width(label: str, color: ImVec4, label_tooltip: str | None) -> None:
+    cur_pos = imgui.get_cursor_pos()
+    if "##" in label:
+        label = label.split("##")[0]
+    shortened_label = label
+    max_width_pixels = hello_imgui.em_size(get_fiat_config().style.param_label_max_width_em)
+    while True:
+        size = imgui.calc_text_size(shortened_label)
+        if size.x < max_width_pixels:
+            break
+        shortened_label = shortened_label[:-1]
+        if len(shortened_label) == 0:
+            break
+
+    if shortened_label != label:
+        imgui.text_colored(color, shortened_label + "...")
+        if label_tooltip is not None:
+            fiat_osd.set_widget_tooltip(label + "\n" + label_tooltip)
+        else:
+            fiat_osd.set_widget_tooltip(label)
+    else:
+        imgui.text_colored(color, label)
+        if label_tooltip is not None:
+            fiat_osd.set_widget_tooltip(label_tooltip)
+
+    new_cursor_pos = ImVec2(cur_pos.x + max_width_pixels, cur_pos.y)
+    imgui.set_cursor_pos(new_cursor_pos)
+
+
 @dataclass
 class GuiHeaderLineParams(Generic[DataType]):
     label: str = ""
@@ -346,9 +375,7 @@ class AnyDataWithGui(Generic[DataType]):
             label_color = (
                 imgui.get_style().color_(imgui.Col_.text.value) if params.label_color is None else params.label_color
             )
-            imgui.text_colored(label_color, params.label)
-            if params.label_tooltip is not None:
-                fiat_osd.set_widget_tooltip(params.label_tooltip)
+            _draw_label_with_max_width(params.label, label_color, params.label_tooltip)
             # Expand button
             if self.can_collapse_present():
                 self._show_collapse_button()
@@ -435,9 +462,7 @@ class AnyDataWithGui(Generic[DataType]):
             label_color = (
                 imgui.get_style().color_(imgui.Col_.text.value) if params.label_color is None else params.label_color
             )
-            imgui.text_colored(label_color, params.label)
-            if params.label_tooltip is not None:
-                fiat_osd.set_widget_tooltip(params.label_tooltip)
+            _draw_label_with_max_width(params.label, label_color, params.label_tooltip)
             # Expand button
             if self.can_collapse_edit():
                 self._show_collapse_button()
@@ -568,7 +593,7 @@ class AnyDataWithGui(Generic[DataType]):
         if can_edit:
             assert self.callbacks.edit is not None
             with imgui_ctx.begin_horizontal("left_margin_edit"):
-                margin_size = hello_imgui.em_size(1.5)
+                margin_size = hello_imgui.em_size(get_fiat_config().style.indentation_em)
                 imgui.dummy(ImVec2(margin_size, 0))
                 value = self.get_actual_or_invalid_value()
                 with imgui_ctx.begin_vertical("callback_edit"):

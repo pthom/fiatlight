@@ -49,8 +49,16 @@ yellow = ColorRgbaFloat((1.0, 1.0, 0.0, 1.0))
 
 
 class FiatStyle(BaseModel):
+    # colors used in the GUI
     colors: Dict[FiatColorType, ColorRgbaFloat] = Field(default_factory=dict)
+    # minimum width of a node, in em units
     node_minimum_width_em: float = 9.0
+    # indentation between header line and edition / present
+    indentation_em: float = 1.75
+    # max width of the param labels, in em units
+    # (if too big, they will be truncated and the full name will be displayed in a tooltip)
+    param_label_max_width_em: float = 7.0
+    # max number of elements to display in node, for list-like data
     list_maximum_elements_in_node: int = 10
 
     def __init__(self, **data: Any):
