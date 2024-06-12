@@ -47,7 +47,7 @@ from imgui_bundle import (
 )
 from imgui_bundle import ImColor
 from fiatlight.fiat_widgets import icons_fontawesome_6, fontawesome_6_ctx, fiat_osd
-from fiatlight import fiat_widgets
+from fiatlight import fiat_widgets, fiat_togui
 from typing import Dict, List, Any
 from dataclasses import dataclass
 
@@ -650,6 +650,10 @@ class FunctionNodeGui:
             return False
 
     def _draw_fiat_internals(self) -> None:
+        """Draw the internals of the function (for debugging)
+        They should be stored in a dictionary fiat_internals inside the function.
+        See example inside toon_edges.py
+        """
         fn = self._function_node.function_with_gui._f_impl  # noqa
         if fn is None:
             self._fiat_internals_with_gui = {}
@@ -686,7 +690,7 @@ class FunctionNodeGui:
         if node_separator_output.was_toggle_collapse_all_clicked:
             from fiatlight.fiat_core.any_data_with_gui import toggle_expanded_state_on_guis
 
-            guis = [gui for _name, gui in fn_fiat_internals.items()]
+            guis = [gui for _name, gui in self._fiat_internals_with_gui.items()]
             toggle_expanded_state_on_guis(guis)
 
         # remove old internals
@@ -700,10 +704,23 @@ class FunctionNodeGui:
             return
 
         # display the internals
-        for name, data_with_gui in fn_fiat_internals.items():
-            assert isinstance(data_with_gui, AnyDataWithGui)
+        for name, value in fn_fiat_internals.items():
+            # Insert new AnyDataWithGui into self._fiat_internals_with_gui if needed
+            # either by creating an AnyDataWithGui from the value or using the one that is provided
             if name not in self._fiat_internals_with_gui:
-                self._fiat_internals_with_gui[name] = data_with_gui
+                if not isinstance(value, AnyDataWithGui):
+                    self._fiat_internals_with_gui[name] = fiat_togui.any_type_to_gui(type(value), {})
+                else:
+                    self._fiat_internals_with_gui[name] = value
+            data_with_gui = self._fiat_internals_with_gui[name]
+
+            # Update value
+            if not isinstance(value, AnyDataWithGui):
+                data_with_gui.value = value
+            else:
+                data_with_gui.value = value.value
+
+            # Draw the gui for the internal
             with imgui_ctx.push_obj_id(data_with_gui):
                 data_with_gui.gui_present(name)
 

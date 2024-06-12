@@ -95,19 +95,18 @@ def add_toon_edges(image: ImageU8_3, params: ToonEdgesParams) -> ImageU8_3:
         )  # type: ignore
     image_with_edges = merge_toon_edges(image, dilated_edges, params.appearance.intensity, params.appearance.color)
 
-    # Add internals for debugging
+    # fiat_internals: add debug internals to ease fine-tuning the function inside the node
     from fiatlight.fiat_kits.fiat_image import ImageWithGui
-    from fiatlight import AnyDataWithGui
 
-    if not hasattr(add_toon_edges, "fiat_internals"):
-        add_toon_edges.fiat_internals: dict[str, AnyDataWithGui] = {  # type: ignore
-            "edges": ImageWithGui(),
-            "dilated_edges": ImageWithGui(),
-            "image_with_edges": ImageWithGui(),
-        }
-    add_toon_edges.fiat_internals["edges"].value = edges  # type: ignore
-    add_toon_edges.fiat_internals["dilated_edges"].value = dilated_edges  # type: ignore
-    add_toon_edges.fiat_internals["image_with_edges"].value = image_with_edges  # type: ignore
+    # Add to fiat_internals any variable you want to be able to diagnose in the node
+    #     * Either a raw type (int, float, str, etc.): see "aperture_size"
+    #     * Or a descendant of AnyDataWithGui: see "canny", "dilate", "image_with_edges"
+    add_toon_edges.fiat_internals = {  # type: ignore
+        "aperture_size": params.canny.aperture_size,
+        "canny": ImageWithGui(edges),
+        "dilate": ImageWithGui(dilated_edges),
+        "image_with_edges": ImageWithGui(image_with_edges),
+    }
 
     # return
     return image_with_edges

@@ -1,5 +1,5 @@
 from fiatlight.fiat_utils.custom_attrs_decorator import with_custom_attrs
-from fiatlight.fiat_types import JsonDict, ImagePath, CustomAttributesDict
+from fiatlight.fiat_types import JsonDict, ImagePath, CustomAttributesDict, Unspecified, UnspecifiedValue
 from fiatlight.fiat_core import AnyDataWithGui, PossibleCustomAttributes
 from fiatlight.fiat_kits.fiat_image.image_types import Image, ImageU8
 from imgui_bundle import immvision, imgui, ImVec2
@@ -296,8 +296,9 @@ class ImageWithGui(AnyDataWithGui[Image]):
     image_presenter: ImagePresenter
     open_file_dialog: Optional[pfd.open_file]
 
-    def __init__(self) -> None:
+    def __init__(self, image: Image | Unspecified = UnspecifiedValue) -> None:
         super().__init__(Image)  # type: ignore
+        self.value = image
         self.image_presenter = ImagePresenter()
         self.open_file_dialog = None
         self.callbacks.edit = self.edit
