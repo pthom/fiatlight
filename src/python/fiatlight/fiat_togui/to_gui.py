@@ -642,57 +642,52 @@ class GuiFactories:
                 exec(code)
                 break
 
-    def get_gui_info(self, gui_typename: str) -> str:
+    def get_gui_info(self, typename: str) -> str:
         """Returns the info about a GUI type."""
         from fiatlight.fiat_doc import code_utils
 
-        for factory in self._factories:
-            factored_gui = factory.gui_factory()
-            if type(factored_gui).__name__ != gui_typename:
-                continue
+        if not self.can_handle_typename(typename):
+            r = f"This typename ({typename}) is not handled"
+            # Failure, list all gui types
+            r += "===============================\n"
+            r += "List of all GUI types:\n"
+            for factory in self._factories:
+                factored_gui = factory.gui_factory()
+                typename = type(factored_gui).__name__
+                r += f"    {typename}\n"
 
-            doc = factored_gui.__doc__
+        factored_gui = self.factor(typename, {})
+        doc = factored_gui.__doc__
 
-            r = f"GUI type: {gui_typename}\n"
-            r += "=" * len(r) + "\n"
-            if doc is not None:
-                r += code_utils.indent_code(doc, 2)
-                r += "\n"
-
-            (
-                possible_custom_attributes,
-                generic_custom_attributes,
-            ) = factored_gui.possible_custom_attributes_with_generic()
-            if possible_custom_attributes is not None:
-                doc_attr = possible_custom_attributes.documentation()
-                r += "\n"
-                r += code_utils.indent_code(doc_attr, 2)
-                r += "\n"
-
-            generic_attr_doc = generic_custom_attributes.documentation()
-            r += "\n"
-            r += code_utils.indent_code(generic_attr_doc, 2)
+        r = f"GUI type: {typename}\n"
+        r += "=" * len(r) + "\n"
+        if doc is not None:
+            r += code_utils.indent_code(doc, 2)
             r += "\n"
 
-            from fiatlight.fiat_togui.make_gui_demo_code import make_gui_demo_code
-
+        (
+            possible_custom_attributes,
+            generic_custom_attributes,
+        ) = factored_gui.possible_custom_attributes_with_generic()
+        if possible_custom_attributes is not None:
+            doc_attr = possible_custom_attributes.documentation()
             r += "\n"
-            r += "Code to test this GUI type:\n"
-            r += "----------------------------\n"
-            r += "```python\n"
-            r += make_gui_demo_code(factored_gui)
-            r += "```\n"
+            r += code_utils.indent_code(doc_attr, 2)
+            r += "\n"
 
-            return r
+        generic_attr_doc = generic_custom_attributes.documentation()
+        r += "\n"
+        r += code_utils.indent_code(generic_attr_doc, 2)
+        r += "\n"
 
-        # Failure, list all gui types
-        r = f'No GUI found for "{gui_typename}"\n'
-        r += "===============================\n"
-        r += "List of all GUI types:\n"
-        for factory in self._factories:
-            factored_gui = factory.gui_factory()
-            gui_typename = type(factored_gui).__name__
-            r += f"    {gui_typename}\n"
+        from fiatlight.fiat_togui.make_gui_demo_code import make_gui_demo_code
+
+        r += "\n"
+        r += "Code to test this GUI type:\n"
+        r += "----------------------------\n"
+        r += "```python\n"
+        r += make_gui_demo_code(factored_gui)
+        r += "```\n"
         return r
 
     def _RegisterFactoriesSection(self) -> None:  # dummy method to create a section in the IDE  # noqa
