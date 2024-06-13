@@ -320,6 +320,11 @@ class AnyDataWithGui(Generic[DataType]):
             self.label = self.custom_attrs["label"]
         if "tooltip" in self.custom_attrs:
             self.tooltip = self.custom_attrs["tooltip"]
+        if "validate_value" in self.custom_attrs:
+            validate_value = self.custom_attrs["validate_value"]
+            if not callable(validate_value):
+                raise ValueError("validate_value is not a callable for parameter output")
+            self.callbacks.validate_value.append(validate_value)
 
     @staticmethod
     def propagate_label_and_tooltip(a: "AnyDataWithGui[Any]", b: "AnyDataWithGui[Any]") -> None:

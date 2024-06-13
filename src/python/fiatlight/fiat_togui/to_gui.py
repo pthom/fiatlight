@@ -298,17 +298,6 @@ def any_typing_new_type_to_gui(type_: DataType, custom_attributes: CustomAttribu
     return r
 
 
-def _add_validate_value_callback(
-    custom_attributes: CustomAttributesDict, inout_data_with_gui: AnyDataWithGui[Any]
-) -> None:
-    """Add a validate_value callback to the inout_data_with_gui, if it is defined in the custom attributes."""
-    if "validate_value" in custom_attributes:
-        validate_value = custom_attributes["validate_value"]
-        if not callable(validate_value):
-            raise ValueError("validate_value is not a callable for parameter output")
-        inout_data_with_gui.callbacks.validate_value.append(validate_value)
-
-
 def _fn_outputs_with_gui(type_class_name: str, fn_custom_attributes: CustomAttributesDict) -> List[AnyDataWithGui[Any]]:
     """Convert the return type of a function to a (list of) GUI representation."""
     r = []
@@ -317,12 +306,10 @@ def _fn_outputs_with_gui(type_class_name: str, fn_custom_attributes: CustomAttri
         for idx_output, inner_type_class in enumerate(inner_type_classes):
             output_custom_attrs = get_output_custom_attributes(fn_custom_attributes, idx_output)
             output_gui = _any_typename_to_gui(inner_type_class, custom_attributes=output_custom_attrs)
-            _add_validate_value_callback(output_custom_attrs, output_gui)
             r.append(output_gui)
     else:
         output_custom_attrs = get_output_custom_attributes(fn_custom_attributes)
         output_gui = _any_typename_to_gui(type_class_name, custom_attributes=output_custom_attrs)
-        _add_validate_value_callback(output_custom_attrs, output_gui)
         r.append(output_gui)
     return r
 
@@ -353,9 +340,6 @@ def _to_param_with_gui(
 
     if data_with_gui.label is None:
         data_with_gui.label = name
-
-    # add validate_value callback
-    _add_validate_value_callback(custom_attributes, data_with_gui)
 
     param_kind = ParamKind.PositionalOrKeyword
     if param.kind is inspect.Parameter.POSITIONAL_ONLY:
