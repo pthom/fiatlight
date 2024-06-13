@@ -62,12 +62,12 @@ class PossibleFiatAttributes:
     def merge_attributes(self, other: "PossibleFiatAttributes") -> None:
         self._explained_attributes_or_section += other._explained_attributes_or_section
 
-    def validate_custom_attrs(self, custom_attrs: dict[str, Any]) -> DataValidationResult:
+    def validate_custom_attrs(self, fiat_attrs: dict[str, Any]) -> DataValidationResult:
         unwanted_keys = []
         attributes_with_wrong_type_msgs = []
         attributes_with_failed_validation: dict[str, str] = {}
 
-        for attr_name, value in custom_attrs.items():
+        for attr_name, value in fiat_attrs.items():
             explained_attr = self._get_explained_attribute(attr_name)
             if explained_attr is None:
                 unwanted_keys.append(attr_name)
@@ -101,8 +101,8 @@ class PossibleFiatAttributes:
 
         return DataValidationResult.ok()
 
-    def raise_exception_if_bad_custom_attrs(self, custom_attrs: dict[str, Any]) -> None:
-        validation_result = self.validate_custom_attrs(custom_attrs)
+    def raise_exception_if_bad_custom_attrs(self, fiat_attrs: dict[str, Any]) -> None:
+        validation_result = self.validate_custom_attrs(fiat_attrs)
 
         if not validation_result.is_valid:
             msg = f"Encountered incorrect attributes for {self.parent_name} !\n"

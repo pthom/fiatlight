@@ -124,8 +124,8 @@ class DataFrameWithGui(AnyDataWithGui[pd.DataFrame]):
         # This is a method which we inherit from AnyDataWithGui.
         return _DATAFRAME_POSSIBLE_FIAT_ATTRIBUTES
 
-    def on_fiat_attributes_changes(self, custom_attrs: FiatAttributes) -> None:
-        self.dataframe_presenter.on_fiat_attributes_changes(custom_attrs)
+    def on_fiat_attributes_changes(self, fiat_attrs: FiatAttributes) -> None:
+        self.dataframe_presenter.on_fiat_attributes_changes(fiat_attrs)
 
     @staticmethod
     def _SerializationAndDeserializationSection() -> None:

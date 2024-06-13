@@ -96,17 +96,17 @@ class StrWithGui(AnyDataWithGui[str]):
         if nb_lines >= 2:
             self.callbacks.present_collapsible = True
 
-    def on_fiat_attributes_changes(self, custom_attrs: FiatAttributes) -> None:
-        if "width_em" in custom_attrs:
-            self.params.width_em = custom_attrs["width_em"]
-        if "hint" in custom_attrs:
-            self.params.hint = custom_attrs["hint"]
-        if "allow_multiline" in custom_attrs:
-            self.params.allow_multiline = custom_attrs["allow_multiline"]
+    def on_fiat_attributes_changes(self, fiat_attrs: FiatAttributes) -> None:
+        if "width_em" in fiat_attrs:
+            self.params.width_em = fiat_attrs["width_em"]
+        if "hint" in fiat_attrs:
+            self.params.hint = fiat_attrs["hint"]
+        if "allow_multiline" in fiat_attrs:
+            self.params.allow_multiline = fiat_attrs["allow_multiline"]
             self.callbacks.present_collapsible = self.params.allow_multiline
             self.callbacks.edit_collapsible = self.params.allow_multiline
-        if "resizable" in custom_attrs:
-            self.params.resizable = custom_attrs["resizable"]
+        if "resizable" in fiat_attrs:
+            self.params.resizable = fiat_attrs["resizable"]
         self._update_internal_state_from_params()
 
     def _update_internal_state_from_params(self) -> None:

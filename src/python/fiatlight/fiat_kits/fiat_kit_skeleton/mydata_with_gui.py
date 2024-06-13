@@ -116,7 +116,7 @@ class MydataWithGui(AnyDataWithGui[Mydata]):
     def possible_fiat_attributes() -> MydataPossibleFiatAttributes | None:
         return MydataPresenter.possible_fiat_attributes()
 
-    def on_fiat_attributes_changes(self, custom_attrs: FiatAttributes) -> None:
+    def on_fiat_attributes_changes(self, fiat_attrs: FiatAttributes) -> None:
         # Here we should update the presenter with the new custom attributes
         pass
 

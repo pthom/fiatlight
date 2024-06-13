@@ -102,7 +102,7 @@ class IntWithGui(AnyDataWithGui[int]):
     def possible_fiat_attributes() -> PossibleFiatAttributes | None:
         return _POSSIBLE_INT_ATTRIBUTES
 
-    def _handle_custom_attrs(self, custom_attrs: FiatAttributes) -> None:
+    def _handle_custom_attrs(self, fiat_attrs: FiatAttributes) -> None:
         if "range" in self.fiat_attributes:
             range_ = self.fiat_attributes["range"]
             self.params.v_min = range_[0]
@@ -338,7 +338,7 @@ class FloatWithGui(AnyDataWithGui[float]):
     def possible_fiat_attributes() -> PossibleFiatAttributes | None:
         return _POSSIBLE_FLOAT_ATTRIBUTES
 
-    def _handle_custom_attrs(self, custom_attrs: FiatAttributes) -> None:
+    def _handle_custom_attrs(self, fiat_attrs: FiatAttributes) -> None:
         if "range" in self.fiat_attributes:
             range_ = self.fiat_attributes["range"]
             if not isinstance(range_, tuple) or len(range_) != 2:
@@ -540,7 +540,7 @@ class BoolWithGui(AnyDataWithGui[bool]):
     def possible_fiat_attributes() -> PossibleFiatAttributes | None:
         return _POSSIBLE_BOOL_ATTRIBUTES
 
-    def _handle_custom_attrs(self, custom_attrs: FiatAttributes) -> None:
+    def _handle_custom_attrs(self, fiat_attrs: FiatAttributes) -> None:
         if "edit_type" in self.fiat_attributes:
             edit_type_ = self.fiat_attributes["edit_type"]
             try:

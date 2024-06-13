@@ -15,23 +15,23 @@ def int_multiple_of_3(x: int) -> DataValidationResult:
 
 
 def make_possible_fiat_attributes() -> PossibleFiatAttributes:
-    custom_attrs = PossibleFiatAttributes("Foo")
-    custom_attrs.add_explained_attribute(
+    fiat_attrs = PossibleFiatAttributes("Foo")
+    fiat_attrs.add_explained_attribute(
         name="xrange",
         type_=tuple,
         explanation="Range for xrange",
         default_value=(0, 5),
         tuple_types=(int, int),
     )
-    custom_attrs.add_explained_section("Validated attributes")
-    custom_attrs.add_explained_attribute(
+    fiat_attrs.add_explained_section("Validated attributes")
+    fiat_attrs.add_explained_attribute(
         name="m",
         type_=int,
         explanation="Multiple of 3",
         default_value=3,
         data_validation_function=int_multiple_of_3,
     )
-    return custom_attrs
+    return fiat_attrs
 
 
 def test_possible_custom_attr_validation() -> None:
@@ -105,11 +105,11 @@ def test_possible_custom_attr_in_function() -> None:
 
         @staticmethod
         def possible_fiat_attributes() -> PossibleFiatAttributes | None:
-            custom_attrs = PossibleFiatAttributes("Foo")
-            custom_attrs.add_explained_attribute(
+            fiat_attrs = PossibleFiatAttributes("Foo")
+            fiat_attrs.add_explained_attribute(
                 name="xrange", type_=tuple, explanation="Range for xrange", default_value=(0, 5), tuple_types=(int, int)
             )
-            return custom_attrs
+            return fiat_attrs
 
     fl.register_type(Foo, FooWithGui)
 
@@ -121,6 +121,6 @@ def test_possible_custom_attr_in_function() -> None:
         return foo
 
     f_gui = fl.FunctionWithGui(f)
-    custom_attrs = f_gui.param("foo").data_with_gui.fiat_attributes
-    assert "xrange" in custom_attrs
-    assert custom_attrs["xrange"] == (5, 10)
+    fiat_attrs = f_gui.param("foo").data_with_gui.fiat_attributes
+    assert "xrange" in fiat_attrs
+    assert fiat_attrs["xrange"] == (5, 10)

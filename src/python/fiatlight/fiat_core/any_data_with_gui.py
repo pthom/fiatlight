@@ -140,9 +140,9 @@ class AnyDataWithGui(Generic[DataType]):
     #         def f(x: int, y: int) -> int:
     #             return x + y
     #        f.x__range = (0, 10)
-    # custom_attrs["range"] will be (0, 10) for the parameter x.
+    # fiat_attributes["range"] will be (0, 10) for the parameter x.
     @property
-    custom_attrs -> dict[str, Any]
+    fiat_attributes -> dict[str, Any]
 
     """
 
@@ -171,7 +171,7 @@ class AnyDataWithGui(Generic[DataType]):
     #         def f(x: int, y: int) -> int:
     #             return x + y
     #        f.x__range = (0, 10)
-    # custom_attrs["range"] will be (0, 10) for the parameter x.
+    # _fiat_attributes["range"] will be (0, 10) for the parameter x.
     _fiat_attributes: FiatAttributes
 
     # Is the present or edit view expanded. This is serialized and deserialized in the GUI options.
@@ -297,9 +297,9 @@ class AnyDataWithGui(Generic[DataType]):
     def fiat_attributes(self) -> FiatAttributes:
         return self._fiat_attributes
 
-    def merge_fiat_attributes(self, custom_attrs: FiatAttributes) -> None:
+    def merge_fiat_attributes(self, fiat_attrs: FiatAttributes) -> None:
         """Merge custom attributes with the existing ones"""
-        if len(custom_attrs) == 0:
+        if len(fiat_attrs) == 0:
             return
         possible_fiat_attrs, _generic_possible_custom_attrs = self.possible_fiat_attributes_with_generic()
 
@@ -308,9 +308,9 @@ class AnyDataWithGui(Generic[DataType]):
         if possible_fiat_attrs is not None:
             all_possible_custom_attrs.merge_attributes(copy.copy(possible_fiat_attrs))
 
-        all_possible_custom_attrs.raise_exception_if_bad_custom_attrs(custom_attrs)
+        all_possible_custom_attrs.raise_exception_if_bad_custom_attrs(fiat_attrs)
 
-        self.fiat_attributes.update(custom_attrs)
+        self.fiat_attributes.update(fiat_attrs)
         self._handle_generic_attrs()
         if self.callbacks.on_fiat_attributes_changed is not None:
             self.callbacks.on_fiat_attributes_changed(self.fiat_attributes)

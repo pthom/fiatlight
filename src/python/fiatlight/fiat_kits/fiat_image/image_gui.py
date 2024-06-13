@@ -139,9 +139,9 @@ class ImagePresenter:
         self.image_params = default_image_params()
         self.size_when_only_display = ImVec2(200, 0)
 
-    def handle_custom_attrs(self, custom_attrs: dict[str, Any]) -> None:
-        if "image_display_size" in custom_attrs:
-            image_display_size = custom_attrs["image_display_size"]
+    def handle_custom_attrs(self, fiat_attrs: dict[str, Any]) -> None:
+        if "image_display_size" in fiat_attrs:
+            image_display_size = fiat_attrs["image_display_size"]
 
             # We only take into account the custom attribute if it was not already handled,
             # so that the user can resize the image with the mouse after setting the image_display_size
@@ -154,42 +154,42 @@ class ImagePresenter:
                 self.size_when_only_display = ImVec2(image_display_size[0], image_display_size[1])
                 self._was_image_size_custom_attr_handled = True
 
-        if "show_channels" in custom_attrs:
-            self.show_channels = custom_attrs["show_channels"]
-        if "channel_layout_vertically" in custom_attrs:
-            self.channel_layout_vertically = custom_attrs["channel_layout_vertically"]
-        if "only_display" in custom_attrs:
-            self.only_display = custom_attrs["only_display"]
-        if "zoom_key" in custom_attrs:
-            self.image_params.zoom_key = custom_attrs["zoom_key"]
-        if "can_resize" in custom_attrs:
-            self.image_params.can_resize = custom_attrs["can_resize"]
-        if "is_color_order_bgr" in custom_attrs:
-            self.image_params.is_color_order_bgr = custom_attrs["is_color_order_bgr"]
-        if "pan_with_mouse" in custom_attrs:
-            self.image_params.pan_with_mouse = custom_attrs["pan_with_mouse"]
-        if "zoom_with_mouse_wheel" in custom_attrs:
-            self.image_params.zoom_with_mouse_wheel = custom_attrs["zoom_with_mouse_wheel"]
-        if "show_school_paper_background" in custom_attrs:
-            self.image_params.show_school_paper_background = custom_attrs["show_school_paper_background"]
-        if "show_alpha_channel_checkerboard" in custom_attrs:
-            self.image_params.show_alpha_channel_checkerboard = custom_attrs["show_alpha_channel_checkerboard"]
-        if "show_grid" in custom_attrs:
-            self.image_params.show_grid = custom_attrs["show_grid"]
-        if "draw_values_on_zoomed_pixels" in custom_attrs:
-            self.image_params.draw_values_on_zoomed_pixels = custom_attrs["draw_values_on_zoomed_pixels"]
-        if "show_image_info" in custom_attrs:
-            self.image_params.show_image_info = custom_attrs["show_image_info"]
-        if "show_pixel_info" in custom_attrs:
-            self.image_params.show_pixel_info = custom_attrs["show_pixel_info"]
-        if "show_zoom_buttons" in custom_attrs:
-            self.image_params.show_zoom_buttons = custom_attrs["show_zoom_buttons"]
-        if "show_options_panel" in custom_attrs:
-            self.image_params.show_options_panel = custom_attrs["show_options_panel"]
-        if "show_options_button" in custom_attrs:
-            self.image_params.show_options_button = custom_attrs["show_options_button"]
-        if "show_inspect_button" in custom_attrs:
-            self.show_inspect_button = custom_attrs["show_inspect_button"]
+        if "show_channels" in fiat_attrs:
+            self.show_channels = fiat_attrs["show_channels"]
+        if "channel_layout_vertically" in fiat_attrs:
+            self.channel_layout_vertically = fiat_attrs["channel_layout_vertically"]
+        if "only_display" in fiat_attrs:
+            self.only_display = fiat_attrs["only_display"]
+        if "zoom_key" in fiat_attrs:
+            self.image_params.zoom_key = fiat_attrs["zoom_key"]
+        if "can_resize" in fiat_attrs:
+            self.image_params.can_resize = fiat_attrs["can_resize"]
+        if "is_color_order_bgr" in fiat_attrs:
+            self.image_params.is_color_order_bgr = fiat_attrs["is_color_order_bgr"]
+        if "pan_with_mouse" in fiat_attrs:
+            self.image_params.pan_with_mouse = fiat_attrs["pan_with_mouse"]
+        if "zoom_with_mouse_wheel" in fiat_attrs:
+            self.image_params.zoom_with_mouse_wheel = fiat_attrs["zoom_with_mouse_wheel"]
+        if "show_school_paper_background" in fiat_attrs:
+            self.image_params.show_school_paper_background = fiat_attrs["show_school_paper_background"]
+        if "show_alpha_channel_checkerboard" in fiat_attrs:
+            self.image_params.show_alpha_channel_checkerboard = fiat_attrs["show_alpha_channel_checkerboard"]
+        if "show_grid" in fiat_attrs:
+            self.image_params.show_grid = fiat_attrs["show_grid"]
+        if "draw_values_on_zoomed_pixels" in fiat_attrs:
+            self.image_params.draw_values_on_zoomed_pixels = fiat_attrs["draw_values_on_zoomed_pixels"]
+        if "show_image_info" in fiat_attrs:
+            self.image_params.show_image_info = fiat_attrs["show_image_info"]
+        if "show_pixel_info" in fiat_attrs:
+            self.image_params.show_pixel_info = fiat_attrs["show_pixel_info"]
+        if "show_zoom_buttons" in fiat_attrs:
+            self.image_params.show_zoom_buttons = fiat_attrs["show_zoom_buttons"]
+        if "show_options_panel" in fiat_attrs:
+            self.image_params.show_options_panel = fiat_attrs["show_options_panel"]
+        if "show_options_button" in fiat_attrs:
+            self.image_params.show_options_button = fiat_attrs["show_options_button"]
+        if "show_inspect_button" in fiat_attrs:
+            self.show_inspect_button = fiat_attrs["show_inspect_button"]
 
     def set_image(self, image: Image) -> None:
         self.image = image
@@ -311,8 +311,8 @@ class ImageWithGui(AnyDataWithGui[Image]):
     def possible_fiat_attributes() -> PossibleFiatAttributes | None:
         return _IMAGE_POSSIBLE_ATTRIBUTES
 
-    def on_fiat_attributes_changes(self, custom_attrs: FiatAttributes) -> None:
-        self.image_presenter.handle_custom_attrs(custom_attrs)
+    def on_fiat_attributes_changes(self, fiat_attrs: FiatAttributes) -> None:
+        self.image_presenter.handle_custom_attrs(fiat_attrs)
 
     def edit(self, value: Image) -> tuple[bool, Image]:
         changed = False
