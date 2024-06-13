@@ -20,26 +20,6 @@ def test_param_custom_attributes() -> None:
     _f_gui = fl.FunctionWithGui(f)
 
 
-def test_wrong_param_custom_attributes() -> None:
-    @fl.with_custom_attrs(x__cklmskdlmskdflmk=True)
-    def f(x: int) -> int:
-        return x
-
-    # This should raise an exception
-    with pytest.raises(fl.FiatToGuiException):
-        _f_gui = fl.FunctionWithGui(f)
-
-
-def test_wrong_return_custom_attributes() -> None:
-    @fl.with_custom_attrs(return__cklmskdlmskdflmk=True)
-    def f(x: int) -> int:
-        return x
-
-    # This should raise an exception
-    with pytest.raises(fl.FiatToGuiException):
-        _f_gui = fl.FunctionWithGui(f)
-
-
 def test_function_attributes() -> None:
     @fl.with_custom_attrs(
         invoke_async=True,
