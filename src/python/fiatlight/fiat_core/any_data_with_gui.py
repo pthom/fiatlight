@@ -9,7 +9,7 @@ from fiatlight.fiat_types.base_types import (
 )
 from fiatlight.fiat_types.error_types import Error, ErrorValue, Unspecified, UnspecifiedValue, InvalidValue
 from fiatlight.fiat_types.function_types import DataPresentFunction, DataEditFunction, DataValidationResult  # noqa
-from fiatlight.fiat_types.base_types import CustomAttributesDict
+from fiatlight.fiat_types.base_types import FiatAttributes
 from .any_data_gui_callbacks import AnyDataGuiCallbacks
 from .possible_custom_attributes import PossibleCustomAttributes
 from imgui_bundle import imgui, imgui_ctx, ImVec4, hello_imgui, ImVec2
@@ -172,7 +172,7 @@ class AnyDataWithGui(Generic[DataType]):
     #             return x + y
     #        f.x__range = (0, 10)
     # custom_attrs["range"] will be (0, 10) for the parameter x.
-    _custom_attrs: CustomAttributesDict
+    _custom_attrs: FiatAttributes
 
     # Is the present or edit view expanded. This is serialized and deserialized in the GUI options.
     _expanded: bool = True
@@ -201,7 +201,7 @@ class AnyDataWithGui(Generic[DataType]):
         """Initialize the AnyDataWithGui with a type, an unspecified value, and no callbacks."""
         self._type = data_type
         self.callbacks = AnyDataGuiCallbacks()
-        self._custom_attrs = CustomAttributesDict({})
+        self._custom_attrs = FiatAttributes({})
 
     @staticmethod
     def _Value_Section() -> None:  # Dummy function to create a section in the IDE # noqa
@@ -294,10 +294,10 @@ class AnyDataWithGui(Generic[DataType]):
         return descendant_attrs, _ANYDATAWITHGUI_GENERIC_POSSIBLE_CUSTOM_ATTRIBUTES
 
     @property
-    def custom_attrs(self) -> CustomAttributesDict:
+    def custom_attrs(self) -> FiatAttributes:
         return self._custom_attrs
 
-    def merge_custom_attrs(self, custom_attrs: CustomAttributesDict) -> None:
+    def merge_custom_attrs(self, custom_attrs: FiatAttributes) -> None:
         """Merge custom attributes with the existing ones"""
         if len(custom_attrs) == 0:
             return

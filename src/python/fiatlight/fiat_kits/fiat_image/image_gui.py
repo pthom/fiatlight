@@ -1,5 +1,5 @@
 from fiatlight.fiat_utils.custom_attrs_decorator import with_custom_attrs
-from fiatlight.fiat_types import JsonDict, ImagePath, CustomAttributesDict, Unspecified, UnspecifiedValue
+from fiatlight.fiat_types import JsonDict, ImagePath, FiatAttributes, Unspecified, UnspecifiedValue
 from fiatlight.fiat_core import AnyDataWithGui, PossibleCustomAttributes
 from fiatlight.fiat_kits.fiat_image.image_types import Image, ImageU8
 from imgui_bundle import immvision, imgui, ImVec2
@@ -315,7 +315,7 @@ class ImageWithGui(AnyDataWithGui[Image]):
     def possible_custom_attributes() -> PossibleCustomAttributes | None:
         return _IMAGE_POSSIBLE_ATTRIBUTES
 
-    def on_custom_attrs_changed(self, custom_attrs: CustomAttributesDict) -> None:
+    def on_custom_attrs_changed(self, custom_attrs: FiatAttributes) -> None:
         self.image_presenter.handle_custom_attrs(custom_attrs)
 
     def edit(self, value: Image) -> tuple[bool, Image]:

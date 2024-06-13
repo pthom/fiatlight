@@ -30,4 +30,4 @@ JsonDict = dict[str, Any]
 JsonPrimitiveOrDict = JsonPrimitive | JsonDict
 
 # Type for custom attributes
-CustomAttributesDict = NewType("CustomAttributesDict", dict[str, Any])
+FiatAttributes = NewType("FiatAttributes", dict[str, Any])

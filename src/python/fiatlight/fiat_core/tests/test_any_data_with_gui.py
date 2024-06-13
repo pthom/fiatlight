@@ -5,10 +5,10 @@ from fiatlight.fiat_togui.to_gui import (
     _any_typename_to_gui,
     _any_type_to_gui_impl,
 )
-from fiatlight.fiat_types import CustomAttributesDict
+from fiatlight.fiat_types import FiatAttributes
 
 
-NO_CUSTOM_ATTRIBUTES = CustomAttributesDict({})
+NO_CUSTOM_ATTRIBUTES = FiatAttributes({})
 
 
 def test_creation() -> None:

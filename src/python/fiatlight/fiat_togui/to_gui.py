@@ -4,7 +4,7 @@ from types import NoneType
 
 import pydantic
 
-from fiatlight.fiat_types import UnspecifiedValue, DataType, CustomAttributesDict
+from fiatlight.fiat_types import UnspecifiedValue, DataType, FiatAttributes
 from fiatlight.fiat_types.base_types import JsonDict
 from fiatlight.fiat_togui import primitives_gui
 from fiatlight.fiat_core.any_data_with_gui import AnyDataWithGui, AnyDataWithGui_UnregisteredType
@@ -217,7 +217,7 @@ def _extract_tuple_typeclasses(type_class_name: str) -> Tuple[bool, List[str]]:
     return False, []
 
 
-def _any_typename_to_gui(typename: str, custom_attributes: CustomAttributesDict) -> AnyDataWithGui[Any]:
+def _any_typename_to_gui(typename: str, custom_attributes: FiatAttributes) -> AnyDataWithGui[Any]:
     """Central function to convert a type name to a GUI representation.
     It handles simple types, enum, optional, list, tuple, etc.
     """
@@ -265,7 +265,7 @@ def _any_typename_to_gui(typename: str, custom_attributes: CustomAttributesDict)
     return AnyDataWithGui_UnregisteredType(typename)
 
 
-def _any_type_to_gui_impl(type_: Type[Any], custom_attributes: CustomAttributesDict) -> AnyDataWithGui[Any]:
+def _any_type_to_gui_impl(type_: Type[Any], custom_attributes: FiatAttributes) -> AnyDataWithGui[Any]:
     """Converts a type to a GUI representation."""
     typename = fully_qualified_typename(type_)
     return _any_typename_to_gui(typename, custom_attributes)
@@ -273,11 +273,11 @@ def _any_type_to_gui_impl(type_: Type[Any], custom_attributes: CustomAttributesD
 
 def any_type_to_gui(type_: Type[Any], **custom_attributes: Any) -> AnyDataWithGui[Any]:
     """Converts a type to a GUI representation."""
-    attr_as_dict = CustomAttributesDict(custom_attributes)
+    attr_as_dict = FiatAttributes(custom_attributes)
     return _any_type_to_gui_impl(type_, attr_as_dict)
 
 
-def _any_composed_type_to_gui_impl(type_: DataType, custom_attributes: CustomAttributesDict) -> AnyDataWithGui[Any]:
+def _any_composed_type_to_gui_impl(type_: DataType, custom_attributes: FiatAttributes) -> AnyDataWithGui[Any]:
     """Converts a complex type to a GUI representation.
     By composed we mean a type composed of multiple types like:
         - Optional[int]
@@ -295,7 +295,7 @@ def _any_composed_type_to_gui_impl(type_: DataType, custom_attributes: CustomAtt
     return r
 
 
-def any_typing_new_type_to_gui(type_: DataType, custom_attributes: CustomAttributesDict) -> AnyDataWithGui[Any]:
+def any_typing_new_type_to_gui(type_: DataType, custom_attributes: FiatAttributes) -> AnyDataWithGui[Any]:
     """Converts a type created with typing.NewType to a GUI representation."""
     if isinstance(type_, type):
         raise ValueError("Use any_type_to_gui for simple types")
@@ -304,7 +304,7 @@ def any_typing_new_type_to_gui(type_: DataType, custom_attributes: CustomAttribu
     return r
 
 
-def _fn_outputs_with_gui(type_class_name: str, fn_custom_attributes: CustomAttributesDict) -> List[AnyDataWithGui[Any]]:
+def _fn_outputs_with_gui(type_class_name: str, fn_custom_attributes: FiatAttributes) -> List[AnyDataWithGui[Any]]:
     """Convert the return type of a function to a (list of) GUI representation."""
     r = []
     is_tuple, inner_type_classes = _extract_tuple_typeclasses(type_class_name)
@@ -322,7 +322,7 @@ def _fn_outputs_with_gui(type_class_name: str, fn_custom_attributes: CustomAttri
 
 def _to_data_with_gui_impl(
     value: DataType,
-    custom_attributes: CustomAttributesDict,
+    custom_attributes: FiatAttributes,
 ) -> AnyDataWithGui[DataType]:
     """Convert a value to a GUI representation."""
     type_class_name = fully_qualified_typename_or_str(type(value))
@@ -333,13 +333,11 @@ def _to_data_with_gui_impl(
 
 def to_data_with_gui(value: DataType, **custom_attributes: Any) -> AnyDataWithGui[DataType]:
     """Convert a value to a GUI representation."""
-    attr_as_dict = CustomAttributesDict(custom_attributes)
+    attr_as_dict = FiatAttributes(custom_attributes)
     return _to_data_with_gui_impl(value, attr_as_dict)
 
 
-def _to_param_with_gui(
-    name: str, param: inspect.Parameter, custom_attributes: CustomAttributesDict
-) -> ParamWithGui[Any]:
+def _to_param_with_gui(name: str, param: inspect.Parameter, custom_attributes: FiatAttributes) -> ParamWithGui[Any]:
     """Convert a function parameter to a GUI representation."""
     annotation = param.annotation
 
@@ -385,7 +383,7 @@ def _get_calling_module_name() -> str:
         raise ValueError("No module found")
 
 
-def _get_input_param_custom_attributes(fn_attributes: JsonDict, param_name: str) -> CustomAttributesDict:
+def _get_input_param_custom_attributes(fn_attributes: JsonDict, param_name: str) -> FiatAttributes:
     """Get the optional custom attributes for the parameter.
     Those parameters are defined in the function attributes, and may be passed:
 
@@ -401,21 +399,21 @@ def _get_input_param_custom_attributes(fn_attributes: JsonDict, param_name: str)
        def f(x: float):
            return x
     """
-    r = CustomAttributesDict({})
+    r = FiatAttributes({})
     for k, v in fn_attributes.items():
         if k.startswith(param_name + "__"):
             r[k[len(param_name) + 2 :]] = v
     return r
 
 
-def get_output_custom_attributes(fn_attributes: JsonDict, idx_output: int = 0) -> CustomAttributesDict:
+def get_output_custom_attributes(fn_attributes: JsonDict, idx_output: int = 0) -> FiatAttributes:
     """Get the optional custom attributes for the return value.
     For example:
         @with_custom_attrs(return__range=(0, 1))
         def f() -> float:
             return 1.0
     """
-    r = CustomAttributesDict({})
+    r = FiatAttributes({})
 
     if idx_output == 0:
         prefix = "return__"
@@ -432,7 +430,7 @@ def get_output_custom_attributes(fn_attributes: JsonDict, idx_output: int = 0) -
 def add_input_outputs_to_function(
     function_with_gui: FunctionWithGui,
     signature_string: str | None,
-    custom_attributes: CustomAttributesDict,
+    custom_attributes: FiatAttributes,
 ) -> None:
     """Central function that is called by FunctionWithGui.__init__ to add the inputs and outputs to the function.
 
@@ -862,7 +860,7 @@ class GuiFactories:
         # ==================================================================================================================
         """
 
-    def factor(self, typename: Typename, custom_attributes: CustomAttributesDict) -> AnyDataWithGui[Any]:
+    def factor(self, typename: Typename, custom_attributes: FiatAttributes) -> AnyDataWithGui[Any]:
         """Converts a type name to a GUI representation."""
         r = self.get_factory(typename)()
         r.merge_custom_attrs(custom_attributes)
@@ -943,7 +941,7 @@ def register_base_model(base_model_type: Type[DataclassLikeType], **custom_attrs
     assert issubclass(base_model_type, pydantic.BaseModel)
 
     def factory() -> AnyDataWithGui[Any]:
-        attrs_as_dict = CustomAttributesDict(custom_attrs)
+        attrs_as_dict = FiatAttributes(custom_attrs)
         r = BaseModelGui(base_model_type, attrs_as_dict)
         return r
 

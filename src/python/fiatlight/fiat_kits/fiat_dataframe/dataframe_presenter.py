@@ -3,7 +3,7 @@ import copy
 from pydantic import BaseModel, Field
 import pandas as pd
 from fiatlight.fiat_core.possible_custom_attributes import PossibleCustomAttributes
-from fiatlight.fiat_types import CustomAttributesDict, JsonDict
+from fiatlight.fiat_types import FiatAttributes, JsonDict
 from fiatlight.fiat_widgets.fontawesome6_ctx_utils import fontawesome_6_ctx, icons_fontawesome_6
 from imgui_bundle import imgui, imgui_ctx, hello_imgui, immapp
 from fiatlight.fiat_widgets.fiat_osd import is_rendering_in_node
@@ -153,7 +153,7 @@ class DataFramePresenter:
         # We create a copy because we might change settings in the data frame (ordering, filtering, etc.)
         self.dataframe = copy.copy(self.dataframe_original)
 
-    def on_custom_attrs_changed(self, custom_attrs: CustomAttributesDict) -> None:
+    def on_custom_attrs_changed(self, custom_attrs: FiatAttributes) -> None:
         # Update the params with the custom attributes
         for key, value in custom_attrs.items():
             if hasattr(self.params, key):

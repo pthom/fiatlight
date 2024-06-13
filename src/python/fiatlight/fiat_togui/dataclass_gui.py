@@ -40,7 +40,7 @@ from fiatlight.fiat_core import AnyDataWithGui, FunctionWithGui, ParamWithGui
 from fiatlight.fiat_core.any_data_with_gui import GuiHeaderLineParams
 from fiatlight.fiat_types import JsonDict, Unspecified, Error
 from fiatlight.fiat_core.togui_exception import FiatToGuiException
-from fiatlight.fiat_types.base_types import CustomAttributesDict
+from fiatlight.fiat_types.base_types import FiatAttributes
 from imgui_bundle import imgui_ctx, ImVec4
 from typing import Type, Any, TypeVar, List
 from dataclasses import is_dataclass
@@ -56,9 +56,7 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
 
     _parameters_with_gui: List[ParamWithGui[Any]]
 
-    def __init__(
-        self, dataclass_type: Type[DataclassLikeType], param_attrs: CustomAttributesDict | None = None
-    ) -> None:
+    def __init__(self, dataclass_type: Type[DataclassLikeType], param_attrs: FiatAttributes | None = None) -> None:
         super().__init__(dataclass_type)
 
         # In order to find the members of the dataclass, we
@@ -163,11 +161,11 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
             if param_on_exit is not None:
                 param_on_exit()
 
-    def on_custom_attrs_changed(self, attrs: CustomAttributesDict) -> None:
+    def on_custom_attrs_changed(self, attrs: FiatAttributes) -> None:
         self._custom_attrs = attrs
         for param_gui in self._parameters_with_gui:
             prefix = f"{param_gui.name}__"
-            this_param_attrs = CustomAttributesDict({})
+            this_param_attrs = FiatAttributes({})
             for k, v in attrs.items():
                 if k.startswith(prefix):
                     this_param_attrs[k[len(prefix) :]] = v
@@ -256,9 +254,7 @@ class DataclassGui(DataclassLikeGui[DataclassLikeType]):
 class BaseModelGui(DataclassLikeGui[DataclassLikeType]):
     """A sophisticated GUI for a pydantic model. Can edit and present all members of the model. Can handle nested models."""
 
-    def __init__(
-        self, basemodel_type: Type[DataclassLikeType], param_attrs: CustomAttributesDict | None = None
-    ) -> None:
+    def __init__(self, basemodel_type: Type[DataclassLikeType], param_attrs: FiatAttributes | None = None) -> None:
         if not issubclass(basemodel_type, BaseModel):
             raise FiatToGuiException(f"{basemodel_type} is not a pydantic model")
         super().__init__(basemodel_type, param_attrs)  # type: ignore

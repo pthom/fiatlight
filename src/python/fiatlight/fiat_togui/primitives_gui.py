@@ -1,7 +1,7 @@
 from imgui_bundle import imgui, hello_imgui, imgui_knobs, imgui_toggle, ImVec2, imgui_ctx, ImVec4
 from fiatlight.fiat_core import AnyDataWithGui, PossibleCustomAttributes
 from fiatlight.fiat_types.color_types import ColorRgb, ColorRgba, ColorRgbFloat, ColorRgbaFloat
-from fiatlight.fiat_types import CustomAttributesDict
+from fiatlight.fiat_types import FiatAttributes
 from typing import Callable, TypeAlias
 from dataclasses import dataclass
 from enum import Enum
@@ -106,7 +106,7 @@ class IntWithGui(AnyDataWithGui[int]):
     def possible_custom_attributes() -> PossibleCustomAttributes | None:
         return _POSSIBLE_INT_ATTRIBUTES
 
-    def _handle_custom_attrs(self, custom_attrs: CustomAttributesDict) -> None:
+    def _handle_custom_attrs(self, custom_attrs: FiatAttributes) -> None:
         if "range" in self.custom_attrs:
             range_ = self.custom_attrs["range"]
             self.params.v_min = range_[0]
@@ -342,7 +342,7 @@ class FloatWithGui(AnyDataWithGui[float]):
     def possible_custom_attributes() -> PossibleCustomAttributes | None:
         return _POSSIBLE_FLOAT_ATTRIBUTES
 
-    def _handle_custom_attrs(self, custom_attrs: CustomAttributesDict) -> None:
+    def _handle_custom_attrs(self, custom_attrs: FiatAttributes) -> None:
         if "range" in self.custom_attrs:
             range_ = self.custom_attrs["range"]
             if not isinstance(range_, tuple) or len(range_) != 2:
@@ -544,7 +544,7 @@ class BoolWithGui(AnyDataWithGui[bool]):
     def possible_custom_attributes() -> PossibleCustomAttributes | None:
         return _POSSIBLE_BOOL_ATTRIBUTES
 
-    def _handle_custom_attrs(self, custom_attrs: CustomAttributesDict) -> None:
+    def _handle_custom_attrs(self, custom_attrs: FiatAttributes) -> None:
         if "edit_type" in self.custom_attrs:
             edit_type_ = self.custom_attrs["edit_type"]
             try:

@@ -12,11 +12,11 @@ from fiatlight import (
 )
 from dataclasses import dataclass
 from fiatlight.fiat_togui.to_gui import _to_data_with_gui_impl
-from fiatlight.fiat_types import CustomAttributesDict
+from fiatlight.fiat_types import FiatAttributes
 import copy
 
 
-NO_CUSTOM_ATTRIBUTES = CustomAttributesDict({})
+NO_CUSTOM_ATTRIBUTES = FiatAttributes({})
 
 
 def test_dataclass_like_gui() -> None:
@@ -200,7 +200,7 @@ def test_base_model_with_custom_attributes() -> None:
 
     # Test the custom attribute
     # 1. When creating the GUI manually
-    my_param_gui = BaseModelGui(ImageEffect, CustomAttributesDict({"rotation_degree__range": (-180, 180)}))
+    my_param_gui = BaseModelGui(ImageEffect, FiatAttributes({"rotation_degree__range": (-180, 180)}))
     rot_gui = my_param_gui._parameters_with_gui[0].data_with_gui
     assert rot_gui.custom_attrs["range"] == (-180, 180)
 

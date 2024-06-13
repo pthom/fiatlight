@@ -26,7 +26,7 @@ from .file_types import (
 from .base_types import (
     DataType,
     GuiType,
-    CustomAttributesDict,
+    FiatAttributes,
     ExplainedValue,
     ExplainedValues,
     JsonDict,
@@ -88,7 +88,7 @@ __all__ = [
     "JsonDict",
     "JsonPrimitive",
     "JsonPrimitiveOrDict",
-    "CustomAttributesDict",
+    "FiatAttributes",
     "ExplainedValue",
     "ExplainedValues",
     # from fiat_number_types

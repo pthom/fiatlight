@@ -1,6 +1,6 @@
 import fiatlight as fl
 from fiatlight.fiat_togui import to_gui
-from fiatlight.fiat_types import CustomAttributesDict
+from fiatlight.fiat_types import FiatAttributes
 from fiatlight.fiat_togui.composite_gui import EnumWithGui
 from fiatlight.fiat_togui.tests.sample_enum import (
     SampleEnumNotRegistered,
@@ -8,7 +8,7 @@ from fiatlight.fiat_togui.tests.sample_enum import (
     SampleEnumRegisteredManually,
 )
 
-NO_CUSTOM_ATTRIBUTES = CustomAttributesDict({})
+NO_CUSTOM_ATTRIBUTES = FiatAttributes({})
 
 
 def test_enum_registered() -> None:

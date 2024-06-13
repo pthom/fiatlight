@@ -1,4 +1,4 @@
-from fiatlight.fiat_types import CustomAttributesDict, JsonDict
+from fiatlight.fiat_types import FiatAttributes, JsonDict
 from fiatlight.fiat_core.any_data_with_gui import AnyDataWithGui
 from fiatlight.fiat_core.possible_custom_attributes import PossibleCustomAttributes
 from fiatlight.fiat_kits.fiat_dataframe.dataframe_presenter import _DATAFRAME_POSSIBLE_CUSTOM_ATTRIBUTES
@@ -124,7 +124,7 @@ class DataFrameWithGui(AnyDataWithGui[pd.DataFrame]):
         # This is a method which we inherit from AnyDataWithGui.
         return _DATAFRAME_POSSIBLE_CUSTOM_ATTRIBUTES
 
-    def on_custom_attrs_changed(self, custom_attrs: CustomAttributesDict) -> None:
+    def on_custom_attrs_changed(self, custom_attrs: FiatAttributes) -> None:
         self.dataframe_presenter.on_custom_attrs_changed(custom_attrs)
 
     @staticmethod

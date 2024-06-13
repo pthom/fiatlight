@@ -1,4 +1,4 @@
-from fiatlight.fiat_types import CustomAttributesDict, JsonDict
+from fiatlight.fiat_types import FiatAttributes, JsonDict
 from fiatlight.fiat_core.any_data_with_gui import AnyDataWithGui
 from imgui_bundle import imgui
 from fiatlight.fiat_kits.fiat_kit_skeleton.mydata import Mydata
@@ -116,7 +116,7 @@ class MydataWithGui(AnyDataWithGui[Mydata]):
     def possible_custom_attributes() -> MydataPossibleCustomAttributes | None:
         return MydataPresenter.possible_custom_attributes()
 
-    def on_custom_attrs_changed(self, custom_attrs: CustomAttributesDict) -> None:
+    def on_custom_attrs_changed(self, custom_attrs: FiatAttributes) -> None:
         # Here we should update the presenter with the new custom attributes
         pass
 

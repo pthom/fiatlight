@@ -3,7 +3,7 @@ import pytest
 from fiatlight.fiat_togui import to_gui
 from fiatlight.fiat_types import UnspecifiedValue, ErrorValue
 from fiatlight import FunctionWithGui
-from fiatlight.fiat_types import CustomAttributesDict
+from fiatlight.fiat_types import FiatAttributes
 
 from typing import Tuple, Optional, NewType
 import typing
@@ -13,7 +13,7 @@ class Dummy:
     pass
 
 
-NO_CUSTOM_ATTRIBUTES = CustomAttributesDict({})
+NO_CUSTOM_ATTRIBUTES = FiatAttributes({})
 
 
 def test_fully_qualified_name_to_gui() -> None:

@@ -466,7 +466,7 @@ from fiatlight.fiat_types.function_types import BoolFunction
 from fiatlight.fiat_core.param_with_gui import ParamWithGui, ParamKind
 from fiatlight.fiat_core.output_with_gui import OutputWithGui
 from fiatlight.fiat_core.possible_custom_attributes import PossibleCustomAttributes
-from fiatlight.fiat_types.base_types import CustomAttributesDict
+from fiatlight.fiat_types.base_types import FiatAttributes
 from typing import Any, List, final, Callable, Optional, Type, TypeAlias
 
 import logging
@@ -676,7 +676,7 @@ class FunctionWithGui:
         fn_name: str | None = None,
         *,
         signature_string: str | None = None,
-        custom_attributes: CustomAttributesDict | None = None,
+        custom_attributes: FiatAttributes | None = None,
     ) -> None:
         """Create a FunctionWithGui object, with the given function as implementation
 
@@ -712,9 +712,7 @@ class FunctionWithGui:
             if self.name == "":
                 self.name = fn.__name__ if hasattr(fn, "__name__") else ""
             if custom_attributes is None:
-                custom_attributes = (
-                    CustomAttributesDict(fn.__dict__) if hasattr(fn, "__dict__") else CustomAttributesDict({})
-                )
+                custom_attributes = FiatAttributes(fn.__dict__) if hasattr(fn, "__dict__") else FiatAttributes({})
             add_input_outputs_to_function(
                 self,
                 signature_string=signature_string,

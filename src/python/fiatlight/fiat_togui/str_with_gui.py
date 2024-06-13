@@ -1,7 +1,7 @@
 import fiatlight
 from fiatlight.fiat_types import JsonDict
 from fiatlight.fiat_core import AnyDataWithGui, PossibleCustomAttributes
-from fiatlight.fiat_types.base_types import CustomAttributesDict
+from fiatlight.fiat_types.base_types import FiatAttributes
 from fiatlight.fiat_widgets import fiat_osd, icons_fontawesome_6, fontawesome_6_ctx, text_maybe_truncated
 from imgui_bundle import imgui, imgui_ctx, hello_imgui, ImVec2
 from pydantic import BaseModel
@@ -96,7 +96,7 @@ class StrWithGui(AnyDataWithGui[str]):
         if nb_lines >= 2:
             self.callbacks.present_collapsible = True
 
-    def on_custom_attrs_changed(self, custom_attrs: CustomAttributesDict) -> None:
+    def on_custom_attrs_changed(self, custom_attrs: FiatAttributes) -> None:
         if "width_em" in custom_attrs:
             self.params.width_em = custom_attrs["width_em"]
         if "hint" in custom_attrs:
