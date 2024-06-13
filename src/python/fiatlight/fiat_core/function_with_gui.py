@@ -728,17 +728,17 @@ class FunctionWithGui:
         if self.name == "":
             raise FiatToGuiException("FunctionWithGui: function name is empty")
 
-    def handle_fiat_attributes(self, custom_attributes: dict[str, Any]) -> None:
+    def handle_fiat_attributes(self, fiat_attributes: dict[str, Any]) -> None:
         """Handle custom attributes for the function"""
         # Filter out the custom attributes for parameters and outputs
         # (they contain a double underscore "__" in their name)
-        fn_custom_attributes = {key: value for key, value in custom_attributes.items() if "__" not in key}
+        fn_custom_attributes = {key: value for key, value in fiat_attributes.items() if "__" not in key}
         # We accept wrong keys, because other libraries, such as Pydantic, may add custom attributes
         # that would not be recognized by FiatLight
         _FUNCTION_POSSIBLE_FIAT_ATTRIBUTES.raise_exception_if_bad_fiat_attrs(fn_custom_attributes)
 
         # Check that there are no custom attributes for a non-existing parameter or output
-        params_custom_attributes = [key for key in custom_attributes if "__" in key and not key.startswith("__")]
+        params_custom_attributes = [key for key in fiat_attributes if "__" in key and not key.startswith("__")]
         for custom_attribute in params_custom_attributes:
             assert "__" in custom_attribute
             param_name = custom_attribute.split("__")[0]
