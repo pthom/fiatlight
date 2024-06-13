@@ -63,7 +63,7 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
         # create a FunctionWithGui instance with the dataclass type
         # so that FunctionWithGui can find the members of the dataclass
         # and associate them with GUI
-        constructor_gui = FunctionWithGui(dataclass_type, custom_attributes=param_attrs)
+        constructor_gui = FunctionWithGui(dataclass_type, fiat_attributes=param_attrs)
         self._parameters_with_gui = constructor_gui._inputs_with_gui
 
         # We set the _can_set_unspecified_or_default to False for all parameters

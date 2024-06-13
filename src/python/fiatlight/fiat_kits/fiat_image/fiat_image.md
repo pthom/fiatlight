@@ -7,8 +7,8 @@ Example
 -------
 
 ```python
-from fiatlight.fiat_kits.fiat_image import fiat_image_custom_attrs_demo
-fiat_image_custom_attrs_demo.main()
+from fiatlight.fiat_kits.fiat_image import fiat_image_attrs_demo
+fiat_image_attrs_demo.main()
 ```
 
 > * In the "show_image" output, the options panel was opened
@@ -46,6 +46,6 @@ Source code for the example
 ---------------------------
 
 ```python
-%look_at_python_file fiat_kits/fiat_image/fiat_image_custom_attrs_demo.py
+%look_at_python_file fiat_kits/fiat_image/fiat_image_attrs_demo.py
 ```
 

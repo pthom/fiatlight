@@ -430,7 +430,7 @@ def get_output_fiat_attributes(fn_attributes: JsonDict, idx_output: int = 0) -> 
 def add_input_outputs_to_function(
     function_with_gui: FunctionWithGui,
     signature_string: str | None,
-    custom_attributes: FiatAttributes,
+    fiat_attributes: FiatAttributes,
 ) -> None:
     """Central function that is called by FunctionWithGui.__init__ to add the inputs and outputs to the function.
 
@@ -447,19 +447,19 @@ def add_input_outputs_to_function(
 
     params = sig.parameters
     for name, param in params.items():
-        param_fiat_attrs = _get_input_param_fiat_attributes(custom_attributes, name)
+        param_fiat_attrs = _get_input_param_fiat_attributes(fiat_attributes, name)
         function_with_gui._inputs_with_gui.append(_to_param_with_gui(name, param, param_fiat_attrs))
 
     return_annotation = sig.return_annotation
     if return_annotation is inspect.Parameter.empty:
         output_with_gui = AnyDataWithGui_UnregisteredType("inspect.Parameter.empty")
         output_with_gui.label = "Output"
-        output_with_gui.merge_fiat_attributes(get_output_fiat_attributes(custom_attributes))
+        output_with_gui.merge_fiat_attributes(get_output_fiat_attributes(fiat_attributes))
         function_with_gui._outputs_with_gui.append(OutputWithGui(output_with_gui))
     else:
         return_annotation_str = fully_qualified_annotation(return_annotation)
         if return_annotation_str != "None":
-            outputs_with_guis = _fn_outputs_with_gui(return_annotation_str, custom_attributes)
+            outputs_with_guis = _fn_outputs_with_gui(return_annotation_str, fiat_attributes)
             for i, output_with_gui_any in enumerate(outputs_with_guis):
                 output_with_gui_any.label = f"Output {i + 1}"
                 if len(outputs_with_guis) == 1:

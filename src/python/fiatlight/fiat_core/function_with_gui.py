@@ -676,7 +676,7 @@ class FunctionWithGui:
         fn_name: str | None = None,
         *,
         signature_string: str | None = None,
-        custom_attributes: FiatAttributes | None = None,
+        fiat_attributes: FiatAttributes | None = None,
     ) -> None:
         """Create a FunctionWithGui object, with the given function as implementation
 
@@ -711,16 +711,16 @@ class FunctionWithGui:
         if fn is not None:
             if self.name == "":
                 self.name = fn.__name__ if hasattr(fn, "__name__") else ""
-            if custom_attributes is None:
-                custom_attributes = FiatAttributes(fn.__dict__) if hasattr(fn, "__dict__") else FiatAttributes({})
+            if fiat_attributes is None:
+                fiat_attributes = FiatAttributes(fn.__dict__) if hasattr(fn, "__dict__") else FiatAttributes({})
             add_input_outputs_to_function(
                 self,
                 signature_string=signature_string,
-                custom_attributes=custom_attributes,
+                fiat_attributes=fiat_attributes,
             )
 
-            if custom_attributes is not None:
-                self._handle_custom_attributes(custom_attributes)
+            if fiat_attributes is not None:
+                self.handle_fiat_attributes(fiat_attributes)
 
             for input_with_gui in self._inputs_with_gui:
                 input_with_gui.data_with_gui._can_set_unspecified_or_default = True
@@ -728,7 +728,7 @@ class FunctionWithGui:
         if self.name == "":
             raise FiatToGuiException("FunctionWithGui: function name is empty")
 
-    def _handle_custom_attributes(self, custom_attributes: dict[str, Any]) -> None:
+    def handle_fiat_attributes(self, custom_attributes: dict[str, Any]) -> None:
         """Handle custom attributes for the function"""
         # Filter out the custom attributes for parameters and outputs
         # (they contain a double underscore "__" in their name)

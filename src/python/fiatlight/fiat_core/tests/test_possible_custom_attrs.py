@@ -41,7 +41,7 @@ def test_possible_fiat_attr_validation() -> None:
     assert r.is_valid
 
     # Test with wrong key: disabled, too much trouble
-    # r = possible_fiat_attrs.validate_custom_attrs({"badkey": 0})
+    # r = possible_fiat_attrs.validate_fiat_attrs({"badkey": 0})
     # assert not r.is_valid
 
     # Test with wrong type
