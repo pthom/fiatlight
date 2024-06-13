@@ -465,14 +465,14 @@ from fiatlight.fiat_core.any_data_with_gui import AnyDataWithGui, toggle_expande
 from fiatlight.fiat_types.function_types import BoolFunction
 from fiatlight.fiat_core.param_with_gui import ParamWithGui, ParamKind
 from fiatlight.fiat_core.output_with_gui import OutputWithGui
-from fiatlight.fiat_core.possible_custom_attributes import PossibleCustomAttributes
+from fiatlight.fiat_core.possible_fiat_attributes import PossibleFiatAttributes
 from fiatlight.fiat_types.base_types import FiatAttributes
 from typing import Any, List, final, Callable, Optional, Type, TypeAlias
 
 import logging
 
 
-class FunctionPossibleCustomAttributes(PossibleCustomAttributes):
+class FunctionPossibleFiatAttributes(PossibleFiatAttributes):
     def __init__(self) -> None:
         super().__init__("FunctionWithGui")
 
@@ -517,7 +517,7 @@ class FunctionPossibleCustomAttributes(PossibleCustomAttributes):
         )
 
 
-_FUNCTION_POSSIBLE_CUSTOM_ATTRIBUTES = FunctionPossibleCustomAttributes()
+_FUNCTION_POSSIBLE_CUSTOM_ATTRIBUTES = FunctionPossibleFiatAttributes()
 
 
 class FunctionWithGui:

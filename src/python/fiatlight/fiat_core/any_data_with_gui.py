@@ -11,7 +11,7 @@ from fiatlight.fiat_types.error_types import Error, ErrorValue, Unspecified, Uns
 from fiatlight.fiat_types.function_types import DataPresentFunction, DataEditFunction, DataValidationResult  # noqa
 from fiatlight.fiat_types.base_types import FiatAttributes
 from .any_data_gui_callbacks import AnyDataGuiCallbacks
-from .possible_custom_attributes import PossibleCustomAttributes
+from .possible_fiat_attributes import PossibleFiatAttributes
 from imgui_bundle import imgui, imgui_ctx, ImVec4, hello_imgui, ImVec2
 from fiatlight.fiat_config import get_fiat_config, FiatColorType
 from fiatlight.fiat_widgets.fontawesome6_ctx_utils import icons_fontawesome_6, fontawesome_6_ctx
@@ -21,7 +21,7 @@ from typing import Generic, Any, Type, final, Callable
 import logging
 
 
-class AnyDataWithGuiGenericPossibleCustomAttributes(PossibleCustomAttributes):
+class AnyDataWithGuiGenericPossibleFiatAttributes(PossibleFiatAttributes):
     def __init__(self) -> None:
         super().__init__("AnyDataWithGui Generic attributes")
         self.add_explained_section("Generic attributes")
@@ -51,7 +51,7 @@ class AnyDataWithGuiGenericPossibleCustomAttributes(PossibleCustomAttributes):
         )
 
 
-_ANYDATAWITHGUI_GENERIC_POSSIBLE_CUSTOM_ATTRIBUTES = AnyDataWithGuiGenericPossibleCustomAttributes()
+_ANYDATAWITHGUI_GENERIC_POSSIBLE_CUSTOM_ATTRIBUTES = AnyDataWithGuiGenericPossibleFiatAttributes()
 
 
 def _draw_label_with_max_width(
@@ -277,7 +277,7 @@ class AnyDataWithGui(Generic[DataType]):
         pass
 
     @staticmethod
-    def possible_custom_attributes() -> PossibleCustomAttributes | None:
+    def possible_custom_attributes() -> PossibleFiatAttributes | None:
         """Return the possible custom attributes for this type, if available.
         Should be overridden in subclasses, when custom attributes are available.
 
@@ -289,7 +289,7 @@ class AnyDataWithGui(Generic[DataType]):
     @final
     def possible_custom_attributes_with_generic(
         self,
-    ) -> tuple[PossibleCustomAttributes | None, PossibleCustomAttributes]:
+    ) -> tuple[PossibleFiatAttributes | None, PossibleFiatAttributes]:
         descendant_attrs = self.possible_custom_attributes()
         return descendant_attrs, _ANYDATAWITHGUI_GENERIC_POSSIBLE_CUSTOM_ATTRIBUTES
 

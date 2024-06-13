@@ -1,14 +1,14 @@
 import fiatlight
 from fiatlight.fiat_types import JsonDict
-from fiatlight.fiat_core import AnyDataWithGui, PossibleCustomAttributes
+from fiatlight.fiat_core import AnyDataWithGui, PossibleFiatAttributes
 from fiatlight.fiat_types.base_types import FiatAttributes
 from fiatlight.fiat_widgets import fiat_osd, icons_fontawesome_6, fontawesome_6_ctx, text_maybe_truncated
 from imgui_bundle import imgui, imgui_ctx, hello_imgui, ImVec2
 from pydantic import BaseModel
 
 
-class StrPossibleCustomAttributes(PossibleCustomAttributes):
-    """PossibleCustomAttributes for StrWithGui"""
+class StrPossibleFiatAttributes(PossibleFiatAttributes):
+    """PossibleFiatAttributes for StrWithGui"""
 
     def __init__(self) -> None:
         super().__init__("StrWithGui")
@@ -46,7 +46,7 @@ class StrPossibleCustomAttributes(PossibleCustomAttributes):
         )
 
 
-_STR_POSSIBLE_CUSTOM_ATTRIBUTES = StrPossibleCustomAttributes()
+_STR_POSSIBLE_CUSTOM_ATTRIBUTES = StrPossibleFiatAttributes()
 
 
 class StrWithGuiParams(BaseModel):
@@ -116,7 +116,7 @@ class StrWithGui(AnyDataWithGui[str]):
         self._input_text_in_node.resizable = self.params.resizable
 
     @staticmethod
-    def possible_custom_attributes() -> PossibleCustomAttributes | None:
+    def possible_custom_attributes() -> PossibleFiatAttributes | None:
         return _STR_POSSIBLE_CUSTOM_ATTRIBUTES
 
     def save_gui_options_to_json(self) -> JsonDict:

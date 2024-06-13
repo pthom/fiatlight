@@ -12,8 +12,8 @@ class _ExplainedSection:
     explanation: str
 
 
-class PossibleCustomAttributes:
-    """PossibleCustomAttributes: a collection of possible custom attributes for a AnyDataWithGui descendant type"""
+class PossibleFiatAttributes:
+    """PossibleFiatAttributes: a collection of possible custom attributes for a AnyDataWithGui descendant type"""
 
     parent_name: str  # name of the AnyDataWithGui descendant type
     _explained_attributes_or_section: list[DetailedVar[Any] | _ExplainedSection]
@@ -59,7 +59,7 @@ class PossibleCustomAttributes:
                 return attr
         return None
 
-    def merge_attributes(self, other: "PossibleCustomAttributes") -> None:
+    def merge_attributes(self, other: "PossibleFiatAttributes") -> None:
         self._explained_attributes_or_section += other._explained_attributes_or_section
 
     def validate_custom_attrs(self, custom_attrs: dict[str, Any]) -> DataValidationResult:
@@ -161,8 +161,8 @@ class PossibleCustomAttributes:
         return r
 
 
-_EMPTY_CUSTOM_ATTRS = PossibleCustomAttributes("")
+_EMPTY_CUSTOM_ATTRS = PossibleFiatAttributes("")
 
 
-def empty_custom_attrs() -> PossibleCustomAttributes:
+def empty_custom_attrs() -> PossibleFiatAttributes:
     return _EMPTY_CUSTOM_ATTRS

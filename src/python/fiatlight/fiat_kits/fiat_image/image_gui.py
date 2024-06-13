@@ -1,6 +1,6 @@
 from fiatlight.fiat_utils.custom_attrs_decorator import with_custom_attrs
 from fiatlight.fiat_types import JsonDict, ImagePath, FiatAttributes, Unspecified, UnspecifiedValue
-from fiatlight.fiat_core import AnyDataWithGui, PossibleCustomAttributes
+from fiatlight.fiat_core import AnyDataWithGui, PossibleFiatAttributes
 from fiatlight.fiat_kits.fiat_image.image_types import Image, ImageU8
 from imgui_bundle import immvision, imgui, ImVec2
 from imgui_bundle import portable_file_dialogs as pfd
@@ -35,7 +35,7 @@ def default_image_params() -> ImagePresenterParams:
     return r
 
 
-class _ImagePossibleAttributes(PossibleCustomAttributes):
+class _ImagePossibleAttributes(PossibleFiatAttributes):
     def __init__(self) -> None:
         super().__init__("fiat_image.ImageWithGui")
 
@@ -312,7 +312,7 @@ class ImageWithGui(AnyDataWithGui[Image]):
         self.callbacks.on_custom_attrs_changed = self.on_custom_attrs_changed
 
     @staticmethod
-    def possible_custom_attributes() -> PossibleCustomAttributes | None:
+    def possible_custom_attributes() -> PossibleFiatAttributes | None:
         return _IMAGE_POSSIBLE_ATTRIBUTES
 
     def on_custom_attrs_changed(self, custom_attrs: FiatAttributes) -> None:

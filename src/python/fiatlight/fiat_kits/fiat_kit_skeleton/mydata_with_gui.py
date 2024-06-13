@@ -3,7 +3,7 @@ from fiatlight.fiat_core.any_data_with_gui import AnyDataWithGui
 from imgui_bundle import imgui
 from fiatlight.fiat_kits.fiat_kit_skeleton.mydata import Mydata
 
-from fiatlight.fiat_kits.fiat_kit_skeleton.mydata_presenter import MydataPresenter, MydataPossibleCustomAttributes
+from fiatlight.fiat_kits.fiat_kit_skeleton.mydata_presenter import MydataPresenter, MydataPossibleFiatAttributes
 
 
 class MydataWithGui(AnyDataWithGui[Mydata]):
@@ -113,7 +113,7 @@ class MydataWithGui(AnyDataWithGui[Mydata]):
         pass
 
     @staticmethod
-    def possible_custom_attributes() -> MydataPossibleCustomAttributes | None:
+    def possible_custom_attributes() -> MydataPossibleFiatAttributes | None:
         return MydataPresenter.possible_custom_attributes()
 
     def on_custom_attrs_changed(self, custom_attrs: FiatAttributes) -> None:

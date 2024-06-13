@@ -2,14 +2,14 @@ import copy
 
 from pydantic import BaseModel, Field
 import pandas as pd
-from fiatlight.fiat_core.possible_custom_attributes import PossibleCustomAttributes
+from fiatlight.fiat_core.possible_fiat_attributes import PossibleFiatAttributes
 from fiatlight.fiat_types import FiatAttributes, JsonDict
 from fiatlight.fiat_widgets.fontawesome6_ctx_utils import fontawesome_6_ctx, icons_fontawesome_6
 from imgui_bundle import imgui, imgui_ctx, hello_imgui, immapp
 from fiatlight.fiat_widgets.fiat_osd import is_rendering_in_node
 
 
-class DataFramePossibleCustomAttributes(PossibleCustomAttributes):
+class DataFramePossibleFiatAttributes(PossibleFiatAttributes):
     # Here we will add all the possible custom attributes for the DataFrame
     # so that the user can customize the presentation of the DataFrame
     # (probably by settings params in DataFramePresenterParams)
@@ -50,7 +50,7 @@ class DataFramePossibleCustomAttributes(PossibleCustomAttributes):
         )
 
 
-_DATAFRAME_POSSIBLE_CUSTOM_ATTRIBUTES = DataFramePossibleCustomAttributes()
+_DATAFRAME_POSSIBLE_CUSTOM_ATTRIBUTES = DataFramePossibleFiatAttributes()
 
 
 class DataFramePresenterParams(BaseModel):

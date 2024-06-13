@@ -1,6 +1,6 @@
 from .any_data_gui_callbacks import AnyDataGuiCallbacks
 from .any_data_with_gui import AnyDataWithGui, AnyDataWithGui_UnregisteredType
-from .possible_custom_attributes import PossibleCustomAttributes
+from .possible_fiat_attributes import PossibleFiatAttributes
 from .param_with_gui import (
     ParamKind,
     ParamWithGui,
@@ -33,7 +33,7 @@ __all__ = [
     # from functions_graph
     "FunctionsGraph",
     # from possible_custom_attributes
-    "PossibleCustomAttributes",
+    "PossibleFiatAttributes",
     # from togui_exception
     "FiatToGuiException",
 ]

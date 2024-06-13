@@ -1,5 +1,5 @@
 from imgui_bundle import imgui, hello_imgui, imgui_knobs, imgui_toggle, ImVec2, imgui_ctx, ImVec4
-from fiatlight.fiat_core import AnyDataWithGui, PossibleCustomAttributes
+from fiatlight.fiat_core import AnyDataWithGui, PossibleFiatAttributes
 from fiatlight.fiat_types.color_types import ColorRgb, ColorRgba, ColorRgbFloat, ColorRgbaFloat
 from fiatlight.fiat_types import FiatAttributes
 from typing import Callable, TypeAlias
@@ -17,7 +17,7 @@ ImGuiKnobVariant_: TypeAlias = imgui_knobs.ImGuiKnobVariant_
 ToggleConfig: TypeAlias = imgui_toggle.ToggleConfig
 
 
-class _PossibleIntAttributes(PossibleCustomAttributes):
+class _PossibleIntAttributes(PossibleFiatAttributes):
     def __init__(self) -> None:
         super().__init__("IntWithGui")
         self.add_explained_attribute(
@@ -103,7 +103,7 @@ class IntWithGui(AnyDataWithGui[int]):
         self.callbacks.edit_collapsible = False
 
     @staticmethod
-    def possible_custom_attributes() -> PossibleCustomAttributes | None:
+    def possible_custom_attributes() -> PossibleFiatAttributes | None:
         return _POSSIBLE_INT_ATTRIBUTES
 
     def _handle_custom_attrs(self, custom_attrs: FiatAttributes) -> None:
@@ -249,7 +249,7 @@ class IntWithGui(AnyDataWithGui[int]):
 ########################################################################################################################
 
 
-class PossibleFloatAttributes(PossibleCustomAttributes):
+class PossibleFloatAttributes(PossibleFiatAttributes):
     def __init__(self) -> None:
         super().__init__("FloatWithGui")
         self.add_explained_attribute(
@@ -339,7 +339,7 @@ class FloatWithGui(AnyDataWithGui[float]):
         self.callbacks.edit_collapsible = False
 
     @staticmethod
-    def possible_custom_attributes() -> PossibleCustomAttributes | None:
+    def possible_custom_attributes() -> PossibleFiatAttributes | None:
         return _POSSIBLE_FLOAT_ATTRIBUTES
 
     def _handle_custom_attrs(self, custom_attrs: FiatAttributes) -> None:
@@ -494,7 +494,7 @@ def make_positive_float_with_gui() -> AnyDataWithGui[float]:
 ########################################################################################################################
 
 
-class _PossibleBoolAttributes(PossibleCustomAttributes):
+class _PossibleBoolAttributes(PossibleFiatAttributes):
     def __init__(self) -> None:
         super().__init__("BoolWithGui")
         self.add_explained_attribute(
@@ -541,7 +541,7 @@ class BoolWithGui(AnyDataWithGui[bool]):
         self.callbacks.edit_collapsible = False
 
     @staticmethod
-    def possible_custom_attributes() -> PossibleCustomAttributes | None:
+    def possible_custom_attributes() -> PossibleFiatAttributes | None:
         return _POSSIBLE_BOOL_ATTRIBUTES
 
     def _handle_custom_attrs(self, custom_attrs: FiatAttributes) -> None:
