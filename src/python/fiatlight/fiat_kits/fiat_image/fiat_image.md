@@ -25,11 +25,9 @@ Custom attributes available for the ImageWithGui widget
 
 The image widget provided with fiat_image is extremely customizable. Here is a list of all the possible customizations options:
 
-```python
-import fiatlight
-from fiatlight.fiat_doc import look_at_code  # noqa
-
-%run_bash_command fiatlight gui_info ImageWithGui
+```
+%%bash
+fiatlight gui ImageWithGui
 ```
 
 
@@ -39,6 +37,8 @@ Fiatlight provides several synonyms for Numpy arrays that denote different types
 
 
 ````python
+import fiatlight
+from fiatlight.fiat_doc import look_at_code  # noqa
 %look_at_python_file fiat_kits/fiat_image/image_types.py
 ````
 

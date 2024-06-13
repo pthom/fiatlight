@@ -199,6 +199,7 @@ class ImagePresenter:
 
     def _gui_channels(self) -> None:
         for i, image_channel in enumerate(self.image_channels):
+            imgui.push_id(str(i))
             label = f"channel {i}"
             imgui.begin_group()
             if self.only_display:
@@ -221,6 +222,7 @@ class ImagePresenter:
             imgui.end_group()
             if not self.channel_layout_vertically:
                 imgui.same_line()
+            imgui.pop_id()
         if not self.channel_layout_vertically:
             imgui.new_line()
 

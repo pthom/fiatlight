@@ -24,11 +24,9 @@ Custom attributes available for DataFrameWithGui
 
 Here is a list of all the possible customizations options:
 
-```python
-import fiatlight
-from fiatlight.fiat_doc import look_at_code  # noqa
-
-%run_bash_command fiatlight gui_info DataFrameWithGui
+```
+%%bash
+fiatlight gui DataFrameWithGui
 ```
 
 
@@ -36,6 +34,8 @@ Source code for the example
 ---------------------------
 
 ```python
+import fiatlight
+from fiatlight.fiat_doc import look_at_code  # noqa
 %look_at_python_file fiat_kits/fiat_dataframe/dataframe_with_gui_demo_titanic.py
 ```
 

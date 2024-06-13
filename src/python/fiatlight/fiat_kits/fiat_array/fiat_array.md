@@ -17,13 +17,19 @@ simple_plot_gui_demo.main()
 Custom attributes available for SimplePlotGui
 ---------------------------------------------
 
-Here is a list of all the possible customizations options:
+**Here is a list of all the type handled by SimplePlotGui:**
 
-```python
-import fiatlight
-from fiatlight.fiat_doc import look_at_code  # noqa
+```
+%%bash
+fiatlight types FloatMatrix_Dim
+```
 
-%run_bash_command fiatlight gui_info SimplePlotGui
+
+**Here is a list of all the possible customizations options:**
+
+```
+%%bash
+fiatlight gui SimplePlotGui
 ```
 
 
@@ -31,6 +37,8 @@ Source code for the example
 ---------------------------
 
 ```python
+import fiatlight
+from fiatlight.fiat_doc import look_at_code  # noqa
 %look_at_python_file fiat_kits/fiat_array/simple_plot_gui_demo.py
 ```
 
