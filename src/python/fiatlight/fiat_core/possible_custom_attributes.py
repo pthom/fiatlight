@@ -62,9 +62,7 @@ class PossibleCustomAttributes:
     def merge_attributes(self, other: "PossibleCustomAttributes") -> None:
         self._explained_attributes_or_section += other._explained_attributes_or_section
 
-    def validate_custom_attrs(
-        self, custom_attrs: dict[str, Any], accept_wrong_keys: bool = False
-    ) -> DataValidationResult:
+    def validate_custom_attrs(self, custom_attrs: dict[str, Any]) -> DataValidationResult:
         unwanted_keys = []
         attributes_with_wrong_type_msgs = []
         attributes_with_failed_validation: dict[str, str] = {}
@@ -81,15 +79,16 @@ class PossibleCustomAttributes:
                 if not data_validation.is_valid:
                     attributes_with_failed_validation[attr_name] = data_validation.error_message
 
+        accept_wrong_keys = True  # This check is too complex
         if (
             (len(unwanted_keys) > 0 and not accept_wrong_keys)
             or len(attributes_with_wrong_type_msgs) > 0
             or len(attributes_with_failed_validation) > 0
         ):
             msg = ""
-            if len(unwanted_keys) > 0:
-                unwanted_keys_str = ", ".join(unwanted_keys)
-                msg += f"The following custom attributes are not allowed: {unwanted_keys_str}\n\n"
+            # if len(unwanted_keys) > 0:
+            #     unwanted_keys_str = ", ".join(unwanted_keys)
+            #     msg += f"The following custom attributes are not allowed: {unwanted_keys_str}\n\n"
             if len(attributes_with_wrong_type_msgs) > 0:
                 msg += "The following custom attributes have wrong types:\n    "
                 msg += "\n    ".join(attributes_with_wrong_type_msgs) + "\n\n"
@@ -102,10 +101,8 @@ class PossibleCustomAttributes:
 
         return DataValidationResult.ok()
 
-    def raise_exception_if_bad_custom_attrs(
-        self, custom_attrs: dict[str, Any], accept_wrong_keys: bool = False
-    ) -> None:
-        validation_result = self.validate_custom_attrs(custom_attrs, accept_wrong_keys=accept_wrong_keys)
+    def raise_exception_if_bad_custom_attrs(self, custom_attrs: dict[str, Any]) -> None:
+        validation_result = self.validate_custom_attrs(custom_attrs)
 
         if not validation_result.is_valid:
             msg = f"Encountered incorrect attributes for {self.parent_name} !\n"

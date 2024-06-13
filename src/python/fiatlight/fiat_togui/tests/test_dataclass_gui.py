@@ -287,7 +287,7 @@ def test_dataclass_in_custom_function() -> None:
 
 def test_basemodel_with_optional_member() -> None:
     @fl.base_model_with_gui_registration(
-        # x__range=(0, 10),
+        x__range=(0, 10),
         x__label="X Value",
         x__tooltip="This is the x value",
     )
