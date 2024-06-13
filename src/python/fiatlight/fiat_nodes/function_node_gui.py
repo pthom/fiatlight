@@ -711,7 +711,7 @@ class FunctionNodeGui:
             # either by creating an AnyDataWithGui from the value or using the one that is provided
             if name not in self._fiat_internals_with_gui:
                 if not isinstance(value, AnyDataWithGui):
-                    self._fiat_internals_with_gui[name] = fiat_togui.any_type_to_gui(type(value), {})
+                    self._fiat_internals_with_gui[name] = fiat_togui.any_type_to_gui(type(value))
                 else:
                     self._fiat_internals_with_gui[name] = value
                 self._fiat_internals_with_gui[name].label = name

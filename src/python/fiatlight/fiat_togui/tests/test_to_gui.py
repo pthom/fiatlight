@@ -13,7 +13,7 @@ class Dummy:
     pass
 
 
-NO_CUSTOM_ATTRIBUTES: CustomAttributesDict = {}
+NO_CUSTOM_ATTRIBUTES = CustomAttributesDict({})
 
 
 def test_fully_qualified_name_to_gui() -> None:
@@ -45,45 +45,45 @@ def test_register_new_type() -> None:
 
 
 def test_type_member_simple() -> None:
-    assert to_gui.any_type_to_gui(int, NO_CUSTOM_ATTRIBUTES)._type == int
-    assert to_gui.any_type_to_gui(float, NO_CUSTOM_ATTRIBUTES)._type == float
-    assert to_gui.any_type_to_gui(str, NO_CUSTOM_ATTRIBUTES)._type == str
-    assert to_gui.any_type_to_gui(bool, NO_CUSTOM_ATTRIBUTES)._type == bool
+    assert to_gui._any_type_to_gui_impl(int, NO_CUSTOM_ATTRIBUTES)._type == int
+    assert to_gui._any_type_to_gui_impl(float, NO_CUSTOM_ATTRIBUTES)._type == float
+    assert to_gui._any_type_to_gui_impl(str, NO_CUSTOM_ATTRIBUTES)._type == str
+    assert to_gui._any_type_to_gui_impl(bool, NO_CUSTOM_ATTRIBUTES)._type == bool
 
 
 def test_type_member_composed() -> None:
     with pytest.raises(ValueError):
         # We should not call any_composed_type_to_gui with a simple type
-        to_gui.any_composed_type_to_gui(int, NO_CUSTOM_ATTRIBUTES)
+        to_gui._any_composed_type_to_gui_impl(int, NO_CUSTOM_ATTRIBUTES)
 
     from fiatlight.fiat_togui.composite_gui import OptionalWithGui, ListWithGui
 
     OptionalInt = Optional[int]
-    oi = to_gui.any_composed_type_to_gui(OptionalInt, NO_CUSTOM_ATTRIBUTES)
+    oi = to_gui._any_composed_type_to_gui_impl(OptionalInt, NO_CUSTOM_ATTRIBUTES)
     assert oi._type == typing.Optional[int]
     assert isinstance(oi, OptionalWithGui)
     assert oi.inner_gui._type == int
 
     OptionalInt2 = int | None
-    oi2 = to_gui.any_composed_type_to_gui(OptionalInt2, NO_CUSTOM_ATTRIBUTES)
+    oi2 = to_gui._any_composed_type_to_gui_impl(OptionalInt2, NO_CUSTOM_ATTRIBUTES)
     assert oi2._type == typing.Optional[int]
     assert isinstance(oi2, OptionalWithGui)
     assert oi2.inner_gui._type == int
 
     ListInt = typing.List[int]
-    li = to_gui.any_composed_type_to_gui(ListInt, NO_CUSTOM_ATTRIBUTES)
+    li = to_gui._any_composed_type_to_gui_impl(ListInt, NO_CUSTOM_ATTRIBUTES)
     assert li._type == typing.List[int]
     assert isinstance(li, ListWithGui)
     assert li.inner_gui._type == int
 
     ListInt2 = list[int]
-    li2 = to_gui.any_composed_type_to_gui(ListInt2, NO_CUSTOM_ATTRIBUTES)
+    li2 = to_gui._any_composed_type_to_gui_impl(ListInt2, NO_CUSTOM_ATTRIBUTES)
     assert li2._type == typing.List[int]
     assert isinstance(li2, ListWithGui)
     assert li2.inner_gui._type == int
 
     ListOptionalInt = list[int | None]
-    loi = to_gui.any_composed_type_to_gui(ListOptionalInt, NO_CUSTOM_ATTRIBUTES)
+    loi = to_gui._any_composed_type_to_gui_impl(ListOptionalInt, NO_CUSTOM_ATTRIBUTES)
     assert loi._type == typing.List[typing.Optional[int]]
     assert isinstance(loi, ListWithGui)
     assert loi.inner_gui._type == typing.Optional[int]
@@ -115,7 +115,7 @@ def test_any_typeclass_to_data_with_gui() -> None:
 
 
 def test_any_value_to_data_with_gui() -> None:
-    a = to_gui.to_data_with_gui(1, NO_CUSTOM_ATTRIBUTES)
+    a = to_gui._to_data_with_gui_impl(1, NO_CUSTOM_ATTRIBUTES)
     assert a.value == 1
 
 

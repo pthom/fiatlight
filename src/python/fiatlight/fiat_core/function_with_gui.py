@@ -712,7 +712,9 @@ class FunctionWithGui:
             if self.name == "":
                 self.name = fn.__name__ if hasattr(fn, "__name__") else ""
             if custom_attributes is None:
-                custom_attributes = fn.__dict__ if hasattr(fn, "__dict__") else {}
+                custom_attributes = (
+                    CustomAttributesDict(fn.__dict__) if hasattr(fn, "__dict__") else CustomAttributesDict({})
+                )
             add_input_outputs_to_function(
                 self,
                 signature_string=signature_string,

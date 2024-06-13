@@ -17,6 +17,8 @@ from .to_gui import (
     # ===============================
     to_data_with_gui,
     any_type_to_gui,
+    _to_data_with_gui_impl,
+    _any_type_to_gui_impl,
     # ==============================================
     # Factory used when dealing with editable graphs
     # ==============================================
@@ -39,8 +41,10 @@ __all__ = [
     "dataclass_with_gui_registration",
     "register_base_model",
     "base_model_with_gui_registration",
-    "to_data_with_gui",
     "any_type_to_gui",
+    "to_data_with_gui",
+    "_to_data_with_gui_impl",
+    "_any_type_to_gui_impl",
     "FunctionWithGuiFactory",
     # from explained_value_gui
     "edit_explained_value",

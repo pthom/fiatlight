@@ -1,4 +1,4 @@
-from typing import Any, TypeVar, Generic, List
+from typing import Any, TypeVar, Generic, List, NewType
 from dataclasses import dataclass
 
 # A type variable that represents a data type, included in a AnyDataWithGui object.
@@ -30,4 +30,4 @@ JsonDict = dict[str, Any]
 JsonPrimitiveOrDict = JsonPrimitive | JsonDict
 
 # Type for custom attributes
-CustomAttributesDict = dict[str, Any]
+CustomAttributesDict = NewType("CustomAttributesDict", dict[str, Any])

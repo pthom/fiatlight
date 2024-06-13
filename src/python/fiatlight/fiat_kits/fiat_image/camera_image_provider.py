@@ -146,7 +146,7 @@ class CameraImageProviderGui(FunctionWithGui):
         from fiatlight.fiat_togui import to_data_with_gui
 
         self._camera_provider = CameraImageProvider()
-        self._camera_params_gui = to_data_with_gui(self._camera_provider.camera_params, {})
+        self._camera_params_gui = to_data_with_gui(self._camera_provider.camera_params)
         self._camera_params_gui.label = "Camera Params"
 
         self.internal_state_gui = self._internal_state_gui

@@ -167,7 +167,7 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
         self._custom_attrs = attrs
         for param_gui in self._parameters_with_gui:
             prefix = f"{param_gui.name}__"
-            this_param_attrs = {}
+            this_param_attrs = CustomAttributesDict({})
             for k, v in attrs.items():
                 if k.startswith(prefix):
                     this_param_attrs[k[len(prefix) :]] = v
