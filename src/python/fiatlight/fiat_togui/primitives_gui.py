@@ -98,7 +98,7 @@ class IntWithGui(AnyDataWithGui[int]):
         self.callbacks.edit = self.edit
         self.callbacks.default_value_provider = lambda: 0
         self.callbacks.clipboard_copy_possible = True
-        self.callbacks.on_custom_attrs_changed = self._handle_custom_attrs
+        self.callbacks.on_fiat_attributes_changed = self._handle_custom_attrs
         self.callbacks.present_collapsible = False
         self.callbacks.edit_collapsible = False
 
@@ -334,7 +334,7 @@ class FloatWithGui(AnyDataWithGui[float]):
         self.callbacks.default_value_provider = lambda: 0.0
         self.callbacks.clipboard_copy_possible = True
         self.callbacks.present_str = self.present_str
-        self.callbacks.on_custom_attrs_changed = self._handle_custom_attrs
+        self.callbacks.on_fiat_attributes_changed = self._handle_custom_attrs
         self.callbacks.present_collapsible = False
         self.callbacks.edit_collapsible = False
 
@@ -536,7 +536,7 @@ class BoolWithGui(AnyDataWithGui[bool]):
         self.callbacks.edit = self.edit
         self.callbacks.default_value_provider = lambda: False
         self.callbacks.clipboard_copy_possible = True
-        self.callbacks.on_custom_attrs_changed = self._handle_custom_attrs
+        self.callbacks.on_fiat_attributes_changed = self._handle_custom_attrs
         self.callbacks.present_collapsible = False
         self.callbacks.edit_collapsible = False
 

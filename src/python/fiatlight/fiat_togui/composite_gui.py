@@ -25,7 +25,7 @@ class OptionalWithGui(AnyDataWithGui[DataType | None]):
         self.callbacks.present_popup_required = inner_gui.callbacks.present_popup_required
         self.callbacks.edit_popup_possible = inner_gui.callbacks.edit_popup_possible
         self.callbacks.edit_popup_required = inner_gui.callbacks.edit_popup_required
-        self.callbacks.on_custom_attrs_changed = inner_gui.callbacks.on_custom_attrs_changed
+        self.callbacks.on_fiat_attributes_changed = inner_gui.callbacks.on_fiat_attributes_changed
 
         if self.inner_gui.callbacks.present is not None:
             self.callbacks.present = self.present
@@ -151,7 +151,7 @@ class ListWithGui(AnyDataWithGui[List[DataType]]):
         self.callbacks.save_to_dict = self._save_to_dict
         self.callbacks.load_from_dict = self._load_from_dict
         self.callbacks.on_heartbeat = self.inner_gui.callbacks.on_heartbeat
-        self.callbacks.on_custom_attrs_changed = self.inner_gui.callbacks.on_custom_attrs_changed
+        self.callbacks.on_fiat_attributes_changed = self.inner_gui.callbacks.on_fiat_attributes_changed
 
     @staticmethod
     def clipboard_copy_str(v: List[DataType]) -> str:

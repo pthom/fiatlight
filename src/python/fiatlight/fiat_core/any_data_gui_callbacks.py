@@ -135,10 +135,10 @@ class AnyDataGuiCallbacks(Generic[DataType]):
     # (before the value is drawn). It should return True if any change has been made to the data.
     on_heartbeat: BoolFunction | None = None
 
-    # on_custom_attrs_changed (Optional)
+    # on_fiat_attributes_changed (Optional)
     # if provided, this function will be called when the custom attributes of the data change.
     # Used in more advanced cases, when the data presentation depends on custom attributes.
-    on_custom_attrs_changed: Callable[[FiatAttributes], None] | None = None
+    on_fiat_attributes_changed: Callable[[FiatAttributes], None] | None = None
 
     # ---------------------------------------------------------------------------------------------
 

@@ -153,7 +153,7 @@ class DataFramePresenter:
         # We create a copy because we might change settings in the data frame (ordering, filtering, etc.)
         self.dataframe = copy.copy(self.dataframe_original)
 
-    def on_custom_attrs_changed(self, custom_attrs: FiatAttributes) -> None:
+    def on_fiat_attributes_changes(self, custom_attrs: FiatAttributes) -> None:
         # Update the params with the custom attributes
         for key, value in custom_attrs.items():
             if hasattr(self.params, key):

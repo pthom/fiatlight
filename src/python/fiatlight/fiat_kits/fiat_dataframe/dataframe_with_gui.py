@@ -31,7 +31,7 @@ class DataFrameWithGui(AnyDataWithGui[pd.DataFrame]):
         self.callbacks.on_change = self.on_change
         self.callbacks.on_heartbeat = self.on_heartbeat
         # custom attributes
-        self.callbacks.on_custom_attrs_changed = self.on_custom_attrs_changed
+        self.callbacks.on_fiat_attributes_changed = self.on_fiat_attributes_changes
         # serialization and deserialization of presentation options
         self.callbacks.save_gui_options_to_json = self.save_gui_options_to_json
         self.callbacks.load_gui_options_from_json = self.load_gui_options_from_json
@@ -124,8 +124,8 @@ class DataFrameWithGui(AnyDataWithGui[pd.DataFrame]):
         # This is a method which we inherit from AnyDataWithGui.
         return _DATAFRAME_POSSIBLE_CUSTOM_ATTRIBUTES
 
-    def on_custom_attrs_changed(self, custom_attrs: FiatAttributes) -> None:
-        self.dataframe_presenter.on_custom_attrs_changed(custom_attrs)
+    def on_fiat_attributes_changes(self, custom_attrs: FiatAttributes) -> None:
+        self.dataframe_presenter.on_fiat_attributes_changes(custom_attrs)
 
     @staticmethod
     def _SerializationAndDeserializationSection() -> None:

@@ -28,7 +28,7 @@ class MydataWithGui(AnyDataWithGui[Mydata]):
         self.callbacks.on_change = self.on_change
         self.callbacks.on_heartbeat = self.on_heartbeat
         # custom attributes
-        self.callbacks.on_custom_attrs_changed = self.on_custom_attrs_changed
+        self.callbacks.on_fiat_attributes_changed = self.on_fiat_attributes_changes
         # serialization and deserialization of presentation options
         self.callbacks.save_gui_options_to_json = self.save_gui_options_to_json
         self.callbacks.load_gui_options_from_json = self.load_gui_options_from_json
@@ -116,7 +116,7 @@ class MydataWithGui(AnyDataWithGui[Mydata]):
     def possible_custom_attributes() -> MydataPossibleFiatAttributes | None:
         return MydataPresenter.possible_custom_attributes()
 
-    def on_custom_attrs_changed(self, custom_attrs: FiatAttributes) -> None:
+    def on_fiat_attributes_changes(self, custom_attrs: FiatAttributes) -> None:
         # Here we should update the presenter with the new custom attributes
         pass
 

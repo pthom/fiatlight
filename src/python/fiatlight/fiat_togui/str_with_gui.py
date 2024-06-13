@@ -83,7 +83,7 @@ class StrWithGui(AnyDataWithGui[str]):
         self.callbacks.default_value_provider = lambda: ""
         self.callbacks.save_gui_options_to_json = self.save_gui_options_to_json
         self.callbacks.load_gui_options_from_json = self.load_gui_options_from_json
-        self.callbacks.on_custom_attrs_changed = self.on_custom_attrs_changed
+        self.callbacks.on_fiat_attributes_changed = self.on_fiat_attributes_changes
 
         self.callbacks.present_collapsible = False
         self.callbacks.edit_collapsible = False
@@ -96,7 +96,7 @@ class StrWithGui(AnyDataWithGui[str]):
         if nb_lines >= 2:
             self.callbacks.present_collapsible = True
 
-    def on_custom_attrs_changed(self, custom_attrs: FiatAttributes) -> None:
+    def on_fiat_attributes_changes(self, custom_attrs: FiatAttributes) -> None:
         if "width_em" in custom_attrs:
             self.params.width_em = custom_attrs["width_em"]
         if "hint" in custom_attrs:

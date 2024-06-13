@@ -3,7 +3,7 @@ from .lazy_module import LazyModule
 from . import fiat_math
 from .print_repeatable_message import print_repeatable_message
 from .docstring_utils import docstring_first_line
-from .custom_attrs_decorator import with_fiat_attributes, add_fiat_attributes
+from .fiat_attributes_decorator import with_fiat_attributes, add_fiat_attributes
 
 
 __all__ = [

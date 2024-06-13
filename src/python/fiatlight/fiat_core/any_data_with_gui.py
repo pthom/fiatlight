@@ -312,8 +312,8 @@ class AnyDataWithGui(Generic[DataType]):
 
         self.fiat_attributes.update(custom_attrs)
         self._handle_generic_attrs()
-        if self.callbacks.on_custom_attrs_changed is not None:
-            self.callbacks.on_custom_attrs_changed(self.fiat_attributes)
+        if self.callbacks.on_fiat_attributes_changed is not None:
+            self.callbacks.on_fiat_attributes_changed(self.fiat_attributes)
 
     def _handle_generic_attrs(self) -> None:
         """Handle generic custom attributes"""

@@ -73,7 +73,7 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
 
         self.fill_callbacks()
         if param_attrs is not None:
-            self.on_custom_attrs_changed(param_attrs)
+            self.on_fiat_attributes_changes(param_attrs)
 
     def param_of_name(self, name: str) -> ParamWithGui[Any]:
         for param_gui in self._parameters_with_gui:
@@ -114,7 +114,7 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
         self.callbacks.save_gui_options_to_json = self.save_gui_options_to_json
         self.callbacks.load_gui_options_from_json = self.load_gui_options_from_json
 
-        self.callbacks.on_custom_attrs_changed = self.on_custom_attrs_changed
+        self.callbacks.on_fiat_attributes_changed = self.on_fiat_attributes_changes
 
     def is_fully_specified(self) -> bool:
         has_unspecified = False
@@ -161,7 +161,7 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
             if param_on_exit is not None:
                 param_on_exit()
 
-    def on_custom_attrs_changed(self, attrs: FiatAttributes) -> None:
+    def on_fiat_attributes_changes(self, attrs: FiatAttributes) -> None:
         self._fiat_attributes = attrs
         for param_gui in self._parameters_with_gui:
             prefix = f"{param_gui.name}__"

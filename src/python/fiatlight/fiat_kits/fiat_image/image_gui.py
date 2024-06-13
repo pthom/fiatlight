@@ -1,4 +1,4 @@
-from fiatlight.fiat_utils.custom_attrs_decorator import with_fiat_attributes
+from fiatlight.fiat_utils.fiat_attributes_decorator import with_fiat_attributes
 from fiatlight.fiat_types import JsonDict, ImagePath, FiatAttributes, Unspecified, UnspecifiedValue
 from fiatlight.fiat_core import AnyDataWithGui, PossibleFiatAttributes
 from fiatlight.fiat_kits.fiat_image.image_types import Image, ImageU8
@@ -309,13 +309,13 @@ class ImageWithGui(AnyDataWithGui[Image]):
         self.callbacks.save_gui_options_to_json = self.save_gui_options_to_json
         self.callbacks.load_gui_options_from_json = self.load_gui_options_from_json
         self.callbacks.present_popup_possible = True
-        self.callbacks.on_custom_attrs_changed = self.on_custom_attrs_changed
+        self.callbacks.on_fiat_attributes_changed = self.on_fiat_attributes_changes
 
     @staticmethod
     def possible_custom_attributes() -> PossibleFiatAttributes | None:
         return _IMAGE_POSSIBLE_ATTRIBUTES
 
-    def on_custom_attrs_changed(self, custom_attrs: FiatAttributes) -> None:
+    def on_fiat_attributes_changes(self, custom_attrs: FiatAttributes) -> None:
         self.image_presenter.handle_custom_attrs(custom_attrs)
 
     def edit(self, value: Image) -> tuple[bool, Image]:
