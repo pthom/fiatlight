@@ -13,10 +13,7 @@
                     "name": "max_image_size",
                     "data": {
                         "type": "Optional",
-                        "value": {
-                            "type": "Primitive",
-                            "value": 1210
-                        }
+                        "value": null
                     }
                 }
             },
@@ -42,9 +39,9 @@
                                 "blur_sigma": 0.0,
                                 "intensity": 0.8,
                                 "color": [
-                                    18,
-                                    13,
-                                    90
+                                    0,
+                                    0,
+                                    0
                                 ]
                             }
                         }
@@ -92,8 +89,8 @@
                                     "DrawValuesOnZoomedPixels": true,
                                     "HighlightWatchedPixels": true,
                                     "ImageDisplaySize": {
-                                        "height": 254,
-                                        "width": 373
+                                        "height": 313,
+                                        "width": 471
                                     },
                                     "IsColorOrderBGR": true,
                                     "PanWithMouse": true,
@@ -111,12 +108,12 @@
                                     "WatchedPixels": [],
                                     "ZoomKey": "z",
                                     "ZoomPanMatrix": {
-                                        "00": 0.531553903265103,
+                                        "00": 0.11684445547010668,
                                         "01": 0.0,
-                                        "02": -124.69319812824858,
+                                        "02": 2.1786455395609136e-14,
                                         "10": 0.0,
-                                        "11": 0.531553903265103,
-                                        "12": -53.563481514660445,
+                                        "11": 0.11684445547010668,
+                                        "12": 32.86250000000002,
                                         "20": 0.0,
                                         "21": 0.0,
                                         "22": 1.0
@@ -164,8 +161,8 @@
                                 "DrawValuesOnZoomedPixels": true,
                                 "HighlightWatchedPixels": true,
                                 "ImageDisplaySize": {
-                                    "height": 254,
-                                    "width": 373
+                                    "height": 313,
+                                    "width": 471
                                 },
                                 "IsColorOrderBGR": true,
                                 "PanWithMouse": true,
@@ -183,12 +180,12 @@
                                 "WatchedPixels": [],
                                 "ZoomKey": "z",
                                 "ZoomPanMatrix": {
-                                    "00": 0.531553903265103,
+                                    "00": 0.11684445547010668,
                                     "01": 0.0,
-                                    "02": -124.69319812824858,
+                                    "02": 2.1786455395609136e-14,
                                     "10": 0.0,
-                                    "11": 0.531553903265103,
-                                    "12": -53.563481514660445,
+                                    "11": 0.11684445547010668,
+                                    "12": 32.86250000000002,
                                     "20": 0.0,
                                     "21": 0.0,
                                     "22": 1.0
@@ -232,7 +229,7 @@
                                     "DrawValuesOnZoomedPixels": true,
                                     "HighlightWatchedPixels": true,
                                     "ImageDisplaySize": {
-                                        "height": 105,
+                                        "height": 0,
                                         "width": 200
                                     },
                                     "IsColorOrderBGR": true,
@@ -251,11 +248,11 @@
                                     "WatchedPixels": [],
                                     "ZoomKey": "z",
                                     "ZoomPanMatrix": {
-                                        "00": 0.1669449081803005,
+                                        "00": 1.0,
                                         "01": 0.0,
                                         "02": 0.0,
                                         "10": 0.0,
-                                        "11": 0.1669449081803005,
+                                        "11": 1.0,
                                         "12": 0.0,
                                         "20": 0.0,
                                         "21": 0.0,
@@ -310,7 +307,7 @@
                                             "expanded": true
                                         }
                                     },
-                                    "expanded": false
+                                    "expanded": true
                                 },
                                 "appearance": {
                                     "cb_options": {
@@ -354,8 +351,8 @@
                                     "DrawValuesOnZoomedPixels": true,
                                     "HighlightWatchedPixels": true,
                                     "ImageDisplaySize": {
-                                        "height": 275,
-                                        "width": 593
+                                        "height": 105,
+                                        "width": 200
                                     },
                                     "IsColorOrderBGR": true,
                                     "PanWithMouse": true,
@@ -373,12 +370,12 @@
                                     "WatchedPixels": [],
                                     "ZoomKey": "z",
                                     "ZoomPanMatrix": {
-                                        "00": 0.8450709507673086,
+                                        "00": 0.04961548002976929,
                                         "01": 0.0,
-                                        "02": -198.23878415563388,
+                                        "02": 0.0,
                                         "10": 0.0,
-                                        "11": 0.8450709507673086,
-                                        "12": -149.56204970025112,
+                                        "11": 0.04961548002976929,
+                                        "12": 0.0,
                                         "20": 0.0,
                                         "21": 0.0,
                                         "22": 1.0
@@ -416,7 +413,7 @@
                                 "DrawValuesOnZoomedPixels": true,
                                 "HighlightWatchedPixels": true,
                                 "ImageDisplaySize": {
-                                    "height": 105,
+                                    "height": 0,
                                     "width": 200
                                 },
                                 "IsColorOrderBGR": true,
@@ -435,11 +432,11 @@
                                 "WatchedPixels": [],
                                 "ZoomKey": "z",
                                 "ZoomPanMatrix": {
-                                    "00": 0.1669449081803005,
+                                    "00": 1.0,
                                     "01": 0.0,
                                     "02": 0.0,
                                     "10": 0.0,
-                                    "11": 0.1669449081803005,
+                                    "11": 1.0,
                                     "12": 0.0,
                                     "20": 0.0,
                                     "21": 0.0,
@@ -494,7 +491,7 @@
                                         "expanded": true
                                     }
                                 },
-                                "expanded": false
+                                "expanded": true
                             },
                             "appearance": {
                                 "cb_options": {
@@ -538,8 +535,8 @@
                                 "DrawValuesOnZoomedPixels": true,
                                 "HighlightWatchedPixels": true,
                                 "ImageDisplaySize": {
-                                    "height": 275,
-                                    "width": 593
+                                    "height": 105,
+                                    "width": 200
                                 },
                                 "IsColorOrderBGR": true,
                                 "PanWithMouse": true,
@@ -557,12 +554,12 @@
                                 "WatchedPixels": [],
                                 "ZoomKey": "z",
                                 "ZoomPanMatrix": {
-                                    "00": 0.8450709507673086,
+                                    "00": 0.04961548002976929,
                                     "01": 0.0,
-                                    "02": -198.23878415563388,
+                                    "02": 0.0,
                                     "10": 0.0,
-                                    "11": 0.8450709507673086,
-                                    "12": -149.56204970025112,
+                                    "11": 0.04961548002976929,
+                                    "12": 0.0,
                                     "20": 0.0,
                                     "21": 0.0,
                                     "22": 1.0

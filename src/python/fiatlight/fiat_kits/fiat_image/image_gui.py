@@ -355,7 +355,12 @@ class ImageWithGui(AnyDataWithGui[Image]):
         self.image_presenter.load_gui_options_from_json(data)
 
 
-@with_custom_attrs(max_image_size__range=(0, 3000))
+@with_custom_attrs(
+    image_file__label="Select Image",
+    max_image_size__range=(1, 3000),
+    max_image_size__label="Max Image Size",
+    max_image_size__tooltip="If the image with or height is larger than this size, it will be resized",
+)
 def image_source(image_file: ImagePath, max_image_size: int | None = None) -> ImageU8:
     """A simple function that reads an image from a file and optionally resizes it if it is too large.
 

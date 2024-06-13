@@ -250,11 +250,15 @@ def _any_typename_to_gui(typename: str, custom_attributes: CustomAttributesDict)
             return AnyDataWithGui_UnregisteredType(enum_type_class_name)
 
     if is_optional:
-        inner_gui = _any_typename_to_gui(optional_inner_type_class_name, custom_attributes=custom_attributes)
-        return OptionalWithGui(inner_gui)
+        inner_gui_opt = _any_typename_to_gui(optional_inner_type_class_name, custom_attributes=custom_attributes)
+        r_opt = OptionalWithGui(inner_gui_opt)
+        AnyDataWithGui.propagate_label_and_tooltip(inner_gui_opt, r_opt)
+        return r_opt
     elif is_list:
-        inner_gui = _any_typename_to_gui(list_inner_type_class_name, custom_attributes=custom_attributes)
-        return ListWithGui(inner_gui)
+        inner_gui_item = _any_typename_to_gui(list_inner_type_class_name, custom_attributes=custom_attributes)
+        r_list = ListWithGui(inner_gui_item)
+        AnyDataWithGui.propagate_label_and_tooltip(inner_gui_item, r_list)
+        return r_list
 
     # if we reach this point, we have no GUI implementation for the type
     _TO_GUI_CONTEXT.add_missing_gui_factory(typename)
@@ -347,7 +351,8 @@ def _to_param_with_gui(
         param_typename = fully_qualified_annotation(annotation)
         data_with_gui = _any_typename_to_gui(param_typename, custom_attributes)
 
-    data_with_gui.label = name
+    if data_with_gui.label is None:
+        data_with_gui.label = name
 
     # add validate_value callback
     _add_validate_value_callback(custom_attributes, data_with_gui)

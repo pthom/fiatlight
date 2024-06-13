@@ -59,7 +59,7 @@ def _draw_label_with_max_width(
     tooltip: str
 
     if label_tooltip is not None and status_tooltip is not None:
-        tooltip = label_tooltip + "\n" + status_tooltip
+        tooltip = label_tooltip + "\n----------------------------------\n" + status_tooltip
     elif label_tooltip is not None:
         tooltip = label_tooltip
     elif status_tooltip is not None:
@@ -300,14 +300,14 @@ class AnyDataWithGui(Generic[DataType]):
         """Merge custom attributes with the existing ones"""
         if len(custom_attrs) == 0:
             return
-        possible_custom_attrs, _generic_custom_attrs = self.possible_custom_attributes_with_generic()
+        possible_custom_attrs, _generic_possible_custom_attrs = self.possible_custom_attributes_with_generic()
 
         # Create a version that holds all custom attributes
-        all_custom_attrs = copy.deepcopy(_generic_custom_attrs)
+        all_possible_custom_attrs = copy.deepcopy(_generic_possible_custom_attrs)
         if possible_custom_attrs is not None:
-            all_custom_attrs.merge_attributes(copy.copy(possible_custom_attrs))
+            all_possible_custom_attrs.merge_attributes(copy.copy(possible_custom_attrs))
 
-        all_custom_attrs.raise_exception_if_bad_custom_attrs(custom_attrs)
+        all_possible_custom_attrs.raise_exception_if_bad_custom_attrs(custom_attrs)
 
         self.custom_attrs.update(custom_attrs)
         self._handle_generic_attrs()
@@ -320,6 +320,20 @@ class AnyDataWithGui(Generic[DataType]):
             self.label = self.custom_attrs["label"]
         if "tooltip" in self.custom_attrs:
             self.tooltip = self.custom_attrs["tooltip"]
+
+    @staticmethod
+    def propagate_label_and_tooltip(a: "AnyDataWithGui[Any]", b: "AnyDataWithGui[Any]") -> None:
+        """Propagate label and tooltip from one AnyDataWithGui to another
+        Meant to be used with CompositeGui
+        """
+        if a.label is None:
+            a.label = b.label
+        if a.tooltip is None:
+            a.tooltip = b.tooltip
+        if b.label is None:
+            b.label = a.label
+        if b.tooltip is None:
+            b.tooltip = a.tooltip
 
     def _Gui_Section(self) -> None:  # Dummy function to create a section in the IDE # noqa
         """

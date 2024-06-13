@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 
-import fiatlight
+import fiatlight as fl
 from fiatlight.fiat_togui.dataclass_gui import DataclassGui, DataclassLikeGui, BaseModelGui
 from fiatlight import (
     FunctionWithGui,
@@ -131,7 +131,7 @@ def test_base_model_with_field_default_factory() -> None:
 
     my_param_gui = BaseModelGui(MyParam)
     assert my_param_gui._type == MyParam
-    assert isinstance(my_param_gui.value, fiatlight.fiat_types.Unspecified)
+    assert isinstance(my_param_gui.value, fl.fiat_types.Unspecified)
     assert my_param_gui.callbacks.default_value_provider is not None
     default_value = my_param_gui.callbacks.default_value_provider()
     assert isinstance(default_value.foo, Foo)
@@ -171,12 +171,12 @@ def test_decorators() -> None:
 def test_pydantic_with_enum() -> None:
     from enum import Enum
 
-    @fiatlight.enum_with_gui_registration
+    @fl.enum_with_gui_registration
     class MyEnum(Enum):
         A = 1
         B = 2
 
-    @fiatlight.base_model_with_gui_registration()
+    @fl.base_model_with_gui_registration()
     class MyParam(BaseModel):
         my_enum: MyEnum = MyEnum.A
         x: int = 3
@@ -194,7 +194,7 @@ def test_pydantic_with_enum() -> None:
 
 
 def test_base_model_with_custom_attributes() -> None:
-    @fiatlight.base_model_with_gui_registration(rotation_degree__range=(-180, 180))
+    @fl.base_model_with_gui_registration(rotation_degree__range=(-180, 180))
     class ImageEffect(BaseModel):
         rotation_degree: int = 0
 
@@ -205,7 +205,7 @@ def test_base_model_with_custom_attributes() -> None:
     assert rot_gui.custom_attrs["range"] == (-180, 180)
 
     # 2. When using fiatlight machinery
-    gui2 = fiatlight.fiat_togui.any_type_to_gui(ImageEffect, NO_CUSTOM_ATTRIBUTES)
+    gui2 = fl.fiat_togui.any_type_to_gui(ImageEffect, NO_CUSTOM_ATTRIBUTES)
     assert isinstance(gui2, BaseModelGui)
     rot_gui2 = gui2._parameters_with_gui[0].data_with_gui
     assert rot_gui2.custom_attrs["range"] == (-180, 180)
@@ -225,14 +225,14 @@ def test_base_model_with_custom_attributes() -> None:
 
     f2_gui = FunctionWithGui(f2)
     f2_gui_param_gui = f2_gui.input("effect")
-    assert isinstance(f2_gui_param_gui, fiatlight.fiat_togui.composite_gui.OptionalWithGui)
+    assert isinstance(f2_gui_param_gui, fl.fiat_togui.composite_gui.OptionalWithGui)
     assert isinstance(f2_gui_param_gui.inner_gui, BaseModelGui)
     range_f2 = f2_gui_param_gui.inner_gui._parameters_with_gui[0].data_with_gui.custom_attrs["range"]
     assert range_f2 == (-180, 180)
 
 
 def test_dataclass_with_custom_attributes() -> None:
-    @fiatlight.dataclass_with_gui_registration(rotation_degree__range=(-180, 180))
+    @fl.dataclass_with_gui_registration(rotation_degree__range=(-180, 180))
     class ImageEffect:
         rotation_degree: int = 0
 
@@ -242,14 +242,14 @@ def test_dataclass_with_custom_attributes() -> None:
 
     f2_gui = FunctionWithGui(f2)
     f2_gui_param_gui = f2_gui.input("effect")
-    assert isinstance(f2_gui_param_gui, fiatlight.fiat_togui.composite_gui.OptionalWithGui)
+    assert isinstance(f2_gui_param_gui, fl.fiat_togui.composite_gui.OptionalWithGui)
     assert isinstance(f2_gui_param_gui.inner_gui, DataclassGui)
     range_f2 = f2_gui_param_gui.inner_gui._parameters_with_gui[0].data_with_gui.custom_attrs["range"]
     assert range_f2 == (-180, 180)
 
 
 def test_dataclass_in_custom_function() -> None:
-    @fiatlight.base_model_with_gui_registration(x__range=(0, 10))
+    @fl.base_model_with_gui_registration(x__range=(0, 10))
     class Foo(BaseModel):
         x: int = 3
 
@@ -269,7 +269,7 @@ def test_dataclass_in_custom_function() -> None:
             changed = self.foo_gui.gui_edit()
             return changed
 
-    foo_gui = fiatlight.fiat_togui.any_type_to_gui(Foo, NO_CUSTOM_ATTRIBUTES)
+    foo_gui = fl.fiat_togui.any_type_to_gui(Foo, NO_CUSTOM_ATTRIBUTES)
     assert isinstance(foo_gui, BaseModelGui)
     assert foo_gui.custom_attrs == {"x__range": (0, 10)}
     base_model_x_attrs = foo_gui._parameters_with_gui[0].data_with_gui.custom_attrs
@@ -285,4 +285,22 @@ def test_dataclass_in_custom_function() -> None:
     assert inner_base_model_x_attrs == {"range": (0, 10)}
 
 
-# test_dataclass_in_custom_function()
+def test_basemodel_with_optional_member() -> None:
+    @fl.base_model_with_gui_registration(
+        # x__range=(0, 10),
+        x__label="X Value",
+        x__tooltip="This is the x value",
+    )
+    class MyParam(BaseModel):
+        x: int | None = 3
+
+    def f(param: MyParam) -> MyParam:
+        return param
+
+    f_gui = FunctionWithGui(f)
+    f_gui_param_gui = f_gui.input("param")
+    assert isinstance(f_gui_param_gui, BaseModelGui)
+    assert f_gui_param_gui._type == MyParam
+    f_gui_param_gui_inner = f_gui_param_gui._parameters_with_gui[0].data_with_gui
+    assert f_gui_param_gui_inner.label == "X Value"
+    assert f_gui_param_gui_inner.tooltip == "This is the x value"

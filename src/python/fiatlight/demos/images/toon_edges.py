@@ -24,7 +24,7 @@ def merge_toon_edges(
     :param edges_color: Color of the edges
     """
     if is_image_bgr:
-        edges_color = edges_color[::-1]
+        edges_color = ColorRgb((edges_color[2], edges_color[1], edges_color[0]))
 
     # Create a RGBA image that will be overlayed on the original image
     # Its color will be constant (color) and its alpha channel will be the edges_images
@@ -69,13 +69,21 @@ class ToonEdgesAppearance(BaseModel):
     color: ColorRgb = ColorRgb((0, 0, 0))
 
 
-@fl.base_model_with_gui_registration()
+@fl.base_model_with_gui_registration(
+    canny__tooltip="Params for the edge detection",
+    dilate__tooltip="Params for the edge dilation (make it thicker)",
+    appearance__tooltip="Params for the appearance of the edges",
+)
 class ToonEdgesParams(BaseModel):
     canny: ToonCannyParams = ToonCannyParams()
     dilate: ToonDilateParams = ToonDilateParams()
     appearance: ToonEdgesAppearance = ToonEdgesAppearance()
 
 
+@fl.with_custom_attrs(
+    params__tooltip="Parameters for the Toon Edges function",
+    params__label="Edges Params",
+)
 def add_toon_edges(image: ImageU8_3, params: ToonEdgesParams) -> ImageU8_3:
     # ) -> ToonEdgesOutput:
     edges = canny(

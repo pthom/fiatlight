@@ -25,6 +25,7 @@ class OptionalWithGui(AnyDataWithGui[DataType | None]):
         self.callbacks.present_popup_required = inner_gui.callbacks.present_popup_required
         self.callbacks.edit_popup_possible = inner_gui.callbacks.edit_popup_possible
         self.callbacks.edit_popup_required = inner_gui.callbacks.edit_popup_required
+        self.callbacks.on_custom_attrs_changed = inner_gui.callbacks.on_custom_attrs_changed
 
         if self.inner_gui.callbacks.present is not None:
             self.callbacks.present = self.present
@@ -51,6 +52,7 @@ class OptionalWithGui(AnyDataWithGui[DataType | None]):
                 return str(value)
 
     def _on_heartbeat(self) -> bool:
+        AnyDataWithGui.propagate_label_and_tooltip(self, self.inner_gui)
         if self.value is None:
             return False
         if self.inner_gui.callbacks.on_heartbeat is not None:
@@ -149,6 +151,7 @@ class ListWithGui(AnyDataWithGui[List[DataType]]):
         self.callbacks.save_to_dict = self._save_to_dict
         self.callbacks.load_from_dict = self._load_from_dict
         self.callbacks.on_heartbeat = self.inner_gui.callbacks.on_heartbeat
+        self.callbacks.on_custom_attrs_changed = self.inner_gui.callbacks.on_custom_attrs_changed
 
     @staticmethod
     def clipboard_copy_str(v: List[DataType]) -> str:

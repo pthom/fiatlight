@@ -126,10 +126,6 @@ def main() -> None:
     image_to_file = fi.ImageToFileGui()
     fl.run([camera_gui, apply_image_effect, image_to_file])
 
-    # fl.run([fi.image_from_file, apply_image_effect, image_to_file])
-    # fl.run([fi.image_from_file, rotate_image])
-    # fl.run([fi.image_from_file, apply_geo_transf])
-
 
 if __name__ == "__main__":
     main()

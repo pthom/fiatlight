@@ -410,7 +410,7 @@ class FunctionNodeGui:
                 r.param_label_tooltip = "This parameter needs to be specified!"
         else:
             r.param_label_color = FiatColorType.ParameterValueUserSpecified
-            r.param_label_tooltip = "User specified value"
+            r.param_label_tooltip = None
 
         # fill param_name and param_name_tooltip
         r.param_name = input_param.name
