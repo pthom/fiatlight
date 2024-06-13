@@ -172,7 +172,7 @@ class AnyDataWithGui(Generic[DataType]):
     #             return x + y
     #        f.x__range = (0, 10)
     # custom_attrs["range"] will be (0, 10) for the parameter x.
-    _custom_attrs: FiatAttributes
+    _fiat_attributes: FiatAttributes
 
     # Is the present or edit view expanded. This is serialized and deserialized in the GUI options.
     _expanded: bool = True
@@ -201,7 +201,7 @@ class AnyDataWithGui(Generic[DataType]):
         """Initialize the AnyDataWithGui with a type, an unspecified value, and no callbacks."""
         self._type = data_type
         self.callbacks = AnyDataGuiCallbacks()
-        self._custom_attrs = FiatAttributes({})
+        self._fiat_attributes = FiatAttributes({})
 
     @staticmethod
     def _Value_Section() -> None:  # Dummy function to create a section in the IDE # noqa
@@ -294,8 +294,8 @@ class AnyDataWithGui(Generic[DataType]):
         return descendant_attrs, _ANYDATAWITHGUI_GENERIC_POSSIBLE_CUSTOM_ATTRIBUTES
 
     @property
-    def custom_attrs(self) -> FiatAttributes:
-        return self._custom_attrs
+    def fiat_attributes(self) -> FiatAttributes:
+        return self._fiat_attributes
 
     def merge_custom_attrs(self, custom_attrs: FiatAttributes) -> None:
         """Merge custom attributes with the existing ones"""
@@ -310,19 +310,19 @@ class AnyDataWithGui(Generic[DataType]):
 
         all_possible_custom_attrs.raise_exception_if_bad_custom_attrs(custom_attrs)
 
-        self.custom_attrs.update(custom_attrs)
+        self.fiat_attributes.update(custom_attrs)
         self._handle_generic_attrs()
         if self.callbacks.on_custom_attrs_changed is not None:
-            self.callbacks.on_custom_attrs_changed(self.custom_attrs)
+            self.callbacks.on_custom_attrs_changed(self.fiat_attributes)
 
     def _handle_generic_attrs(self) -> None:
         """Handle generic custom attributes"""
-        if "label" in self.custom_attrs:
-            self.label = self.custom_attrs["label"]
-        if "tooltip" in self.custom_attrs:
-            self.tooltip = self.custom_attrs["tooltip"]
-        if "validate_value" in self.custom_attrs:
-            validate_value = self.custom_attrs["validate_value"]
+        if "label" in self.fiat_attributes:
+            self.label = self.fiat_attributes["label"]
+        if "tooltip" in self.fiat_attributes:
+            self.tooltip = self.fiat_attributes["tooltip"]
+        if "validate_value" in self.fiat_attributes:
+            validate_value = self.fiat_attributes["validate_value"]
             if not callable(validate_value):
                 raise ValueError("validate_value is not a callable for parameter output")
             self.callbacks.validate_value.append(validate_value)

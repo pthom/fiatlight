@@ -121,6 +121,6 @@ def test_possible_custom_attr_in_function() -> None:
         return foo
 
     f_gui = fl.FunctionWithGui(f)
-    custom_attrs = f_gui.param("foo").data_with_gui.custom_attrs
+    custom_attrs = f_gui.param("foo").data_with_gui.fiat_attributes
     assert "xrange" in custom_attrs
     assert custom_attrs["xrange"] == (5, 10)

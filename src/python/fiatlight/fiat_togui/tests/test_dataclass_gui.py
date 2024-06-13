@@ -202,13 +202,13 @@ def test_base_model_with_custom_attributes() -> None:
     # 1. When creating the GUI manually
     my_param_gui = BaseModelGui(ImageEffect, FiatAttributes({"rotation_degree__range": (-180, 180)}))
     rot_gui = my_param_gui._parameters_with_gui[0].data_with_gui
-    assert rot_gui.custom_attrs["range"] == (-180, 180)
+    assert rot_gui.fiat_attributes["range"] == (-180, 180)
 
     # 2. When using fiatlight machinery
     gui2 = fl.fiat_togui._any_type_to_gui_impl(ImageEffect, NO_CUSTOM_ATTRIBUTES)
     assert isinstance(gui2, BaseModelGui)
     rot_gui2 = gui2._parameters_with_gui[0].data_with_gui
-    assert rot_gui2.custom_attrs["range"] == (-180, 180)
+    assert rot_gui2.fiat_attributes["range"] == (-180, 180)
 
     # 3 When using fiatlight machinery with a function
     def f(effect: ImageEffect) -> ImageEffect:
@@ -217,7 +217,7 @@ def test_base_model_with_custom_attributes() -> None:
     f_gui = FunctionWithGui(f)
     f_gui_param_gui = f_gui.input("effect")
     rot_gui3 = f_gui_param_gui._parameters_with_gui[0].data_with_gui  # type: ignore
-    assert rot_gui3.custom_attrs["range"] == (-180, 180)
+    assert rot_gui3.fiat_attributes["range"] == (-180, 180)
 
     # 4.  When using fiatlight machinery with a function where the param is optional
     def f2(effect: ImageEffect | None = None) -> ImageEffect | None:
@@ -227,7 +227,7 @@ def test_base_model_with_custom_attributes() -> None:
     f2_gui_param_gui = f2_gui.input("effect")
     assert isinstance(f2_gui_param_gui, fl.fiat_togui.composite_gui.OptionalWithGui)
     assert isinstance(f2_gui_param_gui.inner_gui, BaseModelGui)
-    range_f2 = f2_gui_param_gui.inner_gui._parameters_with_gui[0].data_with_gui.custom_attrs["range"]
+    range_f2 = f2_gui_param_gui.inner_gui._parameters_with_gui[0].data_with_gui.fiat_attributes["range"]
     assert range_f2 == (-180, 180)
 
 
@@ -244,7 +244,7 @@ def test_dataclass_with_custom_attributes() -> None:
     f2_gui_param_gui = f2_gui.input("effect")
     assert isinstance(f2_gui_param_gui, fl.fiat_togui.composite_gui.OptionalWithGui)
     assert isinstance(f2_gui_param_gui.inner_gui, DataclassGui)
-    range_f2 = f2_gui_param_gui.inner_gui._parameters_with_gui[0].data_with_gui.custom_attrs["range"]
+    range_f2 = f2_gui_param_gui.inner_gui._parameters_with_gui[0].data_with_gui.fiat_attributes["range"]
     assert range_f2 == (-180, 180)
 
 
@@ -271,17 +271,17 @@ def test_dataclass_in_custom_function() -> None:
 
     foo_gui = fl.fiat_togui._any_type_to_gui_impl(Foo, NO_CUSTOM_ATTRIBUTES)
     assert isinstance(foo_gui, BaseModelGui)
-    assert foo_gui.custom_attrs == {"x__range": (0, 10)}
-    base_model_x_attrs = foo_gui._parameters_with_gui[0].data_with_gui.custom_attrs
+    assert foo_gui.fiat_attributes == {"x__range": (0, 10)}
+    base_model_x_attrs = foo_gui._parameters_with_gui[0].data_with_gui.fiat_attributes
     assert base_model_x_attrs == {"range": (0, 10)}
 
     my_function = MyFunction()
 
-    inner_foo_gui_attrs = my_function.foo_gui.custom_attrs
+    inner_foo_gui_attrs = my_function.foo_gui.fiat_attributes
     assert inner_foo_gui_attrs == {"x__range": (0, 10)}
 
     assert isinstance(my_function.foo_gui, BaseModelGui)
-    inner_base_model_x_attrs = my_function.foo_gui._parameters_with_gui[0].data_with_gui.custom_attrs
+    inner_base_model_x_attrs = my_function.foo_gui._parameters_with_gui[0].data_with_gui.fiat_attributes
     assert inner_base_model_x_attrs == {"range": (0, 10)}
 
 

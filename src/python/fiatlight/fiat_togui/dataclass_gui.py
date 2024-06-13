@@ -162,7 +162,7 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
                 param_on_exit()
 
     def on_custom_attrs_changed(self, attrs: FiatAttributes) -> None:
-        self._custom_attrs = attrs
+        self._fiat_attributes = attrs
         for param_gui in self._parameters_with_gui:
             prefix = f"{param_gui.name}__"
             this_param_attrs = FiatAttributes({})

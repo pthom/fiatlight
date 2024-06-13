@@ -107,54 +107,54 @@ class IntWithGui(AnyDataWithGui[int]):
         return _POSSIBLE_INT_ATTRIBUTES
 
     def _handle_custom_attrs(self, custom_attrs: FiatAttributes) -> None:
-        if "range" in self.custom_attrs:
-            range_ = self.custom_attrs["range"]
+        if "range" in self.fiat_attributes:
+            range_ = self.fiat_attributes["range"]
             self.params.v_min = range_[0]
             self.params.v_max = range_[1]
             self.params.edit_type = IntEditType.slider
 
-        if "edit_type" in self.custom_attrs:
-            edit_type_ = self.custom_attrs["edit_type"]
+        if "edit_type" in self.fiat_attributes:
+            edit_type_ = self.fiat_attributes["edit_type"]
             try:
                 edit_type = IntEditType[edit_type_]
                 self.params.edit_type = edit_type
             except KeyError:
                 raise ValueError(f"Unknown edit_type: {edit_type_}. Available types: {available_int_edit_types()}")
 
-        if "format" in self.custom_attrs:
-            self.params.format = self.custom_attrs["format"]
+        if "format" in self.fiat_attributes:
+            self.params.format = self.fiat_attributes["format"]
 
-        if "width_em" in self.custom_attrs:
-            if not isinstance(self.custom_attrs["width_em"], (int, float)):
-                raise ValueError(f"width_em must be a number, got: {self.custom_attrs['width_em']}")
-            self.params.width_em = self.custom_attrs["width_em"]
+        if "width_em" in self.fiat_attributes:
+            if not isinstance(self.fiat_attributes["width_em"], (int, float)):
+                raise ValueError(f"width_em must be a number, got: {self.fiat_attributes['width_em']}")
+            self.params.width_em = self.fiat_attributes["width_em"]
 
-        if "knob_size_em" in self.custom_attrs:
-            if not isinstance(self.custom_attrs["knob_size_em"], (int, float)):
-                raise ValueError(f"knob_size_em must be a number, got: {self.custom_attrs['knob_size_em']}")
-            self.params.knob_size_em = self.custom_attrs["knob_size_em"]
+        if "knob_size_em" in self.fiat_attributes:
+            if not isinstance(self.fiat_attributes["knob_size_em"], (int, float)):
+                raise ValueError(f"knob_size_em must be a number, got: {self.fiat_attributes['knob_size_em']}")
+            self.params.knob_size_em = self.fiat_attributes["knob_size_em"]
 
-        if "knob_steps" in self.custom_attrs:
-            if not isinstance(self.custom_attrs["knob_steps"], int):
-                raise ValueError(f"knob_steps must be an integer, got: {self.custom_attrs['knob_steps']}")
-            self.params.knob_steps = self.custom_attrs["knob_steps"]
+        if "knob_steps" in self.fiat_attributes:
+            if not isinstance(self.fiat_attributes["knob_steps"], int):
+                raise ValueError(f"knob_steps must be an integer, got: {self.fiat_attributes['knob_steps']}")
+            self.params.knob_steps = self.fiat_attributes["knob_steps"]
 
-        if "knob_no_input" in self.custom_attrs:
-            if not isinstance(self.custom_attrs["knob_no_input"], bool):
-                raise ValueError(f"knob_no_input must be a boolean, got: {self.custom_attrs['knob_no_input']}")
-            self.params.knob_no_input = self.custom_attrs["knob_no_input"]
+        if "knob_no_input" in self.fiat_attributes:
+            if not isinstance(self.fiat_attributes["knob_no_input"], bool):
+                raise ValueError(f"knob_no_input must be a boolean, got: {self.fiat_attributes['knob_no_input']}")
+            self.params.knob_no_input = self.fiat_attributes["knob_no_input"]
 
-        if "slider_no_input" in self.custom_attrs:
-            if not isinstance(self.custom_attrs["slider_no_input"], bool):
-                raise ValueError(f"slider_no_input must be a boolean, got: {self.custom_attrs['slider_no_input']}")
-            self.params.slider_no_input = self.custom_attrs["slider_no_input"]
+        if "slider_no_input" in self.fiat_attributes:
+            if not isinstance(self.fiat_attributes["slider_no_input"], bool):
+                raise ValueError(f"slider_no_input must be a boolean, got: {self.fiat_attributes['slider_no_input']}")
+            self.params.slider_no_input = self.fiat_attributes["slider_no_input"]
 
-        if "slider_logarithmic" in self.custom_attrs:
-            if not isinstance(self.custom_attrs["slider_logarithmic"], bool):
+        if "slider_logarithmic" in self.fiat_attributes:
+            if not isinstance(self.fiat_attributes["slider_logarithmic"], bool):
                 raise ValueError(
-                    f"slider_logarithmic must be a boolean, got: {self.custom_attrs['slider_logarithmic']}"
+                    f"slider_logarithmic must be a boolean, got: {self.fiat_attributes['slider_logarithmic']}"
                 )
-            self.params.slider_logarithmic = self.custom_attrs["slider_logarithmic"]
+            self.params.slider_logarithmic = self.fiat_attributes["slider_logarithmic"]
 
     def edit(self, value: int) -> tuple[bool, int]:
         if not isinstance(value, int):
@@ -343,8 +343,8 @@ class FloatWithGui(AnyDataWithGui[float]):
         return _POSSIBLE_FLOAT_ATTRIBUTES
 
     def _handle_custom_attrs(self, custom_attrs: FiatAttributes) -> None:
-        if "range" in self.custom_attrs:
-            range_ = self.custom_attrs["range"]
+        if "range" in self.fiat_attributes:
+            range_ = self.fiat_attributes["range"]
             if not isinstance(range_, tuple) or len(range_) != 2:
                 raise ValueError(f"range must be a tuple of two numbers, got: {range_}")
             if not all(isinstance(x, (int, float)) for x in range_):
@@ -353,8 +353,8 @@ class FloatWithGui(AnyDataWithGui[float]):
             self.params.v_max = range_[1]
             self.params.edit_type = FloatEditType.slider
 
-        if "edit_type" in self.custom_attrs:
-            edit_type_ = self.custom_attrs["edit_type"]
+        if "edit_type" in self.fiat_attributes:
+            edit_type_ = self.fiat_attributes["edit_type"]
             try:
                 edit_type = FloatEditType[edit_type_]
                 self.params.edit_type = edit_type
@@ -363,40 +363,40 @@ class FloatWithGui(AnyDataWithGui[float]):
             except KeyError:
                 raise ValueError(f"Unknown edit_type: {edit_type_}. Available types: {_available_float_edit_types()}")
 
-        if "format" in self.custom_attrs:
-            self.params.format = self.custom_attrs["format"]
+        if "format" in self.fiat_attributes:
+            self.params.format = self.fiat_attributes["format"]
 
-        if "width_em" in self.custom_attrs:
-            if not isinstance(self.custom_attrs["width_em"], (int, float)):
-                raise ValueError(f"width_em must be a number, got: {self.custom_attrs['width_em']}")
-            self.params.width_em = self.custom_attrs["width_em"]
+        if "width_em" in self.fiat_attributes:
+            if not isinstance(self.fiat_attributes["width_em"], (int, float)):
+                raise ValueError(f"width_em must be a number, got: {self.fiat_attributes['width_em']}")
+            self.params.width_em = self.fiat_attributes["width_em"]
 
-        if "knob_size_em" in self.custom_attrs:
-            if not isinstance(self.custom_attrs["knob_size_em"], (int, float)):
-                raise ValueError(f"knob_size_em must be a number, got: {self.custom_attrs['knob_size_em']}")
-            self.params.knob_size_em = self.custom_attrs["knob_size_em"]
+        if "knob_size_em" in self.fiat_attributes:
+            if not isinstance(self.fiat_attributes["knob_size_em"], (int, float)):
+                raise ValueError(f"knob_size_em must be a number, got: {self.fiat_attributes['knob_size_em']}")
+            self.params.knob_size_em = self.fiat_attributes["knob_size_em"]
 
-        if "knob_steps" in self.custom_attrs:
-            if not isinstance(self.custom_attrs["knob_steps"], int):
-                raise ValueError(f"knob_steps must be an integer, got: {self.custom_attrs['knob_steps']}")
-            self.params.knob_steps = self.custom_attrs["knob_steps"]
+        if "knob_steps" in self.fiat_attributes:
+            if not isinstance(self.fiat_attributes["knob_steps"], int):
+                raise ValueError(f"knob_steps must be an integer, got: {self.fiat_attributes['knob_steps']}")
+            self.params.knob_steps = self.fiat_attributes["knob_steps"]
 
-        if "knob_no_input" in self.custom_attrs:
-            if not isinstance(self.custom_attrs["knob_no_input"], bool):
-                raise ValueError(f"knob_no_input must be a boolean, got: {self.custom_attrs['knob_no_input']}")
-            self.params.knob_no_input = self.custom_attrs["knob_no_input"]
+        if "knob_no_input" in self.fiat_attributes:
+            if not isinstance(self.fiat_attributes["knob_no_input"], bool):
+                raise ValueError(f"knob_no_input must be a boolean, got: {self.fiat_attributes['knob_no_input']}")
+            self.params.knob_no_input = self.fiat_attributes["knob_no_input"]
 
-        if "slider_no_input" in self.custom_attrs:
-            if not isinstance(self.custom_attrs["slider_no_input"], bool):
-                raise ValueError(f"slider_no_input must be a boolean, got: {self.custom_attrs['slider_no_input']}")
-            self.params.slider_no_input = self.custom_attrs["slider_no_input"]
+        if "slider_no_input" in self.fiat_attributes:
+            if not isinstance(self.fiat_attributes["slider_no_input"], bool):
+                raise ValueError(f"slider_no_input must be a boolean, got: {self.fiat_attributes['slider_no_input']}")
+            self.params.slider_no_input = self.fiat_attributes["slider_no_input"]
 
-        if "slider_logarithmic" in self.custom_attrs:
-            if not isinstance(self.custom_attrs["slider_logarithmic"], bool):
+        if "slider_logarithmic" in self.fiat_attributes:
+            if not isinstance(self.fiat_attributes["slider_logarithmic"], bool):
                 raise ValueError(
-                    f"slider_logarithmic must be a boolean, got: {self.custom_attrs['slider_logarithmic']}"
+                    f"slider_logarithmic must be a boolean, got: {self.fiat_attributes['slider_logarithmic']}"
                 )
-            self.params.slider_logarithmic = self.custom_attrs["slider_logarithmic"]
+            self.params.slider_logarithmic = self.fiat_attributes["slider_logarithmic"]
 
     def present_str(self, value: float) -> str:
         if self.params.nb_significant_digits >= 0:
@@ -545,8 +545,8 @@ class BoolWithGui(AnyDataWithGui[bool]):
         return _POSSIBLE_BOOL_ATTRIBUTES
 
     def _handle_custom_attrs(self, custom_attrs: FiatAttributes) -> None:
-        if "edit_type" in self.custom_attrs:
-            edit_type_ = self.custom_attrs["edit_type"]
+        if "edit_type" in self.fiat_attributes:
+            edit_type_ = self.fiat_attributes["edit_type"]
             try:
                 edit_type = BoolEditType[edit_type_]
                 self.params.edit_type = edit_type
