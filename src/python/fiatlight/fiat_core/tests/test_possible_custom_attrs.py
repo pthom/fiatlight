@@ -66,7 +66,7 @@ def test_possible_fiat_attr_validation() -> None:
     assert "must be a multiple of 3" in r.error_message
 
 
-def test_custom_attr_doc() -> None:
+def test_fiat_attr_doc() -> None:
     possible_fiat_attrs = make_possible_fiat_attributes()
     doc = possible_fiat_attrs.documentation()
     code_utils.assert_are_codes_equal(
@@ -98,7 +98,7 @@ def test_custom_attr_doc() -> None:
     )
 
 
-def test_possible_custom_attr_in_function() -> None:
+def test_possible_fiat_attr_in_function() -> None:
     class FooWithGui(AnyDataWithGui[Foo]):
         def __init__(self) -> None:
             super().__init__(Foo)

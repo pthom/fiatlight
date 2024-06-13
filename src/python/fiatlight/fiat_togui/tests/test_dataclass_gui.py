@@ -193,7 +193,7 @@ def test_pydantic_with_enum() -> None:
     assert as_dict == {"type": "Pydantic", "value": {"my_enum": 2, "x": 4}}
 
 
-def test_base_model_with_custom_attributes() -> None:
+def test_base_model_with_fiat_attributes() -> None:
     @fl.base_model_with_gui_registration(rotation_degree__range=(-180, 180))
     class ImageEffect(BaseModel):
         rotation_degree: int = 0
@@ -231,7 +231,7 @@ def test_base_model_with_custom_attributes() -> None:
     assert range_f2 == (-180, 180)
 
 
-def test_dataclass_with_custom_attributes() -> None:
+def test_dataclass_with_fiat_attributes() -> None:
     @fl.dataclass_with_gui_registration(rotation_degree__range=(-180, 180))
     class ImageEffect:
         rotation_degree: int = 0

@@ -133,7 +133,7 @@ class ImagePresenter:
     size_when_only_display: ImVec2
     show_inspect_button: bool = True
 
-    _was_image_size_custom_attr_handled: bool = False
+    _was_image_size_fiat_attr_handled: bool = False
 
     def __init__(self) -> None:
         self.image_params = default_image_params()
@@ -148,11 +148,11 @@ class ImagePresenter:
             # (except if can_resize is False)
             shall_take_into_account = True
             if self.image_params.can_resize:
-                shall_take_into_account = not self._was_image_size_custom_attr_handled
+                shall_take_into_account = not self._was_image_size_fiat_attr_handled
             if shall_take_into_account:
                 self.image_params.image_display_size = tuple(image_display_size)
                 self.size_when_only_display = ImVec2(image_display_size[0], image_display_size[1])
-                self._was_image_size_custom_attr_handled = True
+                self._was_image_size_fiat_attr_handled = True
 
         if "show_channels" in fiat_attrs:
             self.show_channels = fiat_attrs["show_channels"]

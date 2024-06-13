@@ -732,46 +732,46 @@ class FunctionWithGui:
         """Handle custom attributes for the function"""
         # Filter out the custom attributes for parameters and outputs
         # (they contain a double underscore "__" in their name)
-        fn_custom_attributes = {key: value for key, value in fiat_attributes.items() if "__" not in key}
+        fn_fiat_attributes = {key: value for key, value in fiat_attributes.items() if "__" not in key}
         # We accept wrong keys, because other libraries, such as Pydantic, may add custom attributes
         # that would not be recognized by FiatLight
-        _FUNCTION_POSSIBLE_FIAT_ATTRIBUTES.raise_exception_if_bad_fiat_attrs(fn_custom_attributes)
+        _FUNCTION_POSSIBLE_FIAT_ATTRIBUTES.raise_exception_if_bad_fiat_attrs(fn_fiat_attributes)
 
         # Check that there are no custom attributes for a non-existing parameter or output
-        params_custom_attributes = [key for key in fiat_attributes if "__" in key and not key.startswith("__")]
-        for custom_attribute in params_custom_attributes:
-            assert "__" in custom_attribute
-            param_name = custom_attribute.split("__")[0]
-            if custom_attribute.startswith("return__"):
+        params_fiat_attributes = [key for key in fiat_attributes if "__" in key and not key.startswith("__")]
+        for fiat_attribute in params_fiat_attributes:
+            assert "__" in fiat_attribute
+            param_name = fiat_attribute.split("__")[0]
+            if fiat_attribute.startswith("return__"):
                 if len(self._outputs_with_gui) == 0:
                     raise FiatToGuiException(
                         f"""
-                        FunctionWithGui({self.name}): custom attribute '{custom_attribute}' invalid. The function has no output!
+                        FunctionWithGui({self.name}): custom attribute '{fiat_attribute}' invalid. The function has no output!
                         """
                     )
             else:
                 if not self.has_param(param_name):
                     raise FiatToGuiException(
                         f"""
-                        FunctionWithGui({self.name}): custom attribute '{custom_attribute}' is associated to a parameter {param_name} that does not exist!
+                        FunctionWithGui({self.name}): custom attribute '{fiat_attribute}' is associated to a parameter {param_name} that does not exist!
                         """
                     )
 
         # Set the custom attributes for the function
-        if "invoke_async" in fn_custom_attributes:
-            self.invoke_async = fn_custom_attributes["invoke_async"]
-        if "invoke_manually" in fn_custom_attributes:
-            self.invoke_manually = fn_custom_attributes["invoke_manually"]
-        if "invoke_always_dirty" in fn_custom_attributes:
-            self.invoke_always_dirty = fn_custom_attributes["invoke_always_dirty"]
-        if "doc_display" in fn_custom_attributes:
-            self.doc_display = fn_custom_attributes["doc_display"]
-        if "doc_markdown" in fn_custom_attributes:
-            self.doc_markdown = fn_custom_attributes["doc_markdown"]
-        if "doc_user" in fn_custom_attributes:
-            self.doc_user = fn_custom_attributes["doc_user"]
-        if "doc_show_source" in fn_custom_attributes:
-            self.doc_show_source = fn_custom_attributes["doc_show_source"]
+        if "invoke_async" in fn_fiat_attributes:
+            self.invoke_async = fn_fiat_attributes["invoke_async"]
+        if "invoke_manually" in fn_fiat_attributes:
+            self.invoke_manually = fn_fiat_attributes["invoke_manually"]
+        if "invoke_always_dirty" in fn_fiat_attributes:
+            self.invoke_always_dirty = fn_fiat_attributes["invoke_always_dirty"]
+        if "doc_display" in fn_fiat_attributes:
+            self.doc_display = fn_fiat_attributes["doc_display"]
+        if "doc_markdown" in fn_fiat_attributes:
+            self.doc_markdown = fn_fiat_attributes["doc_markdown"]
+        if "doc_user" in fn_fiat_attributes:
+            self.doc_user = fn_fiat_attributes["doc_user"]
+        if "doc_show_source" in fn_fiat_attributes:
+            self.doc_show_source = fn_fiat_attributes["doc_show_source"]
 
     def set_invoke_live(self) -> None:
         """Set flags to make this a live function (called automatically at each frame)"""

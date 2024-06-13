@@ -16,12 +16,12 @@ def make_gui_demo_code(gui_instance: AnyDataWithGui[Any]) -> str:
     param_name = datatype_basename.lower() + "_param"
 
     def compute_fiat_attrs_code() -> str:
-        possible_fiat_attrs, generic_custom_attributes = gui_instance.possible_fiat_attributes_with_generic()
+        possible_fiat_attrs, generic_fiat_attributes = gui_instance.possible_fiat_attributes_with_generic()
         if possible_fiat_attrs is None:
-            possible_plus_generic = generic_custom_attributes
+            possible_plus_generic = generic_fiat_attributes
         else:
             possible_plus_generic = copy.deepcopy(possible_fiat_attrs)
-            possible_plus_generic.merge_attributes(generic_custom_attributes)
+            possible_plus_generic.merge_attributes(generic_fiat_attributes)
 
         example_usage = possible_plus_generic.example_usage(param_name)
         example_usage = code_utils.indent_code(example_usage, indent_size=4)

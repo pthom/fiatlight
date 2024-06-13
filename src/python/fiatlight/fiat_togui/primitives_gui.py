@@ -273,10 +273,6 @@ class PossibleFloatAttributes(PossibleFiatAttributes):
 _POSSIBLE_FLOAT_ATTRIBUTES = PossibleFloatAttributes()
 
 
-def float_custom_attributes_documentation() -> str:
-    return _POSSIBLE_FLOAT_ATTRIBUTES.documentation()
-
-
 class FloatEditType(Enum):
     slider = 1
     input = 2
@@ -499,10 +495,6 @@ class _PossibleBoolAttributes(PossibleFiatAttributes):
 
 
 _POSSIBLE_BOOL_ATTRIBUTES = _PossibleBoolAttributes()
-
-
-def bool_custom_attributes_documentation() -> str:
-    return _POSSIBLE_BOOL_ATTRIBUTES.documentation()
 
 
 class BoolEditType(Enum):

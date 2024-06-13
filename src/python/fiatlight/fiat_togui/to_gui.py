@@ -304,17 +304,17 @@ def any_typing_new_type_to_gui(type_: DataType, fiat_attributes: FiatAttributes)
     return r
 
 
-def _fn_outputs_with_gui(type_class_name: str, fn_custom_attributes: FiatAttributes) -> List[AnyDataWithGui[Any]]:
+def _fn_outputs_with_gui(type_class_name: str, fn_fiat_attributes: FiatAttributes) -> List[AnyDataWithGui[Any]]:
     """Convert the return type of a function to a (list of) GUI representation."""
     r = []
     is_tuple, inner_type_classes = _extract_tuple_typeclasses(type_class_name)
     if is_tuple:
         for idx_output, inner_type_class in enumerate(inner_type_classes):
-            output_fiat_attrs = get_output_fiat_attributes(fn_custom_attributes, idx_output)
+            output_fiat_attrs = get_output_fiat_attributes(fn_fiat_attributes, idx_output)
             output_gui = _any_typename_to_gui(inner_type_class, fiat_attributes=output_fiat_attrs)
             r.append(output_gui)
     else:
-        output_fiat_attrs = get_output_fiat_attributes(fn_custom_attributes)
+        output_fiat_attrs = get_output_fiat_attributes(fn_fiat_attributes)
         output_gui = _any_typename_to_gui(type_class_name, fiat_attributes=output_fiat_attrs)
         r.append(output_gui)
     return r

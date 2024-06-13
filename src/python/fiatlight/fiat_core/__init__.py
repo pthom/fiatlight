@@ -32,7 +32,7 @@ __all__ = [
     "FunctionNodeLink",
     # from functions_graph
     "FunctionsGraph",
-    # from possible_custom_attributes
+    # from possible_fiat_attributes
     "PossibleFiatAttributes",
     # from togui_exception
     "FiatToGuiException",

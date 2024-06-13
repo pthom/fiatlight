@@ -1,7 +1,7 @@
 import fiatlight
 
 
-def test_numeric_ranges_with_manual_custom_attr() -> None:
+def test_numeric_ranges_with_manual_fiat_attr() -> None:
     def to_fahrenheit(celsius: float = 10) -> float:
         return celsius * 9 / 5 + 32
 

@@ -3,7 +3,7 @@ import pytest
 import fiatlight as fl
 
 
-def test_no_custom_attributes() -> None:
+def test_no_fiat_attributes() -> None:
     def f() -> None:
         pass
 
@@ -11,7 +11,7 @@ def test_no_custom_attributes() -> None:
     _f_gui = fl.FunctionWithGui(f)
 
 
-def test_param_custom_attributes() -> None:
+def test_param_fiat_attributes() -> None:
     @fl.with_fiat_attributes(x__range=(0, 10), return__range=(0, 10))
     def f(x: int) -> int:
         return x
