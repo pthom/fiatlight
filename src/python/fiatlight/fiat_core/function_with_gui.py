@@ -107,10 +107,10 @@ with a range from -1 to 1.
     ```python
     import fiatlight as fl
 
-    # Use the `with_custom_attrs` decorator to set custom attributes for the function:
+    # Use the `with_fiat_attributes` decorator to set custom attributes for the function:
     # Here, we set the range of the x parameter.
     # Important: note the double underscore ("_") after the parameter name!
-    @fl.with_custom_attrs(x__range=(-1, 1))
+    @fl.with_fiat_attributes(x__range=(-1, 1))
     def my_asin(x: float = 0.5) -> float:
         import math
         return math.asin(x)
@@ -126,30 +126,30 @@ Available customization options
 
 ### For int parameters:
 
-```python
-from fiatlight.fiat_togui.primitives_gui import int_custom_attributes_documentation
-print(int_custom_attributes_documentation())
+```
+%%bash
+fiatlight gui int
 ```
 
 ### For float parameters:
 
 ```python
-from fiatlight.fiat_togui.primitives_gui import float_custom_attributes_documentation
-print(float_custom_attributes_documentation())
+%%bash
+fiatlight gui float
 ```
 
 ### For bool parameters:
 
 ```python
-from fiatlight.fiat_togui.primitives_gui import bool_custom_attributes_documentation
-print(bool_custom_attributes_documentation())
+%%bash
+fiatlight gui bool
 ```
 
 ### For images:
 
 ```python
-from fiatlight.fiat_kits.fiat_image.image_gui import image_custom_attributes_documentation
-print(image_custom_attributes_documentation())
+%%bash
+fiatlight gui ImageWithGui
 ```
 
 
@@ -160,7 +160,7 @@ A full example with custom attributes for function parameters
     import fiatlight
     from matplotlib.figure import Figure
 
-    @fiatlight.with_custom_attrs(
+    @fiatlight.with_fiat_attributes(
         # Edit the number of bars with a knob
         n_bars__edit_type="knob",
         n_bars__range=(1, 300),
@@ -517,7 +517,7 @@ class FunctionPossibleFiatAttributes(PossibleFiatAttributes):
         )
 
 
-_FUNCTION_POSSIBLE_CUSTOM_ATTRIBUTES = FunctionPossibleFiatAttributes()
+_FUNCTION_POSSIBLE_FIAT_ATTRIBUTES = FunctionPossibleFiatAttributes()
 
 
 class FunctionWithGui:
@@ -735,7 +735,7 @@ class FunctionWithGui:
         fn_custom_attributes = {key: value for key, value in custom_attributes.items() if "__" not in key}
         # We accept wrong keys, because other libraries, such as Pydantic, may add custom attributes
         # that would not be recognized by FiatLight
-        _FUNCTION_POSSIBLE_CUSTOM_ATTRIBUTES.raise_exception_if_bad_custom_attrs(fn_custom_attributes)
+        _FUNCTION_POSSIBLE_FIAT_ATTRIBUTES.raise_exception_if_bad_custom_attrs(fn_custom_attributes)
 
         # Check that there are no custom attributes for a non-existing parameter or output
         params_custom_attributes = [key for key in custom_attributes if "__" in key and not key.startswith("__")]

@@ -14,7 +14,7 @@ def int_multiple_of_3(x: int) -> DataValidationResult:
     return DataValidationResult.error("must be a multiple of 3")
 
 
-def make_possible_custom_attributes() -> PossibleFiatAttributes:
+def make_possible_fiat_attributes() -> PossibleFiatAttributes:
     custom_attrs = PossibleFiatAttributes("Foo")
     custom_attrs.add_explained_attribute(
         name="xrange",
@@ -35,7 +35,7 @@ def make_possible_custom_attributes() -> PossibleFiatAttributes:
 
 
 def test_possible_custom_attr_validation() -> None:
-    possible_custom_attrs = make_possible_custom_attributes()
+    possible_custom_attrs = make_possible_fiat_attributes()
 
     r = possible_custom_attrs.validate_custom_attrs({"xrange": (0, 5)})
     assert r.is_valid
@@ -67,7 +67,7 @@ def test_possible_custom_attr_validation() -> None:
 
 
 def test_custom_attr_doc() -> None:
-    possible_custom_attrs = make_possible_custom_attributes()
+    possible_custom_attrs = make_possible_fiat_attributes()
     doc = possible_custom_attrs.documentation()
     code_utils.assert_are_codes_equal(
         doc,
@@ -104,7 +104,7 @@ def test_possible_custom_attr_in_function() -> None:
             super().__init__(Foo)
 
         @staticmethod
-        def possible_custom_attributes() -> PossibleFiatAttributes | None:
+        def possible_fiat_attributes() -> PossibleFiatAttributes | None:
             custom_attrs = PossibleFiatAttributes("Foo")
             custom_attrs.add_explained_attribute(
                 name="xrange", type_=tuple, explanation="Range for xrange", default_value=(0, 5), tuple_types=(int, int)

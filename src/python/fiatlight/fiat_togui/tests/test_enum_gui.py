@@ -8,7 +8,7 @@ from fiatlight.fiat_togui.tests.sample_enum import (
     SampleEnumRegisteredManually,
 )
 
-NO_CUSTOM_ATTRIBUTES = FiatAttributes({})
+NO_FIAT_ATTRIBUTES = FiatAttributes({})
 
 
 def test_enum_registered() -> None:
@@ -41,7 +41,7 @@ def test_enum_serialization() -> None:
         A = 1
         B = 2
 
-    a = to_gui._to_data_with_gui_impl(MyEnum.A, NO_CUSTOM_ATTRIBUTES)
+    a = to_gui._to_data_with_gui_impl(MyEnum.A, NO_FIAT_ATTRIBUTES)
     assert a.value == MyEnum.A
     as_json = a.call_save_to_dict(a.value)
     assert as_json == {"class": "MyEnum", "type": "Enum", "value_name": "A"}

@@ -45,10 +45,6 @@ class _PossibleIntAttributes(PossibleFiatAttributes):
 _POSSIBLE_INT_ATTRIBUTES = _PossibleIntAttributes()
 
 
-def int_custom_attributes_documentation() -> str:
-    return _POSSIBLE_INT_ATTRIBUTES.documentation()
-
-
 class IntEditType(Enum):
     slider = 1
     input = 2
@@ -103,7 +99,7 @@ class IntWithGui(AnyDataWithGui[int]):
         self.callbacks.edit_collapsible = False
 
     @staticmethod
-    def possible_custom_attributes() -> PossibleFiatAttributes | None:
+    def possible_fiat_attributes() -> PossibleFiatAttributes | None:
         return _POSSIBLE_INT_ATTRIBUTES
 
     def _handle_custom_attrs(self, custom_attrs: FiatAttributes) -> None:
@@ -339,7 +335,7 @@ class FloatWithGui(AnyDataWithGui[float]):
         self.callbacks.edit_collapsible = False
 
     @staticmethod
-    def possible_custom_attributes() -> PossibleFiatAttributes | None:
+    def possible_fiat_attributes() -> PossibleFiatAttributes | None:
         return _POSSIBLE_FLOAT_ATTRIBUTES
 
     def _handle_custom_attrs(self, custom_attrs: FiatAttributes) -> None:
@@ -541,7 +537,7 @@ class BoolWithGui(AnyDataWithGui[bool]):
         self.callbacks.edit_collapsible = False
 
     @staticmethod
-    def possible_custom_attributes() -> PossibleFiatAttributes | None:
+    def possible_fiat_attributes() -> PossibleFiatAttributes | None:
         return _POSSIBLE_BOOL_ATTRIBUTES
 
     def _handle_custom_attrs(self, custom_attrs: FiatAttributes) -> None:

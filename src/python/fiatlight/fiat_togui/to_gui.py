@@ -394,8 +394,8 @@ def _get_input_param_custom_attributes(fn_attributes: JsonDict, param_name: str)
        f.x__range = (0, 1)
        f.x__type = "slider"
 
-    * or by using the with_custom_attrs decorator:
-       @fl.with_custom_attrs(x__range=(0, 1), x__type="slider")
+    * or by using the with_fiat_attributes decorator:
+       @fl.with_fiat_attributes(x__range=(0, 1), x__type="slider")
        def f(x: float):
            return x
     """
@@ -409,7 +409,7 @@ def _get_input_param_custom_attributes(fn_attributes: JsonDict, param_name: str)
 def get_output_custom_attributes(fn_attributes: JsonDict, idx_output: int = 0) -> FiatAttributes:
     """Get the optional custom attributes for the return value.
     For example:
-        @with_custom_attrs(return__range=(0, 1))
+        @with_fiat_attributes(return__range=(0, 1))
         def f() -> float:
             return 1.0
     """
@@ -454,7 +454,7 @@ def add_input_outputs_to_function(
     if return_annotation is inspect.Parameter.empty:
         output_with_gui = AnyDataWithGui_UnregisteredType("inspect.Parameter.empty")
         output_with_gui.label = "Output"
-        output_with_gui.merge_custom_attrs(get_output_custom_attributes(custom_attributes))
+        output_with_gui.merge_fiat_attributes(get_output_custom_attributes(custom_attributes))
         function_with_gui._outputs_with_gui.append(OutputWithGui(output_with_gui))
     else:
         return_annotation_str = fully_qualified_annotation(return_annotation)
@@ -709,16 +709,16 @@ class GuiFactories:
             r += "\n"
 
         (
-            possible_custom_attributes,
-            generic_custom_attributes,
-        ) = factored_gui.possible_custom_attributes_with_generic()
-        if possible_custom_attributes is not None:
-            doc_attr = possible_custom_attributes.documentation()
+            possible_fiat_attributes,
+            generic_fiat_attributes,
+        ) = factored_gui.possible_fiat_attributes_with_generic()
+        if possible_fiat_attributes is not None:
+            doc_attr = possible_fiat_attributes.documentation()
             r += "\n"
             r += code_utils.indent_code(doc_attr, 2)
             r += "\n"
 
-        generic_attr_doc = generic_custom_attributes.documentation()
+        generic_attr_doc = generic_fiat_attributes.documentation()
         r += "\n"
         r += code_utils.indent_code(generic_attr_doc, 2)
         r += "\n"
@@ -863,7 +863,7 @@ class GuiFactories:
     def factor(self, typename: Typename, custom_attributes: FiatAttributes) -> AnyDataWithGui[Any]:
         """Converts a type name to a GUI representation."""
         r = self.get_factory(typename)()
-        r.merge_custom_attrs(custom_attributes)
+        r.merge_fiat_attributes(custom_attributes)
         return r
 
     def can_handle_typename(self, typename: Typename) -> bool:

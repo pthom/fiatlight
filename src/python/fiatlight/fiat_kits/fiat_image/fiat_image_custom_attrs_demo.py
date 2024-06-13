@@ -1,9 +1,7 @@
 """Demo how to set custom presentation attributes for the Image Widget (ImageWithGui)
 
 Notes:
-    - Documentation: fl.fiat_kits.fiat_image.image_custom_attributes_documentation()
-      will return a full documentation of the custom attributes.
-    - The custom attributes can be set using the decorator fl.with_custom_attrs
+    - The custom attributes can be set using the decorator fl.with_fiat_attributes
     - In these examples, we intend to set custom attributes for the output of the
       functions, i.e. the returned value.
       As a consequence, the custom attributes are set in the return__...
@@ -62,7 +60,7 @@ def main() -> None:
     graph.add_function(show_image_different_zoom_key)
     graph.add_function(show_image_only_display)
 
-    fl.run(graph, app_name="fiat_image_custom_attrs_demo")
+    fl.run(graph, app_name="fiat_image_fiat_attrs_demo")
 
 
 if __name__ == "__main__":

@@ -113,8 +113,8 @@ class MydataWithGui(AnyDataWithGui[Mydata]):
         pass
 
     @staticmethod
-    def possible_custom_attributes() -> MydataPossibleFiatAttributes | None:
-        return MydataPresenter.possible_custom_attributes()
+    def possible_fiat_attributes() -> MydataPossibleFiatAttributes | None:
+        return MydataPresenter.possible_fiat_attributes()
 
     def on_fiat_attributes_changes(self, custom_attrs: FiatAttributes) -> None:
         # Here we should update the presenter with the new custom attributes

@@ -16,7 +16,7 @@ def make_gui_demo_code(gui_instance: AnyDataWithGui[Any]) -> str:
     param_name = datatype_basename.lower() + "_param"
 
     def compute_custom_attrs_code() -> str:
-        possible_custom_attrs, generic_custom_attributes = gui_instance.possible_custom_attributes_with_generic()
+        possible_custom_attrs, generic_custom_attributes = gui_instance.possible_fiat_attributes_with_generic()
         if possible_custom_attrs is None:
             possible_plus_generic = generic_custom_attributes
         else:
@@ -25,7 +25,7 @@ def make_gui_demo_code(gui_instance: AnyDataWithGui[Any]) -> str:
 
         example_usage = possible_plus_generic.example_usage(param_name)
         example_usage = code_utils.indent_code(example_usage, indent_size=4)
-        r = "@fiatlight.with_custom_attrs(\n"
+        r = "@fiatlight.with_fiat_attributes(\n"
         r += example_usage
         r += ")"
         return r

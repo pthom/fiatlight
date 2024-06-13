@@ -121,10 +121,6 @@ class _ImagePossibleAttributes(PossibleFiatAttributes):
 _IMAGE_POSSIBLE_ATTRIBUTES = _ImagePossibleAttributes()
 
 
-def image_custom_attributes_documentation() -> str:
-    return _IMAGE_POSSIBLE_ATTRIBUTES.documentation()
-
-
 class ImagePresenter:
     # Cached image and channels
     image: Image
@@ -312,7 +308,7 @@ class ImageWithGui(AnyDataWithGui[Image]):
         self.callbacks.on_fiat_attributes_changed = self.on_fiat_attributes_changes
 
     @staticmethod
-    def possible_custom_attributes() -> PossibleFiatAttributes | None:
+    def possible_fiat_attributes() -> PossibleFiatAttributes | None:
         return _IMAGE_POSSIBLE_ATTRIBUTES
 
     def on_fiat_attributes_changes(self, custom_attrs: FiatAttributes) -> None:

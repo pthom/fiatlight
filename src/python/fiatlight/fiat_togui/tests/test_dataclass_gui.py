@@ -16,7 +16,7 @@ from fiatlight.fiat_types import FiatAttributes
 import copy
 
 
-NO_CUSTOM_ATTRIBUTES = FiatAttributes({})
+NO_FIAT_ATTRIBUTES = FiatAttributes({})
 
 
 def test_dataclass_like_gui() -> None:
@@ -186,7 +186,7 @@ def test_pydantic_with_enum() -> None:
     as_dict_base_model = my_param.model_dump(mode="json")
     assert as_dict_base_model == {"my_enum": 2, "x": 4}
 
-    my_param_gui = _to_data_with_gui_impl(my_param, NO_CUSTOM_ATTRIBUTES)
+    my_param_gui = _to_data_with_gui_impl(my_param, NO_FIAT_ATTRIBUTES)
     assert my_param_gui.value == my_param
 
     as_dict = my_param_gui.call_save_to_dict(my_param_gui.value)
@@ -205,7 +205,7 @@ def test_base_model_with_custom_attributes() -> None:
     assert rot_gui.fiat_attributes["range"] == (-180, 180)
 
     # 2. When using fiatlight machinery
-    gui2 = fl.fiat_togui._any_type_to_gui_impl(ImageEffect, NO_CUSTOM_ATTRIBUTES)
+    gui2 = fl.fiat_togui._any_type_to_gui_impl(ImageEffect, NO_FIAT_ATTRIBUTES)
     assert isinstance(gui2, BaseModelGui)
     rot_gui2 = gui2._parameters_with_gui[0].data_with_gui
     assert rot_gui2.fiat_attributes["range"] == (-180, 180)
@@ -259,7 +259,7 @@ def test_dataclass_in_custom_function() -> None:
         def __init__(self) -> None:
             super().__init__(self.my_function)
             foo = Foo()
-            self.foo_gui = _to_data_with_gui_impl(foo, NO_CUSTOM_ATTRIBUTES)
+            self.foo_gui = _to_data_with_gui_impl(foo, NO_FIAT_ATTRIBUTES)
             self.internal_state_gui = self._internal_state_gui
 
         def my_function(self) -> None:
@@ -269,7 +269,7 @@ def test_dataclass_in_custom_function() -> None:
             changed = self.foo_gui.gui_edit()
             return changed
 
-    foo_gui = fl.fiat_togui._any_type_to_gui_impl(Foo, NO_CUSTOM_ATTRIBUTES)
+    foo_gui = fl.fiat_togui._any_type_to_gui_impl(Foo, NO_FIAT_ATTRIBUTES)
     assert isinstance(foo_gui, BaseModelGui)
     assert foo_gui.fiat_attributes == {"x__range": (0, 10)}
     base_model_x_attrs = foo_gui._parameters_with_gui[0].data_with_gui.fiat_attributes

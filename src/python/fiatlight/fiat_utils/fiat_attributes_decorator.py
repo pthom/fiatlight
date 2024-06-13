@@ -1,4 +1,4 @@
-"""with_custom_attrs: a decorator to add custom attributes to a function,
+"""with_fiat_attributes: a decorator to add custom attributes to a function,
 that will be applied to the GUI of its parameters
 """
 

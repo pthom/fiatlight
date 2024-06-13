@@ -50,7 +50,7 @@ class DataFramePossibleFiatAttributes(PossibleFiatAttributes):
         )
 
 
-_DATAFRAME_POSSIBLE_CUSTOM_ATTRIBUTES = DataFramePossibleFiatAttributes()
+_DATAFRAME_POSSIBLE_FIAT_ATTRIBUTES = DataFramePossibleFiatAttributes()
 
 
 class DataFramePresenterParams(BaseModel):

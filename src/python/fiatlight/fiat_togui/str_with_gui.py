@@ -46,7 +46,7 @@ class StrPossibleFiatAttributes(PossibleFiatAttributes):
         )
 
 
-_STR_POSSIBLE_CUSTOM_ATTRIBUTES = StrPossibleFiatAttributes()
+_STR_POSSIBLE_FIAT_ATTRIBUTES = StrPossibleFiatAttributes()
 
 
 class StrWithGuiParams(BaseModel):
@@ -116,8 +116,8 @@ class StrWithGui(AnyDataWithGui[str]):
         self._input_text_in_node.resizable = self.params.resizable
 
     @staticmethod
-    def possible_custom_attributes() -> PossibleFiatAttributes | None:
-        return _STR_POSSIBLE_CUSTOM_ATTRIBUTES
+    def possible_fiat_attributes() -> PossibleFiatAttributes | None:
+        return _STR_POSSIBLE_FIAT_ATTRIBUTES
 
     def save_gui_options_to_json(self) -> JsonDict:
         # We only save the width (the other parameters are decided by the developer, not the user)

@@ -8,7 +8,7 @@ class MydataPossibleFiatAttributes(PossibleFiatAttributes):
         super().__init__("DataFrameWithGui")
 
 
-_MYDATA_POSSIBLE_CUSTOM_ATTRIBUTES = MydataPossibleFiatAttributes()
+_MYDATA_POSSIBLE_FIAT_ATTRIBUTES = MydataPossibleFiatAttributes()
 
 
 class MydataPresenterParams(BaseModel):
@@ -24,5 +24,5 @@ class MydataPresenter:
         self.params = MydataPresenterParams()
 
     @staticmethod
-    def possible_custom_attributes() -> MydataPossibleFiatAttributes:
-        return _MYDATA_POSSIBLE_CUSTOM_ATTRIBUTES
+    def possible_fiat_attributes() -> MydataPossibleFiatAttributes:
+        return _MYDATA_POSSIBLE_FIAT_ATTRIBUTES

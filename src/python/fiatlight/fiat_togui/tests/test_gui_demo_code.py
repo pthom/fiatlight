@@ -14,7 +14,7 @@ def test_int() -> None:
 import typing
 import fiatlight
 
-@fiatlight.with_custom_attrs(
+@fiatlight.with_fiat_attributes(
     int_param__range = (0, 10),
     int_param__edit_type = "input",
     int_param__format = "%d",

@@ -51,7 +51,7 @@ class AnyDataWithGuiGenericPossibleFiatAttributes(PossibleFiatAttributes):
         )
 
 
-_ANYDATAWITHGUI_GENERIC_POSSIBLE_CUSTOM_ATTRIBUTES = AnyDataWithGuiGenericPossibleFiatAttributes()
+_ANYDATAWITHGUI_GENERIC_POSSIBLE_FIAT_ATTRIBUTES = AnyDataWithGuiGenericPossibleFiatAttributes()
 
 
 def _draw_label_with_max_width(
@@ -277,7 +277,7 @@ class AnyDataWithGui(Generic[DataType]):
         pass
 
     @staticmethod
-    def possible_custom_attributes() -> PossibleFiatAttributes | None:
+    def possible_fiat_attributes() -> PossibleFiatAttributes | None:
         """Return the possible custom attributes for this type, if available.
         Should be overridden in subclasses, when custom attributes are available.
 
@@ -287,21 +287,21 @@ class AnyDataWithGui(Generic[DataType]):
         return None
 
     @final
-    def possible_custom_attributes_with_generic(
+    def possible_fiat_attributes_with_generic(
         self,
     ) -> tuple[PossibleFiatAttributes | None, PossibleFiatAttributes]:
-        descendant_attrs = self.possible_custom_attributes()
-        return descendant_attrs, _ANYDATAWITHGUI_GENERIC_POSSIBLE_CUSTOM_ATTRIBUTES
+        descendant_attrs = self.possible_fiat_attributes()
+        return descendant_attrs, _ANYDATAWITHGUI_GENERIC_POSSIBLE_FIAT_ATTRIBUTES
 
     @property
     def fiat_attributes(self) -> FiatAttributes:
         return self._fiat_attributes
 
-    def merge_custom_attrs(self, custom_attrs: FiatAttributes) -> None:
+    def merge_fiat_attributes(self, custom_attrs: FiatAttributes) -> None:
         """Merge custom attributes with the existing ones"""
         if len(custom_attrs) == 0:
             return
-        possible_custom_attrs, _generic_possible_custom_attrs = self.possible_custom_attributes_with_generic()
+        possible_custom_attrs, _generic_possible_custom_attrs = self.possible_fiat_attributes_with_generic()
 
         # Create a version that holds all custom attributes
         all_possible_custom_attrs = copy.deepcopy(_generic_possible_custom_attrs)
