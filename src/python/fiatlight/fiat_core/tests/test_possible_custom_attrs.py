@@ -35,40 +35,40 @@ def make_possible_fiat_attributes() -> PossibleFiatAttributes:
 
 
 def test_possible_custom_attr_validation() -> None:
-    possible_custom_attrs = make_possible_fiat_attributes()
+    possible_fiat_attrs = make_possible_fiat_attributes()
 
-    r = possible_custom_attrs.validate_custom_attrs({"xrange": (0, 5)})
+    r = possible_fiat_attrs.validate_custom_attrs({"xrange": (0, 5)})
     assert r.is_valid
 
     # Test with wrong key: disabled, too much trouble
-    # r = possible_custom_attrs.validate_custom_attrs({"badkey": 0})
+    # r = possible_fiat_attrs.validate_custom_attrs({"badkey": 0})
     # assert not r.is_valid
 
     # Test with wrong type
-    r = possible_custom_attrs.validate_custom_attrs({"xrange": 0})
+    r = possible_fiat_attrs.validate_custom_attrs({"xrange": 0})
     assert not r.is_valid
 
     # Test with wrong tuple len
-    r = possible_custom_attrs.validate_custom_attrs({"xrange": (0, 5, 10)})
+    r = possible_fiat_attrs.validate_custom_attrs({"xrange": (0, 5, 10)})
     assert not r.is_valid
 
     # Test with wrong tuple type
-    r = possible_custom_attrs.validate_custom_attrs({"xrange": (0, "string!")})
+    r = possible_fiat_attrs.validate_custom_attrs({"xrange": (0, "string!")})
     assert not r.is_valid
 
     # Test with good value (multiple of 3)
-    r = possible_custom_attrs.validate_custom_attrs({"m": 9})
+    r = possible_fiat_attrs.validate_custom_attrs({"m": 9})
     assert r.is_valid
 
     # Test with wrong value (not multiple of 3)
-    r = possible_custom_attrs.validate_custom_attrs({"m": 4})
+    r = possible_fiat_attrs.validate_custom_attrs({"m": 4})
     assert not r.is_valid
     assert "must be a multiple of 3" in r.error_message
 
 
 def test_custom_attr_doc() -> None:
-    possible_custom_attrs = make_possible_fiat_attributes()
-    doc = possible_custom_attrs.documentation()
+    possible_fiat_attrs = make_possible_fiat_attributes()
+    doc = possible_fiat_attrs.documentation()
     code_utils.assert_are_codes_equal(
         doc,
         """
@@ -86,7 +86,7 @@ def test_custom_attr_doc() -> None:
     """,
     )
 
-    example_usage = possible_custom_attrs.example_usage("param")
+    example_usage = possible_fiat_attrs.example_usage("param")
     # print(example_usage)
     code_utils.assert_are_codes_equal(
         example_usage,
