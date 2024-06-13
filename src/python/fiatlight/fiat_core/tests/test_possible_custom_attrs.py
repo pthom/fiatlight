@@ -34,10 +34,10 @@ def make_possible_fiat_attributes() -> PossibleFiatAttributes:
     return fiat_attrs
 
 
-def test_possible_custom_attr_validation() -> None:
+def test_possible_fiat_attr_validation() -> None:
     possible_fiat_attrs = make_possible_fiat_attributes()
 
-    r = possible_fiat_attrs.validate_custom_attrs({"xrange": (0, 5)})
+    r = possible_fiat_attrs.validate_fiat_attrs({"xrange": (0, 5)})
     assert r.is_valid
 
     # Test with wrong key: disabled, too much trouble
@@ -45,23 +45,23 @@ def test_possible_custom_attr_validation() -> None:
     # assert not r.is_valid
 
     # Test with wrong type
-    r = possible_fiat_attrs.validate_custom_attrs({"xrange": 0})
+    r = possible_fiat_attrs.validate_fiat_attrs({"xrange": 0})
     assert not r.is_valid
 
     # Test with wrong tuple len
-    r = possible_fiat_attrs.validate_custom_attrs({"xrange": (0, 5, 10)})
+    r = possible_fiat_attrs.validate_fiat_attrs({"xrange": (0, 5, 10)})
     assert not r.is_valid
 
     # Test with wrong tuple type
-    r = possible_fiat_attrs.validate_custom_attrs({"xrange": (0, "string!")})
+    r = possible_fiat_attrs.validate_fiat_attrs({"xrange": (0, "string!")})
     assert not r.is_valid
 
     # Test with good value (multiple of 3)
-    r = possible_fiat_attrs.validate_custom_attrs({"m": 9})
+    r = possible_fiat_attrs.validate_fiat_attrs({"m": 9})
     assert r.is_valid
 
     # Test with wrong value (not multiple of 3)
-    r = possible_fiat_attrs.validate_custom_attrs({"m": 4})
+    r = possible_fiat_attrs.validate_fiat_attrs({"m": 4})
     assert not r.is_valid
     assert "must be a multiple of 3" in r.error_message
 

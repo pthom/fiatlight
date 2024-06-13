@@ -310,12 +310,12 @@ def _fn_outputs_with_gui(type_class_name: str, fn_custom_attributes: FiatAttribu
     is_tuple, inner_type_classes = _extract_tuple_typeclasses(type_class_name)
     if is_tuple:
         for idx_output, inner_type_class in enumerate(inner_type_classes):
-            output_custom_attrs = get_output_custom_attributes(fn_custom_attributes, idx_output)
-            output_gui = _any_typename_to_gui(inner_type_class, custom_attributes=output_custom_attrs)
+            output_fiat_attrs = get_output_fiat_attributes(fn_custom_attributes, idx_output)
+            output_gui = _any_typename_to_gui(inner_type_class, custom_attributes=output_fiat_attrs)
             r.append(output_gui)
     else:
-        output_custom_attrs = get_output_custom_attributes(fn_custom_attributes)
-        output_gui = _any_typename_to_gui(type_class_name, custom_attributes=output_custom_attrs)
+        output_fiat_attrs = get_output_fiat_attributes(fn_custom_attributes)
+        output_gui = _any_typename_to_gui(type_class_name, custom_attributes=output_fiat_attrs)
         r.append(output_gui)
     return r
 
@@ -383,7 +383,7 @@ def _get_calling_module_name() -> str:
         raise ValueError("No module found")
 
 
-def _get_input_param_custom_attributes(fn_attributes: JsonDict, param_name: str) -> FiatAttributes:
+def _get_input_param_fiat_attributes(fn_attributes: JsonDict, param_name: str) -> FiatAttributes:
     """Get the optional custom attributes for the parameter.
     Those parameters are defined in the function attributes, and may be passed:
 
@@ -406,7 +406,7 @@ def _get_input_param_custom_attributes(fn_attributes: JsonDict, param_name: str)
     return r
 
 
-def get_output_custom_attributes(fn_attributes: JsonDict, idx_output: int = 0) -> FiatAttributes:
+def get_output_fiat_attributes(fn_attributes: JsonDict, idx_output: int = 0) -> FiatAttributes:
     """Get the optional custom attributes for the return value.
     For example:
         @with_fiat_attributes(return__range=(0, 1))
@@ -447,14 +447,14 @@ def add_input_outputs_to_function(
 
     params = sig.parameters
     for name, param in params.items():
-        param_custom_attrs = _get_input_param_custom_attributes(custom_attributes, name)
-        function_with_gui._inputs_with_gui.append(_to_param_with_gui(name, param, param_custom_attrs))
+        param_fiat_attrs = _get_input_param_fiat_attributes(custom_attributes, name)
+        function_with_gui._inputs_with_gui.append(_to_param_with_gui(name, param, param_fiat_attrs))
 
     return_annotation = sig.return_annotation
     if return_annotation is inspect.Parameter.empty:
         output_with_gui = AnyDataWithGui_UnregisteredType("inspect.Parameter.empty")
         output_with_gui.label = "Output"
-        output_with_gui.merge_fiat_attributes(get_output_custom_attributes(custom_attributes))
+        output_with_gui.merge_fiat_attributes(get_output_fiat_attributes(custom_attributes))
         function_with_gui._outputs_with_gui.append(OutputWithGui(output_with_gui))
     else:
         return_annotation_str = fully_qualified_annotation(return_annotation)

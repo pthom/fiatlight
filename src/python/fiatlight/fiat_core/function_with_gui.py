@@ -735,7 +735,7 @@ class FunctionWithGui:
         fn_custom_attributes = {key: value for key, value in custom_attributes.items() if "__" not in key}
         # We accept wrong keys, because other libraries, such as Pydantic, may add custom attributes
         # that would not be recognized by FiatLight
-        _FUNCTION_POSSIBLE_FIAT_ATTRIBUTES.raise_exception_if_bad_custom_attrs(fn_custom_attributes)
+        _FUNCTION_POSSIBLE_FIAT_ATTRIBUTES.raise_exception_if_bad_fiat_attrs(fn_custom_attributes)
 
         # Check that there are no custom attributes for a non-existing parameter or output
         params_custom_attributes = [key for key in custom_attributes if "__" in key and not key.startswith("__")]

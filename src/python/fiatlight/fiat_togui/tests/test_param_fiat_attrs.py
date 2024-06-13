@@ -13,7 +13,7 @@ def test_numeric_ranges_with_manual_custom_attr() -> None:
     assert celsius_gui.fiat_attributes["range"] == (-20, 60)
 
 
-def test_numeric_ranges_with_decorator_custom_attrs() -> None:
+def test_numeric_ranges_with_decorator_fiat_attrs() -> None:
     import fiatlight as fl
     import math
 
@@ -22,9 +22,9 @@ def test_numeric_ranges_with_decorator_custom_attrs() -> None:
         return math.sin(x)
 
     f_gui = fl.FunctionWithGui(f)
-    x_custom_attrs = f_gui.input("x").fiat_attributes
-    assert "range" in x_custom_attrs
-    assert x_custom_attrs["range"] == (0.0, 10.0)
+    x_fiat_attrs = f_gui.input("x").fiat_attributes
+    assert "range" in x_fiat_attrs
+    assert x_fiat_attrs["range"] == (0.0, 10.0)
 
 
 def test_custom_ranges_optional() -> None:

@@ -301,14 +301,14 @@ class AnyDataWithGui(Generic[DataType]):
         """Merge custom attributes with the existing ones"""
         if len(fiat_attrs) == 0:
             return
-        possible_fiat_attrs, _generic_possible_custom_attrs = self.possible_fiat_attributes_with_generic()
+        possible_fiat_attrs, _generic_possible_fiat_attrs = self.possible_fiat_attributes_with_generic()
 
         # Create a version that holds all custom attributes
-        all_possible_custom_attrs = copy.deepcopy(_generic_possible_custom_attrs)
+        all_possible_fiat_attrs = copy.deepcopy(_generic_possible_fiat_attrs)
         if possible_fiat_attrs is not None:
-            all_possible_custom_attrs.merge_attributes(copy.copy(possible_fiat_attrs))
+            all_possible_fiat_attrs.merge_attributes(copy.copy(possible_fiat_attrs))
 
-        all_possible_custom_attrs.raise_exception_if_bad_custom_attrs(fiat_attrs)
+        all_possible_fiat_attrs.raise_exception_if_bad_fiat_attrs(fiat_attrs)
 
         self.fiat_attributes.update(fiat_attrs)
         self._handle_generic_attrs()

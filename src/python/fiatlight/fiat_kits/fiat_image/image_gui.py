@@ -139,7 +139,7 @@ class ImagePresenter:
         self.image_params = default_image_params()
         self.size_when_only_display = ImVec2(200, 0)
 
-    def handle_custom_attrs(self, fiat_attrs: dict[str, Any]) -> None:
+    def handle_fiat_attrs(self, fiat_attrs: dict[str, Any]) -> None:
         if "image_display_size" in fiat_attrs:
             image_display_size = fiat_attrs["image_display_size"]
 
@@ -312,7 +312,7 @@ class ImageWithGui(AnyDataWithGui[Image]):
         return _IMAGE_POSSIBLE_ATTRIBUTES
 
     def on_fiat_attributes_changes(self, fiat_attrs: FiatAttributes) -> None:
-        self.image_presenter.handle_custom_attrs(fiat_attrs)
+        self.image_presenter.handle_fiat_attrs(fiat_attrs)
 
     def edit(self, value: Image) -> tuple[bool, Image]:
         changed = False

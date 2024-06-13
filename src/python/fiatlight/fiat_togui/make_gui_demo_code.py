@@ -15,7 +15,7 @@ def make_gui_demo_code(gui_instance: AnyDataWithGui[Any]) -> str:
 
     param_name = datatype_basename.lower() + "_param"
 
-    def compute_custom_attrs_code() -> str:
+    def compute_fiat_attrs_code() -> str:
         possible_fiat_attrs, generic_custom_attributes = gui_instance.possible_fiat_attributes_with_generic()
         if possible_fiat_attrs is None:
             possible_plus_generic = generic_custom_attributes
@@ -30,13 +30,13 @@ def make_gui_demo_code(gui_instance: AnyDataWithGui[Any]) -> str:
         r += ")"
         return r
 
-    custom_attrs_code = compute_custom_attrs_code()
+    fiat_attrs_code = compute_fiat_attrs_code()
 
     code = f"""
     import typing
     import fiatlight
 
-    {custom_attrs_code}
+    {fiat_attrs_code}
     def f({param_name}: {datatype_str}) -> {datatype_str}:
         return {param_name}
 

@@ -94,7 +94,7 @@ class IntWithGui(AnyDataWithGui[int]):
         self.callbacks.edit = self.edit
         self.callbacks.default_value_provider = lambda: 0
         self.callbacks.clipboard_copy_possible = True
-        self.callbacks.on_fiat_attributes_changed = self._handle_custom_attrs
+        self.callbacks.on_fiat_attributes_changed = self._handle_fiat_attrs
         self.callbacks.present_collapsible = False
         self.callbacks.edit_collapsible = False
 
@@ -102,7 +102,7 @@ class IntWithGui(AnyDataWithGui[int]):
     def possible_fiat_attributes() -> PossibleFiatAttributes | None:
         return _POSSIBLE_INT_ATTRIBUTES
 
-    def _handle_custom_attrs(self, fiat_attrs: FiatAttributes) -> None:
+    def _handle_fiat_attrs(self, fiat_attrs: FiatAttributes) -> None:
         if "range" in self.fiat_attributes:
             range_ = self.fiat_attributes["range"]
             self.params.v_min = range_[0]
@@ -330,7 +330,7 @@ class FloatWithGui(AnyDataWithGui[float]):
         self.callbacks.default_value_provider = lambda: 0.0
         self.callbacks.clipboard_copy_possible = True
         self.callbacks.present_str = self.present_str
-        self.callbacks.on_fiat_attributes_changed = self._handle_custom_attrs
+        self.callbacks.on_fiat_attributes_changed = self._handle_fiat_attrs
         self.callbacks.present_collapsible = False
         self.callbacks.edit_collapsible = False
 
@@ -338,7 +338,7 @@ class FloatWithGui(AnyDataWithGui[float]):
     def possible_fiat_attributes() -> PossibleFiatAttributes | None:
         return _POSSIBLE_FLOAT_ATTRIBUTES
 
-    def _handle_custom_attrs(self, fiat_attrs: FiatAttributes) -> None:
+    def _handle_fiat_attrs(self, fiat_attrs: FiatAttributes) -> None:
         if "range" in self.fiat_attributes:
             range_ = self.fiat_attributes["range"]
             if not isinstance(range_, tuple) or len(range_) != 2:
@@ -532,7 +532,7 @@ class BoolWithGui(AnyDataWithGui[bool]):
         self.callbacks.edit = self.edit
         self.callbacks.default_value_provider = lambda: False
         self.callbacks.clipboard_copy_possible = True
-        self.callbacks.on_fiat_attributes_changed = self._handle_custom_attrs
+        self.callbacks.on_fiat_attributes_changed = self._handle_fiat_attrs
         self.callbacks.present_collapsible = False
         self.callbacks.edit_collapsible = False
 
@@ -540,7 +540,7 @@ class BoolWithGui(AnyDataWithGui[bool]):
     def possible_fiat_attributes() -> PossibleFiatAttributes | None:
         return _POSSIBLE_BOOL_ATTRIBUTES
 
-    def _handle_custom_attrs(self, fiat_attrs: FiatAttributes) -> None:
+    def _handle_fiat_attrs(self, fiat_attrs: FiatAttributes) -> None:
         if "edit_type" in self.fiat_attributes:
             edit_type_ = self.fiat_attributes["edit_type"]
             try:
