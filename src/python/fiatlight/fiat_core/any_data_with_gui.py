@@ -30,12 +30,43 @@ class AnyDataWithGuiGenericPossibleCustomAttributes(PossibleCustomAttributes):
             explanation="Function to validate a parameter value (should return DataValidationResult.ok() .error()",
             default_value=None,
         )
+        self.add_explained_attribute(
+            name="label",
+            type_=str,
+            explanation="A label for the parameter. If empty, the function parameter name is used",
+            default_value="",
+        )
+        self.add_explained_attribute(
+            name="tooltip",
+            type_=str,
+            explanation="An optional tooltip to be displayed",
+            default_value="",
+        )
+        self.add_explained_attribute(
+            name="label_color",
+            type_=ImVec4,
+            explanation="The color of the label (will use the default text color if not provided)",
+            default_value=ImVec4(0, 0, 0, 1),
+        )
 
 
 _ANYDATAWITHGUI_GENERIC_POSSIBLE_CUSTOM_ATTRIBUTES = AnyDataWithGuiGenericPossibleCustomAttributes()
 
 
-def _draw_label_with_max_width(label: str, color: ImVec4, label_tooltip: str | None) -> None:
+def _draw_label_with_max_width(
+    label: str, color: ImVec4, label_tooltip: str | None, status_tooltip: str | None = None
+) -> None:
+    tooltip: str
+
+    if label_tooltip is not None and status_tooltip is not None:
+        tooltip = label_tooltip + "\n" + status_tooltip
+    elif label_tooltip is not None:
+        tooltip = label_tooltip
+    elif status_tooltip is not None:
+        tooltip = status_tooltip
+    else:
+        tooltip = ""
+
     cur_pos = imgui.get_cursor_pos()
     if "##" in label:
         label = label.split("##")[0]
@@ -51,14 +82,12 @@ def _draw_label_with_max_width(label: str, color: ImVec4, label_tooltip: str | N
 
     if shortened_label != label:
         imgui.text_colored(color, shortened_label + "...")
-        if label_tooltip is not None:
-            fiat_osd.set_widget_tooltip(label + "\n" + label_tooltip)
-        else:
-            fiat_osd.set_widget_tooltip(label)
+        tooltip = label + "\n" + tooltip
     else:
         imgui.text_colored(color, label)
-        if label_tooltip is not None:
-            fiat_osd.set_widget_tooltip(label_tooltip)
+
+    if len(tooltip) > 0:
+        fiat_osd.set_widget_tooltip(tooltip)
 
     new_cursor_pos = ImVec2(cur_pos.x + max_width_pixels, cur_pos.y)
     imgui.set_cursor_pos(new_cursor_pos)
@@ -66,9 +95,6 @@ def _draw_label_with_max_width(label: str, color: ImVec4, label_tooltip: str | N
 
 @dataclass
 class GuiHeaderLineParams(Generic[DataType]):
-    label: str = ""
-    label_color: ImVec4 | None = None
-    label_tooltip: str | None = None
     show_clipboard_button: bool = True
     prefix_gui: Callable[[], None] | None = None
     suffix_gui: Callable[[], None] | None = None
@@ -154,6 +180,12 @@ class AnyDataWithGui(Generic[DataType]):
     # This is useful in Function Nodes.
     # Unspecified stands for a function parameter that has not been set by the user
     _can_set_unspecified_or_default: bool = False
+
+    # Label and tooltip (can be set via custom attributes)
+    label: str | None = None
+    label_color: ImVec4 | None = None
+    tooltip: str | None = None
+    status_tooltip: str | None = None
 
     @staticmethod
     def _Init_Section() -> None:  # Dummy function to create a section in the IDE # noqa
@@ -276,26 +308,18 @@ class AnyDataWithGui(Generic[DataType]):
             all_custom_attrs.merge_attributes(copy.copy(possible_custom_attrs))
 
         all_custom_attrs.raise_exception_if_bad_custom_attrs(custom_attrs)
-        # except FiatToGuiException as e:
-        #     msg_error = f'''
-        #         Cannot set custom attributes for {self._type} in class {self.__class__}
-        #             Please override the possible_custom_attributes() method in the class {self.__class__}
-        #             with the following signature:
-        #
-        #                 @staticmethod
-        #                 def possible_custom_attributes() -> PossibleCustomAttributes | None:
-        #                     """Return the possible custom attributes for this type, if available.
-        #
-        #                     It is advised to return a global variable, to avoid creating
-        #                     a new instance each time this method is called.
-        #                     """
-        #                     ...
-        #         '''
-        #     raise FiatToGuiException(msg_error) from e
 
         self.custom_attrs.update(custom_attrs)
+        self._handle_generic_attrs()
         if self.callbacks.on_custom_attrs_changed is not None:
             self.callbacks.on_custom_attrs_changed(self.custom_attrs)
+
+    def _handle_generic_attrs(self) -> None:
+        """Handle generic custom attributes"""
+        if "label" in self.custom_attrs:
+            self.label = self.custom_attrs["label"]
+        if "tooltip" in self.custom_attrs:
+            self.tooltip = self.custom_attrs["tooltip"]
 
     def _Gui_Section(self) -> None:  # Dummy function to create a section in the IDE # noqa
         """
@@ -372,10 +396,11 @@ class AnyDataWithGui(Generic[DataType]):
             if params.prefix_gui is not None:
                 params.prefix_gui()
             # Label
-            label_color = (
-                imgui.get_style().color_(imgui.Col_.text.value) if params.label_color is None else params.label_color
-            )
-            _draw_label_with_max_width(params.label, label_color, params.label_tooltip)
+            if self.label is not None:
+                label_color = (
+                    imgui.get_style().color_(imgui.Col_.text.value) if self.label_color is None else self.label_color
+                )
+                _draw_label_with_max_width(self.label, label_color, self.tooltip, self.status_tooltip)
             # Expand button
             if self.can_collapse_present():
                 self._show_collapse_button()
@@ -459,10 +484,11 @@ class AnyDataWithGui(Generic[DataType]):
             if params.prefix_gui is not None:
                 params.prefix_gui()
             # Label
-            label_color = (
-                imgui.get_style().color_(imgui.Col_.text.value) if params.label_color is None else params.label_color
-            )
-            _draw_label_with_max_width(params.label, label_color, params.label_tooltip)
+            if self.label is not None:
+                label_color = (
+                    imgui.get_style().color_(imgui.Col_.text.value) if self.label_color is None else self.label_color
+                )
+                _draw_label_with_max_width(self.label, label_color, self.tooltip, self.status_tooltip)
             # Expand button
             if self.can_collapse_edit():
                 self._show_collapse_button()
@@ -625,8 +651,9 @@ class AnyDataWithGui(Generic[DataType]):
                 self._gui_present_header_line(params)
                 self._gui_present_next_lines(in_popup=False)
 
-    def gui_present(self, label: str) -> None:
-        params = GuiHeaderLineParams[DataType](label=label)
+    # def gui_present(self, label: str) -> None:
+    def gui_present(self) -> None:
+        params = GuiHeaderLineParams[DataType]()
         self.gui_present_customizable(params)
 
     def gui_edit_customizable(self, params: GuiHeaderLineParams[DataType]) -> bool:
@@ -643,8 +670,8 @@ class AnyDataWithGui(Generic[DataType]):
 
         return changed
 
-    def gui_edit(self, label: str) -> bool:
-        params = GuiHeaderLineParams[DataType](label=label)
+    def gui_edit(self) -> bool:
+        params = GuiHeaderLineParams[DataType]()
         return self.gui_edit_customizable(params)
 
     def _Callbacks_Section(self) -> None:  # Dummy function to create a section in the IDE # noqa

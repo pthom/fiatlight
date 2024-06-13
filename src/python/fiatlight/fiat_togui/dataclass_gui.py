@@ -60,8 +60,6 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
         self, dataclass_type: Type[DataclassLikeType], param_attrs: CustomAttributesDict | None = None
     ) -> None:
         super().__init__(dataclass_type)
-        if param_attrs is not None:
-            self._custom_attrs = param_attrs
 
         # In order to find the members of the dataclass, we
         # create a FunctionWithGui instance with the dataclass type
@@ -73,27 +71,17 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
         # We set the _can_set_unspecified_or_default to False for all parameters
         for parameters_with_gui in self._parameters_with_gui:
             parameters_with_gui.data_with_gui._can_set_unspecified_or_default = False
+            parameters_with_gui.data_with_gui.label_color = self._member_label_color()
 
         self.fill_callbacks()
-        self._apply_param_attrs()
+        if param_attrs is not None:
+            self.on_custom_attrs_changed(param_attrs)
 
     def param_of_name(self, name: str) -> ParamWithGui[Any]:
         for param_gui in self._parameters_with_gui:
             if param_gui.name == name:
                 return param_gui
         raise ValueError(f"Parameter {name} not found")
-
-    def _apply_param_attrs(self) -> None:
-        if self._custom_attrs is None:
-            return
-        for param_gui in self._parameters_with_gui:
-            prefix = f"{param_gui.name}__"
-            this_param_attrs = {}
-            for k, v in self._custom_attrs.items():
-                if k.startswith(prefix):
-                    this_param_attrs[k[len(prefix) :]] = v
-            if len(this_param_attrs) > 0:
-                param_gui.data_with_gui.merge_custom_attrs(this_param_attrs)
 
     def fill_callbacks(self) -> None:
         self.callbacks.present_str = self.present_str
@@ -127,6 +115,8 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
 
         self.callbacks.save_gui_options_to_json = self.save_gui_options_to_json
         self.callbacks.load_gui_options_from_json = self.load_gui_options_from_json
+
+        self.callbacks.on_custom_attrs_changed = self.on_custom_attrs_changed
 
     def is_fully_specified(self) -> bool:
         has_unspecified = False
@@ -173,9 +163,19 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
             if param_on_exit is not None:
                 param_on_exit()
 
+    def on_custom_attrs_changed(self, attrs: CustomAttributesDict) -> None:
+        self._custom_attrs = attrs
+        for param_gui in self._parameters_with_gui:
+            prefix = f"{param_gui.name}__"
+            this_param_attrs = {}
+            for k, v in attrs.items():
+                if k.startswith(prefix):
+                    this_param_attrs[k[len(prefix) :]] = v
+            if len(this_param_attrs) > 0:
+                param_gui.data_with_gui.merge_custom_attrs(this_param_attrs)
+
     def on_heartbeat(self) -> bool:
         changed = False
-        self._apply_param_attrs()
         for param_gui in self._parameters_with_gui:
             param_on_heartbeat = param_gui.data_with_gui.callbacks.on_heartbeat
             if param_on_heartbeat is not None:
@@ -200,13 +200,7 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
         with imgui_ctx.begin_vertical("##CompositeGui_present"):
             for param_gui in self._parameters_with_gui:
                 with imgui_ctx.push_obj_id(param_gui):
-                    param_gui.data_with_gui.gui_present_customizable(
-                        GuiHeaderLineParams(
-                            label_color=self._member_label_color(),
-                            label=param_gui.name,
-                            show_clipboard_button=False,
-                        )
-                    )
+                    param_gui.data_with_gui.gui_present_customizable(GuiHeaderLineParams(show_clipboard_button=False))
 
     def edit(self, value: DataclassLikeType) -> tuple[bool, DataclassLikeType]:
         changed = False
@@ -217,11 +211,7 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
                     raise ValueError(f"Object does not have attribute {param_gui.name}")
                 param_gui.data_with_gui.value = getattr(value, param_gui.name)
                 changed_in_edit = param_gui.data_with_gui.gui_edit_customizable(
-                    GuiHeaderLineParams(
-                        label_color=self._member_label_color(),
-                        label=param_gui.name,
-                        show_clipboard_button=False,
-                    )
+                    GuiHeaderLineParams(show_clipboard_button=False)
                 )
                 if changed_in_edit:
                     new_value = param_gui.data_with_gui.value

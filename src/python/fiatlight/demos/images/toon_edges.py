@@ -14,6 +14,7 @@ def merge_toon_edges(
     edges_images: ImageU8_GRAY,
     edges_intensity: float = 0.7,
     edges_color: ColorRgb = ColorRgb((0, 0, 0)),
+    is_image_bgr: bool = True,
 ) -> ImageU8_3:
     """Add toon edges to the image.
     :param image: Image: Input image
@@ -22,6 +23,8 @@ def merge_toon_edges(
     :param edges_intensity: Intensity of the edges
     :param edges_color: Color of the edges
     """
+    if is_image_bgr:
+        edges_color = edges_color[::-1]
 
     # Create a RGBA image that will be overlayed on the original image
     # Its color will be constant (color) and its alpha channel will be the edges_images

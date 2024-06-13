@@ -266,12 +266,23 @@ def test_dataclass_in_custom_function() -> None:
             return
 
         def _internal_state_gui(self) -> bool:
-            changed = self.foo_gui.gui_edit("Blah")
+            changed = self.foo_gui.gui_edit()
             return changed
 
+    foo_gui = fiatlight.fiat_togui.any_type_to_gui(Foo, NO_CUSTOM_ATTRIBUTES)
+    assert isinstance(foo_gui, BaseModelGui)
+    assert foo_gui.custom_attrs == {"x__range": (0, 10)}
+    base_model_x_attrs = foo_gui._parameters_with_gui[0].data_with_gui.custom_attrs
+    assert base_model_x_attrs == {"range": (0, 10)}
+
     my_function = MyFunction()
-    fn_attrs = my_function.foo_gui.custom_attrs
-    assert fn_attrs == {"x__range": (0, 10)}
+
+    inner_foo_gui_attrs = my_function.foo_gui.custom_attrs
+    assert inner_foo_gui_attrs == {"x__range": (0, 10)}
+
     assert isinstance(my_function.foo_gui, BaseModelGui)
-    x_attrs = my_function.foo_gui._parameters_with_gui[0].data_with_gui.custom_attrs
-    assert x_attrs == {"range": (0, 10)}
+    inner_base_model_x_attrs = my_function.foo_gui._parameters_with_gui[0].data_with_gui.custom_attrs
+    assert inner_base_model_x_attrs == {"range": (0, 10)}
+
+
+# test_dataclass_in_custom_function()

@@ -40,12 +40,12 @@ def edit_value_with_gui(label: str, value_with_gui: fl.AnyDataWithGui[Any]) -> b
         #     "_can_set_unspecified_or_default", value_with_gui._can_set_unspecified_or_default
         # )
         imgui.text("Edit " + label)
-        changed = value_with_gui.gui_edit(label)
+        changed = value_with_gui.gui_edit()
         if changed:
             logging.info("changed")
         imgui.text("-------------")
         imgui.text("Present " + label)
-        value_with_gui.gui_present(label)
+        value_with_gui.gui_present()
         imgui.separator()
         return changed
 

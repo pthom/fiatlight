@@ -347,6 +347,8 @@ def _to_param_with_gui(
         param_typename = fully_qualified_annotation(annotation)
         data_with_gui = _any_typename_to_gui(param_typename, custom_attributes)
 
+    data_with_gui.label = name
+
     # add validate_value callback
     _add_validate_value_callback(custom_attributes, data_with_gui)
 
@@ -426,7 +428,7 @@ def get_output_custom_attributes(fn_attributes: JsonDict, idx_output: int = 0) -
     return r
 
 
-def _add_input_outputs_to_function_with_gui_globals_locals_captured(
+def add_input_outputs_to_function(
     function_with_gui: FunctionWithGui,
     signature_string: str | None,
     custom_attributes: CustomAttributesDict,
@@ -452,14 +454,18 @@ def _add_input_outputs_to_function_with_gui_globals_locals_captured(
     return_annotation = sig.return_annotation
     if return_annotation is inspect.Parameter.empty:
         output_with_gui = AnyDataWithGui_UnregisteredType("inspect.Parameter.empty")
+        output_with_gui.label = "Output"
         output_with_gui.merge_custom_attrs(get_output_custom_attributes(custom_attributes))
         function_with_gui._outputs_with_gui.append(OutputWithGui(output_with_gui))
     else:
         return_annotation_str = fully_qualified_annotation(return_annotation)
         if return_annotation_str != "None":
             outputs_with_guis = _fn_outputs_with_gui(return_annotation_str, custom_attributes)
-            for i, numbered_output_with_gui in enumerate(outputs_with_guis):
-                function_with_gui._outputs_with_gui.append(OutputWithGui(numbered_output_with_gui))
+            for i, output_with_gui_any in enumerate(outputs_with_guis):
+                output_with_gui_any.label = f"Output {i + 1}"
+                if len(outputs_with_guis) == 1:
+                    output_with_gui_any.label = "Output"
+                function_with_gui._outputs_with_gui.append(OutputWithGui(output_with_gui_any))
 
 
 # ----------------------------------------------------------------------------------------------------------------------

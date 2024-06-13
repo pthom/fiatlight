@@ -700,7 +700,7 @@ class FunctionWithGui:
                                  used when the function signature cannot be retrieved automatically
         """
         from fiatlight.fiat_togui.to_gui import (
-            _add_input_outputs_to_function_with_gui_globals_locals_captured,
+            add_input_outputs_to_function,
         )
 
         self._inputs_with_gui = []
@@ -713,7 +713,7 @@ class FunctionWithGui:
                 self.name = fn.__name__ if hasattr(fn, "__name__") else ""
             if custom_attributes is None:
                 custom_attributes = fn.__dict__ if hasattr(fn, "__dict__") else {}
-            _add_input_outputs_to_function_with_gui_globals_locals_captured(
+            add_input_outputs_to_function(
                 self,
                 signature_string=signature_string,
                 custom_attributes=custom_attributes,

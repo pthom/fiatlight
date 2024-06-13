@@ -38,13 +38,13 @@
                                 "morph_shape": 2,
                                 "iterations": 2
                             },
-                            "appearance_qsdlmklmskdqlmsdkml": {
+                            "appearance": {
                                 "blur_sigma": 0.0,
                                 "intensity": 0.8,
                                 "color": [
-                                    0,
-                                    0,
-                                    0
+                                    18,
+                                    13,
+                                    90
                                 ]
                             }
                         }
@@ -92,8 +92,8 @@
                                     "DrawValuesOnZoomedPixels": true,
                                     "HighlightWatchedPixels": true,
                                     "ImageDisplaySize": {
-                                        "height": 105,
-                                        "width": 200
+                                        "height": 254,
+                                        "width": 373
                                     },
                                     "IsColorOrderBGR": true,
                                     "PanWithMouse": true,
@@ -111,12 +111,12 @@
                                     "WatchedPixels": [],
                                     "ZoomKey": "z",
                                     "ZoomPanMatrix": {
-                                        "00": 0.1669449081803005,
+                                        "00": 0.531553903265103,
                                         "01": 0.0,
-                                        "02": 1.9645572499519005e-14,
+                                        "02": -124.69319812824858,
                                         "10": 0.0,
-                                        "11": 0.1669449081803005,
-                                        "12": 6.043551858180098e-15,
+                                        "11": 0.531553903265103,
+                                        "12": -53.563481514660445,
                                         "20": 0.0,
                                         "21": 0.0,
                                         "22": 1.0
@@ -164,8 +164,8 @@
                                 "DrawValuesOnZoomedPixels": true,
                                 "HighlightWatchedPixels": true,
                                 "ImageDisplaySize": {
-                                    "height": 105,
-                                    "width": 200
+                                    "height": 254,
+                                    "width": 373
                                 },
                                 "IsColorOrderBGR": true,
                                 "PanWithMouse": true,
@@ -183,12 +183,12 @@
                                 "WatchedPixels": [],
                                 "ZoomKey": "z",
                                 "ZoomPanMatrix": {
-                                    "00": 0.1669449081803005,
+                                    "00": 0.531553903265103,
                                     "01": 0.0,
-                                    "02": 1.9645572499519005e-14,
+                                    "02": -124.69319812824858,
                                     "10": 0.0,
-                                    "11": 0.1669449081803005,
-                                    "12": 6.043551858180098e-15,
+                                    "11": 0.531553903265103,
+                                    "12": -53.563481514660445,
                                     "20": 0.0,
                                     "21": 0.0,
                                     "22": 1.0
@@ -312,7 +312,7 @@
                                     },
                                     "expanded": false
                                 },
-                                "appearance_qsdlmklmskdqlmsdkml": {
+                                "appearance": {
                                     "cb_options": {
                                         "blur_sigma": {
                                             "cb_options": {},
@@ -327,7 +327,7 @@
                                             "expanded": true
                                         }
                                     },
-                                    "expanded": false
+                                    "expanded": true
                                 }
                             },
                             "expanded": true
@@ -354,8 +354,8 @@
                                     "DrawValuesOnZoomedPixels": true,
                                     "HighlightWatchedPixels": true,
                                     "ImageDisplaySize": {
-                                        "height": 105,
-                                        "width": 200
+                                        "height": 275,
+                                        "width": 593
                                     },
                                     "IsColorOrderBGR": true,
                                     "PanWithMouse": true,
@@ -373,12 +373,12 @@
                                     "WatchedPixels": [],
                                     "ZoomKey": "z",
                                     "ZoomPanMatrix": {
-                                        "00": 0.1669449081803005,
+                                        "00": 0.8450709507673086,
                                         "01": 0.0,
-                                        "02": 0.0,
+                                        "02": -198.23878415563388,
                                         "10": 0.0,
-                                        "11": 0.1669449081803005,
-                                        "12": 0.0,
+                                        "11": 0.8450709507673086,
+                                        "12": -149.56204970025112,
                                         "20": 0.0,
                                         "21": 0.0,
                                         "22": 1.0
@@ -496,7 +496,7 @@
                                 },
                                 "expanded": false
                             },
-                            "appearance_qsdlmklmskdqlmsdkml": {
+                            "appearance": {
                                 "cb_options": {
                                     "blur_sigma": {
                                         "cb_options": {},
@@ -511,7 +511,7 @@
                                         "expanded": true
                                     }
                                 },
-                                "expanded": false
+                                "expanded": true
                             }
                         },
                         "expanded": true
@@ -538,8 +538,8 @@
                                 "DrawValuesOnZoomedPixels": true,
                                 "HighlightWatchedPixels": true,
                                 "ImageDisplaySize": {
-                                    "height": 105,
-                                    "width": 200
+                                    "height": 275,
+                                    "width": 593
                                 },
                                 "IsColorOrderBGR": true,
                                 "PanWithMouse": true,
@@ -557,12 +557,12 @@
                                 "WatchedPixels": [],
                                 "ZoomKey": "z",
                                 "ZoomPanMatrix": {
-                                    "00": 0.1669449081803005,
+                                    "00": 0.8450709507673086,
                                     "01": 0.0,
-                                    "02": 0.0,
+                                    "02": -198.23878415563388,
                                     "10": 0.0,
-                                    "11": 0.1669449081803005,
-                                    "12": 0.0,
+                                    "11": 0.8450709507673086,
+                                    "12": -149.56204970025112,
                                     "20": 0.0,
                                     "21": 0.0,
                                     "22": 1.0

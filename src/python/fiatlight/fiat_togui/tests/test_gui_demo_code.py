@@ -25,7 +25,10 @@ import fiatlight
     int_param__slider_no_input = False,
     int_param__slider_logarithmic = False,
     #  Generic attributes
-    int_param__validate_value = None)
+    int_param__validate_value = None,
+    int_param__label = "",
+    int_param__tooltip = "",
+    int_param__label_color = ImVec4(0.000000, 0.000000, 0.000000, 1.000000))
 def f(int_param: int) -> int:
     return int_param
 

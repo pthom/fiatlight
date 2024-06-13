@@ -184,7 +184,7 @@ class CameraImageProviderGui(FunctionWithGui):
         with fontawesome_6_ctx():
             with imgui_ctx.begin_vertical("CamParams"):
                 imgui.text_wrapped("(Note: some cameras may not support all the settings)")
-                changed = self._camera_params_gui.gui_edit("Camera Parameters")
+                changed = self._camera_params_gui.gui_edit()
                 if changed:
                     assert isinstance(self._camera_params_gui.value, CameraParams)
                     self._camera_provider.apply_params(self._camera_params_gui.value)

@@ -492,10 +492,12 @@ class FunctionNodeGui:
 
             header_elements = self._input_param_header_elements(input_param)
 
+            input_param.data_with_gui.label_color = get_fiat_config().style.color_as_vec4(
+                header_elements.param_label_color
+            )
+            input_param.data_with_gui.status_tooltip = header_elements.param_label_tooltip
+
             header_params = GuiHeaderLineParams[Any]()
-            header_params.label = header_elements.param_name
-            header_params.label_color = get_fiat_config().style.color_as_vec4(header_elements.param_label_color)
-            header_params.label_tooltip = header_elements.param_label_tooltip
             header_params.prefix_gui = lambda: self._draw_input_pin(header_elements)
             header_params.default_value_if_unspecified = input_param.default_value
             header_params.popup_allow = True
@@ -567,11 +569,11 @@ class FunctionNodeGui:
 
         bof_header_elements = self._output_header_elements(idx_output)
 
+        output_param.label_color = get_fiat_config().style.color_as_vec4(bof_header_elements.value_color)
+        output_param.status_tooltip = bof_header_elements.value_tooltip
+
         header_params = GuiHeaderLineParams[Any]()
         header_params.suffix_gui = lambda: self._draw_output_pin(bof_header_elements, idx_output)
-        header_params.label = f"Output {idx_output}:"
-        # header_params.label_color = ...
-        header_params.label_tooltip = bof_header_elements.value_tooltip
         header_params.popup_allow = True
         header_params.popup_title = f"detached view - {unique_name}: output {idx_output}"
 
@@ -712,6 +714,7 @@ class FunctionNodeGui:
                     self._fiat_internals_with_gui[name] = fiat_togui.any_type_to_gui(type(value), {})
                 else:
                     self._fiat_internals_with_gui[name] = value
+                self._fiat_internals_with_gui[name].label = name
             data_with_gui = self._fiat_internals_with_gui[name]
 
             # Update value
@@ -722,7 +725,7 @@ class FunctionNodeGui:
 
             # Draw the gui for the internal
             with imgui_ctx.push_obj_id(data_with_gui):
-                data_with_gui.gui_present(name)
+                data_with_gui.gui_present()
 
     # ------------------------------------------------------------------------------------------------------------------
     #      Draw misc elements
