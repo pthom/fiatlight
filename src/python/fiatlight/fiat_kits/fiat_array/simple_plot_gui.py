@@ -4,7 +4,8 @@ Internally, it uses ImPlot (https://github.com/epezent/implot)
 """
 
 from fiatlight.fiat_core.any_data_with_gui import AnyDataWithGui
-from fiatlight.fiat_types.base_types import JsonDict
+from fiatlight.fiat_core import PossibleFiatAttributes
+from fiatlight.fiat_types.base_types import JsonDict, FiatAttributes
 from fiatlight.fiat_kits.fiat_array.array_types import (
     FloatMatrix_Dim1,
     FloatMatrix_Dim2,
@@ -49,6 +50,40 @@ class SimplePlotParams(BaseModel):
     small_array_threshold: int = 100
     # Auto-scale the plot axes
     auto_fit: bool = True
+
+
+class SimplePlotPossibleFiatAttributes(PossibleFiatAttributes):
+    def __init__(self) -> None:
+        super().__init__("SimplePlotGui")
+
+        self.add_explained_attribute(
+            name="plot_type",
+            explanation="The type of presentation to use. Choose from line, scatter, stairs, or bars.",
+            type_=str,
+            default_value="line",
+        )
+        self.add_explained_attribute(
+            name="plot_size_em",
+            explanation="Size in em units (i.e. multiples of the font height)",
+            type_=tuple,
+            default_value=(35.0, 20.0),
+            tuple_types=(float, float),
+        )
+        self.add_explained_attribute(
+            name="auto_fit",
+            explanation="Auto-scale the plot axes",
+            type_=bool,
+            default_value=True,
+        )
+        self.add_explained_attribute(
+            name="small_array_threshold",
+            explanation="The threshold for the array size to be able to present scatter, bars, and stairs plots",
+            type_=int,
+            default_value=100,
+        )
+
+
+_SIMPLE_PLOT_POSSIBLE_FIAT_ATTRIBUTES = SimplePlotPossibleFiatAttributes()
 
 
 class SimplePlotPresenter:
@@ -98,6 +133,16 @@ class SimplePlotPresenter:
             if not self._is_2d_array():
                 r.append(SimplePlotType.bars)
         return r
+
+    def on_fiat_attributes_changed(self, attributes: FiatAttributes) -> None:
+        if "plot_type" in attributes:
+            self.plot_params.plot_type = SimplePlotType.from_str(attributes["plot_type"])
+        if "plot_size_em" in attributes:
+            self.plot_params.plot_size_em = ImVec2(*attributes["plot_size_em"])
+        if "auto_fit" in attributes:
+            self.plot_params.auto_fit = attributes["auto_fit"]
+        if "small_array_threshold" in attributes:
+            self.plot_params.small_array_threshold = attributes["small_array_threshold"]
 
     def _gui_select_plot_type(self) -> None:
         available_plot_types = self._available_plot_types()
@@ -160,6 +205,12 @@ class SimplePlotGui(AnyDataWithGui[FloatMatrix_Dim1_Or_2]):
         self.callbacks.save_gui_options_to_json = self.save_gui_options_to_json
         self.callbacks.load_gui_options_from_json = self.load_gui_options_from_json
 
+        # custom attributes
+        self.callbacks.on_fiat_attributes_changed = self.on_fiat_attributes_changes
+
+    def on_fiat_attributes_changes(self, attributes: FiatAttributes) -> None:
+        self.plot_presenter.on_fiat_attributes_changed(attributes)
+
     def present(self, _value: FloatMatrix_Dim1_Or_2) -> None:
         # _value is not used, as the array is set with on_change
         self.plot_presenter.gui()
@@ -172,6 +223,11 @@ class SimplePlotGui(AnyDataWithGui[FloatMatrix_Dim1_Or_2]):
 
     def load_gui_options_from_json(self, data: JsonDict) -> None:
         self.plot_presenter.plot_params = SimplePlotParams.model_validate(data)
+
+    @staticmethod
+    def possible_fiat_attributes() -> PossibleFiatAttributes | None:
+        # This is a method which we inherit from AnyDataWithGui.
+        return _SIMPLE_PLOT_POSSIBLE_FIAT_ATTRIBUTES
 
 
 def present_float1_arrays_as_plot() -> None:

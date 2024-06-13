@@ -58,6 +58,12 @@ def make_spirograph_curve(
     return np.array([x, y])  # type: ignore
 
 
+@fl.with_fiat_attributes(
+    x__range=(0.0, 10.0),
+    return__plot_type="bars",
+    return__auto_fit=False,
+    return__plot_size_em=(20, 10),
+)
 def get_simple_values(x: float) -> fiat_array.FloatMatrix_Dim1:
     r = []
     for i in range(10):
