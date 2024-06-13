@@ -4,7 +4,7 @@
 #   pip install -r requirements_ai.txt
 from fiatlight.fiat_kits.fiat_image import ImageU8
 from fiatlight.fiat_utils import LazyModule
-from fiatlight.fiat_utils import with_custom_attrs
+from fiatlight.fiat_utils import with_fiat_attributes
 from .prompt import Prompt
 import numpy as np
 import cv2
@@ -83,7 +83,7 @@ class _SdxlTurboWrapper:
 _stable_diffusion_xl_wrapper: _SdxlTurboWrapper | None = None
 
 
-@with_custom_attrs(seed__range=(0, 1000))
+@with_fiat_attributes(seed__range=(0, 1000))
 def invoke_sdxl_turbo(
     prompt: Prompt,
     seed: int = 0,

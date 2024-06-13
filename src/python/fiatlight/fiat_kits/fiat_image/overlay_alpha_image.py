@@ -1,10 +1,10 @@
 from fiatlight.fiat_kits.fiat_image.image_types import ImageU8_3, ImageU8_4
-from fiatlight.fiat_utils import with_custom_attrs
+from fiatlight.fiat_utils import with_fiat_attributes
 
 import numpy as np
 
 
-@with_custom_attrs(alpha__range=(0.0, 1.0), gamma_factor__range=(0.0, 3.0))
+@with_fiat_attributes(alpha__range=(0.0, 1.0), gamma_factor__range=(0.0, 3.0))
 def overlay_alpha_image(
     background_rgb: ImageU8_3,
     overlay_rgba: ImageU8_4,

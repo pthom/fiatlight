@@ -33,7 +33,7 @@ def sin_wave(phase: float, amplitude: float = 1.0) -> fiat_array.FloatMatrix_Dim
     return r  # type: ignore
 
 
-@fl.with_custom_attrs(
+@fl.with_fiat_attributes(
     radius_fixed_circle__range=(0.0, 100.0),
     radius_moving_circle__range=(0.0, 100.0),
     pen_offset__range=(0.0, 100.0),

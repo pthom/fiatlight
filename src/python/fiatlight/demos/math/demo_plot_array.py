@@ -8,7 +8,7 @@ from fiatlight.fiat_kits.fiat_array import FloatMatrix_Dim2
 import fiatlight as fl
 
 
-@fl.with_custom_attrs(
+@fl.with_fiat_attributes(
     radius_fixed_circle__range=(0.0, 100.0),
     radius_moving_circle__range=(0.0, 100.0),
     pen_offset__range=(0.0, 100.0),

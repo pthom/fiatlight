@@ -12,7 +12,7 @@ def test_no_custom_attributes() -> None:
 
 
 def test_param_custom_attributes() -> None:
-    @fl.with_custom_attrs(x__range=(0, 10), return__range=(0, 10))
+    @fl.with_fiat_attributes(x__range=(0, 10), return__range=(0, 10))
     def f(x: int) -> int:
         return x
 
@@ -21,7 +21,7 @@ def test_param_custom_attributes() -> None:
 
 
 def test_function_attributes() -> None:
-    @fl.with_custom_attrs(
+    @fl.with_fiat_attributes(
         invoke_async=True,
         invoke_manually=True,
         invoke_always_dirty=True,
@@ -42,7 +42,7 @@ def test_function_attributes() -> None:
 
 
 def test_function_attributes_wrong_type() -> None:
-    @fl.with_custom_attrs(
+    @fl.with_fiat_attributes(
         invoke_async="True",
     )
     def f(x: int) -> int:
@@ -53,7 +53,7 @@ def test_function_attributes_wrong_type() -> None:
 
 
 def test_function_attributes_wrong_key() -> None:
-    @fl.with_custom_attrs(
+    @fl.with_fiat_attributes(
         wrong_key=True,
     )
     def f(x: int) -> int:

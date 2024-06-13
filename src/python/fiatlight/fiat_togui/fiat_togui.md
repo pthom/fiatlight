@@ -56,9 +56,11 @@ See [FunctionWithGui](function_with_gui) for a comprehensive list of all the ava
 ```python
 import fiatlight as fl
 
-@fl.with_custom_attrs(celsius__range=(0, 100), celsius__format="%.1f °C")
+
+@fl.with_fiat_attributes(celsius__range=(0, 100), celsius__format="%.1f °C")
 def to_fahrenheit(celsius: float) -> float:
     return celsius * 9 / 5 + 32
+
 
 fl.run(to_fahrenheit, app_name="Primitive Custom")
 ```

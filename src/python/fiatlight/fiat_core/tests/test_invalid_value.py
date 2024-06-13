@@ -11,7 +11,7 @@ def test_invalid_value() -> None:
     def f(odd_int: int) -> int:
         return odd_int + 1
 
-    fl.add_custom_attrs(f, odd_int__range=(1, 100), odd_int__validate_value=validate_odd_int)
+    fl.add_fiat_attributes(f, odd_int__range=(1, 100), odd_int__validate_value=validate_odd_int)
 
     f_gui = fl.FunctionWithGui(f)
 

@@ -40,7 +40,7 @@ def interactive_sine_wave(freq: float = 1.0, phase: float = 0.0, amplitude: floa
 
 
 # Set ranges and edit types for the sine wave parameters
-fl.add_custom_attrs(
+fl.add_fiat_attributes(
     interactive_sine_wave,
     freq__range=(0.1, 3),
     phase__range=(-np.pi, np.pi),
@@ -60,7 +60,7 @@ class ColorMap(Enum):
     CIVIDIS = "cividis"
 
 
-@fl.with_custom_attrs(
+@fl.with_fiat_attributes(
     mean__range=(-5, 5),
     variance__range=(0.1, 5),
     levels__range=(1, 20),
@@ -78,7 +78,7 @@ def gaussian_heatmap(
     return fig
 
 
-@fl.with_custom_attrs(window_size__range=(1, 40))
+@fl.with_fiat_attributes(window_size__range=(1, 40))
 def data_smoothing(window_size: int = 5) -> Figure:
     """Demonstrates data smoothing using a moving average filter."""
     x = np.linspace(0, 15, 300)
@@ -103,7 +103,7 @@ def interactive_histogram(
 
 
 # Set interactive parameters for the histogram
-fl.add_custom_attrs(
+fl.add_fiat_attributes(
     interactive_histogram,
     n_bars__edit_type="knob",
     n_bars__range=(1, 300),

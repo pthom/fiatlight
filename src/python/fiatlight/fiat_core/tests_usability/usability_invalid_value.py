@@ -7,7 +7,7 @@ def validate_odd_int(odd_int: int) -> fl.DataValidationResult:
     return fl.DataValidationResult.error("must be an odd number")
 
 
-@fl.with_custom_attrs(odd_int__range=(0, 6), odd_int__validate_value=validate_odd_int)
+@fl.with_fiat_attributes(odd_int__range=(0, 6), odd_int__validate_value=validate_odd_int)
 def f(odd_int: int) -> int:
     return odd_int + 1
 

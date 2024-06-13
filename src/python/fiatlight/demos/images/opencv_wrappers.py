@@ -13,7 +13,7 @@ class CannyApertureSize(Enum):
     APERTURE_7 = 7
 
 
-@fl.with_custom_attrs(blur_sigma__range=(0.0, 10.0))
+@fl.with_fiat_attributes(blur_sigma__range=(0.0, 10.0))
 def canny(
     image: ImageU8,
     t_lower: PositiveFloat = PositiveFloat(1000.0),
@@ -44,7 +44,7 @@ class MorphShape(Enum):
     MORPH_ELLIPSE = cv2.MORPH_ELLIPSE
 
 
-@fl.with_custom_attrs(kernel_size__range=(1, 10), iterations__range=(1, 10))
+@fl.with_fiat_attributes(kernel_size__range=(1, 10), iterations__range=(1, 10))
 def dilate(
     image: ImageU8_GRAY,
     kernel_size: int = 2,
@@ -61,7 +61,7 @@ def dilate(
     return r  # type: ignore
 
 
-@fl.with_custom_attrs(size__range=(1, 10), dynRatio__range=(1, 10))
+@fl.with_fiat_attributes(size__range=(1, 10), dynRatio__range=(1, 10))
 def oil_paint(image: ImageU8, size: int = 1, dynRatio: int = 3) -> ImageU8:
     """Applies oil painting effect to an image, using the OpenCV xphoto module."""
     return cv2.xphoto.oilPainting(image, size, dynRatio, cv2.COLOR_BGR2HSV)  # type: ignore

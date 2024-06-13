@@ -81,7 +81,7 @@ def validate_name(name: str) -> fl.DataValidationResult:
     return fl.DataValidationResult.ok()
 
 
-fl.add_custom_attrs(
+fl.add_fiat_attributes(
     hello_rosetta,
     age__range=(0, 125),
     name__hint="Enter your name",

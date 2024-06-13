@@ -2,7 +2,7 @@ import fiatlight as fl
 
 
 def usability_with_md_docstring() -> None:
-    @fl.with_custom_attrs(doc_display=True, doc_markdown=True, doc_show_source=True)
+    @fl.with_fiat_attributes(doc_display=True, doc_markdown=True, doc_show_source=True)
     def f(x: int) -> int:
         """# This is a markdown docstring
 
@@ -17,7 +17,7 @@ def usability_with_md_docstring() -> None:
 
 
 def usability_with_md_doc_user() -> None:
-    @fl.with_custom_attrs(
+    @fl.with_fiat_attributes(
         doc_display=True,
         doc_markdown=True,
         doc_show_source=False,

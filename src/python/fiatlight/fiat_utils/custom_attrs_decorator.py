@@ -11,7 +11,7 @@ from functools import wraps
 FunctionType = TypeVar("FunctionType", bound=Callable[..., Any])
 
 
-def with_custom_attrs(**kwargs: Any) -> Callable[[FunctionType], FunctionType]:
+def with_fiat_attributes(**kwargs: Any) -> Callable[[FunctionType], FunctionType]:
     def decorator(func: FunctionType) -> FunctionType:
         @wraps(func)
         def wrapper(*args: Any, **kwargs: Any) -> Any:
@@ -24,14 +24,14 @@ def with_custom_attrs(**kwargs: Any) -> Callable[[FunctionType], FunctionType]:
     return decorator
 
 
-def add_custom_attrs(func: FunctionType, **kwargs: Any) -> FunctionType:
+def add_fiat_attributes(func: FunctionType, **kwargs: Any) -> FunctionType:
     for key, value in kwargs.items():
         setattr(func, key, value)
     return func
 
 
-def test_fiatlight_custom_attrs() -> None:
-    @with_custom_attrs(x__range=(0, 10), y__range=(0, 20))
+def test_fiatlight_attrs() -> None:
+    @with_fiat_attributes(x__range=(0, 10), y__range=(0, 20))
     def f(x: int, y: int) -> int:
         return x + y
 

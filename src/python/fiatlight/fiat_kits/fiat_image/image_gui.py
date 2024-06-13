@@ -1,4 +1,4 @@
-from fiatlight.fiat_utils.custom_attrs_decorator import with_custom_attrs
+from fiatlight.fiat_utils.custom_attrs_decorator import with_fiat_attributes
 from fiatlight.fiat_types import JsonDict, ImagePath, FiatAttributes, Unspecified, UnspecifiedValue
 from fiatlight.fiat_core import AnyDataWithGui, PossibleFiatAttributes
 from fiatlight.fiat_kits.fiat_image.image_types import Image, ImageU8
@@ -355,7 +355,7 @@ class ImageWithGui(AnyDataWithGui[Image]):
         self.image_presenter.load_gui_options_from_json(data)
 
 
-@with_custom_attrs(
+@with_fiat_attributes(
     image_file__label="Select Image",
     max_image_size__range=(1, 3000),
     max_image_size__label="Max Image Size",

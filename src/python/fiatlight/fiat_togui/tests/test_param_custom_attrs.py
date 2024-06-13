@@ -17,7 +17,7 @@ def test_numeric_ranges_with_decorator_custom_attrs() -> None:
     import fiatlight as fl
     import math
 
-    @fl.with_custom_attrs(x__range=(0.0, 10.0))
+    @fl.with_fiat_attributes(x__range=(0.0, 10.0))
     def f(x: float) -> float:
         return math.sin(x)
 

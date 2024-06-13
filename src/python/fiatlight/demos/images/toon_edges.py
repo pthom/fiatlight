@@ -8,7 +8,7 @@ import numpy as np
 import cv2
 
 
-@fl.with_custom_attrs(edges_intensity__range=(0.0, 1.0))
+@fl.with_fiat_attributes(edges_intensity__range=(0.0, 1.0))
 def merge_toon_edges(
     image: ImageU8_3,
     edges_images: ImageU8_GRAY,
@@ -80,7 +80,7 @@ class ToonEdgesParams(BaseModel):
     appearance: ToonEdgesAppearance = ToonEdgesAppearance()
 
 
-@fl.with_custom_attrs(
+@fl.with_fiat_attributes(
     params__tooltip="Parameters for the Toon Edges function",
     params__label="Edges Params",
 )

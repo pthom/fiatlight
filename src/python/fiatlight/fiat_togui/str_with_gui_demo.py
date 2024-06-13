@@ -7,7 +7,7 @@ def only_lowercase(s: str) -> fl.DataValidationResult:
     return fl.DataValidationResult.error("The string should be lowercase.")
 
 
-@fl.with_custom_attrs(
+@fl.with_fiat_attributes(
     #  Validation
     name__validate_value=only_lowercase,
     #  Custom attributes

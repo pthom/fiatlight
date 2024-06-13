@@ -116,7 +116,7 @@ def test_possible_custom_attr_in_function() -> None:
     #
     # Test register a function with correct custom attributes
     #
-    @fl.with_custom_attrs(foo__xrange=(5, 10))
+    @fl.with_fiat_attributes(foo__xrange=(5, 10))
     def f(foo: Foo) -> Foo:
         return foo
 

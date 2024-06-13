@@ -20,7 +20,7 @@ def lissajous_curve(freq1: float = 5.0, freq2: float = 4.0, delta: float = np.pi
 import fiatlight as fl
 
 # Options for widgets
-fl.add_custom_attrs(
+fl.add_fiat_attributes(
     lissajous_curve,
     freq1__range=(0, 10),
     freq2__range=(0, 10),

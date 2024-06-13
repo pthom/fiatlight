@@ -22,7 +22,7 @@ class Sex(Enum):
     Woman = "female"
 
 
-@fl.with_custom_attrs(
+@fl.with_fiat_attributes(
     # define the custom attributes for the function parameters
     age_min__range=(0, 100),
     age_max__range=(0, 100),

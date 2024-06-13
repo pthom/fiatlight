@@ -8,7 +8,7 @@ def only_lowercase(s: str) -> fl.DataValidationResult:
 
 
 def main() -> None:
-    @fl.with_custom_attrs(s__validate_value=only_lowercase)
+    @fl.with_fiat_attributes(s__validate_value=only_lowercase)
     def f(s: str = "") -> str:
         return s
 
