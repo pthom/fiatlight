@@ -12,8 +12,8 @@ def test_serialize_params() -> None:
     params = SimplePlotParams()
     array_with_gui = SimplePlotGui(params)
     as_dict = array_with_gui.save_gui_options_to_json()
-    assert as_dict["_plot_type_str"] == "line"
+    assert as_dict["plot_type"] == "line"
 
-    as_dict["_plot_type_str"] = "bars"
+    as_dict["plot_type"] = "bars"
     array_with_gui.load_gui_options_from_json(as_dict)
-    assert array_with_gui.plot_presenter.plot_params._plot_type_str == "bars"
+    assert array_with_gui.plot_presenter.plot_params.plot_type == SimplePlotType.bars

@@ -11,10 +11,10 @@ from fiatlight.fiat_kits.fiat_array.array_types import (
     present_array,
     FloatMatrix,
 )
-from dataclasses import dataclass
-from enum import Enum, auto
+from enum import Enum
 from typing import List
-from imgui_bundle import implot, ImVec2, imgui_ctx, imgui, immapp
+from imgui_bundle import implot, ImVec2, imgui_ctx, imgui, immapp, ImVec2_Pydantic
+from pydantic import BaseModel
 
 
 FloatMatrix_Dim1_Or_2 = FloatMatrix_Dim1 | FloatMatrix_Dim2
@@ -26,13 +26,13 @@ class SimplePlotType(Enum):
     """
 
     # line: A 2D line plot for displaying continuous data
-    line = auto()  #
+    line = "line"
     # scatter: A scatter plot for displaying individual data points (for small arrays)
-    scatter = auto()
+    scatter = "scatter"
     # stairs: A stairstep graph, useful for non-continuous data (for small arrays)
-    stairs = auto()
+    stairs = "stairs"
     # bars: A bar chart for categorical data (for small arrays)
-    bars = auto()
+    bars = "bars"
 
     @staticmethod
     def from_str(name: str) -> "SimplePlotType":
@@ -41,33 +41,14 @@ class SimplePlotType(Enum):
         return SimplePlotType[name]
 
 
-@dataclass
-class SimplePlotParams:
-    _plot_type_str: str = "line"  # The type of presentation to use (a string from SimplePlotType)
+class SimplePlotParams(BaseModel):
+    plot_type: SimplePlotType = SimplePlotType.line  # The type of presentation to use
     # Size in em units (i.e. multiples of the font height)
-    plot_size_em: ImVec2 = ImVec2(35, 20)
+    plot_size_em: ImVec2_Pydantic = ImVec2(35, 20)
     # The threshold for the array size to be able to present scatter, bars, and stairs plots
     small_array_threshold: int = 100
     # Auto-scale the plot axes
     auto_fit: bool = True
-
-    def as_dict(self) -> JsonDict:
-        r = {
-            "_plot_type_str": self._plot_type_str,
-            "plot_size_em": (self.plot_size_em.x, self.plot_size_em.y),
-            "small_array_threshold": self.small_array_threshold,
-            "auto_fit": self.auto_fit,
-        }
-        return r
-
-    def fill_from_dict(self, data: JsonDict) -> None:
-        self._plot_type_str = data["_plot_type_str"]
-        self.plot_size_em = ImVec2(*data["plot_size_em"])
-        self.small_array_threshold = data["small_array_threshold"]
-        self.auto_fit = data["auto_fit"]
-
-    def presentation_type(self) -> SimplePlotType:
-        return SimplePlotType.from_str(self._plot_type_str)
 
 
 class SimplePlotPresenter:
@@ -123,11 +104,11 @@ class SimplePlotPresenter:
         if len(available_plot_types) > 1:
             with imgui_ctx.begin_horizontal("Plot Type"):
                 for plot_type in available_plot_types:
-                    is_selected = self.plot_params.presentation_type() == plot_type
+                    is_selected = self.plot_params.plot_type == plot_type
                     if imgui.radio_button(plot_type.name, is_selected):
-                        self.plot_params._plot_type_str = plot_type.name
+                        self.plot_params.plot_type = plot_type
         else:
-            self.plot_params._plot_type_str = available_plot_types[0].name
+            self.plot_params.plot_type = available_plot_types[0]
 
     def gui(self) -> None:
         if self.array is None:
@@ -140,20 +121,20 @@ class SimplePlotPresenter:
             implot.setup_axes("x", "y", axis_flags, axis_flags)
             label = "##plot"
             if not self._is_2d_array():
-                if self.plot_params.presentation_type() == SimplePlotType.line:
+                if self.plot_params.plot_type == SimplePlotType.line:
                     implot.plot_line(label, self.array)  # type: ignore
-                elif self.plot_params.presentation_type() == SimplePlotType.scatter:
+                elif self.plot_params.plot_type == SimplePlotType.scatter:
                     implot.plot_scatter(label, self.array)  # type: ignore
-                elif self.plot_params.presentation_type() == SimplePlotType.stairs:
+                elif self.plot_params.plot_type == SimplePlotType.stairs:
                     implot.plot_stairs(label, self.array)  # type: ignore
-                elif self.plot_params.presentation_type() == SimplePlotType.bars:
+                elif self.plot_params.plot_type == SimplePlotType.bars:
                     implot.plot_bars(label, self.array)  # type: ignore
             else:
-                if self.plot_params.presentation_type() == SimplePlotType.line:
+                if self.plot_params.plot_type == SimplePlotType.line:
                     implot.plot_line(label, self._array_x(), self._array_y())
-                elif self.plot_params.presentation_type() == SimplePlotType.scatter:
+                elif self.plot_params.plot_type == SimplePlotType.scatter:
                     implot.plot_scatter(label, self._array_x(), self._array_y())
-                elif self.plot_params.presentation_type() == SimplePlotType.stairs:
+                elif self.plot_params.plot_type == SimplePlotType.stairs:
                     implot.plot_stairs(label, self._array_x(), self._array_y())
 
         self.plot_params.plot_size_em = immapp.show_resizable_plot_in_node_editor_em(
@@ -187,10 +168,10 @@ class SimplePlotGui(AnyDataWithGui[FloatMatrix_Dim1_Or_2]):
         self.plot_presenter.set_array(value)
 
     def save_gui_options_to_json(self) -> JsonDict:
-        return self.plot_presenter.plot_params.as_dict()
+        return self.plot_presenter.plot_params.model_dump(mode="json")
 
     def load_gui_options_from_json(self, data: JsonDict) -> None:
-        self.plot_presenter.plot_params.fill_from_dict(data)
+        self.plot_presenter.plot_params = SimplePlotParams.model_validate(data)
 
 
 def present_float1_arrays_as_plot() -> None:
