@@ -197,7 +197,7 @@ class SimplePlotGui(AnyDataWithGui[FloatMatrix_Dim1_Or_2]):
         self.plot_presenter = SimplePlotPresenter(array_params)
 
         self.callbacks.present = self.present
-        self.callbacks.present_popup_possible = True
+        self.callbacks.present_collapsible = True
 
         self.callbacks.on_change = self.on_change
         self.callbacks.present_str = present_array

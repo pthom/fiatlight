@@ -501,7 +501,6 @@ class FunctionNodeGui:
             header_params = GuiHeaderLineParams[Any]()
             header_params.prefix_gui = lambda: self._draw_input_pin(header_elements)
             header_params.default_value_if_unspecified = input_param.default_value
-            header_params.popup_allow = True
             header_params.popup_title = f"detached view - {unique_name}: param {input_param.name}"
 
             if can_edit:
@@ -575,7 +574,6 @@ class FunctionNodeGui:
 
         header_params = GuiHeaderLineParams[Any]()
         header_params.suffix_gui = lambda: self._draw_output_pin(bof_header_elements, idx_output)
-        header_params.popup_allow = True
         header_params.popup_title = f"detached view - {unique_name}: output {idx_output}"
 
         output_param.gui_present_customizable(header_params)

@@ -85,18 +85,18 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
         self.callbacks.present_str = self.present_str
         self.callbacks.present = self.present
 
-        # It is always possible to present and edit a dataclass in a popup
-        self.callbacks.edit_popup_possible = True
-        self.callbacks.present_popup_possible = True
+        # It is always possible to collapse a dataclass
+        self.callbacks.edit_collapsible = True
+        self.callbacks.present_collapsible = True
 
-        # A popup is required only if any of the parameters require a popup
-        self.callbacks.present_popup_required = False
-        self.callbacks.edit_popup_required = False
+        # The data cannot be presented in a node if any of its params is incompatible
+        self.callbacks.present_node_compatible = True
+        self.callbacks.edit_node_compatible = True
         for param_gui in self._parameters_with_gui:
-            if param_gui.data_with_gui.callbacks.present_popup_required:
-                self.callbacks.present_popup_required = True
-            if param_gui.data_with_gui.callbacks.edit_popup_required:
-                self.callbacks.edit_popup_required = True
+            if not param_gui.data_with_gui.callbacks.present_node_compatible:
+                self.callbacks.present_node_compatible = False
+            if param_gui.data_with_gui.callbacks.edit_node_compatible:
+                self.callbacks.edit_node_compatible = False
 
         self.callbacks.edit_collapsible = True
         self.callbacks.present_collapsible = True

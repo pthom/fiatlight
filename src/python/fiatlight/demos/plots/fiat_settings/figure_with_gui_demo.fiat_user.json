@@ -87,145 +87,334 @@
     },
     "gui_options": {
         "interactive_sine_wave": {
-            "inputs": {
-                "freq": {
-                    "cb_options": {},
-                    "expanded": true
-                },
-                "phase": {
-                    "cb_options": {},
-                    "expanded": false
-                },
-                "amplitude": {
-                    "cb_options": {},
-                    "expanded": true
-                }
-            },
-            "outputs": {
-                "0": {
-                    "cb_options": {
-                        "figure_size": {
-                            "x": 640.0,
-                            "y": 480.0
+            "function_node_with_gui": {
+                "_inputs_expanded": true,
+                "_outputs_expanded": true,
+                "fiat_tuning_expanded": false,
+                "_internal_state_gui_expanded": true,
+                "_function_node": {
+                    "inputs": {
+                        "freq": {
+                            "cb_options": {},
+                            "expanded": true
+                        },
+                        "phase": {
+                            "cb_options": {},
+                            "expanded": false
+                        },
+                        "amplitude": {
+                            "cb_options": {},
+                            "expanded": true
                         }
                     },
-                    "expanded": true
+                    "outputs": {
+                        "0": {
+                            "cb_options": {
+                                "figure_size": {
+                                    "x": 640.0,
+                                    "y": 480.0
+                                }
+                            },
+                            "expanded": true
+                        }
+                    },
+                    "internal_gui_options": {}
                 }
             },
-            "internal_gui_options": {}
+            "function_node": {
+                "inputs": {
+                    "freq": {
+                        "cb_options": {},
+                        "expanded": true
+                    },
+                    "phase": {
+                        "cb_options": {},
+                        "expanded": false
+                    },
+                    "amplitude": {
+                        "cb_options": {},
+                        "expanded": true
+                    }
+                },
+                "outputs": {
+                    "0": {
+                        "cb_options": {
+                            "figure_size": {
+                                "x": 640.0,
+                                "y": 480.0
+                            }
+                        },
+                        "expanded": true
+                    }
+                },
+                "internal_gui_options": {}
+            }
         },
         "gaussian_heatmap": {
-            "inputs": {
-                "mean": {
-                    "cb_options": {},
-                    "expanded": true
-                },
-                "variance": {
-                    "cb_options": {},
-                    "expanded": true
-                },
-                "colormap": {
-                    "cb_options": {},
-                    "expanded": true
-                },
-                "levels": {
-                    "cb_options": {},
-                    "expanded": true
-                }
-            },
-            "outputs": {
-                "0": {
-                    "cb_options": {
-                        "figure_size": {
-                            "x": 640.0,
-                            "y": 480.0
+            "function_node_with_gui": {
+                "_inputs_expanded": true,
+                "_outputs_expanded": true,
+                "fiat_tuning_expanded": false,
+                "_internal_state_gui_expanded": true,
+                "_function_node": {
+                    "inputs": {
+                        "mean": {
+                            "cb_options": {},
+                            "expanded": true
+                        },
+                        "variance": {
+                            "cb_options": {},
+                            "expanded": true
+                        },
+                        "colormap": {
+                            "cb_options": {},
+                            "expanded": true
+                        },
+                        "levels": {
+                            "cb_options": {},
+                            "expanded": true
                         }
                     },
-                    "expanded": true
+                    "outputs": {
+                        "0": {
+                            "cb_options": {
+                                "figure_size": {
+                                    "x": 640.0,
+                                    "y": 480.0
+                                }
+                            },
+                            "expanded": true
+                        }
+                    },
+                    "internal_gui_options": {}
                 }
             },
-            "internal_gui_options": {}
+            "function_node": {
+                "inputs": {
+                    "mean": {
+                        "cb_options": {},
+                        "expanded": true
+                    },
+                    "variance": {
+                        "cb_options": {},
+                        "expanded": true
+                    },
+                    "colormap": {
+                        "cb_options": {},
+                        "expanded": true
+                    },
+                    "levels": {
+                        "cb_options": {},
+                        "expanded": true
+                    }
+                },
+                "outputs": {
+                    "0": {
+                        "cb_options": {
+                            "figure_size": {
+                                "x": 640.0,
+                                "y": 480.0
+                            }
+                        },
+                        "expanded": true
+                    }
+                },
+                "internal_gui_options": {}
+            }
         },
         "data_smoothing": {
-            "inputs": {
-                "window_size": {
-                    "cb_options": {},
-                    "expanded": true
-                }
-            },
-            "outputs": {
-                "0": {
-                    "cb_options": {
-                        "figure_size": {
-                            "x": 640.0,
-                            "y": 480.0
+            "function_node_with_gui": {
+                "_inputs_expanded": true,
+                "_outputs_expanded": true,
+                "fiat_tuning_expanded": false,
+                "_internal_state_gui_expanded": true,
+                "_function_node": {
+                    "inputs": {
+                        "window_size": {
+                            "cb_options": {},
+                            "expanded": true
                         }
                     },
-                    "expanded": true
+                    "outputs": {
+                        "0": {
+                            "cb_options": {
+                                "figure_size": {
+                                    "x": 640.0,
+                                    "y": 480.0
+                                }
+                            },
+                            "expanded": true
+                        }
+                    },
+                    "internal_gui_options": {}
                 }
             },
-            "internal_gui_options": {}
+            "function_node": {
+                "inputs": {
+                    "window_size": {
+                        "cb_options": {},
+                        "expanded": true
+                    }
+                },
+                "outputs": {
+                    "0": {
+                        "cb_options": {
+                            "figure_size": {
+                                "x": 640.0,
+                                "y": 480.0
+                            }
+                        },
+                        "expanded": true
+                    }
+                },
+                "internal_gui_options": {}
+            }
         },
         "interactive_histogram": {
-            "inputs": {
-                "n_bars": {
-                    "cb_options": {},
-                    "expanded": true
-                },
-                "mu": {
-                    "cb_options": {},
-                    "expanded": true
-                },
-                "sigma": {
-                    "cb_options": {},
-                    "expanded": true
-                },
-                "average": {
-                    "cb_options": {},
-                    "expanded": true
-                },
-                "nb_data": {
-                    "cb_options": {},
-                    "expanded": true
-                }
-            },
-            "outputs": {
-                "0": {
-                    "cb_options": {
-                        "figure_size": {
-                            "x": 640.0,
-                            "y": 480.0
+            "function_node_with_gui": {
+                "_inputs_expanded": true,
+                "_outputs_expanded": true,
+                "fiat_tuning_expanded": false,
+                "_internal_state_gui_expanded": true,
+                "_function_node": {
+                    "inputs": {
+                        "n_bars": {
+                            "cb_options": {},
+                            "expanded": true
+                        },
+                        "mu": {
+                            "cb_options": {},
+                            "expanded": true
+                        },
+                        "sigma": {
+                            "cb_options": {},
+                            "expanded": true
+                        },
+                        "average": {
+                            "cb_options": {},
+                            "expanded": true
+                        },
+                        "nb_data": {
+                            "cb_options": {},
+                            "expanded": true
                         }
                     },
-                    "expanded": true
+                    "outputs": {
+                        "0": {
+                            "cb_options": {
+                                "figure_size": {
+                                    "x": 640.0,
+                                    "y": 480.0
+                                }
+                            },
+                            "expanded": true
+                        }
+                    },
+                    "internal_gui_options": {}
                 }
             },
-            "internal_gui_options": {}
+            "function_node": {
+                "inputs": {
+                    "n_bars": {
+                        "cb_options": {},
+                        "expanded": true
+                    },
+                    "mu": {
+                        "cb_options": {},
+                        "expanded": true
+                    },
+                    "sigma": {
+                        "cb_options": {},
+                        "expanded": true
+                    },
+                    "average": {
+                        "cb_options": {},
+                        "expanded": true
+                    },
+                    "nb_data": {
+                        "cb_options": {},
+                        "expanded": true
+                    }
+                },
+                "outputs": {
+                    "0": {
+                        "cb_options": {
+                            "figure_size": {
+                                "x": 640.0,
+                                "y": 480.0
+                            }
+                        },
+                        "expanded": true
+                    }
+                },
+                "internal_gui_options": {}
+            }
         },
         "time_seconds": {
-            "inputs": {},
-            "outputs": {
-                "0": {
-                    "cb_options": {},
-                    "expanded": true
+            "function_node_with_gui": {
+                "_inputs_expanded": true,
+                "_outputs_expanded": true,
+                "fiat_tuning_expanded": false,
+                "_internal_state_gui_expanded": true,
+                "_function_node": {
+                    "inputs": {},
+                    "outputs": {
+                        "0": {
+                            "cb_options": {},
+                            "expanded": true
+                        }
+                    },
+                    "internal_gui_options": {}
                 }
             },
-            "internal_gui_options": {}
+            "function_node": {
+                "inputs": {},
+                "outputs": {
+                    "0": {
+                        "cb_options": {},
+                        "expanded": true
+                    }
+                },
+                "internal_gui_options": {}
+            }
         },
         "phase_from_time_seconds": {
-            "inputs": {
-                "time_": {
-                    "cb_options": {},
-                    "expanded": false
+            "function_node_with_gui": {
+                "_inputs_expanded": true,
+                "_outputs_expanded": true,
+                "fiat_tuning_expanded": false,
+                "_internal_state_gui_expanded": true,
+                "_function_node": {
+                    "inputs": {
+                        "time_": {
+                            "cb_options": {},
+                            "expanded": false
+                        }
+                    },
+                    "outputs": {
+                        "0": {
+                            "cb_options": {},
+                            "expanded": true
+                        }
+                    },
+                    "internal_gui_options": {}
                 }
             },
-            "outputs": {
-                "0": {
-                    "cb_options": {},
-                    "expanded": true
-                }
-            },
-            "internal_gui_options": {}
+            "function_node": {
+                "inputs": {
+                    "time_": {
+                        "cb_options": {},
+                        "expanded": false
+                    }
+                },
+                "outputs": {
+                    "0": {
+                        "cb_options": {},
+                        "expanded": true
+                    }
+                },
+                "internal_gui_options": {}
+            }
         }
     }
 }

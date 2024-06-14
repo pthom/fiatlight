@@ -19,12 +19,12 @@ class DataFrameWithGui(AnyDataWithGui[pd.DataFrame]):
         # present callbacks
         self.callbacks.present_str = self.present_str
         self.callbacks.present = self.present
-        self.callbacks.present_popup_required = False
-        self.callbacks.present_popup_possible = True
-        # edit callbacks
+        self.callbacks.present_collapsible = True
+        self.callbacks.present_node_compatible = True
+        # edit callbacks: there is no edit, actually!
         self.callbacks.edit = self.edit
-        self.callbacks.edit_popup_required = False
-        self.callbacks.edit_popup_possible = False
+        self.callbacks.edit_collapsible = False
+        self.callbacks.edit_node_compatible = True
         # default value provider
         self.callbacks.default_value_provider = self.default_value_provider
         # on_change callback

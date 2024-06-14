@@ -44,26 +44,18 @@ class AnyDataGuiCallbacks(Generic[DataType]):
     # Set this to False if your custom presentation is small and fits in one line
     # (i.e. it does not need to be collapsible)
     # If True, the gui presentation will either:
-    #     - show the first characters of present_str (with "..." and a tooltip)
-    #     - show the custom presentation in a collapsible area
+    #     - show present_str + an expand button
+    #     - show the custom presentation + a collapse button
     present_collapsible: bool = True
 
-    # present_popup_required (Optional: leave to False in most cases)
-    # If True, the present function needs to be called in a popup window.
-    # This is due to a limitation of the node editor, which cannot render complex widgets
-    # in the node itself.
-    # By complex widgets, we mean widgets that require a scrollable area, or a child window, such as:
-    #      - imgui.input_text_multiline
-    #      - imgui.combo
-    #      - imgui.begin_child
-    present_popup_required: bool = False
+    # present_node_compatible: (Optional: set to False if using input_text_multiline, combo, begin_child, etc.)
+    # If True, the present function is incompatible with being presented in a node (this is due to a limitation
+    # of the node editor, which cannot render scrollable widgets)
+    # Note: instead of setting edit_node_compatible to False, you may query
+    #       `fiatlight.is_rendering_in_node()` to know if you are rendering in a node
+    #       and choose alternative widgets in this case.
+    present_node_compatible: bool = True
 
-    # present_popup_possible (Optional: leave to False in most cases)
-    # If True, the present function can be called in a popup window.
-    # Only used if you want to allow the user to see the data in a popup window
-    # (for example, to provide more space for a large text input, or for an image viewer)
-    # Note: if present_popup_required is True, this flag is ignored
-    present_popup_possible: bool = False
     # ---------------------------------------------------------------------------------------------
 
     #                        Edition
@@ -78,29 +70,20 @@ class AnyDataGuiCallbacks(Generic[DataType]):
     edit: Callable[[DataType], tuple[bool, DataType]] | None = None
 
     # edit_collapsible:
-    # Set this to False if your custom edition is small and fits in one line
-    # (i.e. it does not need to be collapsible)
+    # Set this to False if your custom edition is small, and does not need to be collapsible (i.e. it fits one line)
     # If True, the gui edition will either:
-    #     - show the first characters of present_str (with "..." and a tooltip)
-    #     - show the custom edition in a collapsible area
+    #     - show present_str + an expand button
+    #     - show the custom edition + a collapse button
     edit_collapsible: bool = True
 
-    # edit_popup_required (Optional: leave to False in most cases)
-    # If True, the edit function needs to be called in a popup window.
-    # This is due to a limitation of the node editor, which cannot render complex widgets
-    # in the node itself.
-    # By complex widgets, we mean widgets that require a scrollable area, or a child window, such as:
-    #      - imgui.input_text_multiline
-    #      - imgui.combo
-    #      - imgui.begin_child
-    edit_popup_required: bool = False
+    # edit_node_compatible: (Optional: set to False if using input_text_multiline, combo, begin_child, etc.)
+    # If True, the edit function is incompatible with being presented in a node (this is due to a limitation
+    # of the node editor, which cannot render scrollable widgets)
+    # Note: instead of setting edit_node_compatible to False, you may query
+    #       `fiatlight.is_rendering_in_node()` to know if you are rendering in a node
+    #       and choose alternative widgets in this case.
+    edit_node_compatible: bool = True
 
-    # edit_popup_possible (Optional: leave to False in most cases)
-    # If True, the edit function can be called in a popup window.
-    # Only used if you want to allow the user to edit the data in a popup window
-    # (for example, to provide more space for a large text input)
-    # Note: if edit_popup_required is True, this flag is ignored
-    edit_popup_possible: bool = False
     # ---------------------------------------------------------------------------------------------
 
     #                        Default value

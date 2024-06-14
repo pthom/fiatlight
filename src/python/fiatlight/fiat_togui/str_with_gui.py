@@ -107,9 +107,9 @@ class StrWithGui(AnyDataWithGui[str]):
         self._input_text_classic = hello_imgui.InputTextData("", multiline=False, size_em=ImVec2(15, 0))
         self.callbacks.on_change = self.on_change
         self.callbacks.edit = self.edit
-        self.callbacks.edit_popup_possible = False
+        self.callbacks.edit_node_compatible = True
         self.callbacks.present = self.present
-        self.callbacks.present_popup_possible = True
+        self.callbacks.present_node_compatible = True
         self.callbacks.default_value_provider = lambda: ""
         self.callbacks.save_gui_options_to_json = self.save_gui_options_to_json
         self.callbacks.load_gui_options_from_json = self.load_gui_options_from_json
@@ -143,6 +143,7 @@ class StrWithGui(AnyDataWithGui[str]):
             self.params.developer_params.allow_multiline_edit = fiat_attrs["allow_multiline_edit"]
             self.callbacks.present_collapsible = self.params.developer_params.allow_multiline_edit
             self.callbacks.edit_collapsible = self.params.developer_params.allow_multiline_edit
+            self.callbacks.edit_node_compatible = not self.params.developer_params.allow_multiline_edit
         if "resizable" in fiat_attrs:
             self.params.developer_params.resizable = fiat_attrs["resizable"]
         if "wrap_multiline" in fiat_attrs:
@@ -154,7 +155,7 @@ class StrWithGui(AnyDataWithGui[str]):
     def _update_internal_state_from_params(self) -> None:
         self._input_text_in_node.size_em.x = self.params.user_params.width_em
         self._input_text_in_node.hint = self.params.developer_params.hint
-        self.callbacks.edit_popup_possible = self.params.developer_params.allow_multiline_edit
+        self.callbacks.edit_node_compatible = not self.params.developer_params.allow_multiline_edit
         self._input_text_in_node.resizable = self.params.developer_params.resizable
 
     @staticmethod

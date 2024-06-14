@@ -80,7 +80,7 @@ class IntWithGuiParams:
     knob_variant: int = ImGuiKnobVariant_.stepped.value
     knob_size_em: float = 2.5
     knob_steps: int = 10
-    knob_no_input: bool = True
+    knob_no_input: bool = False
 
 
 class IntWithGui(AnyDataWithGui[int]):

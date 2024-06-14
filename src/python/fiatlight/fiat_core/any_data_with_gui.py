@@ -100,8 +100,6 @@ class GuiHeaderLineParams(Generic[DataType]):
     prefix_gui: Callable[[], None] | None = None
     suffix_gui: Callable[[], None] | None = None
     default_value_if_unspecified: DataType | Unspecified = UnspecifiedValue
-    #
-    popup_allow: bool = False
     popup_title: str = ""
 
 
@@ -349,6 +347,20 @@ class AnyDataWithGui(Generic[DataType]):
         # ------------------------------------------------------------------------------------------------------------------
         """
 
+    def can_show_present_popup(self) -> bool:
+        if self.callbacks.present_collapsible:
+            return True
+        if fiat_osd.is_rendering_in_node() and not self.callbacks.present_node_compatible:
+            return True
+        return False
+
+    def can_show_edit_popup(self) -> bool:
+        if self.callbacks.edit_collapsible:
+            return True
+        if fiat_osd.is_rendering_in_node() and not self.callbacks.edit_node_compatible:
+            return True
+        return False
+
     def _show_collapse_button(self) -> None:
         icon = icons_fontawesome_6.ICON_FA_CARET_DOWN if self._expanded else icons_fontawesome_6.ICON_FA_CARET_RIGHT
         tooltip = "Collapse" if self._expanded else "Expand"
@@ -399,11 +411,7 @@ class AnyDataWithGui(Generic[DataType]):
 
     def _gui_present_header_line(self, params: GuiHeaderLineParams[DataType]) -> None:
         """Present the value as a string in one line, or as a widget if it fits on one line"""
-
-        # can_present_in_node = not self.callbacks.present_popup_required
-        can_present_in_popup = params.popup_allow and (
-            self.callbacks.present_popup_required or self.callbacks.present_popup_possible
-        )
+        can_present_in_popup = self.can_show_present_popup()
 
         with imgui_ctx.begin_horizontal("present_header_line"):
             #
@@ -487,9 +495,7 @@ class AnyDataWithGui(Generic[DataType]):
 
     def _gui_edit_header_line(self, params: GuiHeaderLineParams[DataType]) -> bool:
         # can_edit_in_node = not self.callbacks.edit_popup_required
-        can_edit_in_popup = params.popup_allow and (
-            self.callbacks.edit_popup_required or self.callbacks.edit_popup_possible
-        )
+        can_edit_in_popup = self.can_show_edit_popup()
 
         changed = False
 
@@ -706,12 +712,12 @@ class AnyDataWithGui(Generic[DataType]):
         self.callbacks.edit = edit_callback
 
     def set_present_callback(
-        self, present_callback: DataPresentFunction[DataType], present_popup_required: bool | None = None
+        self, present_callback: DataPresentFunction[DataType], present_node_compatible: bool | None = None
     ) -> None:
         """Helper function to set the present custom callback from a free function"""
         self.callbacks.present = present_callback
-        if present_popup_required is not None:
-            self.callbacks.present_popup_required = present_popup_required
+        if present_node_compatible is not None:
+            self.callbacks.present_node_compatible = present_node_compatible
 
     def add_validate_value_callback(self, cb: Callable[[DataType], DataValidationResult]) -> None:
         self.callbacks.validate_value.append(cb)

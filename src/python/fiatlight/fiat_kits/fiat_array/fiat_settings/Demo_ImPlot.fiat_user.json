@@ -5,25 +5,29 @@
                 "radius_fixed_circle": {
                     "name": "radius_fixed_circle",
                     "data": {
-                        "type": "Unspecified"
+                        "type": "Primitive",
+                        "value": 10.84
                     }
                 },
                 "radius_moving_circle": {
                     "name": "radius_moving_circle",
                     "data": {
-                        "type": "Unspecified"
+                        "type": "Primitive",
+                        "value": 3.48
                     }
                 },
                 "pen_offset": {
                     "name": "pen_offset",
                     "data": {
-                        "type": "Unspecified"
+                        "type": "Primitive",
+                        "value": 6.0
                     }
                 },
                 "nb_turns": {
                     "name": "nb_turns",
                     "data": {
-                        "type": "Unspecified"
+                        "type": "Primitive",
+                        "value": 23.0
                     }
                 }
             },
@@ -42,7 +46,8 @@
                 "amplitude": {
                     "name": "amplitude",
                     "data": {
-                        "type": "Unspecified"
+                        "type": "Primitive",
+                        "value": 1.0
                     }
                 }
             }
