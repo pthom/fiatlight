@@ -7,6 +7,7 @@ This avoids issues with the canvas's zooming feature, which is incompatible with
 
 from fiatlight.fiat_types import VoidFunction, BoolFunction
 from imgui_bundle import imgui, ImVec2, imgui_node_editor, hello_imgui, imgui_ctx, ImVec4
+from .fontawesome6_ctx_utils import fontawesome_6_ctx, icons_fontawesome_6
 from dataclasses import dataclass
 
 
@@ -144,9 +145,16 @@ class _OsdDetachedWindows:
             show, flag_open = imgui.begin(detached_info.popup_label, True, window_flags)
             if show and flag_open:
                 _IS_PRESENTLY_IN_DETACHED_WINDOW = True
+                with fontawesome_6_ctx():
+                    with imgui_ctx.push_style_var(imgui.StyleVar_.frame_rounding.value, 50.0):
+                        cur_pos = imgui.get_cursor_pos()
+                        window_tl = cur_pos - imgui.get_style().window_padding  # type: ignore
+                        imgui.set_cursor_pos(window_tl)
+                        shall_close = imgui.button(icons_fontawesome_6.ICON_FA_CIRCLE_XMARK)
+                        set_widget_tooltip("Close ")
+                        imgui.set_cursor_pos(cur_pos)
                 detached_info.bool_returned = detached_info.gui_function()
                 _IS_PRESENTLY_IN_DETACHED_WINDOW = False
-                shall_close = imgui.button("Close")
                 if not shall_close:
                     alive_windows.append(detached_info)
             imgui.end()
