@@ -725,6 +725,9 @@ class FunctionWithGui:
             for input_with_gui in self._inputs_with_gui:
                 input_with_gui.data_with_gui._can_set_unspecified_or_default = True
 
+            for output_with_gui in self._outputs_with_gui:
+                output_with_gui.data_with_gui._expanded = True
+
         if self.name == "":
             raise FiatToGuiException("FunctionWithGui: function name is empty")
 
