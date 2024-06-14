@@ -280,7 +280,9 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
         with imgui_ctx.begin_vertical("##CompositeGui_present"):
             for param_gui in self._parameters_with_gui:
                 with imgui_ctx.push_obj_id(param_gui):
-                    param_gui.data_with_gui.gui_present_customizable(GuiHeaderLineParams(show_clipboard_button=False))
+                    param_gui.data_with_gui.gui_present_customizable(
+                        GuiHeaderLineParams(show_clipboard_button=False, parent_name=self.datatype_name())
+                    )
 
     def edit(self, value: DataclassLikeType) -> tuple[bool, DataclassLikeType]:
         changed = False
@@ -291,7 +293,7 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
                     raise ValueError(f"Object does not have attribute {param_gui.name}")
                 param_gui.data_with_gui.value = getattr(value, param_gui.name)
                 changed_in_edit = param_gui.data_with_gui.gui_edit_customizable(
-                    GuiHeaderLineParams(show_clipboard_button=False)
+                    GuiHeaderLineParams(show_clipboard_button=False, parent_name=self.datatype_name())
                 )
                 if changed_in_edit:
                     new_value = param_gui.data_with_gui.value

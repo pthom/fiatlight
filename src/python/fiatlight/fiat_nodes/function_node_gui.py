@@ -500,10 +500,9 @@ class FunctionNodeGui:
             )
             input_param.data_with_gui.status_tooltip = header_elements.param_label_tooltip
 
-            header_params = GuiHeaderLineParams[Any]()
+            header_params = GuiHeaderLineParams[Any](parent_name=self._function_node.function_with_gui.name)
             header_params.prefix_gui = lambda: self._draw_input_pin(header_elements)
             header_params.default_value_if_unspecified = input_param.default_value
-            header_params.popup_title = f"detached view - {unique_name}: param {input_param.name}"
 
             if can_edit:
                 changed = input_param.data_with_gui.gui_edit_customizable(header_params)
@@ -564,9 +563,9 @@ class FunctionNodeGui:
             if not has_link and not self._outputs_expanded:
                 continue
             with imgui_ctx.begin_group():
-                self._draw_one_output(idx_output, unique_name)
+                self._draw_one_output(idx_output)
 
-    def _draw_one_output(self, idx_output: int, unique_name: str) -> None:
+    def _draw_one_output(self, idx_output: int) -> None:
         output_param = self._function_node.function_with_gui.output(idx_output)
 
         bof_header_elements = self._output_header_elements(idx_output)
@@ -574,9 +573,8 @@ class FunctionNodeGui:
         output_param.label_color = get_fiat_config().style.color_as_vec4(bof_header_elements.value_color)
         output_param.status_tooltip = bof_header_elements.value_tooltip
 
-        header_params = GuiHeaderLineParams[Any]()
+        header_params = GuiHeaderLineParams[Any](parent_name=self._function_node.function_with_gui.name)
         header_params.suffix_gui = lambda: self._draw_output_pin(bof_header_elements, idx_output)
-        header_params.popup_title = f"detached view - {unique_name}: output {idx_output}"
 
         output_param.gui_present_customizable(header_params)
 
@@ -756,13 +754,6 @@ class FunctionNodeGui:
 
         # Raise the exception so that the user can debug it
         with fontawesome_6_ctx():
-            # if imgui.button(icons_fontawesome_6.ICON_FA_BOMB):
-            #     imgui.open_popup("Confirm Raise exception")
-            # if imgui.is_item_hovered():
-            #     fiat_osd.set_tooltip("Raise this exception to debug it.")
-
-            btn_label = icons_fontawesome_6.ICON_FA_BOMB + " Debug this exception"
-            popup_label = "Confirm Raise exception"
 
             def confirmation_gui() -> None:
                 msg = """
@@ -788,10 +779,14 @@ class FunctionNodeGui:
                     imgui.close_current_popup()  # close the popup (which will never happen, we will crash)
                 imgui.same_line()
 
-            popup_flags = imgui.WindowFlags_.always_auto_resize.value
-            fiat_osd.show_void_detached_window_button(
-                btn_label, popup_label, confirmation_gui, window_flags=popup_flags
+            detached_window_params = fiat_osd.DetachedWindowParams(
+                unique_id="raise_exception" + str(id(self)),
+                window_name="Confirm Raise exception",
+                gui_function=confirmation_gui,
+                button_label=icons_fontawesome_6.ICON_FA_BOMB + " Debug this exception",
+                window_flags=imgui.WindowFlags_.always_auto_resize.value,
             )
+            fiat_osd.show_void_detached_window_button(detached_window_params)
 
     def _render_function_doc(self, unique_name: str) -> None:
         if not self._has_doc():
@@ -819,9 +814,14 @@ class FunctionNodeGui:
 
         with fontawesome_6_ctx():
             imgui.spring()
-            popup_label = f"{unique_name}(): function documentation"
-            btn_text = icons_fontawesome_6.ICON_FA_BOOK
-            fiat_osd.show_void_detached_window_button(btn_text, popup_label, show_doc)
+
+            detached_window_params = fiat_osd.DetachedWindowParams(
+                unique_id="function_doc" + str(id(self)),
+                window_name=f"Function documentation for {unique_name}",
+                button_label=icons_fontawesome_6.ICON_FA_BOOK,
+                gui_function=show_doc,
+            )
+            fiat_osd.show_void_detached_window_button(detached_window_params)
 
     class _Serialization_Section:  # Dummy class to create a section in the IDE # noqa
         """

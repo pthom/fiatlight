@@ -97,11 +97,11 @@ def _draw_label_with_max_width(
 
 @dataclass
 class GuiHeaderLineParams(Generic[DataType]):
+    parent_name: str
     show_clipboard_button: bool = True
     prefix_gui: Callable[[], None] | None = None
     suffix_gui: Callable[[], None] | None = None
     default_value_if_unspecified: DataType | Unspecified = UnspecifiedValue
-    popup_title: str = ""
 
 
 class AnyDataWithGui(Generic[DataType]):
@@ -186,6 +186,14 @@ class AnyDataWithGui(Generic[DataType]):
     label_color: ImVec4 | None = None
     tooltip: str | None = None
     status_tooltip: str | None = None
+
+    class CollapseOrExpand(Enum):
+        collapse = "Collapse All"
+        expand = "Expand All"
+
+    class PresentOrEdit(Enum):
+        present = "View"
+        edit = "Edit"
 
     class _Init_Section:  # Dummy class to create a section in the IDE # noqa
         """
@@ -348,14 +356,6 @@ class AnyDataWithGui(Generic[DataType]):
         # ------------------------------------------------------------------------------------------------------------------
         """
 
-    class CollapseOrExpand(Enum):
-        collapse = "Collapse All"
-        expand = "Expand All"
-
-    class PresentOrEdit(Enum):
-        present = "Present"
-        edit = "Edit"
-
     def sub_items_can_collapse(self, _present_or_edit: PresentOrEdit) -> bool:
         """Overwrite this in derived classes if they provide multiple sub-items that can be collapsed"""
         return False
@@ -451,6 +451,17 @@ class AnyDataWithGui(Generic[DataType]):
     def _is_presenting_on_next_lines(self) -> bool:
         return self._expanded and self._can_present_on_next_lines_if_expanded()
 
+    def _popup_window_name(self, params: GuiHeaderLineParams[DataType], present_or_edit: PresentOrEdit) -> str:
+        window_name = ""
+        if self.label is not None:
+            window_name += f"{self.label}"
+        if len(params.parent_name) > 0:
+            if len(window_name) > 0:
+                window_name += "    -    "
+            window_name += params.parent_name
+        window_name += f"   ({present_or_edit.value})"
+        return window_name
+
     def _gui_present_header_line(self, params: GuiHeaderLineParams[DataType]) -> None:
         """Present the value as a string in one line, or as a widget if it fits on one line"""
         can_present_in_popup = self.can_show_present_popup()
@@ -526,13 +537,16 @@ class AnyDataWithGui(Generic[DataType]):
             imgui.spring()  # Align the rest to the right
             # popup button
             if can_present_in_popup:
-                btn_label = "##present_in_popup"  # This will be our popup id (with the imgui id context)
-                popup_label = params.popup_title + "##" + str(id(self))
 
                 def gui_present_in_popup() -> None:
                     self._gui_present_next_lines(in_popup=True)
 
-                fiat_osd.show_void_detached_window_button(btn_label, popup_label, gui_present_in_popup)
+                detached_window_params = fiat_osd.DetachedWindowParams(
+                    unique_id="##present_in_popup" + str(id(self)),
+                    window_name=self._popup_window_name(params, self.PresentOrEdit.present),
+                    gui_function=gui_present_in_popup,
+                )
+                fiat_osd.show_void_detached_window_button(detached_window_params)
             # clipboard button
             if params.show_clipboard_button:
                 self._show_copy_to_clipboard_button()
@@ -616,10 +630,6 @@ class AnyDataWithGui(Generic[DataType]):
             imgui.spring()  # Align the rest to the right
             # popup button
             if can_edit_in_popup:
-                btn_label = (
-                    "##edit_in_popup" + "##" + str(id(self))
-                )  # This will be our popup id (with the imgui id context)
-                popup_label = params.popup_title + "##" + str(id(self))
 
                 def gui_edit_in_popup() -> bool:
                     if isinstance(self.value, Unspecified):
@@ -632,10 +642,15 @@ class AnyDataWithGui(Generic[DataType]):
 
                     return changed
 
-                fiat_osd.show_bool_detached_window_button(btn_label, popup_label, gui_edit_in_popup)
+                detached_window_params = fiat_osd.DetachedWindowParams(
+                    unique_id="##edit_in_popup" + str(id(self)),
+                    window_name=self._popup_window_name(params, self.PresentOrEdit.edit),
+                    gui_function=gui_edit_in_popup,
+                )
+                fiat_osd.show_bool_detached_window_button(detached_window_params)
 
                 # If the user edits the input value in a detached window
-                if fiat_osd.get_detached_window_bool_return(btn_label):
+                if fiat_osd.get_detached_window_bool_return(detached_window_params):
                     changed = True
 
             # clipboard button
@@ -729,7 +744,7 @@ class AnyDataWithGui(Generic[DataType]):
 
     # def gui_present(self, label: str) -> None:
     def gui_present(self) -> None:
-        params = GuiHeaderLineParams[DataType]()
+        params = GuiHeaderLineParams[DataType](parent_name="")
         self.gui_present_customizable(params)
 
     def gui_edit_customizable(self, params: GuiHeaderLineParams[DataType]) -> bool:
@@ -747,7 +762,7 @@ class AnyDataWithGui(Generic[DataType]):
         return changed
 
     def gui_edit(self) -> bool:
-        params = GuiHeaderLineParams[DataType]()
+        params = GuiHeaderLineParams[DataType](parent_name="")
         return self.gui_edit_customizable(params)
 
     class _Callbacks_Section:  # Dummy class to create a section in the IDE # noqa
@@ -869,6 +884,9 @@ class AnyDataWithGui(Generic[DataType]):
         if self.callbacks.default_value_provider is not None:
             return self.callbacks.default_value_provider()
         return self._type()
+
+    def datatype_name(self) -> str:
+        return str(self._type)
 
     def datatype_value_to_str(self, value: DataType) -> str:
         """Convert the value to a string

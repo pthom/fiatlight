@@ -107,15 +107,24 @@ def set_tooltip_gui(gui_function: VoidFunction) -> None:
 # ======================================================================================================================
 # OSD Detached Windows
 # ======================================================================================================================
+
+
 @dataclass
-class _DetachedWindowInfo:
-    btn_label: str  # This is the id
-    popup_label: str
-    location: ImVec2
+class DetachedWindowParams:
+    unique_id: str  # Should be unique
     gui_function: VoidFunction | BoolFunction
-    bool_returned: bool | None = None
+    window_name: str
+    # button_tooltip: str | None = None
+    button_label: str | None = None
     window_flags: int | None = None  # imgui.WindowFlags_
     window_size: ImVec2 | None = None
+
+
+@dataclass
+class _DetachedWindowInfo:
+    params: DetachedWindowParams
+    location: ImVec2
+    bool_returned: bool | None = None
 
 
 class _OsdDetachedWindows:
@@ -133,16 +142,17 @@ class _OsdDetachedWindows:
         alive_windows = []  # remove windows that are closed
         for detached_info in self.detached_windows:
             window_flags = imgui.WindowFlags_.no_collapse.value
-            if detached_info.window_flags is not None:
-                window_flags |= detached_info.window_flags
+            if detached_info.params.window_flags is not None:
+                window_flags |= detached_info.params.window_flags
 
             window_size = hello_imgui.em_to_vec2(40, 30)
-            if detached_info.window_size is not None:
-                window_size = detached_info.window_size
+            if detached_info.params.window_size is not None:
+                window_size = detached_info.params.window_size
 
             imgui.set_next_window_pos(detached_info.location, imgui.Cond_.once.value)
             imgui.set_next_window_size(window_size, imgui.Cond_.once.value)
-            show, flag_open = imgui.begin(detached_info.popup_label, True, window_flags)
+            window_label_unique = detached_info.params.window_name + "##" + detached_info.params.unique_id
+            show, flag_open = imgui.begin(window_label_unique, True, window_flags)
             if show and flag_open:
                 _IS_PRESENTLY_IN_DETACHED_WINDOW = True
                 with fontawesome_6_ctx():
@@ -152,8 +162,9 @@ class _OsdDetachedWindows:
                         imgui.set_cursor_pos(window_tl)
                         shall_close = imgui.button(icons_fontawesome_6.ICON_FA_CIRCLE_XMARK)
                         set_widget_tooltip("Close ")
+                        cur_pos.x += hello_imgui.em_size(3)
                         imgui.set_cursor_pos(cur_pos)
-                detached_info.bool_returned = detached_info.gui_function()
+                detached_info.bool_returned = detached_info.params.gui_function()
                 _IS_PRESENTLY_IN_DETACHED_WINDOW = False
                 if not shall_close:
                     alive_windows.append(detached_info)
@@ -167,154 +178,108 @@ class _OsdDetachedWindows:
     def _detached_window_unique_name(trigger_btn_label: str) -> str:
         return trigger_btn_label + "##" + str(imgui.get_id("BLAH"))
 
-    def _remove_detached_window(self, trigger_btn_label: str) -> None:
-        unique_name = self._detached_window_unique_name(trigger_btn_label)
+    def _remove_detached_window(self, params: DetachedWindowParams) -> None:
         new_windows = []
         for window in self.detached_windows:
-            if window.btn_label != unique_name:
+            if window.params.unique_id != params.unique_id:
                 new_windows.append(window)
         self.detached_windows = new_windows
 
-    def detached_window_exists(self, trigger_btn_label: str) -> bool:
-        unique_name = self._detached_window_unique_name(trigger_btn_label)
+    def detached_window_exists(self, params: DetachedWindowParams) -> bool:
         for popup_info in self.detached_windows:
-            if popup_info.btn_label == unique_name:
+            if popup_info.params.unique_id == params.unique_id:
                 return True
         return False
 
-    def get_detached_window_bool_return(self, trigger_btn_label: str) -> bool | None:
-        if not self.detached_window_exists(trigger_btn_label):
+    def get_detached_window_bool_return(self, params: DetachedWindowParams) -> bool | None:
+        if not self.detached_window_exists(params):
             return False
-        unique_name = self._detached_window_unique_name(trigger_btn_label)
         for window_info in self.detached_windows:
-            if window_info.btn_label == unique_name:
+            if window_info.params.unique_id == params.unique_id:
                 if not isinstance(window_info.bool_returned, bool):
-                    raise ValueError(f"Popup '{trigger_btn_label}' does not return a bool.")
+                    raise ValueError(f"Detached window '{params.unique_id}' does not return a bool.")
                 return window_info.bool_returned
         return False
 
-    def _add_detached_window(
-        self,
-        trigger_btn_label: str,
-        window_label: str,
-        gui_function: VoidFunction | BoolFunction,
-        bool_returned: bool | None,
-        window_flags: int | None,  # imgui.WindowFlags_
-        window_size: ImVec2 | None,
-    ) -> None:
-        if self.detached_window_exists(trigger_btn_label):
+    def _add_detached_window(self, params: DetachedWindowParams, bool_returned: bool | None) -> None:
+        if self.detached_window_exists(params):
             return
-        unique_name = self._detached_window_unique_name(trigger_btn_label)
         location = imgui_node_editor.canvas_to_screen(imgui.get_cursor_pos())
         new_popup = _DetachedWindowInfo(
-            unique_name, window_label, location, gui_function, bool_returned, window_flags, window_size
+            params,
+            location=location,
+            bool_returned=bool_returned,
         )
         self.detached_windows.append(new_popup)
 
     def _add_trigger_button(
         self,
-        trigger_btn_label: str,
-        window_label: str,
-        gui_function: VoidFunction | BoolFunction,
+        params: DetachedWindowParams,
         bool_returned: bool | None,
-        window_flags: int | None,  # imgui.WindowFlags_
-        window_size: ImVec2 | None,
     ) -> None:
         from fiatlight.fiat_widgets import fontawesome_6_ctx, icons_fontawesome_6
 
-        tooltip_btn_label = trigger_btn_label
-        if "##" in trigger_btn_label:
-            tooltip_btn_label = trigger_btn_label.split("##")[0]
-
         with fontawesome_6_ctx():
-            if self.detached_window_exists(trigger_btn_label):
-                if imgui.button(icons_fontawesome_6.ICON_FA_CIRCLE_XMARK + " " + trigger_btn_label):
-                    self._remove_detached_window(trigger_btn_label)
-                set_widget_tooltip("Hide " + tooltip_btn_label + " - " + window_label)
+            if self.detached_window_exists(params):
+                if imgui.button(icons_fontawesome_6.ICON_FA_CIRCLE_XMARK + "##" + params.unique_id):
+                    self._remove_detached_window(params)
+                set_widget_tooltip("Hide " + params.window_name)
             else:
-                if imgui.button(icons_fontawesome_6.ICON_FA_MAGNIFYING_GLASS_ARROW_RIGHT + " " + trigger_btn_label):
-                    self._add_detached_window(
-                        trigger_btn_label, window_label, gui_function, bool_returned, window_flags, window_size
-                    )
-                set_widget_tooltip("Show " + tooltip_btn_label + " - " + window_label)
+                icon_label = icons_fontawesome_6.ICON_FA_MAGNIFYING_GLASS_ARROW_RIGHT + "##" + params.unique_id
+                if params.button_label is not None:
+                    button_label = params.button_label + " " + icon_label
+                else:
+                    button_label = icon_label
+                if imgui.button(button_label):
+                    self._add_detached_window(params, bool_returned)
+                set_widget_tooltip("Popup " + params.window_name)
 
     def update_detached_window_callback(
-        self, trigger_btn_label: str, gui_function: BoolFunction | VoidFunction
+        self, params: DetachedWindowParams, gui_function: BoolFunction | VoidFunction
     ) -> None:
-        unique_name = self._detached_window_unique_name(trigger_btn_label)
         for popup_info in self.detached_windows:
-            if popup_info.btn_label == unique_name:
-                popup_info.gui_function = gui_function
+            if popup_info.params.unique_id == params.unique_id:
+                popup_info.params.gui_function = gui_function
 
-    def show_bool_detached_window_button(
-        self,
-        trigger_btn_label: str,
-        window_label: str,
-        gui_function: BoolFunction,
-        window_flags: int | None = None,  # imgui.WindowFlags_
-        window_size: ImVec2 | None = None,
-    ) -> None:
-        self._add_trigger_button(trigger_btn_label, window_label, gui_function, False, window_flags, window_size)
+    def show_bool_detached_window_button(self, params: DetachedWindowParams) -> None:
+        self._add_trigger_button(params, False)
 
-    def show_void_detached_window_button(
-        self,
-        btn_label: str,
-        popup_label: str,
-        gui_function: VoidFunction,
-        window_flags: int | None = None,  # imgui.WindowFlags_
-        window_size: ImVec2 | None = None,
-    ) -> None:
-        self._add_trigger_button(btn_label, popup_label, gui_function, None, window_flags, window_size)
+    def show_void_detached_window_button(self, params: DetachedWindowParams) -> None:
+        self._add_trigger_button(params, None)
 
 
 _OSD_DETACHED_WINDOWS = _OsdDetachedWindows()
 
 
-def show_bool_detached_window_button(
-    trigger_btn_label: str,
-    window_label: str,
-    gui_function: BoolFunction,
-    window_flags: int | None = None,  # imgui.WindowFlags_
-    window_size: ImVec2 | None = None,
-) -> None:
+def show_bool_detached_window_button(params: DetachedWindowParams) -> None:
     """Show a button that opens a popup when clicked. The popup contains a boolean function that returns a bool.
     trigger_btn_label: The label of the button.
     window_label: The label of the popup window
     """
-    _OSD_DETACHED_WINDOWS.show_bool_detached_window_button(
-        trigger_btn_label, window_label, gui_function, window_flags, window_size
-    )
+    _OSD_DETACHED_WINDOWS.show_bool_detached_window_button(params)
 
 
-def show_void_detached_window_button(
-    trigger_btn_label: str,
-    window_label: str,
-    gui_function: VoidFunction,
-    window_flags: int | None = None,  # imgui.WindowFlags_
-    window_size: ImVec2 | None = None,
-) -> None:
+def show_void_detached_window_button(params: DetachedWindowParams) -> None:
     """Show a button that opens a popup when clicked. The popup contains a void function.
     trigger_btn_label: The label of the button.
     window_label: The label of the popup window
     """
-    _OSD_DETACHED_WINDOWS.show_void_detached_window_button(
-        trigger_btn_label, window_label, gui_function, window_flags, window_size
-    )
+    _OSD_DETACHED_WINDOWS.show_void_detached_window_button(params)
 
 
-def get_detached_window_bool_return(trigger_btn_label: str) -> bool | None:
+def get_detached_window_bool_return(params: DetachedWindowParams) -> bool | None:
     """Get the return value of the boolean function in the popup window opened by the button."""
-    r = _OSD_DETACHED_WINDOWS.get_detached_window_bool_return(trigger_btn_label)
+    r = _OSD_DETACHED_WINDOWS.get_detached_window_bool_return(params)
     return r
 
 
-def is_detached_window_opened(trigger_btn_label: str) -> bool:
+def is_detached_window_opened(params: DetachedWindowParams) -> bool:
     """Check if a popup window is open."""
-    return _OSD_DETACHED_WINDOWS.detached_window_exists(trigger_btn_label)
+    return _OSD_DETACHED_WINDOWS.detached_window_exists(params)
 
 
-def update_detached_window_callback(trigger_btn_label: str, gui_function: BoolFunction | VoidFunction) -> None:
-    _OSD_DETACHED_WINDOWS.update_detached_window_callback(trigger_btn_label, gui_function)
+def update_detached_window_callback(params: DetachedWindowParams, gui_function: BoolFunction | VoidFunction) -> None:
+    _OSD_DETACHED_WINDOWS.update_detached_window_callback(params, gui_function)
 
 
 # ======================================================================================================================
