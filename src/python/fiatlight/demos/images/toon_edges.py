@@ -1,3 +1,5 @@
+import time
+
 import fiatlight as fl
 from fiatlight.fiat_types import PositiveFloat, ColorRgb
 from fiatlight.fiat_kits.fiat_image import ImageU8_GRAY, ImageU8_3, image_source
@@ -26,7 +28,7 @@ def merge_toon_edges(
     if is_image_bgr:
         edges_color = ColorRgb((edges_color[2], edges_color[1], edges_color[0]))
 
-    # Create a RGBA image that will be overlayed on the original image
+    # Create an RGBA image that will be overlaid on the original image
     # Its color will be constant (color) and its alpha channel will be the edges_images
     overlay_rgba = np.zeros((*image.shape[:2], 4), dtype=np.uint8)
     overlay_rgba[:, :, :3] = edges_color
@@ -86,6 +88,7 @@ class ToonEdgesParams(BaseModel):
 )
 def add_toon_edges(image: ImageU8_3, params: ToonEdgesParams) -> ImageU8_3:
     # ) -> ToonEdgesOutput:
+    start_time = time.time()
     edges = canny(
         image,
         params.canny.t_lower,
@@ -94,26 +97,39 @@ def add_toon_edges(image: ImageU8_3, params: ToonEdgesParams) -> ImageU8_3:
         params.canny.l2_gradient,
         params.canny.blur_sigma,
     )
+    duration_canny = time.time() - start_time
+
+    start_time = time.time()
     dilated_edges = dilate(
         edges,
         params.dilate.kernel_size,
         params.dilate.morph_shape,
         params.dilate.iterations,
     )
+    duration_dilate = time.time() - start_time
+
+    start_time = time.time()
     if params.appearance.blur_sigma > 0:
         dilated_edges = cv2.GaussianBlur(
             dilated_edges, (0, 0), sigmaX=params.appearance.blur_sigma, sigmaY=params.appearance.blur_sigma
         )  # type: ignore
+    duration_blur = time.time() - start_time
+
+    start_time = time.time()
     image_with_edges = merge_toon_edges(image, dilated_edges, params.appearance.intensity, params.appearance.color)
+    duration_merge = time.time() - start_time
 
     # fiat_internals: add debug internals to ease fine-tuning the function inside the node
     from fiatlight.fiat_kits.fiat_image import ImageWithGui
 
-    # Add to fiat_internals any variable you want to be able to diagnose in the node
+    # Add to fiat_internals any variable you want to be able to diagnose in the function node
     #     * Either a raw type (int, float, str, etc.): see "aperture_size"
     #     * Or a descendant of AnyDataWithGui: see "canny", "dilate", "image_with_edges"
     add_toon_edges.fiat_internals = {  # type: ignore
-        "aperture_size": params.canny.aperture_size,
+        "duration_canny": duration_canny,
+        "duration_dilate": duration_dilate,
+        "duration_blur": duration_blur,
+        "duration_merge": duration_merge,
         "canny": ImageWithGui(edges),
         "dilate": ImageWithGui(dilated_edges),
         "image_with_edges": ImageWithGui(image_with_edges),
