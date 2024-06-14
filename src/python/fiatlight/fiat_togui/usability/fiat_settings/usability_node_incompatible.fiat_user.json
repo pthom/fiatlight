@@ -1,0 +1,175 @@
+{
+    "user_inputs": {
+        "functions_nodes": {
+            "f": {
+                "data": {
+                    "name": "data",
+                    "data": {
+                        "type": "Pydantic",
+                        "value": {
+                            "value": 54,
+                            "name": "",
+                            "firstname": ""
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "gui_options": {
+        "f": {
+            "function_node_with_gui": {
+                "_inputs_expanded": true,
+                "_outputs_expanded": true,
+                "fiat_tuning_expanded": false,
+                "_internal_state_gui_expanded": true,
+                "_function_node": {
+                    "inputs": {
+                        "data": {
+                            "cb_options": {
+                                "value": {
+                                    "cb_options": {},
+                                    "expanded": true
+                                },
+                                "name": {
+                                    "cb_options": {
+                                        "width_em": 37.0,
+                                        "size_multiline_em": [
+                                            60.0,
+                                            15.0
+                                        ],
+                                        "wrap_multiline": false,
+                                        "wrap_multiline_width": 80
+                                    },
+                                    "expanded": true
+                                },
+                                "firstname": {
+                                    "cb_options": {
+                                        "width_em": 37.0,
+                                        "size_multiline_em": [
+                                            60.0,
+                                            15.0
+                                        ],
+                                        "wrap_multiline": false,
+                                        "wrap_multiline_width": 80
+                                    },
+                                    "expanded": true
+                                }
+                            },
+                            "expanded": false
+                        }
+                    },
+                    "outputs": {
+                        "0": {
+                            "cb_options": {
+                                "value": {
+                                    "cb_options": {},
+                                    "expanded": true
+                                },
+                                "name": {
+                                    "cb_options": {
+                                        "width_em": 15.0,
+                                        "size_multiline_em": [
+                                            60.0,
+                                            15.0
+                                        ],
+                                        "wrap_multiline": false,
+                                        "wrap_multiline_width": 80
+                                    },
+                                    "expanded": true
+                                },
+                                "firstname": {
+                                    "cb_options": {
+                                        "width_em": 15.0,
+                                        "size_multiline_em": [
+                                            60.0,
+                                            15.0
+                                        ],
+                                        "wrap_multiline": false,
+                                        "wrap_multiline_width": 80
+                                    },
+                                    "expanded": true
+                                }
+                            },
+                            "expanded": true
+                        }
+                    },
+                    "internal_gui_options": {}
+                }
+            },
+            "function_node": {
+                "inputs": {
+                    "data": {
+                        "cb_options": {
+                            "value": {
+                                "cb_options": {},
+                                "expanded": true
+                            },
+                            "name": {
+                                "cb_options": {
+                                    "width_em": 37.0,
+                                    "size_multiline_em": [
+                                        60.0,
+                                        15.0
+                                    ],
+                                    "wrap_multiline": false,
+                                    "wrap_multiline_width": 80
+                                },
+                                "expanded": true
+                            },
+                            "firstname": {
+                                "cb_options": {
+                                    "width_em": 37.0,
+                                    "size_multiline_em": [
+                                        60.0,
+                                        15.0
+                                    ],
+                                    "wrap_multiline": false,
+                                    "wrap_multiline_width": 80
+                                },
+                                "expanded": true
+                            }
+                        },
+                        "expanded": false
+                    }
+                },
+                "outputs": {
+                    "0": {
+                        "cb_options": {
+                            "value": {
+                                "cb_options": {},
+                                "expanded": true
+                            },
+                            "name": {
+                                "cb_options": {
+                                    "width_em": 15.0,
+                                    "size_multiline_em": [
+                                        60.0,
+                                        15.0
+                                    ],
+                                    "wrap_multiline": false,
+                                    "wrap_multiline_width": 80
+                                },
+                                "expanded": true
+                            },
+                            "firstname": {
+                                "cb_options": {
+                                    "width_em": 15.0,
+                                    "size_multiline_em": [
+                                        60.0,
+                                        15.0
+                                    ],
+                                    "wrap_multiline": false,
+                                    "wrap_multiline_width": 80
+                                },
+                                "expanded": true
+                            }
+                        },
+                        "expanded": true
+                    }
+                },
+                "internal_gui_options": {}
+            }
+        }
+    }
+}

@@ -95,7 +95,7 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
         for param_gui in self._parameters_with_gui:
             if not param_gui.data_with_gui.callbacks.present_node_compatible:
                 self.callbacks.present_node_compatible = False
-            if param_gui.data_with_gui.callbacks.edit_node_compatible:
+            if not param_gui.data_with_gui.callbacks.edit_node_compatible:
                 self.callbacks.edit_node_compatible = False
 
         self.callbacks.edit_collapsible = True

@@ -382,26 +382,39 @@ class AnyDataWithGui(Generic[DataType]):
     def can_collapse_present(self) -> bool:
         if isinstance(self.value, (Unspecified, Error)):
             return False
-        return self.callbacks.present_collapsible
+        disabled_in_node = fiat_osd.is_rendering_in_node() and not self.callbacks.present_node_compatible
+        return self.callbacks.present_collapsible and not disabled_in_node
 
     def can_collapse_edit(self) -> bool:
         if isinstance(self.value, (Unspecified, Error)):
             return False
-        return self.callbacks.edit_collapsible
+        disabled_in_node = fiat_osd.is_rendering_in_node() and not self.callbacks.edit_node_compatible
+        return self.callbacks.edit_collapsible and not disabled_in_node
 
     def can_edit_on_header_line(self) -> bool:
-        return self.callbacks.edit is not None and not self.callbacks.edit_collapsible
+        has_small_edit = self.callbacks.edit is not None and not self.callbacks.edit_collapsible
+        disabled_in_node = fiat_osd.is_rendering_in_node() and not self.callbacks.edit_node_compatible
+        return has_small_edit and not disabled_in_node
 
     def can_present_on_header_line(self) -> bool:
-        return self.callbacks.present is not None and not self.callbacks.present_collapsible
+        # we do not test self.callbacks.present is None because if not provided, it will be presented with str()
+        has_small_present = not self.callbacks.present_collapsible
+        disabled_in_node = fiat_osd.is_rendering_in_node() and not self.callbacks.present_node_compatible
+        return has_small_present and not disabled_in_node
 
     def _can_edit_on_next_lines_if_expanded(self) -> bool:
         is_datatype_or_invalid = not isinstance(self.value, (Unspecified, Error))
-        return self.callbacks.edit is not None and self.callbacks.edit_collapsible and is_datatype_or_invalid
+        has_callback = self.callbacks.edit is not None
+        # collapsible = self.callbacks.edit_collapsible
+        disabled_in_node = fiat_osd.is_rendering_in_node() and not self.callbacks.edit_node_compatible
+        return has_callback and is_datatype_or_invalid and not disabled_in_node
 
     def _can_present_on_next_lines_if_expanded(self) -> bool:
+        # we do not test self.callbacks.present is None because if not provided, it will be presented with str()
         is_datatype_or_invalid = not isinstance(self.value, (Unspecified, Error))
-        return self.callbacks.present is not None and self.callbacks.present_collapsible and is_datatype_or_invalid
+        # collapsible = self.callbacks.present_collapsible
+        disabled_in_node = fiat_osd.is_rendering_in_node() and not self.callbacks.present_node_compatible
+        return is_datatype_or_invalid and not disabled_in_node
 
     def _is_editing_on_next_lines(self) -> bool:
         return self._expanded and self._can_edit_on_next_lines_if_expanded()
@@ -453,11 +466,14 @@ class AnyDataWithGui(Generic[DataType]):
                     value = self.get_actual_or_invalid_value()
                     can_present_on_header_line = self.can_present_on_header_line()
                     if can_present_on_header_line:
-                        assert self.callbacks.present is not None  # make mypy happy
-                        with imgui_ctx.begin_vertical(
-                            "callback_present"
-                        ):  # Some widgets expect a standard vertical layout
-                            self.callbacks.present(value)
+                        if self.callbacks.present is not None:
+                            with imgui_ctx.begin_vertical(
+                                "callback_present"
+                            ):  # Some widgets expect a standard vertical layout
+                                self.callbacks.present(value)
+                        else:
+                            as_str = self.datatype_value_to_str(value)
+                            text_maybe_truncated(as_str, max_width_chars=40, max_lines=1)
                     else:
                         as_str = self.datatype_value_to_str(value)
                         text_maybe_truncated(as_str, max_width_chars=40, max_lines=1)
@@ -660,13 +676,16 @@ class AnyDataWithGui(Generic[DataType]):
             self._is_presenting_on_next_lines() if not in_popup else self._can_present_on_next_lines_if_expanded()
         )
         if can_present:
-            assert self.callbacks.present is not None
             with imgui_ctx.begin_horizontal("left_margin_present"):
                 margin_size = hello_imgui.em_size(1.5)
                 imgui.dummy(ImVec2(margin_size, 0))
                 value = self.get_actual_or_invalid_value()
                 with imgui_ctx.begin_vertical("callback_present"):
-                    self.callbacks.present(value)
+                    if self.callbacks.present is not None:
+                        self.callbacks.present(value)
+                    else:
+                        as_str = self.datatype_value_to_str(value)
+                        text_maybe_truncated(as_str, max_width_chars=40, max_lines=5)
 
     def gui_present_customizable(self, params: GuiHeaderLineParams[DataType]) -> None:
         """Present the value using either the present callback or the default str conversion
