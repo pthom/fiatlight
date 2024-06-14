@@ -227,10 +227,14 @@ class StrWithGui(AnyDataWithGui[str]):
                     if fiatlight.is_rendering_in_fiatlight_detached_window():
                         window_width = imgui.get_window_width()
                         window_width_em = hello_imgui.pixel_size_to_em(window_width)
-                        self._input_text_classic.size_em.x = window_width_em - 3.0
+                        self._input_text_classic.size_em.x = window_width_em - 12.0
 
-                    # Display the widget
-                    changed = hello_imgui.input_text_resizable("##StringPopup", self._input_text_classic)
+                        was_resizable_in_node = self._input_text_classic.resizable
+                        self._input_text_classic.resizable = False
+                        changed = hello_imgui.input_text_resizable("##StringPopup", self._input_text_classic)
+                        self._input_text_classic.resizable = was_resizable_in_node
+                    else:
+                        changed = hello_imgui.input_text_resizable("##StringPopup", self._input_text_classic)
 
                     # update params if resized
                     if self.params.developer_params.allow_multiline_edit:
