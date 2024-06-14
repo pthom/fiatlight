@@ -86,15 +86,16 @@ class FunctionNodeGui:
 
     _function_doc: _FunctionDocElements
 
-    # internals of the function
-    _fiat_internals_with_gui: Dict[str, AnyDataWithGui[Any]]
+    # Fine tune function internals
+    # (displayed if the user adds a *function variable* dictionary named fiat_tuning)
+    _fiat_tuning_with_gui: Dict[str, AnyDataWithGui[Any]]
 
     # user settings:
     #   Flags that indicate whether the details of the inputs/outputs/internals are shown or not
     #   (those settings are saved in the user settings file)
     _inputs_expanded: bool = True
     _outputs_expanded: bool = True
-    _fiat_internals_expanded: bool = False  # This is for the debug internals
+    fiat_tuning_expanded: bool = False  # This is for the debug internals
     _internal_state_gui_expanded: bool = True  # This is for the function's internal state gui
 
     # ==================================================================================================================
@@ -123,7 +124,7 @@ class FunctionNodeGui:
                 param.data_with_gui._expanded = False  # No need to expand linked field by default
 
         self._fill_function_docstring_and_source()
-        self._fiat_internals_with_gui = {}
+        self._fiat_tuning_with_gui = {}
 
     # ==================================================================================================================
     #                                            Node info
@@ -230,7 +231,7 @@ class FunctionNodeGui:
                         self._function_node.on_inputs_changed()
 
                     # Internals
-                    self._draw_fiat_internals()
+                    self._draw_fiat_tuning()
                     # Exceptions, if any
                     self._draw_exception_message()
                     # Outputs
@@ -613,7 +614,7 @@ class FunctionNodeGui:
     def _Draw_Internals_Section() -> None:  # Dummy function to create a section in the IDE # noqa
         """
         # ------------------------------------------------------------------------------------------------------------------
-        #      Draw function Internal State and fiat_internals (debug help)
+        #      Draw function Internal State and fiat_tuning (debug help)
         # ------------------------------------------------------------------------------------------------------------------
         """
         pass
@@ -651,22 +652,22 @@ class FunctionNodeGui:
         else:
             return False
 
-    def _draw_fiat_internals(self) -> None:
+    def _draw_fiat_tuning(self) -> None:
         """Draw the internals of the function (for debugging)
-        They should be stored in a dictionary fiat_internals inside the function.
+        They should be stored in a dictionary fiat_tuning inside the function.
         See example inside toon_edges.py
         """
         fn = self._function_node.function_with_gui._f_impl  # noqa
         if fn is None:
-            self._fiat_internals_with_gui = {}
+            self._fiat_tuning_with_gui = {}
             return
 
-        has_fiat_internals = hasattr(fn, "fiat_internals")
-        if not has_fiat_internals:
-            self._fiat_internals_with_gui = {}
+        has_fiat_tuning = hasattr(fn, "fiat_tuning")
+        if not has_fiat_tuning:
+            self._fiat_tuning_with_gui = {}
             return
-        fn_fiat_internals: Dict[str, Any] = fn.fiat_internals  # type: ignore
-        assert isinstance(fn_fiat_internals, dict)
+        fn_fiat_tuning: Dict[str, Any] = fn.fiat_tuning  # type: ignore
+        assert isinstance(fn_fiat_tuning, dict)
 
         # Separator
 
@@ -675,47 +676,47 @@ class FunctionNodeGui:
         #
         node_separator_params = fiat_widgets.NodeSeparatorParams()
         node_separator_params.parent_node = self._node_id
-        node_separator_params.expanded = self._fiat_internals_expanded
-        node_separator_params.text = "Internals"
+        node_separator_params.expanded = self.fiat_tuning_expanded
+        node_separator_params.text = "Fiat Tuning"
         node_separator_params.show_collapse_button = True
-        node_separator_params.show_toggle_collapse_all_button = self._fiat_internals_expanded
-        if not self._fiat_internals_expanded:
-            node_separator_params.text += f" ({len(fn_fiat_internals)} hidden)"
+        node_separator_params.show_toggle_collapse_all_button = self.fiat_tuning_expanded
+        if not self.fiat_tuning_expanded:
+            node_separator_params.text += f" ({len(fn_fiat_tuning)} hidden)"
 
         # Draw the separator
         node_separator_output = fiat_widgets.node_separator(node_separator_params)
 
         # Update the expanded state
-        self._fiat_internals_expanded = node_separator_output.expanded
+        self.fiat_tuning_expanded = node_separator_output.expanded
 
         # Update the internals expanded state
         if node_separator_output.was_toggle_collapse_all_clicked:
             from fiatlight.fiat_core.any_data_with_gui import toggle_expanded_state_on_guis
 
-            guis = [gui for _name, gui in self._fiat_internals_with_gui.items()]
+            guis = [gui for _name, gui in self._fiat_tuning_with_gui.items()]
             toggle_expanded_state_on_guis(guis)
 
         # remove old internals
-        new_fiat_internals_with_gui = {}
-        for name in self._fiat_internals_with_gui:
-            if name in fn_fiat_internals:
-                new_fiat_internals_with_gui[name] = self._fiat_internals_with_gui[name]
-        self._fiat_internals_with_gui = new_fiat_internals_with_gui
+        new_fiat_tuning_with_gui = {}
+        for name in self._fiat_tuning_with_gui:
+            if name in fn_fiat_tuning:
+                new_fiat_tuning_with_gui[name] = self._fiat_tuning_with_gui[name]
+        self._fiat_tuning_with_gui = new_fiat_tuning_with_gui
 
-        if not self._fiat_internals_expanded:
+        if not self.fiat_tuning_expanded:
             return
 
         # display the internals
-        for name, value in fn_fiat_internals.items():
-            # Insert new AnyDataWithGui into self._fiat_internals_with_gui if needed
+        for name, value in fn_fiat_tuning.items():
+            # Insert new AnyDataWithGui into self._fiat_tuning_with_gui if needed
             # either by creating an AnyDataWithGui from the value or using the one that is provided
-            if name not in self._fiat_internals_with_gui:
+            if name not in self._fiat_tuning_with_gui:
                 if not isinstance(value, AnyDataWithGui):
-                    self._fiat_internals_with_gui[name] = fiat_togui.any_type_to_gui(type(value))
+                    self._fiat_tuning_with_gui[name] = fiat_togui.any_type_to_gui(type(value))
                 else:
-                    self._fiat_internals_with_gui[name] = value
-                self._fiat_internals_with_gui[name].label = name
-            data_with_gui = self._fiat_internals_with_gui[name]
+                    self._fiat_tuning_with_gui[name] = value
+                self._fiat_tuning_with_gui[name].label = name
+            data_with_gui = self._fiat_tuning_with_gui[name]
 
             # Update value
             if not isinstance(value, AnyDataWithGui):
@@ -830,32 +831,32 @@ class FunctionNodeGui:
         pass
 
     def save_gui_options_to_json(self) -> JsonDict:
-        # We cannot save the fiat_internals_options, because reloading them
-        # would fail: the list of fiat_internals_options is unknown until the
+        # We cannot save the fiat_tuning_options, because reloading them
+        # would fail: the list of fiat_tuning_options is unknown until the
         # first function execution.
-        #     fiat_internals_options = {}
-        #     for name, data_with_gui in self._fiat_internals_with_gui.items():
-        #         fiat_internals_options[name] = data_with_gui.save_gui_options_to_json()
+        #     fiat_tuning_options = {}
+        #     for name, data_with_gui in self._fiat_tuning_with_gui.items():
+        #         fiat_tuning_options[name] = data_with_gui.save_gui_options_to_json()
         r = {
             "_inputs_expanded": self._inputs_expanded,
             "_outputs_expanded": self._outputs_expanded,
-            "_fiat_internals_expanded": self._fiat_internals_expanded,
+            "fiat_tuning_expanded": self.fiat_tuning_expanded,
             "_internal_state_gui_expanded": self._internal_state_gui_expanded,
             "_function_node": self._function_node.save_gui_options_to_json(),
-            # "_fiat_internals_with_gui": fiat_internals_options,
+            # "_fiat_tuning_with_gui": fiat_tuning_options,
         }
         return r
 
     def load_gui_options_from_json(self, json_data: JsonDict) -> None:
         self._inputs_expanded = json_data.get("_inputs_expanded", True)
         self._outputs_expanded = json_data.get("_outputs_expanded", True)
-        self._fiat_internals_expanded = json_data.get("_fiat_internals_expanded", False)
+        self.fiat_tuning_expanded = json_data.get("fiat_tuning_expanded", False)
         self._internal_state_gui_expanded = json_data.get("_internal_state_gui_expanded", True)
         self._function_node.load_gui_options_from_json(json_data["_function_node"])
-        # fiat_internals_options = json_data.get("_fiat_internals_with_gui", {})
-        # for name, data_with_gui in self._fiat_internals_with_gui.items():
-        #     if name in fiat_internals_options:
-        #         data_with_gui.load_gui_options_from_json(fiat_internals_options[name])
+        # fiat_tuning_options = json_data.get("_fiat_tuning_with_gui", {})
+        # for name, data_with_gui in self._fiat_tuning_with_gui.items():
+        #     if name in fiat_tuning_options:
+        #         data_with_gui.load_gui_options_from_json(fiat_tuning_options[name])
 
 
 class FunctionNodeLinkGui:

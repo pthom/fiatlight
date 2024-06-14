@@ -384,7 +384,7 @@ Debug function internals
 
 fiatlight provides you with powerful tools to visually debug the intermediate states of your function.
 
-[demos/images/toon_edges.py](../demos/images/toon_edges.py) is a good example of how to use the `fiat_internals` attribute.
+[demos/images/toon_edges.py](../demos/images/toon_edges.py) is a good example of how to use the `fiat_tuning` attribute.
 
 This is a complex function that adds a toon effect to an image, by adding colored edges to the image contours.
 
@@ -401,13 +401,13 @@ image: ImageU8_3,
     dilated_edges: ImageU8_1 #  = ...    (dilate the edges)
     image_with_edges: ImageU8_3  # = ... (superimpose the edges on the image)
 
-    # fiat_internals: add debug internals to ease fine-tuning the function inside the node
+    # fiat_tuning: add debug internals to ease fine-tuning the function inside the node
     from fiatlight.fiat_kits.fiat_image import ImageWithGui
 
-    # Add to fiat_internals any variable you want to be able to diagnose in the node
+    # Add to fiat_tuning any variable you want to be able to diagnose in the node
     #     * Either a raw type (int, float, str, etc.): see "aperture_size"
     #     * Or a descendant of AnyDataWithGui: see "canny", "dilate", "image_with_edges"
-    add_toon_edges.fiat_internals = {  # type: ignore
+    add_toon_edges.fiat_tuning = {  # type: ignore
         "aperture_size": params.canny.aperture_size,
         "canny": ImageWithGui(edges),
         "dilate": ImageWithGui(dilated_edges),

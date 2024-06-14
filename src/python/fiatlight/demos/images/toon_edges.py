@@ -119,13 +119,13 @@ def add_toon_edges(image: ImageU8_3, params: ToonEdgesParams) -> ImageU8_3:
     image_with_edges = merge_toon_edges(image, dilated_edges, params.appearance.intensity, params.appearance.color)
     duration_merge = time.time() - start_time
 
-    # fiat_internals: add debug internals to ease fine-tuning the function inside the node
+    # fiat_tuning: add debug internals to ease fine-tuning the function inside the node
     from fiatlight.fiat_kits.fiat_image import ImageWithGui
 
-    # Add to fiat_internals any variable you want to be able to diagnose in the function node
-    #     * Either a raw type (int, float, str, etc.): see "aperture_size"
+    # Add to fiat_tuning any variable you want to be able to fine-tune or debug in the function node
+    #     * Either a raw type (int, float, str, etc.): see durations
     #     * Or a descendant of AnyDataWithGui: see "canny", "dilate", "image_with_edges"
-    add_toon_edges.fiat_internals = {  # type: ignore
+    add_toon_edges.fiat_tuning = {  # type: ignore
         "duration_canny": duration_canny,
         "duration_dilate": duration_dilate,
         "duration_blur": duration_blur,
