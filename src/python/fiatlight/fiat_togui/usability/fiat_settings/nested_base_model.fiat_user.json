@@ -9,7 +9,7 @@
                         "value": {
                             "p": 0,
                             "inner1": {
-                                "c": 0,
+                                "c": 1,
                                 "d": 0,
                                 "sub": {
                                     "a": 0,
@@ -62,14 +62,14 @@
                                             "expanded": true
                                         }
                                     },
-                                    "expanded": false
+                                    "expanded": true
                                 },
                                 "inner2": {
                                     "cb_options": {},
                                     "expanded": false
                                 }
                             },
-                            "expanded": false
+                            "expanded": true
                         }
                     },
                     "outputs": {
@@ -148,14 +148,14 @@
                                         "expanded": true
                                     }
                                 },
-                                "expanded": false
+                                "expanded": true
                             },
                             "inner2": {
                                 "cb_options": {},
                                 "expanded": false
                             }
                         },
-                        "expanded": false
+                        "expanded": true
                     }
                 },
                 "outputs": {

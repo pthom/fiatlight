@@ -1,0 +1,111 @@
+{
+    "user_inputs": {
+        "functions_nodes": {
+            "f": {
+                "data": {
+                    "name": "data",
+                    "data": {
+                        "type": "Pydantic",
+                        "value": {
+                            "prompt1": "",
+                            "prompt2": "",
+                            "value": 0
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "gui_options": {
+        "f": {
+            "function_node_with_gui": {
+                "_inputs_expanded": true,
+                "_outputs_expanded": true,
+                "fiat_tuning_expanded": false,
+                "_internal_state_gui_expanded": true,
+                "_function_node": {
+                    "inputs": {
+                        "data": {
+                            "cb_options": {
+                                "prompt1": {
+                                    "cb_options": {},
+                                    "expanded": false
+                                },
+                                "prompt2": {
+                                    "cb_options": {},
+                                    "expanded": true
+                                },
+                                "value": {
+                                    "cb_options": {},
+                                    "expanded": false
+                                }
+                            },
+                            "expanded": false
+                        }
+                    },
+                    "outputs": {
+                        "0": {
+                            "cb_options": {
+                                "prompt1": {
+                                    "cb_options": {},
+                                    "expanded": false
+                                },
+                                "prompt2": {
+                                    "cb_options": {},
+                                    "expanded": false
+                                },
+                                "value": {
+                                    "cb_options": {},
+                                    "expanded": false
+                                }
+                            },
+                            "expanded": false
+                        }
+                    },
+                    "internal_gui_options": {}
+                }
+            },
+            "function_node": {
+                "inputs": {
+                    "data": {
+                        "cb_options": {
+                            "prompt1": {
+                                "cb_options": {},
+                                "expanded": false
+                            },
+                            "prompt2": {
+                                "cb_options": {},
+                                "expanded": true
+                            },
+                            "value": {
+                                "cb_options": {},
+                                "expanded": false
+                            }
+                        },
+                        "expanded": false
+                    }
+                },
+                "outputs": {
+                    "0": {
+                        "cb_options": {
+                            "prompt1": {
+                                "cb_options": {},
+                                "expanded": false
+                            },
+                            "prompt2": {
+                                "cb_options": {},
+                                "expanded": false
+                            },
+                            "value": {
+                                "cb_options": {},
+                                "expanded": false
+                            }
+                        },
+                        "expanded": false
+                    }
+                },
+                "internal_gui_options": {}
+            }
+        }
+    }
+}

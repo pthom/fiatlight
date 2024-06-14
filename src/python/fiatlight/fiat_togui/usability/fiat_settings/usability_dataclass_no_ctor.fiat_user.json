@@ -1,0 +1,74 @@
+{
+    "user_inputs": {
+        "functions_nodes": {
+            "f": {
+                "param": {
+                    "name": "param",
+                    "data": {
+                        "type": "Error"
+                    }
+                }
+            }
+        }
+    },
+    "gui_options": {
+        "f": {
+            "function_node_with_gui": {
+                "_inputs_expanded": true,
+                "_outputs_expanded": true,
+                "fiat_tuning_expanded": false,
+                "_internal_state_gui_expanded": true,
+                "_function_node": {
+                    "inputs": {
+                        "param": {
+                            "cb_options": {
+                                "inner": {
+                                    "cb_options": {},
+                                    "expanded": false
+                                }
+                            },
+                            "expanded": false
+                        }
+                    },
+                    "outputs": {
+                        "0": {
+                            "cb_options": {
+                                "inner": {
+                                    "cb_options": {},
+                                    "expanded": false
+                                }
+                            },
+                            "expanded": false
+                        }
+                    },
+                    "internal_gui_options": {}
+                }
+            },
+            "function_node": {
+                "inputs": {
+                    "param": {
+                        "cb_options": {
+                            "inner": {
+                                "cb_options": {},
+                                "expanded": false
+                            }
+                        },
+                        "expanded": false
+                    }
+                },
+                "outputs": {
+                    "0": {
+                        "cb_options": {
+                            "inner": {
+                                "cb_options": {},
+                                "expanded": false
+                            }
+                        },
+                        "expanded": false
+                    }
+                },
+                "internal_gui_options": {}
+            }
+        }
+    }
+}

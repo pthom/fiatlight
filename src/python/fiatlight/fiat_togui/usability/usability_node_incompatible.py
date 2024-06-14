@@ -4,6 +4,8 @@ from typing import NewType
 
 
 def usability_single_incompatible_param() -> None:
+    """In this example the prompt should not be editable in the node, but it should be editable in the pop-up."""
+
     def f(prompt: str) -> str:
         return prompt
 
@@ -19,7 +21,7 @@ def usability_single_incompatible_param() -> None:
     param_gui.callbacks.edit_node_compatible = False
     param_gui.callbacks.edit_collapsible = True
 
-    fl.run(f_gui)
+    fl.run(f_gui, app_name="usability_single_incompatible_param")
 
 
 StrMultiline = NewType("StrMultiline", str)
@@ -59,13 +61,18 @@ fl.register_type(StrMultiline, StrMultilineWithGui)
 
 
 def usability_incompatible_registered() -> None:
+    """In this example the prompt should not be editable in the node, but it should be editable in the pop-up."""
+
     def f(prompt: StrMultiline) -> StrMultiline:
         return prompt
 
-    fl.run(f)
+    fl.run(f, app_name="usability_incompatible_registered")
 
 
 def usability_incompatible_param_in_dataclass() -> None:
+    """In this example MyData should not be editable in the node, but it should be editable in the pop-up.
+    (It should inherit the fact that it cannot be edited in a node from its members)
+    """
     from pydantic import BaseModel
 
     @fl.base_model_with_gui_registration(value__range=(50, 75))
@@ -77,10 +84,11 @@ def usability_incompatible_param_in_dataclass() -> None:
     def f(data: MyData) -> MyData:
         return data
 
-    fl.run(f)
+    fl.run(f, app_name="usability_incompatible_param_in_dataclass")
 
 
 def usability_compatible_param_in_dataclass() -> None:
+    """In this example MyData should be editable in the node, and it should be editable in the pop-up."""
     from pydantic import BaseModel
 
     @fl.base_model_with_gui_registration(value__range=(50, 75))
@@ -92,11 +100,12 @@ def usability_compatible_param_in_dataclass() -> None:
     def f(data: MyData) -> MyData:
         return data
 
-    fl.run(f)
+    fl.run(f, app_name="usability_compatible_param_in_dataclass")
 
 
 if __name__ == "__main__":
+    """Choose which example you want to run. When making modifications, all should behave correctly."""
     # usability_single_incompatible_param()
     # usability_incompatible_registered()
-    # usability_incompatible_param_in_dataclass()
-    usability_compatible_param_in_dataclass()
+    usability_incompatible_param_in_dataclass()
+    # usability_compatible_param_in_dataclass()

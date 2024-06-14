@@ -7,7 +7,7 @@
                     "data": {
                         "type": "Pydantic",
                         "value": {
-                            "value": 54,
+                            "value": 0,
                             "name": "",
                             "firstname": ""
                         }
@@ -29,7 +29,7 @@
                             "cb_options": {
                                 "value": {
                                     "cb_options": {},
-                                    "expanded": true
+                                    "expanded": false
                                 },
                                 "name": {
                                     "cb_options": {
@@ -41,7 +41,7 @@
                                         "wrap_multiline": false,
                                         "wrap_multiline_width": 80
                                     },
-                                    "expanded": true
+                                    "expanded": false
                                 },
                                 "firstname": {
                                     "cb_options": {
@@ -53,10 +53,10 @@
                                         "wrap_multiline": false,
                                         "wrap_multiline_width": 80
                                     },
-                                    "expanded": true
+                                    "expanded": false
                                 }
                             },
-                            "expanded": false
+                            "expanded": true
                         }
                     },
                     "outputs": {
@@ -64,7 +64,7 @@
                             "cb_options": {
                                 "value": {
                                     "cb_options": {},
-                                    "expanded": true
+                                    "expanded": false
                                 },
                                 "name": {
                                     "cb_options": {
@@ -76,7 +76,7 @@
                                         "wrap_multiline": false,
                                         "wrap_multiline_width": 80
                                     },
-                                    "expanded": true
+                                    "expanded": false
                                 },
                                 "firstname": {
                                     "cb_options": {
@@ -88,10 +88,10 @@
                                         "wrap_multiline": false,
                                         "wrap_multiline_width": 80
                                     },
-                                    "expanded": true
+                                    "expanded": false
                                 }
                             },
-                            "expanded": true
+                            "expanded": false
                         }
                     },
                     "internal_gui_options": {}
@@ -103,7 +103,7 @@
                         "cb_options": {
                             "value": {
                                 "cb_options": {},
-                                "expanded": true
+                                "expanded": false
                             },
                             "name": {
                                 "cb_options": {
@@ -115,7 +115,7 @@
                                     "wrap_multiline": false,
                                     "wrap_multiline_width": 80
                                 },
-                                "expanded": true
+                                "expanded": false
                             },
                             "firstname": {
                                 "cb_options": {
@@ -127,10 +127,10 @@
                                     "wrap_multiline": false,
                                     "wrap_multiline_width": 80
                                 },
-                                "expanded": true
+                                "expanded": false
                             }
                         },
-                        "expanded": false
+                        "expanded": true
                     }
                 },
                 "outputs": {
@@ -138,7 +138,7 @@
                         "cb_options": {
                             "value": {
                                 "cb_options": {},
-                                "expanded": true
+                                "expanded": false
                             },
                             "name": {
                                 "cb_options": {
@@ -150,7 +150,7 @@
                                     "wrap_multiline": false,
                                     "wrap_multiline_width": 80
                                 },
-                                "expanded": true
+                                "expanded": false
                             },
                             "firstname": {
                                 "cb_options": {
@@ -162,10 +162,10 @@
                                     "wrap_multiline": false,
                                     "wrap_multiline_width": 80
                                 },
-                                "expanded": true
+                                "expanded": false
                             }
                         },
-                        "expanded": true
+                        "expanded": false
                     }
                 },
                 "internal_gui_options": {}

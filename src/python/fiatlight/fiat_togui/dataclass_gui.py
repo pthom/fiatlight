@@ -129,7 +129,7 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
         for param_gui in self._parameters_with_gui:
             param_value = param_gui.data_with_gui.value
             if isinstance(param_value, (Unspecified, Error)):
-                raise ValueError(f"Parameter {param_gui.name} is unspecified")
+                raise ValueError(f"Parameter {param_gui.name} is unspecified in class {self._type}")
             kwargs[param_gui.name] = param_value
         r = self._type(**kwargs)
         return r
@@ -141,7 +141,7 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
             else:
                 default_value_provider = param_gui.data_with_gui.callbacks.default_value_provider
                 if default_value_provider is None:
-                    raise ValueError(f"Parameter {param_gui.name} has no default value provider")
+                    raise ValueError(f"Parameter {param_gui.name} has no default value provider in class {self._type}")
                 param_gui.data_with_gui.value = default_value_provider()
 
         r = self.factor_dataclass_instance()
@@ -158,7 +158,7 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
         for param_gui in self._parameters_with_gui:
             if param_gui.name == name:
                 return param_gui
-        raise ValueError(f"Parameter {name} not found")
+        raise ValueError(f"Parameter {name} not found in class {self._type}")
 
     def is_fully_specified(self) -> bool:
         has_unspecified = False

@@ -659,7 +659,7 @@ class AnyDataWithGui(Generic[DataType]):
         can_set_default_value = False
         warn_no_default_provider = False
         can_set_unspecified = False
-        if isinstance(self.value, Unspecified):
+        if isinstance(self.value, (Unspecified, Error)):
             # if unspecified, provide "+" to set to default provider value
             if self.callbacks.default_value_provider is not None:
                 can_set_default_value = True
