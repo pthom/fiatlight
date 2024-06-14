@@ -16,8 +16,8 @@ class PromptWithGui(AnyDataWithGui[Prompt]):
     def __init__(self) -> None:
         super().__init__(Prompt)
         self._str_with_resizable_gui = StrWithGui()
-        self._str_with_resizable_gui.params.hint = "Enter a prompt"
-        self._str_with_resizable_gui.params.allow_multiline = True
+        self._str_with_resizable_gui.params.developer_params.hint = "Enter a prompt"
+        self._str_with_resizable_gui.params.developer_params.allow_multiline_edit = True
 
         self._edited_prompt = Prompt("")
         self.callbacks.on_change = self.on_change

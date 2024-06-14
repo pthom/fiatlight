@@ -13,7 +13,7 @@ def only_lowercase(s: str) -> fl.DataValidationResult:
     #  Custom attributes
     name__width_em=10.0,
     name__hint="Enter your name",
-    name__allow_multiline=False,
+    name__allow_multiline_edit=False,
     name__resizable=True,
 )
 def greet(name: str = "") -> str:
