@@ -55,13 +55,13 @@ class MydataWithGui(AnyDataWithGui[Mydata]):
         imgui.text("present")
         # We should probably use a distinct class such as DataFramePresenter here
 
-    @staticmethod
-    def _EditCallbacksSection() -> None:
+    class _EditCallbacksSection:  # Dummy class to create a section in the IDE # noqa
         """
         # --------------------------------------------------------------------------------------------
         #        Edit callbacks
         # --------------------------------------------------------------------------------------------
         """
+
         pass
 
     def edit(self, value: Mydata) -> tuple[bool, Mydata]:
@@ -69,13 +69,13 @@ class MydataWithGui(AnyDataWithGui[Mydata]):
         # There can be two different presentations, depending on whether we are inside a pop-up or inside a node.
         return False, value
 
-    @staticmethod
-    def _DefaultValueProviderSection() -> None:
+    class _DefaultValueProviderSection:  # Dummy class to create a section in the IDE # noqa
         """
         # --------------------------------------------------------------------------------------------
         #        Default value provider
         # --------------------------------------------------------------------------------------------
         """
+
         pass
 
     @staticmethod
@@ -83,13 +83,13 @@ class MydataWithGui(AnyDataWithGui[Mydata]):
         # Here we provide a default value for the data.
         return Mydata(x=0)
 
-    @staticmethod
-    def _OnChangeSection() -> None:
+    class _OnChangeSection:  # Dummy class to create a section in the IDE # noqa
         """
         # --------------------------------------------------------------------------------------------
         #        On Change
         # --------------------------------------------------------------------------------------------
         """
+
         pass
 
     def on_change(self, value: Mydata) -> None:
@@ -101,13 +101,13 @@ class MydataWithGui(AnyDataWithGui[Mydata]):
         # Probably nothing to do here.
         return False
 
-    @staticmethod
-    def _CustomAttributesSection() -> None:
+    class _CustomAttributesSection:  # Dummy class to create a section in the IDE # noqa
         """
         # --------------------------------------------------------------------------------------------
         #        Custom Attributes
         # --------------------------------------------------------------------------------------------
         """
+
         pass
 
     @staticmethod
@@ -118,13 +118,13 @@ class MydataWithGui(AnyDataWithGui[Mydata]):
         # Here we should update the presenter with the new custom attributes
         pass
 
-    @staticmethod
-    def _SerializationAndDeserializationSection() -> None:
+    class _SerializationAndDeserializationSection:  # Dummy class to create a section in the IDE # noqa
         """
         # --------------------------------------------------------------------------------------------
         #        Serialization and deserialization
         # --------------------------------------------------------------------------------------------
         """
+
         pass
 
     def save_gui_options_to_json(self) -> JsonDict:
@@ -149,13 +149,13 @@ class MydataWithGui(AnyDataWithGui[Mydata]):
         # But this is probably a bad idea, so we will probably dump this method or return an empty data frame
         raise NotImplementedError()
 
-    @staticmethod
-    def _ClipboardSection() -> None:
+    class _ClipboardSection:  # Dummy class to create a section in the IDE # noqa
         """
         # --------------------------------------------------------------------------------------------
         #        Clipboard
         # --------------------------------------------------------------------------------------------
         """
+
         pass
 
     def clipboard_copy_str(self, value: Mydata) -> str:

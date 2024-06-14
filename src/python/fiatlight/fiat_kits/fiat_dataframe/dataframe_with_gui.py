@@ -59,48 +59,26 @@ class DataFrameWithGui(AnyDataWithGui[pd.DataFrame]):
     def present(self, value: pd.DataFrame) -> None:
         self.dataframe_presenter.present(value)
 
-    @staticmethod
-    def _EditCallbacksSection() -> None:
+    class _EditCallbacksSection:
         """
         # --------------------------------------------------------------------------------------------
         #        Edit callbacks
         # --------------------------------------------------------------------------------------------
         """
+
         pass
 
     def edit(self, value: pd.DataFrame) -> tuple[bool, pd.DataFrame]:
         # We will probably not be able to edit data frames.
         return False, value
 
-    @staticmethod
-    def _DefaultValueProviderSection() -> None:
-        """
-        # --------------------------------------------------------------------------------------------
-        #        Default value provider
-        # --------------------------------------------------------------------------------------------
-        """
-        pass
-
-    @staticmethod
-    def default_value_provider() -> pd.DataFrame:
-        # Here, we provide an example data frame to the user,
-        # using the Titanic dataset from the Data Science Dojo repository.
-        # (widely used in data science tutorials)
-        url = "https://raw.githubusercontent.com/datasciencedojo/datasets/master/titanic.csv"
-        try:
-            df = pd.read_csv(url)
-        except Exception as e:
-            print(f"Error loading sample dataset: {e}")
-            df = pd.DataFrame()  # Return an empty DataFrame in case of failure
-        return df
-
-    @staticmethod
-    def _OnChangeSection() -> None:
+    class _OnChangeSection:
         """
         # --------------------------------------------------------------------------------------------
         #        On Change
         # --------------------------------------------------------------------------------------------
         """
+
         pass
 
     def on_change(self, value: pd.DataFrame) -> None:
@@ -110,13 +88,13 @@ class DataFrameWithGui(AnyDataWithGui[pd.DataFrame]):
         # Probably nothing to do here.
         return False
 
-    @staticmethod
-    def _CustomAttributesSection() -> None:
+    class _CustomAttributesSection:
         """
         # --------------------------------------------------------------------------------------------
         #        Custom Attributes
         # --------------------------------------------------------------------------------------------
         """
+
         pass
 
     @staticmethod
@@ -127,13 +105,13 @@ class DataFrameWithGui(AnyDataWithGui[pd.DataFrame]):
     def on_fiat_attributes_changes(self, fiat_attrs: FiatAttributes) -> None:
         self.dataframe_presenter.on_fiat_attributes_changes(fiat_attrs)
 
-    @staticmethod
-    def _SerializationAndDeserializationSection() -> None:
+    class _SerializationAndDeserializationSection:
         """
         # --------------------------------------------------------------------------------------------
         #        Serialization and deserialization
         # --------------------------------------------------------------------------------------------
         """
+
         pass
 
     def save_gui_options_to_json(self) -> JsonDict:
@@ -158,13 +136,13 @@ class DataFrameWithGui(AnyDataWithGui[pd.DataFrame]):
         # But this is probably a bad idea, so we will probably dump this method or return an empty data frame
         return pd.DataFrame()
 
-    @staticmethod
-    def _ClipboardSection() -> None:
+    class _ClipboardSection:
         """
         # --------------------------------------------------------------------------------------------
         #        Clipboard
         # --------------------------------------------------------------------------------------------
         """
+
         pass
 
     def clipboard_copy_str(self, value: pd.DataFrame) -> str:
