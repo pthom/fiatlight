@@ -174,8 +174,8 @@
                                     60.0,
                                     15.0
                                 ],
-                                "wrap_multiline": false,
-                                "wrap_multiline_width": 80
+                                "wrap_multiline": true,
+                                "wrap_multiline_width": 112
                             },
                             "expanded": false
                         }
@@ -206,8 +206,8 @@
                                 60.0,
                                 15.0
                             ],
-                            "wrap_multiline": false,
-                            "wrap_multiline_width": 80
+                            "wrap_multiline": true,
+                            "wrap_multiline_width": 112
                         },
                         "expanded": false
                     }

@@ -9,6 +9,11 @@ from pydantic import BaseModel
 import textwrap
 
 
+def _textwrap_preserve_line_breaks(s: str, width) -> str:
+    wrapped_text = "\n".join(textwrap.fill(line, width=width) for line in s.splitlines())
+    return wrapped_text
+
+
 class StrPossibleFiatAttributes(PossibleFiatAttributes):
     """PossibleFiatAttributes for StrWithGui"""
 
@@ -172,7 +177,7 @@ class StrWithGui(AnyDataWithGui[str]):
     def present(self, text_value: str) -> None:
         if fiatlight.is_rendering_in_fiatlight_detached_window():
             text_edit_size = ImVec2(
-                imgui.get_window_width() - hello_imgui.em_size(1), imgui.get_window_height() - hello_imgui.em_size(4)
+                imgui.get_window_width() - hello_imgui.em_size(3), imgui.get_window_height() - hello_imgui.em_size(4)
             )
             if StrWithGui._shall_present_in_multiline_text_edit(text_value):
                 can_wrap = _lines_max_width(text_value) > self.params.user_params.wrap_multiline_width
@@ -187,7 +192,12 @@ class StrWithGui(AnyDataWithGui[str]):
                     )
                     text_edit_size.y -= hello_imgui.em_size(1.5)
                 if self.params.user_params.wrap_multiline:
-                    text_value = textwrap.fill(text_value, self.params.user_params.wrap_multiline_width)
+                    # text_value = textwrap.fill(text_value, self.params.user_params.wrap_multiline_width)
+                    # text_value = "\n".join(textwrap.wrap(text_value, self.params.user_params.wrap_multiline_width))
+                    # text_value = "\n".join(textwrap.fill(text_value, self.params.user_params.wrap_multiline_width))
+                    text_value = _textwrap_preserve_line_breaks(
+                        text_value, self.params.user_params.wrap_multiline_width
+                    )
                 imgui.input_text_multiline("##str", text_value, text_edit_size, imgui.InputTextFlags_.read_only.value)
             else:
                 imgui.text(text_value)

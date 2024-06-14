@@ -1,58 +1,121 @@
 {
-    "functions_graph": {
+    "user_inputs": {
         "functions_nodes": {
             "f": {
-                "inputs": {
-                    "prompt": {
-                        "name": "prompt",
-                        "data": {
-                            "type": "Primitive",
-                            "value": "A toy car on a mountain road"
-                        }
-                    },
-                    "s": {
-                        "name": "s",
-                        "data": {
-                            "type": "Primitive",
-                            "value": "aaacwc"
-                        }
+                "prompt": {
+                    "name": "prompt",
+                    "data": {
+                        "type": "Primitive",
+                        "value": ""
                     }
                 },
-                "gui_options": {
-                    "inputs": {
-                        "prompt": {
-                            "_str_with_resizable_gui": {
-                                "width_em": 15.0
-                            }
-                        },
-                        "s": {
-                            "width_em": 15.0
-                        }
-                    },
-                    "outputs": {
-                        "0": {
-                            "width_em": 15.0
-                        }
-                    },
-                    "internal_gui_options": {}
+                "s": {
+                    "name": "s",
+                    "data": {
+                        "type": "Unspecified"
+                    }
                 }
             }
         }
     },
-    "functions_gui_settings": {
+    "gui_options": {
         "f": {
-            "_show_input_details": {
-                "prompt": true,
-                "s": true
+            "function_node_with_gui": {
+                "_inputs_expanded": true,
+                "_outputs_expanded": true,
+                "fiat_tuning_expanded": false,
+                "_internal_state_gui_expanded": true,
+                "_function_node": {
+                    "inputs": {
+                        "prompt": {
+                            "cb_options": {
+                                "_str_with_resizable_gui": {
+                                    "width_em": 15.0,
+                                    "size_multiline_em": [
+                                        28.0,
+                                        15.0
+                                    ],
+                                    "wrap_multiline": false,
+                                    "wrap_multiline_width": 80
+                                }
+                            },
+                            "expanded": false
+                        },
+                        "s": {
+                            "cb_options": {
+                                "width_em": 15.0,
+                                "size_multiline_em": [
+                                    60.0,
+                                    15.0
+                                ],
+                                "wrap_multiline": false,
+                                "wrap_multiline_width": 80
+                            },
+                            "expanded": false
+                        }
+                    },
+                    "outputs": {
+                        "0": {
+                            "cb_options": {
+                                "width_em": 15.0,
+                                "size_multiline_em": [
+                                    60.0,
+                                    15.0
+                                ],
+                                "wrap_multiline": false,
+                                "wrap_multiline_width": 80
+                            },
+                            "expanded": true
+                        }
+                    },
+                    "internal_gui_options": {}
+                }
             },
-            "_inputs_expanded": true,
-            "_show_output_details": {
-                "0": true
-            },
-            "_outputs_expanded": true,
-            "_show_internals_details": {},
-            "_internals_expanded": true,
-            "_internal_state_gui_expanded": true
+            "function_node": {
+                "inputs": {
+                    "prompt": {
+                        "cb_options": {
+                            "_str_with_resizable_gui": {
+                                "width_em": 15.0,
+                                "size_multiline_em": [
+                                    28.0,
+                                    15.0
+                                ],
+                                "wrap_multiline": false,
+                                "wrap_multiline_width": 80
+                            }
+                        },
+                        "expanded": false
+                    },
+                    "s": {
+                        "cb_options": {
+                            "width_em": 15.0,
+                            "size_multiline_em": [
+                                60.0,
+                                15.0
+                            ],
+                            "wrap_multiline": false,
+                            "wrap_multiline_width": 80
+                        },
+                        "expanded": false
+                    }
+                },
+                "outputs": {
+                    "0": {
+                        "cb_options": {
+                            "width_em": 15.0,
+                            "size_multiline_em": [
+                                60.0,
+                                15.0
+                            ],
+                            "wrap_multiline": false,
+                            "wrap_multiline_width": 80
+                        },
+                        "expanded": true
+                    }
+                },
+                "internal_gui_options": {}
+            }
         }
     }
 }
