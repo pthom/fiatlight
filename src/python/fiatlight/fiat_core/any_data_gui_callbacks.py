@@ -88,7 +88,7 @@ class AnyDataGuiCallbacks(Generic[DataType]):
 
     #                        Default value
     # ---------------------------------------------------------------------------------------------
-    # default value provider (Mandatory if edition is required)
+    # default value provider (Needed only for a type without default constructor)
     # this function will be called to provide a default value if needed
     default_value_provider: Callable[[], DataType] | None = None
     # ---------------------------------------------------------------------------------------------

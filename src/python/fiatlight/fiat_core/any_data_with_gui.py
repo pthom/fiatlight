@@ -626,11 +626,9 @@ class AnyDataWithGui(Generic[DataType]):
                 def gui_edit_in_popup() -> bool:
                     if isinstance(self.value, Unspecified):
                         # If unspecified, set to default value before editing in popup
-                        if self.callbacks.default_value_provider is not None:
-                            logging.warning(
-                                "Value unspecified: setting to default_value_provider() before editing in popup"
-                            )
-                            self.value = self.callbacks.default_value_provider()
+                        if self.can_construct_default_value():
+                            logging.warning("Value unspecified: setting to default value before editing in popup")
+                            self.value = self.construct_default_value()
                     # Edit in popup
                     changed = self._gui_edit_next_lines(in_popup=True)
 
@@ -661,7 +659,7 @@ class AnyDataWithGui(Generic[DataType]):
         can_set_unspecified = False
         if isinstance(self.value, (Unspecified, Error)):
             # if unspecified, provide "+" to set to default provider value
-            if self.callbacks.default_value_provider is not None:
+            if self.can_construct_default_value():
                 can_set_default_value = True
             else:
                 warn_no_default_provider = True
@@ -676,8 +674,8 @@ class AnyDataWithGui(Generic[DataType]):
             fiat_osd.set_widget_tooltip("Reset to unspecified")
         if can_set_default_value:
             if imgui.button(icons_fontawesome_6.ICON_FA_SQUARE_PLUS):
-                assert self.callbacks.default_value_provider is not None
-                self.value = self.callbacks.default_value_provider()
+                assert self.can_construct_default_value()
+                self.value = self.construct_default_value()
                 changed = True
             fiat_osd.set_widget_tooltip("Set to default value")
         if warn_no_default_provider:
@@ -860,6 +858,20 @@ class AnyDataWithGui(Generic[DataType]):
         # ------------------------------------------------------------------------------------------------------------------
         """
 
+    def can_construct_default_value(self) -> bool:
+        if self.callbacks.default_value_provider is not None:
+            return True
+        try:
+            _ = self._type()
+            return True
+        except TypeError:
+            return False
+
+    def construct_default_value(self) -> DataType:
+        if self.callbacks.default_value_provider is not None:
+            return self.callbacks.default_value_provider()
+        return self._type()
+
     def datatype_value_to_str(self, value: DataType) -> str:
         """Convert the value to a string
         Uses either the present_str callback, or the default str conversion
@@ -902,7 +914,7 @@ class AnyDataWithGui(Generic[DataType]):
         return doc
 
 
-class AnyDataWithGui_UnregisteredType(AnyDataWithGui[Any]):
+class AnyDataWithGui_UnregisteredType(AnyDataWithGui[Any], Generic[DataType]):
     """AnyDataWithGui_UnregisteredType: a GUI associated to a type that is not registered in the Fiatlight framework.
 
     Use sparingly, as such a data type cannot do much, and is not very useful.
@@ -910,8 +922,8 @@ class AnyDataWithGui_UnregisteredType(AnyDataWithGui[Any]):
 
     unregistered_typename: str
 
-    def __init__(self, typename: str) -> None:
-        super().__init__(type(Any))
+    def __init__(self, typename: str, data_type: Type[DataType]) -> None:
+        super().__init__(data_type)
         self.unregistered_typename = typename
 
 

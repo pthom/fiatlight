@@ -21,6 +21,8 @@ from enum import Enum
 import inspect
 import logging
 from typing import TypeAlias, Callable, Any, Tuple, List, Type, Generic
+import typing
+
 
 GuiFactory = Callable[[], AnyDataWithGui[DataType]]
 FunctionWithGuiFactory = Callable[[], FunctionWithGui]
@@ -217,9 +219,11 @@ def _extract_tuple_typeclasses(type_class_name: str) -> Tuple[bool, List[str]]:
     return False, []
 
 
-def _any_typename_to_gui(typename: str, fiat_attributes: FiatAttributes) -> AnyDataWithGui[Any]:
+def _any_typename_to_gui(typename: str, fiat_attributes: FiatAttributes, type_: Type[Any]) -> AnyDataWithGui[Any]:
     """Central function to convert a type name to a GUI representation.
     It handles simple types, enum, optional, list, tuple, etc.
+
+    It normally uses only  the typename param, but it will use type_ if no GUI is not registered for this typename.
     """
 
     # Note: typename can be a string like "int", "float", "str", "typing.List[int]", "typing.Optional[int]", etc.
@@ -247,28 +251,36 @@ def _any_typename_to_gui(typename: str, fiat_attributes: FiatAttributes) -> AnyD
             return gui_factories().factor(enum_type_class_name, fiat_attributes)
         else:
             logging.warning(f"Enum {typename}: enum not found in globals and locals")
-            return AnyDataWithGui_UnregisteredType(enum_type_class_name)
+            return AnyDataWithGui_UnregisteredType(enum_type_class_name, type_)
 
     if is_optional:
-        inner_gui_opt = _any_typename_to_gui(optional_inner_type_class_name, fiat_attributes=fiat_attributes)
+        # We cannot transmit the inner type of the Optional. This would require calling eval(),
+        # which is a security issue.
+        inner_gui_opt = _any_typename_to_gui(
+            optional_inner_type_class_name, fiat_attributes=fiat_attributes, type_=type(Any)
+        )
         r_opt = OptionalWithGui(inner_gui_opt)
         AnyDataWithGui.propagate_label_and_tooltip(inner_gui_opt, r_opt)
         return r_opt
     elif is_list:
-        inner_gui_item = _any_typename_to_gui(list_inner_type_class_name, fiat_attributes=fiat_attributes)
+        # We cannot transmit the inner type of the list. This would require calling eval(),
+        # which is a security issue.
+        inner_gui_item = _any_typename_to_gui(
+            list_inner_type_class_name, fiat_attributes=fiat_attributes, type_=type(Any)
+        )
         r_list = ListWithGui(inner_gui_item)
         AnyDataWithGui.propagate_label_and_tooltip(inner_gui_item, r_list)
         return r_list
 
     # if we reach this point, we have no GUI implementation for the type
     _TO_GUI_CONTEXT.add_missing_gui_factory(typename)
-    return AnyDataWithGui_UnregisteredType(typename)
+    return AnyDataWithGui_UnregisteredType(typename, type_)
 
 
 def _any_type_to_gui_impl(type_: Type[Any], fiat_attributes: FiatAttributes) -> AnyDataWithGui[Any]:
     """Converts a type to a GUI representation."""
     typename = fully_qualified_typename(type_)
-    return _any_typename_to_gui(typename, fiat_attributes)
+    return _any_typename_to_gui(typename, fiat_attributes, type_)
 
 
 def any_type_to_gui(type_: Type[Any], **fiat_attributes: Any) -> AnyDataWithGui[Any]:
@@ -277,7 +289,9 @@ def any_type_to_gui(type_: Type[Any], **fiat_attributes: Any) -> AnyDataWithGui[
     return _any_type_to_gui_impl(type_, attr_as_dict)
 
 
-def _any_composed_type_to_gui_impl(type_: DataType, fiat_attributes: FiatAttributes) -> AnyDataWithGui[Any]:
+def _any_composed_type_to_gui_impl(
+    type_or_special_form: type[Any] | typing._SpecialForm, fiat_attributes: FiatAttributes
+) -> AnyDataWithGui[Any]:
     """Converts a complex type to a GUI representation.
     By composed we mean a type composed of multiple types like:
         - Optional[int]
@@ -288,34 +302,40 @@ def _any_composed_type_to_gui_impl(type_: DataType, fiat_attributes: FiatAttribu
         - int | float
         etc.
     """
-    if isinstance(type_, type):
+    if isinstance(type_or_special_form, type):
         raise ValueError("Use any_type_to_gui for simple types")
-    composed_typename = fully_qualified_complex_typename(type_)
-    r = _any_typename_to_gui(composed_typename, fiat_attributes)
+    composed_typename = fully_qualified_complex_typename(type_or_special_form)
+    # We cannot pass the _SpecialForm type to _any_typename_to_gui
+    # It will use composed_typename anyhow.
+    r = _any_typename_to_gui(composed_typename, fiat_attributes, type(Any))
     return r
 
 
-def any_typing_new_type_to_gui(type_: DataType, fiat_attributes: FiatAttributes) -> AnyDataWithGui[Any]:
+def any_typing_new_type_to_gui(type_: Type[Any], fiat_attributes: FiatAttributes) -> AnyDataWithGui[Any]:
     """Converts a type created with typing.NewType to a GUI representation."""
     if isinstance(type_, type):
         raise ValueError("Use any_type_to_gui for simple types")
     composed_typename = fully_qualified_complex_typename(type_)
-    r = _any_typename_to_gui(composed_typename, fiat_attributes)
+    r = _any_typename_to_gui(composed_typename, fiat_attributes, type_)
     return r
 
 
-def _fn_outputs_with_gui(type_class_name: str, fn_fiat_attributes: FiatAttributes) -> List[AnyDataWithGui[Any]]:
+def _fn_outputs_with_gui(
+    type_class_name: str, fn_fiat_attributes: FiatAttributes, type_: Type[Any]
+) -> List[AnyDataWithGui[Any]]:
     """Convert the return type of a function to a (list of) GUI representation."""
     r = []
     is_tuple, inner_type_classes = _extract_tuple_typeclasses(type_class_name)
     if is_tuple:
         for idx_output, inner_type_class in enumerate(inner_type_classes):
+            # We cannot extract the inner tuple types because this would require to call eval,
+            # which is insecure.
             output_fiat_attrs = get_output_fiat_attributes(fn_fiat_attributes, idx_output)
-            output_gui = _any_typename_to_gui(inner_type_class, fiat_attributes=output_fiat_attrs)
+            output_gui = _any_typename_to_gui(inner_type_class, fiat_attributes=output_fiat_attrs, type_=type(Any))
             r.append(output_gui)
     else:
         output_fiat_attrs = get_output_fiat_attributes(fn_fiat_attributes)
-        output_gui = _any_typename_to_gui(type_class_name, fiat_attributes=output_fiat_attrs)
+        output_gui = _any_typename_to_gui(type_class_name, fiat_attributes=output_fiat_attrs, type_=type_)
         r.append(output_gui)
     return r
 
@@ -326,7 +346,7 @@ def _to_data_with_gui_impl(
 ) -> AnyDataWithGui[DataType]:
     """Convert a value to a GUI representation."""
     type_class_name = fully_qualified_typename_or_str(type(value))
-    r = _any_typename_to_gui(type_class_name, fiat_attributes)
+    r = _any_typename_to_gui(type_class_name, fiat_attributes, type(value))
     r.value = value
     return r
 
@@ -339,14 +359,14 @@ def to_data_with_gui(value: DataType, **fiat_attributes: Any) -> AnyDataWithGui[
 
 def _to_param_with_gui(name: str, param: inspect.Parameter, fiat_attributes: FiatAttributes) -> ParamWithGui[Any]:
     """Convert a function parameter to a GUI representation."""
-    annotation = param.annotation
+    type_annotation = param.annotation
 
     data_with_gui: AnyDataWithGui[Any]
-    if annotation is None or annotation is inspect.Parameter.empty:
-        data_with_gui = AnyDataWithGui_UnregisteredType(fully_qualified_annotation(annotation))
+    if type_annotation is None or type_annotation is inspect.Parameter.empty:
+        data_with_gui = AnyDataWithGui_UnregisteredType(fully_qualified_annotation(type_annotation), type_annotation)
     else:
-        param_typename = fully_qualified_annotation(annotation)
-        data_with_gui = _any_typename_to_gui(param_typename, fiat_attributes)
+        param_typename = fully_qualified_annotation(type_annotation)
+        data_with_gui = _any_typename_to_gui(param_typename, fiat_attributes, type_annotation)
 
     if data_with_gui.label is None:
         data_with_gui.label = name
@@ -452,14 +472,14 @@ def add_input_outputs_to_function(
 
     return_annotation = sig.return_annotation
     if return_annotation is inspect.Parameter.empty:
-        output_with_gui = AnyDataWithGui_UnregisteredType("inspect.Parameter.empty")
+        output_with_gui = AnyDataWithGui_UnregisteredType("inspect.Parameter.empty", NoneType)
         output_with_gui.label = "Output"
         output_with_gui.merge_fiat_attributes(get_output_fiat_attributes(fiat_attributes))
         function_with_gui._outputs_with_gui.append(OutputWithGui(output_with_gui))
     else:
         return_annotation_str = fully_qualified_annotation(return_annotation)
         if return_annotation_str != "None":
-            outputs_with_guis = _fn_outputs_with_gui(return_annotation_str, fiat_attributes)
+            outputs_with_guis = _fn_outputs_with_gui(return_annotation_str, fiat_attributes, return_annotation)
             for i, output_with_gui_any in enumerate(outputs_with_guis):
                 output_with_gui_any.label = f"Output {i + 1}"
                 if len(outputs_with_guis) == 1:

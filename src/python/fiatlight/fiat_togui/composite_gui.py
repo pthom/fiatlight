@@ -34,10 +34,10 @@ class OptionalWithGui(AnyDataWithGui[DataType | None]):
         self.callbacks.on_heartbeat = self._on_heartbeat
 
     def default_provider(self) -> DataType | None:
-        if self.inner_gui.callbacks.default_value_provider is None:
+        if not self.inner_gui.can_construct_default_value():
             return None
         else:
-            return self.inner_gui.callbacks.default_value_provider()
+            return self.inner_gui.construct_default_value()
 
     def present_str(self, value: DataType | None) -> str:
         if value is None:
@@ -76,9 +76,8 @@ class OptionalWithGui(AnyDataWithGui[DataType | None]):
             imgui.begin_horizontal("##OptionalH")
             imgui.text("Optional: None")
             if imgui.button("Set"):
-                default_value_provider = self.inner_gui.callbacks.default_value_provider
-                assert default_value_provider is not None
-                value = default_value_provider()
+                assert self.inner_gui.can_construct_default_value()
+                value = self.inner_gui.construct_default_value()
                 changed = True
             fiat_osd.set_widget_tooltip("Set Optional to default value for this type.")
             imgui.end_horizontal()

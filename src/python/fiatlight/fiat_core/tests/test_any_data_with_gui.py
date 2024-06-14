@@ -12,7 +12,7 @@ NO_FIAT_ATTRIBUTES = FiatAttributes({})
 
 
 def test_creation() -> None:
-    a: AnyDataWithGui[int] = _any_typename_to_gui("int", NO_FIAT_ATTRIBUTES)
+    a: AnyDataWithGui[int] = _any_typename_to_gui("int", NO_FIAT_ATTRIBUTES, int)
     assert a.callbacks.edit is not None
     assert a.callbacks.default_value_provider is not None
     assert a.callbacks.default_value_provider() == 0

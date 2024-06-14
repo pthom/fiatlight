@@ -5,7 +5,7 @@ from fiatlight.fiat_types import UnspecifiedValue, ErrorValue
 from fiatlight import FunctionWithGui
 from fiatlight.fiat_types import FiatAttributes
 
-from typing import Tuple, Optional, NewType
+from typing import Tuple, Optional, NewType, Any
 import typing
 
 
@@ -108,7 +108,7 @@ def test_image_new_type_to_gui() -> None:
 
 
 def test_any_typeclass_to_data_with_gui() -> None:
-    d = to_gui._any_typename_to_gui("Dummy", NO_FIAT_ATTRIBUTES)
+    d = to_gui._any_typename_to_gui("Dummy", NO_FIAT_ATTRIBUTES, type(Any))
     assert d.callbacks.edit is None
     assert d.callbacks.default_value_provider is None
     assert d.callbacks.default_value_provider is None

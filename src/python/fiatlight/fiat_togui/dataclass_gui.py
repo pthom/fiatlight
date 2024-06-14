@@ -139,10 +139,9 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
             if not isinstance(param_gui.default_value, Unspecified):
                 param_gui.data_with_gui.value = param_gui.default_value
             else:
-                default_value_provider = param_gui.data_with_gui.callbacks.default_value_provider
-                if default_value_provider is None:
+                if not param_gui.data_with_gui.can_construct_default_value():
                     raise ValueError(f"Parameter {param_gui.name} has no default value provider in class {self._type}")
-                param_gui.data_with_gui.value = default_value_provider()
+                param_gui.data_with_gui.value = param_gui.data_with_gui.construct_default_value()
 
         r = self.factor_dataclass_instance()
         return r
