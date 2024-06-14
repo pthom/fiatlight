@@ -301,18 +301,21 @@ class FunctionsGraph:
         """Check if a link can be added between two functions. (private)"""
         # 1. Check that the function nodes are in the graph
         if src_function_node not in self.functions_nodes:
-            return False, f"Function {src_function_node.function_with_gui.name} not found in the graph"
+            return False, f"Function {src_function_node.function_with_gui.function_name} not found in the graph"
         if dst_function_node not in self.functions_nodes:
-            return False, f"Function {dst_function_node.function_with_gui.name} not found in the graph"
+            return False, f"Function {dst_function_node.function_with_gui.function_name} not found in the graph"
 
         # 2. Check that the output index and input name are valid
         if src_output_idx >= src_function_node.function_with_gui.nb_outputs():
             return (
                 False,
-                f"Output index {src_output_idx} is out of range for function {src_function_node.function_with_gui.name}",
+                f"Output index {src_output_idx} is out of range for function {src_function_node.function_with_gui.function_name}",
             )
         if dst_input_name not in dst_function_node.function_with_gui.all_inputs_names():
-            return False, f"Input {dst_input_name} not found in function {dst_function_node.function_with_gui.name}"
+            return (
+                False,
+                f"Input {dst_input_name} not found in function {dst_function_node.function_with_gui.function_name}",
+            )
 
         # 3. Check that src_function_node and dst_function_node are not the same
         if src_function_node == dst_function_node:
@@ -334,7 +337,7 @@ class FunctionsGraph:
         if dst_function_node.has_input_link(dst_input_name):
             return (
                 False,
-                f"Input {dst_input_name} of function {dst_function_node.function_with_gui.name} is already linked",
+                f"Input {dst_input_name} of function {dst_function_node.function_with_gui.function_name} is already linked",
             )
 
         # 6. Check that the link does not create a cycle
@@ -351,8 +354,8 @@ class FunctionsGraph:
         src_output_idx: int = 0,
     ) -> FunctionNodeLink:
         """Add a link between two functions nodes (private)"""
-        src_function_name = src_function_node.function_with_gui.name
-        dst_function_name = dst_function_node.function_with_gui.name
+        src_function_name = src_function_node.function_with_gui.function_name
+        dst_function_name = dst_function_node.function_with_gui.function_name
 
         if src_output_idx >= src_function_node.function_with_gui.nb_outputs():
             raise ValueError(
@@ -417,7 +420,7 @@ class FunctionsGraph:
             assert len(self.functions_nodes) == 1
             return self.functions_nodes[0].function_with_gui
         for fn in self.functions_nodes:
-            if fn.function_with_gui.name == name:
+            if fn.function_with_gui.function_name == name:
                 return fn.function_with_gui
         raise ValueError(f"No function with the name {name}")
 
@@ -489,16 +492,18 @@ class FunctionsGraph:
         If a graph reuses several times the same function "f",
         the unique names for this functions will be "f_1", "f_2", "f_3", etc.
         """
-        names = [fn.function_with_gui.name for fn in self.functions_nodes]
+        names = [fn.function_with_gui.function_name for fn in self.functions_nodes]
         duplicated_names = [name for name in names if names.count(name) > 1]
-        if function_node.function_with_gui.name not in duplicated_names:
-            return function_node.function_with_gui.name
+        if function_node.function_with_gui.function_name not in duplicated_names:
+            return function_node.function_with_gui.function_name
         else:
             functions_with_same_name = [
-                fn for fn in self.functions_nodes if fn.function_with_gui.name == function_node.function_with_gui.name
+                fn
+                for fn in self.functions_nodes
+                if fn.function_with_gui.function_name == function_node.function_with_gui.function_name
             ]
             this_function_idx = functions_with_same_name.index(function_node)
-            return f"{function_node.function_with_gui.name}_{this_function_idx + 1}"
+            return f"{function_node.function_with_gui.function_name}_{this_function_idx + 1}"
 
     def _function_node_with_unique_name(self, function_name: str) -> FunctionNode:
         """Get the function with the unique name"""
@@ -551,7 +556,7 @@ class FunctionsGraph:
         """
 
         all_function_names: List[str]
-        all_function_names = [fn.function_with_gui.name for fn in self.functions_nodes]
+        all_function_names = [fn.function_with_gui.function_name for fn in self.functions_nodes]
 
         links_data = []
         for link in self.functions_nodes_links:

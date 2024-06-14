@@ -251,10 +251,10 @@ class FunctionNodeGui:
         pass
 
     def _draw_title(self, unique_name: str) -> None:
-        fn_name = self._function_node.function_with_gui.name
-        imgui.text(fn_name)
-        if unique_name != fn_name:
-            imgui.text(f" (id: {unique_name})")
+        fn_label = self._function_node.function_with_gui.function_label
+        imgui.text(fn_label)
+        if unique_name != fn_label:
+            fiat_osd.set_widget_tooltip(f" (id: {unique_name})")
 
         self._draw_async_status()
         self._render_function_doc(unique_name)
@@ -500,7 +500,7 @@ class FunctionNodeGui:
             )
             input_param.data_with_gui.status_tooltip = header_elements.param_label_tooltip
 
-            header_params = GuiHeaderLineParams[Any](parent_name=self._function_node.function_with_gui.name)
+            header_params = GuiHeaderLineParams[Any](parent_name=self._function_node.function_with_gui.function_label)
             header_params.prefix_gui = lambda: self._draw_input_pin(header_elements)
             header_params.default_value_if_unspecified = input_param.default_value
 
@@ -573,7 +573,7 @@ class FunctionNodeGui:
         output_param.label_color = get_fiat_config().style.color_as_vec4(bof_header_elements.value_color)
         output_param.status_tooltip = bof_header_elements.value_tooltip
 
-        header_params = GuiHeaderLineParams[Any](parent_name=self._function_node.function_with_gui.name)
+        header_params = GuiHeaderLineParams[Any](parent_name=self._function_node.function_with_gui.function_label)
         header_params.suffix_gui = lambda: self._draw_output_pin(bof_header_elements, idx_output)
 
         output_param.gui_present_customizable(header_params)

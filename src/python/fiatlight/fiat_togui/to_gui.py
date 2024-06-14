@@ -457,7 +457,7 @@ def add_input_outputs_to_function(
     It analyzes the signature of the function, and adds the inputs and outputs to the function_with_gui.
     """
 
-    _TO_GUI_CONTEXT.enqueue_function(function_with_gui.name)
+    _TO_GUI_CONTEXT.enqueue_function(function_with_gui.function_name)
     f = function_with_gui._f_impl  # noqa
     assert f is not None
     try:

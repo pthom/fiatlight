@@ -358,6 +358,7 @@ class ImageWithGui(AnyDataWithGui[Image]):
     max_image_size__range=(1, 3000),
     max_image_size__label="Max Image Size",
     max_image_size__tooltip="If the image with or height is larger than this size, it will be resized",
+    function_label="Image from file",
 )
 def image_source(image_file: ImagePath, max_image_size: int | None = None) -> ImageU8:
     """A simple function that reads an image from a file and optionally resizes it if it is too large.

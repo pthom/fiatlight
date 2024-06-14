@@ -107,8 +107,8 @@ class FunctionNode:
         link = self.input_node_link(parameter_name)
         if link is None:
             return None
-        fn_name = link.src_function_node.function_with_gui.name
-        r = "linked to " + fn_name
+        fn_label = link.src_function_node.function_with_gui.function_label
+        r = "linked to " + fn_label
         if link.src_function_node.function_with_gui.nb_outputs() > 1:
             r += f" (output {link.src_output_idx})"
         return r
@@ -121,8 +121,8 @@ class FunctionNode:
         output_links = self.output_links_for_idx(output_idx)
         r = []
         for link in output_links:
-            fn_name = link.dst_function_node.function_with_gui.name
-            r.append(f"linked to {fn_name} (input {link.dst_input_name})")
+            fn_label = link.dst_function_node.function_with_gui.function_label
+            r.append(f"linked to {fn_label} (input {link.dst_input_name})")
         return r
 
     class _Serialization_Section:  # Dummy class to create a section in the IDE # noqa
@@ -228,8 +228,8 @@ class FunctionNode:
                 dst_input.value = src_output.value
             else:
                 if not dst_input.can_be_none:
-                    this_function_name = self.function_with_gui.name
-                    other_function_name = link.dst_function_node.function_with_gui.name
+                    this_function_name = self.function_with_gui.function_name
+                    other_function_name = link.dst_function_node.function_with_gui.function_name
                     msg = f"""{this_function_name} returned None, but {other_function_name} cannot accept it as param "{link.dst_input_name}"!\n\n"""
                     msg += "Fiatlight will not transmit None values to functions that cannot accept them.\n"
                     msg += "(This might be what you expect, as it is spares you from checking for\nNone values in your code, when using Fiatlight)\n\n"

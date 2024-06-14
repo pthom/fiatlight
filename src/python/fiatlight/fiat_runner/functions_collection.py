@@ -40,7 +40,7 @@ class FunctionsCollection:
         if tags is None:
             tags = []
 
-        name = function_factory().name
+        name = function_factory().function_name
 
         function_info = FunctionInfo(name, function_factory, tags)
         self._functions.append(function_info)

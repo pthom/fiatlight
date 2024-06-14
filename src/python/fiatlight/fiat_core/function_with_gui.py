@@ -497,6 +497,13 @@ class FunctionPossibleFiatAttributes(PossibleFiatAttributes):
             "  - if invoke_manually is False, the function will be called at each frame",
             False,
         )
+        self.add_explained_section("Documentation")
+        self.add_explained_attribute(
+            "function_label",
+            str,
+            "The display name of the function (will use the function name if empty)",
+            "",
+        )
         self.add_explained_attribute(
             "doc_display",
             bool,
@@ -589,7 +596,9 @@ class FunctionWithGui:
     #        Public Members
     # --------------------------------------------------------------------------------------------
     # the name of the function
-    name: str = ""
+    function_name: str = ""
+    # the display name of the function (will use the function name if empty)
+    function_label: str = ""
 
     #
     # Behavioral Flags
@@ -706,11 +715,11 @@ class FunctionWithGui:
         self._inputs_with_gui = []
         self._outputs_with_gui = []
         self._f_impl = fn
-        self.name = fn_name or ""
+        self.function_name = fn_name or ""
 
         if fn is not None:
-            if self.name == "":
-                self.name = fn.__name__ if hasattr(fn, "__name__") else ""
+            if self.function_name == "":
+                self.function_name = fn.__name__ if hasattr(fn, "__name__") else ""
             if fiat_attributes is None:
                 fiat_attributes = FiatAttributes(fn.__dict__) if hasattr(fn, "__dict__") else FiatAttributes({})
             add_input_outputs_to_function(
@@ -719,17 +728,18 @@ class FunctionWithGui:
                 fiat_attributes=fiat_attributes,
             )
 
-            if fiat_attributes is not None:
-                self.handle_fiat_attributes(fiat_attributes)
-
-            for input_with_gui in self._inputs_with_gui:
-                input_with_gui.data_with_gui._can_set_unspecified_or_default = True
-
-            for output_with_gui in self._outputs_with_gui:
-                output_with_gui.data_with_gui._expanded = True
-
-        if self.name == "":
+        if self.function_name == "":
             raise FiatToGuiException("FunctionWithGui: function name is empty")
+        self.function_label = self.function_name  # Can be customized via fiat_attributes
+
+        if fiat_attributes is not None:
+            self.handle_fiat_attributes(fiat_attributes)
+
+        for input_with_gui in self._inputs_with_gui:
+            input_with_gui.data_with_gui._can_set_unspecified_or_default = True
+
+        for output_with_gui in self._outputs_with_gui:
+            output_with_gui.data_with_gui._expanded = True
 
     def handle_fiat_attributes(self, fiat_attributes: dict[str, Any]) -> None:
         """Handle custom attributes for the function"""
@@ -749,14 +759,14 @@ class FunctionWithGui:
                 if len(self._outputs_with_gui) == 0:
                     raise FiatToGuiException(
                         f"""
-                        FunctionWithGui({self.name}): custom attribute '{fiat_attribute}' invalid. The function has no output!
+                        FunctionWithGui({self.function_name}): custom attribute '{fiat_attribute}' invalid. The function has no output!
                         """
                     )
             else:
                 if not self.has_param(param_name):
                     raise FiatToGuiException(
                         f"""
-                        FunctionWithGui({self.name}): custom attribute '{fiat_attribute}' is associated to a parameter {param_name} that does not exist!
+                        FunctionWithGui({self.function_name}): custom attribute '{fiat_attribute}' is associated to a parameter {param_name} that does not exist!
                         """
                     )
 
@@ -775,6 +785,8 @@ class FunctionWithGui:
             self.doc_user = fn_fiat_attributes["doc_user"]
         if "doc_show_source" in fn_fiat_attributes:
             self.doc_show_source = fn_fiat_attributes["doc_show_source"]
+        if "function_label" in fn_fiat_attributes:
+            self.function_label = fn_fiat_attributes["function_label"]
 
     def set_invoke_live(self) -> None:
         """Set flags to make this a live function (called automatically at each frame)"""
@@ -1044,7 +1056,7 @@ class FunctionWithGui:
             fn_output = self._f_impl(*positional_only_values, **keyword_values)
 
             if fn_output is None and not self._can_emit_none_output():
-                msg = f"Function {self.name} returned None, which is not allowed"
+                msg = f"Function {self.function_name} returned None, which is not allowed"
                 logging.warning(msg)
                 # If you are trying to debug and find the root cause of your problem,
                 # be informed that a user was just called a few lines before, with this call:

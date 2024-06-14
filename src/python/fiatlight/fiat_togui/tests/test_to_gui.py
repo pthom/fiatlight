@@ -126,7 +126,7 @@ def test_any_function_to_function_with_gui_one_output() -> None:
     add_gui = FunctionWithGui(add)
 
     # Test after construction
-    assert add_gui.name == "add"
+    assert add_gui.function_name == "add"
     assert add_gui._f_impl == add
     assert len(add_gui._inputs_with_gui) == 2
     assert len(add_gui._outputs_with_gui) == 1
@@ -165,7 +165,7 @@ def test_any_function_to_function_with_gui_two_outputs() -> None:
     add_mult_gui = FunctionWithGui(add_mult)
 
     # Test after construction
-    assert add_mult_gui.name == "add_mult"
+    assert add_mult_gui.function_name == "add_mult"
     assert add_mult_gui._f_impl == add_mult
     assert len(add_mult_gui._inputs_with_gui) == 2
     assert len(add_mult_gui._outputs_with_gui) == 2
