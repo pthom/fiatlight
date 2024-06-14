@@ -1,62 +1,209 @@
 {
-    "functions_graph": {
+    "user_inputs": {
         "functions_nodes": {
             "f": {
-                "inputs": {
-                    "param": {
-                        "name": "param",
-                        "data": {
-                            "type": "Pydantic",
-                            "value": {
-                                "inner1": {
-                                    "c": 0,
-                                    "d": 0,
-                                    "sub": {
-                                        "a": 0,
-                                        "b": 0
-                                    }
-                                },
-                                "inner2": {
-                                    "x": 0,
-                                    "y": 0
+                "param": {
+                    "name": "param",
+                    "data": {
+                        "type": "Pydantic",
+                        "value": {
+                            "p": 0,
+                            "inner1": {
+                                "c": 0,
+                                "d": 0,
+                                "sub": {
+                                    "a": 0,
+                                    "b": 0
                                 }
+                            },
+                            "inner2": {
+                                "x": 0,
+                                "y": 0
                             }
                         }
                     }
-                },
-                "gui_options": {
-                    "inputs": {
-                        "param": {
-                            "inner1": {
-                                "sub": {}
-                            }
-                        }
-                    },
-                    "outputs": {
-                        "0": {
-                            "inner1": {
-                                "sub": {}
-                            }
-                        }
-                    },
-                    "internal_gui_options": {}
                 }
             }
         }
     },
-    "functions_gui_settings": {
+    "gui_options": {
         "f": {
-            "_show_input_details": {
-                "param": true
+            "function_node_with_gui": {
+                "_inputs_expanded": true,
+                "_outputs_expanded": true,
+                "fiat_tuning_expanded": false,
+                "_internal_state_gui_expanded": true,
+                "_function_node": {
+                    "inputs": {
+                        "param": {
+                            "cb_options": {
+                                "p": {
+                                    "cb_options": {},
+                                    "expanded": false
+                                },
+                                "inner1": {
+                                    "cb_options": {
+                                        "c": {
+                                            "cb_options": {},
+                                            "expanded": false
+                                        },
+                                        "d": {
+                                            "cb_options": {},
+                                            "expanded": false
+                                        },
+                                        "sub": {
+                                            "cb_options": {
+                                                "a": {
+                                                    "cb_options": {},
+                                                    "expanded": false
+                                                },
+                                                "b": {
+                                                    "cb_options": {},
+                                                    "expanded": false
+                                                }
+                                            },
+                                            "expanded": true
+                                        }
+                                    },
+                                    "expanded": true
+                                },
+                                "inner2": {
+                                    "cb_options": {},
+                                    "expanded": true
+                                }
+                            },
+                            "expanded": false
+                        }
+                    },
+                    "outputs": {
+                        "0": {
+                            "cb_options": {
+                                "p": {
+                                    "cb_options": {},
+                                    "expanded": false
+                                },
+                                "inner1": {
+                                    "cb_options": {
+                                        "c": {
+                                            "cb_options": {},
+                                            "expanded": false
+                                        },
+                                        "d": {
+                                            "cb_options": {},
+                                            "expanded": false
+                                        },
+                                        "sub": {
+                                            "cb_options": {
+                                                "a": {
+                                                    "cb_options": {},
+                                                    "expanded": false
+                                                },
+                                                "b": {
+                                                    "cb_options": {},
+                                                    "expanded": false
+                                                }
+                                            },
+                                            "expanded": true
+                                        }
+                                    },
+                                    "expanded": true
+                                },
+                                "inner2": {
+                                    "cb_options": {},
+                                    "expanded": true
+                                }
+                            },
+                            "expanded": false
+                        }
+                    },
+                    "internal_gui_options": {}
+                }
             },
-            "_inputs_expanded": true,
-            "_show_output_details": {
-                "0": true
-            },
-            "_outputs_expanded": true,
-            "_show_internals_details": {},
-            "_internals_expanded": true,
-            "_internal_state_gui_expanded": true
+            "function_node": {
+                "inputs": {
+                    "param": {
+                        "cb_options": {
+                            "p": {
+                                "cb_options": {},
+                                "expanded": false
+                            },
+                            "inner1": {
+                                "cb_options": {
+                                    "c": {
+                                        "cb_options": {},
+                                        "expanded": false
+                                    },
+                                    "d": {
+                                        "cb_options": {},
+                                        "expanded": false
+                                    },
+                                    "sub": {
+                                        "cb_options": {
+                                            "a": {
+                                                "cb_options": {},
+                                                "expanded": false
+                                            },
+                                            "b": {
+                                                "cb_options": {},
+                                                "expanded": false
+                                            }
+                                        },
+                                        "expanded": true
+                                    }
+                                },
+                                "expanded": true
+                            },
+                            "inner2": {
+                                "cb_options": {},
+                                "expanded": true
+                            }
+                        },
+                        "expanded": false
+                    }
+                },
+                "outputs": {
+                    "0": {
+                        "cb_options": {
+                            "p": {
+                                "cb_options": {},
+                                "expanded": false
+                            },
+                            "inner1": {
+                                "cb_options": {
+                                    "c": {
+                                        "cb_options": {},
+                                        "expanded": false
+                                    },
+                                    "d": {
+                                        "cb_options": {},
+                                        "expanded": false
+                                    },
+                                    "sub": {
+                                        "cb_options": {
+                                            "a": {
+                                                "cb_options": {},
+                                                "expanded": false
+                                            },
+                                            "b": {
+                                                "cb_options": {},
+                                                "expanded": false
+                                            }
+                                        },
+                                        "expanded": true
+                                    }
+                                },
+                                "expanded": true
+                            },
+                            "inner2": {
+                                "cb_options": {},
+                                "expanded": true
+                            }
+                        },
+                        "expanded": false
+                    }
+                },
+                "internal_gui_options": {}
+            }
         }
     }
 }

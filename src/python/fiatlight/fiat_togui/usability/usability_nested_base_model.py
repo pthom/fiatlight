@@ -24,8 +24,8 @@ class Inner2(BaseModel):
 @fl.base_model_with_gui_registration()
 class Outer(BaseModel):
     p: int = 0
-    # inner1: Inner1 = Field(default_factory=Inner1)
-    # inner2: Inner2 | None = None
+    inner1: Inner1 = Field(default_factory=Inner1)
+    inner2: Inner2 | None = None
 
 
 def f(param: Outer) -> Outer:
