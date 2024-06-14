@@ -125,11 +125,15 @@ class FunctionNodeGui:
         self._fill_function_docstring_and_source()
         self._fiat_tuning_with_gui = {}
 
-    # ==================================================================================================================
-    #                                            Node info
-    #                           (i.e. imgui-node-editor node id, size, etc.)
-    # ==================================================================================================================
     class _Node_Info_Section:  # Dummy class to create a section in the IDE # noqa
+        """
+        # ==================================================================================================================
+        #                                            Node info
+        #                           (i.e. imgui-node-editor node id, size, etc.)
+        # ==================================================================================================================
+
+        """
+
         pass
 
     def node_id(self) -> ed.NodeId:
@@ -724,9 +728,15 @@ class FunctionNodeGui:
             with imgui_ctx.push_obj_id(data_with_gui):
                 data_with_gui.gui_present()
 
-    # ------------------------------------------------------------------------------------------------------------------
-    #      Draw misc elements
-    # ------------------------------------------------------------------------------------------------------------------
+    class _Draw_Misc_Section:  # Dummy class to create a section in the IDE # noqa
+        """
+        # ------------------------------------------------------------------------------------------------------------------
+        #      Draw misc elements
+        # ------------------------------------------------------------------------------------------------------------------
+        """
+
+        pass
+
     def _draw_exception_message(self) -> None:
         last_exception_message = self._function_node.function_with_gui.get_last_exception_message()
         if last_exception_message is None:

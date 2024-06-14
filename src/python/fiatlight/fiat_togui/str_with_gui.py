@@ -9,7 +9,7 @@ from pydantic import BaseModel
 import textwrap
 
 
-def _textwrap_preserve_line_breaks(s: str, width) -> str:
+def _textwrap_preserve_line_breaks(s: str, width: int) -> str:
     wrapped_text = "\n".join(textwrap.fill(line, width=width) for line in s.splitlines())
     return wrapped_text
 
