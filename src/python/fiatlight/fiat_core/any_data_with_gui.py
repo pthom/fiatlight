@@ -17,7 +17,7 @@ from imgui_bundle import imgui, imgui_ctx, ImVec4, hello_imgui, ImVec2
 from fiatlight.fiat_config import get_fiat_config, FiatColorType
 from fiatlight.fiat_widgets.fontawesome6_ctx_utils import icons_fontawesome_6, fontawesome_6_ctx
 from fiatlight.fiat_widgets import fiat_osd
-from fiatlight.fiat_widgets.misc_widgets import text_maybe_truncated
+from fiatlight.fiat_widgets.text_truncated import text_maybe_truncated
 from typing import Generic, Any, Type, final, Callable
 import logging
 
@@ -491,7 +491,7 @@ class AnyDataWithGui(Generic[DataType]):
                             "Default value: ",
                         )
                         as_str = self.datatype_value_to_str(params.default_value_if_unspecified)
-                        text_maybe_truncated(as_str, max_width_chars=40, max_lines=1)
+                        text_maybe_truncated(as_str, get_fiat_config().style.str_truncation.present_header_line)
                 elif isinstance(self.value, Error):
                     imgui.text_colored(get_fiat_config().style.color_as_vec4(FiatColorType.ValueWithError), "Error")
                 else:  # if isinstance(self.value, (InvalidValue, DataType))
@@ -505,18 +505,17 @@ class AnyDataWithGui(Generic[DataType]):
                                 self.callbacks.present(value)
                         else:
                             as_str = self.datatype_value_to_str(value)
-                            text_maybe_truncated(as_str, max_width_chars=40, max_lines=1)
+                            text_maybe_truncated(as_str, get_fiat_config().style.str_truncation.present_header_line)
                     else:
                         as_str = self.datatype_value_to_str(value)
-                        text_maybe_truncated(as_str, max_width_chars=40, max_lines=1)
+                        text_maybe_truncated(as_str, get_fiat_config().style.str_truncation.present_header_line)
 
             # invalid value info
             if isinstance(self.value, InvalidValue):
                 text_maybe_truncated(
                     icons_fontawesome_6.ICON_FA_TRIANGLE_EXCLAMATION + " " + self.value.error_message,
+                    get_fiat_config().style.str_truncation.invalid_value_message,
                     color=get_fiat_config().style.color_as_vec4(FiatColorType.InvalidValue),
-                    max_lines=1,
-                    max_width_chars=40,
                 )
 
             #
@@ -583,7 +582,7 @@ class AnyDataWithGui(Generic[DataType]):
                             "Default value: ",
                         )
                         as_str = self.datatype_value_to_str(params.default_value_if_unspecified)
-                        text_maybe_truncated(as_str, max_width_chars=40, max_lines=1)
+                        text_maybe_truncated(as_str, get_fiat_config().style.str_truncation.present_header_line)
                 elif isinstance(self.value, Error):
                     imgui.text_colored(get_fiat_config().style.color_as_vec4(FiatColorType.ValueWithError), "Error")
                 else:  # if isinstance(self.value, (InvalidValue, DataType))
@@ -599,15 +598,14 @@ class AnyDataWithGui(Generic[DataType]):
                             self.value = new_value  # this will call the setter and trigger the validation
                     else:
                         as_str = self.datatype_value_to_str(value)
-                        text_maybe_truncated(as_str, max_width_chars=40, max_lines=1)
+                        text_maybe_truncated(as_str, get_fiat_config().style.str_truncation.present_header_line)
 
             # invalid value info
             if isinstance(self.value, InvalidValue):
                 text_maybe_truncated(
                     icons_fontawesome_6.ICON_FA_TRIANGLE_EXCLAMATION + " " + self.value.error_message,
+                    get_fiat_config().style.str_truncation.invalid_value_message,
                     color=get_fiat_config().style.color_as_vec4(FiatColorType.InvalidValue),
-                    max_lines=1,
-                    max_width_chars=40,
                 )
 
             #
@@ -718,7 +716,7 @@ class AnyDataWithGui(Generic[DataType]):
                         self.callbacks.present(value)
                     else:
                         as_str = self.datatype_value_to_str(value)
-                        text_maybe_truncated(as_str, max_width_chars=40, max_lines=5)
+                        text_maybe_truncated(as_str, get_fiat_config().style.str_truncation.present_next_lines)
 
     def gui_present_customizable(self, params: GuiHeaderLineParams[DataType]) -> None:
         """Present the value using either the present callback or the default str conversion

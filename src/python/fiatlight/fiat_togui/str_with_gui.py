@@ -2,6 +2,7 @@ import fiatlight
 from fiatlight.fiat_types import JsonDict
 from fiatlight.fiat_core import AnyDataWithGui, PossibleFiatAttributes
 from fiatlight.fiat_types.base_types import FiatAttributes
+from fiatlight.fiat_config import get_fiat_config
 from fiatlight.fiat_widgets import fiat_osd, icons_fontawesome_6, fontawesome_6_ctx, text_maybe_truncated
 from imgui_bundle import imgui, imgui_ctx, hello_imgui, ImVec2
 from pydantic import BaseModel
@@ -191,11 +192,7 @@ class StrWithGui(AnyDataWithGui[str]):
             else:
                 imgui.text(text_value)
         else:
-            text_maybe_truncated(
-                text_value,
-                max_width_chars=50,
-                max_lines=5,
-            )
+            text_maybe_truncated(text_value, get_fiat_config().style.str_truncation.str_expanded_in_node)
 
     def edit(self, value: str) -> tuple[bool, str]:
         if not isinstance(value, str):

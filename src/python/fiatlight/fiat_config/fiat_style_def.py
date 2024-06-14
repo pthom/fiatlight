@@ -4,6 +4,7 @@ from typing import Dict, Any
 from pydantic import BaseModel, Field
 
 from fiatlight.fiat_types.color_types import ColorRgbaFloat
+from fiatlight.fiat_widgets.text_truncated import TruncationParams
 from imgui_bundle import ImVec4
 
 
@@ -48,18 +49,37 @@ white = ColorRgbaFloat((1.0, 1.0, 1.0, 1.0))
 yellow = ColorRgbaFloat((1.0, 1.0, 0.0, 1.0))
 
 
+class FiatStrTruncationParams(BaseModel):
+    """FiatTextTruncation: Configuration for text truncation in the GUI"""
+
+    # Header line (when presenting a value as a string)
+    present_header_line: TruncationParams = TruncationParams(max_characters=40, max_lines=1)
+    # Next lines (when presenting a value as a string, and expanded)
+    present_next_lines: TruncationParams = TruncationParams(max_characters=40, max_lines=5)
+    # When a string is presented in expanded mode inside a node
+    str_expanded_in_node: TruncationParams = TruncationParams(max_characters=40, max_lines=5)
+    # Invalid value message
+    invalid_value_message: TruncationParams = TruncationParams(max_characters=40, max_lines=1)
+    # Exceptions
+    exceptions: TruncationParams = TruncationParams(max_characters=70, max_lines=7)
+
+
 class FiatStyle(BaseModel):
     # colors used in the GUI
     colors: Dict[FiatColorType, ColorRgbaFloat] = Field(default_factory=dict)
     # minimum width of a node, in em units
     node_minimum_width_em: float = 9.0
-    # indentation between header line and edition / present
-    indentation_em: float = 1.75
+    # max number of elements to display in node, for list-like data
+    list_maximum_elements_in_node: int = 10
+
+    # text truncation parameters
+    str_truncation: FiatStrTruncationParams = FiatStrTruncationParams()
+
     # max width of the param labels, in em units
     # (if too big, they will be truncated and the full name will be displayed in a tooltip)
     param_label_max_width_em: float = 7.0
-    # max number of elements to display in node, for list-like data
-    list_maximum_elements_in_node: int = 10
+    # indentation between header line and edition / present
+    indentation_em: float = 1.75
 
     def __init__(self, **data: Any):
         super().__init__(**data)

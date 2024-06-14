@@ -740,8 +740,7 @@ class FunctionNodeGui:
                 exception_width = min_exception_width
         fiat_widgets.text_maybe_truncated(
             "Exception:\n" + last_exception_message,
-            max_width_pixels=exception_width,
-            max_lines=3,
+            get_fiat_config().style.str_truncation.exceptions,
             color=get_fiat_config().style.color_as_vec4(FiatColorType.ExceptionError),
         )
 

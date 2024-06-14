@@ -6,14 +6,13 @@
                     "name": "image_file",
                     "data": {
                         "type": "Primitive",
-                        "value": "/Users/pascal/Pictures/p16bmhkurhwa1.jpg"
+                        "value": "/Users/pascal/dvp/OpenSource/ImGuiWork/_Bundle/fiatlight/priv_assets/images/house.jpg"
                     }
                 },
                 "max_image_size": {
                     "name": "max_image_size",
                     "data": {
-                        "type": "Optional",
-                        "value": null
+                        "type": "Unspecified"
                     }
                 }
             },
@@ -31,7 +30,7 @@
                                 "aperture_size": 5
                             },
                             "dilate": {
-                                "kernel_size": 3,
+                                "kernel_size": 2,
                                 "morph_shape": 2,
                                 "iterations": 2
                             },
@@ -61,11 +60,11 @@
                     "inputs": {
                         "image_file": {
                             "cb_options": {},
-                            "expanded": true
+                            "expanded": false
                         },
                         "max_image_size": {
                             "cb_options": {},
-                            "expanded": true
+                            "expanded": false
                         }
                     },
                     "outputs": {
@@ -89,8 +88,8 @@
                                     "DrawValuesOnZoomedPixels": true,
                                     "HighlightWatchedPixels": true,
                                     "ImageDisplaySize": {
-                                        "height": 313,
-                                        "width": 471
+                                        "height": 171,
+                                        "width": 200
                                     },
                                     "IsColorOrderBGR": true,
                                     "PanWithMouse": true,
@@ -108,12 +107,12 @@
                                     "WatchedPixels": [],
                                     "ZoomKey": "z",
                                     "ZoomPanMatrix": {
-                                        "00": 0.14449247595421547,
+                                        "00": 0.19772857329992907,
                                         "01": 0.0,
-                                        "02": -55.7245852857214,
+                                        "02": 1.0200826054155852,
                                         "10": 0.0,
-                                        "11": 0.14449247595421547,
-                                        "12": 3.607092724996162,
+                                        "11": 0.19772857329992907,
+                                        "12": 0.8721706276303121,
                                         "20": 0.0,
                                         "21": 0.0,
                                         "22": 1.0
@@ -133,11 +132,11 @@
                 "inputs": {
                     "image_file": {
                         "cb_options": {},
-                        "expanded": true
+                        "expanded": false
                     },
                     "max_image_size": {
                         "cb_options": {},
-                        "expanded": true
+                        "expanded": false
                     }
                 },
                 "outputs": {
@@ -161,8 +160,8 @@
                                 "DrawValuesOnZoomedPixels": true,
                                 "HighlightWatchedPixels": true,
                                 "ImageDisplaySize": {
-                                    "height": 313,
-                                    "width": 471
+                                    "height": 171,
+                                    "width": 200
                                 },
                                 "IsColorOrderBGR": true,
                                 "PanWithMouse": true,
@@ -180,12 +179,12 @@
                                 "WatchedPixels": [],
                                 "ZoomKey": "z",
                                 "ZoomPanMatrix": {
-                                    "00": 0.14449247595421547,
+                                    "00": 0.19772857329992907,
                                     "01": 0.0,
-                                    "02": -55.7245852857214,
+                                    "02": 1.0200826054155852,
                                     "10": 0.0,
-                                    "11": 0.14449247595421547,
-                                    "12": 3.607092724996162,
+                                    "11": 0.19772857329992907,
+                                    "12": 0.8721706276303121,
                                     "20": 0.0,
                                     "21": 0.0,
                                     "22": 1.0
@@ -205,7 +204,7 @@
             "function_node_with_gui": {
                 "_inputs_expanded": true,
                 "_outputs_expanded": true,
-                "fiat_tuning_expanded": true,
+                "fiat_tuning_expanded": false,
                 "_internal_state_gui_expanded": true,
                 "_function_node": {
                     "inputs": {
@@ -229,7 +228,7 @@
                                     "DrawValuesOnZoomedPixels": true,
                                     "HighlightWatchedPixels": true,
                                     "ImageDisplaySize": {
-                                        "height": 105,
+                                        "height": 0,
                                         "width": 200
                                     },
                                     "IsColorOrderBGR": true,
@@ -248,12 +247,12 @@
                                     "WatchedPixels": [],
                                     "ZoomKey": "z",
                                     "ZoomPanMatrix": {
-                                        "00": 0.061355616116439686,
+                                        "00": 1.0,
                                         "01": 0.0,
-                                        "02": -23.662244282684227,
+                                        "02": 0.0,
                                         "10": 0.0,
-                                        "11": 0.061355616116439686,
-                                        "12": -12.422678248409257,
+                                        "11": 1.0,
+                                        "12": 0.0,
                                         "20": 0.0,
                                         "21": 0.0,
                                         "22": 1.0
@@ -271,23 +270,23 @@
                                     "cb_options": {
                                         "t_lower": {
                                             "cb_options": {},
-                                            "expanded": true
+                                            "expanded": false
                                         },
                                         "t_upper": {
                                             "cb_options": {},
-                                            "expanded": true
+                                            "expanded": false
                                         },
                                         "l2_gradient": {
                                             "cb_options": {},
-                                            "expanded": true
+                                            "expanded": false
                                         },
                                         "blur_sigma": {
                                             "cb_options": {},
-                                            "expanded": true
+                                            "expanded": false
                                         },
                                         "aperture_size": {
                                             "cb_options": {},
-                                            "expanded": true
+                                            "expanded": false
                                         }
                                     },
                                     "expanded": false
@@ -296,15 +295,15 @@
                                     "cb_options": {
                                         "kernel_size": {
                                             "cb_options": {},
-                                            "expanded": true
+                                            "expanded": false
                                         },
                                         "morph_shape": {
                                             "cb_options": {},
-                                            "expanded": true
+                                            "expanded": false
                                         },
                                         "iterations": {
                                             "cb_options": {},
-                                            "expanded": true
+                                            "expanded": false
                                         }
                                     },
                                     "expanded": false
@@ -313,11 +312,11 @@
                                     "cb_options": {
                                         "blur_sigma": {
                                             "cb_options": {},
-                                            "expanded": true
+                                            "expanded": false
                                         },
                                         "intensity": {
                                             "cb_options": {},
-                                            "expanded": true
+                                            "expanded": false
                                         },
                                         "color": {
                                             "cb_options": {},
@@ -351,8 +350,8 @@
                                     "DrawValuesOnZoomedPixels": true,
                                     "HighlightWatchedPixels": true,
                                     "ImageDisplaySize": {
-                                        "height": 105,
-                                        "width": 200
+                                        "height": 390,
+                                        "width": 466
                                     },
                                     "IsColorOrderBGR": true,
                                     "PanWithMouse": true,
@@ -370,12 +369,12 @@
                                     "WatchedPixels": [],
                                     "ZoomKey": "z",
                                     "ZoomPanMatrix": {
-                                        "00": 0.061355616116439686,
+                                        "00": 0.46070757578883476,
                                         "01": 0.0,
-                                        "02": -23.662244282684227,
+                                        "02": 2.376792470618284,
                                         "10": 0.0,
-                                        "11": 0.061355616116439686,
-                                        "12": -12.422678248409257,
+                                        "11": 0.46070757578883476,
+                                        "12": -2.182842437621389,
                                         "20": 0.0,
                                         "21": 0.0,
                                         "22": 1.0
@@ -413,7 +412,7 @@
                                 "DrawValuesOnZoomedPixels": true,
                                 "HighlightWatchedPixels": true,
                                 "ImageDisplaySize": {
-                                    "height": 105,
+                                    "height": 0,
                                     "width": 200
                                 },
                                 "IsColorOrderBGR": true,
@@ -432,12 +431,12 @@
                                 "WatchedPixels": [],
                                 "ZoomKey": "z",
                                 "ZoomPanMatrix": {
-                                    "00": 0.061355616116439686,
+                                    "00": 1.0,
                                     "01": 0.0,
-                                    "02": -23.662244282684227,
+                                    "02": 0.0,
                                     "10": 0.0,
-                                    "11": 0.061355616116439686,
-                                    "12": -12.422678248409257,
+                                    "11": 1.0,
+                                    "12": 0.0,
                                     "20": 0.0,
                                     "21": 0.0,
                                     "22": 1.0
@@ -455,23 +454,23 @@
                                 "cb_options": {
                                     "t_lower": {
                                         "cb_options": {},
-                                        "expanded": true
+                                        "expanded": false
                                     },
                                     "t_upper": {
                                         "cb_options": {},
-                                        "expanded": true
+                                        "expanded": false
                                     },
                                     "l2_gradient": {
                                         "cb_options": {},
-                                        "expanded": true
+                                        "expanded": false
                                     },
                                     "blur_sigma": {
                                         "cb_options": {},
-                                        "expanded": true
+                                        "expanded": false
                                     },
                                     "aperture_size": {
                                         "cb_options": {},
-                                        "expanded": true
+                                        "expanded": false
                                     }
                                 },
                                 "expanded": false
@@ -480,15 +479,15 @@
                                 "cb_options": {
                                     "kernel_size": {
                                         "cb_options": {},
-                                        "expanded": true
+                                        "expanded": false
                                     },
                                     "morph_shape": {
                                         "cb_options": {},
-                                        "expanded": true
+                                        "expanded": false
                                     },
                                     "iterations": {
                                         "cb_options": {},
-                                        "expanded": true
+                                        "expanded": false
                                     }
                                 },
                                 "expanded": false
@@ -497,11 +496,11 @@
                                 "cb_options": {
                                     "blur_sigma": {
                                         "cb_options": {},
-                                        "expanded": true
+                                        "expanded": false
                                     },
                                     "intensity": {
                                         "cb_options": {},
-                                        "expanded": true
+                                        "expanded": false
                                     },
                                     "color": {
                                         "cb_options": {},
@@ -535,8 +534,8 @@
                                 "DrawValuesOnZoomedPixels": true,
                                 "HighlightWatchedPixels": true,
                                 "ImageDisplaySize": {
-                                    "height": 105,
-                                    "width": 200
+                                    "height": 390,
+                                    "width": 466
                                 },
                                 "IsColorOrderBGR": true,
                                 "PanWithMouse": true,
@@ -554,12 +553,12 @@
                                 "WatchedPixels": [],
                                 "ZoomKey": "z",
                                 "ZoomPanMatrix": {
-                                    "00": 0.061355616116439686,
+                                    "00": 0.46070757578883476,
                                     "01": 0.0,
-                                    "02": -23.662244282684227,
+                                    "02": 2.376792470618284,
                                     "10": 0.0,
-                                    "11": 0.061355616116439686,
-                                    "12": -12.422678248409257,
+                                    "11": 0.46070757578883476,
+                                    "12": -2.182842437621389,
                                     "20": 0.0,
                                     "21": 0.0,
                                     "22": 1.0

@@ -1,5 +1,6 @@
 from . import fiat_osd
-from .misc_widgets import text_maybe_truncated, collapsible_button, button_with_disable_flag
+from .misc_widgets import collapsible_button, button_with_disable_flag
+from .text_truncated import text_maybe_truncated, TruncationParams
 from .fontawesome6_ctx_utils import fontawesome_6_ctx, icons_fontawesome_6
 from .node_separator import node_separator, NodeSeparatorParams, NodeSeparatorOutput
 from .fiat_osd import is_rendering_in_node, is_rendering_in_fiatlight_detached_window
@@ -11,6 +12,7 @@ __all__ = [
     "node_separator",
     "NodeSeparatorParams",
     "NodeSeparatorOutput",
+    "TruncationParams",
     "text_maybe_truncated",
     "collapsible_button",
     "button_with_disable_flag",
