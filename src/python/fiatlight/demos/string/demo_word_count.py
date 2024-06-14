@@ -64,6 +64,7 @@ def sort_word_with_counts(words: List[WordWithCount]) -> List[WordWithCount]:
 
 
 def filter_out_short_words(words: List[str], min_length: int = 4) -> List[str]:
+    """Filter out words that are shorter than a given length."""
     return list(filter(lambda word: len(word) >= min_length, words))
 
 

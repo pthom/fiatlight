@@ -13,10 +13,12 @@ def text_from_file(text_file: TextPath) -> str:
 
 
 def str_lower(s: str) -> str:
+    """Convert a string to lowercase."""
     return s.lower()
 
 
 def remove_non_letters(s: str) -> str:
+    """Remove all non-letter characters from a string."""
     r = ""
     for c in s:
         if c.isalpha():
@@ -27,16 +29,19 @@ def remove_non_letters(s: str) -> str:
 
 
 def split_words(s: str) -> List[str]:
+    """Split a string into a list of words."""
     r = s.split(" ")
     return r
 
 
 def remove_empty_words(words: List[str]) -> List[str]:
+    """Remove empty words from a list of words."""
     r = [word for word in words if len(word) > 0]
     return r
 
 
 def sort_words(words: List[str], reverse: bool = False) -> List[str]:
+    """Sort a list of words alphabetically (or reverse alphabetically)."""
     r = sorted(words, reverse=reverse)
     return r
 
