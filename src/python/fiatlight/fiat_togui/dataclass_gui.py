@@ -56,6 +56,13 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
 
     _parameters_with_gui: List[ParamWithGui[Any]]
 
+    def _Initialization_Section(self) -> None:  # Dummy function to create a section in the IDE # noqa
+        """
+        # ------------------------------------------------------------------------------------------------------------------
+        #            Initialization
+        # ------------------------------------------------------------------------------------------------------------------
+        """
+
     def __init__(self, dataclass_type: Type[DataclassLikeType], param_attrs: FiatAttributes | None = None) -> None:
         super().__init__(dataclass_type)
 
@@ -74,12 +81,6 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
         self.fill_callbacks()
         if param_attrs is not None:
             self.on_fiat_attributes_changes(param_attrs)
-
-    def param_of_name(self, name: str) -> ParamWithGui[Any]:
-        for param_gui in self._parameters_with_gui:
-            if param_gui.name == name:
-                return param_gui
-        raise ValueError(f"Parameter {name} not found")
 
     def fill_callbacks(self) -> None:
         self.callbacks.present_str = self.present_str
@@ -116,14 +117,12 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
 
         self.callbacks.on_fiat_attributes_changed = self.on_fiat_attributes_changes
 
-    def is_fully_specified(self) -> bool:
-        has_unspecified = False
-        for param_gui in self._parameters_with_gui:
-            param_value = param_gui.data_with_gui.value
-            if isinstance(param_value, (Unspecified, Error)):
-                has_unspecified = True
-                break
-        return not has_unspecified
+    def _Factor_Section(self) -> None:  # Dummy function to create a section in the IDE # noqa
+        """
+        # ------------------------------------------------------------------------------------------------------------------
+        #            Factor
+        # ------------------------------------------------------------------------------------------------------------------
+        """
 
     def factor_dataclass_instance(self) -> DataclassLikeType:
         kwargs = {}
@@ -147,6 +146,83 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
 
         r = self.factor_dataclass_instance()
         return r
+
+    def _Utils_Section(self) -> None:  # Dummy function to create a section in the IDE # noqa
+        """
+        # ------------------------------------------------------------------------------------------------------------------
+        #            Utils
+        # ------------------------------------------------------------------------------------------------------------------
+        """
+
+    def param_of_name(self, name: str) -> ParamWithGui[Any]:
+        for param_gui in self._parameters_with_gui:
+            if param_gui.name == name:
+                return param_gui
+        raise ValueError(f"Parameter {name} not found")
+
+    def is_fully_specified(self) -> bool:
+        has_unspecified = False
+        for param_gui in self._parameters_with_gui:
+            param_value = param_gui.data_with_gui.value
+            if isinstance(param_value, (Unspecified, Error)):
+                has_unspecified = True
+                break
+        return not has_unspecified
+
+    def _SubItemsCollapse_Section(self) -> None:  # Dummy function to create a section in the IDE # noqa
+        """
+        # ------------------------------------------------------------------------------------------------------------------
+        #            SubItems collapse
+        # ------------------------------------------------------------------------------------------------------------------
+        """
+
+    def sub_items_can_collapse(self, present_or_edit: AnyDataWithGui.PresentOrEdit) -> bool:
+        for param_gui in self._parameters_with_gui:
+            if (
+                param_gui.data_with_gui.callbacks.present_collapsible
+                and present_or_edit == AnyDataWithGui.PresentOrEdit.present
+            ):
+                return True
+            if (
+                param_gui.data_with_gui.callbacks.edit_collapsible
+                and present_or_edit == AnyDataWithGui.PresentOrEdit.edit
+            ):
+                return True
+        return False
+
+    def sub_items_collapse_or_expand(self, collapse_or_expand: AnyDataWithGui.CollapseOrExpand) -> None:
+        new_expanded_state = collapse_or_expand == AnyDataWithGui.CollapseOrExpand.expand
+
+        for param_gui in self._parameters_with_gui:
+            if param_gui.data_with_gui.callbacks.present_collapsible:
+                param_gui.data_with_gui._expanded = new_expanded_state
+                if isinstance(param_gui.data_with_gui, DataclassLikeGui):
+                    param_gui.data_with_gui.sub_items_collapse_or_expand(collapse_or_expand)
+
+    def sub_items_will_collapse_or_expand(
+        self, present_or_edit: AnyDataWithGui.PresentOrEdit
+    ) -> AnyDataWithGui.CollapseOrExpand:
+        for param_gui in self._parameters_with_gui:
+            if (
+                param_gui.data_with_gui.callbacks.present_collapsible
+                and present_or_edit == AnyDataWithGui.PresentOrEdit.present
+                and param_gui.data_with_gui._expanded
+            ):
+                return AnyDataWithGui.CollapseOrExpand.collapse
+            if (
+                param_gui.data_with_gui.callbacks.edit_collapsible
+                and present_or_edit == AnyDataWithGui.PresentOrEdit.edit
+                and param_gui.data_with_gui._expanded
+            ):
+                return AnyDataWithGui.CollapseOrExpand.collapse
+        return AnyDataWithGui.CollapseOrExpand.expand
+
+    def _Callbacks_Section(self) -> None:  # Dummy function to create a section in the IDE # noqa
+        """
+        # ------------------------------------------------------------------------------------------------------------------
+        #            Callbacks
+        # ------------------------------------------------------------------------------------------------------------------
+        """
 
     def on_change(self, value: DataclassLikeType) -> None:
         for param_gui in self._parameters_with_gui:
@@ -180,6 +256,13 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
                 if param_on_heartbeat():
                     changed = True
         return changed
+
+    def _Gui_Section(self) -> None:  # Dummy function to create a section in the IDE # noqa
+        """
+        # ------------------------------------------------------------------------------------------------------------------
+        #            GUI
+        # ------------------------------------------------------------------------------------------------------------------
+        """
 
     def present_str(self, _: DataclassLikeType) -> str:
         # the parameter is not used, because we have the data in the self._parameters_with_gui
@@ -227,6 +310,13 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
 
         r = get_fiat_config().style.color_as_vec4(FiatColorType.DataclassMemberName)
         return r
+
+    def _Serialization_Section(self) -> None:  # Dummy function to create a section in the IDE # noqa
+        """
+        # ------------------------------------------------------------------------------------------------------------------
+        #            Serialization
+        # ------------------------------------------------------------------------------------------------------------------
+        """
 
     def save_gui_options_to_json(self) -> JsonDict:
         # We only save the GUI options, not the data!

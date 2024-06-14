@@ -33,7 +33,7 @@
                                 },
                                 "name": {
                                     "cb_options": {
-                                        "width_em": 37.0,
+                                        "width_em": 15.0,
                                         "size_multiline_em": [
                                             60.0,
                                             15.0
@@ -45,7 +45,7 @@
                                 },
                                 "firstname": {
                                     "cb_options": {
-                                        "width_em": 37.0,
+                                        "width_em": 15.0,
                                         "size_multiline_em": [
                                             60.0,
                                             15.0
@@ -107,7 +107,7 @@
                             },
                             "name": {
                                 "cb_options": {
-                                    "width_em": 37.0,
+                                    "width_em": 15.0,
                                     "size_multiline_em": [
                                         60.0,
                                         15.0
@@ -119,7 +119,7 @@
                             },
                             "firstname": {
                                 "cb_options": {
-                                    "width_em": 37.0,
+                                    "width_em": 15.0,
                                     "size_multiline_em": [
                                         60.0,
                                         15.0

@@ -1,5 +1,6 @@
 import copy
 from dataclasses import dataclass
+from enum import Enum
 
 import pydantic
 
@@ -347,6 +348,34 @@ class AnyDataWithGui(Generic[DataType]):
         # ------------------------------------------------------------------------------------------------------------------
         """
 
+    class CollapseOrExpand(Enum):
+        collapse = "Collapse All"
+        expand = "Expand All"
+
+    class PresentOrEdit(Enum):
+        present = "Present"
+        edit = "Edit"
+
+    def sub_items_can_collapse(self, _present_or_edit: PresentOrEdit) -> bool:
+        """Overwrite this in derived classes if they provide multiple sub-items that can be collapsed"""
+        return False
+
+    def sub_items_collapse_or_expand(self, _collapse_or_expand: CollapseOrExpand) -> None:
+        """Overwrite this in derived classes if they provide multiple sub-items that can be collapsed"""
+        return
+
+    def sub_items_will_collapse_or_expand(self, _present_or_edit: PresentOrEdit) -> CollapseOrExpand:
+        """Overwrite this in derived classes if they provide multiple sub-items that can be collapsed"""
+        return self.CollapseOrExpand.collapse
+
+    def _show_collapse_sub_items_buttons(self, present_or_edit: PresentOrEdit) -> None:
+        icon = icons_fontawesome_6.ICON_FA_COMPRESS
+        new_expanded_state = self.sub_items_will_collapse_or_expand(present_or_edit)
+        tooltip = str(new_expanded_state.value)
+        if imgui.button(icon):
+            self.sub_items_collapse_or_expand(new_expanded_state)
+        fiat_osd.set_widget_tooltip(tooltip)
+
     def can_show_present_popup(self) -> bool:
         if self.callbacks.present_collapsible:
             return True
@@ -445,6 +474,9 @@ class AnyDataWithGui(Generic[DataType]):
             # Expand button
             if self.can_collapse_present():
                 self._show_collapse_button()
+                if self._expanded:
+                    if self.sub_items_can_collapse(self.PresentOrEdit.present):
+                        self._show_collapse_sub_items_buttons(self.PresentOrEdit.present)
 
             # Value as string or widget
             if not self._is_presenting_on_next_lines():
@@ -534,6 +566,9 @@ class AnyDataWithGui(Generic[DataType]):
             # Expand button
             if self.can_collapse_edit():
                 self._show_collapse_button()
+                if self._expanded:
+                    if self.sub_items_can_collapse(self.PresentOrEdit.edit):
+                        self._show_collapse_sub_items_buttons(self.PresentOrEdit.edit)
 
             # Value as string or widget
             if not self._is_editing_on_next_lines():

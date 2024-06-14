@@ -110,10 +110,10 @@
                                     "ZoomPanMatrix": {
                                         "00": 0.14449247595421547,
                                         "01": 0.0,
-                                        "02": -55.72458528572137,
+                                        "02": -55.7245852857214,
                                         "10": 0.0,
                                         "11": 0.14449247595421547,
-                                        "12": 3.607092724996195,
+                                        "12": 3.607092724996162,
                                         "20": 0.0,
                                         "21": 0.0,
                                         "22": 1.0
@@ -182,10 +182,10 @@
                                 "ZoomPanMatrix": {
                                     "00": 0.14449247595421547,
                                     "01": 0.0,
-                                    "02": -55.72458528572137,
+                                    "02": -55.7245852857214,
                                     "10": 0.0,
                                     "11": 0.14449247595421547,
-                                    "12": 3.607092724996195,
+                                    "12": 3.607092724996162,
                                     "20": 0.0,
                                     "21": 0.0,
                                     "22": 1.0
@@ -234,7 +234,7 @@
                                     },
                                     "IsColorOrderBGR": true,
                                     "PanWithMouse": true,
-                                    "RefreshImage": false,
+                                    "RefreshImage": true,
                                     "SelectedChannel": -1,
                                     "ShowAlphaChannelCheckerboard": true,
                                     "ShowGrid": true,
@@ -307,7 +307,7 @@
                                             "expanded": true
                                         }
                                     },
-                                    "expanded": true
+                                    "expanded": false
                                 },
                                 "appearance": {
                                     "cb_options": {
@@ -324,10 +324,10 @@
                                             "expanded": false
                                         }
                                     },
-                                    "expanded": true
+                                    "expanded": false
                                 }
                             },
-                            "expanded": true
+                            "expanded": false
                         }
                     },
                     "outputs": {
@@ -418,7 +418,7 @@
                                 },
                                 "IsColorOrderBGR": true,
                                 "PanWithMouse": true,
-                                "RefreshImage": false,
+                                "RefreshImage": true,
                                 "SelectedChannel": -1,
                                 "ShowAlphaChannelCheckerboard": true,
                                 "ShowGrid": true,
@@ -491,7 +491,7 @@
                                         "expanded": true
                                     }
                                 },
-                                "expanded": true
+                                "expanded": false
                             },
                             "appearance": {
                                 "cb_options": {
@@ -508,10 +508,10 @@
                                         "expanded": false
                                     }
                                 },
-                                "expanded": true
+                                "expanded": false
                             }
                         },
-                        "expanded": true
+                        "expanded": false
                     }
                 },
                 "outputs": {

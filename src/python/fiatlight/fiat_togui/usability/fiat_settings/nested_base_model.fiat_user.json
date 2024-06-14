@@ -16,10 +16,7 @@
                                     "b": 0
                                 }
                             },
-                            "inner2": {
-                                "x": 0,
-                                "y": 0
-                            }
+                            "inner2": null
                         }
                     }
                 }
@@ -65,11 +62,11 @@
                                             "expanded": true
                                         }
                                     },
-                                    "expanded": true
+                                    "expanded": false
                                 },
                                 "inner2": {
                                     "cb_options": {},
-                                    "expanded": true
+                                    "expanded": false
                                 }
                             },
                             "expanded": false
@@ -103,14 +100,14 @@
                                                     "expanded": false
                                                 }
                                             },
-                                            "expanded": true
+                                            "expanded": false
                                         }
                                     },
-                                    "expanded": true
+                                    "expanded": false
                                 },
                                 "inner2": {
                                     "cb_options": {},
-                                    "expanded": true
+                                    "expanded": false
                                 }
                             },
                             "expanded": false
@@ -151,11 +148,11 @@
                                         "expanded": true
                                     }
                                 },
-                                "expanded": true
+                                "expanded": false
                             },
                             "inner2": {
                                 "cb_options": {},
-                                "expanded": true
+                                "expanded": false
                             }
                         },
                         "expanded": false
@@ -189,14 +186,14 @@
                                                 "expanded": false
                                             }
                                         },
-                                        "expanded": true
+                                        "expanded": false
                                     }
                                 },
-                                "expanded": true
+                                "expanded": false
                             },
                             "inner2": {
                                 "cb_options": {},
-                                "expanded": true
+                                "expanded": false
                             }
                         },
                         "expanded": false
