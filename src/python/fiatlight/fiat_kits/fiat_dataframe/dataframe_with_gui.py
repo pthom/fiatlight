@@ -25,7 +25,7 @@ class DataFrameWithGui(AnyDataWithGui[pd.DataFrame]):
         self.callbacks.edit = self.edit
         self.callbacks.edit_collapsible = False
         self.callbacks.edit_node_compatible = True
-        # default value provider
+        # default value provider: None
         self.callbacks.default_value_provider = self.default_value_provider
         # on_change callback
         self.callbacks.on_change = self.on_change
@@ -41,6 +41,10 @@ class DataFrameWithGui(AnyDataWithGui[pd.DataFrame]):
         # clipboard
         self.callbacks.clipboard_copy_str = self.clipboard_copy_str
         self.callbacks.clipboard_copy_possible = True
+
+    @staticmethod
+    def default_value_provider() -> pd.DataFrame:
+        return pd.DataFrame()
 
     class _PresentCallbacksSection:  # Dummy class to create a section in the IDE # noqa
         """
