@@ -889,14 +889,6 @@ class AnyDataWithGui(Generic[DataType]):
             else:
                 return self.datatype_value_to_str(actual_value)
 
-    def can_present(self) -> bool:
-        """Returns True if the present callback can be called
-        i.e. if the value is not Unspecified or Error, and the present callback is set
-        """
-        if isinstance(self.value, (Error, Unspecified)):
-            return False
-        return self.callbacks.present is not None
-
     def docstring_first_line(self) -> str | None:
         """Return the first line of the docstring, if available"""
         from fiatlight.fiat_utils.docstring_utils import docstring_first_line

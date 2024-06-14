@@ -189,7 +189,7 @@ class FunctionNodeGui:
         r = 0
         nb_outputs = self._function_node.function_with_gui.nb_outputs()
         for i in range(nb_outputs):
-            if self._function_node.function_with_gui.output(i).can_present():
+            if self._function_node.function_with_gui.output(i)._can_present_on_next_lines_if_expanded():
                 r += 1
         return r
 
