@@ -56,7 +56,7 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
 
     _parameters_with_gui: List[ParamWithGui[Any]]
 
-    def _Initialization_Section(self) -> None:  # Dummy function to create a section in the IDE # noqa
+    class _Initialization_Section:  # Dummy class to create a section in the IDE # noqa
         """
         # ------------------------------------------------------------------------------------------------------------------
         #            Initialization
@@ -117,7 +117,7 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
 
         self.callbacks.on_fiat_attributes_changed = self.on_fiat_attributes_changes
 
-    def _Factor_Section(self) -> None:  # Dummy function to create a section in the IDE # noqa
+    class _Factor_Section:  # Dummy class to create a section in the IDE # noqa
         """
         # ------------------------------------------------------------------------------------------------------------------
         #            Factor
@@ -147,7 +147,7 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
         r = self.factor_dataclass_instance()
         return r
 
-    def _Utils_Section(self) -> None:  # Dummy function to create a section in the IDE # noqa
+    class _Utils_Section:  # Dummy class to create a section in the IDE # noqa
         """
         # ------------------------------------------------------------------------------------------------------------------
         #            Utils
@@ -169,7 +169,7 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
                 break
         return not has_unspecified
 
-    def _SubItemsCollapse_Section(self) -> None:  # Dummy function to create a section in the IDE # noqa
+    class _SubItemsCollapse_Section:  # Dummy class to create a section in the IDE # noqa
         """
         # ------------------------------------------------------------------------------------------------------------------
         #            SubItems collapse
@@ -217,7 +217,7 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
                 return AnyDataWithGui.CollapseOrExpand.collapse
         return AnyDataWithGui.CollapseOrExpand.expand
 
-    def _Callbacks_Section(self) -> None:  # Dummy function to create a section in the IDE # noqa
+    class _Callbacks_Section:  # Dummy class to create a section in the IDE # noqa
         """
         # ------------------------------------------------------------------------------------------------------------------
         #            Callbacks
@@ -257,7 +257,7 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
                     changed = True
         return changed
 
-    def _Gui_Section(self) -> None:  # Dummy function to create a section in the IDE # noqa
+    class _Gui_Section:  # Dummy class to create a section in the IDE # noqa
         """
         # ------------------------------------------------------------------------------------------------------------------
         #            GUI
@@ -311,7 +311,7 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
         r = get_fiat_config().style.color_as_vec4(FiatColorType.DataclassMemberName)
         return r
 
-    def _Serialization_Section(self) -> None:  # Dummy function to create a section in the IDE # noqa
+    class _Serialization_Section:  # Dummy class to create a section in the IDE # noqa
         """
         # ------------------------------------------------------------------------------------------------------------------
         #            Serialization

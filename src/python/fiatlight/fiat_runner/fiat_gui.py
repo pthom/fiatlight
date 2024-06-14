@@ -271,8 +271,7 @@ class FiatGui:
     # ==================================================================================================================
     #                                  Run
     # ==================================================================================================================
-    @staticmethod
-    def _Run_Section() -> None:  # Dummy function to create a section in the IDE # noqa
+    class _Run_Section:  # Dummy class to create a section in the IDE # noqa
         pass
 
     def _post_init(self) -> None:
@@ -357,8 +356,7 @@ class FiatGui:
     # ==================================================================================================================
     #                                  GUI
     # ==================================================================================================================
-    @staticmethod
-    def _Gui_Section() -> None:  # Dummy function to create a section in the IDE # noqa
+    class _Gui_Section:  # Dummy class to create a section in the IDE # noqa
         pass
 
     @staticmethod
@@ -531,8 +529,7 @@ class FiatGui:
     # ==================================================================================================================
     #                                  Utilities
     # ==================================================================================================================
-    @staticmethod
-    def _Utilities_Section() -> None:  # Dummy function to create a section in the IDE # noqa
+    class _Utilities_Section:  # Dummy class to create a section in the IDE # noqa
         pass
 
     def _function_nodes(self) -> List[FunctionNodeGui]:
@@ -554,8 +551,7 @@ class FiatGui:
     # ==================================================================================================================
     #                                  Serialization
     # ==================================================================================================================
-    @staticmethod
-    def _Serialization_Section() -> None:  # Dummy function to create a section in the IDE # noqa
+    class _Serialization_Section:  # Dummy class to create a section in the IDE # noqa
         pass
 
     def _user_settings_filename(self) -> str:

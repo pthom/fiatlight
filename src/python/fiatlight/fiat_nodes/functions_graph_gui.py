@@ -41,8 +41,7 @@ class FunctionsGraphGui:
     # ======================================================================================================================
     # Drawing
     # ======================================================================================================================
-    @staticmethod
-    def _Drawing_Section() -> None:  # Dummy function to create a section in the IDE # noqa
+    class _Drawing_Section:  # Dummy class to create a section in the IDE # noqa
         pass
 
     def draw(self) -> bool:
@@ -138,8 +137,7 @@ class FunctionsGraphGui:
     # ======================================================================================================================
     # Graph manipulation
     # ======================================================================================================================
-    @staticmethod
-    def _GraphManipulation_Section() -> None:  # Dummy function to create a section in the IDE # noqa
+    class _GraphManipulation_Section:  # Dummy class to create a section in the IDE # noqa
         pass
 
     def add_function_with_gui(self, function: FunctionWithGui) -> None:
@@ -302,8 +300,7 @@ class FunctionsGraphGui:
     # ======================================================================================================================
     # Utilities
     # ======================================================================================================================
-    @staticmethod
-    def _Utilities_Section() -> None:  # Dummy function to create a section in the IDE # noqa
+    class _Utilities_Section:  # Dummy class to create a section in the IDE # noqa
         pass
 
     def function_node_unique_name(self, function_node_gui: FunctionNodeGui) -> str:
@@ -366,11 +363,13 @@ class FunctionsGraphGui:
         for fn in self.functions_graph.functions_nodes:
             fn.function_with_gui.on_exit()
 
-    # ======================================================================================================================
-    # Serialization
-    # ======================================================================================================================
-    @staticmethod
-    def _Serialization_Section() -> None:  # Dummy function to create a section in the IDE # noqa
+    class _Serialization_Section:  # Dummy class to create a section in the IDE # noqa
+        """
+        # ======================================================================================================================
+        # Serialization
+        # ======================================================================================================================
+        """
+
         pass
 
     def save_user_inputs_to_json(self) -> JsonDict:

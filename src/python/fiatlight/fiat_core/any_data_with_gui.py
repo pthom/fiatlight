@@ -187,13 +187,13 @@ class AnyDataWithGui(Generic[DataType]):
     tooltip: str | None = None
     status_tooltip: str | None = None
 
-    @staticmethod
-    def _Init_Section() -> None:  # Dummy function to create a section in the IDE # noqa
+    class _Init_Section:  # Dummy class to create a section in the IDE # noqa
         """
         # ------------------------------------------------------------------------------------------------------------------
         #            Initialization
         # ------------------------------------------------------------------------------------------------------------------
         """
+
         pass
 
     def __init__(self, data_type: Type[DataType]) -> None:
@@ -202,13 +202,13 @@ class AnyDataWithGui(Generic[DataType]):
         self.callbacks = AnyDataGuiCallbacks()
         self._fiat_attributes = FiatAttributes({})
 
-    @staticmethod
-    def _Value_Section() -> None:  # Dummy function to create a section in the IDE # noqa
+    class _Value_Section:  # Dummy class to create a section in the IDE # noqa
         """
         # ------------------------------------------------------------------------------------------------------------------
         #            Value getter and setter + get_actual_value (which returns a DataType or raises an exception)
         # ------------------------------------------------------------------------------------------------------------------
         """
+
         pass
 
     @property
@@ -266,13 +266,13 @@ class AnyDataWithGui(Generic[DataType]):
         else:
             return self.value
 
-    @staticmethod
-    def _CustomAttributes_Section() -> None:  # Dummy function to create a section in the IDE # noqa
+    class _CustomAttributes_Section:  # Dummy class to create a section in the IDE  # noqa
         """
         # ------------------------------------------------------------------------------------------------------------------
         #            Custom Attributes
         # ------------------------------------------------------------------------------------------------------------------
         """
+
         pass
 
     @staticmethod
@@ -340,7 +340,7 @@ class AnyDataWithGui(Generic[DataType]):
         if b.tooltip is None:
             b.tooltip = a.tooltip
 
-    def _Gui_Section(self) -> None:  # Dummy function to create a section in the IDE # noqa
+    class _Gui_Section:  # Dummy class to create a section in the IDE # noqa
         """
         # ------------------------------------------------------------------------------------------------------------------
         #            Gui sections
@@ -754,7 +754,7 @@ class AnyDataWithGui(Generic[DataType]):
         params = GuiHeaderLineParams[DataType]()
         return self.gui_edit_customizable(params)
 
-    def _Callbacks_Section(self) -> None:  # Dummy function to create a section in the IDE # noqa
+    class _Callbacks_Section:  # Dummy class to create a section in the IDE # noqa
         """
         # ------------------------------------------------------------------------------------------------------------------
         #            Callbacks sections
@@ -853,7 +853,7 @@ class AnyDataWithGui(Generic[DataType]):
             self.callbacks.load_gui_options_from_json(json_data["cb_options"])
         self._expanded = json_data.get("expanded", True)
 
-    def _Utilities_Section(self) -> None:
+    class _Utilities_Section:  # Dummy class to create a section in the IDE # noqa
         """
         # ------------------------------------------------------------------------------------------------------------------
         #            Utilities

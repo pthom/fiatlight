@@ -101,8 +101,7 @@ class FunctionNodeGui:
     # ==================================================================================================================
     #                                            Constructor
     # ==================================================================================================================
-    @staticmethod
-    def _Constructor_Section() -> None:  # Dummy function to create a section in the IDE # noqa
+    class _Constructor_Section:  # Dummy class to create a section in the IDE # noqa
         pass
 
     def __init__(self, function_node: FunctionNode) -> None:
@@ -130,8 +129,7 @@ class FunctionNodeGui:
     #                                            Node info
     #                           (i.e. imgui-node-editor node id, size, etc.)
     # ==================================================================================================================
-    @staticmethod
-    def _Node_Info_Section() -> None:  # Dummy function to create a section in the IDE # noqa
+    class _Node_Info_Section:  # Dummy class to create a section in the IDE # noqa
         pass
 
     def node_id(self) -> ed.NodeId:
@@ -141,13 +139,13 @@ class FunctionNodeGui:
         assert self._node_size is not None
         return self._node_size
 
-    @staticmethod
-    def _Doc_Section() -> None:  # Dummy function to create a section in the IDE # noqa
+    class _Doc_Section:  # Dummy class to create a section in the IDE # noqa
         """
         # ==================================================================================================================
         #                                            Doc
         # ==================================================================================================================
         """
+
         pass
 
     def _fill_function_docstring_and_source(self) -> None:
@@ -159,13 +157,13 @@ class FunctionNodeGui:
     def _has_doc(self) -> bool:
         return self._function_doc.has_info()
 
-    @staticmethod
-    def _Utilities_Section() -> None:  # Dummy function to create a section in the IDE # noqa
+    class _Utilities_Section:  # Dummy class to create a section in the IDE # noqa
         """
         # ------------------------------------------------------------------------------------------------------------------
         #  Utilities
         # ------------------------------------------------------------------------------------------------------------------
         """
+
         pass
 
     def _heartbeat(self) -> bool:
@@ -198,14 +196,14 @@ class FunctionNodeGui:
     def invoke(self) -> None:
         self._function_node.call_invoke_async_or_not()
 
-    @staticmethod
-    def _Draw_Node_Section() -> None:  # Dummy function to create a section in the IDE # noqa
+    class _Draw_Node_Section:  # Dummy class to create a section in the IDE # noqa
         """
         # ==================================================================================================================
         #                                            Draw the node
         #         This is the heart of the class, with `draw_node` being the main function
         # ==================================================================================================================
         """
+
         pass
 
     def draw_node(self, unique_name: str) -> bool:
@@ -239,13 +237,13 @@ class FunctionNodeGui:
             self._node_size = ed.get_node_size(self._node_id)
         return inputs_changed
 
-    @staticmethod
-    def _Draw_Title_Section() -> None:  # Dummy function to create a section in the IDE # noqa
+    class _Draw_Title_Section:  # Dummy class to create a section in the IDE # noqa
         """
         # ------------------------------------------------------------------------------------------------------------------
         #  Draw title and header lines
         # ------------------------------------------------------------------------------------------------------------------
         """
+
         pass
 
     def _draw_title(self, unique_name: str) -> None:
@@ -418,13 +416,13 @@ class FunctionNodeGui:
 
         return r
 
-    @staticmethod
-    def _Draw_Inputs_Section() -> None:  # Dummy function to create a section in the IDE # noqa
+    class _Draw_Inputs_Section:  # Dummy class to create a section in the IDE # noqa
         """
         # ------------------------------------------------------------------------------------------------------------------
         #       Draw inputs
         # ------------------------------------------------------------------------------------------------------------------
         """
+
         pass
 
     def _draw_function_inputs(self, unique_name: str) -> bool:
@@ -510,13 +508,13 @@ class FunctionNodeGui:
                 input_param.data_with_gui.gui_present_customizable(header_params)
                 return False
 
-    @staticmethod
-    def _Draw_Outputs_Section() -> None:  # Dummy function to create a section in the IDE # noqa
+    class _Draw_Outputs_Section:  # Dummy class to create a section in the IDE # noqa
         """
         # ------------------------------------------------------------------------------------------------------------------
         #       Draw outputs
         # ------------------------------------------------------------------------------------------------------------------
         """
+
         pass
 
     def _draw_function_outputs(self, unique_name: str) -> None:
@@ -608,13 +606,13 @@ class FunctionNodeGui:
                     imgui.text(icons_fontawesome_6.ICON_FA_CHECK)
                     fiat_osd.set_widget_tooltip("Up to date!")
 
-    @staticmethod
-    def _Draw_Internals_Section() -> None:  # Dummy function to create a section in the IDE # noqa
+    class _Draw_Internals_Section:  # Dummy class to create a section in the IDE # noqa
         """
         # ------------------------------------------------------------------------------------------------------------------
         #      Draw function Internal State and fiat_tuning (debug help)
         # ------------------------------------------------------------------------------------------------------------------
         """
+
         pass
 
     def _draw_function_internal_state(self, unique_name: str) -> bool:
@@ -816,8 +814,7 @@ class FunctionNodeGui:
             btn_text = icons_fontawesome_6.ICON_FA_BOOK
             fiat_osd.show_void_detached_window_button(btn_text, popup_label, show_doc)
 
-    @staticmethod
-    def _Serialization_Section() -> None:  # Dummy function to create a section in the IDE # noqa
+    class _Serialization_Section:  # Dummy class to create a section in the IDE # noqa
         """
         # ==================================================================================================================
         # Save and load user settings
@@ -826,6 +823,7 @@ class FunctionNodeGui:
         #     you should use FunctionNode.save_user_inputs_to_json & FunctionNode.load_user_inputs_from_json
         # ==================================================================================================================
         """
+
         pass
 
     def save_gui_options_to_json(self) -> JsonDict:

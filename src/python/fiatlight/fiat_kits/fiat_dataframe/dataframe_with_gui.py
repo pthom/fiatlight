@@ -42,8 +42,7 @@ class DataFrameWithGui(AnyDataWithGui[pd.DataFrame]):
         self.callbacks.clipboard_copy_str = self.clipboard_copy_str
         self.callbacks.clipboard_copy_possible = True
 
-    @staticmethod
-    def _PresentCallbacksSection() -> None:  # Dummy function to create a section in the IDE # noqa
+    class _PresentCallbacksSection:  # Dummy class to create a section in the IDE # noqa
         """
         # --------------------------------------------------------------------------------------------
         #        Present callbacks
@@ -51,6 +50,7 @@ class DataFrameWithGui(AnyDataWithGui[pd.DataFrame]):
         # There are two different presentations depending on whether we are inside a pop-up or inside a node.
         # --------------------------------------------------------------------------------------------
         """
+
         pass
 
     def present_str(self, value: pd.DataFrame) -> str:

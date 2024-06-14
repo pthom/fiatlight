@@ -660,14 +660,14 @@ class FunctionWithGui:
     _last_exception_message: Optional[str] = None
     _last_exception_traceback: Optional[str] = None
 
-    @staticmethod
-    def _Construct_Section() -> None:  # Dummy function to create a section in the IDE # noqa
+    class _Construct_Section:  # Dummy class to create a section in the IDE # noqa
         """
         # --------------------------------------------------------------------------------------------
         #        Construction
         #  input_with_gui and output_with_gui should be filled soon after construction
         # --------------------------------------------------------------------------------------------
         """
+
         pass
 
     def __init__(
@@ -801,13 +801,13 @@ class FunctionWithGui:
         """Return True if the function is live"""
         return not self.invoke_manually and self.invoke_always_dirty
 
-    @staticmethod
-    def _Utilities_Section() -> None:  # Dummy function to create a section in the IDE # noqa
+    class _Utilities_Section:  # Dummy class to create a section in the IDE # noqa
         """
         # --------------------------------------------------------------------------------------------
         #        Utilities
         # --------------------------------------------------------------------------------------------
         """
+
         pass
 
     # There is intentionally no __call__ function!
@@ -840,13 +840,13 @@ class FunctionWithGui:
         i.e. if the function is dirty and invoke_manually is True"""
         return self.invoke_manually and self._dirty and not self.is_invoke_manually_io()
 
-    @staticmethod
-    def _Inputs_Section() -> None:  # Dummy function to create a section in the IDE # noqa
+    class _Inputs_Section:  # Dummy class to create a section in the IDE # noqa
         """
         # --------------------------------------------------------------------------------------------
         #        Inputs, aka parameters
         # --------------------------------------------------------------------------------------------
         """
+
         pass
 
     def nb_inputs(self) -> int:
@@ -941,13 +941,13 @@ class FunctionWithGui:
     def toggle_expand_outputs(self) -> None:
         toggle_expanded_state_on_guis(self.outputs_guis())
 
-    @staticmethod
-    def _Outputs_Section() -> None:  # Dummy function to create a section in the IDE # noqa
+    class _Outputs_Section:  # Dummy class to create a section in the IDE # noqa
         """
         # --------------------------------------------------------------------------------------------
         #        Outputs
         # --------------------------------------------------------------------------------------------
         """
+
         pass
 
     def nb_outputs(self) -> int:
@@ -986,8 +986,7 @@ class FunctionWithGui:
             r.append(i.data_with_gui)
         return r
 
-    @staticmethod
-    def _Invoke_Section() -> None:  # Dummy function to create a section in the IDE # noqa
+    class _Invoke_Section:  # Dummy class to create a section in the IDE # noqa
         """
         # --------------------------------------------------------------------------------------------
         #        Invoke the function
@@ -995,6 +994,7 @@ class FunctionWithGui:
         # and stores the result in the outputs, stores the exception if any, etc.
         # --------------------------------------------------------------------------------------------
         """
+
         pass
 
     @final
@@ -1100,8 +1100,7 @@ class FunctionWithGui:
         r = output.data_with_gui.can_be_none
         return r
 
-    @staticmethod
-    def _Serialize_Section() -> None:  # Dummy function to create a section in the IDE # noqa
+    class _Serialize_Section:  # Dummy class to create a section in the IDE # noqa
         """
         # --------------------------------------------------------------------------------------------
         #        Save and load to json
@@ -1110,6 +1109,7 @@ class FunctionWithGui:
         #   - the options of the outputs
         # --------------------------------------------------------------------------------------------
         """
+
         pass
 
     def save_user_inputs_to_json(self) -> JsonDict:
@@ -1161,8 +1161,7 @@ class FunctionWithGui:
         if self.load_internal_gui_options_from_json is not None:
             self.load_internal_gui_options_from_json(internal_gui_options)
 
-    @staticmethod
-    def _Doc_Section() -> None:  # Dummy function to create a section in the IDE # noqa
+    class _Doc_Section:  # Dummy class to create a section in the IDE # noqa
         # --------------------------------------------------------------------------------------------
         #       Function documentation & source code
         #       (This is a draft)

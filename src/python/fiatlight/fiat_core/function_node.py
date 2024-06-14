@@ -125,13 +125,13 @@ class FunctionNode:
             r.append(f"linked to {fn_name} (input {link.dst_input_name})")
         return r
 
-    @staticmethod
-    def _Serialization_Section() -> None:  # Dummy function to create a section in the IDE # noqa
+    class _Serialization_Section:  # Dummy class to create a section in the IDE # noqa
         """
         # ==================================================================================================================
         # Save and load user settings
         # ==================================================================================================================
         """
+
         pass
 
     def user_editable_params(self) -> list[ParamWithGui[Any]]:
@@ -154,8 +154,7 @@ class FunctionNode:
     def load_gui_options_from_json(self, json_data: JsonDict) -> None:
         self.function_with_gui.load_gui_options_from_json(json_data)
 
-    @staticmethod
-    def _Invoke_Section() -> None:  # Dummy function to create a section in the IDE # noqa
+    class _Invoke_Section:  # Dummy class to create a section in the IDE # noqa
         # ------------------------------------------------------------------------------------------------------------------
         #  Invoke
         # ------------------------------------------------------------------------------------------------------------------

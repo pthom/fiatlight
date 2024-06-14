@@ -154,13 +154,13 @@ class FunctionsGraph:
 
     _secret_key: str = "FunctionsGraph"
 
-    @staticmethod
-    def _Construction_Section() -> None:  # Dummy function to create a section in the IDE # noqa
+    class _Construction_Section:  # Dummy class to create a section in the IDE # noqa
         """
         # ================================================================================================================
         #                                            Construction (Empty)
         # ================================================================================================================
         """
+
         pass
 
     def __init__(self, secret_key: str = "FunctionsGraph") -> None:
@@ -175,8 +175,7 @@ class FunctionsGraph:
         """Create an empty FunctionsGraph"""
         return FunctionsGraph(secret_key=FunctionsGraph._secret_key)
 
-    @staticmethod
-    def _Public_API_Add_Function_Section() -> None:  # Dummy function to create a section in the IDE # noqa
+    class _Public_API_Add_Function_Section:  # Dummy class to create a section in the IDE # noqa
         """
         # ================================================================================================================
         #                                            Public API / Add functions
@@ -190,6 +189,7 @@ class FunctionsGraph:
         #         - the function signature *must* mention the types of the parameters and the return type
         # ================================================================================================================
         """
+
         pass
 
     #
@@ -227,13 +227,13 @@ class FunctionsGraph:
         else:
             return self._add_function(f)
 
-    @staticmethod
-    def _Private_API_Add_Function_Section() -> None:  # Dummy function to create a section in the IDE # noqa
+    class _Private_API_Add_Function_Section:  # Dummy class to create a section in the IDE # noqa
         """
         # ================================================================================================================
         #                                            Private API / Add functions
         # ================================================================================================================
         """
+
         pass
 
     def _add_function_with_gui(self, f_gui: FunctionWithGui) -> FunctionNode:
@@ -286,13 +286,13 @@ class FunctionsGraph:
         _fill_links()
         return r
 
-    @staticmethod
-    def _Graph_Manipulation_Section() -> None:  # Dummy function to create a section in the IDE # noqa
+    class _Graph_Manipulation_Section:  # Dummy class to create a section in the IDE # noqa
         """
         # ================================================================================================================
         #                                            Graph manipulation
         # ================================================================================================================
         """
+
         pass
 
     def _can_add_link(
@@ -475,13 +475,13 @@ class FunctionsGraph:
             self._remove_link(link)
         self.functions_nodes.remove(function_node)
 
-    @staticmethod
-    def _Utilities_Section() -> None:  # Dummy function to create a section in the IDE # noqa
+    class _Utilities_Section:  # Dummy class to create a section in the IDE # noqa
         """
         # ================================================================================================================
         #                                            Utilities
         # ================================================================================================================
         """
+
         pass
 
     def function_node_unique_name(self, function_node: FunctionNode) -> str:
@@ -516,8 +516,7 @@ class FunctionsGraph:
         r = any(fn.function_with_gui.shall_display_refresh_needed_label() for fn in self.functions_nodes)
         return r
 
-    @staticmethod
-    def _Serialization_Section() -> None:  # Dummy function to create a section in the IDE # noqa
+    class _Serialization_Section:  # Dummy class to create a section in the IDE # noqa
         """
         # ================================================================================================================
         #                                            Serialization
@@ -526,6 +525,7 @@ class FunctionsGraph:
         #        See FunctionsGraphGui (which does deals with the GUI)
         # ================================================================================================================
         """
+
         pass
 
     def save_user_inputs_to_json(self) -> JsonDict:
