@@ -884,7 +884,12 @@ class FunctionNodeLinkGui:
         assert hasattr(self, "end_id")
 
     def draw(self) -> None:
-        ed.link(self.link_id, self.start_id, self.end_id)
+        ed.link(
+            self.link_id,
+            self.start_id,
+            self.end_id,
+            color=get_fiat_config().style.color_as_vec4(FiatColorType.LinkFunctions),
+        )
 
 
 @dataclass
