@@ -150,7 +150,7 @@ def add_toon_edges(image: ImageU8_3, params: ToonEdgesParams) -> ImageU8_3:
 
 
 def main() -> None:
-    fl.run([image_source, add_toon_edges], app_name="Toon Edges")
+    fl.run([image_source, add_toon_edges], app_name="Toon Edges", theme=fl.ImGuiTheme_.material_flat)
 
 
 if __name__ == "__main__":

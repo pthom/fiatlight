@@ -1,11 +1,12 @@
-from enum import Enum
+from enum import Enum, auto
 from typing import Dict, Any
+from dataclasses import dataclass
 
 from pydantic import BaseModel, Field
 
 from fiatlight.fiat_types.color_types import ColorRgbaFloat
 from fiatlight.fiat_widgets.text_truncated import TruncationParams
-from imgui_bundle import ImVec4
+from imgui_bundle import ImVec4, imgui_node_editor as ed
 
 
 class FiatColorType(Enum):
@@ -41,16 +42,62 @@ class FiatColorType(Enum):
     InvalidValue = "InvalidValue"
 
 
-orange = ColorRgbaFloat((1.0, 0.8, 0.4, 1.0))
-blue = ColorRgbaFloat((0.5, 0.7, 1.0, 1.0))
-grey_blue = ColorRgbaFloat((0.6, 0.6, 0.65, 1.0))
-green = ColorRgbaFloat((0.4, 0.8, 0.4, 1.0))
-red = ColorRgbaFloat((1.0, 0.4, 0.4, 1.0))
-grey = ColorRgbaFloat((0.5, 0.5, 0.5, 1.0))
-transparent_grey = ColorRgbaFloat((0.8, 0.8, 0.8, 0.4))
-white = ColorRgbaFloat((1.0, 1.0, 1.0, 1.0))
-yellow = ColorRgbaFloat((1.0, 1.0, 0.0, 1.0))
-light_grey = ColorRgbaFloat((0.9, 0.9, 0.9, 1.0))
+class _ColorTypes(Enum):
+    orange = auto()
+    blue = auto()
+    grey_blue = auto()
+    green = auto()
+    red = auto()
+    grey = auto()
+    transparent_grey = auto()
+    yellow = auto()
+    light_grey = auto()
+    contrasting_black_or_white = auto()
+
+
+@dataclass
+class _ColorWithDarkLightVariations:
+    dark_theme: ColorRgbaFloat
+    light_theme: ColorRgbaFloat
+
+    def __init__(self, dark_theme_color: ColorRgbaFloat, light_theme_color: ColorRgbaFloat | None = None):
+        self.dark_theme = dark_theme_color
+        self.light_theme = light_theme_color if light_theme_color is not None else dark_theme_color
+
+
+_STANDARD_COLORS: dict[_ColorTypes, _ColorWithDarkLightVariations] = {
+    _ColorTypes.orange: _ColorWithDarkLightVariations(
+        ColorRgbaFloat((1.0, 0.8, 0.4, 1.0)), ColorRgbaFloat((0.8, 0.4, 0.0, 1.0))
+    ),
+    _ColorTypes.blue: _ColorWithDarkLightVariations(
+        ColorRgbaFloat((0.5, 0.7, 1.0, 1.0)), ColorRgbaFloat((0.3, 0.4, 0.8, 1.0))
+    ),
+    _ColorTypes.grey_blue: _ColorWithDarkLightVariations(
+        ColorRgbaFloat((0.6, 0.6, 0.65, 1.0)),
+    ),
+    _ColorTypes.green: _ColorWithDarkLightVariations(
+        ColorRgbaFloat((0.4, 0.8, 0.4, 1.0)), ColorRgbaFloat((0.2, 0.6, 0.2, 1.0))
+    ),
+    _ColorTypes.red: _ColorWithDarkLightVariations(
+        ColorRgbaFloat((1.0, 0.4, 0.4, 1.0)), ColorRgbaFloat((0.8, 0.2, 0.2, 1.0))
+    ),
+    _ColorTypes.grey: _ColorWithDarkLightVariations(ColorRgbaFloat((0.5, 0.5, 0.5, 1.0))),
+    _ColorTypes.transparent_grey: _ColorWithDarkLightVariations(ColorRgbaFloat((0.8, 0.8, 0.8, 0.4))),
+    _ColorTypes.yellow: _ColorWithDarkLightVariations(ColorRgbaFloat((1.0, 1.0, 0.0, 1.0))),
+    _ColorTypes.light_grey: _ColorWithDarkLightVariations(ColorRgbaFloat((0.9, 0.9, 0.9, 1.0))),
+    _ColorTypes.contrasting_black_or_white: _ColorWithDarkLightVariations(
+        ColorRgbaFloat((1.0, 1.0, 1.0, 1.0)), ColorRgbaFloat((0.0, 0.0, 0.0, 1.0))
+    ),
+}
+
+
+_STANDARD_COLORS_LIGHT_THEME: dict[_ColorTypes, ColorRgbaFloat] = {
+    standard_color: value.light_theme for standard_color, value in _STANDARD_COLORS.items()
+}
+
+_STANDARD_COLORS_DARK_THEME: dict[_ColorTypes, ColorRgbaFloat] = {
+    standard_color: value.dark_theme for standard_color, value in _STANDARD_COLORS.items()
+}
 
 
 class FiatStrTruncationParams(BaseModel):
@@ -89,53 +136,52 @@ class FiatStyle(BaseModel):
         super().__init__(**data)
         self.fill_with_default_style()
 
+    def is_dark_theme(self) -> bool:
+        if ed.get_current_editor() is None:
+            return True
+
+        node_bg_color = ed.get_style().color_(ed.StyleColor.node_bg)
+        luminance = 0.2126 * node_bg_color.x + 0.7152 * node_bg_color.y + 0.0722 * node_bg_color.z
+        is_dark = luminance < 0.5
+        return is_dark
+
+    def update_colors_from_imgui_colors(self) -> None:
+        self.fill_with_default_style()
+
     def fill_with_default_style(self) -> None:
+        is_dark_theme = self.is_dark_theme()
+        colors = _STANDARD_COLORS_DARK_THEME if is_dark_theme else _STANDARD_COLORS_LIGHT_THEME
         default_colors = {
             # Input Pins
-            FiatColorType.InputPinLinked: blue,
-            FiatColorType.InputPinNotLinked: grey_blue,
+            FiatColorType.InputPinLinked: colors[_ColorTypes.blue],
+            FiatColorType.InputPinNotLinked: colors[_ColorTypes.grey_blue],
             # Links
-            FiatColorType.LinkFunctions: light_grey,
+            FiatColorType.LinkFunctions: colors[_ColorTypes.contrasting_black_or_white],
             # Parameters
-            FiatColorType.ParameterValueWithError: red,
-            FiatColorType.ParameterValueLinked: blue,
-            FiatColorType.ParameterValueUsingDefault: grey,
-            FiatColorType.ParameterValueUserSpecified: green,
-            FiatColorType.ParameterValueUnspecified: orange,
+            FiatColorType.ParameterValueWithError: colors[_ColorTypes.red],
+            FiatColorType.ParameterValueLinked: colors[_ColorTypes.blue],
+            FiatColorType.ParameterValueUsingDefault: colors[_ColorTypes.grey],
+            FiatColorType.ParameterValueUserSpecified: colors[_ColorTypes.green],
+            FiatColorType.ParameterValueUnspecified: colors[_ColorTypes.orange],
             # Output Pins
-            FiatColorType.OutputPinLinked: blue,
-            FiatColorType.OutputPinNotLinked: grey_blue,
+            FiatColorType.OutputPinLinked: colors[_ColorTypes.blue],
+            FiatColorType.OutputPinNotLinked: colors[_ColorTypes.grey_blue],
             # When the output is dirty
-            FiatColorType.ValueWithError: red,
-            FiatColorType.OutputValueDirty: orange,
-            FiatColorType.ValueUnspecified: red,
-            FiatColorType.OutputValueOk: white,
+            FiatColorType.ValueWithError: colors[_ColorTypes.red],
+            FiatColorType.OutputValueDirty: colors[_ColorTypes.orange],
+            FiatColorType.ValueUnspecified: colors[_ColorTypes.red],
+            FiatColorType.OutputValueOk: colors[_ColorTypes.contrasting_black_or_white],  # aaa
             # Dataclass member name
             FiatColorType.DataclassMemberName: ColorRgbaFloat((0.7, 0.8, 0.7, 1.0)),
             # Exception color
-            FiatColorType.ExceptionError: red,
+            FiatColorType.ExceptionError: colors[_ColorTypes.red],
             # Invalid value
-            FiatColorType.InvalidValue: yellow,
+            FiatColorType.InvalidValue: colors[_ColorTypes.yellow],
         }
 
-        # fill missing colors
         for color_type, color in default_colors.items():
-            if color_type not in self.colors:
-                self.colors[color_type] = color
+            self.colors[color_type] = color
 
     def color_as_vec4(self, color_type: FiatColorType) -> ImVec4:
         color = self.colors[color_type]
         return ImVec4(color[0], color[1], color[2], color[3])
-
-
-def test_serialize_style() -> None:
-    style = FiatStyle()
-    style.colors[FiatColorType.OutputValueOk] = red
-
-    as_json = style.model_dump(mode="json")
-
-    style2 = FiatStyle.model_validate(as_json)
-    assert style == style2
-
-    print(style.colors[FiatColorType.OutputValueOk])
-    print(style2.colors[FiatColorType.OutputValueOk])

@@ -31,7 +31,7 @@ class MicrophoneGui(FunctionWithGui):
 
     def __init__(self) -> None:
         super().__init__(self._f)
-        self.name = "MicrophoneGui"
+        self.function_name = "MicrophoneGui"
         self.internal_state_gui = self._internal_gui
         self.on_heartbeat = self._on_heartbeat
 

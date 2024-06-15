@@ -9,15 +9,19 @@ from fiatlight.fiat_widgets import fontawesome_6_ctx, icons_fontawesome_6, fiat_
 from fiatlight.fiat_utils import functional_utils
 from fiatlight.fiat_runner.functions_collection import FunctionCollectionGui
 from fiatlight.fiat_kits.fiat_image.image_types import ImageU8_3
+from fiatlight.fiat_config import get_fiat_config
 from imgui_bundle import immapp, imgui, imgui_ctx, ImVec4, portable_file_dialogs as pfd
 from typing import Any, Callable
 from imgui_bundle import hello_imgui, ImVec2, immvision
+
 
 import json
 import logging
 import pathlib
 from typing import List, Tuple
 from enum import Enum, auto
+
+ImGuiTheme_ = hello_imgui.ImGuiTheme_
 
 
 class _EnqueuedCallbacks:
@@ -235,7 +239,12 @@ class FiatGui:
     #                                  Constructor
     # ==================================================================================================================
     def __init__(
-        self, functions_graph: FunctionsGraph, params: FiatGuiParams | None = None, app_name: str | None = None
+        self,
+        functions_graph: FunctionsGraph,
+        params: FiatGuiParams | None = None,
+        app_name: str | None = None,
+        theme: ImGuiTheme_ | None = None,
+        remember_theme: bool = False,
     ) -> None:
         if params is None:
             params = FiatGuiParams()
@@ -245,6 +254,11 @@ class FiatGui:
         elif params.runner_params.app_window_params.window_title == "":
             # Set window_title from the name of the calling module
             params.runner_params.app_window_params.window_title = _main_python_module_name()
+
+        if theme is not None:
+            params.runner_params.imgui_window_params.tweaked_theme.theme = theme
+            params.runner_params.imgui_window_params.remember_theme = False
+        params.runner_params.imgui_window_params.remember_theme = remember_theme
 
         if len(params.runner_params.ini_filename) == 0:
             params.runner_params.ini_filename = _ini_filename_from_app_name(
@@ -292,6 +306,7 @@ class FiatGui:
     @staticmethod
     def _pre_new_frame() -> None:
         _ENQUEUED_CALLBACKS.run_pre_frame_callbacks()
+        get_fiat_config().style.update_colors_from_imgui_colors()
 
     @staticmethod
     def _after_swap() -> None:
@@ -659,6 +674,8 @@ def fiat_run_graph(
     functions_graph: FunctionsGraph,
     params: FiatGuiParams | None = None,
     app_name: str | None = None,
+    theme: ImGuiTheme_ | None = None,
+    remember_theme: bool = False,
 ) -> None:
     from fiatlight.fiat_config.fiat_config_def import load_user_default_fiat_run_config
 
@@ -677,10 +694,17 @@ def fiat_run_graph(
         notebook_runner_params = NotebookRunnerParams()
 
         _fiat_run_graph_nb(
-            functions_graph, params=params, app_name=app_name, notebook_runner_params=notebook_runner_params
+            functions_graph,
+            params=params,
+            app_name=app_name,
+            notebook_runner_params=notebook_runner_params,
+            theme=theme,
+            remember_theme=remember_theme,
         )
     else:
-        fiat_gui = FiatGui(functions_graph, params=params, app_name=app_name)
+        fiat_gui = FiatGui(
+            functions_graph, params=params, app_name=app_name, theme=theme, remember_theme=remember_theme
+        )
         fiat_gui.run()
 
 
@@ -688,15 +712,19 @@ def fiat_run(
     fn: Function | FunctionWithGui,
     params: FiatGuiParams | None = None,
     app_name: str | None = None,
+    theme: ImGuiTheme_ | None = None,
+    remember_theme: bool = False,
 ) -> None:
     functions_graph = FunctionsGraph.from_function(fn)
-    fiat_run_graph(functions_graph, params=params, app_name=app_name)
+    fiat_run_graph(functions_graph, params=params, app_name=app_name, theme=theme, remember_theme=remember_theme)
 
 
 def fiat_run_composition(
     composition: List[Function | FunctionWithGui],
     params: FiatGuiParams | None = None,
     app_name: str | None = None,
+    theme: ImGuiTheme_ | None = None,
+    remember_theme: bool = False,
 ) -> None:
     """Runs a composition of functions in the Fiat GUI.
     - app_name: will be displayed in the window title, and used to save/load the user inputs and graph composition.
@@ -704,25 +732,30 @@ def fiat_run_composition(
                 Note: inside a notebook, specifying app_name is mandatory, since the module name is not available.
     """
     functions_graph = FunctionsGraph.from_function_composition(composition)
-    fiat_run_graph(functions_graph, params=params, app_name=app_name)
+    fiat_run_graph(functions_graph, params=params, app_name=app_name, theme=theme, remember_theme=remember_theme)
 
 
 def run(
     fn: Function | FunctionWithGui | List[Function | FunctionWithGui] | FunctionsGraph,
     params: FiatGuiParams | None = None,
     app_name: str | None = None,
+    theme: ImGuiTheme_ | None = None,
+    remember_theme: bool = False,
 ) -> None:
     """Runs a function, a composition of functions, or a functions graph in the Fiat GUI.
 
     - app_name: will be displayed in the window title, and used to save/load the user inputs and graph composition.
                 if it is None, then the name of the calling module will be used.
                 Note: inside a notebook, specifying app_name is mandatory, since the module name is not available.
+    - theme: the theme to use. If None, the default theme will be used.
+    - remember_theme: if True, the user selected theme will be saved in the settings file, and restored at the next run.
+                      (this will bypass the theme parameter)
     """
     if isinstance(fn, FunctionsGraph):
-        fiat_run_graph(fn, params=params, app_name=app_name)
+        fiat_run_graph(fn, params=params, app_name=app_name, theme=theme, remember_theme=remember_theme)
     elif isinstance(fn, list):
-        fiat_run_composition(fn, params=params, app_name=app_name)
+        fiat_run_composition(fn, params=params, app_name=app_name, theme=theme, remember_theme=remember_theme)
     elif isinstance(fn, FunctionWithGui):
-        fiat_run(fn, params=params, app_name=app_name)
+        fiat_run(fn, params=params, app_name=app_name, theme=theme, remember_theme=remember_theme)
     else:
-        fiat_run(fn, params=params, app_name=app_name)
+        fiat_run(fn, params=params, app_name=app_name, theme=theme, remember_theme=remember_theme)

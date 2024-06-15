@@ -84,6 +84,7 @@ def main() -> None:
             sort_word_with_counts,
         ],
         app_name="demo_word_count",
+        theme=fl.ImGuiTheme_.white_is_white,
     )
 
 

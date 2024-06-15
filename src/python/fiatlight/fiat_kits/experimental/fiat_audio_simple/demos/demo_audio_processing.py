@@ -139,7 +139,7 @@ def show_harmonic_percussive_graph(wave: fiat_audio_simple.SoundWave) -> Figure:
 
 
 def main() -> None:
-    import fiatlight  # noqa
+    import fiatlight as fl
 
     # Tell fiatlight to run this function asynchronously
     evaluate_note.invoke_async = True  # type: ignore
@@ -149,7 +149,7 @@ def main() -> None:
     # Tell fiatlight to display a slider for the pre-emphasis factor with a range from 0.8 to 0.99
     set_pre_emphasis_factor.factor__range = (0.8, 0.99)  # type: ignore
 
-    graph = fiatlight.FunctionsGraph()
+    graph = fl.FunctionsGraph()
     graph.add_function(set_pre_emphasis_factor)
     graph.add_function(fiat_audio_simple.MicrophoneGui())
     graph.add_function(evaluate_note)
@@ -160,7 +160,7 @@ def main() -> None:
     graph.add_link("MicrophoneGui", "show_fundamental_freq_graph")
     graph.add_link("MicrophoneGui", "show_harmonic_percussive_graph")
 
-    fiatlight.run(graph, app_name="demo_audio_processing")
+    fl.run(graph, app_name="demo_audio_processing", theme=fl.ImGuiTheme_.black_is_black)
 
 
 if __name__ == "__main__":
