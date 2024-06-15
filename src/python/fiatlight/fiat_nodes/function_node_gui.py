@@ -623,17 +623,21 @@ class FunctionNodeGui:
         if internal_state_fn is None:
             return False
 
+        is_node_compatible = fn_with_gui.internal_state_gui_node_compatible
+        can_collapse = is_node_compatible
+        expanded = self._internal_state_gui_expanded or not is_node_compatible
+
         #
         # Draw the separator
         #
         node_separator_params = fiat_widgets.NodeSeparatorParams()
         node_separator_params.parent_node = self._node_id
         # expanded state
-        node_separator_params.expanded = self._internal_state_gui_expanded
+        node_separator_params.expanded = expanded
         # Separator text
         node_separator_params.text = "Function internal state"
         # Separator collapse button
-        node_separator_params.show_collapse_button = True
+        node_separator_params.show_collapse_button = can_collapse
         # Separator collapse all button
         node_separator_params.show_toggle_collapse_all_button = False
         # Draw the separator
@@ -644,11 +648,23 @@ class FunctionNodeGui:
         #
         # Invoke the internal state gui
         #
-        if self._internal_state_gui_expanded:
-            result = internal_state_fn()
-            return result
-        else:
-            return False
+        changed = False
+
+        detached_window_params = fiat_osd.DetachedWindowParams(
+            unique_id="internal_state" + str(id(internal_state_fn)),
+            window_name=f"{self._function_node.function_with_gui.function_label} Internal GUI",
+            gui_function=internal_state_fn,
+        )
+        fiat_osd.show_bool_detached_window_button(detached_window_params)
+
+        # If the user edits the internal gui in a detached window
+        if fiat_osd.get_detached_window_bool_return(detached_window_params):
+            changed = True
+
+        if self._internal_state_gui_expanded and is_node_compatible:
+            changed = internal_state_fn()
+
+        return changed
 
     def _draw_fiat_tuning(self) -> None:
         """Draw the internals of the function (for debugging)

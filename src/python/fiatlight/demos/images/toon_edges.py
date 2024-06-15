@@ -88,7 +88,16 @@ class ToonEdgesParams(BaseModel):
     function_label="Add Toon Edges",
 )
 def add_toon_edges(image: ImageU8_3, params: ToonEdgesParams) -> ImageU8_3:
-    # ) -> ToonEdgesOutput:
+    """Add toon edges to an image.
+    Edges are detected using the Canny filter, then dilated and blurred.
+    The edges are then overlaid on the original image, with a given intensity and color.
+
+    :param image: Image: Input image
+
+    :param params: ToonEdgesParams: Parameters for the Toon Edges function
+
+    :return Image: Image with edges overlaid
+    """
     start_time = time.time()
     edges = canny(
         image,

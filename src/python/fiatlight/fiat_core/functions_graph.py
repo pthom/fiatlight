@@ -166,7 +166,9 @@ class FunctionsGraph:
     def __init__(self, secret_key: str = "FunctionsGraph") -> None:
         """This class should not be instantiated directly. Use the factory methods instead."""
         if secret_key != self._secret_key:
-            raise ValueError("This class should not be instantiated directly. Use the factory method instead.")
+            raise ValueError(
+                "This class should not be instantiated directly. Use the factory methods (from_...) instead."
+            )
         self.functions_nodes = []
         self.functions_nodes_links = []
 
