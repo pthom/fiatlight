@@ -1,35 +1,33 @@
-"""DataclassGui: adds a GUI to a dataclass, or to a pydantic model
+"""DataclassGui: adds a GUI to a dataclass
 
 Usage example
+=============
 
-1. Register the dataclass or pydantic model with `register_dataclass`:
-* With pydantic:
-    from pydantic import BaseModel
+**Register the dataclass**
 
-    class MyParam(BaseModel):
+_Either with the decorator `@fl.dataclass_with_gui_registration`:_
+
+    import fiatlight as fl
+
+    @fl.dataclass_with_gui_registration(x__range=(0, 10))
+    class MyParam:
         image_in: ImagePath
-        image_out: ImagePath_Save = "save.png"  # type: ignore
         x: int | None = None
-        y: str = "Hello"
 
-    from fiatlight.fiat_togui import register_dataclass
-    register_dataclass(MyParam)
+_Or with `register_dataclass`:_
 
-
-* With dataclasses:
     from dataclasses import dataclass
 
     @dataclass
     class MyParam:
         image_in: ImagePath
-        image_out: ImagePath_Save = "save.png"  # type: ignore
         x: int | None = None
-        y: str = "Hello"
 
     from fiatlight.fiat_togui import register_dataclass
-    register_dataclass(MyParam)
+    register_dataclass(MyParam, x__range=(0, 10))
 
-2. Use the dataclass in a function:
+**Use the dataclass in a function:**
+
     def f(param: MyParam) -> MyParam:
         return param
 
@@ -44,8 +42,6 @@ from fiatlight.fiat_types.base_types import FiatAttributes
 from imgui_bundle import imgui_ctx, ImVec4
 from typing import Type, Any, TypeVar, List
 from dataclasses import is_dataclass
-from pydantic import BaseModel
-
 
 # A type variable that represents a dataclass type, or a pydantic BaseModel type
 DataclassLikeType = TypeVar("DataclassLikeType")
@@ -124,7 +120,7 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
         # ------------------------------------------------------------------------------------------------------------------
         """
 
-    def factor_dataclass_instance(self) -> DataclassLikeType:
+    def factor_dataclass_instance(self) -> DataclassLikeType | Error:
         kwargs = {}
         for param_gui in self._parameters_with_gui:
             param_value = param_gui.data_with_gui.value
@@ -143,8 +139,16 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
                     raise ValueError(f"Parameter {param_gui.name} has no default value provider in class {self._type}")
                 param_gui.data_with_gui.value = param_gui.data_with_gui.construct_default_value()
 
-        r = self.factor_dataclass_instance()
-        return r
+        default_value = self.factor_dataclass_instance()
+        if isinstance(default_value, Error):
+            raise ValueError(
+                f"""
+            DataclassLikeGui({self.datatype_name()}).default_value_provider
+            returned a default value that does not pass validation!
+            Please check your default values.
+            """
+            )
+        return default_value
 
     class _Utils_Section:  # Dummy class to create a section in the IDE # noqa
         """
@@ -152,6 +156,12 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
         #            Utils
         # ------------------------------------------------------------------------------------------------------------------
         """
+
+    def has_param_of_name(self, name: str) -> bool:
+        for param_gui in self._parameters_with_gui:
+            if param_gui.name == name:
+                return True
+        return False
 
     def param_of_name(self, name: str) -> ParamWithGui[Any]:
         for param_gui in self._parameters_with_gui:
@@ -302,6 +312,16 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
 
         if changed:
             r = self.factor_dataclass_instance()
+            if isinstance(r, Error):
+                raise RuntimeError(
+                    f"""
+                DataclassLikeGui({self.datatype_name()}).edit() called factor_dataclass_instance()
+                which returned an error.
+                This is not allowed. The subtypes (such as BaseModelGui) should
+                catch the error, store the values as invalid value in self._parameters_with_gui
+                and return the correct type anyhow
+                """
+                )
             return changed, r
         else:
             return False, value
@@ -340,47 +360,3 @@ class DataclassGui(DataclassLikeGui[DataclassLikeType]):
             raise FiatToGuiException(f"{dataclass_type} is not a dataclass")
 
         super().__init__(dataclass_type, param_attrs)  # type: ignore
-
-
-class BaseModelGui(DataclassLikeGui[DataclassLikeType]):
-    """A sophisticated GUI for a pydantic model. Can edit and present all members of the model. Can handle nested models."""
-
-    def __init__(self, basemodel_type: Type[DataclassLikeType], param_attrs: FiatAttributes | None = None) -> None:
-        if not issubclass(basemodel_type, BaseModel):
-            raise FiatToGuiException(f"{basemodel_type} is not a pydantic model")
-        super().__init__(basemodel_type, param_attrs)  # type: ignore
-        self.callbacks.load_from_dict = self._load_from_dict
-        self.callbacks.save_to_dict = self._save_to_dict
-        self.callbacks.clipboard_copy_possible = True
-        self.callbacks.clipboard_copy_str = self.clipboard_copy_str
-
-        # Look for fields with default_factory
-        self._initialize_fields()
-
-    def _initialize_fields(self) -> None:
-        basemodel_type = self._type
-        assert issubclass(basemodel_type, BaseModel)
-        for field_name, model_field in basemodel_type.model_fields.items():
-            param = self.param_of_name(field_name)
-            if model_field.default_factory:
-                param.default_value = model_field.default_factory()
-                param.data_with_gui.callbacks.default_value_provider = model_field.default_factory
-
-    @staticmethod
-    def _save_to_dict(value: DataclassLikeType) -> JsonDict:
-        r = {"type": "Pydantic", "value": value.model_dump(mode="json")}  # type: ignore
-        return r
-
-    def _load_from_dict(self, json_data: JsonDict) -> DataclassLikeType:
-        json_data_type = json_data.get("type")
-        if json_data_type != "Pydantic":
-            raise ValueError(f"Expected type Pydantic, got {json_data_type}")
-        assert self._type is not None
-        assert issubclass(self._type, BaseModel)
-        r = self._type.model_validate(json_data["value"])
-        assert isinstance(r, self._type)
-        return r  # type: ignore
-
-    def clipboard_copy_str(self, value: DataclassLikeType) -> str:
-        assert isinstance(value, BaseModel)
-        return value.model_dump_json(indent=2)
