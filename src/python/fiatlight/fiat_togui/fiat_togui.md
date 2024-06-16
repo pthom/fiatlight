@@ -185,20 +185,16 @@ fl.run(list_words_in_file, app_name="List Words in File")
 Enum classes
 ============
 
-Enum classes can very easily be registered with their GUI.
+Enum classes are automatically associated to a GUI.
 
 ```python
 import fiatlight as fl
 from enum import Enum
 
-@fl.enum_with_gui_registration
 class Color(Enum):
     Red = 1
     Green = 2
     Blue = 3
-
-# Note, it is also possible to register the enum class with the commented line below
-#    fl.register_enum(Color)
 
 def color_chooser(color: Color) -> str:
     return f"You selected: {color.name}"
@@ -255,8 +251,7 @@ from fiatlight.fiat_kits.fiat_image import ImageU8_3
 from pydantic import BaseModel
 import cv2
 
-# An Enum with a GUI decorator
-@fl.enum_with_gui_registration
+# An Enum which will associated to a Gui automatically
 class TrainingDataType(Enum):
     Test = "test"
     Train = "train"

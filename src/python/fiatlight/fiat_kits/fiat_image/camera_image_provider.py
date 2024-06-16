@@ -5,7 +5,7 @@ import cv2
 import os  # noqa
 from pydantic import BaseModel
 
-from fiatlight.fiat_togui.gui_registry import enum_with_gui_registration, base_model_with_gui_registration
+from fiatlight.fiat_togui.gui_registry import base_model_with_gui_registration
 from fiatlight.fiat_types import JsonDict
 from fiatlight.fiat_kits.fiat_image import ImageU8_3
 from fiatlight.fiat_core.function_with_gui import FunctionWithGui
@@ -21,7 +21,6 @@ from typing import Optional
 _HACK_IMAGE = None
 
 
-@enum_with_gui_registration
 class CameraResolution(Enum):
     """Some typical camera resolutions"""
 
@@ -32,7 +31,6 @@ class CameraResolution(Enum):
     QVGA_320_240 = [320, 240]
 
 
-@enum_with_gui_registration
 class CameraFps(Enum):
     """Some typical camera frame rates"""
 

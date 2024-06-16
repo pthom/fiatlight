@@ -28,11 +28,10 @@ from .camera_image_provider import CameraImageProvider, CameraImageProviderGui
 
 def _register_factories() -> None:
     from .image_types import _register_image_type_factories
-    from fiatlight.fiat_togui.gui_registry import register_type, register_enum
+    from fiatlight.fiat_togui.gui_registry import register_type
 
     _register_image_type_factories()
     register_type(LutParams, LutParamsWithGui)
-    register_enum(ColorType)
 
 
 _register_factories()

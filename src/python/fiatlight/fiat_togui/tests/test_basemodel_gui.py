@@ -167,7 +167,6 @@ def test_decorators() -> None:
 def test_pydantic_with_enum() -> None:
     from enum import Enum
 
-    @fl.enum_with_gui_registration
     class MyEnum(Enum):
         A = 1
         B = 2

@@ -112,7 +112,6 @@ def test_enum_type() -> None:
     from enum import Enum
     from fiatlight.fiat_togui.enum_with_gui import EnumWithGui
 
-    # @fl.enum_with_gui_registration
     class MyEnum(Enum):
         a = "a"
         b = "b"

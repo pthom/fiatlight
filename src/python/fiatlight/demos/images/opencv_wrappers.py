@@ -6,7 +6,6 @@ from enum import Enum
 import cv2
 
 
-@fl.enum_with_gui_registration
 class CannyApertureSize(Enum):
     APERTURE_3 = 3
     APERTURE_5 = 5
@@ -37,7 +36,6 @@ def canny(
     return r  # type: ignore
 
 
-@fl.enum_with_gui_registration
 class MorphShape(Enum):
     MORPH_RECT = cv2.MORPH_RECT
     MORPH_CROSS = cv2.MORPH_CROSS

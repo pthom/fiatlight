@@ -349,16 +349,16 @@ Note: CameraImageProviderGui uses a `CameraImageProvider` class that provides im
       as well `CameraParams`, as a Pydantic model for the camera parameters that will be displayed in the GUI,
       and saved to a JSON file.
 
-We use the `enum_with_gui_registration` and `base_model_with_gui_registration` decorators to automatically create
-a GUI for the enums and the Pydantic model (note: `dataclass_with_gui_registration` is also available for dataclasses)
+We use `base_model_with_gui_registration` decorators to automatically create a GUI for the Pydantic model.
+
+*Notes: `dataclass_with_gui_registration` is also available for dataclasses). A GUI will be created automatically for enums.*
 
     ```python
-    from fiatlight.fiat_togui.to_gui import enum_with_gui_registration, base_model_with_gui_registration
+    from fiatlight.fiat_togui.to_gui base_model_with_gui_registration
     from enum import Enum
     from pydantic import BaseModel
     import cv2
 
-    @enum_with_gui_registration
     class CameraResolution(Enum):
         HD_1280_720 = [1280, 720]
         FULL_HD_1920_1080 = [1920, 1080]

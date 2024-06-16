@@ -51,7 +51,6 @@ fl.add_fiat_attributes(
 )
 
 
-@fl.enum_with_gui_registration
 class ColorMap(Enum):
     VIRIDIS = "viridis"
     PLASMA = "plasma"

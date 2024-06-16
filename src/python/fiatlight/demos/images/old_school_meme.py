@@ -10,7 +10,6 @@ import numpy as np
 import os
 
 
-@fl.enum_with_gui_registration
 class MemeFont(Enum):
     Stadium = "fonts/stadium/Stadium.ttf"
     Anton = "fonts/Anton/Anton-Regular.ttf"

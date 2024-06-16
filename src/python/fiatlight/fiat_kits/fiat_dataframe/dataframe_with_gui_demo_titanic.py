@@ -16,7 +16,6 @@ def make_titanic_df() -> pd.DataFrame:
     return df
 
 
-@fl.enum_with_gui_registration
 class Sex(Enum):
     Man = "male"
     Woman = "female"

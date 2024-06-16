@@ -3,9 +3,6 @@ from .gui_registry import (
     # Types registration
     # ==================
     register_type,
-    # For Enums
-    register_enum,
-    enum_with_gui_registration,  # (decorator)
     # For dataclasses
     register_dataclass,
     dataclass_with_gui_registration,  # (decorator)
@@ -36,8 +33,6 @@ _register_file_paths_types()
 __all__ = [
     # from to_gui
     "register_type",
-    "register_enum",
-    "enum_with_gui_registration",
     "register_dataclass",
     "dataclass_with_gui_registration",
     "register_base_model",

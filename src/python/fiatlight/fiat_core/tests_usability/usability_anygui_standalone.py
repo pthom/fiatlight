@@ -7,7 +7,6 @@ import fiatlight as fl
 import logging
 
 
-@fl.enum_with_gui_registration
 class MyEnum(Enum):
     A = "A"
     B = "B"

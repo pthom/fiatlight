@@ -13,8 +13,6 @@ from fiatlight.fiat_kits import fiat_image, fiat_array
 from fiatlight.fiat_widgets.fiat_osd import is_rendering_in_node, is_rendering_in_fiatlight_detached_window
 from fiatlight.fiat_togui import (
     register_type,
-    register_enum,
-    enum_with_gui_registration,
     register_dataclass,
     dataclass_with_gui_registration,
     register_base_model,
@@ -61,8 +59,6 @@ __all__ = [
     "FiatToGuiException",
     # from to_gui
     "register_type",
-    "register_enum",
-    "enum_with_gui_registration",
     "register_dataclass",
     "dataclass_with_gui_registration",
     "register_base_model",
