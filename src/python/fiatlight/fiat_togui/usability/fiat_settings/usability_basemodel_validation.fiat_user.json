@@ -1,0 +1,77 @@
+{
+    "user_inputs": {
+        "functions_nodes": {
+            "f": {
+                "v": {
+                    "name": "v",
+                    "data": {
+                        "type": "Pydantic",
+                        "value": {
+                            "x": 45
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "gui_options": {
+        "f": {
+            "function_node_with_gui": {
+                "_inputs_expanded": true,
+                "_outputs_expanded": true,
+                "fiat_tuning_expanded": false,
+                "_internal_state_gui_expanded": true,
+                "_function_node": {
+                    "inputs": {
+                        "v": {
+                            "cb_options": {
+                                "x": {
+                                    "cb_options": {},
+                                    "expanded": false
+                                }
+                            },
+                            "expanded": true
+                        }
+                    },
+                    "outputs": {
+                        "0": {
+                            "cb_options": {
+                                "x": {
+                                    "cb_options": {},
+                                    "expanded": false
+                                }
+                            },
+                            "expanded": true
+                        }
+                    },
+                    "internal_gui_options": {}
+                }
+            },
+            "function_node": {
+                "inputs": {
+                    "v": {
+                        "cb_options": {
+                            "x": {
+                                "cb_options": {},
+                                "expanded": false
+                            }
+                        },
+                        "expanded": true
+                    }
+                },
+                "outputs": {
+                    "0": {
+                        "cb_options": {
+                            "x": {
+                                "cb_options": {},
+                                "expanded": false
+                            }
+                        },
+                        "expanded": true
+                    }
+                },
+                "internal_gui_options": {}
+            }
+        }
+    }
+}
