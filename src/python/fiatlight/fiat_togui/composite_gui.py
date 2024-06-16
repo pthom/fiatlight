@@ -6,7 +6,7 @@ from fiatlight.fiat_widgets import fiat_osd
 from fiatlight.fiat_types import FiatAttributes
 from imgui_bundle import hello_imgui, imgui, imgui_ctx, ImVec4
 from enum import Enum
-from typing import Type, List, Union, Any
+from typing import Type, List, Union, Any, Tuple
 from types import NoneType
 
 
@@ -144,7 +144,8 @@ class TupleWithGui(AnyDataWithGui[tuple[Any, ...]]):
     def __init__(self, inner_guis: tuple[AnyDataWithGui[Any], ...], fiat_attributes: FiatAttributes) -> None:
         # Constructing a tuple type for all _inner_guis
         types = tuple(inner_gui._type for inner_gui in inner_guis)
-        super().__init__(types)  # type: ignore
+        tuple_type = Tuple[*types]  # type: ignore
+        super().__init__(tuple_type)
         self._inner_guis = inner_guis
 
         # We set the _can_set_unspecified_or_default to False for all parameters
