@@ -4,7 +4,7 @@ from .qualified_typename import (
     fully_qualified_typename,
     fully_qualified_typename_or_str,
 )
-from .dataclass_gui import DataclassLikeType
+from .dataclass_like_gui import DataclassLikeType
 from fiatlight.fiat_types.base_types import DataType, FiatAttributes
 from fiatlight.fiat_types.fiat_number_types import FloatInterval, IntInterval
 from fiatlight.fiat_core.any_data_with_gui import AnyDataWithGui

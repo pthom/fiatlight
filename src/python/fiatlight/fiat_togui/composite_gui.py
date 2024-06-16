@@ -239,7 +239,7 @@ class TupleWithGui(AnyDataWithGui[tuple[Any, ...]]):
         return False
 
     def sub_items_collapse_or_expand(self, collapse_or_expand: AnyDataWithGui.CollapseOrExpand) -> None:
-        from fiatlight.fiat_togui.dataclass_gui import DataclassLikeGui
+        from fiatlight.fiat_togui.dataclass_like_gui import DataclassLikeGui
 
         new_expanded_state = collapse_or_expand == AnyDataWithGui.CollapseOrExpand.expand
 

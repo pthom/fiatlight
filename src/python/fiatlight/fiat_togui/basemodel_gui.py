@@ -36,7 +36,7 @@ _Or with `register_base_model`:_
 
 import logging
 
-from .dataclass_gui import DataclassLikeGui, DataclassLikeType
+from .dataclass_like_gui import DataclassLikeGui, DataclassLikeType
 from fiatlight.fiat_types.error_types import Error, Unspecified, InvalidValue, ErrorValue
 from fiatlight.fiat_types.base_types import JsonDict, FiatAttributes
 from fiatlight.fiat_core import FiatToGuiException

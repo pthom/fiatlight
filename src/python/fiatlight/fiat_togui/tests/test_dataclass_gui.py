@@ -1,5 +1,6 @@
 import fiatlight as fl
-from fiatlight.fiat_togui.dataclass_gui import DataclassGui, DataclassLikeGui
+from fiatlight.fiat_togui.dataclass_gui import DataclassGui
+from fiatlight.fiat_togui.dataclass_like_gui import DataclassLikeGui
 from fiatlight import (
     FunctionWithGui,
     register_dataclass,
