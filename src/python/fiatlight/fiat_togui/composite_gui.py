@@ -187,6 +187,8 @@ class TupleWithGui(AnyDataWithGui[tuple[Any, ...]]):
 
         self.callbacks.save_to_dict = self._save_to_dict
         self.callbacks.load_from_dict = self._load_from_dict
+        self.callbacks.save_gui_options_to_json = self.save_gui_options_to_json
+        self.callbacks.load_gui_options_from_json = self.load_gui_options_from_json
 
     class _Factor_Section:  # Dummy class to create a section in the IDE # noqa
         """
@@ -201,6 +203,7 @@ class TupleWithGui(AnyDataWithGui[tuple[Any, ...]]):
             if not inner_gui.can_construct_default_value():
                 raise ValueError(f"Tuple element {i} has no default value provider in class {self._type}")
             inner_gui.value = inner_gui.construct_default_value()
+            default_values.append(inner_gui.value)
         return tuple(default_values)
 
     class _Utils_Section:  # Dummy class to create a section in the IDE # noqa
@@ -360,8 +363,8 @@ class TupleWithGui(AnyDataWithGui[tuple[Any, ...]]):
                 changed_in_edit = inner_gui.gui_edit_customizable(
                     GuiHeaderLineParams(show_clipboard_button=False, parent_name=self.datatype_name())
                 )
+                new_values.append(inner_gui.value)
                 if changed_in_edit:
-                    new_values.append(inner_gui.value)
                     changed = True
 
         if changed:
@@ -405,6 +408,23 @@ class TupleWithGui(AnyDataWithGui[tuple[Any, ...]]):
             values.append(inner_gui.call_load_from_dict(json_data["values"][i]))
         r = tuple(values)
         return r
+
+    def save_gui_options_to_json(self) -> JsonDict:
+        # We only save the GUI options, not the data!
+        options = []
+        for inner_gui in self._inner_guis:
+            options.append(inner_gui.call_save_gui_options_to_json())
+        return {"type": "Tuple", "options": options}
+
+    def load_gui_options_from_json(self, json: JsonDict) -> None:
+        # We only load the GUI options, not the data!
+        if json["type"] != "Tuple":
+            raise ValueError("Invalid JSON data for TupleWithGui")
+        if len(json["options"]) != len(self._inner_guis):
+            raise ValueError("The length of the provided tuple does not match the number of inner GUIs.")
+        for i in range(len(json["options"])):
+            inner_gui = self._inner_guis[i]
+            inner_gui.call_load_gui_options_from_json(json["options"][i])
 
 
 class ListWithGui(AnyDataWithGui[List[DataType]]):

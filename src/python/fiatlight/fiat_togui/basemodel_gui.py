@@ -34,6 +34,8 @@ _Or with `register_base_model`:_
     fiatlight.run(f)
 """
 
+import logging
+
 from .dataclass_gui import DataclassLikeGui, DataclassLikeType
 from fiatlight.fiat_types.error_types import Error, Unspecified, InvalidValue, ErrorValue
 from fiatlight.fiat_types.base_types import JsonDict, FiatAttributes
@@ -75,6 +77,12 @@ class BaseModelGui(DataclassLikeGui[DataclassLikeType]):
                 )
             return instance
         except ValidationError as e:
+            logging.warning(
+                f"""
+                In BaseModelGui({self.datatype_name()})
+                ValidationError:
+                {e}"""
+            )
             validation_errors = e.errors()  # the detailed list of pydantic validation errors
             for validation_error in validation_errors:
                 error_field_name_tuple = validation_error["loc"]  # a tuple of field name

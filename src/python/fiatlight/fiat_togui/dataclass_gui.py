@@ -36,7 +36,7 @@ _Or with `register_dataclass`:_
 
 from fiatlight.fiat_core import AnyDataWithGui, FunctionWithGui, ParamWithGui
 from fiatlight.fiat_core.any_data_with_gui import GuiHeaderLineParams
-from fiatlight.fiat_types import JsonDict, Unspecified, Error
+from fiatlight.fiat_types import JsonDict, Unspecified, Error, InvalidValue
 from fiatlight.fiat_core.togui_exception import FiatToGuiException
 from fiatlight.fiat_types.base_types import FiatAttributes
 from imgui_bundle import imgui_ctx, ImVec4
@@ -305,37 +305,28 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
                         GuiHeaderLineParams(show_clipboard_button=False, parent_name=self.datatype_name())
                     )
 
-    def edit(self, value: DataclassLikeType) -> tuple[bool, DataclassLikeType]:
+    def edit(self, original_value: DataclassLikeType) -> tuple[bool, DataclassLikeType]:
+        # the parameter is not used, because we have the data in self._parameters_with_gui
         changed = False
 
         for param_gui in self._parameters_with_gui:
             with imgui_ctx.push_obj_id(param_gui):
-                if not hasattr(value, param_gui.name):
-                    raise ValueError(f"Object does not have attribute {param_gui.name}")
-                param_gui.data_with_gui.value = getattr(value, param_gui.name)
                 changed_in_edit = param_gui.data_with_gui.gui_edit_customizable(
                     GuiHeaderLineParams(show_clipboard_button=False, parent_name=self.datatype_name())
                 )
                 if changed_in_edit:
-                    new_value = param_gui.data_with_gui.value
-                    setattr(value, param_gui.name, new_value)
                     changed = True
 
         if changed:
             r = self.factor_dataclass_instance()
-            if isinstance(r, Error):
-                raise RuntimeError(
-                    f"""
-                DataclassLikeGui({self.datatype_name()}).edit() called factor_dataclass_instance()
-                which returned an error.
-                This is not allowed. The subtypes (such as BaseModelGui) should
-                catch the error, store the values as invalid value in self._parameters_with_gui
-                and return the correct type anyhow
-                """
-                )
-            return changed, r
+            if isinstance(r, (Error, InvalidValue, Unspecified)):
+                # this can happen with BaseModel when the validation fails
+                # we will transmit only when it is ok
+                return False, original_value
+            else:
+                return True, r
         else:
-            return False, value
+            return False, original_value
 
     @staticmethod
     def _member_label_color() -> ImVec4:
