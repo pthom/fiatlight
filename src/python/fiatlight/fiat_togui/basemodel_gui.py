@@ -48,10 +48,10 @@ class BaseModelGui(DataclassLikeGui[DataclassLikeType]):
     Can catch validation errors and propagate them to the corresponding fields.
     """
 
-    def __init__(self, basemodel_type: Type[DataclassLikeType], param_attrs: FiatAttributes | None = None) -> None:
+    def __init__(self, basemodel_type: Type[DataclassLikeType], fiat_attributes: FiatAttributes | None = None) -> None:
         if not issubclass(basemodel_type, BaseModel):
             raise FiatToGuiException(f"{basemodel_type} is not a pydantic model")
-        super().__init__(basemodel_type, param_attrs)  # type: ignore
+        super().__init__(basemodel_type, fiat_attributes)  # type: ignore
         self.callbacks.load_from_dict = self._load_from_dict
         self.callbacks.save_to_dict = self._save_to_dict
         self.callbacks.clipboard_copy_possible = True

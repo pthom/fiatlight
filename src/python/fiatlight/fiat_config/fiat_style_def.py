@@ -35,6 +35,7 @@ class FiatColorType(Enum):
     OutputValueOk = "OutputValueOk"
 
     DataclassMemberName = "DataclassMemberName"
+    TupleLabel = "TupleLabel"
 
     # Exception color
     ExceptionError = "ExceptionError"
@@ -173,6 +174,8 @@ class FiatStyle(BaseModel):
             FiatColorType.OutputValueOk: colors[_ColorTypes.contrasting_black_or_white],  # aaa
             # Dataclass member name
             FiatColorType.DataclassMemberName: ColorRgbaFloat((0.7, 0.8, 0.7, 1.0)),
+            # Tuple label
+            FiatColorType.TupleLabel: ColorRgbaFloat((0.7, 0.8, 0.7, 1.0)),
             # Exception color
             FiatColorType.ExceptionError: colors[_ColorTypes.red],
             # Invalid value

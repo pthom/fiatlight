@@ -50,6 +50,8 @@ DataclassLikeType = TypeVar("DataclassLikeType")
 class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
     """Base GUI class for a dataclass or a pydantic model"""
 
+    # The implementation for this resembles TupleWithGui
+
     _parameters_with_gui: List[ParamWithGui[Any]]
 
     class _Initialization_Section:  # Dummy class to create a section in the IDE # noqa
@@ -59,14 +61,14 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
         # ------------------------------------------------------------------------------------------------------------------
         """
 
-    def __init__(self, dataclass_type: Type[DataclassLikeType], param_attrs: FiatAttributes | None = None) -> None:
+    def __init__(self, dataclass_type: Type[DataclassLikeType], fiat_attributes: FiatAttributes | None = None) -> None:
         super().__init__(dataclass_type)
 
         # In order to find the members of the dataclass, we
         # create a FunctionWithGui instance with the dataclass type
         # so that FunctionWithGui can find the members of the dataclass
         # and associate them with GUI
-        constructor_gui = FunctionWithGui(dataclass_type, fiat_attributes=param_attrs)
+        constructor_gui = FunctionWithGui(dataclass_type, fiat_attributes=fiat_attributes)
         self._parameters_with_gui = constructor_gui._inputs_with_gui
 
         # We set the _can_set_unspecified_or_default to False for all parameters
@@ -75,12 +77,13 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
             parameters_with_gui.data_with_gui.label_color = self._member_label_color()
 
         self.fill_callbacks()
-        if param_attrs is not None:
-            self.on_fiat_attributes_changes(param_attrs)
+        if fiat_attributes is not None:
+            self.on_fiat_attributes_changed(fiat_attributes)
 
     def fill_callbacks(self) -> None:
         self.callbacks.present_str = self.present_str
         self.callbacks.present = self.present
+        self.callbacks.edit = self.edit
 
         # It is always possible to collapse a dataclass
         self.callbacks.edit_collapsible = True
@@ -95,23 +98,19 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
             if not param_gui.data_with_gui.callbacks.edit_node_compatible:
                 self.callbacks.edit_node_compatible = False
 
-        self.callbacks.edit_collapsible = True
-        self.callbacks.present_collapsible = True
-
-        self.callbacks.edit = self.edit
         self.callbacks.on_change = self.on_change
         self.callbacks.on_exit = self.on_exit
         self.callbacks.on_heartbeat = self.on_heartbeat
-
-        self.callbacks.clipboard_copy_str = None
-        self.callbacks.clipboard_copy_possible = False
-
         self.callbacks.default_value_provider = self.default_value_provider
+        self.callbacks.on_fiat_attributes_changed = self.on_fiat_attributes_changed
+
+        self.callbacks.clipboard_copy_possible = all(
+            param_gui.data_with_gui.callbacks.clipboard_copy_possible for param_gui in self._parameters_with_gui
+        )
+        self.callbacks.clipboard_copy_str = self.clipboard_copy_str
 
         self.callbacks.save_gui_options_to_json = self.save_gui_options_to_json
         self.callbacks.load_gui_options_from_json = self.load_gui_options_from_json
-
-        self.callbacks.on_fiat_attributes_changed = self.on_fiat_attributes_changes
 
     class _Factor_Section:  # Dummy class to create a section in the IDE # noqa
         """
@@ -200,12 +199,14 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
         return False
 
     def sub_items_collapse_or_expand(self, collapse_or_expand: AnyDataWithGui.CollapseOrExpand) -> None:
+        from fiatlight.fiat_togui.composite_gui import TupleWithGui
+
         new_expanded_state = collapse_or_expand == AnyDataWithGui.CollapseOrExpand.expand
 
         for param_gui in self._parameters_with_gui:
             if param_gui.data_with_gui.callbacks.present_collapsible:
                 param_gui.data_with_gui._expanded = new_expanded_state
-                if isinstance(param_gui.data_with_gui, DataclassLikeGui):
+                if isinstance(param_gui.data_with_gui, (DataclassLikeGui, TupleWithGui)):
                     param_gui.data_with_gui.sub_items_collapse_or_expand(collapse_or_expand)
 
     def sub_items_will_collapse_or_expand(
@@ -246,7 +247,7 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
             if param_on_exit is not None:
                 param_on_exit()
 
-    def on_fiat_attributes_changes(self, attrs: FiatAttributes) -> None:
+    def on_fiat_attributes_changed(self, attrs: FiatAttributes) -> None:
         self._fiat_attributes = attrs
         for param_gui in self._parameters_with_gui:
             prefix = f"{param_gui.name}__"
@@ -265,6 +266,16 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
                 if param_on_heartbeat():
                     changed = True
         return changed
+
+    def clipboard_copy_str(self, value: DataclassLikeType) -> str:
+        strs = {}
+        for param_gui in self._parameters_with_gui:
+            param_value = getattr(value, param_gui.name)
+            param_str = param_gui.data_with_gui.datatype_value_to_clipboard_str(param_value)
+            strs[param_gui.name] = param_str
+        joined_strs = ", ".join(f"{k}: {v}" for k, v in strs.items())
+        r = f"{{{joined_strs}}}"
+        return r
 
     class _Gui_Section:  # Dummy class to create a section in the IDE # noqa
         """
@@ -287,7 +298,7 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
 
     def present(self, _: DataclassLikeType) -> None:
         # the parameter is not used, because we have the data in self._parameters_with_gui
-        with imgui_ctx.begin_vertical("##CompositeGui_present"):
+        with imgui_ctx.begin_vertical("##DataclassLikeGui_present"):
             for param_gui in self._parameters_with_gui:
                 with imgui_ctx.push_obj_id(param_gui):
                     param_gui.data_with_gui.gui_present_customizable(
@@ -326,7 +337,8 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
         else:
             return False, value
 
-    def _member_label_color(self) -> ImVec4:
+    @staticmethod
+    def _member_label_color() -> ImVec4:
         from fiatlight.fiat_config import get_fiat_config, FiatColorType
 
         r = get_fiat_config().style.color_as_vec4(FiatColorType.DataclassMemberName)
@@ -355,8 +367,8 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
 class DataclassGui(DataclassLikeGui[DataclassLikeType]):
     """A sophisticated GUI for a dataclass type. Can edit and present all members of the dataclass. Can handle nested dataclasses."""
 
-    def __init__(self, dataclass_type: Type[DataclassLikeType], param_attrs: dict[str, Any] | None = None) -> None:
+    def __init__(self, dataclass_type: Type[DataclassLikeType], fiat_attributes: dict[str, Any] | None = None) -> None:
         if not is_dataclass(dataclass_type):
             raise FiatToGuiException(f"{dataclass_type} is not a dataclass")
 
-        super().__init__(dataclass_type, param_attrs)  # type: ignore
+        super().__init__(dataclass_type, fiat_attributes)  # type: ignore

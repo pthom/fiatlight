@@ -400,11 +400,11 @@ class AnyDataWithGui(Generic[DataType]):
     def _show_copy_to_clipboard_button(self) -> None:
         if not self.callbacks.clipboard_copy_possible:
             return
-        if self.value is UnspecifiedValue or self.value is ErrorValue:
+        if isinstance(self.value, (Error, Unspecified, InvalidValue)):
             return
         with fontawesome_6_ctx():
             if imgui.button(icons_fontawesome_6.ICON_FA_COPY):
-                clipboard_str = self.datatype_value_to_clipboard_str()
+                clipboard_str = self.datatype_value_to_clipboard_str(self.value)
                 imgui.set_clipboard_text(clipboard_str)
             fiat_osd.set_widget_tooltip("Copy value to clipboard")
 
@@ -902,20 +902,21 @@ class AnyDataWithGui(Generic[DataType]):
                 default_str = "???"
         return default_str
 
-    def datatype_value_to_clipboard_str(self) -> str:
+    def datatype_value_to_clipboard_str(self, value: DataType) -> str:
         """Convert the value to a string for the clipboard
         Uses either the clipboard_copy_str callback, or the default str conversion
         """
-        if isinstance(self.value, Unspecified):
+        if isinstance(value, Unspecified):
             return "Unspecified"
-        elif isinstance(self.value, Error):
+        elif isinstance(value, Error):
             return "Error"
+        elif isinstance(value, InvalidValue):
+            return "Invalid"
         else:
-            actual_value = self.get_actual_or_invalid_value()
             if self.callbacks.clipboard_copy_str is not None:
-                return self.callbacks.clipboard_copy_str(actual_value)
+                return self.callbacks.clipboard_copy_str(value)
             else:
-                return self.datatype_value_to_str(actual_value)
+                return self.datatype_value_to_str(value)
 
     def docstring_first_line(self) -> str | None:
         """Return the first line of the docstring, if available"""
