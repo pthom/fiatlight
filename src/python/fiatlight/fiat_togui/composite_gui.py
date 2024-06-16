@@ -287,9 +287,10 @@ class TupleWithGui(AnyDataWithGui[tuple[Any, ...]]):
         for i, element_gui in enumerate(self._inner_guis):
             # Each tuple gui element will only receive the attributes that concern it.
             prefix = f"{i}_"
-            fiat_attributes_this_element = FiatAttributes(
-                {item: value for item, value in fiat_attributes.items() if item.startswith(prefix)}
-            )
+            fiat_attributes_this_element = FiatAttributes({})
+            for item, value in fiat_attributes.items():
+                if item.startswith(prefix):
+                    fiat_attributes_this_element[item[len(prefix) :]] = value
             element_gui.merge_fiat_attributes(fiat_attributes_this_element)
 
     def _on_heartbeat(self) -> bool:

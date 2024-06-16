@@ -27,8 +27,25 @@ def test_fully_qualified_name_to_gui() -> None:
         == "fiatlight.fiat_togui.tests.sample_enum.SampleEnumNotRegistered"
     )
 
-    with pytest.raises(AssertionError):
+    with pytest.raises(RuntimeError):
         to_gui.fully_qualified_typename(int | None)  # type: ignore
+
+
+def test_type_member_simple() -> None:
+    assert to_gui._any_type_to_gui_impl(int, NO_FIAT_ATTRIBUTES)._type == int
+    assert to_gui._any_type_to_gui_impl(float, NO_FIAT_ATTRIBUTES)._type == float
+    assert to_gui._any_type_to_gui_impl(str, NO_FIAT_ATTRIBUTES)._type == str
+    assert to_gui._any_type_to_gui_impl(bool, NO_FIAT_ATTRIBUTES)._type == bool
+
+
+def test_type_new_type() -> None:
+    from fiatlight.fiat_core.any_data_with_gui import AnyDataWithGui_UnregisteredType
+
+    MyInt = typing.NewType("MyInt", int)
+    my_int_gui = to_gui._any_type_to_gui_impl(MyInt, NO_FIAT_ATTRIBUTES)
+    assert isinstance(my_int_gui, AnyDataWithGui_UnregisteredType)
+    assert my_int_gui.unregistered_typename == "fiatlight.fiat_togui.tests.test_to_gui.MyInt"
+    assert my_int_gui._type is MyInt
 
 
 def test_register_new_type() -> None:
@@ -43,68 +60,66 @@ def test_register_new_type() -> None:
     EvenInt.__doc__ = "Even integer (synonym for int) (NewType)"
     to_gui.register_typing_new_type(EvenInt, IntWithGui)
 
-
-def test_type_member_simple() -> None:
-    assert to_gui._any_type_to_gui_impl(int, NO_FIAT_ATTRIBUTES)._type == int
-    assert to_gui._any_type_to_gui_impl(float, NO_FIAT_ATTRIBUTES)._type == float
-    assert to_gui._any_type_to_gui_impl(str, NO_FIAT_ATTRIBUTES)._type == str
-    assert to_gui._any_type_to_gui_impl(bool, NO_FIAT_ATTRIBUTES)._type == bool
+    event_int_gui = to_gui._any_new_type_to_gui_impl(EvenInt, NO_FIAT_ATTRIBUTES)
+    assert isinstance(event_int_gui, IntWithGui)
 
 
-def test_type_member_composed() -> None:
-    with pytest.raises(ValueError):
-        # We should not call any_composed_type_to_gui with a simple type
-        to_gui._any_composed_type_to_gui_impl(int, NO_FIAT_ATTRIBUTES)
+def test_type_optional() -> None:
+    from typing import Union
+    from fiatlight.fiat_togui.composite_gui import OptionalWithGui
 
-    from fiatlight.fiat_togui.composite_gui import OptionalWithGui, ListWithGui
+    OptIntUnion = Union[int, None]
+    opt_int_union_gui = to_gui._any_type_to_gui_impl(OptIntUnion, NO_FIAT_ATTRIBUTES)
+    assert isinstance(opt_int_union_gui, OptionalWithGui)
 
-    OptionalInt = Optional[int]
-    oi = to_gui._any_composed_type_to_gui_impl(OptionalInt, NO_FIAT_ATTRIBUTES)
-    assert oi._type == typing.Optional[int]
-    assert isinstance(oi, OptionalWithGui)
-    assert oi.inner_gui._type == int
+    OptIntOptional = Optional[int]
+    opt_int_optional_gui = to_gui._any_type_to_gui_impl(OptIntOptional, NO_FIAT_ATTRIBUTES)
+    assert isinstance(opt_int_optional_gui, OptionalWithGui)
 
-    OptionalInt2 = int | None
-    oi2 = to_gui._any_composed_type_to_gui_impl(OptionalInt2, NO_FIAT_ATTRIBUTES)
-    assert oi2._type == typing.Optional[int]
-    assert isinstance(oi2, OptionalWithGui)
-    assert oi2.inner_gui._type == int
-
-    ListInt = typing.List[int]
-    li = to_gui._any_composed_type_to_gui_impl(ListInt, NO_FIAT_ATTRIBUTES)
-    assert li._type == typing.List[int]
-    assert isinstance(li, ListWithGui)
-    assert li.inner_gui._type == int
-
-    ListInt2 = list[int]
-    li2 = to_gui._any_composed_type_to_gui_impl(ListInt2, NO_FIAT_ATTRIBUTES)
-    assert li2._type == typing.List[int]
-    assert isinstance(li2, ListWithGui)
-    assert li2.inner_gui._type == int
-
-    ListOptionalInt = list[int | None]
-    loi = to_gui._any_composed_type_to_gui_impl(ListOptionalInt, NO_FIAT_ATTRIBUTES)
-    assert loi._type == typing.List[typing.Optional[int]]
-    assert isinstance(loi, ListWithGui)
-    assert loi.inner_gui._type == typing.Optional[int]
+    OptIntNone = int | None
+    opt_int_none_gui = to_gui._any_type_to_gui_impl(OptIntNone, NO_FIAT_ATTRIBUTES)
+    assert isinstance(opt_int_none_gui, OptionalWithGui)
 
 
-def test_image_new_type_to_gui() -> None:
-    # Complex case:
-    # Images are handled by a Gui that can handle multiple types defined by NewType
-    from fiatlight.fiat_kits.fiat_image import ImageU8_3, ImageWithGui
+def test_tuple_type() -> None:
+    from fiatlight.fiat_togui.composite_gui import TupleWithGui
+    from fiatlight.fiat_togui.primitives_gui import IntWithGui
+    from fiatlight.fiat_togui.str_with_gui import StrWithGui
 
-    gi = to_gui.any_typing_new_type_to_gui(ImageU8_3, NO_FIAT_ATTRIBUTES)
+    IntAndStr = tuple[int, str]
+    fiat_attributes = FiatAttributes({"0_range": (0, 5), "1_type": "email"})
+    int_and_str_gui = to_gui._any_type_to_gui_impl(IntAndStr, fiat_attributes)
+    assert isinstance(int_and_str_gui, TupleWithGui)
+    assert len(int_and_str_gui._inner_guis) == 2
+    assert isinstance(int_and_str_gui._inner_guis[0], IntWithGui)
+    assert int_and_str_gui._inner_guis[0].fiat_attributes["range"] == (0, 5)
+    assert isinstance(int_and_str_gui._inner_guis[1], StrWithGui)
+    assert int_and_str_gui._inner_guis[1].fiat_attributes["type"] == "email"
 
-    # gi._type is equal to
-    #    typing.Union[
-    #    fiatlight.fiat_kits.fiat_image.image_types.ImageU8_1,
-    #    fiatlight.fiat_kits.fiat_image.image_types.ImageU8_2,
-    #    fiatlight.fiat_kits.fiat_image.image_types.ImageU8_3,
-    #    fiatlight.fiat_kits.fiat_image.image_types.ImageU8_4,
-    #    ...]
 
-    assert isinstance(gi, ImageWithGui)
+def test_list_type() -> None:
+    from fiatlight.fiat_togui.composite_gui import ListWithGui
+    from fiatlight.fiat_togui.primitives_gui import IntWithGui
+
+    ListInt = list[int]
+    list_int_gui = to_gui._any_type_to_gui_impl(ListInt, NO_FIAT_ATTRIBUTES)
+    assert isinstance(list_int_gui, ListWithGui)
+    assert isinstance(list_int_gui.inner_gui, IntWithGui)
+    assert list_int_gui.inner_gui._type is int
+
+
+def test_enum_type() -> None:
+    from enum import Enum
+    from fiatlight.fiat_togui.composite_gui import EnumWithGui
+
+    # @fl.enum_with_gui_registration
+    class MyEnum(Enum):
+        a = "a"
+        b = "b"
+
+    my_enum_gui = to_gui._any_type_to_gui_impl(MyEnum, NO_FIAT_ATTRIBUTES)
+    assert isinstance(my_enum_gui, EnumWithGui)
+    assert my_enum_gui.enum_type is MyEnum
 
 
 def test_any_typeclass_to_data_with_gui() -> None:
@@ -231,3 +246,45 @@ def test_function_with_optional_param() -> None:
     assert isinstance(foo2_gui._inputs_with_gui[0].data_with_gui, OptionalWithGui)
 
     print("a")
+
+
+def test_annotated_type() -> None:
+    from dataclasses import dataclass
+    from typing import Annotated
+    from fiatlight.fiat_togui.primitives_gui import IntWithGui
+
+    @dataclass
+    class ValueRange:
+        lo: int
+        hi: int
+
+    @dataclass
+    class MultipleOf:
+        value: int
+
+    Int_0_10 = Annotated[int, ValueRange(0, 10), MultipleOf(2)]
+
+    int_0_10_gui = to_gui.any_type_to_gui(Int_0_10)
+    assert isinstance(int_0_10_gui, IntWithGui)
+
+
+def test_annotated_pydantic_type() -> None:
+    import fiatlight as fl
+    from fiatlight.fiat_togui.primitives_gui import IntWithGui
+    from fiatlight.fiat_togui.basemodel_gui import BaseModelGui
+    from pydantic import BaseModel, Field
+
+    @fl.base_model_with_gui_registration()
+    class MyParam(BaseModel):
+        # x is in fact of type
+        #     typing.Annotated[int, Gt(gt=0), Lt(lt=0)]
+        # We should be able to extract the range of possible values for Fiatlight.
+        x: int = Field(gt=0, lt=10, default=0)
+
+    my_param_gui = fl.fiat_togui.any_type_to_gui(MyParam)
+    assert isinstance(my_param_gui, BaseModelGui)
+    x_gui = my_param_gui.param_of_name("x").data_with_gui
+    assert isinstance(x_gui, IntWithGui)
+
+    # assert hasattr(x_gui.fiat_attributes, "range")
+    # assert x_gui.fiat_attributes["range"] == (0, 10)

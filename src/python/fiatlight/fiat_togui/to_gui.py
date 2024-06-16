@@ -15,7 +15,9 @@ from fiatlight.fiat_togui.composite_gui import OptionalWithGui, EnumWithGui, Lis
 from fiatlight.fiat_togui.function_signature import get_function_signature
 from fiatlight.fiat_types.fiat_number_types import FloatInterval, IntInterval
 from fiatlight.fiat_utils import docstring_first_line
+import pydantic.typing
 from .dataclass_gui import DataclassLikeType
+import types
 from enum import Enum
 
 import inspect
@@ -92,7 +94,8 @@ def fully_qualified_typename(type_: Type[Any]) -> str:
     For example:
         fiatlight.fiat_kits.fiat_image.lut_functions.LutParams
     """
-    assert isinstance(type_, type)
+    if not isinstance(type_, type):
+        raise RuntimeError(f"fiatlight.to_gui.fully_qualified_typename({type_}): this is not a type!")
     full_typename = f"{type_.__module__}.{type_.__qualname__}"
     if full_typename.startswith("builtins."):
         full_typename = full_typename[len("builtins.") :]
@@ -127,7 +130,7 @@ def fully_qualified_annotation(annotation: Any) -> str:
         return str(annotation)
 
 
-def _extract_union_list(type_class_name: str) -> List[str]:
+def _deprecated_extract_union_list(type_class_name: str) -> List[str]:
     """Extract the list of types in a Union type."""
     if type_class_name.startswith("typing.Union[") and type_class_name.endswith("]"):
         inner_type_str = type_class_name[len("typing.Union[") : -1]
@@ -137,7 +140,7 @@ def _extract_union_list(type_class_name: str) -> List[str]:
     return []
 
 
-def _extract_optional_typeclass(type_class_name: str) -> Tuple[bool, str]:
+def _deprecated_extract_optional_typeclass(type_class_name: str) -> Tuple[bool, str]:
     """Extract the inner type of an Optional type."""
     if type_class_name.startswith("typing.Optional[") and type_class_name.endswith("]"):
         return True, type_class_name[16:-1]
@@ -145,7 +148,7 @@ def _extract_optional_typeclass(type_class_name: str) -> Tuple[bool, str]:
         return True, type_class_name[:-7]
 
     # If the type is a union of multiple types, and one of them is NoneType, we can convert it to Optional
-    union_list = _extract_union_list(type_class_name)
+    union_list = _deprecated_extract_union_list(type_class_name)
     if len(union_list) >= 2 and "NoneType" in union_list:
         union_list.remove("NoneType")
         union_str = ", ".join(union_list)
@@ -155,7 +158,7 @@ def _extract_optional_typeclass(type_class_name: str) -> Tuple[bool, str]:
     return False, type_class_name
 
 
-def _extract_enum_typeclass(type_class_name: str) -> Tuple[bool, str]:
+def _deprecated_extract_enum_typeclass(type_class_name: str) -> Tuple[bool, str]:
     """Extract the name of an enum type. Probably not useful anymore, since enum are registered manually."""
     # An enum type will be displayed as
     #     <enum 'EnumName'>
@@ -170,7 +173,7 @@ def _extract_enum_typeclass(type_class_name: str) -> Tuple[bool, str]:
         return False, type_class_name
 
 
-def _extract_list_typeclass(type_class_name: str) -> Tuple[bool, str]:
+def _deprecated_extract_list_typeclass(type_class_name: str) -> Tuple[bool, str]:
     """Extract the inner type of a List type."""
     if type_class_name.startswith("typing.List[") and type_class_name.endswith("]"):
         return True, type_class_name[12:-1]
@@ -181,7 +184,7 @@ def _extract_list_typeclass(type_class_name: str) -> Tuple[bool, str]:
     return False, type_class_name
 
 
-def _parse_typeclasses_list(type_class_name: str) -> List[str]:
+def _deprecated_parse_typeclasses_list(type_class_name: str) -> List[str]:
     """
     Parse a string representing a list of type classes.
     :param type_class_name:
@@ -214,7 +217,7 @@ def _extract_tuple_typeclasses(type_class_name: str) -> Tuple[bool, List[str]]:
     for tuple_name in possible_tuple_names:
         if type_class_name.startswith(tuple_name) and type_class_name.endswith("]"):
             inner_type_str = type_class_name[len(tuple_name) : -1]
-            inner_type_strs = _parse_typeclasses_list(inner_type_str)
+            inner_type_strs = _deprecated_parse_typeclasses_list(inner_type_str)
             return True, inner_type_strs
     return False, []
 
@@ -242,11 +245,12 @@ def _any_typename_to_gui(typename: str, fiat_attributes: FiatAttributes, type_: 
         if gui_factories().can_handle_typename(type_class_name):
             return gui_factories().factor(type_class_name, fiat_attributes)
 
-    is_optional, optional_inner_type_class_name = _extract_optional_typeclass(typename)
-    is_enum, enum_type_class_name = _extract_enum_typeclass(typename)
-    is_list, list_inner_type_class_name = _extract_list_typeclass(typename)
+    is_optional, optional_inner_type_class_name = _deprecated_extract_optional_typeclass(typename)
+    is_enum, enum_type_class_name = _deprecated_extract_enum_typeclass(typename)
+    is_list, list_inner_type_class_name = _deprecated_extract_list_typeclass(typename)
 
     if is_enum:
+        raise RuntimeError("This code should be dead (_any_typename_to_gui / Enum)")
         if gui_factories().can_handle_typename(enum_type_class_name):
             return gui_factories().factor(enum_type_class_name, fiat_attributes)
         else:
@@ -254,6 +258,7 @@ def _any_typename_to_gui(typename: str, fiat_attributes: FiatAttributes, type_: 
             return AnyDataWithGui_UnregisteredType(enum_type_class_name, type_)
 
     if is_optional:
+        raise RuntimeError("This code should be dead (_any_typename_to_gui / Optional)")
         # We cannot transmit the inner type of the Optional. This would require calling eval(),
         # which is a security issue.
         inner_gui_opt = _any_typename_to_gui(
@@ -263,6 +268,7 @@ def _any_typename_to_gui(typename: str, fiat_attributes: FiatAttributes, type_: 
         AnyDataWithGui.propagate_label_and_tooltip(inner_gui_opt, r_opt)
         return r_opt
     elif is_list:
+        raise RuntimeError("This code should be dead (_any_typename_to_gui / List)")
         # We cannot transmit the inner type of the list. This would require calling eval(),
         # which is a security issue.
         inner_gui_item = _any_typename_to_gui(
@@ -277,13 +283,193 @@ def _any_typename_to_gui(typename: str, fiat_attributes: FiatAttributes, type_: 
     return AnyDataWithGui_UnregisteredType(typename, type_)
 
 
-def _any_type_to_gui_impl(type_: Type[Any], fiat_attributes: FiatAttributes) -> AnyDataWithGui[Any]:
+def _try_find_range_annotation(
+    base_type: Type[Any],
+    annotations: list[Any],
+    io_gui_type: AnyDataWithGui[Any],
+) -> None:
+    assert base_type is int or base_type is float
+
+    import annotated_types
+
+    range_min: int | float | None = None
+    range_max: int | float | None = None
+    for annotation in annotations:
+        if isinstance(annotation, annotated_types.Ge):
+            range_min = annotation.ge  # type: ignore
+        elif isinstance(annotation, annotated_types.Gt):
+            if base_type is int:
+                range_min = annotation.gt + 1  # type: ignore
+            else:
+                range_min = annotation.gt  # type: ignore
+        elif isinstance(annotation, annotated_types.Le):
+            range_max = annotation.le  # type: ignore
+        elif isinstance(annotation, annotated_types.Lt):
+            if base_type is int:
+                range_max = annotation.lt - 1  # type: ignore
+            else:
+                range_max = annotation.lt  # type: ignore
+
+    if range_min is not None and range_max is not None:
+        io_gui_type.merge_fiat_attributes(FiatAttributes({"range": (range_min, range_max)}))
+
+
+def _try_convert_type_annotations_to_fiat_attributes(
+    base_type: Type[Any],
+    annotations: list[Any],
+    io_gui_type: AnyDataWithGui[Any],
+) -> None:
+    from pydantic import BaseModel  # noqa
+
+    if base_type is int or base_type is float:
+        _try_find_range_annotation(base_type, annotations, io_gui_type)
+
+    # for v in annotations:
+    #     t = fully_qualified_typename_or_str(type(v))
+    #     print(t)
+    # pass
+
+
+def _any_annotated_type_to_gui_impl(
+    type_: typing.Annotated[Type[Any], Any], fiat_attributes: FiatAttributes
+) -> AnyDataWithGui[Any]:
+    base_type, *annotations = typing.get_args(type_)
+    assert isinstance(annotations, list)
+    typename = fully_qualified_typename(base_type)
+    gui_type = _any_typename_to_gui(typename, fiat_attributes, base_type)
+    _try_convert_type_annotations_to_fiat_attributes(base_type, annotations, gui_type)
+    return gui_type
+
+
+def _any_optional_type_to_gui_impl(
+    inner_type: Type[Any] | typing.Union[Type[Any], Any],
+    fiat_attributes: FiatAttributes,
+    is_artificial_union: bool = False,
+) -> AnyDataWithGui[Any]:
+    inner_gui = _any_type_to_gui_impl(inner_type, fiat_attributes, is_artificial_union=is_artificial_union)
+    optional_gui = OptionalWithGui(inner_gui)
+    AnyDataWithGui.propagate_label_and_tooltip(inner_gui, optional_gui)
+    return optional_gui
+
+
+def _extract_optionals_from_union(union_args: tuple[type[Any], ...]) -> tuple[type[Any], ...] | None:
+    nb_none = 0
+    for type_ in union_args:
+        if type_ is NoneType:
+            nb_none += 1
+
+    if nb_none != 1:
+        return None
+
+    non_none_types = tuple(type_ for type_ in union_args if type_ is not NoneType)
+    return non_none_types
+
+
+def _any_union_type_to_gui_impl(
+    union_args: tuple[type[Any], ...], fiat_attributes: FiatAttributes
+) -> AnyDataWithGui[Any]:
+    if len(union_args) == 0:
+        raise RuntimeError(f"_any_union_type_to_gui_impl{union_args} could not extract union args")
+    if len(union_args) == 1:
+        raise RuntimeError(f"_any_union_type_to_gui_impl{union_args}: found only one type")
+
+    inner_optional_types = _extract_optionals_from_union(union_args)
+    if inner_optional_types is not None:
+        if len(inner_optional_types) == 1:
+            return _any_optional_type_to_gui_impl(inner_optional_types[0], fiat_attributes)
+        else:
+            return _any_optional_type_to_gui_impl(inner_optional_types, fiat_attributes, is_artificial_union=True)
+
+    union_typename = "UNION_UNION-" + str(union_args)
+    if _GUI_FACTORIES.can_handle_typename(union_typename):
+        return _GUI_FACTORIES.factor(union_typename, fiat_attributes)
+
+    logging.warning(f"_any_union_type_to_gui_impl{union_args}: can not handle this Union type")
+    return AnyDataWithGui_UnregisteredType("unimplemented", type(Any))
+
+
+def _any_new_type_to_gui_impl(type_: Type[Any], fiat_attributes: FiatAttributes) -> AnyDataWithGui[Any]:
+    """Handle NewType types."""
+    assert hasattr(type_, "__supertype__")
+    _supertype = type_.__supertype__  # noqa
+    new_type_name = str(type_)
+    return _any_typename_to_gui(new_type_name, fiat_attributes, type_)
+
+
+def _any_enum_type_to_gui_impl(type_: Type[Enum], fiat_attributes: FiatAttributes) -> AnyDataWithGui[Any]:
+    """Handle Enum types."""
+    assert issubclass(type_, Enum)
+    enum_type_class_name = fully_qualified_typename(type_)
+    if gui_factories().can_handle_typename(enum_type_class_name):
+        return gui_factories().factor(enum_type_class_name, fiat_attributes)
+    else:
+        logging.warning(
+            f"""
+            Enum {enum_type_class_name} is not registered in Fiatlight. Works anyway !
+            Maybe we could ditch the decorator.
+            """
+        )
+        return EnumWithGui(type_)
+
+
+def _any_list_type_to_gui_impl(type_: Type[List[Any]], fiat_attributes: FiatAttributes) -> AnyDataWithGui[Any]:
+    """Handle list types."""
+    element_type = typing.get_args(type_)[0]
+    inner_gui = _any_type_to_gui_impl(element_type, fiat_attributes)
+    list_gui = ListWithGui(inner_gui)
+    AnyDataWithGui.propagate_label_and_tooltip(inner_gui, list_gui)
+    return list_gui
+
+
+def _any_tuple_type_to_gui_impl(
+    element_types: tuple[type, ...], fiat_attributes: FiatAttributes
+) -> AnyDataWithGui[Any]:
+    """Handle tuple types."""
+    from fiatlight.fiat_togui.composite_gui import TupleWithGui
+
+    empty_fiat_attrs = FiatAttributes({})
+    element_guis_tuple = tuple(_any_type_to_gui_impl(element_type, empty_fiat_attrs) for element_type in element_types)
+    tuple_gui = TupleWithGui(element_guis_tuple, fiat_attributes)
+    return tuple_gui
+
+
+def _any_type_to_gui_impl(
+    type_: Type[Any] | typing.Annotated[Type[Any], Any] | typing.Union[Type[Any], Any],
+    fiat_attributes: FiatAttributes,
+    is_artificial_union: bool = False,
+) -> AnyDataWithGui[Any]:
     """Converts a type to a GUI representation."""
-    typename = fully_qualified_typename(type_)
-    return _any_typename_to_gui(typename, fiat_attributes, type_)
+
+    if typing.get_origin(type_) is typing.Annotated:
+        return _any_annotated_type_to_gui_impl(type_, fiat_attributes)
+
+    elif typing.get_origin(type_) is typing.Union or isinstance(type_, types.UnionType):
+        union_args = typing.get_args(type_)
+        assert isinstance(union_args, tuple)
+        return _any_union_type_to_gui_impl(union_args, fiat_attributes)
+    if is_artificial_union:
+        assert isinstance(type_, tuple)
+        return _any_union_type_to_gui_impl(type_, fiat_attributes)
+
+    elif typing.get_origin(type_) is list:
+        return _any_list_type_to_gui_impl(type_, fiat_attributes)
+
+    elif typing.get_origin(type_) is tuple:
+        element_types = typing.get_args(type_)
+        return _any_tuple_type_to_gui_impl(element_types, fiat_attributes)
+
+    elif hasattr(type_, "__supertype__"):  # Check if it's a NewType
+        return _any_new_type_to_gui_impl(type_, fiat_attributes)
+
+    elif issubclass(type_, Enum):  #
+        return _any_enum_type_to_gui_impl(type_, fiat_attributes)
+
+    else:
+        typename = fully_qualified_typename(type_)
+        return _any_typename_to_gui(typename, fiat_attributes, type_)
 
 
-def any_type_to_gui(type_: Type[Any], **fiat_attributes: Any) -> AnyDataWithGui[Any]:
+def any_type_to_gui(type_: Type[Any] | typing.Annotated[Type[Any], Any], **fiat_attributes: Any) -> AnyDataWithGui[Any]:
     """Converts a type to a GUI representation."""
     attr_as_dict = FiatAttributes(fiat_attributes)
     return _any_type_to_gui_impl(type_, attr_as_dict)
@@ -311,32 +497,27 @@ def _any_composed_type_to_gui_impl(
     return r
 
 
-def any_typing_new_type_to_gui(type_: Type[Any], fiat_attributes: FiatAttributes) -> AnyDataWithGui[Any]:
-    """Converts a type created with typing.NewType to a GUI representation."""
-    if isinstance(type_, type):
-        raise ValueError("Use any_type_to_gui for simple types")
-    composed_typename = fully_qualified_complex_typename(type_)
-    r = _any_typename_to_gui(composed_typename, fiat_attributes, type_)
-    return r
-
-
 def _fn_outputs_with_gui(
-    type_class_name: str, fn_fiat_attributes: FiatAttributes, type_: Type[Any]
+    output_type: Type[Any], fn_fiat_attributes: FiatAttributes, split_if_tuple: bool
 ) -> List[AnyDataWithGui[Any]]:
     """Convert the return type of a function to a (list of) GUI representation."""
-    r = []
-    is_tuple, inner_type_classes = _extract_tuple_typeclasses(type_class_name)
-    if is_tuple:
-        for idx_output, inner_type_class in enumerate(inner_type_classes):
-            # We cannot extract the inner tuple types because this would require to call eval,
-            # which is insecure.
-            output_fiat_attrs = get_output_fiat_attributes(fn_fiat_attributes, idx_output)
-            output_gui = _any_typename_to_gui(inner_type_class, fiat_attributes=output_fiat_attrs, type_=type(Any))
-            r.append(output_gui)
-    else:
+    from fiatlight.fiat_togui.composite_gui import TupleWithGui
+
+    output_gui = _any_type_to_gui_impl(output_type, fn_fiat_attributes)
+
+    if not split_if_tuple or not isinstance(output_gui, TupleWithGui):
         output_fiat_attrs = get_output_fiat_attributes(fn_fiat_attributes)
-        output_gui = _any_typename_to_gui(type_class_name, fiat_attributes=output_fiat_attrs, type_=type_)
-        r.append(output_gui)
+        output_gui.merge_fiat_attributes(output_fiat_attrs)
+        output_gui.label = "Output"
+        return [output_gui]
+    else:
+        r = []
+        for idx_output, output_gui in enumerate(output_gui._inner_guis):
+            output_fiat_attrs = get_output_fiat_attributes(fn_fiat_attributes, idx_output)
+            output_gui.merge_fiat_attributes(output_fiat_attrs)
+            output_gui.label = f"Output {idx_output + 1}"
+            r.append(output_gui)
+
     return r
 
 
@@ -365,8 +546,7 @@ def _to_param_with_gui(name: str, param: inspect.Parameter, fiat_attributes: Fia
     if type_annotation is None or type_annotation is inspect.Parameter.empty:
         data_with_gui = AnyDataWithGui_UnregisteredType(fully_qualified_annotation(type_annotation), type_annotation)
     else:
-        param_typename = fully_qualified_annotation(type_annotation)
-        data_with_gui = _any_typename_to_gui(param_typename, fiat_attributes, type_annotation)
+        data_with_gui = _any_type_to_gui_impl(type_annotation, fiat_attributes)
 
     if data_with_gui.label is None:
         data_with_gui.label = name
@@ -477,14 +657,10 @@ def add_input_outputs_to_function(
         output_with_gui.merge_fiat_attributes(get_output_fiat_attributes(fiat_attributes))
         function_with_gui._outputs_with_gui.append(OutputWithGui(output_with_gui))
     else:
-        return_annotation_str = fully_qualified_annotation(return_annotation)
-        if return_annotation_str != "None":
-            outputs_with_guis = _fn_outputs_with_gui(return_annotation_str, fiat_attributes, return_annotation)
-            for i, output_with_gui_any in enumerate(outputs_with_guis):
-                output_with_gui_any.label = f"Output {i + 1}"
-                if len(outputs_with_guis) == 1:
-                    output_with_gui_any.label = "Output"
-                function_with_gui._outputs_with_gui.append(OutputWithGui(output_with_gui_any))
+        if return_annotation is not None:
+            outputs_guis = _fn_outputs_with_gui(return_annotation, fiat_attributes, split_if_tuple=True)
+            outputs_with_gui = [OutputWithGui(outputs_gui) for outputs_gui in outputs_guis]
+            function_with_gui._outputs_with_gui = outputs_with_gui
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -498,16 +674,16 @@ def _make_union_matcher(typenames_prefix: str) -> FnTypenameMatcher:
     """Create a matcher for union of types whose name start with the given prefix."""
 
     # e.g. for typenames_prefix="fiatlight.fiat_kits.fiat_image.image_types.Image" the matcher will match types like
-    #     typing.Union[fiatlight.fiat_kits.fiat_image.image_types.ImageU8_1, fiatlight.fiat_kits.fiat_image.image_types.ImageU8_2, ...]
+    #     "UNION_UNION-(fiatlight.fiat_kits.fiat_image.image_types.ImageU8_1, fiatlight.fiat_kits.fiat_image.image_types.ImageU8_2, ...)
     def union_matcher(typename: str) -> bool:
-        if not typename.startswith("typing.Union[") or not typename.endswith("]"):
+        if not typename.startswith("UNION_UNION-(") or not typename.endswith(")"):
             return False
-        nb_open_brackets = typename.count("[")
-        nb_close_brackets = typename.count("]")
-        if nb_open_brackets != 1 or nb_close_brackets != 1:
+        nb_open_paren = typename.count("(")
+        nb_close_paren = typename.count(")")
+        if nb_open_paren != 1 or nb_close_paren != 1:
             return False
         # Extract the inner type
-        inner_type = typename[len("typing.Union[") : -1]
+        inner_type = typename[len("UNION_UNION-(") : -1]
         inner_types = inner_type.split(", ")
         are_all_inner_types_image_types = all([t.startswith(typenames_prefix) for t in inner_types])
         return are_all_inner_types_image_types
@@ -614,6 +790,9 @@ class GuiFactories:
     """GuiFactories is the registry of all the factories that can convert a type to a GUI representation."""
 
     _factories: List[_GuiFactoryWithMatcher[Any]]
+
+    # if _GUI_FACTORIES.can_handle_union_type(union_args):
+    # return _GUI_FACTORIES.factor_union_type(union_args, fiat_attributes)
 
     def _InitSection(self) -> None:  # dummy method to create a section in the IDE  # noqa
         """

@@ -30,7 +30,7 @@ def test_enum_non_registered() -> None:
         return a.value
 
     foo_gui = fl.FunctionWithGui(foo)
-    assert not isinstance(foo_gui._inputs_with_gui[0].data_with_gui, EnumWithGui)
+    assert isinstance(foo_gui._inputs_with_gui[0].data_with_gui, EnumWithGui)
 
 
 def test_enum_serialization() -> None:

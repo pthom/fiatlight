@@ -2,6 +2,7 @@ import pytest
 from pydantic import BaseModel, Field
 
 import fiatlight as fl
+import fiatlight.fiat_togui.primitives_gui
 from fiatlight.fiat_togui.basemodel_gui import BaseModelGui
 from fiatlight import (
     FunctionWithGui,
@@ -77,6 +78,36 @@ def test_base_model_with_field_default_factory() -> None:
     default_value = my_param_gui.callbacks.default_value_provider()
     assert isinstance(default_value.foo, Foo)
     assert default_value.x == 3
+
+
+def test_model_with_annotated_types() -> None:
+    @fl.base_model_with_gui_registration()
+    class MyParam(BaseModel):
+        # x is in fact of type
+        #     typing.Annotated[int, Gt(gt=0)]
+        x: int = Field(gt=0, default=0)
+
+    my_param_gui = fl.fiat_togui.any_type_to_gui(MyParam)
+    assert isinstance(my_param_gui, BaseModelGui)
+    x_gui = my_param_gui.param_of_name("x").data_with_gui
+    assert isinstance(x_gui, fiatlight.fiat_togui.primitives_gui.IntWithGui)
+
+
+def test_model_with_annotated_range() -> None:
+    @fl.base_model_with_gui_registration()
+    class MyParam(BaseModel):
+        # x is in fact of type
+        #     typing.Annotated[int, Gt(gt=0), Lt(lt=0)]
+        # We should be able to extract the range of possible values for Fiatlight.
+        x: int = Field(gt=0, lt=10, default=0)
+
+    my_param_gui = fl.fiat_togui.any_type_to_gui(MyParam)
+    assert isinstance(my_param_gui, BaseModelGui)
+    x_gui = my_param_gui.param_of_name("x").data_with_gui
+    assert isinstance(x_gui, fiatlight.fiat_togui.primitives_gui.IntWithGui)
+
+    assert "range" in x_gui.fiat_attributes
+    assert x_gui.fiat_attributes["range"] == (1, 9)  # fiatlight range is inclusive (1, 9) instead of (0, 10)
 
 
 def test_base_model_with_validation_errors() -> None:
