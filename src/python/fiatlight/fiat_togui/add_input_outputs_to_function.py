@@ -17,7 +17,7 @@ def _fn_outputs_with_gui(
     output_type: Type[Any], fn_fiat_attributes: FiatAttributes, split_if_tuple: bool
 ) -> List[AnyDataWithGui[Any]]:
     """Convert the return type of a function to a (list of) GUI representation."""
-    from fiatlight.fiat_togui.composite_gui import TupleWithGui
+    from fiatlight.fiat_togui.tuple_with_gui import TupleWithGui
 
     output_gui = _any_type_to_gui_impl(output_type, fn_fiat_attributes)
 

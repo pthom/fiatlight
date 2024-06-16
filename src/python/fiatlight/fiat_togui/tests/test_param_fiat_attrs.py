@@ -35,7 +35,7 @@ def test_custom_ranges_optional() -> None:
 
     to_fahrenheit.celsius__range = (-20, 60)  # type: ignore
 
-    from fiatlight.fiat_togui.composite_gui import OptionalWithGui
+    from fiatlight.fiat_togui.optional_with_gui import OptionalWithGui
 
     f_gui = fiatlight.FunctionWithGui(to_fahrenheit)
 

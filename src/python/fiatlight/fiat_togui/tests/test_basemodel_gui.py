@@ -221,7 +221,7 @@ def test_base_model_with_fiat_attributes() -> None:
 
     f2_gui = FunctionWithGui(f2)
     f2_gui_param_gui = f2_gui.input("effect")
-    assert isinstance(f2_gui_param_gui, fl.fiat_togui.composite_gui.OptionalWithGui)
+    assert isinstance(f2_gui_param_gui, fl.fiat_togui.optional_with_gui.OptionalWithGui)
     assert isinstance(f2_gui_param_gui.inner_gui, BaseModelGui)
     range_f2 = f2_gui_param_gui.inner_gui._parameters_with_gui[0].data_with_gui.fiat_attributes["range"]
     assert range_f2 == (-180, 180)

@@ -2,7 +2,7 @@ from fiatlight.fiat_kits.fiat_image.image_types import ImageU8_1, ImageU8, Image
 from fiatlight.fiat_kits.fiat_image.image_gui import ImageWithGui
 
 from fiatlight import FunctionWithGui
-from fiatlight.fiat_togui.composite_gui import OptionalWithGui
+from fiatlight.fiat_togui.optional_with_gui import OptionalWithGui
 
 
 def test_image_type() -> None:

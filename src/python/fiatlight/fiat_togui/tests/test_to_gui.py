@@ -66,7 +66,7 @@ def test_register_new_type() -> None:
 
 def test_type_optional() -> None:
     from typing import Union
-    from fiatlight.fiat_togui.composite_gui import OptionalWithGui
+    from fiatlight.fiat_togui.optional_with_gui import OptionalWithGui
 
     OptIntUnion = Union[int, None]
     opt_int_union_gui = to_gui._any_type_to_gui_impl(OptIntUnion, NO_FIAT_ATTRIBUTES)
@@ -82,7 +82,7 @@ def test_type_optional() -> None:
 
 
 def test_tuple_type() -> None:
-    from fiatlight.fiat_togui.composite_gui import TupleWithGui
+    from fiatlight.fiat_togui.tuple_with_gui import TupleWithGui
     from fiatlight.fiat_togui.primitives_gui import IntWithGui
     from fiatlight.fiat_togui.str_with_gui import StrWithGui
 
@@ -98,7 +98,7 @@ def test_tuple_type() -> None:
 
 
 def test_list_type() -> None:
-    from fiatlight.fiat_togui.composite_gui import ListWithGui
+    from fiatlight.fiat_togui.list_with_gui import ListWithGui
     from fiatlight.fiat_togui.primitives_gui import IntWithGui
 
     ListInt = list[int]
@@ -110,7 +110,7 @@ def test_list_type() -> None:
 
 def test_enum_type() -> None:
     from enum import Enum
-    from fiatlight.fiat_togui.composite_gui import EnumWithGui
+    from fiatlight.fiat_togui.enum_with_gui import EnumWithGui
 
     # @fl.enum_with_gui_registration
     class MyEnum(Enum):
@@ -218,7 +218,7 @@ def test_any_function_to_function_with_gui_two_outputs_old_style() -> None:
 
 
 def test_function_with_optional_param() -> None:
-    from fiatlight.fiat_togui.composite_gui import OptionalWithGui
+    from fiatlight.fiat_togui.optional_with_gui import OptionalWithGui
 
     def foo(a: int | None = None) -> int:
         if a is None:

@@ -1,7 +1,7 @@
 import fiatlight as fl
 from fiatlight.fiat_togui import to_gui
 from fiatlight.fiat_types import FiatAttributes
-from fiatlight.fiat_togui.composite_gui import EnumWithGui
+from fiatlight.fiat_togui.enum_with_gui import EnumWithGui
 from fiatlight.fiat_togui.tests.sample_enum import (
     SampleEnumNotRegistered,
     SampleEnumRegisteredDecorator,

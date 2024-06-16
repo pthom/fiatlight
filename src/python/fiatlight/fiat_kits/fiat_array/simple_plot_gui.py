@@ -1,4 +1,4 @@
-"""SimplePlotGui is a version of AnyDataWithGui that is specialized to plot 1D arrays.
+"""SimplePlotGui is a version of AnyDataWithGui that is specialized to plot 1D/2D arrays.
 
 Internally, it uses ImPlot (https://github.com/epezent/implot)
 """

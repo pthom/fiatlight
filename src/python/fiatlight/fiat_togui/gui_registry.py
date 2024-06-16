@@ -1,5 +1,5 @@
 from . import primitives_gui
-from .composite_gui import EnumWithGui
+from .enum_with_gui import EnumWithGui
 from .qualified_typename import (
     fully_qualified_typename,
     fully_qualified_typename_or_str,

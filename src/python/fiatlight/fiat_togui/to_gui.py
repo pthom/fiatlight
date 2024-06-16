@@ -1,6 +1,8 @@
 from fiatlight.fiat_types import DataType, FiatAttributes
 from fiatlight.fiat_core.any_data_with_gui import AnyDataWithGui, AnyDataWithGui_UnregisteredType
-from .composite_gui import OptionalWithGui, EnumWithGui, ListWithGui
+from .optional_with_gui import OptionalWithGui
+from .enum_with_gui import EnumWithGui
+from .list_with_gui import ListWithGui
 from .gui_registry import gui_factories, _GUI_FACTORIES
 from .qualified_typename import fully_qualified_typename_or_str
 from .handle_annotated_types import try_convert_type_annotations_to_fiat_attributes
@@ -107,7 +109,7 @@ def _any_tuple_type_to_gui_impl(
     element_types: tuple[type, ...], fiat_attributes: FiatAttributes
 ) -> AnyDataWithGui[Any]:
     """Handle tuple types."""
-    from fiatlight.fiat_togui.composite_gui import TupleWithGui
+    from fiatlight.fiat_togui.tuple_with_gui import TupleWithGui
 
     empty_fiat_attrs = FiatAttributes({})
     element_guis_tuple = tuple(_any_type_to_gui_impl(element_type, empty_fiat_attrs) for element_type in element_types)
