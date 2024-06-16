@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import librosa
 import librosa.display
 
-from fiatlight.fiat_kits.fiat_array import FloatMatrix_Dim1
+from fiatlight.fiat_kits.fiat_implot import FloatMatrix_Dim1
 
 
 # Constants

@@ -9,7 +9,7 @@ from fiatlight.fiat_runner import (
     fire_once_at_frame_end,
     fire_once_at_frame_start,
 )
-from fiatlight.fiat_kits import fiat_image, fiat_array
+from fiatlight.fiat_kits import fiat_image, fiat_implot
 from fiatlight.fiat_widgets.fiat_osd import is_rendering_in_node, is_rendering_in_fiatlight_detached_window
 from fiatlight.fiat_togui import (
     register_type,
@@ -50,7 +50,7 @@ __all__ = [
     "fiat_nodes",
     "fiat_widgets",
     "fiat_config",
-    "fiat_array",
+    "fiat_implot",
     "fiat_kits",
     # from core
     "FunctionsGraph",
@@ -76,7 +76,7 @@ __all__ = [
     "fiatlight_dir",
     # fiat_kits subpackages
     "fiat_image",
-    "fiat_array",
+    "fiat_implot",
     # from fiat_widgets
     "is_rendering_in_node",
     "is_rendering_in_fiatlight_detached_window",

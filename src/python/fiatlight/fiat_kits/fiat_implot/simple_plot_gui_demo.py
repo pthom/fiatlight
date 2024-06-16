@@ -6,7 +6,7 @@ This example demonstrates
 - how to create a spirograph-like curve using ImPlot.
 """
 
-from fiatlight import fiat_array
+from fiatlight import fiat_implot
 import fiatlight as fl
 import numpy as np
 import math
@@ -26,7 +26,7 @@ def phase_from_time_seconds(time_: float) -> float:
 time_seconds.invoke_always_dirty = True  # type: ignore
 
 
-def sin_wave(phase: float, amplitude: float = 1.0) -> fiat_array.FloatMatrix_Dim2:
+def sin_wave(phase: float, amplitude: float = 1.0) -> fiat_implot.FloatMatrix_Dim2:
     x = np.arange(0, 10, 0.1)
     y = np.sin(x + phase) * amplitude
     r = np.stack((x, y))
@@ -44,7 +44,7 @@ def make_spirograph_curve(
     radius_moving_circle: float = 3.48,
     pen_offset: float = 6.0,
     nb_turns: float = 23.0,
-) -> fiat_array.FloatMatrix_Dim2:
+) -> fiat_implot.FloatMatrix_Dim2:
     """a spirograph-like curve"""
     import numpy as np
 
@@ -64,7 +64,7 @@ def make_spirograph_curve(
     return__auto_fit=False,
     return__plot_size_em=(20, 10),
 )
-def get_simple_values(x: float) -> fiat_array.FloatMatrix_Dim1:
+def get_simple_values(x: float) -> fiat_implot.FloatMatrix_Dim1:
     r = []
     for i in range(10):
         r.append(math.cos(x**i))

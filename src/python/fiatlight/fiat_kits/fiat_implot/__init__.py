@@ -1,4 +1,4 @@
-from fiatlight.fiat_kits.fiat_array.array_types import (
+from fiatlight.fiat_kits.fiat_implot.array_types import (
     FloatMatrix_Dim1,
     FloatMatrix_Dim2,
     FloatMatrix_Dim3,
@@ -8,7 +8,7 @@ from fiatlight.fiat_kits.fiat_array.array_types import (
     IntMatrix_Dim3,
     IntMatrix_Dim4,
 )
-from fiatlight.fiat_kits.fiat_array.simple_plot_gui import (
+from fiatlight.fiat_kits.fiat_implot.simple_plot_gui import (
     present_float1_arrays_as_plot,
     present_float2_arrays_as_plot,
     SimplePlotGui,

@@ -1,8 +1,9 @@
 """SoundWave: a simple dataclass for storing audio waveforms, along with their sample rate."""
+
 import numpy as np
 import soundfile  # type: ignore
 
-from fiatlight.fiat_kits.fiat_array import FloatMatrix_Dim1
+from fiatlight.fiat_kits.fiat_implot import FloatMatrix_Dim1
 from fiatlight.fiat_types import AudioPath, TimeSeconds, ExplainedValue, ExplainedValues
 import scipy  # type: ignore
 from typing import NewType

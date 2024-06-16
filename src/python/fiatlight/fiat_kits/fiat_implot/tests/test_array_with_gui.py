@@ -1,4 +1,4 @@
-from fiatlight.fiat_kits.fiat_array.simple_plot_gui import SimplePlotType, SimplePlotParams, SimplePlotGui
+from fiatlight.fiat_kits.fiat_implot.simple_plot_gui import SimplePlotType, SimplePlotParams, SimplePlotGui
 
 
 def test_plot_type() -> None:

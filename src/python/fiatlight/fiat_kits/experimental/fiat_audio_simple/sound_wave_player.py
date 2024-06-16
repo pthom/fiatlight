@@ -11,6 +11,7 @@ Usage:
     time.sleep(2)  # Play for 2 seconds
     player.stop()
 """
+
 from typing import Any
 import time
 import numpy as np
@@ -18,7 +19,7 @@ import logging
 import sounddevice as sd  # type: ignore
 from threading import Thread, current_thread
 from typing import Optional
-from fiatlight.fiat_kits.fiat_array import FloatMatrix_Dim1
+from fiatlight.fiat_kits.fiat_implot import FloatMatrix_Dim1
 from fiatlight.fiat_types import TimeSeconds
 
 from .audio_types import SoundWave

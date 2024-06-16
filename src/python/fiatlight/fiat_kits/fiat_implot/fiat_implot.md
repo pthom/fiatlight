@@ -1,4 +1,4 @@
-fiat_array: widget for 1D and 2D numpy arrays
+fiat_implot: widget for 1D and 2D numpy arrays
 =============================================
 
 Fiatlight provides `SimplePlotGui`, a viewer for numpy arrays that allows to plot 1D and 2D arrays with [ImPlot](https://github.com/epezent/implot)
@@ -9,7 +9,8 @@ Example
 -------
 
 ```python
-from fiatlight.fiat_kits.fiat_array import simple_plot_gui_demo
+from fiatlight.fiat_kits.fiat_implot import simple_plot_gui_demo
+
 simple_plot_gui_demo.main()
 ```
 
@@ -39,6 +40,6 @@ Source code for the example
 ```python
 import fiatlight
 from fiatlight.fiat_doc import look_at_code  # noqa
-%look_at_python_file fiat_kits/fiat_array/simple_plot_gui_demo.py
+%look_at_python_file fiat_kits/fiat_implot/simple_plot_gui_demo.py
 ```
 

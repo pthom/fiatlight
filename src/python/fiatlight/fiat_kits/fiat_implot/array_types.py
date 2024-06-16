@@ -1,10 +1,5 @@
 """This module defines several types you can use to annotate your functions.
-The array types are defined as NewType instances, which are just aliases for numpy arrays.
-
-All those types will be displayed in the GUI as arrays, with various presentation depending on the array type.
-
-Notes:
-    - The easiest way to display an array is to use the `NumericMatrix` type, which is a union of all known types
+The array types are defined as NewType instances, which are just synonyms for numpy arrays.
 """
 
 from typing import Tuple, Any, NewType

@@ -4,7 +4,7 @@ We use FloatMatrix_Dim2 (which is an alias for np.ndarray[ShapeDim2, AnyFloat]) 
 It will be presented as a plot with ImPlot / SimplePlotGui in the GUI.
 """
 
-from fiatlight.fiat_kits.fiat_array import FloatMatrix_Dim2
+from fiatlight.fiat_kits.fiat_implot import FloatMatrix_Dim2
 import fiatlight as fl
 
 
