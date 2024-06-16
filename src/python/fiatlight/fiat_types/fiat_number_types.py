@@ -40,7 +40,7 @@ def format_time_seconds(time_seconds: TimeSeconds, show_centiseconds: bool = Fal
 
 
 def _register_bound_floats() -> None:
-    from fiatlight.fiat_togui.to_gui import gui_factories
+    from fiatlight.fiat_togui.gui_registry import gui_factories
 
     float_intervals: dict[Type[Any], FloatInterval] = {
         Float_0_1: (0.0, 1.0),
@@ -51,7 +51,7 @@ def _register_bound_floats() -> None:
 
 
 def _register_bound_ints() -> None:
-    from fiatlight.fiat_togui.to_gui import gui_factories
+    from fiatlight.fiat_togui.gui_registry import gui_factories
 
     int_intervals: dict[Type[Any], IntInterval] = {
         Int_0_255: (0, 255),

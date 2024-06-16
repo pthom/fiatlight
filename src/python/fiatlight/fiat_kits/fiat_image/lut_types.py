@@ -1,7 +1,7 @@
 from typing import TypeAlias
 from numpy.typing import NDArray
 import numpy as np
-from fiatlight.fiat_togui.to_gui import base_model_with_gui_registration
+from fiatlight.fiat_togui.gui_registry import base_model_with_gui_registration
 from .cv_color_type import ColorConversion
 from pydantic import BaseModel, Field
 

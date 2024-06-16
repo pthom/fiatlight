@@ -724,7 +724,7 @@ class FunctionWithGui:
         :param signature_string: a string representing the signature of the function
                                  used when the function signature cannot be retrieved automatically
         """
-        from fiatlight.fiat_togui.to_gui import (
+        from fiatlight.fiat_togui.add_input_outputs_to_function import (
             add_input_outputs_to_function,
         )
 

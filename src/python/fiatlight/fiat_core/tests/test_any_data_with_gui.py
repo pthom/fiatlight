@@ -2,7 +2,6 @@ from fiatlight.fiat_types import UnspecifiedValue
 from fiatlight.fiat_core import ParamKind, ParamWithGui, AnyDataWithGui
 from fiatlight.fiat_togui.to_gui import (
     _to_data_with_gui_impl,
-    _any_typename_to_gui,
     _any_type_to_gui_impl,
 )
 from fiatlight.fiat_types import FiatAttributes
@@ -12,7 +11,7 @@ NO_FIAT_ATTRIBUTES = FiatAttributes({})
 
 
 def test_creation() -> None:
-    a: AnyDataWithGui[int] = _any_typename_to_gui("int", NO_FIAT_ATTRIBUTES, int)
+    a: AnyDataWithGui[int] = _any_type_to_gui_impl(int, NO_FIAT_ATTRIBUTES)
     assert a.callbacks.edit is not None
     assert a.callbacks.default_value_provider is not None
     assert a.callbacks.default_value_provider() == 0

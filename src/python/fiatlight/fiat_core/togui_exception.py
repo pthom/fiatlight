@@ -7,7 +7,7 @@ class FiatToGuiException(Exception):
 
     def __init__(self, message: str) -> None:
         # Yes, there is a dependency smell here...
-        from fiatlight.fiat_togui.to_gui import to_gui_context_info
+        from fiatlight.fiat_togui.to_gui_context import to_gui_context_info
 
         message = message + "\n\n" + to_gui_context_info()
         super().__init__(message)

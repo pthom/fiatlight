@@ -1,11 +1,11 @@
 import pytest
 
-from fiatlight.fiat_togui import to_gui
+from fiatlight.fiat_togui import to_gui, gui_registry, qualified_typename
 from fiatlight.fiat_types import UnspecifiedValue, ErrorValue
 from fiatlight import FunctionWithGui
 from fiatlight.fiat_types import FiatAttributes
 
-from typing import Tuple, Optional, NewType, Any
+from typing import Tuple, Optional, NewType
 import typing
 
 
@@ -17,18 +17,18 @@ NO_FIAT_ATTRIBUTES = FiatAttributes({})
 
 
 def test_fully_qualified_name_to_gui() -> None:
-    assert to_gui.fully_qualified_typename(int) == "int"
-    assert to_gui.fully_qualified_typename(str) == "str"
-    assert to_gui.fully_qualified_typename(list) == "list"
+    assert qualified_typename.fully_qualified_typename(int) == "int"
+    assert qualified_typename.fully_qualified_typename(str) == "str"
+    assert qualified_typename.fully_qualified_typename(list) == "list"
     from fiatlight.fiat_togui.tests.sample_enum import SampleEnumNotRegistered
 
     assert (
-        to_gui.fully_qualified_typename(SampleEnumNotRegistered)
+        qualified_typename.fully_qualified_typename(SampleEnumNotRegistered)
         == "fiatlight.fiat_togui.tests.sample_enum.SampleEnumNotRegistered"
     )
 
     with pytest.raises(RuntimeError):
-        to_gui.fully_qualified_typename(int | None)  # type: ignore
+        qualified_typename.fully_qualified_typename(int | None)  # type: ignore
 
 
 def test_type_member_simple() -> None:
@@ -55,10 +55,10 @@ def test_register_new_type() -> None:
 
     with pytest.raises(ValueError):
         # fiatlight requires that the type is documented
-        to_gui.register_typing_new_type(EvenInt, IntWithGui)
+        gui_registry.register_typing_new_type(EvenInt, IntWithGui)
 
     EvenInt.__doc__ = "Even integer (synonym for int) (NewType)"
-    to_gui.register_typing_new_type(EvenInt, IntWithGui)
+    gui_registry.register_typing_new_type(EvenInt, IntWithGui)
 
     event_int_gui = to_gui._any_new_type_to_gui_impl(EvenInt, NO_FIAT_ATTRIBUTES)
     assert isinstance(event_int_gui, IntWithGui)
@@ -120,13 +120,6 @@ def test_enum_type() -> None:
     my_enum_gui = to_gui._any_type_to_gui_impl(MyEnum, NO_FIAT_ATTRIBUTES)
     assert isinstance(my_enum_gui, EnumWithGui)
     assert my_enum_gui.enum_type is MyEnum
-
-
-def test_any_typeclass_to_data_with_gui() -> None:
-    d = to_gui._any_typename_to_gui("Dummy", NO_FIAT_ATTRIBUTES, type(Any))
-    assert d.callbacks.edit is None
-    assert d.callbacks.default_value_provider is None
-    assert d.callbacks.default_value_provider is None
 
 
 def test_any_value_to_data_with_gui() -> None:

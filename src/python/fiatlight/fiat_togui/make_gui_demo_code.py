@@ -1,7 +1,7 @@
 import copy
 
 from fiatlight.fiat_core.any_data_with_gui import AnyDataWithGui
-from fiatlight.fiat_togui.to_gui import fully_qualified_typename_or_str
+from fiatlight.fiat_togui.qualified_typename import fully_qualified_typename_or_str
 from typing import Any
 
 

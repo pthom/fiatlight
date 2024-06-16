@@ -4,7 +4,7 @@ import cv2
 from typing import TypeAlias, Any
 from numpy.typing import NDArray
 from fiatlight.fiat_kits.fiat_image.image_types import ImageU8
-from fiatlight.fiat_togui.to_gui import base_model_with_gui_registration
+from fiatlight.fiat_togui.gui_registry import base_model_with_gui_registration
 from pydantic import BaseModel
 
 

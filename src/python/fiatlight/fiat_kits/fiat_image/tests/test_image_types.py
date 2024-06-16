@@ -6,19 +6,19 @@ from fiatlight.fiat_togui.composite_gui import OptionalWithGui
 
 
 def test_image_type() -> None:
-    def foo1(img: ImageU8_1) -> None:
+    def foo1(_img: ImageU8_1) -> None:
         pass
 
     foo1_gui = FunctionWithGui(foo1)
     assert isinstance(foo1_gui._inputs_with_gui[0].data_with_gui, ImageWithGui)
 
-    def foo2(img: ImageU8) -> None:
+    def foo2(_img: ImageU8) -> None:
         pass
 
     foo2_gui = FunctionWithGui(foo2)
     assert isinstance(foo2_gui._inputs_with_gui[0].data_with_gui, ImageWithGui)
 
-    def foo3(img: Image) -> None:
+    def foo3(_img: Image) -> None:
         pass
 
     foo3_gui = FunctionWithGui(foo3)

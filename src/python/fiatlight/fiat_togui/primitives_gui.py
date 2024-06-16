@@ -705,7 +705,7 @@ class ColorRgbFloatWithGui(AnyDataWithGui[ColorRgbFloat]):
 #                               Register all types
 ########################################################################################################################
 def __register_python_types() -> None:
-    from fiatlight.fiat_togui.to_gui import register_type
+    from fiatlight.fiat_togui.gui_registry import register_type
     from .str_with_gui import StrWithGui
 
     register_type(int, IntWithGui)
@@ -715,7 +715,7 @@ def __register_python_types() -> None:
 
 
 def __register_color_types() -> None:
-    from fiatlight.fiat_togui.to_gui import register_typing_new_type
+    from fiatlight.fiat_togui.gui_registry import register_typing_new_type
 
     register_typing_new_type(ColorRgb, ColorRgbWithGui)
     register_typing_new_type(ColorRgba, ColorRgbaWithGui)
@@ -724,7 +724,7 @@ def __register_color_types() -> None:
 
 
 def __register_custom_float_types() -> None:
-    from fiatlight.fiat_togui.to_gui import register_typing_new_type
+    from fiatlight.fiat_togui.gui_registry import register_typing_new_type
     from fiatlight.fiat_types import PositiveFloat
 
     register_typing_new_type(PositiveFloat, make_positive_float_with_gui)

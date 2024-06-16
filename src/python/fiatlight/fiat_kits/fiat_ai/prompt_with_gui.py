@@ -67,6 +67,6 @@ class PromptWithGui(AnyDataWithGui[Prompt]):
 
 
 def _register_prompt() -> None:
-    from fiatlight.fiat_togui.to_gui import register_typing_new_type
+    from fiatlight.fiat_togui.gui_registry import register_typing_new_type
 
     register_typing_new_type(Prompt, PromptWithGui)

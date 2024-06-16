@@ -196,7 +196,7 @@ class VideoPathSaveWithGui(FilePathSaveWithGui):
 #                               Register all types
 ########################################################################################################################
 def _register_file_paths_types() -> None:
-    from fiatlight.fiat_togui.to_gui import register_typing_new_type
+    from fiatlight.fiat_togui.gui_registry import register_typing_new_type
 
     register_typing_new_type(FilePath, FilePathWithGui)
     register_typing_new_type(TextPath, TextPathWithGui)

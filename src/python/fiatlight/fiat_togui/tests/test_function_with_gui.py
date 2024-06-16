@@ -2,7 +2,7 @@ import fiatlight
 from fiatlight.fiat_core import AnyDataWithGui, FunctionWithGui
 from fiatlight.fiat_togui.primitives_gui import IntWithGui
 from fiatlight.fiat_togui.composite_gui import OptionalWithGui
-from fiatlight.fiat_togui.to_gui import register_type
+from fiatlight.fiat_togui.gui_registry import register_type
 from dataclasses import dataclass
 from typing import List, Optional
 

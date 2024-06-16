@@ -1,4 +1,4 @@
-from fiatlight.fiat_togui.to_gui import _GUI_FACTORIES
+from fiatlight.fiat_togui.gui_registry import _GUI_FACTORIES
 
 
 def show_types(query: str | None = None) -> None:

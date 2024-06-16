@@ -1,4 +1,4 @@
-from .to_gui import (
+from .gui_registry import (
     # ==================
     # Types registration
     # ==================
@@ -12,6 +12,8 @@ from .to_gui import (
     # For pydantic models
     register_base_model,
     base_model_with_gui_registration,  # (decorator)
+)
+from .to_gui import (
     # ===============================
     # Convert a type or data to a GUI
     # ===============================
@@ -22,7 +24,6 @@ from .to_gui import (
     # ==============================================
     # Factory used when dealing with editable graphs
     # ==============================================
-    FunctionWithGuiFactory,
 )
 from .explained_value_gui import edit_explained_value, make_explained_value_edit_callback
 from .file_types_gui import text_from_file, TextToFileGui
@@ -45,7 +46,6 @@ __all__ = [
     "to_data_with_gui",
     "_to_data_with_gui_impl",
     "_any_type_to_gui_impl",
-    "FunctionWithGuiFactory",
     # from explained_value_gui
     "edit_explained_value",
     "make_explained_value_edit_callback",

@@ -155,7 +155,7 @@ class DataFrameWithGui(AnyDataWithGui[pd.DataFrame]):
 
 
 def register_gui() -> None:
-    from fiatlight.fiat_togui.to_gui import register_type
+    from fiatlight.fiat_togui.gui_registry import register_type
 
     register_type(pd.DataFrame, DataFrameWithGui)
 

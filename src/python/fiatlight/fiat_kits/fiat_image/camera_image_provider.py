@@ -5,7 +5,7 @@ import cv2
 import os  # noqa
 from pydantic import BaseModel
 
-from fiatlight.fiat_togui.to_gui import enum_with_gui_registration, base_model_with_gui_registration
+from fiatlight.fiat_togui.gui_registry import enum_with_gui_registration, base_model_with_gui_registration
 from fiatlight.fiat_types import JsonDict
 from fiatlight.fiat_kits.fiat_image import ImageU8_3
 from fiatlight.fiat_core.function_with_gui import FunctionWithGui

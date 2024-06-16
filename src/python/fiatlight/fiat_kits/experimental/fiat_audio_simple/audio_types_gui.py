@@ -1,4 +1,5 @@
 """Gui for simple types in fiat_audio.audio_types"""
+
 from fiatlight.fiat_core import AnyDataWithGui
 from fiatlight.fiat_togui import make_explained_value_edit_callback
 from .audio_types import (
@@ -37,7 +38,7 @@ class SoundBlocksListGui(AnyDataWithGui[SoundBlocksList]):
 
 
 def register_audio_types_gui() -> None:
-    from fiatlight.fiat_togui.to_gui import register_type
+    from fiatlight.fiat_togui.gui_registry import register_type
 
     register_type(SampleRate, SampleRateGui)
     register_type(BlockSize, BlockSizeGui)

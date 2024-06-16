@@ -1,4 +1,4 @@
-from fiatlight.fiat_togui.to_gui import dataclass_with_gui_registration, base_model_with_gui_registration
+from fiatlight.fiat_togui.gui_registry import dataclass_with_gui_registration, base_model_with_gui_registration
 from pydantic import BaseModel
 
 
