@@ -139,6 +139,7 @@ class BaseModelGui(DataclassLikeGui[DataclassLikeType]):
             raise ValueError(f"Expected type Pydantic, got {json_data_type}")
         assert self._type is not None
         assert issubclass(self._type, BaseModel)
+        assert not isinstance(self._type, Error)
         r = self._type.model_validate(json_data["value"])
         assert isinstance(r, self._type)
         return r  # type: ignore

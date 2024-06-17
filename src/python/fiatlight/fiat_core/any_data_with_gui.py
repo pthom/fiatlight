@@ -149,7 +149,7 @@ class AnyDataWithGui(Generic[DataType]):
     #            Members
     # ------------------------------------------------------------------------------------------------------------------
     # The type of the data, e.g. int, str, List[int], Tuple[int, str], Optional[int], etc.
-    _type: Type[DataType]
+    _type: Type[DataType] | Error
 
     # The value of the data - can be a DataType, Unspecified, or Error
     # It is accessed through the value property, which triggers the on_change callback (if set)

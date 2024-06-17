@@ -1,4 +1,5 @@
 from fiatlight.fiat_types.base_types import FiatAttributes, JsonDict
+from fiatlight.fiat_types.error_types import ErrorValue
 from fiatlight.fiat_types.error_types import UnspecifiedValue
 from fiatlight.fiat_core.any_data_with_gui import AnyDataWithGui, AnyDataWithGui_UnregisteredType
 from fiatlight.fiat_core.param_with_gui import ParamWithGui, ParamKind
@@ -10,7 +11,6 @@ from .to_gui_context import TO_GUI_CONTEXT
 from .function_signature import get_function_signature
 import inspect
 from typing import Any, Type, List
-from types import NoneType
 
 
 def _fn_outputs_with_gui(
@@ -43,9 +43,7 @@ def _to_param_with_gui(name: str, param: inspect.Parameter, fiat_attributes: Fia
 
     data_with_gui: AnyDataWithGui[Any]
     if type_annotation is None or type_annotation is inspect.Parameter.empty:
-        data_with_gui = AnyDataWithGui_UnregisteredType(
-            fully_qualified_typename_or_str(type_annotation), type_annotation
-        )
+        data_with_gui = AnyDataWithGui_UnregisteredType(fully_qualified_typename_or_str(type_annotation), ErrorValue)
     else:
         data_with_gui = _any_type_to_gui_impl(type_annotation, fiat_attributes)
 
@@ -122,18 +120,18 @@ def add_input_outputs_to_function(
     f = function_with_gui._f_impl  # noqa
     assert f is not None
     try:
-        sig = get_function_signature(f, signature_string=signature_string)
+        signature = get_function_signature(f, signature_string=signature_string)
     except ValueError as e:
         raise ValueError(f"Failed to get the signature of the function {f.__name__}") from e
 
-    params = sig.parameters
-    for name, param in params.items():
-        param_fiat_attrs = _get_input_param_fiat_attributes(fiat_attributes, name)
-        function_with_gui._inputs_with_gui.append(_to_param_with_gui(name, param, param_fiat_attrs))
+    params_signatures = signature.parameters
+    for param_name, param_signature in params_signatures.items():
+        param_fiat_attrs = _get_input_param_fiat_attributes(fiat_attributes, param_name)
+        function_with_gui._inputs_with_gui.append(_to_param_with_gui(param_name, param_signature, param_fiat_attrs))
 
-    return_annotation = sig.return_annotation
+    return_annotation = signature.return_annotation
     if return_annotation is inspect.Parameter.empty:
-        output_with_gui = AnyDataWithGui_UnregisteredType("inspect.Parameter.empty", NoneType)
+        output_with_gui = AnyDataWithGui_UnregisteredType("inspect.Parameter.empty", ErrorValue)
         output_with_gui.label = "Output"
         output_with_gui.merge_fiat_attributes(get_output_fiat_attributes(fiat_attributes))
         function_with_gui._outputs_with_gui.append(OutputWithGui(output_with_gui))

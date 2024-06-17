@@ -55,3 +55,11 @@ def test_with_default_provider_in_type() -> None:
     assert param_gui.can_construct_default_value()
     default_value = param_gui.construct_default_value()
     assert default_value == MyParam(42)
+
+
+def test_native_function() -> None:
+    import math
+
+    cos_gui = fl.FunctionWithGui(math.cos)
+    can_construct = cos_gui._inputs_with_gui[0].data_with_gui.can_construct_default_value()
+    assert not can_construct
