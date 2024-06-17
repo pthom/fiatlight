@@ -12,7 +12,11 @@
                     "name": "sex_query",
                     "data": {
                         "type": "Optional",
-                        "value": null
+                        "value": {
+                            "type": "Enum",
+                            "value_name": "Man",
+                            "class": "Sex"
+                        }
                     }
                 },
                 "age_min": {
@@ -21,7 +25,7 @@
                         "type": "Optional",
                         "value": {
                             "type": "Primitive",
-                            "value": 25
+                            "value": 45
                         }
                     }
                 },
