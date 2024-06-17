@@ -11,13 +11,18 @@
                 "sex_query": {
                     "name": "sex_query",
                     "data": {
-                        "type": "Unspecified"
+                        "type": "Optional",
+                        "value": null
                     }
                 },
                 "age_min": {
                     "name": "age_min",
                     "data": {
-                        "type": "Unspecified"
+                        "type": "Optional",
+                        "value": {
+                            "type": "Primitive",
+                            "value": 25
+                        }
                     }
                 },
                 "age_max": {
@@ -86,7 +91,7 @@
                                 },
                                 "rows_per_page_node": 10,
                                 "rows_per_page_classic": 20,
-                                "current_page_start_idx": 0,
+                                "current_page_start_idx": 160,
                                 "sort_by": []
                             },
                             "expanded": true
@@ -145,7 +150,7 @@
                             },
                             "rows_per_page_node": 10,
                             "rows_per_page_classic": 20,
-                            "current_page_start_idx": 0,
+                            "current_page_start_idx": 160,
                             "sort_by": []
                         },
                         "expanded": true

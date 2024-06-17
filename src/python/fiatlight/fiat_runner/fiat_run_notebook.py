@@ -2,7 +2,7 @@ from fiatlight.fiat_core import FunctionsGraph
 from fiatlight.fiat_runner.fiat_gui import FiatGuiParams, FiatGui
 from fiatlight.fiat_runner.fiat_gui import get_last_screenshot
 from fiatlight.fiat_kits.fiat_image import ImageU8_3
-from imgui_bundle.hello_imgui import ImGuiTheme_
+from imgui_bundle import hello_imgui
 import imgui_bundle
 from typing import Callable, Tuple, Optional
 
@@ -21,7 +21,7 @@ def _fiat_run_graph_nb(
     params: FiatGuiParams | None,
     app_name: str | None,
     notebook_runner_params: NotebookRunnerParams | None,
-    theme: ImGuiTheme_ | None = None,
+    theme: hello_imgui.ImGuiTheme_ | None = None,
     remember_theme: bool = False,
 ) -> None:
     "fiatlight runner for jupyter notebook"

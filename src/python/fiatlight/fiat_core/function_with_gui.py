@@ -405,10 +405,13 @@ image: ImageU8_3,
     from fiatlight.fiat_kits.fiat_image import ImageWithGui
 
     # Add to fiat_tuning any variable you want to be able to diagnose in the node
-    #     * Either a raw type (int, float, str, etc.): see "aperture_size"
+    #     * Either a raw type (int, float, str, etc.): see "durations"
     #     * Or a descendant of AnyDataWithGui: see "canny", "dilate", "image_with_edges"
     add_toon_edges.fiat_tuning = {  # type: ignore
-        "aperture_size": params.canny.aperture_size,
+        "duration_canny": duration_canny,
+        "duration_dilate": duration_dilate,
+        "duration_blur": duration_blur,
+        "duration_merge": duration_merge,
         "canny": ImageWithGui(edges),
         "dilate": ImageWithGui(dilated_edges),
         "image_with_edges": ImageWithGui(image_with_edges),
