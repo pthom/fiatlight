@@ -29,7 +29,7 @@ def test_type_new_type() -> None:
     MyInt = typing.NewType("MyInt", int)
     my_int_gui = to_gui._any_type_to_gui_impl(MyInt, NO_FIAT_ATTRIBUTES)
     assert isinstance(my_int_gui, AnyDataWithGui_UnregisteredType)
-    assert my_int_gui.unregistered_typename == "fiatlight.fiat_togui.tests.test_to_gui.MyInt"
+    assert my_int_gui.unregistered_typename == "fiatlight.fiat_togui.tests.test_to_gui.MyInt --|> NewType(builtins.int)"
     assert my_int_gui._type is MyInt
 
 

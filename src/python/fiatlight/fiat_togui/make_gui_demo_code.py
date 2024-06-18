@@ -10,6 +10,8 @@ def make_gui_demo_code(gui_instance: AnyDataWithGui[Any]) -> str:
 
     datatype_basename = gui_instance.datatype_basename()
     datatype_qualified_name = gui_instance.datatype_qualified_name()
+    if datatype_qualified_name.startswith("builtins."):
+        datatype_qualified_name = datatype_qualified_name[9:]
 
     param_name = datatype_basename.lower() + "_param"
 

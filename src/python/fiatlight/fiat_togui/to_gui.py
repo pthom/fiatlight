@@ -1,10 +1,10 @@
 from fiatlight.fiat_types import DataType, FiatAttributes
+from fiatlight.fiat_types import typename_utils
 from fiatlight.fiat_core.any_data_with_gui import AnyDataWithGui, AnyDataWithGui_UnregisteredType
 from .optional_with_gui import OptionalWithGui
 from .enum_with_gui import EnumWithGui
 from .list_with_gui import ListWithGui
 from .gui_registry import gui_factories, _GUI_FACTORIES
-from .typename import fully_qualified_typename_or_str
 from .handle_annotated_types import try_convert_type_annotations_to_fiat_attributes
 from .to_gui_context import TO_GUI_CONTEXT
 import types
@@ -17,7 +17,7 @@ import typing
 
 def call_factor(type_: Type[Any], fiat_attributes: FiatAttributes) -> AnyDataWithGui[Any]:
     """Central function to convert a type name to a GUI representation."""
-    typename = fully_qualified_typename_or_str(type_)
+    typename = typename_utils.fully_qualified_typename(type_)
     if gui_factories().can_handle_typename(typename):
         return gui_factories()._factor(typename, fiat_attributes)
 
@@ -123,7 +123,7 @@ def _any_type_to_gui_impl(
     is_artificial_union: bool = False,
 ) -> AnyDataWithGui[Any]:
     """Converts a type to a GUI representation."""
-    typename = fully_qualified_typename_or_str(type_)
+    typename = typename_utils.fully_qualified_typename(type_)
     TO_GUI_CONTEXT.enqueue_typename(typename)
 
     if typing.get_origin(type_) is typing.Annotated:

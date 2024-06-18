@@ -1,10 +1,11 @@
 from . import primitives_gui
-from . import typename
 from .dataclass_like_gui import DataclassLikeType
 from fiatlight.fiat_types.base_types import DataType, FiatAttributes
+from fiatlight.fiat_types import typename_utils
 from fiatlight.fiat_types.fiat_number_types import FloatInterval, IntInterval
 from fiatlight.fiat_core.any_data_with_gui import AnyDataWithGui
 from fiatlight.fiat_utils import docstring_first_line
+
 from typing import Any, Callable, Generic, List, Tuple, Type, TypeAlias
 from enum import Enum
 from dataclasses import dataclass
@@ -57,7 +58,7 @@ class _GuiFactoryWithMatcher(Generic[DataType]):
 
     fn_matcher: FnTypenameMatcher
     gui_factory: GuiFactory[Any]
-    datatype: Type[DataType]  # might be NoneType for special cases like unions, and typename_prefix
+    datatype: Type[Any] | None
     datatype_explanation: str | None = None
 
     def sort_key_by_parent_module_then_name(self) -> tuple[str, str]:
@@ -94,20 +95,21 @@ class _GuiFactoryWithMatcher(Generic[DataType]):
     def info_cells(self) -> list[str | None]:
         factored_gui = self.gui_factory()
 
-        datatype_str = "None" if self.datatype == NoneType else typename.fully_qualified_typename_or_str(self.datatype)
+        datatype_str = "Unknown" if self.datatype == NoneType else typename_utils.base_typename(self.datatype)
         try:
-            if issubclass(self.datatype, Enum):
-                datatype_str = "(Enum) " + datatype_str
-            if issubclass(self.datatype, pydantic.BaseModel):
-                datatype_str = "(BaseModel) " + datatype_str
-            if dataclasses.is_dataclass(self.datatype):
-                datatype_str = "(dataclass) " + datatype_str
+            if isinstance(self.datatype, type):
+                if issubclass(self.datatype, Enum):
+                    datatype_str = "(Enum) " + datatype_str
+                if issubclass(self.datatype, pydantic.BaseModel):
+                    datatype_str = "(BaseModel) " + datatype_str
+                if dataclasses.is_dataclass(self.datatype):
+                    datatype_str = "(dataclass) " + datatype_str
         except TypeError:
             pass
 
         datatype_explanation = self.get_datatype_explanation()
 
-        gui_typename = typename.base_and_qualified_typename(type(factored_gui))
+        gui_typename = typename_utils.base_typename(type(factored_gui))
         gui_explanation = factored_gui.docstring_first_line() or ""
 
         cell1 = datatype_str
@@ -127,7 +129,7 @@ class _GuiFactoryWithMatcher(Generic[DataType]):
 
     def matches_query(self, query: str) -> bool:
         factored_gui_typename = type(self.gui_factory()).__name__
-        matches_data_typename_query = _lower_case_match(typename.fully_qualified_typename_or_str(self.datatype), query)
+        matches_data_typename_query = _lower_case_match(typename_utils.fully_qualified_typename(self.datatype), query)
         matches_gui_typename_query = _lower_case_match(factored_gui_typename, query)
         matches_explanation_query = _lower_case_match(self.datatype_explanation, query)
 
@@ -200,7 +202,7 @@ class GuiFactories:
 
         # Search for a data type
         for factory in self._factories:
-            datatype_qualified_name = typename.fully_qualified_typename_or_str(factory.datatype)
+            datatype_qualified_name = typename_utils.fully_qualified_typename(factory.datatype)
             if datatype_qualified_name == typename_gui_or_data:
                 add_gui_type(factory.gui_factory())
             else:
@@ -298,7 +300,7 @@ class GuiFactories:
 
     def register_typing_new_type(self, type_: Any, factory: GuiFactory[Any]) -> None:
         """Registers a factory for a type created with typing.NewType."""
-        full_typename = str(type_)
+        full_typename = typename_utils.fully_qualified_typename(type_)
 
         def matcher_function(tested_typename: Typename) -> bool:
             return full_typename == tested_typename
@@ -319,7 +321,7 @@ class GuiFactories:
     ) -> None:
         """Registers a factory for a type."""
         assert isinstance(type_, type)
-        full_typename = typename.fully_qualified_typename(type_)
+        full_typename = typename_utils.fully_qualified_typename(type_)
 
         def matcher_function(tested_typename: Typename) -> bool:
             return full_typename == tested_typename
@@ -330,7 +332,7 @@ class GuiFactories:
         self, type_: Type[Any], factory: GuiFactory[Any], datatype_explanation: str | None = None
     ) -> None:
         """Registers a factory for a type (real type or NewType)."""
-        full_typename = typename.fully_qualified_typename_or_str(type_)
+        full_typename = typename_utils.fully_qualified_typename(type_)
 
         def matcher_function(tested_typename: Typename) -> bool:
             return full_typename == tested_typename

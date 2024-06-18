@@ -256,7 +256,7 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
             param_str = param_gui.data_with_gui.datatype_value_to_str(param_value)
             strs[param_gui.name] = param_str
         joined_strs = ", ".join(f"{k}: {v}" for k, v in strs.items())
-        r = f"{self.datatype_qualified_name()}({joined_strs})"
+        r = f"{self.datatype_basename()}({joined_strs})"
         return r
 
     def present(self, _: DataclassLikeType) -> None:

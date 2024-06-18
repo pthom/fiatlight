@@ -4,7 +4,7 @@ from fiatlight.fiat_core.any_data_with_gui import AnyDataWithGui, AnyDataWithGui
 from fiatlight.fiat_core.param_with_gui import ParamWithGui, ParamKind
 from fiatlight.fiat_core.function_with_gui import FunctionWithGui
 from fiatlight.fiat_core.output_with_gui import OutputWithGui
-from .typename import fully_qualified_typename_or_str
+from fiatlight.fiat_types import typename_utils
 from .to_gui import _any_type_to_gui_impl
 from .to_gui_context import TO_GUI_CONTEXT
 from .function_signature import get_function_signature
@@ -42,7 +42,9 @@ def _to_param_with_gui(name: str, param: inspect.Parameter, fiat_attributes: Fia
 
     data_with_gui: AnyDataWithGui[Any]
     if type_annotation is None or type_annotation is inspect.Parameter.empty:
-        data_with_gui = AnyDataWithGui_UnregisteredType[Any](fully_qualified_typename_or_str(type_annotation), None)
+        data_with_gui = AnyDataWithGui_UnregisteredType[Any](
+            typename_utils.fully_qualified_typename(type_annotation), None
+        )
     else:
         data_with_gui = _any_type_to_gui_impl(type_annotation, fiat_attributes)
 

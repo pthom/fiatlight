@@ -53,6 +53,7 @@ from .color_types import (
     color_rgba_to_color_rgba_float,
     color_rgb_to_color_rgba,
 )
+from . import typename_utils
 
 __all__ = [
     # from error_types
@@ -109,4 +110,6 @@ __all__ = [
     "color_rgba_float_to_color_rgba",
     "color_rgba_to_color_rgba_float",
     "color_rgb_to_color_rgba",
+    # modules
+    "typename_utils",
 ]

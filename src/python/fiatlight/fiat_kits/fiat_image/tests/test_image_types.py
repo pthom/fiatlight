@@ -5,6 +5,16 @@ from fiatlight import FunctionWithGui
 from fiatlight.fiat_togui.optional_with_gui import OptionalWithGui
 
 
+def test_image_togui() -> None:
+    from fiatlight.fiat_togui import any_type_to_gui
+
+    iu8_1_gui = any_type_to_gui(ImageU8_1)
+    assert isinstance(iu8_1_gui, ImageWithGui)
+
+    i_gui = any_type_to_gui(Image)  # type: ignore
+    assert isinstance(i_gui, ImageWithGui)
+
+
 def test_image_type() -> None:
     def foo1(_img: ImageU8_1) -> None:
         pass
@@ -31,6 +41,3 @@ def test_image_type() -> None:
     output4_gui = foo4_gui._outputs_with_gui[0].data_with_gui
     assert isinstance(output4_gui, OptionalWithGui)
     assert isinstance(output4_gui.inner_gui, ImageWithGui)
-
-
-test_image_type()
