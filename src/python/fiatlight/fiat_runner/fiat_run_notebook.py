@@ -30,19 +30,14 @@ def _fiat_run_graph_nb(
     from IPython.display import display
     from IPython.core.display import HTML
 
+    if theme is None:
+        theme = hello_imgui.ImGuiTheme_.white_is_white
+
     if notebook_runner_params is None:
         notebook_runner_params = NotebookRunnerParams()
 
     def run_app() -> None:
         nonlocal notebook_runner_params
-        # @immapp.static(was_theme_set=False)
-        # def gui_with_light_theme():
-        #     static = gui_with_light_theme
-        #     if not static.was_theme_set:
-        #         hello_imgui.apply_theme(hello_imgui.ImGuiTheme_.white_is_white)
-        #         static.was_theme_set = True
-        #     gui_function()
-
         fiat_gui = FiatGui(
             functions_graph, params=params, app_name=app_name, theme=theme, remember_theme=remember_theme
         )

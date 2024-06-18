@@ -246,6 +246,8 @@ class FiatGui:
         theme: ImGuiTheme_ | None = None,
         remember_theme: bool = False,
     ) -> None:
+        if theme is None:
+            theme = hello_imgui.ImGuiTheme_.darcula_darker
         if params is None:
             params = FiatGuiParams()
 
