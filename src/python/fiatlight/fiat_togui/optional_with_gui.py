@@ -1,7 +1,7 @@
 from fiatlight.fiat_types import DataType, Unspecified, Error, JsonDict, InvalidValue
 from fiatlight.fiat_core import AnyDataWithGui
 from fiatlight.fiat_widgets import fiat_osd
-from imgui_bundle import imgui
+from imgui_bundle import imgui, imgui_ctx
 from typing import Union
 from types import NoneType
 
@@ -63,37 +63,33 @@ class OptionalWithGui(AnyDataWithGui[DataType | None]):
 
     def edit(self, value: DataType | None) -> tuple[bool, DataType | None]:
         assert not isinstance(value, (Unspecified, Error))
+        assert self.inner_gui.can_construct_default_value()
+        default_value = self.inner_gui.construct_default_value()
+        fn_edit = self.inner_gui.callbacks.edit
 
         changed = False
-
-        if value is None:
-            imgui.begin_horizontal("##OptionalH")
-            imgui.text("Optional: None")
-            if imgui.button("Set"):
-                assert self.inner_gui.can_construct_default_value()
-                value = self.inner_gui.construct_default_value()
-                changed = True
-            fiat_osd.set_widget_tooltip("Set Optional to default value for this type.")
-            imgui.end_horizontal()
-        else:
-            imgui.begin_vertical("##OptionalV")
-            imgui.begin_horizontal("##OptionalH")
-            imgui.text("Optional: Set")
-            if imgui.button("Unset"):
-                value = None
-                changed = True
-            fiat_osd.set_widget_tooltip("Unset Optional.")
-            imgui.end_horizontal()
-            fn_edit = self.inner_gui.callbacks.edit
-            if value is not None and fn_edit is not None:
-                changed_in_edit, value = fn_edit(value)
-                if changed_in_edit:
-                    if isinstance(value, (Unspecified, Error)):
-                        raise ValueError("Inner GUI value is Unspecified or Error")
+        with imgui_ctx.begin_horizontal("##OptionalH"):
+            if value is None:
+                imgui.text("None")
+                if imgui.button("Set"):
+                    value = default_value
                     changed = True
+                fiat_osd.set_widget_tooltip(
+                    f"Set Optional to default value ({default_value}) for {self.inner_gui.datatype_name()}"
+                )
             else:
-                imgui.text("No edit function!")
-            imgui.end_vertical()
+                if fn_edit is not None:
+                    with imgui_ctx.begin_vertical("##OptionalV"):  # Some widgets Expect the standard vertical layout.
+                        changed_in_edit, value = fn_edit(value)
+                    if changed_in_edit:
+                        if isinstance(value, (Unspecified, Error)):
+                            raise ValueError("Inner GUI value is Unspecified or Error")
+                        changed = True
+                else:
+                    imgui.text("No edit function!")
+                if imgui.button("Set None"):
+                    value = None
+                    changed = True
 
         return changed, value
 

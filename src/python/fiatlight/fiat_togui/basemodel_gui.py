@@ -142,7 +142,7 @@ class BaseModelGui(DataclassLikeGui[DataclassLikeType]):
         assert not isinstance(self._type, Error)
         r = self._type.model_validate(json_data["value"])
         assert isinstance(r, self._type)
-        return r  # type: ignore
+        return r
 
     def clipboard_copy_str(self, value: DataclassLikeType) -> str:
         assert isinstance(value, BaseModel)
