@@ -85,10 +85,8 @@ def fully_qualified_newtype_typename(new_type: type[Any]) -> str:
     """
     if not isinstance(new_type, NewType):  # noqa
         raise TypeError(f"Expected a NewType, got {new_type!r}")
-    supertype = new_type.__supertype__  # noqa
     str_type = str(new_type)
-    str_supertype = fully_qualified_typename(supertype)
-    return f"{str_type} --|> NewType({str_supertype})"
+    return f"{str_type}"
 
 
 def base_newtype_typename(new_type: type[Any]) -> str:
@@ -101,8 +99,7 @@ def base_newtype_typename(new_type: type[Any]) -> str:
     supertype = new_type.__supertype__  # noqa
     str_newtype_full = str(new_type)
     str_newtype_base = str_newtype_full.split(".")[-1]
-    str_supertype = base_typename(supertype)
-    return f"{str_newtype_base} --|> NewType({str_supertype})"
+    return f"{str_newtype_base}"
 
 
 def fully_qualified_typename(type_: TypeLike) -> str:

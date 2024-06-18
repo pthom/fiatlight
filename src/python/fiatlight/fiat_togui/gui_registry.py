@@ -194,40 +194,33 @@ class GuiFactories:
                     return
             matching_guis.append(gui_type_)
 
-        # Search for a GUI type
+        # Search for a matching GUI type or datatype
         for factory in self._factories:
             factored_gui = factory.gui_factory()
-            if type(factored_gui).__name__ == typename_gui_or_data:
+            # print(f"testing {type(factored_gui).__name__} {factored_gui.datatype_basename()}")
+            if type(factored_gui).__name__.lower() == typename_gui_or_data.lower():
+                add_gui_type(factored_gui)
+            elif factored_gui.datatype_basename().lower() == typename_gui_or_data.lower():
                 add_gui_type(factored_gui)
 
-        # Search for a data type
-        for factory in self._factories:
-            datatype_qualified_name = typename_utils.fully_qualified_typename(factory.datatype)
-            if datatype_qualified_name == typename_gui_or_data:
-                add_gui_type(factory.gui_factory())
-            else:
-                if "." in datatype_qualified_name:
-                    datatype_name = datatype_qualified_name.split(".")[-1]
-                    if datatype_name == typename_gui_or_data:
-                        add_gui_type(factory.gui_factory())
-
-        if len(matching_guis) == 0:
-            r = f"This typename ({typename_gui_or_data}) is not handled\n"
-            r += "===============================\n"
-            r += "List of all GUI types:\n"
-            for factory in self._factories:
-                factored_gui = factory.gui_factory()
-                data_typename = factored_gui.datatype_base_and_qualified_name()
-                r += f"    {data_typename}\n"
-            return r
-        elif len(matching_guis) > 1:
-            r = "Multiple GUI types found for this typename:\n"
-            for gui_type in matching_guis:
-                r += f"    {type(gui_type).__name__}\n"
-            r += "Please refine your search\n"
-            return r
-        else:
+        if len(matching_guis) == 1:
             return matching_guis[0]
+
+        error_message = ""
+        if len(matching_guis) == 0:
+            error_message = f"This typename ({typename_gui_or_data}) is not handled\n"
+        elif len(matching_guis) > 1:
+            error_message = "Multiple GUI types found for this typename:\n"
+            error_message += "Please refine your search\n"
+
+        error_message += "Available GUI types:\n"
+        error_message += "=====================\n"
+        for gui_type in self._factories:
+            factored_gui = gui_type.gui_factory()
+            error_message += (
+                f"    {factored_gui.datatype_basename()} => {typename_utils.base_typename(type(factored_gui))}\n"
+            )
+        return error_message
 
     # def run_gui_demo(self, gui_or_data_typename: str) -> None:
     #     """Returns the info about a GUI type."""

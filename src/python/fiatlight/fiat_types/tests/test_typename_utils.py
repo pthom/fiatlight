@@ -41,11 +41,8 @@ MyNewType = NewType("MyNewType", int)
 
 
 def test_newtype_typename() -> None:
-    assert (
-        tu.fully_qualified_newtype_typename(MyNewType)
-        == "fiatlight.fiat_types.tests.test_typename_utils.MyNewType --|> NewType(builtins.int)"
-    )
-    assert tu.base_newtype_typename(MyNewType) == "MyNewType --|> NewType(int)"
+    assert tu.fully_qualified_newtype_typename(MyNewType) == "fiatlight.fiat_types.tests.test_typename_utils.MyNewType"
+    assert tu.base_newtype_typename(MyNewType) == "MyNewType"
 
 
 def test_typename() -> None:
@@ -72,11 +69,8 @@ def test_typename() -> None:
     )
     assert tu.base_typename(List[SampleEnum]) == "list[SampleEnum]"
 
-    assert (
-        tu.fully_qualified_typename(MyNewType)
-        == "fiatlight.fiat_types.tests.test_typename_utils.MyNewType --|> NewType(builtins.int)"
-    )
-    assert tu.base_typename(MyNewType) == "MyNewType --|> NewType(int)"
+    assert tu.fully_qualified_typename(MyNewType) == "fiatlight.fiat_types.tests.test_typename_utils.MyNewType"
+    assert tu.base_typename(MyNewType) == "MyNewType"
 
 
 def test_image_types() -> None:
