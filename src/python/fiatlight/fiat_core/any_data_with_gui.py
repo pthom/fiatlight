@@ -522,14 +522,6 @@ class AnyDataWithGui(Generic[DataType]):
                         as_str = self.datatype_value_to_str(value)
                         text_maybe_truncated(as_str, get_fiat_config().style.str_truncation.present_header_line)
 
-            # invalid value info
-            if isinstance(self.value, InvalidValue):
-                text_maybe_truncated(
-                    icons_fontawesome_6.ICON_FA_TRIANGLE_EXCLAMATION + " " + self.value.error_message,
-                    get_fiat_config().style.str_truncation.invalid_value_message,
-                    color=get_fiat_config().style.color_as_vec4(FiatColorType.InvalidValue),
-                )
-
             #
             # Right Side:
             #   * open in popup button
@@ -554,6 +546,14 @@ class AnyDataWithGui(Generic[DataType]):
             # suffix_gui
             if params.suffix_gui is not None:
                 params.suffix_gui()
+
+        # Optional second line: invalid value info
+        if isinstance(self.value, InvalidValue):
+            text_maybe_truncated(
+                icons_fontawesome_6.ICON_FA_TRIANGLE_EXCLAMATION + " " + self.value.error_message,
+                get_fiat_config().style.str_truncation.invalid_value_message,
+                color=get_fiat_config().style.color_as_vec4(FiatColorType.InvalidValue),
+            )
 
     def _gui_edit_header_line(self, params: GuiHeaderLineParams[DataType]) -> bool:
         # can_edit_in_node = not self.callbacks.edit_popup_required
@@ -615,14 +615,6 @@ class AnyDataWithGui(Generic[DataType]):
                         as_str = self.datatype_value_to_str(value)
                         text_maybe_truncated(as_str, get_fiat_config().style.str_truncation.present_header_line)
 
-            # invalid value info
-            if isinstance(self.value, InvalidValue):
-                text_maybe_truncated(
-                    icons_fontawesome_6.ICON_FA_TRIANGLE_EXCLAMATION + " " + self.value.error_message,
-                    get_fiat_config().style.str_truncation.invalid_value_message,
-                    color=get_fiat_config().style.color_as_vec4(FiatColorType.InvalidValue),
-                )
-
             #
             # Right Side:
             #   * open in popup button
@@ -664,6 +656,14 @@ class AnyDataWithGui(Generic[DataType]):
             # suffix_gui
             if params.suffix_gui is not None:
                 params.suffix_gui()
+
+        # Optional second line: invalid value info
+        if isinstance(self.value, InvalidValue):
+            text_maybe_truncated(
+                icons_fontawesome_6.ICON_FA_TRIANGLE_EXCLAMATION + " " + self.value.error_message,
+                get_fiat_config().style.str_truncation.invalid_value_message,
+                color=get_fiat_config().style.color_as_vec4(FiatColorType.InvalidValue),
+            )
 
         return changed
 

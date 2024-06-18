@@ -6,6 +6,7 @@ from pydantic import BaseModel, Field, field_validator
 class MyData(BaseModel):
     # This field should be between 0 and 99 inclusive
     x: int = Field(default=1, ge=0, lt=100)
+    y: str = "Hello"
 
     @field_validator("x")
     @classmethod
