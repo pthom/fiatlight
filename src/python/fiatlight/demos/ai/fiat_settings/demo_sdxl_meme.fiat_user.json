@@ -6,14 +6,14 @@
                     "name": "prompt",
                     "data": {
                         "type": "Primitive",
-                        "value": "A cat chasing a winged flying goldfish in a flowered field"
+                        "value": "An exhausted baby bear hiking in the desert with a backpack\n wearing a cap and drinking from a metallic water bottle"
                     }
                 },
                 "seed": {
                     "name": "seed",
                     "data": {
                         "type": "Primitive",
-                        "value": 56
+                        "value": 14
                     }
                 }
             },
@@ -23,11 +23,11 @@
                     "data": {
                         "type": "Pydantic",
                         "value": {
-                            "text": "Mother Nature is full of surprises",
-                            "font_size": 9,
+                            "text": "Are we there yet?",
+                            "font_size": 14,
                             "font_type": "fonts/Anton/Anton-Regular.ttf",
                             "x": 0.0430000014603138,
-                            "y": 0.8529999852180481,
+                            "y": 0.8790000081062317,
                             "text_color": [
                                 255,
                                 255,
@@ -59,18 +59,19 @@
                                 "_str_with_resizable_gui": {
                                     "width_em": 15.0,
                                     "size_multiline_em": [
-                                        37.0,
+                                        28.0,
                                         15.0
                                     ],
                                     "wrap_multiline": false,
                                     "wrap_multiline_width": 80
-                                }
+                                },
+                                "submit_continuously": true
                             },
                             "expanded": true
                         },
                         "seed": {
                             "cb_options": {},
-                            "expanded": true
+                            "expanded": false
                         }
                     },
                     "outputs": {
@@ -94,8 +95,8 @@
                                     "DrawValuesOnZoomedPixels": true,
                                     "HighlightWatchedPixels": true,
                                     "ImageDisplaySize": {
-                                        "height": 346,
-                                        "width": 307
+                                        "height": 506,
+                                        "width": 598
                                     },
                                     "IsColorOrderBGR": true,
                                     "PanWithMouse": true,
@@ -113,12 +114,12 @@
                                     "WatchedPixels": [],
                                     "ZoomKey": "z",
                                     "ZoomPanMatrix": {
-                                        "00": 0.63671773934776,
+                                        "00": 1.1290364583333334,
                                         "01": 0.0,
-                                        "02": -9.499741273026558,
+                                        "02": -4.735905154630332e-14,
                                         "10": 0.0,
-                                        "11": 0.63671773934776,
-                                        "12": 10.00025872697347,
+                                        "11": 1.1290364583333334,
+                                        "12": -36.03333333333336,
                                         "20": 0.0,
                                         "21": 0.0,
                                         "22": 1.0
@@ -141,18 +142,19 @@
                             "_str_with_resizable_gui": {
                                 "width_em": 15.0,
                                 "size_multiline_em": [
-                                    37.0,
+                                    28.0,
                                     15.0
                                 ],
                                 "wrap_multiline": false,
                                 "wrap_multiline_width": 80
-                            }
+                            },
+                            "submit_continuously": true
                         },
                         "expanded": true
                     },
                     "seed": {
                         "cb_options": {},
-                        "expanded": true
+                        "expanded": false
                     }
                 },
                 "outputs": {
@@ -176,8 +178,8 @@
                                 "DrawValuesOnZoomedPixels": true,
                                 "HighlightWatchedPixels": true,
                                 "ImageDisplaySize": {
-                                    "height": 346,
-                                    "width": 307
+                                    "height": 506,
+                                    "width": 598
                                 },
                                 "IsColorOrderBGR": true,
                                 "PanWithMouse": true,
@@ -195,12 +197,12 @@
                                 "WatchedPixels": [],
                                 "ZoomKey": "z",
                                 "ZoomPanMatrix": {
-                                    "00": 0.63671773934776,
+                                    "00": 1.1290364583333334,
                                     "01": 0.0,
-                                    "02": -9.499741273026558,
+                                    "02": -4.735905154630332e-14,
                                     "10": 0.0,
-                                    "11": 0.63671773934776,
-                                    "12": 10.00025872697347,
+                                    "11": 1.1290364583333334,
+                                    "12": -36.03333333333336,
                                     "20": 0.0,
                                     "21": 0.0,
                                     "22": 1.0
@@ -292,23 +294,23 @@
                                         "wrap_multiline": false,
                                         "wrap_multiline_width": 80
                                     },
-                                    "expanded": true
+                                    "expanded": false
                                 },
                                 "font_size": {
                                     "cb_options": {},
-                                    "expanded": true
+                                    "expanded": false
                                 },
                                 "font_type": {
                                     "cb_options": {},
-                                    "expanded": true
+                                    "expanded": false
                                 },
                                 "x": {
                                     "cb_options": {},
-                                    "expanded": true
+                                    "expanded": false
                                 },
                                 "y": {
                                     "cb_options": {},
-                                    "expanded": true
+                                    "expanded": false
                                 },
                                 "text_color": {
                                     "cb_options": {},
@@ -320,7 +322,7 @@
                                 },
                                 "is_image_bgr": {
                                     "cb_options": {},
-                                    "expanded": true
+                                    "expanded": false
                                 }
                             },
                             "expanded": true
@@ -347,8 +349,8 @@
                                     "DrawValuesOnZoomedPixels": true,
                                     "HighlightWatchedPixels": true,
                                     "ImageDisplaySize": {
-                                        "height": 200,
-                                        "width": 200
+                                        "height": 406,
+                                        "width": 420
                                     },
                                     "IsColorOrderBGR": true,
                                     "PanWithMouse": true,
@@ -366,12 +368,12 @@
                                     "WatchedPixels": [],
                                     "ZoomKey": "z",
                                     "ZoomPanMatrix": {
-                                        "00": 0.4147998301939804,
+                                        "00": 0.79296875,
                                         "01": 0.0,
-                                        "02": -6.188756529658977,
+                                        "02": 0.0,
                                         "10": 0.0,
-                                        "11": 0.4147998301939804,
-                                        "12": -6.188756529658953,
+                                        "11": 0.79296875,
+                                        "12": 0.0,
                                         "20": 0.0,
                                         "21": 0.0,
                                         "22": 1.0
@@ -457,23 +459,23 @@
                                     "wrap_multiline": false,
                                     "wrap_multiline_width": 80
                                 },
-                                "expanded": true
+                                "expanded": false
                             },
                             "font_size": {
                                 "cb_options": {},
-                                "expanded": true
+                                "expanded": false
                             },
                             "font_type": {
                                 "cb_options": {},
-                                "expanded": true
+                                "expanded": false
                             },
                             "x": {
                                 "cb_options": {},
-                                "expanded": true
+                                "expanded": false
                             },
                             "y": {
                                 "cb_options": {},
-                                "expanded": true
+                                "expanded": false
                             },
                             "text_color": {
                                 "cb_options": {},
@@ -485,7 +487,7 @@
                             },
                             "is_image_bgr": {
                                 "cb_options": {},
-                                "expanded": true
+                                "expanded": false
                             }
                         },
                         "expanded": true
@@ -512,8 +514,8 @@
                                 "DrawValuesOnZoomedPixels": true,
                                 "HighlightWatchedPixels": true,
                                 "ImageDisplaySize": {
-                                    "height": 200,
-                                    "width": 200
+                                    "height": 406,
+                                    "width": 420
                                 },
                                 "IsColorOrderBGR": true,
                                 "PanWithMouse": true,
@@ -531,12 +533,12 @@
                                 "WatchedPixels": [],
                                 "ZoomKey": "z",
                                 "ZoomPanMatrix": {
-                                    "00": 0.4147998301939804,
+                                    "00": 0.79296875,
                                     "01": 0.0,
-                                    "02": -6.188756529658977,
+                                    "02": 0.0,
                                     "10": 0.0,
-                                    "11": 0.4147998301939804,
-                                    "12": -6.188756529658953,
+                                    "11": 0.79296875,
+                                    "12": 0.0,
                                     "20": 0.0,
                                     "21": 0.0,
                                     "22": 1.0
