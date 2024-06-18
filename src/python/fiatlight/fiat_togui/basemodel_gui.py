@@ -70,7 +70,7 @@ class BaseModelGui(DataclassLikeGui[DataclassLikeType]):
                     f"""
                 Internal error:
                 ---------------
-                BaseModelGui({self.datatype_name()}.factor_dataclass_instance()
+                BaseModelGui({self.datatype_qualified_name()}.factor_dataclass_instance()
                 received an unexpected error: DataClassLikeGui.factor_dataclass_instance()
                 should not return an error...
                 """
@@ -79,7 +79,7 @@ class BaseModelGui(DataclassLikeGui[DataclassLikeType]):
         except ValidationError as e:
             logging.warning(
                 f"""
-                In BaseModelGui({self.datatype_name()})
+                In BaseModelGui({self.datatype_qualified_name()})
                 ValidationError:
                 {e}"""
             )
@@ -101,7 +101,7 @@ class BaseModelGui(DataclassLikeGui[DataclassLikeType]):
                             new_attribute_exception = AttributeError(
                                 f"""
                                 Got twice a pydantic validation error with different values
-                                for field {field_name} in class {self.datatype_name()}
+                                for field {field_name} in class {self.datatype_qualified_name()}
                                 """
                             )
                             raise new_attribute_exception from e
@@ -111,7 +111,7 @@ class BaseModelGui(DataclassLikeGui[DataclassLikeType]):
                             f"""
                                 Internal fiatlight error. The field type should be DataType or InvalidValue,
                                 not (Error, Unspecified)
-                                for field {field_name} in class {self.datatype_name()}
+                                for field {field_name} in class {self.datatype_qualified_name()}
                                 """
                         )
                         raise new_attribute_exception from e

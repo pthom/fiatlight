@@ -29,7 +29,7 @@ class TupleWithGui(AnyDataWithGui[tuple[Any, ...]]):
 
         # We set the _can_set_unspecified_or_default to False for all parameters
         for i, inner_gui in enumerate(inner_guis):
-            inner_gui.label = f"{i} ({inner_gui.datatype_name()})"
+            inner_gui.label = f"{i} ({inner_gui.datatype_qualified_name()})"
             inner_gui._can_set_unspecified_or_default = False
             inner_gui.label_color = self._member_label_color()
 
@@ -225,7 +225,7 @@ class TupleWithGui(AnyDataWithGui[tuple[Any, ...]]):
             for inner_gui in self._inner_guis:
                 with imgui_ctx.push_obj_id(inner_gui):
                     inner_gui.gui_present_customizable(
-                        GuiHeaderLineParams(show_clipboard_button=False, parent_name=self.datatype_name())
+                        GuiHeaderLineParams(show_clipboard_button=False, parent_name=self.datatype_basename())
                     )
 
     def edit(self, value: tuple[Any, ...]) -> tuple[bool, tuple[Any, ...]]:
@@ -241,7 +241,7 @@ class TupleWithGui(AnyDataWithGui[tuple[Any, ...]]):
             with imgui_ctx.push_obj_id(inner_gui):
                 inner_gui.value = value[i]
                 changed_in_edit = inner_gui.gui_edit_customizable(
-                    GuiHeaderLineParams(show_clipboard_button=False, parent_name=self.datatype_name())
+                    GuiHeaderLineParams(show_clipboard_button=False, parent_name=self.datatype_basename())
                 )
                 new_values.append(inner_gui.value)
                 if changed_in_edit:

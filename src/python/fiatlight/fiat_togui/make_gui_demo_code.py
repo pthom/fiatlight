@@ -1,7 +1,6 @@
 import copy
 
 from fiatlight.fiat_core.any_data_with_gui import AnyDataWithGui
-from fiatlight.fiat_togui.qualified_typename import fully_qualified_typename_or_str
 from typing import Any
 
 
@@ -9,9 +8,8 @@ def make_gui_demo_code(gui_instance: AnyDataWithGui[Any]) -> str:
     """Returns a piece of code to test the GUI type."""
     from fiatlight.fiat_doc import code_utils
 
-    datatype = gui_instance._type
-    datatype_str = fully_qualified_typename_or_str(datatype)
-    datatype_basename = datatype.__name__
+    datatype_basename = gui_instance.datatype_basename()
+    datatype_qualified_name = gui_instance.datatype_qualified_name()
 
     param_name = datatype_basename.lower() + "_param"
 
@@ -37,7 +35,7 @@ def make_gui_demo_code(gui_instance: AnyDataWithGui[Any]) -> str:
     import fiatlight
 
     {fiat_attrs_code}
-    def f({param_name}: {datatype_str}) -> {datatype_str}:
+    def f({param_name}: {datatype_qualified_name}) -> {datatype_qualified_name}:
         return {param_name}
 
     fiatlight.run(f)

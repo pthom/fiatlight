@@ -1,7 +1,7 @@
 from enum import Enum
 
 
-class SampleEnumNotRegistered(Enum):
+class SampleEnum(Enum):
     A = 1
     B = 2
 

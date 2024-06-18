@@ -1,8 +1,5 @@
 from . import primitives_gui
-from .qualified_typename import (
-    fully_qualified_typename,
-    fully_qualified_typename_or_str,
-)
+from . import typename
 from .dataclass_like_gui import DataclassLikeType
 from fiatlight.fiat_types.base_types import DataType, FiatAttributes
 from fiatlight.fiat_types.fiat_number_types import FloatInterval, IntInterval
@@ -97,7 +94,7 @@ class _GuiFactoryWithMatcher(Generic[DataType]):
     def info_cells(self) -> list[str | None]:
         factored_gui = self.gui_factory()
 
-        datatype_str = "None" if self.datatype == NoneType else fully_qualified_typename_or_str(self.datatype)
+        datatype_str = "None" if self.datatype == NoneType else typename.fully_qualified_typename_or_str(self.datatype)
         try:
             if issubclass(self.datatype, Enum):
                 datatype_str = "(Enum) " + datatype_str
@@ -110,7 +107,7 @@ class _GuiFactoryWithMatcher(Generic[DataType]):
 
         datatype_explanation = self.get_datatype_explanation()
 
-        gui_typename = fully_qualified_typename(type(factored_gui))
+        gui_typename = typename.base_and_qualified_typename(type(factored_gui))
         gui_explanation = factored_gui.docstring_first_line() or ""
 
         cell1 = datatype_str
@@ -130,7 +127,7 @@ class _GuiFactoryWithMatcher(Generic[DataType]):
 
     def matches_query(self, query: str) -> bool:
         factored_gui_typename = type(self.gui_factory()).__name__
-        matches_data_typename_query = _lower_case_match(fully_qualified_typename_or_str(self.datatype), query)
+        matches_data_typename_query = _lower_case_match(typename.fully_qualified_typename_or_str(self.datatype), query)
         matches_gui_typename_query = _lower_case_match(factored_gui_typename, query)
         matches_explanation_query = _lower_case_match(self.datatype_explanation, query)
 
@@ -203,7 +200,7 @@ class GuiFactories:
 
         # Search for a data type
         for factory in self._factories:
-            datatype_qualified_name = fully_qualified_typename_or_str(factory.datatype)
+            datatype_qualified_name = typename.fully_qualified_typename_or_str(factory.datatype)
             if datatype_qualified_name == typename_gui_or_data:
                 add_gui_type(factory.gui_factory())
             else:
@@ -218,8 +215,8 @@ class GuiFactories:
             r += "List of all GUI types:\n"
             for factory in self._factories:
                 factored_gui = factory.gui_factory()
-                typename = type(factored_gui).__name__
-                r += f"    {typename}\n"
+                data_typename = factored_gui.datatype_base_and_qualified_name()
+                r += f"    {data_typename}\n"
             return r
         elif len(matching_guis) > 1:
             r = "Multiple GUI types found for this typename:\n"
@@ -322,7 +319,7 @@ class GuiFactories:
     ) -> None:
         """Registers a factory for a type."""
         assert isinstance(type_, type)
-        full_typename = fully_qualified_typename(type_)
+        full_typename = typename.fully_qualified_typename(type_)
 
         def matcher_function(tested_typename: Typename) -> bool:
             return full_typename == tested_typename
@@ -333,7 +330,7 @@ class GuiFactories:
         self, type_: Type[Any], factory: GuiFactory[Any], datatype_explanation: str | None = None
     ) -> None:
         """Registers a factory for a type (real type or NewType)."""
-        full_typename = fully_qualified_typename_or_str(type_)
+        full_typename = typename.fully_qualified_typename_or_str(type_)
 
         def matcher_function(tested_typename: Typename) -> bool:
             return full_typename == tested_typename

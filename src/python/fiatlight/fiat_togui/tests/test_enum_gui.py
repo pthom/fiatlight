@@ -3,7 +3,7 @@ from fiatlight.fiat_togui import to_gui
 from fiatlight.fiat_types import FiatAttributes
 from fiatlight.fiat_togui.enum_with_gui import EnumWithGui
 from fiatlight.fiat_togui.tests.sample_enum import (
-    SampleEnumNotRegistered,
+    SampleEnum,
     SampleEnumRegisteredDecorator,
     SampleEnumRegisteredManually,
 )
@@ -26,7 +26,7 @@ def test_enum_registered() -> None:
 
 
 def test_enum_non_registered() -> None:
-    def foo(a: SampleEnumNotRegistered) -> int:
+    def foo(a: SampleEnum) -> int:
         return a.value
 
     foo_gui = fl.FunctionWithGui(foo)

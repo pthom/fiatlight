@@ -1,6 +1,6 @@
 import pytest
 
-from fiatlight.fiat_togui import to_gui, gui_registry, qualified_typename
+from fiatlight.fiat_togui import to_gui, gui_registry
 from fiatlight.fiat_types import UnspecifiedValue, ErrorValue
 from fiatlight import FunctionWithGui
 from fiatlight.fiat_types import FiatAttributes
@@ -14,21 +14,6 @@ class Dummy:
 
 
 NO_FIAT_ATTRIBUTES = FiatAttributes({})
-
-
-def test_fully_qualified_name_to_gui() -> None:
-    assert qualified_typename.fully_qualified_typename(int) == "int"
-    assert qualified_typename.fully_qualified_typename(str) == "str"
-    assert qualified_typename.fully_qualified_typename(list) == "list"
-    from fiatlight.fiat_togui.tests.sample_enum import SampleEnumNotRegistered
-
-    assert (
-        qualified_typename.fully_qualified_typename(SampleEnumNotRegistered)
-        == "fiatlight.fiat_togui.tests.sample_enum.SampleEnumNotRegistered"
-    )
-
-    with pytest.raises(RuntimeError):
-        qualified_typename.fully_qualified_typename(int | None)  # type: ignore
 
 
 def test_type_member_simple() -> None:

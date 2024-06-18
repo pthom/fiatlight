@@ -4,7 +4,7 @@ from .optional_with_gui import OptionalWithGui
 from .enum_with_gui import EnumWithGui
 from .list_with_gui import ListWithGui
 from .gui_registry import gui_factories, _GUI_FACTORIES
-from .qualified_typename import fully_qualified_typename_or_str
+from .typename import fully_qualified_typename_or_str
 from .handle_annotated_types import try_convert_type_annotations_to_fiat_attributes
 from .to_gui_context import TO_GUI_CONTEXT
 import types

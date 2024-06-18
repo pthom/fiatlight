@@ -13,6 +13,7 @@ from fiatlight.fiat_types.function_types import DataPresentFunction, DataEditFun
 from fiatlight.fiat_types.base_types import FiatAttributes
 from .any_data_gui_callbacks import AnyDataGuiCallbacks
 from .possible_fiat_attributes import PossibleFiatAttributes
+from fiatlight.fiat_togui import typename
 from imgui_bundle import imgui, imgui_ctx, ImVec4, hello_imgui, ImVec2
 from fiatlight.fiat_config import get_fiat_config, FiatColorType
 from fiatlight.fiat_widgets.fontawesome6_ctx_utils import icons_fontawesome_6, fontawesome_6_ctx
@@ -890,8 +891,20 @@ class AnyDataWithGui(Generic[DataType]):
         assert self._type is not None
         return self._type()
 
-    def datatype_name(self) -> str:
-        return str(self._type)
+    def datatype_qualified_name(self) -> str:
+        if self._type is None:
+            return "Unknown type!"
+        return typename.fully_qualified_typename(self._type)
+
+    def datatype_basename(self) -> str:
+        if self._type is None:
+            return "Unknown type!"
+        return typename.base_typename(self._type)
+
+    def datatype_base_and_qualified_name(self) -> str:
+        if self._type is None:
+            return "Unknown type!"
+        return typename.base_and_qualified_typename(self._type)
 
     def datatype_value_to_str(self, value: DataType) -> str:
         """Convert the value to a string

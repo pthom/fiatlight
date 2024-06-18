@@ -75,7 +75,7 @@ class OptionalWithGui(AnyDataWithGui[DataType | None]):
                     value = default_value
                     changed = True
                 fiat_osd.set_widget_tooltip(
-                    f"Set Optional to default value ({default_value}) for {self.inner_gui.datatype_name()}"
+                    f"Set Optional to default value ({default_value}) for {self.inner_gui.datatype_basename()}"
                 )
             else:
                 if fn_edit is not None:

@@ -105,7 +105,7 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
         if isinstance(default_value, Error):
             raise ValueError(
                 f"""
-            DataclassLikeGui({self.datatype_name()}).default_value_provider
+            DataclassLikeGui({self.datatype_qualified_name()}).default_value_provider
             returned a default value that does not pass validation!
             Please check your default values.
             """
@@ -256,7 +256,7 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
             param_str = param_gui.data_with_gui.datatype_value_to_str(param_value)
             strs[param_gui.name] = param_str
         joined_strs = ", ".join(f"{k}: {v}" for k, v in strs.items())
-        r = f"{self._type.__name__}({joined_strs})"
+        r = f"{self.datatype_qualified_name()}({joined_strs})"
         return r
 
     def present(self, _: DataclassLikeType) -> None:
@@ -265,7 +265,7 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
             for param_gui in self._parameters_with_gui:
                 with imgui_ctx.push_obj_id(param_gui):
                     param_gui.data_with_gui.gui_present_customizable(
-                        GuiHeaderLineParams(show_clipboard_button=False, parent_name=self.datatype_name())
+                        GuiHeaderLineParams(show_clipboard_button=False, parent_name=self.datatype_basename())
                     )
 
     def edit(self, original_value: DataclassLikeType) -> tuple[bool, DataclassLikeType]:
@@ -275,7 +275,7 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
         for param_gui in self._parameters_with_gui:
             with imgui_ctx.push_obj_id(param_gui):
                 changed_in_edit = param_gui.data_with_gui.gui_edit_customizable(
-                    GuiHeaderLineParams(show_clipboard_button=False, parent_name=self.datatype_name())
+                    GuiHeaderLineParams(show_clipboard_button=False, parent_name=self.datatype_basename())
                 )
                 if changed_in_edit:
                     changed = True
