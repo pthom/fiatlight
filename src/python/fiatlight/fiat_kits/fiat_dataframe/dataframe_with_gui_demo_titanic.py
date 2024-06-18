@@ -16,6 +16,9 @@ def make_titanic_df() -> pd.DataFrame:
     return df
 
 
+TITANIC_DATAFRAME = make_titanic_df()
+
+
 class Sex(Enum):
     Man = "male"
     Woman = "female"
@@ -35,7 +38,7 @@ class Sex(Enum):
 def show_titanic_db(
     name_query: str = "", sex_query: Sex | None = None, age_min: int | None = None, age_max: int | None = None
 ) -> pd.DataFrame:
-    dataframe = make_titanic_df()
+    dataframe = TITANIC_DATAFRAME
     if dataframe.empty:
         return dataframe
 
