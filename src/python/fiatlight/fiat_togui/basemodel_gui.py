@@ -121,6 +121,7 @@ class BaseModelGui(DataclassLikeGui[DataclassLikeType]):
 
     def _initialize_fields(self) -> None:
         basemodel_type = self._type
+        assert basemodel_type is not None
         assert issubclass(basemodel_type, BaseModel)
         for field_name, model_field in basemodel_type.model_fields.items():
             param = self.param_of_name(field_name)
@@ -130,7 +131,8 @@ class BaseModelGui(DataclassLikeGui[DataclassLikeType]):
 
     @staticmethod
     def _save_to_dict(value: DataclassLikeType) -> JsonDict:
-        r = {"type": "Pydantic", "value": value.model_dump(mode="json")}  # type: ignore
+        assert isinstance(value, BaseModel)
+        r = {"type": "Pydantic", "value": value.model_dump(mode="json")}
         return r
 
     def _load_from_dict(self, json_data: JsonDict) -> DataclassLikeType:
@@ -142,7 +144,7 @@ class BaseModelGui(DataclassLikeGui[DataclassLikeType]):
         assert not isinstance(self._type, Error)
         r = self._type.model_validate(json_data["value"])
         assert isinstance(r, self._type)
-        return r
+        return r  # type: ignore
 
     def clipboard_copy_str(self, value: DataclassLikeType) -> str:
         assert isinstance(value, BaseModel)

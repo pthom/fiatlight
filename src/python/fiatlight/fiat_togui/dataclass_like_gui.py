@@ -82,6 +82,7 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
         """
 
     def factor_dataclass_instance(self) -> DataclassLikeType | Error:
+        assert self._type is not None
         kwargs = {}
         for param_gui in self._parameters_with_gui:
             param_value = param_gui.data_with_gui.value

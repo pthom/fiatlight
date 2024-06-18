@@ -149,7 +149,7 @@ class AnyDataWithGui(Generic[DataType]):
     #            Members
     # ------------------------------------------------------------------------------------------------------------------
     # The type of the data, e.g. int, str, List[int], Tuple[int, str], Optional[int], etc.
-    _type: Type[DataType] | Error
+    _type: Type[DataType] | None
 
     # The value of the data - can be a DataType, Unspecified, or Error
     # It is accessed through the value property, which triggers the on_change callback (if set)
@@ -204,7 +204,7 @@ class AnyDataWithGui(Generic[DataType]):
 
         pass
 
-    def __init__(self, data_type: Type[DataType]) -> None:
+    def __init__(self, data_type: Type[DataType] | None) -> None:
         """Initialize the AnyDataWithGui with a type, an unspecified value, and no callbacks."""
         self._type = data_type
         self.callbacks = AnyDataGuiCallbacks()
@@ -874,6 +874,8 @@ class AnyDataWithGui(Generic[DataType]):
     def can_construct_default_value(self) -> bool:
         if self.callbacks.default_value_provider is not None:
             return True
+        if self._type is None:
+            return False
         try:
             _ = self._type()
             return True
@@ -881,8 +883,11 @@ class AnyDataWithGui(Generic[DataType]):
             return False
 
     def construct_default_value(self) -> DataType:
+        if self._type is None and self.callbacks.default_value_provider is None:
+            raise ValueError("Cannot construct default value: Please call can_construct_default_value before!")
         if self.callbacks.default_value_provider is not None:
             return self.callbacks.default_value_provider()
+        assert self._type is not None
         return self._type()
 
     def datatype_name(self) -> str:
@@ -939,7 +944,7 @@ class AnyDataWithGui_UnregisteredType(AnyDataWithGui[Any], Generic[DataType]):
 
     unregistered_typename: str
 
-    def __init__(self, typename: str, data_type: Type[DataType]) -> None:
+    def __init__(self, typename: str, data_type: Type[DataType] | None) -> None:
         super().__init__(data_type)
         self.unregistered_typename = typename
 

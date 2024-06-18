@@ -1,5 +1,4 @@
 from fiatlight.fiat_types.base_types import FiatAttributes, JsonDict
-from fiatlight.fiat_types.error_types import ErrorValue
 from fiatlight.fiat_types.error_types import UnspecifiedValue
 from fiatlight.fiat_core.any_data_with_gui import AnyDataWithGui, AnyDataWithGui_UnregisteredType
 from fiatlight.fiat_core.param_with_gui import ParamWithGui, ParamKind
@@ -43,7 +42,7 @@ def _to_param_with_gui(name: str, param: inspect.Parameter, fiat_attributes: Fia
 
     data_with_gui: AnyDataWithGui[Any]
     if type_annotation is None or type_annotation is inspect.Parameter.empty:
-        data_with_gui = AnyDataWithGui_UnregisteredType(fully_qualified_typename_or_str(type_annotation), ErrorValue)
+        data_with_gui = AnyDataWithGui_UnregisteredType[Any](fully_qualified_typename_or_str(type_annotation), None)
     else:
         data_with_gui = _any_type_to_gui_impl(type_annotation, fiat_attributes)
 
@@ -131,7 +130,7 @@ def add_input_outputs_to_function(
 
     return_annotation = signature.return_annotation
     if return_annotation is inspect.Parameter.empty:
-        output_with_gui = AnyDataWithGui_UnregisteredType("inspect.Parameter.empty", ErrorValue)
+        output_with_gui = AnyDataWithGui_UnregisteredType[Any]("inspect.Parameter.empty", None)
         output_with_gui.label = "Output"
         output_with_gui.merge_fiat_attributes(get_output_fiat_attributes(fiat_attributes))
         function_with_gui._outputs_with_gui.append(OutputWithGui(output_with_gui))
