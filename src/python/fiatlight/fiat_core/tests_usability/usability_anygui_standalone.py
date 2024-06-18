@@ -33,6 +33,11 @@ class MyParam(BaseModel):
     z: float = 3.14
 
 
+def odd_validator(x: int) -> None:
+    if x % 2 == 0:
+        raise ValueError("Must be odd")
+
+
 def edit_value_with_gui(label: str, value_with_gui: fl.AnyDataWithGui[Any]) -> bool:
     with imgui_ctx.push_obj_id(value_with_gui):
         # _, value_with_gui._can_set_unspecified_or_default = imgui.checkbox(
@@ -55,29 +60,26 @@ def usability_int_with_gui() -> None:
     int_with_gui = any_type_to_gui(int)
     int_with_gui._can_set_unspecified_or_default = True
     int_with_gui.value = 2
-    int_with_gui.add_validate_value_callback(
-        lambda x: (fl.DataValidationResult.ok() if x % 2 == 0 else fl.DataValidationResult.error("Must be even"))
-    )
+
+    def even_validator(x: int) -> None:
+        if x % 2 != 0:
+            raise ValueError("Must be even")
+
+    int_with_gui.add_validate_value_callback(even_validator)
+
+    def validate_short_string(s: str) -> None:
+        if len(s) >= 5:
+            raise ValueError("Must be shorter than 5 chars")
 
     str_with_gui = any_type_to_gui(str)
     str_with_gui._can_set_unspecified_or_default = True
     # str_with_gui.value = "Hello"
-    str_with_gui.add_validate_value_callback(
-        lambda x: (
-            fl.DataValidationResult.ok()
-            if len(x) < 5
-            else fl.DataValidationResult.error("Must be shorter than 5 chars")
-        )
-    )
+    str_with_gui.add_validate_value_callback(validate_short_string)
 
     my_param_with_gui = fl.fiat_togui.any_type_to_gui(MyParam)
     my_param_with_gui._can_set_unspecified_or_default = True
     # my_param_with_gui.value = MyParam()
-    my_param_with_gui.add_validate_value_callback(
-        lambda x: (
-            fl.DataValidationResult.ok() if x.x % 2 == 1 else fl.DataValidationResult.error("MyParam.x must be odd")
-        )
-    )
+    my_param_with_gui.add_validate_value_callback(odd_validator)
 
     def gui() -> None:
         with imgui_ctx.begin_vertical("main"):

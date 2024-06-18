@@ -9,7 +9,7 @@ from fiatlight.fiat_types.base_types import (
     DataType,
 )
 from fiatlight.fiat_types.error_types import Error, ErrorValue, Unspecified, UnspecifiedValue, InvalidValue
-from fiatlight.fiat_types.function_types import DataPresentFunction, DataEditFunction, DataValidationResult  # noqa
+from fiatlight.fiat_types.function_types import DataPresentFunction, DataEditFunction
 from fiatlight.fiat_types.base_types import FiatAttributes
 from fiatlight.fiat_types import typename_utils
 from .any_data_gui_callbacks import AnyDataGuiCallbacks
@@ -239,9 +239,15 @@ class AnyDataWithGui(Generic[DataType]):
         if len(self.callbacks.validate_value) > 0:
             error_messages = []
             for validate_value in self.callbacks.validate_value:
-                validation_result = validate_value(new_value)
-                if not validation_result.is_valid:
-                    error_messages.append(validation_result.error_message)
+                is_valid = True
+                error_message = ""
+                try:
+                    validate_value(new_value)
+                except ValueError as e:
+                    is_valid = False
+                    error_message = str(e)
+                if not is_valid:
+                    error_messages.append(error_message)
             if len(error_messages) > 0:
                 all_error_messages = " - ".join(error_messages)
                 self._value = InvalidValue(error_message=all_error_messages, invalid_value=new_value)
@@ -789,7 +795,7 @@ class AnyDataWithGui(Generic[DataType]):
         if present_node_compatible is not None:
             self.callbacks.present_node_compatible = present_node_compatible
 
-    def add_validate_value_callback(self, cb: Callable[[DataType], DataValidationResult]) -> None:
+    def add_validate_value_callback(self, cb: Callable[[DataType], None]) -> None:
         self.callbacks.validate_value.append(cb)
 
     def _Serialization_Section(self) -> None:

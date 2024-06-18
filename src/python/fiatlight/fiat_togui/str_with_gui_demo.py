@@ -1,10 +1,9 @@
 import fiatlight as fl
 
 
-def only_lowercase(s: str) -> fl.DataValidationResult:
-    if s.islower():
-        return fl.DataValidationResult.ok()
-    return fl.DataValidationResult.error("The string should be lowercase.")
+def only_lowercase(s: str) -> None:
+    if not s.islower():
+        raise ValueError("The string should be lowercase.")
 
 
 @fl.with_fiat_attributes(

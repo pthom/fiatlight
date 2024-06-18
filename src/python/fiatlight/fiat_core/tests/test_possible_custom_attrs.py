@@ -1,6 +1,7 @@
+import pytest
+
 import fiatlight as fl
 from fiatlight.fiat_core import AnyDataWithGui, PossibleFiatAttributes
-from fiatlight.fiat_types import DataValidationResult
 from fiatlight.fiat_doc import code_utils
 
 
@@ -8,10 +9,9 @@ class Foo:
     x = int
 
 
-def int_multiple_of_3(x: int) -> DataValidationResult:
-    if x % 3 == 0:
-        return DataValidationResult.ok()
-    return DataValidationResult.error("must be a multiple of 3")
+def int_multiple_of_3(x: int) -> None:
+    if x % 3 != 0:
+        raise ValueError("must be a multiple of 3")
 
 
 def make_possible_fiat_attributes() -> PossibleFiatAttributes:
@@ -37,33 +37,31 @@ def make_possible_fiat_attributes() -> PossibleFiatAttributes:
 def test_possible_fiat_attr_validation() -> None:
     possible_fiat_attrs = make_possible_fiat_attributes()
 
-    r = possible_fiat_attrs.validate_fiat_attrs({"xrange": (0, 5)})
-    assert r.is_valid
+    possible_fiat_attrs.validate_fiat_attrs({"xrange": (0, 5)})
 
     # Test with wrong key: disabled, too much trouble
     # r = possible_fiat_attrs.validate_fiat_attrs({"badkey": 0})
     # assert not r.is_valid
 
     # Test with wrong type
-    r = possible_fiat_attrs.validate_fiat_attrs({"xrange": 0})
-    assert not r.is_valid
+    with pytest.raises(ValueError):
+        possible_fiat_attrs.validate_fiat_attrs({"xrange": 0})
 
     # Test with wrong tuple len
-    r = possible_fiat_attrs.validate_fiat_attrs({"xrange": (0, 5, 10)})
-    assert not r.is_valid
+    with pytest.raises(ValueError):
+        possible_fiat_attrs.validate_fiat_attrs({"xrange": (0, 5, 10)})
 
     # Test with wrong tuple type
-    r = possible_fiat_attrs.validate_fiat_attrs({"xrange": (0, "string!")})
-    assert not r.is_valid
+    with pytest.raises(ValueError):
+        possible_fiat_attrs.validate_fiat_attrs({"xrange": (0, "string!")})
 
     # Test with good value (multiple of 3)
-    r = possible_fiat_attrs.validate_fiat_attrs({"m": 9})
-    assert r.is_valid
+    possible_fiat_attrs.validate_fiat_attrs({"m": 9})
 
     # Test with wrong value (not multiple of 3)
-    r = possible_fiat_attrs.validate_fiat_attrs({"m": 4})
-    assert not r.is_valid
-    assert "must be a multiple of 3" in r.error_message
+    with pytest.raises(ValueError) as e:
+        possible_fiat_attrs.validate_fiat_attrs({"m": 4})
+        assert "must be a multiple of 3" in str(e)
 
 
 def test_fiat_attr_doc() -> None:

@@ -20,7 +20,7 @@ from fiatlight.fiat_togui import (
 )
 from fiatlight.fiat_utils import with_fiat_attributes, add_fiat_attributes
 from fiatlight.fiat_config import get_fiat_config
-from fiatlight.fiat_types import DataValidationResult, Error, Unspecified, InvalidValue, ErrorValue, UnspecifiedValue
+from fiatlight.fiat_types import Error, Unspecified, InvalidValue, ErrorValue, UnspecifiedValue
 from imgui_bundle import hello_imgui
 
 

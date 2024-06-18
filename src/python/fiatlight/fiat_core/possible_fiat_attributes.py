@@ -3,7 +3,7 @@ from typing import Any, Optional
 from .detailed_type import DetailedVar
 from .togui_exception import FiatToGuiException
 from fiatlight.fiat_types.base_types import DataType
-from fiatlight.fiat_types.function_types import DataValidationFunction, DataValidationResult
+from fiatlight.fiat_types.function_types import DataValidationFunction
 from fiatlight.fiat_types.error_types import Unspecified
 
 
@@ -62,7 +62,7 @@ class PossibleFiatAttributes:
     def merge_attributes(self, other: "PossibleFiatAttributes") -> None:
         self._explained_attributes_or_section += other._explained_attributes_or_section
 
-    def validate_fiat_attrs(self, fiat_attrs: dict[str, Any]) -> DataValidationResult:
+    def validate_fiat_attrs(self, fiat_attrs: dict[str, Any]) -> None:
         unwanted_keys = []
         attributes_with_wrong_type_msgs = []
         attributes_with_failed_validation: dict[str, str] = {}
@@ -75,9 +75,10 @@ class PossibleFiatAttributes:
                 msg = f"Attribute {attr_name} should be of type {explained_attr.type_.type_str()}, but it is {type(value)}"  # noqa
                 attributes_with_wrong_type_msgs.append(msg)
             elif explained_attr.data_validation_function is not None:
-                data_validation = explained_attr.data_validation_function(value)
-                if not data_validation.is_valid:
-                    attributes_with_failed_validation[attr_name] = data_validation.error_message
+                try:
+                    explained_attr.data_validation_function(value)
+                except ValueError as e:
+                    attributes_with_failed_validation[attr_name] = str(e)
 
         accept_wrong_keys = True  # This check is too complex
         if (
@@ -97,17 +98,21 @@ class PossibleFiatAttributes:
                 for attr_name, error_msg in attributes_with_failed_validation.items():
                     msg += f"    {attr_name}: {error_msg}\n"
 
-            return DataValidationResult.error(msg)
-
-        return DataValidationResult.ok()
+            raise ValueError(msg)
 
     def raise_exception_if_bad_fiat_attrs(self, fiat_attrs: dict[str, Any]) -> None:
-        validation_result = self.validate_fiat_attrs(fiat_attrs)
+        is_valid = True
+        error_message = ""
+        try:
+            self.validate_fiat_attrs(fiat_attrs)
+        except ValueError as e:
+            is_valid = False
+            error_message = str(e)
 
-        if not validation_result.is_valid:
+        if not is_valid:
             msg = f"Encountered incorrect attributes for {self.parent_name} !\n"
             msg += "-" * 80 + "\n"
-            msg += validation_result.error_message + "\n"
+            msg += error_message + "\n"
             msg += "-" * 80 + "\n"
             msg_documentation = self.documentation()
 

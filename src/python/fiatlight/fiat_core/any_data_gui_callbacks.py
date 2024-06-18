@@ -1,5 +1,5 @@
 from fiatlight.fiat_types.base_types import DataType, JsonDict, FiatAttributes
-from fiatlight.fiat_types.function_types import VoidFunction, BoolFunction, DataValidationResult
+from fiatlight.fiat_types.function_types import VoidFunction, BoolFunction
 from typing import Callable, Generic
 
 
@@ -103,10 +103,11 @@ class AnyDataGuiCallbacks(Generic[DataType]):
     on_change: Callable[[DataType], None] | None = None
 
     # validate_value (Optional)
-    # if provided, these functions will be called when the user tries to set a value.
-    # They should return a DataValidationResult.ok() if the value is valid,
-    # or a DataValidationResult.error() with an error message.
-    validate_value: list[Callable[[DataType], DataValidationResult]]
+    # List of functions that will be called when the user tries to set a value.
+    # You can add to it a validation function to check if the value is valid:
+    #     It should raise a ValueError exception with a nice error message if the value is invalid.
+    #     The error message will be shown to the user.
+    validate_value: list[Callable[[DataType], None]]
 
     # on_exit (Optional)
     # if provided, this function will be called when the application is closed.

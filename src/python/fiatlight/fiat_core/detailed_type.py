@@ -184,8 +184,12 @@ class DetailedVar(Generic[DataType]):
         if not self.type_.is_value_type_ok(value):
             return False
         if self.data_validation_function is not None:
-            data_validation = self.data_validation_function(value)
-            return data_validation.is_valid
+            is_valid = True
+            try:
+                self.data_validation_function(value)
+            except ValueError:
+                is_valid = False
+            return is_valid
         return True
 
 
