@@ -82,7 +82,9 @@ _STANDARD_COLORS: dict[_ColorTypes, _ColorWithDarkLightVariations] = {
     _ColorTypes.red: _ColorWithDarkLightVariations(
         ColorRgbaFloat((1.0, 0.4, 0.4, 1.0)), ColorRgbaFloat((0.8, 0.2, 0.2, 1.0))
     ),
-    _ColorTypes.grey: _ColorWithDarkLightVariations(ColorRgbaFloat((0.5, 0.5, 0.5, 1.0))),
+    _ColorTypes.grey: _ColorWithDarkLightVariations(
+        ColorRgbaFloat((0.65, 0.65, 0.65, 1.0)), ColorRgbaFloat((0.35, 0.35, 0.35, 1.0))
+    ),
     _ColorTypes.transparent_grey: _ColorWithDarkLightVariations(ColorRgbaFloat((0.8, 0.8, 0.8, 0.4))),
     _ColorTypes.yellow: _ColorWithDarkLightVariations(
         ColorRgbaFloat((1.0, 1.0, 0.0, 1.0)), ColorRgbaFloat((0.7, 0.7, 0.0, 1.0))
