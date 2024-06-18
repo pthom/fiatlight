@@ -12,27 +12,24 @@
                     "name": "sex_query",
                     "data": {
                         "type": "Optional",
-                        "value": {
-                            "type": "Enum",
-                            "value_name": "Man",
-                            "class": "Sex"
-                        }
+                        "value": null
                     }
                 },
                 "age_min": {
                     "name": "age_min",
                     "data": {
                         "type": "Optional",
-                        "value": {
-                            "type": "Primitive",
-                            "value": 28
-                        }
+                        "value": null
                     }
                 },
                 "age_max": {
                     "name": "age_max",
                     "data": {
-                        "type": "Unspecified"
+                        "type": "Optional",
+                        "value": {
+                            "type": "Primitive",
+                            "value": 7
+                        }
                     }
                 }
             }
@@ -69,15 +66,15 @@
                         },
                         "age_max": {
                             "cb_options": {},
-                            "expanded": true
+                            "expanded": false
                         }
                     },
                     "outputs": {
                         "0": {
                             "cb_options": {
                                 "widget_size_em": [
-                                    55.0,
-                                    26.600000381469727
+                                    55.411354064941406,
+                                    23.179027557373047
                                 ],
                                 "column_widths_em": {
                                     "PassengerId": 5.666666507720947,
@@ -91,9 +88,9 @@
                                     "Ticket": 7.400000095367432,
                                     "Fare": 3.066666603088379,
                                     "Cabin": 3.133333444595337,
-                                    "Embarked": 4.800000190734863
+                                    "Embarked": 5.199999809265137
                                 },
-                                "rows_per_page_node": 10,
+                                "rows_per_page_node": 17,
                                 "rows_per_page_classic": 20,
                                 "current_page_start_idx": 0,
                                 "sort_by": []
@@ -128,15 +125,15 @@
                     },
                     "age_max": {
                         "cb_options": {},
-                        "expanded": true
+                        "expanded": false
                     }
                 },
                 "outputs": {
                     "0": {
                         "cb_options": {
                             "widget_size_em": [
-                                55.0,
-                                26.600000381469727
+                                55.411354064941406,
+                                23.179027557373047
                             ],
                             "column_widths_em": {
                                 "PassengerId": 5.666666507720947,
@@ -150,9 +147,9 @@
                                 "Ticket": 7.400000095367432,
                                 "Fare": 3.066666603088379,
                                 "Cabin": 3.133333444595337,
-                                "Embarked": 4.800000190734863
+                                "Embarked": 5.199999809265137
                             },
-                            "rows_per_page_node": 10,
+                            "rows_per_page_node": 17,
                             "rows_per_page_classic": 20,
                             "current_page_start_idx": 0,
                             "sort_by": []

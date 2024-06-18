@@ -33,8 +33,8 @@ class MyParam(BaseModel):
     z: float = 3.14
 
 
-def odd_validator(x: int) -> None:
-    if x % 2 == 0:
+def odd_validator(x: MyParam) -> None:
+    if x.x % 2 == 0:
         raise ValueError("Must be odd")
 
 
