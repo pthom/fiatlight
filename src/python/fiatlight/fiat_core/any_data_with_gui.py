@@ -738,6 +738,8 @@ class AnyDataWithGui(Generic[DataType]):
         """Present the value using either the present callback or the default str conversion
         May present on one line (if possible) or on multiple lines with an expand button
         """
+        if not self.callbacks.present_collapsible and self._expanded:
+            self._expanded = False
         with imgui_ctx.push_obj_id(self):
             with fontawesome_6_ctx():
                 self._gui_present_header_line(params)
@@ -753,6 +755,8 @@ class AnyDataWithGui(Generic[DataType]):
         May edit on one line (if possible) or on multiple lines with an expand button
         """
         changed = False  # noqa
+        if not self.callbacks.edit_collapsible and self._expanded:
+            self._expanded = False
         with imgui_ctx.push_obj_id(self):
             with fontawesome_6_ctx():
                 if self._gui_edit_header_line(params):
