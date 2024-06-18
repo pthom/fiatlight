@@ -41,3 +41,12 @@ lines. As long as there are...
     * line2
     * line3"""
     )
+
+
+def memory_readable_str(nb_bytes: int) -> str:
+    """Display the number of bytes in a human-readable format."""
+    for unit in ["B", "KB", "MB", "GB", "TB"]:
+        if nb_bytes < 1024.0:
+            return f"{nb_bytes:.2f} {unit}"
+        nb_bytes /= 1024.0
+    return f"{nb_bytes:.2f} PB"

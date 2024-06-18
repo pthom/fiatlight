@@ -7,6 +7,7 @@ from fiatlight.fiat_types import FiatAttributes, JsonDict
 from fiatlight.fiat_widgets.fontawesome6_ctx_utils import fontawesome_6_ctx, icons_fontawesome_6
 from imgui_bundle import imgui, imgui_ctx, hello_imgui, immapp
 from fiatlight.fiat_widgets.fiat_osd import is_rendering_in_node
+from fiatlight.fiat_utils.str_utils import memory_readable_str
 
 
 class DataFramePossibleFiatAttributes(PossibleFiatAttributes):
@@ -142,9 +143,9 @@ class DataFramePresenter:
         memory_usage = value.memory_usage(deep=True).sum()
 
         return (
-            f"DataFrame: {num_rows} rows, {num_columns} columns\n"
+            f"DataFrame: {num_rows} rows, {num_columns} cols\n"
             f"Columns: {column_info}\n"
-            f"Memory Usage: {memory_usage} bytes"
+            f"Memory Usage: {memory_readable_str(memory_usage)}"
         )
 
     def on_change(self, value: pd.DataFrame) -> None:
@@ -160,6 +161,8 @@ class DataFramePresenter:
                 setattr(self.params, key, value)
 
     def _paginated_dataframe(self) -> pd.DataFrame:
+        if self.params.current_page_start_idx > len(self.dataframe):
+            self.params.current_page_start_idx = 0
         start_idx = self.params.current_page_start_idx
         end_idx = start_idx + self.params.rows_per_page
         paginated_dataframe = self.dataframe.iloc[start_idx:end_idx]
@@ -206,6 +209,15 @@ class DataFramePresenter:
                     if imgui.button(icons_fontawesome_6.ICON_FA_FORWARD_FAST) and end_idx < total_rows:
                         self.params.current_page_start_idx = total_rows - self.params.rows_per_page
                     imgui.end_disabled()
+
+                    # Info
+                    def info_string() -> str:
+                        num_rows, num_columns = self.dataframe.shape
+                        memory_usage = memory_readable_str(self.dataframe.memory_usage(deep=True).sum())
+                        return f"{num_rows} rows, {num_columns} cols, Memory: {memory_usage}"
+
+                    imgui.spring()
+                    imgui.text(info_string())
 
                     # Rows per page
                     imgui.spring()
