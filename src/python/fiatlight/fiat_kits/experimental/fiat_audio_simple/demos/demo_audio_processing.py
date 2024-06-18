@@ -160,7 +160,7 @@ def main() -> None:
     graph.add_link("MicrophoneGui", "show_fundamental_freq_graph")
     graph.add_link("MicrophoneGui", "show_harmonic_percussive_graph")
 
-    fl.run(graph, app_name="demo_audio_processing", theme=fl.ImGuiTheme_.black_is_black)
+    fl.run(graph, app_name="demo_audio_processing")
 
 
 if __name__ == "__main__":
