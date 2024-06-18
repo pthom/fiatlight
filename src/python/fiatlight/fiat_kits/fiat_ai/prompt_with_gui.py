@@ -11,6 +11,7 @@ class PromptWithGui(AnyDataWithGui[Prompt]):
     """A Gui to edit a prompt, with a Submit button, and a multiline edit in a popup."""
 
     _str_with_resizable_gui: StrWithGui
+    _submit_continuously: bool = False
     _edited_prompt: Prompt  # not yet submitted
 
     def __init__(self) -> None:
@@ -35,12 +36,15 @@ class PromptWithGui(AnyDataWithGui[Prompt]):
     def save_gui_options_to_json(self) -> JsonDict:
         r = {
             "_str_with_resizable_gui": self._str_with_resizable_gui.save_gui_options_to_json(),
+            "submit_continuously": self._submit_continuously,
         }
         return r
 
     def load_gui_options_from_json(self, json: JsonDict) -> None:
         if "_str_with_resizable_gui" in json:
             self._str_with_resizable_gui.load_gui_options_from_json(json["_str_with_resizable_gui"])
+        if "submit_continuously" in json:
+            self._submit_continuously = json["submit_continuously"]
 
     def present(self, prompt: Prompt) -> None:
         self._str_with_resizable_gui.present(prompt)
@@ -50,14 +54,16 @@ class PromptWithGui(AnyDataWithGui[Prompt]):
         with fontawesome_6_ctx():
             is_in_node = fiatlight.is_rendering_in_node()
             if is_in_node:
-                with imgui_ctx.begin_horizontal("Prompt"):
-                    _edited_prompt_changed, self._edited_prompt = self._str_with_resizable_gui.edit(self._edited_prompt)  # type: ignore
-                    if imgui.button("Submit"):
-                        fire_change = True
+                return False, prompt  # no edit GUI in node
             else:
                 with imgui_ctx.begin_vertical("Prompt"):
                     _edited_prompt_changed, self._edited_prompt = self._str_with_resizable_gui.edit(self._edited_prompt)  # type: ignore
-                    if imgui.button("Submit"):
+                    with imgui_ctx.begin_horizontal("Prompt"):
+                        if imgui.button("Submit"):
+                            fire_change = True
+                        imgui.spring()
+                        _, self._submit_continuously = imgui.checkbox("Submit continuously", self._submit_continuously)
+                    if _edited_prompt_changed and self._submit_continuously:
                         fire_change = True
 
         if fire_change:

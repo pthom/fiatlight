@@ -6,13 +6,7 @@
                     "name": "prompt",
                     "data": {
                         "type": "Primitive",
-                        "value": ""
-                    }
-                },
-                "s": {
-                    "name": "s",
-                    "data": {
-                        "type": "Unspecified"
+                        "value": "lmqdlmslm\u00f9lxkwl<xkw<lmxklwm\nl<m\u00f9lwxm\u00f9clm\u00f9"
                     }
                 }
             }
@@ -37,19 +31,8 @@
                                     ],
                                     "wrap_multiline": false,
                                     "wrap_multiline_width": 80
-                                }
-                            },
-                            "expanded": false
-                        },
-                        "s": {
-                            "cb_options": {
-                                "width_em": 15.0,
-                                "size_multiline_em": [
-                                    60.0,
-                                    15.0
-                                ],
-                                "wrap_multiline": false,
-                                "wrap_multiline_width": 80
+                                },
+                                "submit_continuously": true
                             },
                             "expanded": false
                         }
@@ -65,7 +48,7 @@
                                 "wrap_multiline": false,
                                 "wrap_multiline_width": 80
                             },
-                            "expanded": true
+                            "expanded": false
                         }
                     },
                     "internal_gui_options": {}
@@ -83,19 +66,8 @@
                                 ],
                                 "wrap_multiline": false,
                                 "wrap_multiline_width": 80
-                            }
-                        },
-                        "expanded": false
-                    },
-                    "s": {
-                        "cb_options": {
-                            "width_em": 15.0,
-                            "size_multiline_em": [
-                                60.0,
-                                15.0
-                            ],
-                            "wrap_multiline": false,
-                            "wrap_multiline_width": 80
+                            },
+                            "submit_continuously": true
                         },
                         "expanded": false
                     }
@@ -111,7 +83,7 @@
                             "wrap_multiline": false,
                             "wrap_multiline_width": 80
                         },
-                        "expanded": true
+                        "expanded": false
                     }
                 },
                 "internal_gui_options": {}
