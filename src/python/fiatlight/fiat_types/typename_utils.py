@@ -49,7 +49,10 @@ def base_runtime_typename(type_: RuntimeType) -> str:
         return f"{origin.__name__}[{args}]"
 
     # Handle non-generic types
-    return type_.__name__
+    r = type_.__name__
+    if r.startswith("builtins."):
+        r = r[len("builtins.") :]
+    return r
 
 
 def fully_qualified_generic_typename(type_: GenericAlias) -> str:  # type: ignore
