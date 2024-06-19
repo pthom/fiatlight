@@ -1103,6 +1103,15 @@ class FunctionWithGui:
                 exc_type, exc_value, exc_traceback = sys.exc_info()
                 traceback_details = traceback.format_exception(exc_type, exc_value, exc_traceback)
                 self._last_exception_traceback = "".join(traceback_details)
+
+                logging.warning(
+                    f"""
+                Function {self.function_name} raised an exception: {self._last_exception_message}
+                Traceback:
+                {self._last_exception_traceback}
+                """
+                )
+
                 for output_with_gui in self._outputs_with_gui:
                     output_with_gui.data_with_gui.value = ErrorValue
 
