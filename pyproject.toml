@@ -26,7 +26,7 @@ dependencies = [
     "pydantic",
     "Pillow",
     "types-Pillow",
-    "numpy",
+    "numpy<2.0.0",  # numpy 2.0.0 breaks compatibility with librosa and OpenCV. Let's wait a bit...
     "matplotlib",
     "scipy",
     "scikit-learn",
