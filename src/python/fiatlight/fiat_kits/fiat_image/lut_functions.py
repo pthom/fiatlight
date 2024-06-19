@@ -78,7 +78,7 @@ def lut_table_graph(lut_table: LutTable, size: int) -> ImageU8:
     def to_point(x: float, y: float) -> Tuple[float, float]:
         return 1.0 + x * (size - 3), 1.0 + (1.0 - y) * (size - 3)
 
-    y_table = lut_table.astype(np.float_) / 255.0
+    y_table = lut_table.astype(np.float64) / 255.0
     x_table = np.arange(0.0, 1.0, 1.0 / 256.0)
 
     image[:, :, :] = (200, 200, 200, 0)

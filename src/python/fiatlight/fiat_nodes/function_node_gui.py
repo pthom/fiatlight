@@ -261,7 +261,8 @@ class FunctionNodeGui:
 
     def _draw_async_status(self) -> None:
         if self._function_node.is_running_async():
-            color = ImColor(1.0, 1.0, 0.0, 1.0)
+            color_vec4 = get_fiat_config().style.color_as_vec4(FiatColorType.SpinnerAsync)
+            color = ImColor(color_vec4)
             radius1 = imgui.get_font_size() / 3.5
             imgui.spring()
             imspinner.spinner_ang_triple(

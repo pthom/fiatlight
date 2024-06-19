@@ -128,7 +128,7 @@ class _BaseFilePathSaveWithGui(AnyDataWithGui[FilePath_Save]):
 _ACCEPT_ANY_FILE = "*.*"
 
 
-class FilePathWithGui(_BaseFilePathSaveWithGui):
+class FilePathWithGui(_BaseFilePathWithGui):
     """A Gui that enable to select a filename via a file dialog."""
 
     def __init__(self) -> None:
@@ -140,7 +140,7 @@ class FilePathSaveWithGui(_BaseFilePathSaveWithGui):
         super().__init__(FilePath_Save)
 
 
-class ImagePathWithGui(_BaseFilePathSaveWithGui):
+class ImagePathWithGui(_BaseFilePathWithGui):
     """A Gui that enable to select an image filename via a file dialog."""
 
     def __init__(self) -> None:
@@ -156,7 +156,7 @@ class ImagePathSaveWithGui(_BaseFilePathSaveWithGui):
         self.filters = ["*.png", "*.jpg", "*.jpeg", "*.bmp", "*.tga", _ACCEPT_ANY_FILE]
 
 
-class TextPathWithGui(_BaseFilePathSaveWithGui):
+class TextPathWithGui(_BaseFilePathWithGui):
     """A Gui that enable to select a text filename via a file dialog."""
 
     def __init__(self) -> None:
@@ -172,7 +172,7 @@ class TextPathSaveWithGui(_BaseFilePathSaveWithGui):
         self.filters = ["*.txt, *.*"]
 
 
-class AudioPathWithGui(_BaseFilePathSaveWithGui):
+class AudioPathWithGui(_BaseFilePathWithGui):
     """A Gui that enable to select an audio filename via a file dialog."""
 
     def __init__(self) -> None:
@@ -188,7 +188,7 @@ class AudioPathSaveWithGui(_BaseFilePathSaveWithGui):
         self.filters = ["*.wav", "*.mp3", "*.ogg", "*.flac", "*.aiff", "*.m4a", _ACCEPT_ANY_FILE]
 
 
-class VideoPathWithGui(_BaseFilePathSaveWithGui):
+class VideoPathWithGui(_BaseFilePathWithGui):
     """A Gui that enable to select a video filename via a file dialog."""
 
     def __init__(self) -> None:

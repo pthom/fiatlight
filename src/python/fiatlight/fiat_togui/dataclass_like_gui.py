@@ -2,7 +2,8 @@ from fiatlight.fiat_core import AnyDataWithGui, FunctionWithGui, ParamWithGui
 from fiatlight.fiat_core.any_data_with_gui import GuiHeaderLineParams
 from fiatlight.fiat_types import JsonDict, Unspecified, Error, Invalid, UnspecifiedValue
 from fiatlight.fiat_types.base_types import FiatAttributes
-from imgui_bundle import imgui_ctx, ImVec4
+from fiatlight.fiat_config import get_fiat_config, FiatColorType
+from imgui_bundle import imgui_ctx
 from typing import Type, Any, TypeVar, List
 
 # A type variable that represents a dataclass type, or a pydantic BaseModel type
@@ -36,7 +37,6 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
         # We set the _can_set_unspecified_or_default to False for all parameters
         for parameters_with_gui in self._parameters_with_gui:
             parameters_with_gui.data_with_gui._can_set_unspecified_or_default = False
-            parameters_with_gui.data_with_gui.label_color = self._member_label_color()
 
         self.fill_callbacks()
         if fiat_attributes is not None:
@@ -238,7 +238,11 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
 
     def on_heartbeat(self) -> bool:
         changed = False
+
         for param_gui in self._parameters_with_gui:
+            param_gui.data_with_gui.label_color = get_fiat_config().style.color_as_vec4(
+                FiatColorType.DataclassMemberName
+            )
             param_on_heartbeat = param_gui.data_with_gui.callbacks.on_heartbeat
             if param_on_heartbeat is not None:
                 if param_on_heartbeat():
@@ -308,13 +312,6 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
                 return True, r
         else:
             return False, original_value
-
-    @staticmethod
-    def _member_label_color() -> ImVec4:
-        from fiatlight.fiat_config import get_fiat_config, FiatColorType
-
-        r = get_fiat_config().style.color_as_vec4(FiatColorType.DataclassMemberName)
-        return r
 
     class _Serialization_Section:  # Dummy class to create a section in the IDE # noqa
         """

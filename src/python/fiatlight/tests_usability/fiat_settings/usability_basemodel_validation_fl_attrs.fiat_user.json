@@ -1,0 +1,126 @@
+{
+    "user_inputs": {
+        "functions_nodes": {
+            "f": {
+                "param": {
+                    "name": "param",
+                    "data": {
+                        "type": "Pydantic",
+                        "value": {
+                            "x": 0,
+                            "name": "adam"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "gui_options": {
+        "f": {
+            "function_node_with_gui": {
+                "_inputs_expanded": true,
+                "_outputs_expanded": true,
+                "fiat_tuning_expanded": false,
+                "_internal_state_gui_expanded": true,
+                "_function_node": {
+                    "inputs": {
+                        "param": {
+                            "cb_options": {
+                                "x": {
+                                    "cb_options": {},
+                                    "expanded": false
+                                },
+                                "name": {
+                                    "cb_options": {
+                                        "width_em": 15.0,
+                                        "size_multiline_em": [
+                                            60.0,
+                                            15.0
+                                        ],
+                                        "wrap_multiline": false,
+                                        "wrap_multiline_width": 80
+                                    },
+                                    "expanded": false
+                                }
+                            },
+                            "expanded": true
+                        }
+                    },
+                    "outputs": {
+                        "0": {
+                            "cb_options": {
+                                "x": {
+                                    "cb_options": {},
+                                    "expanded": false
+                                },
+                                "name": {
+                                    "cb_options": {
+                                        "width_em": 15.0,
+                                        "size_multiline_em": [
+                                            60.0,
+                                            15.0
+                                        ],
+                                        "wrap_multiline": false,
+                                        "wrap_multiline_width": 80
+                                    },
+                                    "expanded": false
+                                }
+                            },
+                            "expanded": true
+                        }
+                    },
+                    "internal_gui_options": {}
+                }
+            },
+            "function_node": {
+                "inputs": {
+                    "param": {
+                        "cb_options": {
+                            "x": {
+                                "cb_options": {},
+                                "expanded": false
+                            },
+                            "name": {
+                                "cb_options": {
+                                    "width_em": 15.0,
+                                    "size_multiline_em": [
+                                        60.0,
+                                        15.0
+                                    ],
+                                    "wrap_multiline": false,
+                                    "wrap_multiline_width": 80
+                                },
+                                "expanded": false
+                            }
+                        },
+                        "expanded": true
+                    }
+                },
+                "outputs": {
+                    "0": {
+                        "cb_options": {
+                            "x": {
+                                "cb_options": {},
+                                "expanded": false
+                            },
+                            "name": {
+                                "cb_options": {
+                                    "width_em": 15.0,
+                                    "size_multiline_em": [
+                                        60.0,
+                                        15.0
+                                    ],
+                                    "wrap_multiline": false,
+                                    "wrap_multiline_width": 80
+                                },
+                                "expanded": false
+                            }
+                        },
+                        "expanded": true
+                    }
+                },
+                "internal_gui_options": {}
+            }
+        }
+    }
+}

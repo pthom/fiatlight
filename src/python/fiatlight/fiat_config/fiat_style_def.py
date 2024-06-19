@@ -42,12 +42,15 @@ class FiatColorType(Enum):
 
     Invalid = "Invalid"
 
+    SpinnerAsync = "SpinnerAsync"
+
 
 class _ColorTypes(Enum):
     orange = auto()
     blue = auto()
     grey_blue = auto()
     green = auto()
+    green_low_saturation = auto()
     red = auto()
     grey = auto()
     transparent_grey = auto()
@@ -78,6 +81,9 @@ _STANDARD_COLORS: dict[_ColorTypes, _ColorWithDarkLightVariations] = {
     ),
     _ColorTypes.green: _ColorWithDarkLightVariations(
         ColorRgbaFloat((0.4, 0.8, 0.4, 1.0)), ColorRgbaFloat((0.2, 0.6, 0.2, 1.0))
+    ),
+    _ColorTypes.green_low_saturation: _ColorWithDarkLightVariations(
+        ColorRgbaFloat((0.75, 0.85, 0.75, 1.0)), ColorRgbaFloat((0.15, 0.4, 0.15, 1.0))
     ),
     _ColorTypes.red: _ColorWithDarkLightVariations(
         ColorRgbaFloat((1.0, 0.4, 0.4, 1.0)), ColorRgbaFloat((0.8, 0.2, 0.2, 1.0))
@@ -175,15 +181,17 @@ class FiatStyle(BaseModel):
             FiatColorType.ValueWithError: colors[_ColorTypes.red],
             FiatColorType.OutputValueDirty: colors[_ColorTypes.orange],
             FiatColorType.ValueUnspecified: colors[_ColorTypes.red],
-            FiatColorType.OutputValueOk: colors[_ColorTypes.contrasting_black_or_white],  # aaa
+            FiatColorType.OutputValueOk: colors[_ColorTypes.contrasting_black_or_white],
             # Dataclass member name
-            FiatColorType.DataclassMemberName: ColorRgbaFloat((0.7, 0.8, 0.7, 1.0)),
+            FiatColorType.DataclassMemberName: colors[_ColorTypes.green_low_saturation],
             # Tuple label
-            FiatColorType.TupleLabel: ColorRgbaFloat((0.7, 0.8, 0.7, 1.0)),
+            FiatColorType.TupleLabel: colors[_ColorTypes.green_low_saturation],
             # Exception color
             FiatColorType.ExceptionError: colors[_ColorTypes.red],
             # Invalid value
             FiatColorType.Invalid: colors[_ColorTypes.yellow],
+            # Spinner wait
+            FiatColorType.SpinnerAsync: colors[_ColorTypes.yellow],
         }
 
         for color_type, color in default_colors.items():
