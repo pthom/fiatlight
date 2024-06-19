@@ -760,6 +760,15 @@ class FunctionWithGui:
         for output_with_gui in self._outputs_with_gui:
             output_with_gui.data_with_gui._expanded = True
 
+    class _FiatAttributes_Section:  # Dummy class to create a section in the IDE # noqa
+        """
+        # --------------------------------------------------------------------------------------------
+        #        Fiat Attributes
+        # --------------------------------------------------------------------------------------------
+        """
+
+        pass
+
     def handle_fiat_attributes(self, fiat_attributes: dict[str, Any]) -> None:
         """Handle custom attributes for the function"""
         # Filter out the custom attributes for parameters and outputs

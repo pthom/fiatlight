@@ -10,7 +10,7 @@ Example
 -------
 
 ```python
-from fiatlight.fiat_kits.fiat_implot import simple_plot_gui_demo
+from fiatlight.fiat_kits.fiat_implot import demo_implot
 
 simple_plot_gui_demo.main()
 ```

@@ -81,7 +81,7 @@ def lut_table_graph(lut_table: LutTable, size: int) -> ImageU8:
     y_table = lut_table.astype(np.float64) / 255.0
     x_table = np.arange(0.0, 1.0, 1.0 / 256.0)
 
-    image[:, :, :] = (200, 200, 200, 0)
+    image[:, :, :] = (0, 0, 0, 200)
     color = (0, 255, 255, 255)
     for i in range(255):
         x0, y0 = float(x_table[i]), float(y_table[i])

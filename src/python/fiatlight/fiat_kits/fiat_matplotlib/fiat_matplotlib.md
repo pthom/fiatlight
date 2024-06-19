@@ -8,7 +8,8 @@ Example
 -------
 
 ```python
-from fiatlight.fiat_kits.fiat_matplotlib import figure_with_gui_demo
+from fiatlight.fiat_kits.fiat_matplotlib import demo_matplotlib
+
 figure_with_gui_demo.main()
 ```
 
