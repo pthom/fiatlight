@@ -204,7 +204,10 @@ class _OsdDetachedWindows:
     def _add_detached_window(self, params: DetachedWindowParams, bool_returned: bool | None) -> None:
         if self.detached_window_exists(params):
             return
-        location = imgui_node_editor.canvas_to_screen(imgui.get_cursor_pos())
+        if is_rendering_in_node():
+            location = imgui_node_editor.canvas_to_screen(imgui.get_cursor_pos())
+        else:
+            location = imgui.get_cursor_screen_pos()
         new_popup = _DetachedWindowInfo(
             params,
             location=location,

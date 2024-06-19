@@ -29,7 +29,7 @@ def edit_value_with_gui(label: str, value_with_gui: fl.AnyDataWithGui[Any]) -> b
         return changed
 
 
-def usability_int_with_gui() -> None:
+def main() -> None:
     my_param_with_gui = fl.fiat_togui.to_data_with_gui(MyParam())
     my_param_with_gui._can_set_unspecified_or_default = True
     # my_param_with_gui.add_validate_value_callback(odd_validator)
@@ -39,7 +39,11 @@ def usability_int_with_gui() -> None:
             imgui.dummy(ImVec2(500, 10))
             edit_value_with_gui("my_param_with_gui", my_param_with_gui)
 
+        from fiatlight.fiat_widgets import fiat_osd
+
+        fiat_osd._render_all_osd()
+
     hello_imgui.run(gui)
 
 
-usability_int_with_gui()
+main()
