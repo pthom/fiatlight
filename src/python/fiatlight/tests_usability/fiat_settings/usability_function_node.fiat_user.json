@@ -2,14 +2,14 @@
     "user_inputs": {
         "functions_nodes": {
             "f": {
-                "data": {
-                    "name": "data",
+                "param": {
+                    "name": "param",
                     "data": {
                         "type": "Pydantic",
                         "value": {
-                            "value": 0,
-                            "name": "",
-                            "firstname": ""
+                            "x": 4,
+                            "y": "Hello",
+                            "z": 3.3399999141693115
                         }
                     }
                 }
@@ -25,13 +25,13 @@
                 "_internal_state_gui_expanded": true,
                 "_function_node": {
                     "inputs": {
-                        "data": {
+                        "param": {
                             "cb_options": {
-                                "value": {
+                                "x": {
                                     "cb_options": {},
                                     "expanded": false
                                 },
-                                "name": {
+                                "y": {
                                     "cb_options": {
                                         "width_em": 15.0,
                                         "size_multiline_em": [
@@ -43,16 +43,8 @@
                                     },
                                     "expanded": false
                                 },
-                                "firstname": {
-                                    "cb_options": {
-                                        "width_em": 15.0,
-                                        "size_multiline_em": [
-                                            60.0,
-                                            15.0
-                                        ],
-                                        "wrap_multiline": false,
-                                        "wrap_multiline_width": 80
-                                    },
+                                "z": {
+                                    "cb_options": {},
                                     "expanded": false
                                 }
                             },
@@ -62,11 +54,11 @@
                     "outputs": {
                         "0": {
                             "cb_options": {
-                                "value": {
+                                "x": {
                                     "cb_options": {},
                                     "expanded": false
                                 },
-                                "name": {
+                                "y": {
                                     "cb_options": {
                                         "width_em": 15.0,
                                         "size_multiline_em": [
@@ -78,20 +70,12 @@
                                     },
                                     "expanded": false
                                 },
-                                "firstname": {
-                                    "cb_options": {
-                                        "width_em": 15.0,
-                                        "size_multiline_em": [
-                                            60.0,
-                                            15.0
-                                        ],
-                                        "wrap_multiline": false,
-                                        "wrap_multiline_width": 80
-                                    },
+                                "z": {
+                                    "cb_options": {},
                                     "expanded": false
                                 }
                             },
-                            "expanded": false
+                            "expanded": true
                         }
                     },
                     "internal_gui_options": {}
@@ -99,13 +83,13 @@
             },
             "function_node": {
                 "inputs": {
-                    "data": {
+                    "param": {
                         "cb_options": {
-                            "value": {
+                            "x": {
                                 "cb_options": {},
                                 "expanded": false
                             },
-                            "name": {
+                            "y": {
                                 "cb_options": {
                                     "width_em": 15.0,
                                     "size_multiline_em": [
@@ -117,16 +101,8 @@
                                 },
                                 "expanded": false
                             },
-                            "firstname": {
-                                "cb_options": {
-                                    "width_em": 15.0,
-                                    "size_multiline_em": [
-                                        60.0,
-                                        15.0
-                                    ],
-                                    "wrap_multiline": false,
-                                    "wrap_multiline_width": 80
-                                },
+                            "z": {
+                                "cb_options": {},
                                 "expanded": false
                             }
                         },
@@ -136,11 +112,11 @@
                 "outputs": {
                     "0": {
                         "cb_options": {
-                            "value": {
+                            "x": {
                                 "cb_options": {},
                                 "expanded": false
                             },
-                            "name": {
+                            "y": {
                                 "cb_options": {
                                     "width_em": 15.0,
                                     "size_multiline_em": [
@@ -152,20 +128,12 @@
                                 },
                                 "expanded": false
                             },
-                            "firstname": {
-                                "cb_options": {
-                                    "width_em": 15.0,
-                                    "size_multiline_em": [
-                                        60.0,
-                                        15.0
-                                    ],
-                                    "wrap_multiline": false,
-                                    "wrap_multiline_width": 80
-                                },
+                            "z": {
+                                "cb_options": {},
                                 "expanded": false
                             }
                         },
-                        "expanded": false
+                        "expanded": true
                     }
                 },
                 "internal_gui_options": {}

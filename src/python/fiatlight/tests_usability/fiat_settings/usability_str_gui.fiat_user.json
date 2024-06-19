@@ -1,36 +1,86 @@
 {
-    "functions_graph": {
+    "user_inputs": {
         "functions_nodes": {
             "f": {
-                "inputs": {
-                    "text": {
-                        "name": "text",
-                        "data": {
-                            "type": "Primitive",
-                            "value": "Demain, d\u00e8s l'aube, \u00e0 l'heure o\u00f9 blanchit la campagne,\nJe partirai. Vois-tu, je sais que tu m'attends.\nJ'irai par la for\u00eat, j'irai par la montagne.\nJe ne puis demeurer loin de toi plus longtemps.\n\nJe marcherai les yeux fix\u00e9s sur mes pens\u00e9es,\nSans rien voir au dehors, sans entendre aucun bruit,\nSeul, inconnu, le dos courb\u00e9, les mains crois\u00e9es,\nTriste, et le jour pour moi sera comme la nuit.\n\nJe ne regarderai ni l'or du soir qui tombe,\nNi les voiles au loin descendant vers Harfleur,\nEt quand j'arriverai, je mettrai sur ta tombe\nUn bouquet de houx vert et de bruy\u00e8re en fleur.\n\nVictor Hugo, extrait du recueil \u00abLes Contemplations\u00bb (1856)\n        "
-                        }
+                "text": {
+                    "name": "text",
+                    "data": {
+                        "type": "Unspecified"
                     }
-                },
-                "gui_options": {
-                    "inputs": {},
-                    "outputs": {}
                 }
             }
         }
     },
-    "functions_gui_settings": {
+    "gui_options": {
         "f": {
-            "_show_input_details": {
-                "text": true
+            "function_node_with_gui": {
+                "_inputs_expanded": true,
+                "_outputs_expanded": true,
+                "fiat_tuning_expanded": false,
+                "_internal_state_gui_expanded": true,
+                "_function_node": {
+                    "inputs": {
+                        "text": {
+                            "cb_options": {
+                                "width_em": 15.0,
+                                "size_multiline_em": [
+                                    60.0,
+                                    15.0
+                                ],
+                                "wrap_multiline": false,
+                                "wrap_multiline_width": 80
+                            },
+                            "expanded": false
+                        }
+                    },
+                    "outputs": {
+                        "0": {
+                            "cb_options": {
+                                "width_em": 15.0,
+                                "size_multiline_em": [
+                                    60.0,
+                                    15.0
+                                ],
+                                "wrap_multiline": false,
+                                "wrap_multiline_width": 80
+                            },
+                            "expanded": true
+                        }
+                    },
+                    "internal_gui_options": {}
+                }
             },
-            "_inputs_expanded": true,
-            "_show_output_details": {
-                "0": true
-            },
-            "_outputs_expanded": true,
-            "_show_internals_details": {},
-            "_internals_expanded": true,
-            "_internal_state_gui_expanded": true
+            "function_node": {
+                "inputs": {
+                    "text": {
+                        "cb_options": {
+                            "width_em": 15.0,
+                            "size_multiline_em": [
+                                60.0,
+                                15.0
+                            ],
+                            "wrap_multiline": false,
+                            "wrap_multiline_width": 80
+                        },
+                        "expanded": false
+                    }
+                },
+                "outputs": {
+                    "0": {
+                        "cb_options": {
+                            "width_em": 15.0,
+                            "size_multiline_em": [
+                                60.0,
+                                15.0
+                            ],
+                            "wrap_multiline": false,
+                            "wrap_multiline_width": 80
+                        },
+                        "expanded": true
+                    }
+                },
+                "internal_gui_options": {}
+            }
         }
     }
 }

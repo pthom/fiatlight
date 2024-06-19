@@ -1,0 +1,142 @@
+{
+    "user_inputs": {
+        "functions_nodes": {
+            "f": {
+                "c3f": {
+                    "name": "c3f",
+                    "data": {
+                        "type": "Tuple",
+                        "value": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ]
+                    }
+                },
+                "c4f": {
+                    "name": "c4f",
+                    "data": {
+                        "type": "Tuple",
+                        "value": [
+                            0.09803921729326248,
+                            0.572549045085907,
+                            0.3294117748737335,
+                            0.5882353186607361
+                        ]
+                    }
+                },
+                "c3": {
+                    "name": "c3",
+                    "data": {
+                        "type": "Tuple",
+                        "value": [
+                            184,
+                            98,
+                            98
+                        ]
+                    }
+                },
+                "c4": {
+                    "name": "c4",
+                    "data": {
+                        "type": "Tuple",
+                        "value": [
+                            0,
+                            0,
+                            0,
+                            255
+                        ]
+                    }
+                }
+            }
+        }
+    },
+    "gui_options": {
+        "f": {
+            "function_node_with_gui": {
+                "_inputs_expanded": true,
+                "_outputs_expanded": true,
+                "fiat_tuning_expanded": false,
+                "_internal_state_gui_expanded": true,
+                "_function_node": {
+                    "inputs": {
+                        "c3f": {
+                            "cb_options": {},
+                            "expanded": false
+                        },
+                        "c4f": {
+                            "cb_options": {},
+                            "expanded": false
+                        },
+                        "c3": {
+                            "cb_options": {},
+                            "expanded": false
+                        },
+                        "c4": {
+                            "cb_options": {},
+                            "expanded": false
+                        }
+                    },
+                    "outputs": {
+                        "0": {
+                            "cb_options": {},
+                            "expanded": true
+                        },
+                        "1": {
+                            "cb_options": {},
+                            "expanded": true
+                        },
+                        "2": {
+                            "cb_options": {},
+                            "expanded": true
+                        },
+                        "3": {
+                            "cb_options": {},
+                            "expanded": true
+                        }
+                    },
+                    "internal_gui_options": {}
+                }
+            },
+            "function_node": {
+                "inputs": {
+                    "c3f": {
+                        "cb_options": {},
+                        "expanded": false
+                    },
+                    "c4f": {
+                        "cb_options": {},
+                        "expanded": false
+                    },
+                    "c3": {
+                        "cb_options": {},
+                        "expanded": false
+                    },
+                    "c4": {
+                        "cb_options": {},
+                        "expanded": false
+                    }
+                },
+                "outputs": {
+                    "0": {
+                        "cb_options": {},
+                        "expanded": true
+                    },
+                    "1": {
+                        "cb_options": {},
+                        "expanded": true
+                    },
+                    "2": {
+                        "cb_options": {},
+                        "expanded": true
+                    },
+                    "3": {
+                        "cb_options": {},
+                        "expanded": true
+                    }
+                },
+                "internal_gui_options": {}
+            }
+        }
+    }
+}
