@@ -8,7 +8,7 @@ from fiatlight.fiat_types.base_types import (
     JsonDict,
     DataType,
 )
-from fiatlight.fiat_types.error_types import Error, ErrorValue, Unspecified, UnspecifiedValue, InvalidValue
+from fiatlight.fiat_types.error_types import Error, ErrorValue, Unspecified, UnspecifiedValue, Invalid
 from fiatlight.fiat_types.function_types import DataPresentFunction, DataEditFunction
 from fiatlight.fiat_types.base_types import FiatAttributes
 from fiatlight.fiat_types import typename_utils
@@ -154,7 +154,7 @@ class AnyDataWithGui(Generic[DataType]):
 
     # The value of the data - can be a DataType, Unspecified, or Error
     # It is accessed through the value property, which triggers the on_change callback (if set)
-    _value: DataType | Unspecified | Error | InvalidValue[DataType] = UnspecifiedValue
+    _value: DataType | Unspecified | Error | Invalid[DataType] = UnspecifiedValue
 
     # Callbacks for the GUI
     # This is the heart of FiatLight: the GUI is defined by the callbacks.
@@ -221,21 +221,21 @@ class AnyDataWithGui(Generic[DataType]):
         pass
 
     @property
-    def value(self) -> DataType | Unspecified | Error | InvalidValue[DataType]:
+    def value(self) -> DataType | Unspecified | Error | Invalid[DataType]:
         """The value of the data, accessed through the value property.
         Warning: it might be an instance of `Unspecified` (user did not enter any value) or `Error` (an error was triggered)
         """
         return self._value
 
     @value.setter
-    def value(self, new_value: DataType | Unspecified | Error | InvalidValue[DataType]) -> None:
+    def value(self, new_value: DataType | Unspecified | Error | Invalid[DataType]) -> None:
         """Set the value of the data. This triggers the on_change callback (if set)"""
         self._value = new_value
-        if isinstance(new_value, (Unspecified, Error, InvalidValue)):
+        if isinstance(new_value, (Unspecified, Error, Invalid)):
             return
 
         # If value is of type DataType, run validators
-        # (this may change self.value to an InvalidValue)
+        # (this may change self.value to an Invalid)
         if len(self.callbacks.validate_value) > 0:
             error_messages = []
             for validate_value in self.callbacks.validate_value:
@@ -251,14 +251,14 @@ class AnyDataWithGui(Generic[DataType]):
                         error_messages.append(error_message)
             if len(error_messages) > 0:
                 all_error_messages = " - ".join(error_messages)
-                self._value = InvalidValue(error_message=all_error_messages, invalid_value=new_value)
+                self._value = Invalid(error_message=all_error_messages, invalid_value=new_value)
 
         # Call on_change callback if everything is fine
-        if not isinstance(self.value, InvalidValue) and self.callbacks.on_change is not None:
+        if not isinstance(self.value, Invalid) and self.callbacks.on_change is not None:
             self.callbacks.on_change(new_value)
 
     def get_actual_value(self) -> DataType:
-        """Returns the actual value of the data, or raises an exception if the value is Unspecified or Error or InvalidValue
+        """Returns the actual value of the data, or raises an exception if the value is Unspecified or Error or Invalid
         When we are inside a callback, we can be sure that the value is of the correct type, so we can call this method
         instead of accessing the value directly and checking for Unspecified or Error.
         """
@@ -266,7 +266,7 @@ class AnyDataWithGui(Generic[DataType]):
             raise ValueError("Cannot get value of Unspecified")
         elif isinstance(self.value, Error):
             raise ValueError("Cannot get value of Error")
-        elif isinstance(self.value, InvalidValue):
+        elif isinstance(self.value, Invalid):
             raise ValueError(f"Invalid value: {self.value} ({self.value.error_message})")
         else:
             return self.value
@@ -277,7 +277,7 @@ class AnyDataWithGui(Generic[DataType]):
             raise ValueError("Cannot get value of Unspecified")
         elif isinstance(self.value, Error):
             raise ValueError("Cannot get value of Error")
-        elif isinstance(self.value, InvalidValue):
+        elif isinstance(self.value, Invalid):
             return self.value.invalid_value
         else:
             return self.value
@@ -408,7 +408,7 @@ class AnyDataWithGui(Generic[DataType]):
     def _show_copy_to_clipboard_button(self) -> None:
         if not self.callbacks.clipboard_copy_possible:
             return
-        if isinstance(self.value, (Error, Unspecified, InvalidValue)):
+        if isinstance(self.value, (Error, Unspecified, Invalid)):
             return
         with fontawesome_6_ctx():
             if imgui.button(icons_fontawesome_6.ICON_FA_COPY):
@@ -513,7 +513,7 @@ class AnyDataWithGui(Generic[DataType]):
                         text_maybe_truncated(as_str, get_fiat_config().style.str_truncation.present_header_line)
                 elif isinstance(self.value, Error):
                     imgui.text_colored(get_fiat_config().style.color_as_vec4(FiatColorType.ValueWithError), "Error")
-                else:  # if isinstance(self.value, (InvalidValue, DataType))
+                else:  # if isinstance(self.value, (Invalid, DataType))
                     value = self.get_actual_or_invalid_value()
                     can_present_on_header_line = self.can_present_on_header_line()
                     if can_present_on_header_line:
@@ -555,11 +555,11 @@ class AnyDataWithGui(Generic[DataType]):
                 params.suffix_gui()
 
         # Optional second line: invalid value info
-        if isinstance(self.value, InvalidValue):
+        if isinstance(self.value, Invalid):
             text_maybe_truncated(
                 icons_fontawesome_6.ICON_FA_TRIANGLE_EXCLAMATION + " " + self.value.error_message,
                 get_fiat_config().style.str_truncation.invalid_value_message,
-                color=get_fiat_config().style.color_as_vec4(FiatColorType.InvalidValue),
+                color=get_fiat_config().style.color_as_vec4(FiatColorType.Invalid),
             )
 
     def _gui_edit_header_line(self, params: GuiHeaderLineParams[DataType]) -> bool:
@@ -607,7 +607,7 @@ class AnyDataWithGui(Generic[DataType]):
                         text_maybe_truncated(as_str, get_fiat_config().style.str_truncation.present_header_line)
                 elif isinstance(self.value, Error):
                     imgui.text_colored(get_fiat_config().style.color_as_vec4(FiatColorType.ValueWithError), "Error")
-                else:  # if isinstance(self.value, (InvalidValue, DataType))
+                else:  # if isinstance(self.value, (Invalid, DataType))
                     value = self.get_actual_or_invalid_value()
                     can_edit_on_header_line = self.can_edit_on_header_line()
                     if can_edit_on_header_line:
@@ -665,11 +665,11 @@ class AnyDataWithGui(Generic[DataType]):
                 params.suffix_gui()
 
         # Optional second line: invalid value info
-        if isinstance(self.value, InvalidValue):
+        if isinstance(self.value, Invalid):
             text_maybe_truncated(
                 icons_fontawesome_6.ICON_FA_TRIANGLE_EXCLAMATION + " " + self.value.error_message,
                 get_fiat_config().style.str_truncation.invalid_value_message,
-                color=get_fiat_config().style.color_as_vec4(FiatColorType.InvalidValue),
+                color=get_fiat_config().style.color_as_vec4(FiatColorType.Invalid),
             )
 
         return changed
@@ -701,7 +701,7 @@ class AnyDataWithGui(Generic[DataType]):
             fiat_osd.set_widget_tooltip("Set to default value")
         if warn_no_default_provider:
             imgui.text_colored(
-                get_fiat_config().style.color_as_vec4(FiatColorType.InvalidValue),
+                get_fiat_config().style.color_as_vec4(FiatColorType.Invalid),
                 icons_fontawesome_6.ICON_FA_TRIANGLE_EXCLAMATION,
             )
             fiat_osd.set_widget_tooltip("No default value provider")
@@ -807,7 +807,7 @@ class AnyDataWithGui(Generic[DataType]):
         """
 
     @final
-    def call_save_to_dict(self, value: DataType | Unspecified | Error | InvalidValue[DataType]) -> JsonDict:
+    def call_save_to_dict(self, value: DataType | Unspecified | Error | Invalid[DataType]) -> JsonDict:
         """Serialize the value to a dictionary
 
         Will call the save_to_dict callback if set, otherwise will use the default serialization, when available.
@@ -817,8 +817,8 @@ class AnyDataWithGui(Generic[DataType]):
 
         Do not override these methods in descendant classes!
         """
-        if isinstance(value, (Unspecified, InvalidValue)):
-            # We do not save Unspecified or InvalidValue,
+        if isinstance(value, (Unspecified, Invalid)):
+            # We do not save Unspecified or Invalid,
             # and we do not differentiate between them in the saved JSON
             return {"type": "Unspecified"}
         elif isinstance(value, Error):
@@ -939,7 +939,7 @@ class AnyDataWithGui(Generic[DataType]):
             return "Unspecified"
         elif isinstance(value, Error):
             return "Error"
-        elif isinstance(value, InvalidValue):
+        elif isinstance(value, Invalid):
             return "Invalid"
         else:
             if self.callbacks.clipboard_copy_str is not None:

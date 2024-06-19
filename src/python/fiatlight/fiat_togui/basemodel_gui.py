@@ -37,7 +37,7 @@ _Or with `register_base_model`:_
 import logging
 
 from .dataclass_like_gui import DataclassLikeGui, DataclassLikeType
-from fiatlight.fiat_types.error_types import Error, Unspecified, InvalidValue, UnspecifiedValue
+from fiatlight.fiat_types.error_types import Error, Unspecified, Invalid, UnspecifiedValue
 from fiatlight.fiat_types.base_types import JsonDict, FiatAttributes
 from fiatlight.fiat_core import FiatToGuiException
 from typing import Type
@@ -62,12 +62,12 @@ class BaseModelGui(DataclassLikeGui[DataclassLikeType]):
         # Look for fields with default_factory
         self._initialize_fields()
 
-    def factor_dataclass_instance(self) -> DataclassLikeType | InvalidValue[DataclassLikeType]:
+    def factor_dataclass_instance(self) -> DataclassLikeType | Invalid[DataclassLikeType]:
         try:
             instance = super().factor_dataclass_instance()
-            if isinstance(instance, InvalidValue):
+            if isinstance(instance, Invalid):
                 logging.debug(
-                    f"DataclassLikeGui.factor_dataclass_instance() returned an InvalidValue for {self.datatype_basename()}, transmitting it"
+                    f"DataclassLikeGui.factor_dataclass_instance() returned an Invalid value for {self.datatype_basename()}, transmitting it"
                 )
             return instance
 
@@ -92,21 +92,21 @@ class BaseModelGui(DataclassLikeGui[DataclassLikeType]):
                     if not self.has_param_of_name(field_name):
                         raise e
                     param = self.param_of_name(field_name)
-                    if isinstance(param.data_with_gui.value, InvalidValue):
+                    if isinstance(param.data_with_gui.value, Invalid):
                         param.data_with_gui.value.error_message += " - " + error_msg
                     elif isinstance(param.data_with_gui.value, (Error, Unspecified)):
                         new_attribute_exception = AttributeError(
                             f"""
-                                Internal fiatlight error. The field type should be DataType or InvalidValue,
+                                Internal fiatlight error. The field type should be DataType or Invalid,
                                 not (Error, Unspecified)
                                 for field {field_name} in class {self.datatype_qualified_name()}
                                 """
                         )
                         raise new_attribute_exception from e
                     else:
-                        param.data_with_gui.value = InvalidValue(invalid_value=error_input, error_message=error_msg)
+                        param.data_with_gui.value = Invalid(invalid_value=error_input, error_message=error_msg)
 
-            return InvalidValue(
+            return Invalid(
                 # Intentional typing error below:
                 # we cannot set invalid_value to an instance of BaseModel, because we cannot construct it
                 invalid_value=UnspecifiedValue,  # type: ignore

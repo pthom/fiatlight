@@ -9,7 +9,7 @@ from fiatlight import (
     register_base_model,
     base_model_with_gui_registration,
     ErrorValue,
-    InvalidValue,
+    Invalid,
 )
 from fiatlight.fiat_togui.to_gui import _to_data_with_gui_impl
 from fiatlight.fiat_types import FiatAttributes
@@ -131,11 +131,11 @@ def test_base_model_with_validation_errors() -> None:
     assert p.x == 3
 
     # If x is negative, factoring should return an error
-    # and x_gui should be noted as an InvalidValue with the correct error message
+    # and x_gui should be noted as an Invalid with the correct error message
     x_gui.value = -3
     factored_instance = my_param_gui.factor_dataclass_instance()
     assert factored_instance is ErrorValue
-    assert isinstance(x_gui.value, InvalidValue)
+    assert isinstance(x_gui.value, Invalid)
     assert x_gui.value.invalid_value == -3
     assert x_gui.value.error_message == "Input should be greater than 0"
 
@@ -143,7 +143,7 @@ def test_base_model_with_validation_errors() -> None:
     x_gui.value = [1, 2, 3]
     factored_instance = my_param_gui.factor_dataclass_instance()
     assert factored_instance is ErrorValue
-    assert isinstance(x_gui.value, InvalidValue)
+    assert isinstance(x_gui.value, Invalid)
     assert x_gui.value.invalid_value == [1, 2, 3]
     assert x_gui.value.error_message == "Input should be a valid integer"
 

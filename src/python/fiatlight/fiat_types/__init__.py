@@ -1,4 +1,4 @@
-from .error_types import Error, ErrorValue, Unspecified, UnspecifiedValue, InvalidValue
+from .error_types import Error, ErrorValue, Unspecified, UnspecifiedValue, Invalid
 from .function_types import (
     Function,
     FunctionList,
@@ -59,7 +59,7 @@ __all__ = [
     "ErrorValue",
     "Unspecified",
     "UnspecifiedValue",
-    "InvalidValue",
+    "Invalid",
     # from function_types
     "Function",
     "FunctionList",

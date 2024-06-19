@@ -1,6 +1,6 @@
 from fiatlight.fiat_core import AnyDataWithGui, FunctionWithGui, ParamWithGui
 from fiatlight.fiat_core.any_data_with_gui import GuiHeaderLineParams
-from fiatlight.fiat_types import JsonDict, Unspecified, Error, InvalidValue, UnspecifiedValue
+from fiatlight.fiat_types import JsonDict, Unspecified, Error, Invalid, UnspecifiedValue
 from fiatlight.fiat_types.base_types import FiatAttributes
 from imgui_bundle import imgui_ctx, ImVec4
 from typing import Type, Any, TypeVar, List
@@ -81,18 +81,18 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
         # ------------------------------------------------------------------------------------------------------------------
         """
 
-    def factor_dataclass_instance(self) -> DataclassLikeType | InvalidValue[DataclassLikeType]:
+    def factor_dataclass_instance(self) -> DataclassLikeType | Invalid[DataclassLikeType]:
         assert self._type is not None
 
         # Check for invalid values
         invalid_params_names = []
         for param_gui in self._parameters_with_gui:
-            if isinstance(param_gui.data_with_gui.value, InvalidValue):
+            if isinstance(param_gui.data_with_gui.value, Invalid):
                 invalid_params_names.append(param_gui.name)
         if len(invalid_params_names) > 0:
             # The typing below isn't correct because we are in a complex case:
             # we have a dataclass that has a parameter that is invalid, so we cannot construct it
-            return InvalidValue(
+            return Invalid(
                 error_message="Invalid!",  # : {', '.join(invalid_params_names)}"
                 # invalid_value should be of type DataclassLikeType, but we cannot construct it
                 invalid_value=UnspecifiedValue,  # type: ignore
@@ -117,7 +117,7 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
                 param_gui.data_with_gui.value = param_gui.data_with_gui.construct_default_value()
 
         default_value = self.factor_dataclass_instance()
-        if isinstance(default_value, (Error, InvalidValue)):
+        if isinstance(default_value, (Error, Invalid)):
             raise ValueError(
                 f"""
             DataclassLikeGui({self.datatype_qualified_name()}).default_value_provider
@@ -300,7 +300,7 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
             if isinstance(r, (Error, Unspecified)):
                 # This should not happen, because we have checked for Unspecified and Error values
                 return False, original_value
-            elif isinstance(r, InvalidValue):
+            elif isinstance(r, Invalid):
                 # this can happen with BaseModel when the validation fails
                 # we will transmit only when it is ok
                 return True, r  #  type: ignore

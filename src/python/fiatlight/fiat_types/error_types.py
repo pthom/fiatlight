@@ -37,7 +37,7 @@ ErrorValue = Error(42)
 
 
 @dataclass
-class InvalidValue(Generic[DataType]):
+class Invalid(Generic[DataType]):
     """A marker for an invalid value, used as a default value for AnyDataWithGui.
     It is akin to None, but it is used to differentiate between a None value
     and a value that has been set to an invalid value by the user,

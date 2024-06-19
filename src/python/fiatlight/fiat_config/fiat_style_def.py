@@ -40,7 +40,7 @@ class FiatColorType(Enum):
     # Exception color
     ExceptionError = "ExceptionError"
 
-    InvalidValue = "InvalidValue"
+    Invalid = "Invalid"
 
 
 class _ColorTypes(Enum):
@@ -183,7 +183,7 @@ class FiatStyle(BaseModel):
             # Exception color
             FiatColorType.ExceptionError: colors[_ColorTypes.red],
             # Invalid value
-            FiatColorType.InvalidValue: colors[_ColorTypes.yellow],
+            FiatColorType.Invalid: colors[_ColorTypes.yellow],
         }
 
         for color_type, color in default_colors.items():

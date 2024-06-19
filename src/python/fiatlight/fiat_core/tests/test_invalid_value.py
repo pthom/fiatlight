@@ -22,7 +22,7 @@ def test_invalid_value() -> None:
     r2 = f_gui.call_for_tests(odd_int=4)
     assert r2 is fl.fiat_types.UnspecifiedValue
     odd_int_param = f_gui.param_gui("odd_int")
-    assert isinstance(odd_int_param.value, fl.fiat_types.InvalidValue)
+    assert isinstance(odd_int_param.value, fl.fiat_types.Invalid)
     assert odd_int_param.value.error_message == "must be an odd number"
 
 

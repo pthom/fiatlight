@@ -463,7 +463,7 @@ See the [architecture page](architecture) for the full architecture diagrams.
 from fiatlight.fiat_config import get_fiat_config
 from fiatlight.fiat_core.togui_exception import FiatToGuiException
 from fiatlight.fiat_types import UnspecifiedValue, ErrorValue, JsonDict, GuiType
-from fiatlight.fiat_types.error_types import Unspecified, Error, InvalidValue
+from fiatlight.fiat_types.error_types import Unspecified, Error, Invalid
 from fiatlight.fiat_core.any_data_with_gui import AnyDataWithGui, toggle_expanded_state_on_guis
 from fiatlight.fiat_types.function_types import BoolFunction
 from fiatlight.fiat_core.param_with_gui import ParamWithGui, ParamKind
@@ -1065,7 +1065,7 @@ class FunctionWithGui:
 
         # if any of the inputs is an error or unspecified, we do not call the function
         all_params = positional_only_values + list(keyword_values.values())
-        if any(isinstance(value, (Error, Unspecified, InvalidValue)) for value in all_params):
+        if any(isinstance(value, (Error, Unspecified, Invalid)) for value in all_params):
             for output_with_gui in self._outputs_with_gui:
                 output_with_gui.data_with_gui.value = UnspecifiedValue
             self._dirty = False
