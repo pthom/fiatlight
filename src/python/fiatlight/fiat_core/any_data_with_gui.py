@@ -247,7 +247,8 @@ class AnyDataWithGui(Generic[DataType]):
                     is_valid = False
                     error_message = str(e)
                 if not is_valid:
-                    error_messages.append(error_message)
+                    if error_message not in error_messages:
+                        error_messages.append(error_message)
             if len(error_messages) > 0:
                 all_error_messages = " - ".join(error_messages)
                 self._value = InvalidValue(error_message=all_error_messages, invalid_value=new_value)
