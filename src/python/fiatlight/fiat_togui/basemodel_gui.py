@@ -37,7 +37,7 @@ _Or with `register_base_model`:_
 import logging
 
 from .dataclass_like_gui import DataclassLikeGui, DataclassLikeType
-from fiatlight.fiat_types.error_types import Error, Unspecified, InvalidValue, ErrorValue
+from fiatlight.fiat_types.error_types import Error, Unspecified, InvalidValue, UnspecifiedValue
 from fiatlight.fiat_types.base_types import JsonDict, FiatAttributes
 from fiatlight.fiat_core import FiatToGuiException
 from typing import Type
@@ -62,21 +62,17 @@ class BaseModelGui(DataclassLikeGui[DataclassLikeType]):
         # Look for fields with default_factory
         self._initialize_fields()
 
-    def factor_dataclass_instance(self) -> DataclassLikeType | Error:
+    def factor_dataclass_instance(self) -> DataclassLikeType | InvalidValue[DataclassLikeType]:
         try:
             instance = super().factor_dataclass_instance()
-            if isinstance(instance, Error):
-                raise RuntimeError(
-                    f"""
-                Internal error:
-                ---------------
-                BaseModelGui({self.datatype_qualified_name()}.factor_dataclass_instance()
-                received an unexpected error: DataClassLikeGui.factor_dataclass_instance()
-                should not return an error...
-                """
+            if isinstance(instance, InvalidValue):
+                logging.debug(
+                    f"DataclassLikeGui.factor_dataclass_instance() returned an InvalidValue for {self.datatype_basename()}, transmitting it"
                 )
             return instance
+
         except ValidationError as e:
+            # Here we catch the Pydantic validation errors.
             logging.warning(
                 f"""
                 In BaseModelGui({self.datatype_qualified_name()})
@@ -97,14 +93,6 @@ class BaseModelGui(DataclassLikeGui[DataclassLikeType]):
                         raise e
                     param = self.param_of_name(field_name)
                     if isinstance(param.data_with_gui.value, InvalidValue):
-                        if param.data_with_gui.value.invalid_value != error_input:
-                            new_attribute_exception = AttributeError(
-                                f"""
-                                Got twice a pydantic validation error with different values
-                                for field {field_name} in class {self.datatype_qualified_name()}
-                                """
-                            )
-                            raise new_attribute_exception from e
                         param.data_with_gui.value.error_message += " - " + error_msg
                     elif isinstance(param.data_with_gui.value, (Error, Unspecified)):
                         new_attribute_exception = AttributeError(
@@ -117,7 +105,13 @@ class BaseModelGui(DataclassLikeGui[DataclassLikeType]):
                         raise new_attribute_exception from e
                     else:
                         param.data_with_gui.value = InvalidValue(invalid_value=error_input, error_message=error_msg)
-            return ErrorValue
+
+            return InvalidValue(
+                # Intentional typing error below:
+                # we cannot set invalid_value to an instance of BaseModel, because we cannot construct it
+                invalid_value=UnspecifiedValue,  # type: ignore
+                error_message="Pydantic validation error",
+            )
 
     def _initialize_fields(self) -> None:
         basemodel_type = self._type

@@ -2,8 +2,8 @@
     "user_inputs": {
         "functions_nodes": {
             "f": {
-                "v": {
-                    "name": "v",
+                "param": {
+                    "name": "param",
                     "data": {
                         "type": "Unspecified"
                     }
@@ -20,7 +20,7 @@
                 "_internal_state_gui_expanded": true,
                 "_function_node": {
                     "inputs": {
-                        "v": {
+                        "param": {
                             "cb_options": {
                                 "x": {
                                     "cb_options": {},
@@ -70,7 +70,7 @@
             },
             "function_node": {
                 "inputs": {
-                    "v": {
+                    "param": {
                         "cb_options": {
                             "x": {
                                 "cb_options": {},
