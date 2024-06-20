@@ -1,3 +1,15 @@
+"""Image processors: _example_ of a collection of image processors
+An ImageProcessor is simply a class that can transform an image into another image, with internal parameters.
+
+ImageEffect is an ImageProcessor that groups several other processors,
+and which can be used to apply multiple transformations to an image.
+
+Technical notes:
+    - all the processors are implemented as Pydantic models, which allows to easily serialize/deserialize them
+    - the processors are registered with the GUI, so that they can be easily used in a GUI application
+    - ImageEffect contains multiple nested BaseModel: this will be nicely handled by the GUI
+"""
+
 from fiatlight import fiat_image as fi
 from fiatlight.fiat_kits.fiat_image.add_meme_text import add_meme_text, MemeTextParams
 import fiatlight as fl

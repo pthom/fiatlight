@@ -41,7 +41,7 @@ def main() -> None:
 
         from fiatlight.fiat_widgets import fiat_osd
 
-        fiat_osd._render_all_osd()
+        fiat_osd.render_all_osd()
 
     hello_imgui.run(gui)
 

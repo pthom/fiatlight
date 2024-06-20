@@ -974,7 +974,7 @@ def sandbox() -> None:
     def gui() -> None:
         with ed_ctx.begin("Functions Graph"):
             function_node_gui.draw_node("add")
-        fiat_osd._render_all_osd()  # noqa
+        fiat_osd.render_all_osd()  # noqa
 
     immapp.run(gui, with_node_editor=True, window_title="function_node_gui_sandbox")
 

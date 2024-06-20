@@ -356,7 +356,7 @@ class FiatGui:
         _LAST_SCREENSHOT = last_nodes_image  # type: ignore
 
     def _heartbeat_post_render_dockable_windows(self) -> None:
-        fiat_osd._render_all_osd()  # noqa
+        fiat_osd.render_all_osd()  # noqa
         self._handle_file_dialogs()
         if self.params.customizable_graph:
             self._functions_collection_gui.gui()
