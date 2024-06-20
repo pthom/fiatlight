@@ -1,4 +1,4 @@
-from fiatlight import fiat_core, fiat_widgets, fiat_types, fiat_runner, fiat_config, fiat_kits
+from fiatlight import fiat_core, fiat_widgets, fiat_types, fiat_runner, fiat_config, fiat_kits, fiat_togui
 from fiatlight.fiat_core import AnyDataWithGui, FunctionWithGui, FunctionsGraph, FiatToGuiException
 from fiatlight.fiat_runner import (
     run,
@@ -17,6 +17,8 @@ from fiatlight.fiat_togui import (
     dataclass_with_gui_registration,
     register_base_model,
     base_model_with_gui_registration,
+    any_type_to_gui,
+    to_data_with_gui,
 )
 from fiatlight.fiat_utils import with_fiat_attributes, add_fiat_attributes
 from fiatlight.fiat_config import get_fiat_config
@@ -52,12 +54,15 @@ __all__ = [
     "fiat_config",
     "fiat_implot",
     "fiat_kits",
+    "fiat_togui",
     # from core
     "FunctionsGraph",
     "AnyDataWithGui",
     "FunctionWithGui",
     "FiatToGuiException",
     # from to_gui
+    "any_type_to_gui",
+    "to_data_with_gui",
     "register_type",
     "register_dataclass",
     "dataclass_with_gui_registration",
@@ -86,7 +91,6 @@ __all__ = [
     "with_fiat_attributes",
     "add_fiat_attributes",
     # from fiat_types
-    "DataValidationResult",
     "Error",
     "Unspecified",
     "Invalid",
