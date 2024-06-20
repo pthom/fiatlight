@@ -536,7 +536,7 @@ from fiatlight.fiat_kits.experimental.fiat_audio_simple import sound_wave_player
 sound_wave_player_gui_demo.main()
 ```
 
-For more info, see its [source code](../fiat_kits/experimental/fiat_audio_simple/sound_wave_player_gui.py).
+For more info, see its [source code](https://github.com/pthom/fiatlight/blob/refact_io/src/python/fiatlight/fiat_kits/experimental/fiat_audio_simple/sound_wave_player_gui.py)).
 
 
 Full code
