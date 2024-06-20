@@ -81,14 +81,18 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
         # ------------------------------------------------------------------------------------------------------------------
         """
 
-    def factor_dataclass_instance(self) -> DataclassLikeType | Invalid[DataclassLikeType]:
-        assert self._type is not None
-
+    @staticmethod
+    def factor_dataclass_instance_from_values__handle_invalid(
+        type_: Type[DataclassLikeType],
+        param_values: dict[str, Any],
+    ) -> DataclassLikeType | Invalid[DataclassLikeType]:
         # Check for invalid values
         invalid_params_names = []
-        for param_gui in self._parameters_with_gui:
-            if isinstance(param_gui.data_with_gui.value, Invalid):
-                invalid_params_names.append(param_gui.name)
+        for param_name, param_value in param_values.items():
+            if isinstance(param_value, Invalid):
+                invalid_params_names.append(param_name)
+            if isinstance(param_value, (Unspecified, Error)):
+                raise ValueError(f"Parameter {param_name} is unspecified in class {type_}")
         if len(invalid_params_names) > 0:
             # The typing below isn't correct because we are in a complex case:
             # we have a dataclass that has a parameter that is invalid, so we cannot construct it
@@ -98,25 +102,32 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
                 invalid_value=UnspecifiedValue,  # type: ignore
             )
 
-        kwargs = {}
+        r = type_(**param_values)
+        return r
+
+    def factor_dataclass_instance(self) -> DataclassLikeType | Invalid[DataclassLikeType]:
+        assert self._type is not None
+
+        param_values = {}
         for param_gui in self._parameters_with_gui:
-            param_value = param_gui.data_with_gui.value
-            if isinstance(param_value, (Unspecified, Error)):
-                raise ValueError(f"Parameter {param_gui.name} is unspecified in class {self._type}")
-            kwargs[param_gui.name] = param_value
-        r = self._type(**kwargs)
+            param_values[param_gui.name] = param_gui.data_with_gui.value
+
+        r = self.factor_dataclass_instance_from_values__handle_invalid(self._type, param_values)
         return r
 
     def default_value_provider(self) -> DataclassLikeType:
+        param_values = {}
         for param_gui in self._parameters_with_gui:
+            param_name = param_gui.name
             if not isinstance(param_gui.default_value, Unspecified):
-                param_gui.data_with_gui.value = param_gui.default_value
+                param_values[param_name] = param_gui.default_value
             else:
                 if not param_gui.data_with_gui.can_construct_default_value():
                     raise ValueError(f"Parameter {param_gui.name} has no default value provider in class {self._type}")
-                param_gui.data_with_gui.value = param_gui.data_with_gui.construct_default_value()
+                param_values[param_name] = param_gui.data_with_gui.construct_default_value()
 
-        default_value = self.factor_dataclass_instance()
+        assert self._type is not None
+        default_value = self.factor_dataclass_instance_from_values__handle_invalid(self._type, param_values)
         if isinstance(default_value, (Error, Invalid)):
             raise ValueError(
                 f"""
@@ -307,7 +318,7 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
             elif isinstance(r, Invalid):
                 # this can happen with BaseModel when the validation fails
                 # we will transmit only when it is ok
-                return True, r  #  type: ignore
+                return True, r  # type: ignore
             else:
                 return True, r
         else:

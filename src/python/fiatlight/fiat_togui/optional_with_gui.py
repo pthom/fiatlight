@@ -64,7 +64,6 @@ class OptionalWithGui(AnyDataWithGui[DataType | None]):
     def edit(self, value: DataType | None) -> tuple[bool, DataType | None]:
         assert not isinstance(value, (Unspecified, Error))
         assert self.inner_gui.can_construct_default_value()
-        default_value = self.inner_gui.construct_default_value()
         fn_edit = self.inner_gui.callbacks.edit
 
         changed = False
@@ -72,11 +71,10 @@ class OptionalWithGui(AnyDataWithGui[DataType | None]):
             if value is None:
                 imgui.text("None")
                 if imgui.button("Set"):
+                    default_value = self.inner_gui.construct_default_value()
                     value = default_value
                     changed = True
-                fiat_osd.set_widget_tooltip(
-                    f"Set Optional to default value ({default_value}) for {self.inner_gui.datatype_basename()}"
-                )
+                fiat_osd.set_widget_tooltip("Set Optional value")
             else:
                 if fn_edit is not None:
                     with imgui_ctx.begin_vertical("##OptionalV"):  # Some widgets Expect the standard vertical layout.

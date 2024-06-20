@@ -1,3 +1,5 @@
+import pytest
+
 import fiatlight as fl
 from fiatlight.fiat_togui.dataclass_gui import DataclassGui
 from fiatlight.fiat_togui.dataclass_like_gui import DataclassLikeGui
@@ -103,3 +105,59 @@ def test_dataclass_with_fiat_attributes() -> None:
     assert isinstance(f2_gui_param_gui.inner_gui, DataclassGui)
     range_f2 = f2_gui_param_gui.inner_gui._parameters_with_gui[0].data_with_gui.fiat_attributes["range"]
     assert range_f2 == (-180, 180)
+
+
+def test_dataclass_default_provider() -> None:
+    # A.
+    # Test the default provider with no given default values.
+    # In that case we should construct the members with the default constructor for the type.
+    @fl.dataclass_with_gui_registration()
+    class A:
+        x: int
+
+    a_gui = fl.any_type_to_gui(A)
+    assert a_gui.callbacks.default_value_provider is not None
+    a_default = a_gui.callbacks.default_value_provider()
+    assert a_default.x == 0
+
+    # B.
+    # Test the default provider with no given default values,
+    # and no default constructor for the type.
+    # In that case we should raise an error.
+    class NoDefaultCtor:
+        def __init__(self, dummy: int):
+            pass
+
+    @fl.dataclass_with_gui_registration()
+    class B:
+        v: NoDefaultCtor
+
+    b_gui = fl.any_type_to_gui(B)
+    assert b_gui.callbacks.default_value_provider is not None
+    with pytest.raises(ValueError):
+        _b_default = b_gui.callbacks.default_value_provider()
+
+    # C.
+    # Test the default provider with given default values.
+    @fl.dataclass_with_gui_registration()
+    class C:
+        x: int = 3
+
+    c_gui = fl.any_type_to_gui(C)
+    assert c_gui.callbacks.default_value_provider is not None
+    c_default = c_gui.callbacks.default_value_provider()
+    assert c_default.x == 3
+
+    # D.
+    # Test that the default provider does not have side effects.
+    @fl.dataclass_with_gui_registration()
+    class D:
+        x: int = 3
+
+    d_instance = D(5)  # type: ignore
+    d_instance_gui = fl.to_data_with_gui(d_instance)
+    assert d_instance_gui.value.x == 5  # type: ignore
+    assert d_instance_gui.callbacks.default_value_provider is not None
+    d_default = d_instance_gui.callbacks.default_value_provider()
+    assert d_default.x == 3
+    assert d_instance_gui.value.x == 5  # type: ignore
