@@ -281,7 +281,7 @@ class FiatGui:
         import cv2
         from fiatlight import demo_assets_dir
 
-        logo_path = demo_assets_dir() + "/logo/logo1.jpg"
+        logo_path = demo_assets_dir() + "/logo/logo.jpg"
         self._logo_image = cv2.imread(logo_path)  # type: ignore
 
     # ==================================================================================================================

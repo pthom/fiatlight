@@ -10,7 +10,7 @@ Example
 ```python
 from fiatlight.fiat_kits.fiat_matplotlib import demo_matplotlib
 
-figure_with_gui_demo.main()
+demo_matplotlib.main()
 ```
 
 
@@ -27,6 +27,6 @@ Source code for the example
 ```python
 import fiatlight
 from fiatlight.fiat_doc import look_at_code  # noqa
-%look_at_python_file fiat_kits/fiat_matplotlib/figure_with_gui_demo.py
+%look_at_python_file fiat_kits/fiat_matplotlib/demo_matplotlib.py
 ```
 
