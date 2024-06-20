@@ -439,7 +439,7 @@ FunctionWithGui signature
 Below, you will find the "signature" of the `FunctionWithGui` class,
 with its main attributes and methods (but not their bodies)
 
-Its full source code is [available online](../fiat_core/function_with_gui.py).
+Its full source code is [available online](https://github.com/pthom/fiatlight/blob/refact_io/src/python/fiatlight/fiat_core/function_with_gui.py).
 
     ```python
     from fiatlight.fiat_doc import look_at_code
