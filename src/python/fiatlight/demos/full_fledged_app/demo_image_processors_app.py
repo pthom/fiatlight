@@ -1,13 +1,14 @@
 """An example application where you can display a camera image, apply a variety of image effects onto it.
 
-LENT!!!
+This is an advanced example usage of Fiatlight, inside a full-fledged standard application: we will
+not be using a FunctionGraph here, but we will use the GUI provided by Fiatlight
+and Dear ImGui / Hello ImGui.
 
-This is an example usage of image_processors, inside a full-fledged standard application:
-we will not be using a FunctionGraph here, but we will use the GUI provided by Fiatlight and Dear ImGui / Hello ImGui.
+This example is heavily documented and tries to show how the main interesting features
+of Fiatlight and Dear ImGui / Hello ImGui.
 
-This example is heavily documented and tries to show how the main interesting features of Fiatlight and Dear ImGui.
-
-It is voluntarily split into several small classes to show an example on how to structure an application with Fiatlight.
+It is voluntarily split into several small classes to show an example on how to structure
+an application with Fiatlight.
 
 This example shows sophisticated usage features:
     Related to Fiatlight:
@@ -31,7 +32,10 @@ from pydantic import BaseModel
 import json
 
 
-def get_this_module_path():
+def get_this_module_path() -> str:
+    """Get the path of the current module, without the extension
+    This is only used to save the settings beside this Python file.
+    """
     import os
     import sys
 
@@ -116,14 +120,16 @@ class Application:
         img = self.resources.camera_provider.get_image()
         if img is not None:
             # Note: by using immvision.image(), we could have more features (zoom, pan, pixel info, ...)
-            immvision.image_display("Camera", img, refresh_image=True)
+            image_width_pixels = int(hello_imgui.em_size(30))  # Fixed image size (in pixels, calculated from em size)
+            immvision.image_display("Camera", img, refresh_image=True, image_display_size=(image_width_pixels, 0))
 
     def gui_image_with_effects(self) -> None:
         # Apply the effects to the camera image
         img = self.resources.camera_provider.get_image()
         if img is not None:
             img = self._app_state().effects.process(img)
-            immvision.image_display("Effects", img, refresh_image=True)
+            image_width_pixels = int(hello_imgui.em_size(30))  # Fixed image size (in pixels, calculated from em size)
+            immvision.image_display("Effects", img, refresh_image=True, image_display_size=(image_width_pixels, 0))
 
     def gui_top_toolbar(self) -> None:
         """Display the top toolbar of the application"""
@@ -182,7 +188,7 @@ class Application:
         filename = self._state_filename()
         try:
             as_dict = json.load(open(filename, "r"))
-            self._params_gui.call_load_from_dict(as_dict)
+            self._params_gui.value = self._params_gui.call_load_from_dict(as_dict)
         except FileNotFoundError:
             pass
 
@@ -198,6 +204,15 @@ class Application:
             self._params_gui.call_load_gui_options_from_json(as_dict)
         except FileNotFoundError:
             pass
+
+
+def remove_hello_imgui_settings(runner_params: hello_imgui.RunnerParams) -> None:
+    """If desired, remove the settings file of Hello ImGui, to start with a fresh state"""
+    import os
+
+    settings_file: str = hello_imgui.ini_settings_location(runner_params)
+    if os.path.exists(settings_file):
+        os.remove(settings_file)
 
 
 def main() -> None:
@@ -217,7 +232,7 @@ def main() -> None:
 
     # Hello ImGui params (they hold the GUI settings of the application)
     runner_params = hello_imgui.RunnerParams()
-    runner_params.app_window_params.window_title = "Image Processors Demo App"
+    runner_params.app_window_params.window_title = "Demo Image Processors App"
 
     # Standard ImGui window settings
     runner_params.imgui_window_params.show_status_bar = True
@@ -303,13 +318,8 @@ def main() -> None:
 
     # Hello ImGui settings location
     runner_params.ini_folder_type = hello_imgui.IniFolderType.current_folder
-
-    # Remove settings
-    import os
-
-    settings_file: str = hello_imgui.ini_settings_location(runner_params)
-    if os.path.exists(settings_file):
-        os.remove(settings_file)
+    # If desired, remove the settings file of Hello ImGui, to start with a fresh state
+    remove_hello_imgui_settings(runner_params)
 
     # Run the application
     immapp.run(runner_params)

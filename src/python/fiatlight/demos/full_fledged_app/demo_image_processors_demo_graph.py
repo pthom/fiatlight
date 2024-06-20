@@ -1,6 +1,8 @@
 """An example with you can display a camera, apply a variety of image effects onto it, and save the result to a file.
 
 This is an example usage of image_processors, inside a function graph provided by Fiatlight.
+It can be compared to demo_image_processors_app which shows how to use the same processors in a
+full-fledged application.
 
 It also shows how a simple pipeline can be built, going from a source (here a camera image) to a sink (here a file).
 """
