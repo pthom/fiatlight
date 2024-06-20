@@ -80,15 +80,11 @@ def add_meme_text(image: ImageU8, params: MemeTextParams) -> ImageU8:
     return image_with_text  # type: ignore
 
 
-def main(use_stable_diffusion: bool) -> None:
-    from fiatlight.fiat_kits.fiat_ai import invoke_sdxl_turbo
+def main() -> None:
     from fiatlight.fiat_kits.fiat_image import image_source
 
-    if use_stable_diffusion:
-        fl.run([invoke_sdxl_turbo, add_meme_text])
-    else:
-        fl.run([image_source, add_meme_text])
+    fl.run([image_source, add_meme_text])
 
 
 if __name__ == "__main__":
-    main(use_stable_diffusion=False)
+    main()
