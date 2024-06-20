@@ -1,0 +1,47 @@
+{
+    "cb_options": {
+        "camera_params": {
+            "cb_options": {
+                "device_number": {
+                    "cb_options": {},
+                    "expanded": false
+                },
+                "camera_resolution": {
+                    "cb_options": {},
+                    "expanded": false
+                },
+                "brightness": {
+                    "cb_options": {},
+                    "expanded": false
+                },
+                "contrast": {
+                    "cb_options": {},
+                    "expanded": false
+                }
+            },
+            "expanded": true
+        },
+        "effects": {
+            "cb_options": {
+                "geo_transf": {
+                    "cb_options": {},
+                    "expanded": true
+                },
+                "color_filter": {
+                    "cb_options": {},
+                    "expanded": false
+                },
+                "image_filters": {
+                    "cb_options": {},
+                    "expanded": true
+                },
+                "title_text": {
+                    "cb_options": {},
+                    "expanded": true
+                }
+            },
+            "expanded": true
+        }
+    },
+    "expanded": true
+}

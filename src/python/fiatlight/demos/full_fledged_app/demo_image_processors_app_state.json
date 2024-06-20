@@ -1,0 +1,59 @@
+{
+    "type": "Pydantic",
+    "value": {
+        "camera_params": {
+            "device_number": 0,
+            "camera_resolution": [
+                640,
+                480
+            ],
+            "brightness": 0.5,
+            "contrast": 0.5
+        },
+        "effects": {
+            "geo_transf": {
+                "rot_degree": 39,
+                "flip_h": false,
+                "flip_v": false
+            },
+            "color_filter": {
+                "lut_0": null,
+                "lut_1": {
+                    "pow_exponent": 10.0,
+                    "min_in": 0.0,
+                    "min_out": 0.0,
+                    "max_in": 1.0,
+                    "max_out": 1.0
+                },
+                "lut_2": null,
+                "lut_3": null,
+                "src_color": 1,
+                "lut_color": 5
+            },
+            "image_filters": {
+                "blur_radius": 4.5970001220703125,
+                "sharpen": false
+            },
+            "title_text": {
+                "params": {
+                    "text": "",
+                    "font_size": 20,
+                    "font_type": "fonts/Anton/Anton-Regular.ttf",
+                    "x": 0.35,
+                    "y": 0.75,
+                    "text_color": [
+                        255,
+                        255,
+                        255
+                    ],
+                    "outline_color": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "is_image_bgr": true
+                }
+            }
+        }
+    }
+}

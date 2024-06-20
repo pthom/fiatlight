@@ -62,7 +62,7 @@ def fire_once_at_frame_end(callback: VoidFunction) -> None:
     _ENQUEUED_CALLBACKS.enqueue_frame_end_callback(callback)
 
 
-def _is_running_in_notebook() -> bool:
+def is_running_in_notebook() -> bool:
     try:
         from IPython import get_ipython  # type: ignore  # noqa
 
@@ -685,7 +685,7 @@ def fiat_run_graph(
     # from a file named .fiat_run_config.json in the current directory or one of its parents.
     load_user_default_fiat_run_config()
 
-    if _is_running_in_notebook():
+    if is_running_in_notebook():
         from fiatlight.fiat_runner.fiat_run_notebook import _fiat_run_graph_nb, NotebookRunnerParams
 
         if app_name is None:

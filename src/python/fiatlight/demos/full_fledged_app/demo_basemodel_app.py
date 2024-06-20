@@ -8,7 +8,7 @@ Here, we demonstrate how to create a GUI for a nested Pydantic model, with custo
 import fiatlight as fl
 from enum import Enum
 from pydantic import BaseModel, Field
-from imgui_bundle import hello_imgui
+from imgui_bundle import immapp
 
 
 # An Enum which will be associated to a Gui automatically
@@ -70,7 +70,7 @@ def main():
         # Display the GUI: we simply call the GUI object's gui_edit method
         _changed = training_gui.gui_edit()
 
-    hello_imgui.run(gui)
+    immapp.run(gui)
 
 
 if __name__ == "__main__":
