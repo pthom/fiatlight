@@ -1,0 +1,110 @@
+{
+    "user_inputs": {
+        "functions_nodes": {
+            "lissajous_curve": {
+                "freq1": {
+                    "name": "freq1",
+                    "data": {
+                        "type": "Primitive",
+                        "value": 4.664000034332275
+                    }
+                },
+                "freq2": {
+                    "name": "freq2",
+                    "data": {
+                        "type": "Primitive",
+                        "value": 2.6549999713897705
+                    }
+                },
+                "delta": {
+                    "name": "delta",
+                    "data": {
+                        "type": "Primitive",
+                        "value": -1.9149999618530273
+                    }
+                },
+                "nb_periods": {
+                    "name": "nb_periods",
+                    "data": {
+                        "type": "Primitive",
+                        "value": 2.5999999046325684
+                    }
+                }
+            }
+        }
+    },
+    "gui_options": {
+        "lissajous_curve": {
+            "function_node_with_gui": {
+                "_inputs_expanded": true,
+                "_outputs_expanded": true,
+                "fiat_tuning_expanded": false,
+                "_internal_state_gui_expanded": true,
+                "_function_node": {
+                    "inputs": {
+                        "freq1": {
+                            "cb_options": {},
+                            "expanded": false
+                        },
+                        "freq2": {
+                            "cb_options": {},
+                            "expanded": false
+                        },
+                        "delta": {
+                            "cb_options": {},
+                            "expanded": false
+                        },
+                        "nb_periods": {
+                            "cb_options": {},
+                            "expanded": false
+                        }
+                    },
+                    "outputs": {
+                        "0": {
+                            "cb_options": {
+                                "figure_size": {
+                                    "x": 640.0,
+                                    "y": 480.0
+                                }
+                            },
+                            "expanded": true
+                        }
+                    },
+                    "internal_gui_options": {}
+                }
+            },
+            "function_node": {
+                "inputs": {
+                    "freq1": {
+                        "cb_options": {},
+                        "expanded": false
+                    },
+                    "freq2": {
+                        "cb_options": {},
+                        "expanded": false
+                    },
+                    "delta": {
+                        "cb_options": {},
+                        "expanded": false
+                    },
+                    "nb_periods": {
+                        "cb_options": {},
+                        "expanded": false
+                    }
+                },
+                "outputs": {
+                    "0": {
+                        "cb_options": {
+                            "figure_size": {
+                                "x": 640.0,
+                                "y": 480.0
+                            }
+                        },
+                        "expanded": true
+                    }
+                },
+                "internal_gui_options": {}
+            }
+        }
+    }
+}

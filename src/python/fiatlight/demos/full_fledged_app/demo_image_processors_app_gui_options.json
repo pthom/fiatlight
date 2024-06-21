@@ -25,15 +25,15 @@
             "cb_options": {
                 "geo_transf": {
                     "cb_options": {},
-                    "expanded": true
+                    "expanded": false
                 },
                 "color_filter": {
                     "cb_options": {},
-                    "expanded": false
+                    "expanded": true
                 },
                 "image_filters": {
                     "cb_options": {},
-                    "expanded": true
+                    "expanded": false
                 },
                 "title_text": {
                     "cb_options": {},

@@ -12,14 +12,14 @@
         },
         "effects": {
             "geo_transf": {
-                "rot_degree": 39,
+                "rot_degree": 11,
                 "flip_h": false,
                 "flip_v": false
             },
             "color_filter": {
                 "lut_0": null,
                 "lut_1": {
-                    "pow_exponent": 10.0,
+                    "pow_exponent": 0.6259999871253967,
                     "min_in": 0.0,
                     "min_out": 0.0,
                     "max_in": 1.0,
@@ -31,15 +31,15 @@
                 "lut_color": 5
             },
             "image_filters": {
-                "blur_radius": 4.5970001220703125,
+                "blur_radius": 0.0,
                 "sharpen": false
             },
             "title_text": {
                 "params": {
-                    "text": "",
+                    "text": "Sintel - 2010 - Blender",
                     "font_size": 20,
                     "font_type": "fonts/Anton/Anton-Regular.ttf",
-                    "x": 0.35,
+                    "x": 0.21299999952316284,
                     "y": 0.75,
                     "text_color": [
                         255,
