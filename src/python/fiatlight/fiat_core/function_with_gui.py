@@ -319,7 +319,7 @@ By subclassing `FunctionWithGui`, you can fully customize the behavior of the fu
 
 **Example: a camera provider with an internal state and saved options**
 
-[fiatlight.fiat_kits.fiat_image.CameraImageProviderGui](../fiat_kits/fiat_image/camera_image_provider.py)
+[fiatlight.fiat_kits.fiat_image.CameraImageProviderGui](https://github.com/pthom/fiatlight/blob/refact_io/src/python/fiatlight/fiat_kits/fiat_image/camera_image_provider.py)
 is a good example of a custom FunctionWithGui class.
 
 You can see it in action with the following code:

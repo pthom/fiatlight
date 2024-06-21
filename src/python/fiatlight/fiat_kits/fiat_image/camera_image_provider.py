@@ -15,10 +15,12 @@ from enum import Enum
 from imgui_bundle import imgui, imgui_ctx, hello_imgui
 from typing import Optional
 
+# hack, used when building documentation: we replace the camera image with a static image or video
+_HACK_IMAGE: str | None = None
+_HACK_MOVIE: str | None = None
 
-# hack, used when building documentation: we replace the camera image with a static image
 # _HACK_IMAGE: ImageU8_3 = cv2.imread(os.path.dirname(__file__) + "/paris.jpg")  # type: ignore
-_HACK_IMAGE = None
+_HACK_MOVIE = "/Users/pascal/dvp/OpenSource/ImGuiWork/_Bundle/fiatlight/priv_assets/videos_demos/Sintel.2010.720p.mkv"  # noqa
 
 
 class CameraResolution(Enum):
@@ -105,7 +107,10 @@ class CameraImageProvider:
     def start(self) -> None:
         logging.info(f"CameraImageProvider start: {self.camera_params}")
         self.cv_cap = cv2.VideoCapture()
-        self.cv_cap.open(self.camera_params.device_number)
+        if _HACK_MOVIE is not None and os.path.exists(_HACK_MOVIE):
+            self.cv_cap.open(_HACK_MOVIE)
+        else:
+            self.cv_cap.open(self.camera_params.device_number)
         frame_width_set = self.cv_cap.set(cv2.CAP_PROP_FRAME_WIDTH, self.camera_params.camera_resolution.value[0])
         frame_height_set = self.cv_cap.set(cv2.CAP_PROP_FRAME_HEIGHT, self.camera_params.camera_resolution.value[1])
         # fps_set = self.cv_cap.set(cv2.CAP_PROP_FPS, self.camera_params.fps.value)
