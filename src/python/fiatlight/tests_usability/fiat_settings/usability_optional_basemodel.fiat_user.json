@@ -1,0 +1,60 @@
+{
+    "user_inputs": {
+        "functions_nodes": {
+            "foo": {
+                "data": {
+                    "name": "data",
+                    "data": {
+                        "type": "Optional",
+                        "value": {
+                            "type": "Pydantic",
+                            "value": {
+                                "x": 5
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "gui_options": {
+        "foo": {
+            "function_node_with_gui": {
+                "_inputs_expanded": true,
+                "_outputs_expanded": true,
+                "fiat_tuning_expanded": true,
+                "_internal_state_gui_expanded": true,
+                "_function_node": {
+                    "inputs": {
+                        "data": {
+                            "cb_options": {},
+                            "expanded": true
+                        }
+                    },
+                    "outputs": {
+                        "0": {
+                            "cb_options": {},
+                            "expanded": true
+                        }
+                    },
+                    "internal_gui_options": {}
+                }
+            },
+            "function_node": {
+                "inputs": {
+                    "data": {
+                        "cb_options": {},
+                        "expanded": true
+                    }
+                },
+                "outputs": {
+                    "0": {
+                        "cb_options": {},
+                        "expanded": true
+                    }
+                },
+                "internal_gui_options": {}
+            }
+        }
+    }
+}

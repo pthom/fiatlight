@@ -454,9 +454,13 @@ class AnyDataWithGui(Generic[DataType]):
         return is_datatype_or_invalid and not disabled_in_node
 
     def _is_editing_on_next_lines(self) -> bool:
+        if not self.callbacks.edit_collapsible:
+            return False
         return self._expanded and self._can_edit_on_next_lines_if_expanded()
 
     def _is_presenting_on_next_lines(self) -> bool:
+        if not self.callbacks.present_collapsible:
+            return False
         return self._expanded and self._can_present_on_next_lines_if_expanded()
 
     def _popup_window_name(self, params: GuiHeaderLineParams[DataType], present_or_edit: PresentOrEdit) -> str:
@@ -745,8 +749,6 @@ class AnyDataWithGui(Generic[DataType]):
         """Present the value using either the present callback or the default str conversion
         May present on one line (if possible) or on multiple lines with an expand button
         """
-        if not self.callbacks.present_collapsible and self._expanded:
-            self._expanded = False
         with imgui_ctx.push_obj_id(self):
             with fontawesome_6_ctx():
                 self._gui_present_header_line(params)
@@ -762,8 +764,6 @@ class AnyDataWithGui(Generic[DataType]):
         May edit on one line (if possible) or on multiple lines with an expand button
         """
         changed = False  # noqa
-        if not self.callbacks.edit_collapsible and self._expanded:
-            self._expanded = False
         with imgui_ctx.push_obj_id(self):
             with fontawesome_6_ctx():
                 if self._gui_edit_header_line(params):
