@@ -117,7 +117,7 @@ import copy
 
 from fiatlight.fiat_core.function_with_gui import FunctionWithGui, FunctionWithGuiFactoryFromName
 from fiatlight.fiat_core.function_node import FunctionNode, FunctionNodeLink
-from fiatlight.fiat_types import Function, JsonDict
+from fiatlight.fiat_types import Function, JsonDict, VoidFunction
 
 from typing import Sequence, Dict, Tuple, Set, List
 
@@ -228,6 +228,24 @@ class FunctionsGraph:
             return self._add_function_with_gui(f)
         else:
             return self._add_function(f)
+
+    def add_gui_node(self, gui_function: VoidFunction, node_title: str | None = None) -> FunctionNode:
+        def nothing() -> None:
+            pass
+
+        fn_gui = FunctionWithGui(nothing)
+        fn_gui.function_name = gui_function.__name__
+        if node_title is not None:
+            fn_gui.function_label = node_title
+        else:
+            fn_gui.function_label = gui_function.__name__
+
+        def wrapped_gui_function() -> bool:
+            gui_function()
+            return False
+
+        fn_gui.internal_state_gui = wrapped_gui_function
+        return self._add_function_with_gui(fn_gui)
 
     class _Private_API_Add_Function_Section:  # Dummy class to create a section in the IDE # noqa
         """
