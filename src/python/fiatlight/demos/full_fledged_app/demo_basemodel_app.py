@@ -57,12 +57,12 @@ class ImageInfo(BaseModel):
     info__label="Image Info",
 )
 class TrainingImage(BaseModel):
-    image_path: fl.fiat_types.ImagePath = ""
+    image_path: fl.fiat_types.ImagePath = ""  # type: ignore
     training_type: TrainingDataType = TrainingDataType.Test
     info: ImageInfo = ImageInfo(width=0, height=0)
 
 
-def main():
+def main() -> None:
     """Main function, which will be run when the script is executed."""
     training_gui = fl.to_data_with_gui(TrainingImage())
 

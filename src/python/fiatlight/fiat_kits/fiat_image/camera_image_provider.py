@@ -16,7 +16,7 @@ from imgui_bundle import imgui, imgui_ctx, hello_imgui
 from typing import Optional
 
 # hack, used when building documentation: we replace the camera image with a static image or video
-_HACK_IMAGE: str | None = None
+_HACK_IMAGE: ImageU8_3 | None = None
 _HACK_MOVIE: str | None = None
 
 # _HACK_IMAGE: ImageU8_3 = cv2.imread(os.path.dirname(__file__) + "/paris.jpg")  # type: ignore
