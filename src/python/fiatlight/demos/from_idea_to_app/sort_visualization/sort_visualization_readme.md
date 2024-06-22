@@ -19,11 +19,13 @@ Later on we will work on creating a visualization for all of them.
 
 TODO:
   Optional collapsed by default!
-  label => label
-  app version
-
+  Graph: add Doc Node
+  ABORT
+  use base model annotated range
   pourquoi les sort run deux fois au debut
   pourquoi time affiche des le départ
+  Standalone app version
+
 
 
 

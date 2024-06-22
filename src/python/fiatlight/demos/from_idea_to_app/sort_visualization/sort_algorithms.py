@@ -1,11 +1,25 @@
 from fiatlight.demos.from_idea_to_app.sort_visualization.number_list import NumbersList
 
+ABORTING = False
+
+
+def is_aborting():
+    global ABORTING
+    return ABORTING
+
+
+def set_aborting(v: bool):
+    global ABORTING
+    ABORTING = v
+
 
 # Just to get started we will write bubble sorts and selection sorts.
 def bubble_sort(numbers: NumbersList) -> NumbersList:
     """Sort the numbers using bubble sort"""
     n = len(numbers)
     for i in range(n):
+        if ABORTING:
+            return numbers
         for j in range(0, n - i - 1):
             if numbers[j] > numbers[j + 1]:
                 numbers[j], numbers[j + 1] = numbers[j + 1], numbers[j]
@@ -16,6 +30,8 @@ def selection_sort(numbers: NumbersList) -> NumbersList:
     """Sort the numbers using selection sort"""
     n = len(numbers)
     for i in range(n):
+        if ABORTING:
+            return numbers
         min_index = i
         for j in range(i + 1, n):
             if numbers[j] < numbers[min_index]:
@@ -28,6 +44,8 @@ def insertion_sort(numbers: NumbersList) -> NumbersList:
     """Sort the numbers using insertion sort"""
     n = len(numbers)
     for i in range(1, n):
+        if ABORTING:
+            return numbers
         key = numbers[i]
         j = i - 1
         while j >= 0 and key < numbers[j]:
@@ -69,6 +87,8 @@ def merge_sort(numbers: NumbersList) -> NumbersList:
 
     def merge_sort_recursive(numbers: NumbersList, left: int, right: int) -> None:
         if left < right:
+            if ABORTING:
+                return
             middle = (left + right) // 2
             merge_sort_recursive(numbers, left, middle)
             merge_sort_recursive(numbers, middle + 1, right)
@@ -92,6 +112,8 @@ def quick_sort(numbers: NumbersList) -> NumbersList:
         return i + 1
 
     def quick_sort_recursive(numbers: NumbersList, low: int, high: int) -> None:
+        if ABORTING:
+            return
         if low < high:
             pi = partition(numbers, low, high)
             quick_sort_recursive(numbers, low, pi - 1)

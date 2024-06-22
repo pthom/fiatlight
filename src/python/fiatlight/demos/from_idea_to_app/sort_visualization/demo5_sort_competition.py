@@ -126,6 +126,16 @@ def gui_latency() -> None:
     if changed:
         set_latency(latency_ms / 1000000)
 
+    # Also, abort
+    from fiatlight.demos.from_idea_to_app.sort_visualization.sort_algorithms import is_aborting, set_aborting
+
+    if not is_aborting():
+        if imgui.button("Abort Sort"):
+            set_aborting(True)
+    else:
+        if imgui.button("Enable Sort"):
+            set_aborting(False)
+
 
 # Disable idling, to make animations smoother
 gui_params = fl.FiatGuiParams()
