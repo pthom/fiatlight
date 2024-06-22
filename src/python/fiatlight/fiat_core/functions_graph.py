@@ -236,9 +236,9 @@ class FunctionsGraph:
         fn_gui = FunctionWithGui(nothing)
         fn_gui.function_name = gui_function.__name__
         if node_title is not None:
-            fn_gui.function_label = node_title
+            fn_gui.label = node_title
         else:
-            fn_gui.function_label = gui_function.__name__
+            fn_gui.label = gui_function.__name__
 
         def wrapped_gui_function() -> bool:
             gui_function()

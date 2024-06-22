@@ -65,7 +65,7 @@ def make_sort_function_visualizer(
     # We use the decorator with_fiat_attributes to add an attribute "invoke_async=True" to the function
     # With this attribute, the function will be called asynchronously, so that the GUI can be updated
     # while the function is running
-    @fl.with_fiat_attributes(invoke_async=True, function_label=sort_function.__name__ + " visualization")
+    @fl.with_fiat_attributes(invoke_async=True, label=sort_function.__name__ + " - view")
     def sort_wrapper(numbers: NumbersList) -> float:
         # Start a timer, to measure the elapsed time
         start_time = time.time()

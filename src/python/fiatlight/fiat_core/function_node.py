@@ -107,7 +107,7 @@ class FunctionNode:
         link = self.input_node_link(parameter_name)
         if link is None:
             return None
-        fn_label = link.src_function_node.function_with_gui.function_label
+        fn_label = link.src_function_node.function_with_gui.label
         r = "linked to " + fn_label
         if link.src_function_node.function_with_gui.nb_outputs() > 1:
             r += f" (output {link.src_output_idx})"
@@ -121,7 +121,7 @@ class FunctionNode:
         output_links = self.output_links_for_idx(output_idx)
         r = []
         for link in output_links:
-            fn_label = link.dst_function_node.function_with_gui.function_label
+            fn_label = link.dst_function_node.function_with_gui.label
             r.append(f"linked to {fn_label} (input {link.dst_input_name})")
         return r
 

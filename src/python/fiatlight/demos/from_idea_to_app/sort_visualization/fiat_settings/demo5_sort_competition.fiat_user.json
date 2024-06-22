@@ -9,7 +9,7 @@
                         "value": {
                             "type": "Pydantic",
                             "value": {
-                                "nb_values": 897,
+                                "nb_values": 96,
                                 "seed": 7,
                                 "generation_type": "Decreasing"
                             }

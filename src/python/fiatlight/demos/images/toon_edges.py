@@ -85,7 +85,7 @@ class ToonEdgesParams(BaseModel):
 @fl.with_fiat_attributes(
     params__tooltip="Parameters for the Toon Edges function",
     params__label="Edges Params",
-    function_label="Add Toon Edges",
+    label="Add Toon Edges",
 )
 def add_toon_edges(image: ImageU8_3, params: ToonEdgesParams) -> ImageU8_3:
     """Add toon edges to an image.

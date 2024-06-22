@@ -502,7 +502,7 @@ class FunctionPossibleFiatAttributes(PossibleFiatAttributes):
         )
         self.add_explained_section("Documentation")
         self.add_explained_attribute(
-            "function_label",
+            "label",
             str,
             "The display name of the function (will use the function name if empty)",
             "",
@@ -609,7 +609,7 @@ class FunctionWithGui:
     # the name of the function
     function_name: str = ""
     # the display name of the function (will use the function name if empty)
-    function_label: str = ""
+    label: str = ""
 
     #
     # Behavioral Flags
@@ -749,7 +749,7 @@ class FunctionWithGui:
 
         if self.function_name == "":
             raise FiatToGuiException("FunctionWithGui: function name is empty")
-        self.function_label = self.function_name  # Can be customized via fiat_attributes
+        self.label = self.function_name  # Can be customized via fiat_attributes
 
         if fiat_attributes is not None:
             self.handle_fiat_attributes(fiat_attributes)
@@ -813,8 +813,8 @@ class FunctionWithGui:
             self.doc_user = fn_fiat_attributes["doc_user"]
         if "doc_show_source" in fn_fiat_attributes:
             self.doc_show_source = fn_fiat_attributes["doc_show_source"]
-        if "function_label" in fn_fiat_attributes:
-            self.function_label = fn_fiat_attributes["function_label"]
+        if "label" in fn_fiat_attributes:
+            self.label = fn_fiat_attributes["label"]
 
     def set_invoke_live(self) -> None:
         """Set flags to make this a live function (called automatically at each frame)"""

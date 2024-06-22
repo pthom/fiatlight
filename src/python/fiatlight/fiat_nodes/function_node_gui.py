@@ -251,7 +251,7 @@ class FunctionNodeGui:
         pass
 
     def _draw_title(self, unique_name: str) -> None:
-        fn_label = self._function_node.function_with_gui.function_label
+        fn_label = self._function_node.function_with_gui.label
         imgui.text(fn_label)
         if unique_name != fn_label:
             fiat_osd.set_widget_tooltip(f" (id: {unique_name})")
@@ -501,7 +501,7 @@ class FunctionNodeGui:
             )
             input_param.data_with_gui.status_tooltip = header_elements.param_label_tooltip
 
-            header_params = GuiHeaderLineParams[Any](parent_name=self._function_node.function_with_gui.function_label)
+            header_params = GuiHeaderLineParams[Any](parent_name=self._function_node.function_with_gui.label)
             header_params.prefix_gui = lambda: self._draw_input_pin(header_elements)
             header_params.default_value_if_unspecified = input_param.default_value
 
@@ -574,7 +574,7 @@ class FunctionNodeGui:
         output_param.label_color = get_fiat_config().style.color_as_vec4(bof_header_elements.value_color)
         output_param.status_tooltip = bof_header_elements.value_tooltip
 
-        header_params = GuiHeaderLineParams[Any](parent_name=self._function_node.function_with_gui.function_label)
+        header_params = GuiHeaderLineParams[Any](parent_name=self._function_node.function_with_gui.label)
         header_params.suffix_gui = lambda: self._draw_output_pin(bof_header_elements, idx_output)
 
         output_param.gui_present_customizable(header_params)
@@ -653,7 +653,7 @@ class FunctionNodeGui:
 
         detached_window_params = fiat_osd.DetachedWindowParams(
             unique_id="internal_state" + str(id(internal_state_fn)),
-            window_name=f"{self._function_node.function_with_gui.function_label} Internal GUI",
+            window_name=f"{self._function_node.function_with_gui.label} Internal GUI",
             gui_function=internal_state_fn,
         )
         fiat_osd.show_bool_detached_window_button(detached_window_params)

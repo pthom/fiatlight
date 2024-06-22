@@ -44,5 +44,10 @@ def make_random_number_list(options: NumbersGenerationOptions | None = None) -> 
 
     random.seed(options.seed)
     all_numbers = list(range(1, options.nb_values + 1))
-    random.shuffle(all_numbers)
+    if options.generation_type == GenerationType.RANDOM:
+        random.shuffle(all_numbers)
+    elif options.generation_type == GenerationType.INCREASING:
+        pass
+    elif options.generation_type == GenerationType.DECREASING:
+        all_numbers.reverse()
     return NumbersList(np.array(all_numbers))

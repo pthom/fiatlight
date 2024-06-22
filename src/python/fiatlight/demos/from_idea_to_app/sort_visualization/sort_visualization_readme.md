@@ -19,7 +19,7 @@ Later on we will work on creating a visualization for all of them.
 
 TODO:
   Optional collapsed by default!
-  function_label => label
+  label => label
   app version
 
   pourquoi les sort run deux fois au debut

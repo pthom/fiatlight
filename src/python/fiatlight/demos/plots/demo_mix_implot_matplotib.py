@@ -28,7 +28,7 @@ time_seconds.invoke_always_dirty = True  # type: ignore
 @fl.with_fiat_attributes(
     phase__range=(0.0, 2 * math.pi),
     amplitude__range=(0.0, 4.0),
-    function_label="Sine Wave (ImPlot)",
+    label="Sine Wave (ImPlot)",
 )
 def sin_wave(phase: float, amplitude: float = 1.0) -> fiat_implot.FloatMatrix_Dim2:
     x = np.arange(0, 10, 0.1)
@@ -43,7 +43,7 @@ def sin_wave(phase: float, amplitude: float = 1.0) -> fiat_implot.FloatMatrix_Di
     pen_offset__range=(0.0, 100.0),
     nb_turns__range=(0.0, 100.0),
     nb_turns__edit_type="knob",
-    function_label="Spirograph (ImPlot)",
+    label="Spirograph (ImPlot)",
 )
 def make_spirograph_curve(
     radius_fixed_circle: float = 10.84,
@@ -74,7 +74,7 @@ class ColorMap(Enum):
     mean__range=(-5, 5),
     variance__range=(0.1, 5),
     levels__range=(1, 20),
-    function_label="Gaussian Heatmap (Matplotlib)",
+    label="Gaussian Heatmap (Matplotlib)",
 )
 def gaussian_heatmap(
     mean: float = 0, variance: float = 1, colormap: ColorMap = ColorMap.VIRIDIS, levels: int = 10
@@ -96,7 +96,7 @@ def gaussian_heatmap(
     average__range=(0, 1000),
     nb_data__range=(100, 1_000_000),
     nb_data__slider_logarithmic=True,
-    function_label="Interactive Histogram (Matplotlib)",
+    label="Interactive Histogram (Matplotlib)",
 )
 def interactive_histogram(
     n_bars: int = 10,

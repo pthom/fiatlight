@@ -28,7 +28,7 @@ def test_function_attributes() -> None:
         doc_display=True,
         doc_markdown=False,
         doc_user="This is a test",
-        function_label="F - Test",
+        label="F - Test",
     )
     def f(x: int) -> int:
         return x
@@ -40,7 +40,7 @@ def test_function_attributes() -> None:
     assert _f_gui.doc_display
     assert not _f_gui.doc_markdown
     assert _f_gui.doc_user == "This is a test"
-    assert _f_gui.function_label == "F - Test"
+    assert _f_gui.label == "F - Test"
 
 
 def test_function_attributes_wrong_type() -> None:
