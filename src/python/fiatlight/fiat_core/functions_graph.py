@@ -416,17 +416,21 @@ class FunctionsGraph:
         return link
 
     def add_link(
-        self, src_function_name: str, dst_function_name: str, dst_input_name: str | None = None, src_output_idx: int = 0
+        self,
+        src_function: str | Function,
+        dst_function: str | Function,
+        dst_input_name: str | None = None,
+        src_output_idx: int = 0,
     ) -> None:
         """Add a link between two functions, which are identified by their *unique* names
 
         If a graph reuses several times the same function "f",
         the unique names for this functions will be "f_1", "f_2", "f_3", etc.
         """
-        src_function = self._function_node_with_unique_name(src_function_name)
-        dst_function = self._function_node_with_unique_name(dst_function_name)
+        src_function_node = self._function_node_with_name_or_is_function(src_function)
+        dst_function_node = self._function_node_with_name_or_is_function(dst_function)
         self._add_link_from_function_nodes(
-            src_function, dst_function, dst_input_name=dst_input_name, src_output_idx=src_output_idx
+            src_function_node, dst_function_node, dst_input_name=dst_input_name, src_output_idx=src_output_idx
         )
 
     def merge_graph(self, other: "FunctionsGraph") -> None:
@@ -524,6 +528,24 @@ class FunctionsGraph:
             ]
             this_function_idx = functions_with_same_name.index(function_node)
             return f"{function_node.function_with_gui.function_name}_{this_function_idx + 1}"
+
+    def _function_node_with_name_or_is_function(self, name_or_function: str | Function) -> FunctionNode:
+        """Get the function node with the given name or function"""
+        if isinstance(name_or_function, str):
+            return self._function_node_with_unique_name(name_or_function)
+
+        function_reference = name_or_function
+        candidate_nodes = []
+        for fn_node in self.functions_nodes:
+            if fn_node.function_with_gui._f_impl is function_reference:
+                candidate_nodes.append(fn_node)
+
+        if len(candidate_nodes) == 0:
+            raise ValueError(f"No function {function_reference}")
+        elif len(candidate_nodes) > 1:
+            raise ValueError(f"Multiple functions {function_reference}")
+        else:
+            return candidate_nodes[0]
 
     def _function_node_with_unique_name(self, function_name: str) -> FunctionNode:
         """Get the function with the unique name"""
