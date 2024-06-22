@@ -277,11 +277,18 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
         # ------------------------------------------------------------------------------------------------------------------
         """
 
-    def present_str(self, _: DataclassLikeType) -> str:
-        # the parameter is not used, because we have the data in the self._parameters_with_gui
+    def present_str(self, value: DataclassLikeType) -> str:
         strs: dict[str, str] = {}
         for param_gui in self._parameters_with_gui:
-            param_value = param_gui.data_with_gui.value
+            param_name = param_gui.name
+            if not hasattr(value, param_name):
+                raise ValueError(
+                    f"""
+                Object does not have attribute {param_name}
+                in class {self.datatype_qualified_name()}
+            """
+                )
+            param_value = value.__getattribute__(param_name)
             assert not isinstance(param_value, (Error, Unspecified))
             param_str = param_gui.data_with_gui.datatype_value_to_str(param_value)
             strs[param_gui.name] = param_str
