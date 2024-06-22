@@ -1,4 +1,23 @@
-"""An interactive visualization of different sorting algorithms, using Fiatlight
+"""Sorting Algorithm Competition
+================================
+This program shows a competition between different sorts algorithms.
+
+**"gui_latency" node**
+
+In this node you can set the speed of memory access: this drastically reduces the speed of the algorithms,
+so that you can visually see their behavior. The latency can be changed while the sorting algorithms are running.
+
+You can also stop the sorting algorithms in their tracks (a slight delay might be needed)
+
+**"make_random_number_list" node**
+
+In this node you can generate the list that will be sorted with different shapes.
+Click on "Call Manually" to generate a new list.
+
+** **Other nodes**
+
+The other function nodes will show various sorting algorithms. You can see their status in real time. T
+heir output is the total execution time after the sorting is finished.
 """
 
 from typing import Callable
@@ -13,6 +32,7 @@ from fiatlight.demos.from_idea_to_app.sort_visualization.sort_algorithms import 
     insertion_sort,
     merge_sort,
     quick_sort,
+    quick_sort_median_of_three,
 )
 import time
 
@@ -26,7 +46,7 @@ def draw_bars(numbers: NumbersList) -> None:
         # We will specify the block size
         # In order to have a size which is independent of the screen DPI scaling,
         # We will specify the size in EM units. 1 EM unit is the height of the font.
-        plot_size = hello_imgui.em_to_vec2(25, 15)
+        plot_size = hello_imgui.em_to_vec2(22, 15)
 
         # Draw our plot (only if begin_plot returns True)
         # 3.1 Show definition of begin_plot:
@@ -121,7 +141,7 @@ def gui_latency() -> None:
     # (the window width is much larger than the function node)
     # We will specify this within EM units. 1 EM unit is the height of the font.
     imgui.set_next_item_width(hello_imgui.em_size(10))
-    changed, latency_ms = imgui.slider_float("Latency (us)", latency_us, 0.0, 1000.0)
+    changed, latency_ms = imgui.slider_float("Latency (us)", latency_us, 0.0, 100.0)
 
     if changed:
         set_latency(latency_ms / 1000000)
@@ -144,12 +164,14 @@ gui_params.runner_params.fps_idling.enable_idling = False
 graph = fl.FunctionsGraph()
 graph.add_function(make_random_number_list)
 # Then add all the sorting algorithms, and link them to the random numbers generator
-sort_functions = [bubble_sort, selection_sort, insertion_sort, merge_sort, quick_sort]
+sort_functions = [bubble_sort, selection_sort, insertion_sort, merge_sort, quick_sort, quick_sort_median_of_three]
 for sort_function in sort_functions:
     sort_view = make_sort_function_visualizer(sort_function)
     graph.add_function(sort_view)
     graph.add_link(make_random_number_list, sort_view)
 # Add a GUI only node to set the latency
 graph.add_gui_node(gui_latency)
+# # Add a documentation node
+graph.add_markdown_node(__doc__, node_title="Doc", text_width_em=15)
 # Finally run the graph with the given parameters
 fl.run(graph, params=gui_params)

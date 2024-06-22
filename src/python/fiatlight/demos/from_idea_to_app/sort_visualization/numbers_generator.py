@@ -1,5 +1,5 @@
 from .number_list import NumbersList
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from enum import Enum
 import numpy as np
 import fiatlight as fl
@@ -11,19 +11,20 @@ class GenerationType(str, Enum):
     RANDOM = "Random"
     INCREASING = "Increasing"
     DECREASING = "Decreasing"
+    HAT = "Hat"
 
 
 @fl.base_model_with_gui_registration(
-    nb_values__range=(1, 10_000),  # range of the number of values. When the range is provided, a slider is displayed
+    nb_values__range=(1, 100_000),  # range of the number of values. When the range is provided, a slider is displayed
     nb_values__slider_logarithmic=True,  # use a logarithmic scale for the slider
     nb_values__label="Nb values",  # label of the widget
-    seed__range=(0, 30),  # range of the seed
+    # Note: the range of the seed is inferred from the pydantic Field annotation!
     seed__label="Random seed",
     generation_type__label="Generation type",
 )
 class NumbersGenerationOptions(BaseModel):
     nb_values: int = 10  # number of values in the list
-    seed: int = 0  # seed for the random number generator
+    seed: int = Field(default=1, ge=0, le=100)  # seed for the random number generator
     generation_type: GenerationType = GenerationType.RANDOM  # type of generation
 
 
@@ -50,4 +51,6 @@ def make_random_number_list(options: NumbersGenerationOptions | None = None) -> 
         pass
     elif options.generation_type == GenerationType.DECREASING:
         all_numbers.reverse()
+    elif options.generation_type == GenerationType.HAT:
+        all_numbers = all_numbers[: options.nb_values // 2] + all_numbers[: options.nb_values // 2 - 1 : -1]
     return NumbersList(np.array(all_numbers))

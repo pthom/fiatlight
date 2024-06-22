@@ -5,15 +5,7 @@
                 "options": {
                     "name": "options",
                     "data": {
-                        "type": "Optional",
-                        "value": {
-                            "type": "Pydantic",
-                            "value": {
-                                "nb_values": 100000,
-                                "seed": 37,
-                                "generation_type": "Random"
-                            }
-                        }
+                        "type": "Unspecified"
                     }
                 }
             },

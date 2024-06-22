@@ -121,3 +121,40 @@ def quick_sort(numbers: NumbersList) -> NumbersList:
 
     quick_sort_recursive(numbers, 0, len(numbers) - 1)
     return numbers
+
+
+def quick_sort_median_of_three(numbers: NumbersList) -> NumbersList:
+    """Sort the numbers using quick sort with median-of-three pivot selection
+    A little optimization to avoid the worst case scenario of quick sort (i.e. reverse sorted list)
+    """
+
+    def median_of_three(numbers: NumbersList, low: int, high: int) -> int:
+        mid = (low + high) // 2
+        if numbers[low] > numbers[mid]:
+            numbers[low], numbers[mid] = numbers[mid], numbers[low]
+        if numbers[low] > numbers[high]:
+            numbers[low], numbers[high] = numbers[high], numbers[low]
+        if numbers[mid] > numbers[high]:
+            numbers[mid], numbers[high] = numbers[high], numbers[mid]
+        return mid
+
+    def partition(numbers: NumbersList, low: int, high: int) -> int:
+        mid = median_of_three(numbers, low, high)
+        numbers[mid], numbers[high] = numbers[high], numbers[mid]
+        pivot = numbers[high]
+        i = low - 1
+        for j in range(low, high):
+            if numbers[j] < pivot:
+                i += 1
+                numbers[i], numbers[j] = numbers[j], numbers[i]
+        numbers[i + 1], numbers[high] = numbers[high], numbers[i + 1]
+        return i + 1
+
+    def quick_sort_recursive(numbers: NumbersList, low: int, high: int) -> None:
+        if low < high:
+            pi = partition(numbers, low, high)
+            quick_sort_recursive(numbers, low, pi - 1)
+            quick_sort_recursive(numbers, pi + 1, high)
+
+    quick_sort_recursive(numbers, 0, len(numbers) - 1)
+    return numbers

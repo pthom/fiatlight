@@ -1,30 +1,49 @@
 An interactive visualization of different sorting algorithms, using Fiatlight
+=============================================================================
 
-Here is the strategy that we will be using:
+This is a full tutorial that demonstrates many features of Fiatlight:
 
-- The function make_random_number_list will create a random unordered set of numbers between
-  one and a given maximum. This will be the set that we will be sorting.
-- The function swap_elements will swap two elements in a set with a configurable latency in order
-  to be able to visually compare the speed
-- We will implement different sorting strategies. Each strategy will be a function that will accept an unordered set
-  and return it after sorting. We will implement the following strategies:
-    - Bubble sort
-    - Selection sort
-    - Insertion sort
-    - Merge sort
-    - Quick sort
+Part 1:
+-------
+- How to run a simple function with a GUI provided by Fiatlight
+- How to add fiat_attributes to set the ranges of value for numeric widgets.
+- How to set the labels for functions and parameters
+- How to add a GUI for a pydantic model. How are pydantic validators handled?
+- How to create functions that are invoked on demand (i.e. when a button is clicked)
 
-Later on we will work on creating a visualization for all of them.
+Part 2:
+-------
+- How to create a custom renderer for a widget.
+- How to specify widget sizes in DPI independent units.
+- how to use ImPlot to plot large quantities of data at high frame rates
+
+Part 3:
+-------
+- How to associate a custom widget class for all instances of a given type
+
+Part 4:
+-------
+- How to use "fiat_tuning" in order to display a function internal state
+  is the GUI
+  (In our case, we will be graphically displaying the current status of the ordering)
+- How to run functions as synchronously
+- How to disable the idling
+- How to run a composition of functions
+
+Part 5:
+-------
+- How to run a custom function graph.
+- How to add a "GUI Only" node to the graph (i.e. a node that does not have a corresponding function)
+- how to add "Documentation" node to the graph
 
 
 TODO:
-  Optional collapsed by default!
+  Standalone sort app version
+
+
   Graph: add Doc Node
-  ABORT
-  use base model annotated range
-  pourquoi les sort run deux fois au debut
-  pourquoi time affiche des le départ
-  Standalone app version
+    Size = Node size initially
+    Resizable
 
 
 

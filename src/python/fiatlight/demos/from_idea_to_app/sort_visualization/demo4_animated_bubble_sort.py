@@ -15,7 +15,7 @@ def draw_bars(numbers: NumbersList) -> None:
         # We will specify the block size
         # In order to have a size which is independent of the screen DPI scaling,
         # We will specify the size in EM units. 1 EM unit is the height of the font.
-        plot_size = hello_imgui.em_to_vec2(25, 15)
+        plot_size = hello_imgui.em_to_vec2(22, 15)
 
         # Draw our plot (only if begin_plot returns True)
         # 3.1 Show definition of begin_plot:

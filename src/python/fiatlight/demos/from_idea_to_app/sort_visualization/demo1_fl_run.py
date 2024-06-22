@@ -10,7 +10,7 @@ fl.register_base_model(
     nb_values__range=(1, 10_000),  # range of the number of values. When the range is provided, a slider is displayed
     nb_values__slider_logarithmic=True,  # use a logarithmic scale for the slider
     nb_values__label="Nb values",  # label of the widget
-    seed__range=(0, 30),  # range of the seed
+    seed__range=(0, 30),  # range of the seed (Note, will be set by Pydantic annotation later)
     seed__label="Random seed",
     generation_type__label="Generation type",
 )
