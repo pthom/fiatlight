@@ -175,7 +175,7 @@ class AnyDataWithGui(Generic[DataType]):
     _fiat_attributes: FiatAttributes
 
     # Is the present or edit view expanded. This is serialized and deserialized in the GUI options.
-    _expanded: bool = False
+    _expanded: bool = True
 
     # If True, a GUI to set the value as Unspecified is provided
     # This is useful in Function Nodes.

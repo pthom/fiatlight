@@ -19,10 +19,6 @@ Later on we will work on creating a visualization for all of them.
 
 TODO:
   Optional collapsed by default!
-
-  base model / settings
-
-  NumberList = iterable
   function_label => label
   app version
 

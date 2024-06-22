@@ -95,7 +95,7 @@ class FunctionNodeGui:
     #   (those settings are saved in the user settings file)
     _inputs_expanded: bool = True
     _outputs_expanded: bool = True
-    fiat_tuning_expanded: bool = False  # This is for the debug internals
+    fiat_tuning_expanded: bool = True  # This is for the debug internals
     _internal_state_gui_expanded: bool = True  # This is for the function's internal state gui
 
     # ==================================================================================================================
@@ -589,7 +589,7 @@ class FunctionNodeGui:
                 # Manual call
                 if fn_with_gui.is_invoke_manually_io():
                     imgui.spring()
-                    if imgui.button("Call IO manually"):
+                    if imgui.button("Call manually"):
                         self.invoke()
                     imgui.spring()
                 elif fn_with_gui.is_dirty():

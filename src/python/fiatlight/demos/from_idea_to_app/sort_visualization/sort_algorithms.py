@@ -1,14 +1,4 @@
-import numpy as np
-import random
 from fiatlight.demos.from_idea_to_app.sort_visualization.number_list import NumbersList
-
-
-def make_random_unordered_set(maximum: int = 10, seed: int = 0) -> NumbersList:
-    """Create a random unordered set of numbers between 1 and a given maximum"""
-    all_numbers = list(range(1, maximum + 1))
-    random.seed(seed)
-    random.shuffle(all_numbers)
-    return NumbersList(np.array(all_numbers))
 
 
 # Just to get started we will write bubble sorts and selection sorts.
