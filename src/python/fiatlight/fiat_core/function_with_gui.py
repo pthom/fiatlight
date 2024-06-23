@@ -653,23 +653,20 @@ class FunctionWithGui:
     #       and choose alternative widgets in this case.
     internal_state_gui_node_compatible: bool = True
 
+    # Serialization
+    # save/load_internal_gui_options_from_json (Optional)
+    # Optional serialization and deserialization of the internal state GUI presentation options and data
+    # If provided, these functions will be used to recreate the GUI presentation options or data when loading a graph,
+    # so that the GUI looks the same when the application is restarted.
+    save_internal_gui_options_to_json: Callable[[], JsonDict] | None = None
+    load_internal_gui_options_from_json: Callable[[JsonDict], None] | None = None
+
     #
     # Heartbeat
     # ---------
     # on_heartbeat: optional function that will be called at each frame
     # (and return True if the function needs to be called to update the output)
     on_heartbeat: BoolFunction | None = None
-
-    #
-    # Serialization
-    # -------------
-    # save/load_internal_gui_options_from_json (Optional)
-    # Optional serialization and deserialization of the internal state GUI presentation options
-    # (i.e. anything that deals with how the GUI is presented, not the data itself)
-    # If provided, these functions will be used to recreate the GUI presentation options when loading a graph,
-    # so that the GUI looks the same when the application is restarted.
-    save_internal_gui_options_to_json: Callable[[], JsonDict] | None = None
-    load_internal_gui_options_from_json: Callable[[JsonDict], None] | None = None
 
     # --------------------------------------------------------------------------------------------
     #        Private Members
@@ -882,6 +879,9 @@ class FunctionWithGui:
         """Return True if the "Refresh needed" label should be displayed
         i.e. if the function is dirty and invoke_manually is True"""
         return self.invoke_manually and self._dirty and not self.is_invoke_manually_io()
+
+    def __str__(self) -> str:
+        return f"FunctionWithGui({self.function_name})"
 
     class _Inputs_Section:  # Dummy class to create a section in the IDE # noqa
         """
@@ -1188,15 +1188,12 @@ class FunctionWithGui:
         for i, output_with_gui in enumerate(self._outputs_with_gui):
             output_options[str(i)] = output_with_gui.data_with_gui.call_save_gui_options_to_json()
 
-        internal_gui_options = {}
-        if self.save_internal_gui_options_to_json is not None:
-            internal_gui_options = self.save_internal_gui_options_to_json()
-
         r = {
             "inputs": input_options,
             "outputs": output_options,
-            "internal_gui_options": internal_gui_options,
         }
+        if self.save_internal_gui_options_to_json is not None:
+            r["internal_gui_options"] = self.save_internal_gui_options_to_json()
         return r
 
     def load_gui_options_from_json(self, json_data: JsonDict) -> None:
@@ -1209,9 +1206,10 @@ class FunctionWithGui:
         for i, output_with_gui in enumerate(self._outputs_with_gui):
             output_with_gui.data_with_gui.call_load_gui_options_from_json(output_options[str(i)])
 
-        internal_gui_options = json_data.get("internal_gui_options", {})
-        if self.load_internal_gui_options_from_json is not None:
-            self.load_internal_gui_options_from_json(internal_gui_options)
+        if "internal_gui_options" in json_data:
+            internal_gui_options = json_data.get("internal_gui_options")
+            if self.load_internal_gui_options_from_json is not None:
+                self.load_internal_gui_options_from_json(internal_gui_options)  # type: ignore
 
     class _Doc_Section:  # Dummy class to create a section in the IDE # noqa
         # --------------------------------------------------------------------------------------------

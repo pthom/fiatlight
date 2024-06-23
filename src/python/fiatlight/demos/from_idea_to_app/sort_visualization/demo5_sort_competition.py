@@ -172,6 +172,6 @@ for sort_function in sort_functions:
 # Add a GUI only node to set the latency
 graph.add_gui_node(gui_latency)
 # # Add a documentation node
-graph.add_markdown_node(__doc__, node_title="Doc", text_width_em=15)
+graph.add_markdown_node(__doc__, label="Doc", text_width_em=15)
 # Finally run the graph with the given parameters
 fl.run(graph, params=gui_params)

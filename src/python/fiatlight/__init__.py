@@ -1,5 +1,12 @@
 from fiatlight import fiat_core, fiat_widgets, fiat_types, fiat_runner, fiat_config, fiat_kits, fiat_togui
-from fiatlight.fiat_core import AnyDataWithGui, FunctionWithGui, FunctionsGraph, FiatToGuiException
+from fiatlight.fiat_core import (
+    AnyDataWithGui,
+    FunctionWithGui,
+    FunctionsGraph,
+    FiatToGuiException,
+    GuiNode,
+    MarkdownNode,
+)
 from fiatlight.fiat_runner import (
     run,
     fiat_run,
@@ -60,6 +67,8 @@ __all__ = [
     "AnyDataWithGui",
     "FunctionWithGui",
     "FiatToGuiException",
+    "GuiNode",
+    "MarkdownNode",
     # from to_gui
     "any_type_to_gui",
     "to_data_with_gui",

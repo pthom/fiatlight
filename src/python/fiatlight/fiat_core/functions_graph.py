@@ -117,9 +117,12 @@ import copy
 
 from fiatlight.fiat_core.function_with_gui import FunctionWithGui, FunctionWithGuiFactoryFromName
 from fiatlight.fiat_core.function_node import FunctionNode, FunctionNodeLink
+from fiatlight.fiat_core.gui_node import GuiNode
+from fiatlight.fiat_core.markdown_node import MarkdownNode
 from fiatlight.fiat_types import Function, JsonDict, VoidFunction
 
 from typing import Sequence, Dict, Tuple, Set, List
+from pydantic import BaseModel
 
 
 class FunctionsGraph:
@@ -229,23 +232,21 @@ class FunctionsGraph:
         else:
             return self._add_function(f)
 
-    def add_gui_node(self, gui_function: VoidFunction, node_title: str | None = None) -> FunctionNode:
-        def nothing() -> None:
-            pass
+    def add_gui_node(
+        self, gui_function: VoidFunction, label: str | None = None, gui_serializable_data: BaseModel | None = None
+    ) -> FunctionNode:
+        gui_node = GuiNode(gui_function, label=label, gui_serializable_data=gui_serializable_data)
+        return self._add_function_with_gui(gui_node)
 
-        fn_gui = FunctionWithGui(nothing)
-        fn_gui.function_name = gui_function.__name__
-        if node_title is not None:
-            fn_gui.label = node_title
-        else:
-            fn_gui.label = gui_function.__name__
-
-        def wrapped_gui_function() -> bool:
-            gui_function()
-            return False
-
-        fn_gui.internal_state_gui = wrapped_gui_function
-        return self._add_function_with_gui(fn_gui)
+    def add_markdown_node(
+        self,
+        md_string: str,
+        label: str = "Documentation",
+        text_width_em: float = 20.0,
+        unindented: bool = True,
+    ) -> FunctionNode:
+        markdown_node = MarkdownNode(md_string, label=label, text_width_em=text_width_em, unindented=unindented)
+        return self._add_function_with_gui(markdown_node)
 
     class _Private_API_Add_Function_Section:  # Dummy class to create a section in the IDE # noqa
         """

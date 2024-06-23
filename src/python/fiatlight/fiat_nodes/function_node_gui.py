@@ -33,6 +33,7 @@ from __future__ import annotations
 import fiatlight
 from fiatlight.fiat_types import Error, Unspecified, UnspecifiedValue, JsonDict
 from fiatlight.fiat_core import FunctionNode, FunctionNodeLink, AnyDataWithGui
+from fiatlight.fiat_core.gui_node import GuiNode
 from fiatlight.fiat_core.any_data_with_gui import GuiHeaderLineParams
 from fiatlight.fiat_config import FiatColorType, get_fiat_config
 from fiatlight.fiat_core.param_with_gui import ParamWithGui
@@ -636,7 +637,10 @@ class FunctionNodeGui:
         # expanded state
         node_separator_params.expanded = expanded
         # Separator text
-        node_separator_params.text = "Function internal state"
+        if isinstance(fn_with_gui, GuiNode):
+            node_separator_params.text = " "
+        else:
+            node_separator_params.text = "Function internal state"
         # Separator collapse button
         node_separator_params.show_collapse_button = can_collapse
         # Separator collapse all button

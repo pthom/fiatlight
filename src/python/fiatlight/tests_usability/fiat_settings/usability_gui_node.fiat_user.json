@@ -1,0 +1,41 @@
+{
+    "user_inputs": {
+        "functions_nodes": {
+            "my_gui": {}
+        }
+    },
+    "gui_options": {
+        "my_gui": {
+            "function_node_with_gui": {
+                "_inputs_expanded": true,
+                "_outputs_expanded": true,
+                "fiat_tuning_expanded": true,
+                "_internal_state_gui_expanded": true,
+                "_function_node": {
+                    "inputs": {},
+                    "outputs": {
+                        "0": {
+                            "cb_options": {},
+                            "expanded": true
+                        }
+                    },
+                    "internal_gui_options": {
+                        "my_int": 45
+                    }
+                }
+            },
+            "function_node": {
+                "inputs": {},
+                "outputs": {
+                    "0": {
+                        "cb_options": {},
+                        "expanded": true
+                    }
+                },
+                "internal_gui_options": {
+                    "my_int": 45
+                }
+            }
+        }
+    }
+}

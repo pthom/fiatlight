@@ -1,0 +1,41 @@
+{
+    "user_inputs": {
+        "functions_nodes": {
+            "gui": {}
+        }
+    },
+    "gui_options": {
+        "gui": {
+            "function_node_with_gui": {
+                "_inputs_expanded": true,
+                "_outputs_expanded": true,
+                "fiat_tuning_expanded": true,
+                "_internal_state_gui_expanded": true,
+                "_function_node": {
+                    "inputs": {},
+                    "outputs": {
+                        "0": {
+                            "cb_options": {},
+                            "expanded": true
+                        }
+                    },
+                    "internal_gui_options": {
+                        "text_width_em": 4.4666666984558105
+                    }
+                }
+            },
+            "function_node": {
+                "inputs": {},
+                "outputs": {
+                    "0": {
+                        "cb_options": {},
+                        "expanded": true
+                    }
+                },
+                "internal_gui_options": {
+                    "text_width_em": 4.4666666984558105
+                }
+            }
+        }
+    }
+}

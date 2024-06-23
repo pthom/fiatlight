@@ -1,0 +1,25 @@
+{
+    "user_inputs": {
+        "functions_nodes": {
+            "gui": {}
+        }
+    },
+    "gui_options": {
+        "gui": {
+            "function_node_with_gui": {
+                "_inputs_expanded": true,
+                "_outputs_expanded": true,
+                "fiat_tuning_expanded": true,
+                "_internal_state_gui_expanded": true,
+                "_function_node": {
+                    "inputs": {},
+                    "outputs": {}
+                }
+            },
+            "function_node": {
+                "inputs": {},
+                "outputs": {}
+            }
+        }
+    }
+}

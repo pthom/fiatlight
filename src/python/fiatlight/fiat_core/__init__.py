@@ -6,9 +6,9 @@ from .param_with_gui import (
     ParamWithGui,
 )
 from .output_with_gui import OutputWithGui
-from .function_with_gui import (
-    FunctionWithGui,
-)
+from .function_with_gui import FunctionWithGui
+from .gui_node import GuiNode
+from .markdown_node import MarkdownNode
 from .function_node import FunctionNode, FunctionNodeLink
 from .functions_graph import FunctionsGraph
 from .togui_exception import FiatToGuiException
@@ -36,4 +36,8 @@ __all__ = [
     "PossibleFiatAttributes",
     # from togui_exception
     "FiatToGuiException",
+    # from gui_node
+    "GuiNode",
+    # from markdown_node
+    "MarkdownNode",
 ]

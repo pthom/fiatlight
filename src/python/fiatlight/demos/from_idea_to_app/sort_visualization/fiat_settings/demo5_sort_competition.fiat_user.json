@@ -9,7 +9,7 @@
                         "value": {
                             "type": "Pydantic",
                             "value": {
-                                "nb_values": 100000,
+                                "nb_values": 5964,
                                 "seed": 37,
                                 "generation_type": "Random"
                             }
@@ -46,8 +46,7 @@
                             "cb_options": {},
                             "expanded": true
                         }
-                    },
-                    "internal_gui_options": {}
+                    }
                 }
             },
             "function_node": {
@@ -62,8 +61,7 @@
                         "cb_options": {},
                         "expanded": true
                     }
-                },
-                "internal_gui_options": {}
+                }
             }
         },
         "sort_wrapper_1": {
@@ -84,8 +82,7 @@
                             "cb_options": {},
                             "expanded": true
                         }
-                    },
-                    "internal_gui_options": {}
+                    }
                 }
             },
             "function_node": {
@@ -100,8 +97,7 @@
                         "cb_options": {},
                         "expanded": true
                     }
-                },
-                "internal_gui_options": {}
+                }
             }
         },
         "sort_wrapper_2": {
@@ -122,8 +118,7 @@
                             "cb_options": {},
                             "expanded": true
                         }
-                    },
-                    "internal_gui_options": {}
+                    }
                 }
             },
             "function_node": {
@@ -138,8 +133,7 @@
                         "cb_options": {},
                         "expanded": true
                     }
-                },
-                "internal_gui_options": {}
+                }
             }
         },
         "sort_wrapper_3": {
@@ -160,8 +154,7 @@
                             "cb_options": {},
                             "expanded": true
                         }
-                    },
-                    "internal_gui_options": {}
+                    }
                 }
             },
             "function_node": {
@@ -176,8 +169,7 @@
                         "cb_options": {},
                         "expanded": true
                     }
-                },
-                "internal_gui_options": {}
+                }
             }
         },
         "sort_wrapper_4": {
@@ -198,8 +190,7 @@
                             "cb_options": {},
                             "expanded": true
                         }
-                    },
-                    "internal_gui_options": {}
+                    }
                 }
             },
             "function_node": {
@@ -214,8 +205,7 @@
                         "cb_options": {},
                         "expanded": true
                     }
-                },
-                "internal_gui_options": {}
+                }
             }
         },
         "sort_wrapper_5": {
@@ -236,8 +226,7 @@
                             "cb_options": {},
                             "expanded": true
                         }
-                    },
-                    "internal_gui_options": {}
+                    }
                 }
             },
             "function_node": {
@@ -252,8 +241,7 @@
                         "cb_options": {},
                         "expanded": true
                     }
-                },
-                "internal_gui_options": {}
+                }
             }
         },
         "sort_wrapper_6": {
@@ -274,8 +262,7 @@
                             "cb_options": {},
                             "expanded": true
                         }
-                    },
-                    "internal_gui_options": {}
+                    }
                 }
             },
             "function_node": {
@@ -290,8 +277,7 @@
                         "cb_options": {},
                         "expanded": true
                     }
-                },
-                "internal_gui_options": {}
+                }
             }
         },
         "gui_latency": {
@@ -302,14 +288,22 @@
                 "_internal_state_gui_expanded": true,
                 "_function_node": {
                     "inputs": {},
-                    "outputs": {},
-                    "internal_gui_options": {}
+                    "outputs": {
+                        "0": {
+                            "cb_options": {},
+                            "expanded": true
+                        }
+                    }
                 }
             },
             "function_node": {
                 "inputs": {},
-                "outputs": {},
-                "internal_gui_options": {}
+                "outputs": {
+                    "0": {
+                        "cb_options": {},
+                        "expanded": true
+                    }
+                }
             }
         },
         "gui": {
@@ -320,14 +314,22 @@
                 "_internal_state_gui_expanded": true,
                 "_function_node": {
                     "inputs": {},
-                    "outputs": {},
-                    "internal_gui_options": {}
+                    "outputs": {
+                        "0": {
+                            "cb_options": {},
+                            "expanded": true
+                        }
+                    }
                 }
             },
             "function_node": {
                 "inputs": {},
-                "outputs": {},
-                "internal_gui_options": {}
+                "outputs": {
+                    "0": {
+                        "cb_options": {},
+                        "expanded": true
+                    }
+                }
             }
         }
     }

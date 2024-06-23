@@ -3,17 +3,16 @@ from fiatlight.demos.from_idea_to_app.sort_visualization.number_list import Numb
 ABORTING = False
 
 
-def is_aborting():
+def is_aborting() -> bool:
     global ABORTING
     return ABORTING
 
 
-def set_aborting(v: bool):
+def set_aborting(v: bool) -> None:
     global ABORTING
     ABORTING = v
 
 
-# Just to get started we will write bubble sorts and selection sorts.
 def bubble_sort(numbers: NumbersList) -> NumbersList:
     """Sort the numbers using bubble sort"""
     n = len(numbers)
@@ -125,7 +124,7 @@ def quick_sort(numbers: NumbersList) -> NumbersList:
 
 def quick_sort_median_of_three(numbers: NumbersList) -> NumbersList:
     """Sort the numbers using quick sort with median-of-three pivot selection
-    A little optimization to avoid the worst case scenario of quick sort (i.e. reverse sorted list)
+    A little optimization to avoid the worst case scenarios of quick sort (i.e. reverse sorted list, etc.)
     """
 
     def median_of_three(numbers: NumbersList, low: int, high: int) -> int:
@@ -151,6 +150,8 @@ def quick_sort_median_of_three(numbers: NumbersList) -> NumbersList:
         return i + 1
 
     def quick_sort_recursive(numbers: NumbersList, low: int, high: int) -> None:
+        if ABORTING:
+            return
         if low < high:
             pi = partition(numbers, low, high)
             quick_sort_recursive(numbers, low, pi - 1)
