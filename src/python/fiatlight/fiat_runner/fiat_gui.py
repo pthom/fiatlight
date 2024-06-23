@@ -10,7 +10,7 @@ from fiatlight.fiat_utils import functional_utils
 from fiatlight.fiat_runner.functions_collection import FunctionCollectionGui
 from fiatlight.fiat_kits.fiat_image.image_types import ImageU8_3
 from fiatlight.fiat_config import get_fiat_config
-from imgui_bundle import immapp, imgui, imgui_ctx, ImVec4, portable_file_dialogs as pfd
+from imgui_bundle import immapp, imgui, imgui_ctx, ImVec4, portable_file_dialogs as pfd, imgui_node_editor as ed
 from typing import Any, Callable
 from imgui_bundle import hello_imgui, ImVec2, immvision
 
@@ -179,6 +179,8 @@ class FiatGuiParams:
             addons = immapp.AddOnsParams()
         self.addons = addons
         addons.with_node_editor = True
+        addons.with_node_editor_config = ed.Config()
+        addons.with_node_editor_config.force_window_content_width_to_node_width = True
         addons.with_markdown = True
         addons.with_implot = True
 
