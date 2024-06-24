@@ -183,7 +183,7 @@ class FunctionNodeGui:
     def invoke(self) -> None:
         self._function_node.call_invoke_async_or_not()
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"FunctionNodeGui({self._function_node.function_with_gui})"
 
     class _Draw_Node_Section:  # Dummy class to create a section in the IDE # noqa
@@ -209,7 +209,7 @@ class FunctionNodeGui:
                         with imgui_ctx.begin_horizontal("Title"):
                             self._draw_title(unique_name)
                         # Doc
-                        self._draw_function_doc()
+                        self._draw_doc()
                         # Set minimum width
                         imgui.dummy(ImVec2(hello_imgui.em_size(get_fiat_config().style.node_minimum_width_em), 1))
 
@@ -256,9 +256,10 @@ class FunctionNodeGui:
         if unique_name != fn_label:
             fiat_osd.set_widget_tooltip(f" (id: {unique_name})")
 
-        self._draw_async_status()
+        self._draw_async_status_on_title_line()
+        self._draw_doc_info_icon_on_title_line()
 
-    def _draw_async_status(self) -> None:
+    def _draw_async_status_on_title_line(self) -> None:
         if self._function_node.is_running_async():
             color_vec4 = get_fiat_config().style.color_as_vec4(FiatColorType.SpinnerAsync)
             color = ImColor(color_vec4)
@@ -807,12 +808,24 @@ class FunctionNodeGui:
             )
             fiat_osd.show_void_detached_window_button(detached_window_params)
 
-    def _draw_function_doc(self) -> None:
+    def _draw_doc_info_icon_on_title_line(self) -> None:
+        fn_with_gui = self._function_node.function_with_gui
+        doc = fn_with_gui.get_function_doc()
+        if doc.user_doc is None:
+            return
+        imgui.spring()
+        with fontawesome_6_ctx():
+            if imgui.button(icons_fontawesome_6.ICON_FA_CIRCLE_INFO):
+                self._doc_expanded = not self._doc_expanded
+            tooltip = "Show documentation" if not self._doc_expanded else "Hide documentation"
+            fiat_osd.set_widget_tooltip(tooltip)
+
+    def _draw_doc(self) -> None:
         fn_with_gui = self._function_node.function_with_gui
 
         doc = fn_with_gui.get_function_doc()
 
-        if doc.user_doc is None:
+        if doc.user_doc is None or not self._doc_expanded:
             return
 
         def render_user_doc() -> None:
@@ -837,24 +850,7 @@ class FunctionNodeGui:
                     imgui.separator_text("Source code")
                     render_source_code()
 
-        #
-        # Instantiate the node separator parameters
-        #
-        node_separator_params = fiat_widgets.NodeSeparatorParams()
-        node_separator_params.parent_node = self._node_id
-        node_separator_params.expanded = self._doc_expanded
-        node_separator_params.text = "Documentation"
-        node_separator_params.show_collapse_button = True
-
-        node_separator_output = fiat_widgets.node_separator(node_separator_params)
-        self._doc_expanded = node_separator_output.expanded
-
-        if not self._doc_expanded:
-            return
-
         with fontawesome_6_ctx():
-            imgui.spring()
-
             detached_window_params = fiat_osd.DetachedWindowParams(
                 unique_id="function_doc" + str(id(self)),
                 window_name=f"Function documentation for {fn_with_gui.label}",
