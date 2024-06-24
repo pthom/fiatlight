@@ -14,7 +14,7 @@ def set_aborting(v: bool) -> None:
 
 
 def bubble_sort(numbers: NumbersList) -> NumbersList:
-    """Sort the numbers using bubble sort"""
+    """Sort the numbers using bubble sort. Very slow"""
     n = len(numbers)
     for i in range(n):
         if ABORTING:
@@ -98,7 +98,7 @@ def merge_sort(numbers: NumbersList) -> NumbersList:
 
 
 def quick_sort(numbers: NumbersList) -> NumbersList:
-    """Sort the numbers using quick sort"""
+    """Sort the numbers using quick sort. *Might be slow for some edge cases, like sorted/reverse sorted list, etc.*"""
 
     def partition(numbers: NumbersList, low: int, high: int) -> int:
         i = low - 1

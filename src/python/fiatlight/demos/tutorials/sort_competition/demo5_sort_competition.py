@@ -89,7 +89,7 @@ def make_sort_function_visualizer(
         invoke_async=True,
         label=sort_function.__name__ + " - view",
         doc_display=True,
-        )
+    )
     def sort_wrapper(numbers: NumbersList) -> float:
         # Start a timer, to measure the elapsed time
         start_time = time.time()

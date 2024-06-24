@@ -1228,7 +1228,7 @@ class FunctionWithGui:
 
     def get_function_doc(self) -> FunctionWithGuiDoc:
         if hasattr(self, "_cached_function_with_gui_doc"):
-            return self._cached_function_with_gui_doc
+            return self._cached_function_with_gui_doc  # type: ignore
         r = FunctionWithGuiDoc()
         r.user_doc = self._get_function_userdoc()
         r.is_user_doc_markdown = self.doc_markdown

@@ -388,7 +388,7 @@ def main_using_dockable_windows() -> None:
     split_commands_and_visualization.initial_dock = "MainDockSpace"
     split_commands_and_visualization.new_dock = "Visualizations"
     split_commands_and_visualization.direction = imgui.Dir_.down
-    split_commands_and_visualization.ratio = 0.75
+    split_commands_and_visualization.ratio = 0.8
 
     runner_params.docking_params.docking_splits = [split_main_doc, split_commands_and_visualization]
 
