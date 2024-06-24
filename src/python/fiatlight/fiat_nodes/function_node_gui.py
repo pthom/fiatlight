@@ -30,6 +30,7 @@ Notes:
 
 from __future__ import annotations
 
+
 import fiatlight
 from fiatlight.fiat_types import Error, Unspecified, UnspecifiedValue, JsonDict
 from fiatlight.fiat_core import FunctionNode, FunctionNodeLink, AnyDataWithGui
@@ -216,29 +217,41 @@ class FunctionNodeGui:
         inputs_changed: bool
         needs_refresh_for_heartbeat = self._heartbeat()
         with imgui_ctx.push_obj_id(self._function_node):
-            with ed_ctx.begin_node(self._node_id):
-                _CURRENT_FUNCTION_NODE_ID = self._node_id
-                with imgui_ctx.begin_vertical("node_content" + unique_name):
-                    # Title and doc
-                    with imgui_ctx.begin_horizontal("Title"):
-                        self._draw_title(unique_name)
-                    # Set minimum width
-                    imgui.dummy(ImVec2(hello_imgui.em_size(get_fiat_config().style.node_minimum_width_em), 1))
+            try:
+                with ed_ctx.begin_node(self._node_id):
+                    _CURRENT_FUNCTION_NODE_ID = self._node_id
+                    with imgui_ctx.begin_vertical("node_content" + unique_name):
+                        # Title and doc
+                        with imgui_ctx.begin_horizontal("Title"):
+                            self._draw_title(unique_name)
+                        # Set minimum width
+                        imgui.dummy(ImVec2(hello_imgui.em_size(get_fiat_config().style.node_minimum_width_em), 1))
 
-                    # Inputs
-                    inputs_changed = self._draw_function_inputs(unique_name)
-                    # Function internal state
-                    internal_state_changed = self._draw_function_internal_state(unique_name)
+                        # Inputs
+                        inputs_changed = self._draw_function_inputs(unique_name)
+                        # Function internal state
+                        internal_state_changed = self._draw_function_internal_state(unique_name)
 
-                    if inputs_changed or internal_state_changed or needs_refresh_for_heartbeat:
-                        self._function_node.on_inputs_changed()
+                        if inputs_changed or internal_state_changed or needs_refresh_for_heartbeat:
+                            self._function_node.on_inputs_changed()
 
-                    # Internals
-                    self._draw_fiat_tuning()
-                    # Exceptions, if any
-                    self._draw_exception_message()
-                    # Outputs
-                    self._draw_function_outputs(unique_name)
+                        # Internals
+                        self._draw_fiat_tuning()
+                        # Exceptions, if any
+                        self._draw_exception_message()
+                        # Outputs
+                        self._draw_function_outputs(unique_name)
+            except Exception as e:
+                function_with_gui = self._function_node.function_with_gui
+                msg = f"""
+                Error while drawing node for Function:
+                    Function Name={unique_name}
+                    Function Label={function_with_gui.label}
+                    FunctionWithGui Type={type(function_with_gui)}
+                Exception Message:
+                    {e}
+                """
+                raise Exception(msg) from e
             self._node_size = ed.get_node_size(self._node_id)
         return inputs_changed
 
