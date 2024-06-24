@@ -52,5 +52,9 @@ def make_random_number_list(options: NumbersGenerationOptions | None = None) -> 
     elif options.generation_type == GenerationType.DECREASING:
         all_numbers.reverse()
     elif options.generation_type == GenerationType.HAT:
-        all_numbers = all_numbers[: options.nb_values // 2] + all_numbers[: options.nb_values // 2 - 1 : -1]
+        if options.nb_values % 2 == 0:
+            options.nb_values += 1
+        evens = list(range(1, options.nb_values, 2))
+        odds = list(range(options.nb_values - 1, 2, -2))
+        all_numbers = evens + odds
     return NumbersList(np.array(all_numbers))

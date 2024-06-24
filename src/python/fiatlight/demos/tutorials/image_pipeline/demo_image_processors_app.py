@@ -25,7 +25,7 @@ This example shows sophisticated usage features:
 """
 
 import fiatlight as fl
-from fiatlight.fiat_kits.fiat_image.image_processors import ImageEffect
+from fiatlight.demos.tutorials.image_pipeline.image_processors import ImageEffect
 from fiatlight.fiat_kits.fiat_image.camera_image_provider import CameraParams, CameraImageProvider
 from imgui_bundle import imgui, immapp, immvision, hello_imgui, ImVec4
 from pydantic import BaseModel
