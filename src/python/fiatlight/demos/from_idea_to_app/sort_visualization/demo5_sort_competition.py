@@ -16,8 +16,8 @@ Click on "Call Manually" to generate a new list.
 
 ** **Other nodes**
 
-The other function nodes will show various sorting algorithms. You can see their status in real time. T
-heir output is the total execution time after the sorting is finished.
+The other function nodes will show various sorting algorithms. You can see their status in real time.
+Their output is the total execution time after the sorting is finished.
 """
 
 from typing import Callable
@@ -172,6 +172,6 @@ for sort_function in sort_functions:
 # Add a GUI only node to set the latency
 graph.add_gui_node(gui_latency)
 # # Add a documentation node
-graph.add_markdown_node(__doc__, label="Doc", text_width_em=15)
+graph.add_markdown_node(__doc__, label="Sort Competition", text_width_em=15)
 # Finally run the graph with the given parameters
 fl.run(graph, params=gui_params)

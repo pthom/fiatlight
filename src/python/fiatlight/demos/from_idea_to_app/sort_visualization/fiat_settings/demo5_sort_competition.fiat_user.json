@@ -9,7 +9,7 @@
                         "value": {
                             "type": "Pydantic",
                             "value": {
-                                "nb_values": 5964,
+                                "nb_values": 207,
                                 "seed": 37,
                                 "generation_type": "Random"
                             }
@@ -288,22 +288,12 @@
                 "_internal_state_gui_expanded": true,
                 "_function_node": {
                     "inputs": {},
-                    "outputs": {
-                        "0": {
-                            "cb_options": {},
-                            "expanded": true
-                        }
-                    }
+                    "outputs": {}
                 }
             },
             "function_node": {
                 "inputs": {},
-                "outputs": {
-                    "0": {
-                        "cb_options": {},
-                        "expanded": true
-                    }
-                }
+                "outputs": {}
             }
         },
         "gui": {
@@ -314,22 +304,12 @@
                 "_internal_state_gui_expanded": true,
                 "_function_node": {
                     "inputs": {},
-                    "outputs": {
-                        "0": {
-                            "cb_options": {},
-                            "expanded": true
-                        }
-                    }
+                    "outputs": {}
                 }
             },
             "function_node": {
                 "inputs": {},
-                "outputs": {
-                    "0": {
-                        "cb_options": {},
-                        "expanded": true
-                    }
-                }
+                "outputs": {}
             }
         }
     }

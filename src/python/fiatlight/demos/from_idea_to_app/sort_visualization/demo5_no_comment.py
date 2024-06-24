@@ -86,5 +86,5 @@ for sort_function in sort_functions:
     graph.add_function(sort_view)
     graph.add_link(make_random_number_list, sort_view)
 graph.add_gui_node(gui_latency)
-graph.add_markdown_node(__doc__, label="Doc", text_width_em=15)
+graph.add_markdown_node(__doc__, label="Sort Competition", text_width_em=15)
 fl.run(graph, params=gui_params)
