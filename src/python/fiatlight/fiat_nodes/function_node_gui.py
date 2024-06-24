@@ -46,8 +46,9 @@ from imgui_bundle import (
     hello_imgui,
     imgui_node_editor_ctx as ed_ctx,
     imspinner,
+    ImColor,
+    imgui_md,
 )
-from imgui_bundle import ImColor
 from fiatlight.fiat_widgets import icons_fontawesome_6, fontawesome_6_ctx, fiat_osd
 from fiatlight import fiat_widgets, fiat_togui
 from typing import Dict, List, Any
@@ -86,8 +87,6 @@ class FunctionNodeGui:
     # (it varies depending on the content)
     _node_size: ImVec2 | None = None  # will be set after the node is drawn once
 
-    _function_doc: _FunctionDocElements
-
     # Fine tune function internals
     # (displayed if the user adds a *function variable* dictionary named fiat_tuning)
     _fiat_tuning_with_gui: Dict[str, AnyDataWithGui[Any]]
@@ -97,6 +96,7 @@ class FunctionNodeGui:
     #   (those settings are saved in the user settings file)
     _inputs_expanded: bool = True
     _outputs_expanded: bool = True
+    _doc_expanded: bool = False
     fiat_tuning_expanded: bool = True  # This is for the debug internals
     _internal_state_gui_expanded: bool = True  # This is for the function's internal state gui
 
@@ -124,7 +124,6 @@ class FunctionNodeGui:
             if self._function_node.has_input_link(input_name):
                 param.data_with_gui._expanded = False  # No need to expand linked field by default
 
-        self._fill_function_docstring_and_source()
         self._fiat_tuning_with_gui = {}
 
     class _Node_Info_Section:  # Dummy class to create a section in the IDE # noqa
@@ -144,24 +143,6 @@ class FunctionNodeGui:
     def node_size(self) -> ImVec2:
         assert self._node_size is not None
         return self._node_size
-
-    class _Doc_Section:  # Dummy class to create a section in the IDE # noqa
-        """
-        # ==================================================================================================================
-        #                                            Doc
-        # ==================================================================================================================
-        """
-
-        pass
-
-    def _fill_function_docstring_and_source(self) -> None:
-        self._function_doc = _FunctionDocElements()
-        self._function_doc.source_code = self._function_node.function_with_gui.get_function_source_code()
-        self._function_doc.userdoc = self._function_node.function_with_gui.get_function_userdoc()
-        self._function_doc.userdoc_is_markdown = self._function_node.function_with_gui.doc_markdown
-
-    def _has_doc(self) -> bool:
-        return self._function_doc.has_info()
 
     class _Utilities_Section:  # Dummy class to create a section in the IDE # noqa
         """
@@ -202,6 +183,9 @@ class FunctionNodeGui:
     def invoke(self) -> None:
         self._function_node.call_invoke_async_or_not()
 
+    def __str__(self):
+        return f"FunctionNodeGui({self._function_node.function_with_gui})"
+
     class _Draw_Node_Section:  # Dummy class to create a section in the IDE # noqa
         """
         # ==================================================================================================================
@@ -221,9 +205,11 @@ class FunctionNodeGui:
                 with ed_ctx.begin_node(self._node_id):
                     _CURRENT_FUNCTION_NODE_ID = self._node_id
                     with imgui_ctx.begin_vertical("node_content" + unique_name):
-                        # Title and doc
+                        # Title
                         with imgui_ctx.begin_horizontal("Title"):
                             self._draw_title(unique_name)
+                        # Doc
+                        self._draw_function_doc()
                         # Set minimum width
                         imgui.dummy(ImVec2(hello_imgui.em_size(get_fiat_config().style.node_minimum_width_em), 1))
 
@@ -271,7 +257,6 @@ class FunctionNodeGui:
             fiat_osd.set_widget_tooltip(f" (id: {unique_name})")
 
         self._draw_async_status()
-        self._render_function_doc(unique_name)
 
     def _draw_async_status(self) -> None:
         if self._function_node.is_running_async():
@@ -822,40 +807,62 @@ class FunctionNodeGui:
             )
             fiat_osd.show_void_detached_window_button(detached_window_params)
 
-    def _render_function_doc(self, unique_name: str) -> None:
-        if not self._has_doc():
+    def _draw_function_doc(self) -> None:
+        fn_with_gui = self._function_node.function_with_gui
+
+        doc = fn_with_gui.get_function_doc()
+
+        if doc.user_doc is None:
             return
 
-        def show_doc() -> None:
-            from imgui_bundle import imgui_md
+        def render_user_doc() -> None:
+            assert doc.user_doc is not None
+            if doc.is_user_doc_markdown:
+                imgui_md.render_unindented(doc.user_doc)
+            else:
+                imgui.text_wrapped(doc.user_doc)
 
+        def render_source_code() -> None:
+            assert doc.source_code is not None
+            md = "### Source code\n\n"
+            md += f"```python\n{doc.source_code}\n```"
+            imgui_md.render(md)
+
+        def render_doc_in_popup() -> None:
             with imgui_ctx.begin_vertical("function_doc"):
-                if self._function_doc.userdoc is not None:
-                    with imgui_ctx.begin_horizontal("header"):
-                        imgui.spring()
-                        imgui.text("User documentation")
+                if doc.user_doc is not None:
+                    imgui.separator_text("Function documentation")
+                    render_user_doc()
+                if doc.source_code is not None:
+                    imgui.separator_text("Source code")
+                    render_source_code()
 
-                    if self._function_doc.userdoc_is_markdown:
-                        imgui_md.render(self._function_doc.userdoc)
-                    else:
-                        imgui.text_wrapped(self._function_doc.userdoc)
-                    imgui.separator()
+        #
+        # Instantiate the node separator parameters
+        #
+        node_separator_params = fiat_widgets.NodeSeparatorParams()
+        node_separator_params.parent_node = self._node_id
+        node_separator_params.expanded = self._doc_expanded
+        node_separator_params.text = "Documentation"
+        node_separator_params.show_collapse_button = True
 
-                if self._function_doc.source_code is not None:
-                    md = "### Source code\n\n"
-                    md += f"```python\n{self._function_doc.source_code}\n```"
-                    imgui_md.render(md)
+        node_separator_output = fiat_widgets.node_separator(node_separator_params)
+        self._doc_expanded = node_separator_output.expanded
+
+        if not self._doc_expanded:
+            return
 
         with fontawesome_6_ctx():
             imgui.spring()
 
             detached_window_params = fiat_osd.DetachedWindowParams(
                 unique_id="function_doc" + str(id(self)),
-                window_name=f"Function documentation for {unique_name}",
+                window_name=f"Function documentation for {fn_with_gui.label}",
                 button_label=icons_fontawesome_6.ICON_FA_BOOK,
-                gui_function=show_doc,
+                gui_function=render_doc_in_popup,
             )
             fiat_osd.show_void_detached_window_button(detached_window_params)
+            render_user_doc()
 
     class _Serialization_Section:  # Dummy class to create a section in the IDE # noqa
         """
@@ -879,6 +886,7 @@ class FunctionNodeGui:
         r = {
             "_inputs_expanded": self._inputs_expanded,
             "_outputs_expanded": self._outputs_expanded,
+            "_doc_expanded": self._doc_expanded,
             "fiat_tuning_expanded": self.fiat_tuning_expanded,
             "_internal_state_gui_expanded": self._internal_state_gui_expanded,
             "_function_node": self._function_node.save_gui_options_to_json(),
@@ -889,6 +897,7 @@ class FunctionNodeGui:
     def load_gui_options_from_json(self, json_data: JsonDict) -> None:
         self._inputs_expanded = json_data.get("_inputs_expanded", True)
         self._outputs_expanded = json_data.get("_outputs_expanded", True)
+        self._doc_expanded = json_data.get("_doc_expanded", True)
         self.fiat_tuning_expanded = json_data.get("fiat_tuning_expanded", False)
         self._internal_state_gui_expanded = json_data.get("_internal_state_gui_expanded", True)
         self._function_node.load_gui_options_from_json(json_data["_function_node"])
@@ -950,16 +959,6 @@ class _OutputHeaderLineElements:
 
     value_color: FiatColorType = FiatColorType.OutputValueOk
     value_tooltip: str | None = None
-
-
-@dataclass
-class _FunctionDocElements:
-    source_code: str | None = None
-    userdoc: str | None = None
-    userdoc_is_markdown: bool = False
-
-    def has_info(self) -> bool:
-        return self.source_code is not None or self.userdoc is not None
 
 
 # ==================================================================================================================

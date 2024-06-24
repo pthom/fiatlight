@@ -471,6 +471,7 @@ from fiatlight.fiat_core.output_with_gui import OutputWithGui
 from fiatlight.fiat_core.possible_fiat_attributes import PossibleFiatAttributes
 from fiatlight.fiat_types.base_types import FiatAttributes
 from typing import Any, List, final, Callable, Optional, Type, TypeAlias
+from dataclasses import dataclass
 
 import logging
 
@@ -528,6 +529,13 @@ class FunctionPossibleFiatAttributes(PossibleFiatAttributes):
 
 
 _FUNCTION_POSSIBLE_FIAT_ATTRIBUTES = FunctionPossibleFiatAttributes()
+
+
+@dataclass
+class FunctionWithGuiDoc:
+    user_doc: str | None = None
+    is_user_doc_markdown: bool = True
+    source_code: str | None = None
 
 
 class FunctionWithGui:
@@ -1218,7 +1226,17 @@ class FunctionWithGui:
         # --------------------------------------------------------------------------------------------
         pass
 
-    def get_function_userdoc(self) -> str | None:
+    def get_function_doc(self) -> FunctionWithGuiDoc:
+        if hasattr(self, "_cached_function_with_gui_doc"):
+            return self._cached_function_with_gui_doc
+        r = FunctionWithGuiDoc()
+        r.user_doc = self._get_function_userdoc()
+        r.is_user_doc_markdown = self.doc_markdown
+        r.source_code = self._get_function_source_code()
+        self._cached_function_with_gui_doc = r
+        return r
+
+    def _get_function_userdoc(self) -> str | None:
         """Return the user documentation of the function"""
         from fiatlight.fiat_utils import docstring_utils
 
@@ -1244,7 +1262,7 @@ class FunctionWithGui:
             return docstring
         return None
 
-    def get_function_source_code(self) -> str | None:
+    def _get_function_source_code(self) -> str | None:
         """Return the source code of the function"""
         if not self.doc_show_source:
             return None
