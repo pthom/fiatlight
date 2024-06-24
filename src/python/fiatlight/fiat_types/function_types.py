@@ -5,12 +5,16 @@ from fiatlight.fiat_types.base_types import DataType
 Function: TypeAlias = Callable[..., Any]
 FunctionList: TypeAlias = List[Function]
 
-# A function that takes no arguments and returns nothing. Used mainly for "present" callbacks.
+# A function that takes no arguments and returns nothing.
 VoidFunction = Callable[[], None]
-
 # A function that takes no arguments and returns a boolean. Used mainly for "edit" callbacks,
 # inside AnyDataWithGuiCallbacks.
 BoolFunction = Callable[[], bool]
+
+# A Gui function that takes no arguments and returns nothing. Used mainly for "present" callbacks.
+GuiFunction = Callable[[], None]
+# A Gui function that takes no arguments and returns a boolean. Used mainly for "edit" callbacks.
+GuiBoolFunction = Callable[[], bool]
 
 # A function that takes a DataType value and returns a tuple of a tuple [modified, new_value]
 # Used

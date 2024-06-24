@@ -16,6 +16,8 @@ Part 2:
 - How to create a custom renderer for a widget.
 - How to specify widget sizes in DPI independent units.
 - how to use ImPlot to plot large quantities of data at high frame rates
+  ==> faq: Drag Implot: deconne quand size pas donnée
+
 
 Part 3:
 -------

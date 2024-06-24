@@ -4,9 +4,8 @@ from fiatlight.fiat_runner.fiat_gui import get_last_screenshot
 from fiatlight.fiat_kits.fiat_image import ImageU8_3
 from imgui_bundle import hello_imgui
 import imgui_bundle
-from typing import Callable, Tuple, Optional
+from typing import Tuple, Optional
 
-VoidFunction = Callable[[], None]
 ScreenSize = Tuple[int, int]
 
 

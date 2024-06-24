@@ -119,7 +119,7 @@ from fiatlight.fiat_core.function_with_gui import FunctionWithGui, FunctionWithG
 from fiatlight.fiat_core.function_node import FunctionNode, FunctionNodeLink
 from fiatlight.fiat_core.gui_node import GuiNode
 from fiatlight.fiat_core.markdown_node import MarkdownNode
-from fiatlight.fiat_types import Function, JsonDict, VoidFunction
+from fiatlight.fiat_types import Function, JsonDict, GuiFunction
 
 from typing import Sequence, Dict, Tuple, Set, List
 from pydantic import BaseModel
@@ -233,7 +233,7 @@ class FunctionsGraph:
             return self._add_function(f)
 
     def add_gui_node(
-        self, gui_function: VoidFunction, label: str | None = None, gui_serializable_data: BaseModel | None = None
+        self, gui_function: GuiFunction, label: str | None = None, gui_serializable_data: BaseModel | None = None
     ) -> FunctionNode:
         gui_node = GuiNode(gui_function, label=label, gui_serializable_data=gui_serializable_data)
         return self._add_function_with_gui(gui_node)

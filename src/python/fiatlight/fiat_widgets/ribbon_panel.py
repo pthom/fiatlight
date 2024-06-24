@@ -1,4 +1,4 @@
-from fiatlight.fiat_types.function_types import VoidFunction
+from fiatlight.fiat_types.function_types import GuiFunction
 from imgui_bundle import imgui, ImVec2, hello_imgui, imgui_ctx
 
 
@@ -20,7 +20,7 @@ def vertical_separator() -> None:
     imgui.set_cursor_pos(cursor_pos)
 
 
-def ribbon_panel(title: str, gui: VoidFunction) -> None:
+def ribbon_panel(title: str, gui: GuiFunction) -> None:
     with imgui_ctx.push_id(title):
         with imgui_ctx.begin_vertical("RibbonV"):
             with imgui_ctx.begin_horizontal("guiH", None, align=0.5):

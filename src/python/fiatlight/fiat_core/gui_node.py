@@ -3,7 +3,7 @@ It is implemented as a function node with an internal gui function.
 """
 from fiatlight.fiat_core.function_with_gui import FunctionWithGui
 from fiatlight.fiat_types.base_types import JsonDict
-from fiatlight.fiat_types.function_types import VoidFunction
+from fiatlight.fiat_types.function_types import GuiFunction
 from pydantic import BaseModel
 
 
@@ -40,7 +40,7 @@ class GuiNode(FunctionWithGui):
 
     def __init__(
         self,
-        gui_function: VoidFunction,
+        gui_function: GuiFunction,
         label: str | None = None,
         gui_node_compatible: bool = True,
         gui_serializable_data: BaseModel | None = None,

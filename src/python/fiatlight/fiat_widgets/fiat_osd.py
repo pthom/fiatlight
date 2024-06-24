@@ -5,7 +5,7 @@ They are rendered after the node editor canvas (with its nodes) was drawn.
 This avoids issues with the canvas's zooming feature, which is incompatible with ImGui windows and child windows.
 """
 
-from fiatlight.fiat_types import VoidFunction, BoolFunction
+from fiatlight.fiat_types import GuiFunction, GuiBoolFunction
 from imgui_bundle import imgui, ImVec2, imgui_node_editor, hello_imgui, imgui_ctx, ImVec4
 from .fontawesome6_ctx_utils import fontawesome_6_ctx, icons_fontawesome_6
 from dataclasses import dataclass
@@ -49,7 +49,7 @@ def is_rendering_in_fiatlight_detached_window() -> bool:
 # ======================================================================================================================
 class _OsdTooltip:
     tooltip_str: str | None = None
-    tooltip_gui_function: VoidFunction | None = None
+    tooltip_gui_function: GuiFunction | None = None
 
     def render(self) -> None:
         if self.tooltip_gui_function is not None:
@@ -78,7 +78,7 @@ class _OsdTooltip:
         else:
             imgui.set_tooltip(tooltip_str)
 
-    def set_tooltip_gui(self, gui_function: VoidFunction) -> None:
+    def set_tooltip_gui(self, gui_function: GuiFunction) -> None:
         self.tooltip_gui_function = gui_function
 
 
@@ -102,7 +102,7 @@ def set_tooltip(tooltip: str) -> None:
 @dataclass
 class DetachedWindowParams:
     unique_id: str  # Should be unique
-    gui_function: VoidFunction | BoolFunction
+    gui_function: GuiFunction | GuiBoolFunction
     window_name: str
     # button_tooltip: str | None = None
     button_label: str | None = None
@@ -232,7 +232,7 @@ class _OsdDetachedWindows:
                 set_widget_tooltip("Popup " + params.window_name)
 
     def update_detached_window_callback(
-        self, params: DetachedWindowParams, gui_function: BoolFunction | VoidFunction
+        self, params: DetachedWindowParams, gui_function: GuiFunction | GuiBoolFunction
     ) -> None:
         for popup_info in self.detached_windows:
             if popup_info.params.unique_id == params.unique_id:
@@ -275,7 +275,7 @@ def is_detached_window_opened(params: DetachedWindowParams) -> bool:
     return _OSD_DETACHED_WINDOWS.detached_window_exists(params)
 
 
-def update_detached_window_callback(params: DetachedWindowParams, gui_function: BoolFunction | VoidFunction) -> None:
+def update_detached_window_callback(params: DetachedWindowParams, gui_function: GuiFunction | GuiBoolFunction) -> None:
     _OSD_DETACHED_WINDOWS.update_detached_window_callback(params, gui_function)
 
 
@@ -283,12 +283,12 @@ def update_detached_window_callback(params: DetachedWindowParams, gui_function: 
 # OSD Popup
 # ======================================================================================================================
 class _OsdPopup:
-    popup_gui_function: VoidFunction | None = None
+    popup_gui_function: GuiFunction | None = None
 
     _popup_id = "This is our own unique id!"
     _needs_open = False
 
-    def set_popup_gui(self, gui_function: VoidFunction) -> None:
+    def set_popup_gui(self, gui_function: GuiFunction) -> None:
         self.popup_gui_function = gui_function
         self._needs_open = True
 
@@ -307,7 +307,7 @@ class _OsdPopup:
 _OSD_POPUP = _OsdPopup()
 
 
-def set_popup_gui(gui_function: VoidFunction) -> None:
+def set_popup_gui(gui_function: GuiFunction) -> None:
     _OSD_POPUP.set_popup_gui(gui_function)
 
 
@@ -319,11 +319,11 @@ _NOTIF_SIZE_EM = ImVec2(22, 4)
 
 
 class _OsdNotificationData:
-    gui: VoidFunction
+    gui: GuiFunction
     start_time: float
     identifier: str
 
-    def __init__(self, gui: VoidFunction, identifier: str) -> None:
+    def __init__(self, gui: GuiFunction, identifier: str) -> None:
         self.gui = gui
         self.identifier = identifier
         self.start_time = imgui.get_time()
@@ -415,7 +415,7 @@ class _OsdNotifications:
 
         self.notifications.append(_OsdNotificationData(gui, identifier))
 
-    def add_notification_gui(self, identifier: str, gui_function: VoidFunction) -> None:
+    def add_notification_gui(self, identifier: str, gui_function: GuiFunction) -> None:
         if self._already_has_notification(identifier):
             return
         self.notifications.append(_OsdNotificationData(gui_function, identifier))
@@ -428,7 +428,7 @@ def add_notification_str(identifier: str, notification: str) -> None:
     _OSD_NOTIFICATIONS.add_notification_str(identifier, notification)
 
 
-def add_notification_gui(identifier: str, gui_function: VoidFunction) -> None:
+def add_notification_gui(identifier: str, gui_function: GuiFunction) -> None:
     _OSD_NOTIFICATIONS.add_notification_gui(identifier, gui_function)
 
 
