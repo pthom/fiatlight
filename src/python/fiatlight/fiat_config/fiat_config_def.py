@@ -1,9 +1,12 @@
-import logging
-import os
-
 from fiatlight.fiat_config.fiat_style_def import FiatStyle
 from pydantic import BaseModel, Field
-from typing import Any, Iterable
+from typing import Any
+
+
+class GuiElementsSettings(BaseModel):
+    show_popup_button: bool = True
+    show_clipboard_button: bool = True
+    show_expand_button: bool = True
 
 
 class FiatRunConfig(BaseModel):
@@ -18,20 +21,21 @@ class FiatRunConfig(BaseModel):
         {
             "catch_function_exceptions": true,
             "disable_input_during_execution": false
-            "disable_type_eval": false
         }
-
-    Members:
-        catch_function_exceptions: bool, default=True
-            If true, exceptions raised by FunctionWithGui nodes will be caught and shown in the function.
-            You can disable this by setting this to False.
-
-        disable_input_during_execution:
-            If true, the input will be disabled during execution, especially the execution of async functions.
     """
 
+    # catch_function_exceptions: bool, default=True
+    # If true, exceptions raised by FunctionWithGui nodes will be caught and shown in the function.
+    # You can disable this by setting this to False.
     catch_function_exceptions: bool = True
+
+    # disable_input_during_execution: bool, default=False
+    # If true, the input will be disabled during execution, especially the execution of async functions.
     disable_input_during_execution: bool = False
+
+    # show_popup_buttons_when_running_outside_of_function_graph: bool, default=False
+    # If true, popup buttons will not be shown, when the GUI is running outside a function graph.
+    show_popup_buttons_when_running_outside_of_function_graph: bool = False
 
 
 class FiatConfig(BaseModel):
@@ -42,50 +46,3 @@ class FiatConfig(BaseModel):
         super().__init__(**data)
         self.style = FiatStyle()
 
-
-_FIAT_CONFIG = FiatConfig()
-
-
-def get_fiat_config() -> FiatConfig:
-    return _FIAT_CONFIG
-
-
-def save_fiat_run_config(run_config: FiatRunConfig, filename: str) -> None:
-    as_json_str = run_config.json()
-    with open(filename, "w") as f:
-        f.write(as_json_str)
-
-
-def load_fiat_run_config(filename: str) -> FiatRunConfig:
-    with open(filename) as f:
-        content = f.read()
-    run_config = FiatRunConfig.model_validate(content)
-    return run_config
-
-
-def _all_cwd_parents() -> Iterable[str]:
-    """Yield all the parent directories of the current working directory.
-    current working directory is yielded first, then its parent, and so on.
-    """
-    cwd = os.getcwd()
-    while True:
-        yield cwd
-        new_cwd = os.path.dirname(cwd)
-        if new_cwd == cwd:
-            break
-        cwd = new_cwd
-
-
-def load_user_default_fiat_run_config() -> None:
-    for dir in _all_cwd_parents():
-        filename = f"{dir}/.fiat_run_config.json"
-        if os.path.exists(filename):
-            run_config = load_fiat_run_config(filename)
-            _FIAT_CONFIG.run_config = run_config
-            logging.warning(
-                f"""
-            Loaded user default fiat run config from {filename}:
-            {run_config}
-            """
-            )
-            return

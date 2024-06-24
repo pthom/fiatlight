@@ -1,9 +1,9 @@
 from .fiat_config_def import (
     FiatConfig,
-    get_fiat_config,
     FiatRunConfig,
 )
 from .fiat_style_def import FiatColorType, FiatStyle
+from .load_save_default_run_config import get_fiat_config
 
 
 def fiatlight_python_src_path() -> str:

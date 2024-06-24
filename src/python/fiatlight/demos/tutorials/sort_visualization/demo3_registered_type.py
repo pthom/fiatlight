@@ -1,7 +1,7 @@
 import fiatlight as fl
 from imgui_bundle import implot, hello_imgui, imgui_ctx
-from fiatlight.demos.from_idea_to_app.sort_visualization.number_list import NumbersList
-from fiatlight.demos.from_idea_to_app.sort_visualization.numbers_generator import make_random_number_list
+from fiatlight.demos.tutorials.sort_visualization.number_list import NumbersList
+from fiatlight.demos.tutorials.sort_visualization.numbers_generator import make_random_number_list
 
 
 def draw_bars(numbers: NumbersList) -> None:
