@@ -10,7 +10,6 @@ from imgui_bundle import imgui, ImVec2, imgui_node_editor, hello_imgui, imgui_ct
 from .fontawesome6_ctx_utils import fontawesome_6_ctx, icons_fontawesome_6
 from dataclasses import dataclass
 
-
 _IS_PRESENTLY_IN_DETACHED_WINDOW = False
 
 
@@ -73,7 +72,11 @@ class _OsdTooltip:
             self.tooltip_str = None
 
     def set_tooltip_str(self, tooltip_str: str) -> None:
-        self.tooltip_str = tooltip_str
+        is_in_editor = imgui_node_editor.get_current_editor() is not None
+        if is_in_editor:
+            self.tooltip_str = tooltip_str
+        else:
+            imgui.set_tooltip(tooltip_str)
 
     def set_tooltip_gui(self, gui_function: VoidFunction) -> None:
         self.tooltip_gui_function = gui_function
@@ -83,25 +86,12 @@ _OSD_TOOLTIP = _OsdTooltip()
 
 
 def set_widget_tooltip(tooltip: str) -> None:
-    is_in_editor = imgui_node_editor.get_current_editor() is not None
     if imgui.is_item_hovered(imgui.HoveredFlags_.delay_normal.value):
-        if is_in_editor:
-            _OSD_TOOLTIP.set_tooltip_str(tooltip)
-        else:
-            imgui.set_tooltip(tooltip)
+        _OSD_TOOLTIP.set_tooltip_str(tooltip)
 
 
 def set_tooltip(tooltip: str) -> None:
     _OSD_TOOLTIP.set_tooltip_str(tooltip)
-
-
-def set_widget_tooltip_gui(gui_function: VoidFunction) -> None:
-    if imgui.is_item_hovered(imgui.HoveredFlags_.delay_normal.value):
-        _OSD_TOOLTIP.set_tooltip_gui(gui_function)
-
-
-def set_tooltip_gui(gui_function: VoidFunction) -> None:
-    _OSD_TOOLTIP.set_tooltip_gui(gui_function)
 
 
 # ======================================================================================================================
@@ -221,6 +211,10 @@ class _OsdDetachedWindows:
         bool_returned: bool | None,
     ) -> None:
         from fiatlight.fiat_widgets import fontawesome_6_ctx, icons_fontawesome_6
+        from fiatlight.fiat_config import get_fiat_config
+
+        if not get_fiat_config().gui_elements_settings().show_popup_button:
+            return
 
         with fontawesome_6_ctx():
             if self.detached_window_exists(params):
