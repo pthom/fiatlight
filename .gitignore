@@ -17,3 +17,4 @@ priv_assets/
 .vscode/launch.json
 src/python/fiatlight/fiat_togui/tests/truc.py
 *.webp
+bindings_imgui_bundle
