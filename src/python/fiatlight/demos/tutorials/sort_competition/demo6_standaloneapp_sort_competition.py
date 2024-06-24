@@ -94,7 +94,11 @@ def make_sort_function_visualizer(
     # We use the decorator with_fiat_attributes to add an attribute "invoke_async=True" to the function
     # With this attribute, the function will be called asynchronously, so that the GUI can be updated
     # while the function is running
-    @fl.with_fiat_attributes(invoke_async=True, label=sort_function.__name__ + " - view")
+    @fl.with_fiat_attributes(
+        invoke_async=True,
+        label=sort_function.__name__ + " - view",
+        doc_display=True,
+    )
     def sort_wrapper(numbers: NumbersList) -> float:
         # Start a timer, to measure the elapsed time
         start_time = time.time()
@@ -133,6 +137,7 @@ def make_sort_function_visualizer(
 
     sort_function_visualizer = sort_wrapper
     sort_function_visualizer.__name__ = sort_function.__name__ + " visualization"
+    sort_function_visualizer.__doc__ = sort_function.__doc__
     return sort_function_visualizer
 
 
@@ -356,7 +361,7 @@ def main_using_dockable_windows() -> None:
     # 2.b Set the Hello ImGui runner params
     runner_params = immapp.RunnerParams()
     runner_params.app_window_params.window_title = "Sort Competition"
-    runner_params.app_window_params.window_geometry.size = (1600, 900)
+    runner_params.app_window_params.window_geometry.size = (1600, 1100)
     runner_params.fps_idling.enable_idling = False
 
     # 3. Set the dockable windows
@@ -383,9 +388,13 @@ def main_using_dockable_windows() -> None:
     split_commands_and_visualization.initial_dock = "MainDockSpace"
     split_commands_and_visualization.new_dock = "Visualizations"
     split_commands_and_visualization.direction = imgui.Dir_.down
-    split_commands_and_visualization.ratio = 0.7
+    split_commands_and_visualization.ratio = 0.75
 
     runner_params.docking_params.docking_splits = [split_main_doc, split_commands_and_visualization]
+
+    # 4. show more elements
+    runner_params.imgui_window_params.show_menu_bar = True
+    runner_params.imgui_window_params.show_status_bar = True
 
     # D. Dockable windows content
     # * Doc window

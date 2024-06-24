@@ -17,12 +17,12 @@
                     }
                 }
             },
-            "sort_wrapper_1": {},
-            "sort_wrapper_2": {},
-            "sort_wrapper_3": {},
-            "sort_wrapper_4": {},
-            "sort_wrapper_5": {},
-            "sort_wrapper_6": {},
+            "bubble_sort visualization": {},
+            "selection_sort visualization": {},
+            "insertion_sort visualization": {},
+            "merge_sort visualization": {},
+            "quick_sort visualization": {},
+            "quick_sort_median_of_three visualization": {},
             "gui_latency": {},
             "gui": {}
         }
@@ -32,6 +32,7 @@
             "function_node_with_gui": {
                 "_inputs_expanded": true,
                 "_outputs_expanded": true,
+                "_doc_expanded": false,
                 "fiat_tuning_expanded": true,
                 "_internal_state_gui_expanded": true,
                 "_function_node": {
@@ -64,10 +65,11 @@
                 }
             }
         },
-        "sort_wrapper_1": {
+        "bubble_sort visualization": {
             "function_node_with_gui": {
                 "_inputs_expanded": true,
                 "_outputs_expanded": true,
+                "_doc_expanded": true,
                 "fiat_tuning_expanded": true,
                 "_internal_state_gui_expanded": true,
                 "_function_node": {
@@ -100,10 +102,11 @@
                 }
             }
         },
-        "sort_wrapper_2": {
+        "selection_sort visualization": {
             "function_node_with_gui": {
                 "_inputs_expanded": true,
                 "_outputs_expanded": true,
+                "_doc_expanded": false,
                 "fiat_tuning_expanded": true,
                 "_internal_state_gui_expanded": true,
                 "_function_node": {
@@ -136,10 +139,11 @@
                 }
             }
         },
-        "sort_wrapper_3": {
+        "insertion_sort visualization": {
             "function_node_with_gui": {
                 "_inputs_expanded": true,
                 "_outputs_expanded": true,
+                "_doc_expanded": false,
                 "fiat_tuning_expanded": true,
                 "_internal_state_gui_expanded": true,
                 "_function_node": {
@@ -172,10 +176,11 @@
                 }
             }
         },
-        "sort_wrapper_4": {
+        "merge_sort visualization": {
             "function_node_with_gui": {
                 "_inputs_expanded": true,
                 "_outputs_expanded": true,
+                "_doc_expanded": false,
                 "fiat_tuning_expanded": true,
                 "_internal_state_gui_expanded": true,
                 "_function_node": {
@@ -208,10 +213,11 @@
                 }
             }
         },
-        "sort_wrapper_5": {
+        "quick_sort visualization": {
             "function_node_with_gui": {
                 "_inputs_expanded": true,
                 "_outputs_expanded": true,
+                "_doc_expanded": false,
                 "fiat_tuning_expanded": true,
                 "_internal_state_gui_expanded": true,
                 "_function_node": {
@@ -244,10 +250,11 @@
                 }
             }
         },
-        "sort_wrapper_6": {
+        "quick_sort_median_of_three visualization": {
             "function_node_with_gui": {
                 "_inputs_expanded": true,
                 "_outputs_expanded": true,
+                "_doc_expanded": false,
                 "fiat_tuning_expanded": true,
                 "_internal_state_gui_expanded": true,
                 "_function_node": {
@@ -284,6 +291,7 @@
             "function_node_with_gui": {
                 "_inputs_expanded": true,
                 "_outputs_expanded": true,
+                "_doc_expanded": false,
                 "fiat_tuning_expanded": true,
                 "_internal_state_gui_expanded": true,
                 "_function_node": {
@@ -300,6 +308,7 @@
             "function_node_with_gui": {
                 "_inputs_expanded": true,
                 "_outputs_expanded": true,
+                "_doc_expanded": false,
                 "fiat_tuning_expanded": true,
                 "_internal_state_gui_expanded": true,
                 "_function_node": {
