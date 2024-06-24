@@ -1,8 +1,8 @@
 import fiatlight as fl
 from imgui_bundle import implot, hello_imgui, imgui_ctx
-from fiatlight.demos.tutorials.sort_visualization.number_list import NumbersList
-from fiatlight.demos.tutorials.sort_visualization.numbers_generator import make_random_number_list
-from fiatlight.demos.tutorials.sort_visualization.sort_algorithms import bubble_sort
+from fiatlight.demos.tutorials.sort_competition.number_list import NumbersList
+from fiatlight.demos.tutorials.sort_competition.numbers_generator import make_random_number_list
+from fiatlight.demos.tutorials.sort_competition.sort_algorithms import bubble_sort
 import time
 
 

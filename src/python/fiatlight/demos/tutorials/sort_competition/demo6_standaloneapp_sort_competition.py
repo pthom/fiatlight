@@ -24,12 +24,12 @@ from typing import Callable
 
 import fiatlight as fl
 from imgui_bundle import implot, hello_imgui, imgui_ctx, imgui, immapp, imgui_md, imspinner, ImVec2
-from fiatlight.demos.tutorials.sort_visualization.number_list import NumbersList
-from fiatlight.demos.tutorials.sort_visualization.numbers_generator import (
+from fiatlight.demos.tutorials.sort_competition.number_list import NumbersList
+from fiatlight.demos.tutorials.sort_competition.numbers_generator import (
     make_random_number_list,
     NumbersGenerationOptions,
 )
-from fiatlight.demos.tutorials.sort_visualization.sort_algorithms import (
+from fiatlight.demos.tutorials.sort_competition.sort_algorithms import (
     bubble_sort,
     selection_sort,
     insertion_sort,
@@ -138,7 +138,7 @@ def make_sort_function_visualizer(
 
 def gui_latency() -> None:
     """A GUI function to set the latency of the sorting algorithms"""
-    from fiatlight.demos.tutorials.sort_visualization.number_list import set_latency, get_latency
+    from fiatlight.demos.tutorials.sort_competition.number_list import set_latency, get_latency
 
     latency_us = get_latency() * 1000000.0
     # Edit the latency via a slider
@@ -152,7 +152,7 @@ def gui_latency() -> None:
         set_latency(latency_ms / 1000000)
 
     # Also, abort
-    from fiatlight.demos.tutorials.sort_visualization.sort_algorithms import is_aborting, set_aborting
+    from fiatlight.demos.tutorials.sort_competition.sort_algorithms import is_aborting, set_aborting
 
     if not is_aborting():
         if imgui.button("Abort Sort"):
@@ -264,7 +264,7 @@ class AppGui:
         imgui_md.render("# Latency")
         gui_latency()
 
-    def gui_visualization(self) -> None:
+    def gui_visualizations(self) -> None:
         # Shows the visualization of the sorting algorithms + their status and duration
         imgui_md.render("# Visualization")
 
@@ -297,14 +297,6 @@ class AppGui:
             if i % 3 != 2:
                 imgui.same_line()
 
-    def gui_main(self) -> None:
-        # Main GUI of the application (without the documentation)
-        # We use imgui.begin_group() and imgui.end_group() to group the different parts of the GUI
-        # (so that the call to imgui.same_line() after this will align with the whole group)
-        self.gui_commands()
-
-        self.gui_visualization()
-
     @staticmethod
     def gui_doc() -> None:
         # Render the documentation as Markdown
@@ -313,21 +305,22 @@ class AppGui:
         imgui.end_child()
 
     def gui(self) -> None:
-        # Full GUI function of the application: it shows the documentation and the main GUI
-        # We use imgui.begin_group() and imgui.end_group() to group the different parts of the GUI
-        # (so that the call to imgui.same_line() after this will align with the whole group)
-        imgui.begin_group()
-        self.gui_doc()
-        imgui.end_group()
+        # Full GUI function of the application: it does the layout by using groups
+        # We use begin_group() to create "groups" that we can then align horizontally (using same_line())
+
+        # Left columns: doc
+        with imgui_ctx.begin_group():
+            self.gui_doc()
 
         imgui.same_line()
 
-        imgui.begin_group()
-        self.gui_main()
-        imgui.end_group()
+        # Right columns: commands and visualization
+        with imgui_ctx.begin_group():
+            self.gui_commands()
+            self.gui_visualizations()
 
 
-def main() -> None:
+def main_using_standard_layout() -> None:
     # Main function of the application
     # 1. We create an instance of AppGui and we run the application
     app_gui = AppGui()
@@ -340,12 +333,83 @@ def main() -> None:
     # 2.b Set the Hello ImGui runner params
     runner_params = immapp.RunnerParams()
     runner_params.app_window_params.window_title = "Sort Competition"
-    runner_params.callbacks.show_gui = app_gui.gui
     runner_params.app_window_params.window_geometry.size = (1600, 900)
     runner_params.fps_idling.enable_idling = False
+    # 2.c Set the GUI function
+    runner_params.callbacks.show_gui = app_gui.gui
+
+    # 2.d Run the application
+    immapp.run(runner_params, addons)
+
+
+def main_using_dockable_windows() -> None:
+    # An alternative version where we use dockable windows
+
+    # 1. We create an instance of AppGui and we run the application
+    app_gui = AppGui()
+
+    # 2. We run the application using HelloImGui and ImmApp
+    # 2.a Set the AddOns we will be using
+    addons = immapp.AddOnsParams()
+    addons.with_implot = True
+    addons.with_markdown = True
+    # 2.b Set the Hello ImGui runner params
+    runner_params = immapp.RunnerParams()
+    runner_params.app_window_params.window_title = "Sort Competition"
+    runner_params.app_window_params.window_geometry.size = (1600, 900)
+    runner_params.fps_idling.enable_idling = False
+
+    # 3. Set the dockable windows
+    runner_params.imgui_window_params.default_imgui_window_type = (
+        hello_imgui.DefaultImGuiWindowType.provide_full_screen_dock_space
+    )
+    # We want this to create this Dockable spaces:
+    #    ___________________________________________
+    #    |         |                                |  # The Dockable Space "MainDockSpace" is provided automatically,
+    #    | Doc     |    Commands                    |  # The Commands will be place here
+    #    |         |    (aka "MainDockSpace")       |  # after it was split into three parts with the code below.
+    #    |         |________________________________|
+    #    |         |                                |
+    #    |         |     Visualizations             |
+    #    |         |                                |
+    #    --------------------------------------------
+    split_main_doc = hello_imgui.DockingSplit()
+    split_main_doc.initial_dock = "MainDockSpace"
+    split_main_doc.new_dock = "Doc"
+    split_main_doc.direction = imgui.Dir_.left
+    split_main_doc.ratio = 0.2
+
+    split_commands_and_visualization = hello_imgui.DockingSplit()
+    split_commands_and_visualization.initial_dock = "MainDockSpace"
+    split_commands_and_visualization.new_dock = "Visualizations"
+    split_commands_and_visualization.direction = imgui.Dir_.down
+    split_commands_and_visualization.ratio = 0.7
+
+    runner_params.docking_params.docking_splits = [split_main_doc, split_commands_and_visualization]
+
+    # D. Dockable windows content
+    # * Doc window
+    doc_window = hello_imgui.DockableWindow()
+    doc_window.label = "Doc"
+    doc_window.dock_space_name = "Doc"
+    doc_window.gui_function = app_gui.gui_doc
+    # * Commands window
+    commands_window = hello_imgui.DockableWindow()
+    commands_window.label = "Commands"
+    commands_window.dock_space_name = "MainDockSpace"
+    commands_window.gui_function = app_gui.gui_commands
+    # * Visualizations window
+    visualizations_window = hello_imgui.DockableWindow()
+    visualizations_window.label = "Visualizations"
+    visualizations_window.dock_space_name = "Visualizations"
+    visualizations_window.gui_function = app_gui.gui_visualizations
+
+    runner_params.docking_params.dockable_windows = [doc_window, commands_window, visualizations_window]
+
     # 2.c Run the application
     immapp.run(runner_params, addons)
 
 
 if __name__ == "__main__":
-    main()
+    # main_using_standard_layout()
+    main_using_dockable_windows()

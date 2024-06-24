@@ -1,4 +1,4 @@
-from fiatlight.demos.tutorials.sort_visualization.number_list import NumbersList
+from fiatlight.demos.tutorials.sort_competition.number_list import NumbersList
 
 ABORTING = False
 

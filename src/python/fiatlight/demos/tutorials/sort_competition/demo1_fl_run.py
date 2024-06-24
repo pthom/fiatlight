@@ -1,9 +1,9 @@
 import fiatlight as fl
-from fiatlight.demos.tutorials.sort_visualization.numbers_generator import make_random_number_list
+from fiatlight.demos.tutorials.sort_competition.numbers_generator import make_random_number_list
 
 
 # 2. Add fiat attributes that set options for the widgets associated with the function
-from fiatlight.demos.tutorials.sort_visualization.numbers_generator import NumbersGenerationOptions
+from fiatlight.demos.tutorials.sort_competition.numbers_generator import NumbersGenerationOptions
 
 fl.register_base_model(
     NumbersGenerationOptions,

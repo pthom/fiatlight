@@ -35,3 +35,11 @@ Part 5:
 - How to run a custom function graph.
 - How to add a "GUI Only" node to the graph (i.e. a node that does not have a corresponding function)
 - how to add "Documentation" node to the graph
+
+Part 6:
+------
+- How to create a standalone app version of the sort visualization
+  (that will reuse the GUI provided by Fiatlight)
+- How to create the layout of an application:
+  - Using standard ImGui layout functions (begin_group, same_line, etc)
+  - Using Dockable windows

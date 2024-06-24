@@ -2,8 +2,8 @@ import fiatlight as fl
 
 # 2. Explain bundle, implot
 from imgui_bundle import implot, hello_imgui, imgui_ctx
-from fiatlight.demos.tutorials.sort_visualization.number_list import NumbersList
-from fiatlight.demos.tutorials.sort_visualization.numbers_generator import make_random_number_list
+from fiatlight.demos.tutorials.sort_competition.number_list import NumbersList
+from fiatlight.demos.tutorials.sort_competition.numbers_generator import make_random_number_list
 
 
 # 3.

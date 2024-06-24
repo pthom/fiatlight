@@ -5,9 +5,9 @@ without the comments to show how short it can be. In total, there are 74 code li
 from typing import Callable
 import fiatlight as fl
 from imgui_bundle import implot, hello_imgui, imgui_ctx, imgui
-from fiatlight.demos.tutorials.sort_visualization.number_list import NumbersList
-from fiatlight.demos.tutorials.sort_visualization.numbers_generator import make_random_number_list
-from fiatlight.demos.tutorials.sort_visualization.sort_algorithms import (
+from fiatlight.demos.tutorials.sort_competition.number_list import NumbersList
+from fiatlight.demos.tutorials.sort_competition.numbers_generator import make_random_number_list
+from fiatlight.demos.tutorials.sort_competition.sort_algorithms import (
     bubble_sort,
     selection_sort,
     insertion_sort,
@@ -57,7 +57,7 @@ fl.register_type(NumbersList, NumbersListWithLatency_Gui)
 
 
 def gui_latency() -> None:
-    from fiatlight.demos.tutorials.sort_visualization.number_list import set_latency, get_latency
+    from fiatlight.demos.tutorials.sort_competition.number_list import set_latency, get_latency
 
     latency_us = get_latency() * 1000000.0
     imgui.set_next_item_width(hello_imgui.em_size(10))
@@ -66,7 +66,7 @@ def gui_latency() -> None:
     if changed:
         set_latency(latency_ms / 1000000)
 
-    from fiatlight.demos.tutorials.sort_visualization.sort_algorithms import is_aborting, set_aborting
+    from fiatlight.demos.tutorials.sort_competition.sort_algorithms import is_aborting, set_aborting
 
     if not is_aborting():
         if imgui.button("Abort Sort"):
