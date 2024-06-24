@@ -18,6 +18,13 @@ def gui_info(gui_or_data_typename: str) -> None:
     print(info)
 
 
+def fn_attrs() -> None:
+    """Display the available custom attributes for a function"""
+    from fiatlight.fiat_core.function_with_gui import _FUNCTION_POSSIBLE_FIAT_ATTRIBUTES
+
+    print(_FUNCTION_POSSIBLE_FIAT_ATTRIBUTES.documentation())
+
+
 # def run_gui_demo(gui_or_data_typename: str) -> None:
 #     """Tries to run a GUI demo for a given type. Add the GUI type name as an argument."""
 #     _GUI_FACTORIES.run_gui_demo(gui_or_data_typename)
@@ -28,6 +35,7 @@ def main() -> None:
         {
             "types": types,
             "gui": gui_info,
+            "fn_attrs": fn_attrs,
         }
     )
 
