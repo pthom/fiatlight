@@ -85,6 +85,13 @@ def _is_running_in_documentation() -> bool:
     return r
 
 
+_IS_RUNNING_IN_FUNCTION_GRAPH = False
+
+
+def is_running_in_function_graph() -> bool:
+    return _IS_RUNNING_IN_FUNCTION_GRAPH
+
+
 # ==================================================================================================================
 #                                  Logging
 # ==================================================================================================================
@@ -293,6 +300,9 @@ class FiatGui:
         pass
 
     def _post_init(self) -> None:
+        global _IS_RUNNING_IN_FUNCTION_GRAPH
+        _IS_RUNNING_IN_FUNCTION_GRAPH = True
+
         self._load_graph_composition_at_startup()
         self._load_user_inputs_at_startup()
         self._functions_graph_gui.invoke_all_functions(also_invoke_manual_function=False)
@@ -300,7 +310,9 @@ class FiatGui:
         self._disable_idling_if_any_live_function()
 
     def _before_exit(self) -> None:
-        # print(f"settings file {self._user_settings_filename()} in {os.getcwd()}")
+        global _IS_RUNNING_IN_FUNCTION_GRAPH
+        _IS_RUNNING_IN_FUNCTION_GRAPH = False
+
         self._store_final_app_window_screenshot()
         self._functions_graph_gui.on_exit()
         if self.params.customizable_graph:
@@ -681,12 +693,6 @@ def fiat_run_graph(
     theme: ImGuiTheme_ | None = None,
     remember_theme: bool = False,
 ) -> None:
-    from fiatlight.fiat_config.fiat_config_def import load_user_default_fiat_run_config
-
-    # This will load the user default settings,
-    # from a file named .fiat_run_config.json in the current directory or one of its parents.
-    load_user_default_fiat_run_config()
-
     if is_running_in_notebook():
         from fiatlight.fiat_runner.fiat_run_notebook import _fiat_run_graph_nb, NotebookRunnerParams
 

@@ -213,7 +213,7 @@ class _OsdDetachedWindows:
         from fiatlight.fiat_widgets import fontawesome_6_ctx, icons_fontawesome_6
         from fiatlight.fiat_config import get_fiat_config
 
-        if not get_fiat_config().gui_elements_settings().show_popup_button:
+        if not get_fiat_config().any_gui_with_data_settings().show_popup_button:
             return
 
         with fontawesome_6_ctx():

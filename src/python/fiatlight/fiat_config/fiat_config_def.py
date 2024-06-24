@@ -3,10 +3,35 @@ from pydantic import BaseModel, Field
 from typing import Any
 
 
-class GuiElementsSettings(BaseModel):
+class AnyGuiWithDataSettings(BaseModel):
+    # show_collapse_button:
+    # If true, display a button that enables the user to collapse a widget
+    show_collapse_button: bool = True
+
+    # show_popup_button:
+    # If true, display a button that enables the user to open a popup
+    # for presentation or edition of a collapsible widgets
     show_popup_button: bool = True
+
+    # show_clipboard_button:
+    # If true, display a button that enables the user to copy the content of a widget to the clipboard
     show_clipboard_button: bool = True
-    show_expand_button: bool = True
+
+    @staticmethod
+    def default_in_function_graph() -> "AnyGuiWithDataSettings":
+        return AnyGuiWithDataSettings(
+            show_collapse_button=True,
+            show_popup_button=True,
+            show_clipboard_button=True,
+        )
+
+    @staticmethod
+    def default_in_standalone_app() -> "AnyGuiWithDataSettings":
+        return AnyGuiWithDataSettings(
+            show_collapse_button=True,
+            show_popup_button=False,
+            show_clipboard_button=False,
+        )
 
 
 class FiatRunConfig(BaseModel):
@@ -33,16 +58,26 @@ class FiatRunConfig(BaseModel):
     # If true, the input will be disabled during execution, especially the execution of async functions.
     disable_input_during_execution: bool = False
 
-    # show_popup_buttons_when_running_outside_of_function_graph: bool, default=False
-    # If true, popup buttons will not be shown, when the GUI is running outside a function graph.
-    show_popup_buttons_when_running_outside_of_function_graph: bool = False
+    any_gui_with_data_settings_function_graph: AnyGuiWithDataSettings = (
+        AnyGuiWithDataSettings.default_in_function_graph()
+    )
+    any_gui_with_data_settings_standalone_app: AnyGuiWithDataSettings = (
+        AnyGuiWithDataSettings.default_in_standalone_app()
+    )
 
 
 class FiatConfig(BaseModel):
     style: FiatStyle = Field(default_factory=FiatStyle)
     run_config: FiatRunConfig = Field(default_factory=FiatRunConfig)
 
+    def any_gui_with_data_settings(self) -> AnyGuiWithDataSettings:
+        from fiatlight.fiat_runner.fiat_gui import is_running_in_function_graph
+
+        if is_running_in_function_graph():
+            return self.run_config.any_gui_with_data_settings_function_graph
+        else:
+            return self.run_config.any_gui_with_data_settings_standalone_app
+
     def __init__(self, **data: Any) -> None:
         super().__init__(**data)
         self.style = FiatStyle()
-

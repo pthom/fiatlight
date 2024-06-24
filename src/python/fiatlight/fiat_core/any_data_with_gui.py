@@ -377,6 +377,8 @@ class AnyDataWithGui(Generic[DataType]):
         return self.CollapseOrExpand.collapse
 
     def _show_collapse_sub_items_buttons(self, present_or_edit: PresentOrEdit) -> None:
+        if not get_fiat_config().any_gui_with_data_settings().show_collapse_button:
+            return
         icon = icons_fontawesome_6.ICON_FA_COMPRESS
         new_expanded_state = self.sub_items_will_collapse_or_expand(present_or_edit)
         tooltip = str(new_expanded_state.value)
@@ -399,6 +401,8 @@ class AnyDataWithGui(Generic[DataType]):
         return False
 
     def _show_collapse_button(self) -> None:
+        if not get_fiat_config().any_gui_with_data_settings().show_collapse_button:
+            return
         icon = icons_fontawesome_6.ICON_FA_CARET_DOWN if self._expanded else icons_fontawesome_6.ICON_FA_CARET_RIGHT
         tooltip = "Collapse" if self._expanded else "Expand"
         if imgui.button(icon):
@@ -406,6 +410,8 @@ class AnyDataWithGui(Generic[DataType]):
         fiat_osd.set_widget_tooltip(tooltip)
 
     def _show_copy_to_clipboard_button(self) -> None:
+        if not get_fiat_config().any_gui_with_data_settings().show_clipboard_button:
+            return
         if not self.callbacks.clipboard_copy_possible:
             return
         if isinstance(self.value, (Error, Unspecified, Invalid)):
