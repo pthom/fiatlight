@@ -25,7 +25,7 @@ This example shows sophisticated usage features:
 """
 
 import fiatlight as fl
-from fiatlight.demos.tutorials.image_pipeline.image_processors import ImageEffect
+from fiatlight.demos.tutorials.image_pipeline_graph_to_app.image_processors import ImageEffect
 from fiatlight.fiat_kits.fiat_image.camera_image_provider import CameraParams, CameraImageProvider
 from imgui_bundle import imgui, immapp, immvision, hello_imgui, ImVec4
 from pydantic import BaseModel
@@ -45,6 +45,7 @@ def get_this_module_path() -> str:
 
 
 THIS_SCRIPT_PATH = get_this_module_path()
+SETTINGS_FOLDER = THIS_SCRIPT_PATH + "_settings/"
 
 
 @fl.base_model_with_gui_registration()
@@ -173,11 +174,11 @@ class Application:
         return self._params_gui.value
 
     def _state_filename(self) -> str:
-        r = THIS_SCRIPT_PATH + "_state.json"
+        r = SETTINGS_FOLDER + "/app_state.json"
         return r
 
     def _gui_options_filename(self) -> str:
-        return THIS_SCRIPT_PATH + "_gui_options.json"
+        return SETTINGS_FOLDER + "/gui_options.json"
 
     def _save_state(self) -> None:
         filename = self._state_filename()
@@ -317,7 +318,8 @@ def main() -> None:
     runner_params.docking_params.dockable_windows = [camera_window, effects_window, params_window]
 
     # Hello ImGui settings location
-    runner_params.ini_folder_type = hello_imgui.IniFolderType.current_folder
+    runner_params.ini_folder_type = hello_imgui.IniFolderType.absolute_path
+    runner_params.ini_filename = SETTINGS_FOLDER + "/hello_imgui.ini"
     # If desired, remove the settings file of Hello ImGui, to start with a fresh state
     remove_hello_imgui_settings(runner_params)
 

@@ -8,7 +8,7 @@ It also shows how a simple pipeline can be built, going from a source (here a ca
 """
 
 from fiatlight.fiat_kits import fiat_image as fi
-from fiatlight.demos.tutorials.image_pipeline.image_processors import apply_image_effect
+from fiatlight.demos.tutorials.image_pipeline_graph_to_app.image_processors import apply_image_effect
 import fiatlight as fl
 
 

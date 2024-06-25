@@ -189,23 +189,23 @@ def test_pydantic_with_enum() -> None:
 
 def test_base_model_with_fiat_attributes() -> None:
     @fl.base_model_with_gui_registration(rotation_degree__range=(-180, 180))
-    class ImageEffect(BaseModel):
+    class MyImageEffect(BaseModel):
         rotation_degree: int = 0
 
     # Test the custom attribute
     # 1. When creating the GUI manually
-    my_param_gui = BaseModelGui(ImageEffect, FiatAttributes({"rotation_degree__range": (-180, 180)}))
+    my_param_gui = BaseModelGui(MyImageEffect, FiatAttributes({"rotation_degree__range": (-180, 180)}))
     rot_gui = my_param_gui._parameters_with_gui[0].data_with_gui
     assert rot_gui.fiat_attributes["range"] == (-180, 180)
 
     # 2. When using fiatlight machinery
-    gui2 = fl.fiat_togui._any_type_to_gui_impl(ImageEffect, NO_FIAT_ATTRIBUTES)
+    gui2 = fl.fiat_togui._any_type_to_gui_impl(MyImageEffect, NO_FIAT_ATTRIBUTES)
     assert isinstance(gui2, BaseModelGui)
     rot_gui2 = gui2._parameters_with_gui[0].data_with_gui
     assert rot_gui2.fiat_attributes["range"] == (-180, 180)
 
     # 3 When using fiatlight machinery with a function
-    def f(effect: ImageEffect) -> ImageEffect:
+    def f(effect: MyImageEffect) -> MyImageEffect:
         return effect
 
     f_gui = FunctionWithGui(f)
@@ -214,7 +214,7 @@ def test_base_model_with_fiat_attributes() -> None:
     assert rot_gui3.fiat_attributes["range"] == (-180, 180)
 
     # 4.  When using fiatlight machinery with a function where the param is optional
-    def f2(effect: ImageEffect | None = None) -> ImageEffect | None:
+    def f2(effect: MyImageEffect | None = None) -> MyImageEffect | None:
         return effect
 
     f2_gui = FunctionWithGui(f2)

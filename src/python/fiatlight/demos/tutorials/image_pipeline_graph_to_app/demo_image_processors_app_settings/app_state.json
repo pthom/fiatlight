@@ -1,0 +1,20 @@
+{
+    "type": "Pydantic",
+    "value": {
+        "camera_params": {
+            "device_number": 0,
+            "camera_resolution": [
+                640,
+                480
+            ],
+            "brightness": 0.5,
+            "contrast": 0.5
+        },
+        "effects": {
+            "geo_transf": null,
+            "color_filter": null,
+            "image_filters": null,
+            "title_text": null
+        }
+    }
+}

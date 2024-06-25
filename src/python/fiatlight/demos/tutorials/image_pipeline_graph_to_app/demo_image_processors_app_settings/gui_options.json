@@ -4,19 +4,19 @@
             "cb_options": {
                 "device_number": {
                     "cb_options": {},
-                    "expanded": false
+                    "expanded": true
                 },
                 "camera_resolution": {
                     "cb_options": {},
-                    "expanded": false
+                    "expanded": true
                 },
                 "brightness": {
                     "cb_options": {},
-                    "expanded": false
+                    "expanded": true
                 },
                 "contrast": {
                     "cb_options": {},
-                    "expanded": false
+                    "expanded": true
                 }
             },
             "expanded": true
@@ -25,7 +25,7 @@
             "cb_options": {
                 "geo_transf": {
                     "cb_options": {},
-                    "expanded": false
+                    "expanded": true
                 },
                 "color_filter": {
                     "cb_options": {},
@@ -33,7 +33,7 @@
                 },
                 "image_filters": {
                     "cb_options": {},
-                    "expanded": false
+                    "expanded": true
                 },
                 "title_text": {
                     "cb_options": {},
