@@ -107,7 +107,7 @@ class AnyDataGuiCallbacks(Generic[DataType]):
     # You can add to it a validation function to check if the value is valid:
     #     It should raise a ValueError exception with a nice error message if the value is invalid.
     #     The error message will be shown to the user.
-    validate_value: list[Callable[[DataType], None]]
+    validate_value: list[Callable[[DataType], DataType]]
 
     # on_exit (Optional)
     # if provided, this function will be called when the application is closed.

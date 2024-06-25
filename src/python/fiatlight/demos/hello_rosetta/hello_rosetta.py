@@ -67,7 +67,7 @@ def hello_rosetta(name: str, age: int) -> str:
 import fiatlight as fl  # noqa
 
 
-def validate_name(name: str) -> None:
+def validate_name(name: str) -> str:
     if len(name) == 0:
         raise ValueError("Please enter your name.")
     if len(name) > 10:
@@ -77,6 +77,7 @@ def validate_name(name: str) -> None:
     letters_a = list(filter(lambda x: x == "a" or x == "A", name))
     if len(letters_a) > 1:
         raise ValueError("Only one 'a' or 'A' is allowed")
+    return name
 
 
 fl.add_fiat_attributes(

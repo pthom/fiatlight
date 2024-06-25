@@ -6,9 +6,10 @@ import fiatlight as fl
 import logging
 
 
-def validate_odd_number(x: int) -> None:
+def validate_odd_number(x: int) -> int:
     if x % 2 == 0:
         raise ValueError("Must be odd")
+    return x
 
 
 @fl.base_model_with_gui_registration(x__range=(0, 10), x__validate_value=validate_odd_number)

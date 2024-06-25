@@ -1,9 +1,10 @@
 import fiatlight as fl
 
 
-def validate_odd_int(odd_int: int) -> None:
-    if odd_int % 2 != 1:
+def validate_odd_int(value: int) -> int:
+    if value % 2 != 1:
         raise ValueError("must be an odd number")
+    return value
 
 
 def test_invalid_value() -> None:

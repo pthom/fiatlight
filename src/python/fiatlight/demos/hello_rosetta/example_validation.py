@@ -1,9 +1,10 @@
 import fiatlight as fl
 
 
-def only_lowercase(s: str) -> None:
+def only_lowercase(s: str) -> str:
     if s.isupper():
         raise ValueError("The string should be lowercase.")
+    return s
 
 
 def main() -> None:

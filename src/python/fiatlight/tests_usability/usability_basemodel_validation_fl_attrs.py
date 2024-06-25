@@ -41,14 +41,16 @@ from pydantic import BaseModel
 from typing import Any
 
 
-def validate_even(x: int) -> None:
+def validate_even(x: int) -> int:
     if x % 2 != 0:
         raise ValueError("Input should be even")
+    return x
 
 
-def validate_lower_case(s: str) -> None:
+def validate_lower_case(s: str) -> str:
     if not s.islower():
         raise ValueError("Input should be lower case")
+    return s
 
 
 @fl.base_model_with_gui_registration(

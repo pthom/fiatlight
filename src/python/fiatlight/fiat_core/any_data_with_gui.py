@@ -30,7 +30,7 @@ class AnyDataWithGuiGenericPossibleFiatAttributes(PossibleFiatAttributes):
         self.add_explained_attribute(
             name="validate_value",
             type_=object,
-            explanation="Function to validate a parameter value (should return DataValidationResult.ok() .error()",
+            explanation="Function to validate a parameter value: should raise a ValueError if invalid, or return the value (possibly modified)",
             default_value=None,
         )
         self.add_explained_attribute(
@@ -242,7 +242,24 @@ class AnyDataWithGui(Generic[DataType]):
                 is_valid = True
                 error_message = ""
                 try:
-                    validate_value(new_value)
+                    new_value_after_validation = validate_value(new_value)
+                    if new_value_after_validation is None and new_value is not None:
+                        import inspect
+
+                        validator_info = inspect.getsourcelines(validate_value)
+                        file_name = inspect.getfile(validate_value)
+                        raise RuntimeError(
+                            f"""
+                            The validator "{validate_value}" for the value "{self.label}" returned None.
+                            A validator should either:
+                                - raise a ValueError if the value is invalid, with a nice error message.
+                                  (the error message will be shown to the user)
+                                - or, return the value itself (or a modified version of it, if needed).
+                            This validator is defined in {file_name}
+                            at line {validator_info[1]}.
+                        """
+                        )
+                    new_value = new_value_after_validation
                 except ValueError as e:
                     is_valid = False
                     error_message = str(e)
@@ -252,6 +269,10 @@ class AnyDataWithGui(Generic[DataType]):
             if len(error_messages) > 0:
                 all_error_messages = " - ".join(error_messages)
                 self._value = Invalid(error_message=all_error_messages, invalid_value=new_value)
+
+        # Since the validators may have changed the value, we need to set it again
+        # We do it by using the _value member, not the value property, to avoid calling the validators again
+        self._value = new_value
 
         # Call on_change callback if everything is fine
         if not isinstance(self.value, Invalid) and self.callbacks.on_change is not None:
@@ -802,7 +823,7 @@ class AnyDataWithGui(Generic[DataType]):
         if present_node_compatible is not None:
             self.callbacks.present_node_compatible = present_node_compatible
 
-    def add_validate_value_callback(self, cb: Callable[[DataType], None]) -> None:
+    def add_validate_value_callback(self, cb: Callable[[DataType], DataType]) -> None:
         self.callbacks.validate_value.append(cb)
 
     def _Serialization_Section(self) -> None:

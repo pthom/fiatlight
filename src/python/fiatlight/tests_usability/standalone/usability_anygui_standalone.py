@@ -33,9 +33,10 @@ class MyParam(BaseModel):
     z: float = 3.14
 
 
-def odd_validator(x: MyParam) -> None:
+def odd_validator(x: MyParam) -> MyParam:
     if x.x % 2 == 0:
         raise ValueError("Must be odd")
+    return x
 
 
 def edit_value_with_gui(label: str, value_with_gui: fl.AnyDataWithGui[Any]) -> bool:
@@ -61,15 +62,17 @@ def usability_int_with_gui() -> None:
     int_with_gui._can_set_unspecified_or_default = True
     int_with_gui.value = 2
 
-    def even_validator(x: int) -> None:
+    def even_validator(x: int) -> int:
         if x % 2 != 0:
             raise ValueError("Must be even")
+        return x
 
     int_with_gui.add_validate_value_callback(even_validator)
 
-    def validate_short_string(s: str) -> None:
+    def validate_short_string(s: str) -> str:
         if len(s) >= 5:
             raise ValueError("Must be shorter than 5 chars")
+        return s
 
     str_with_gui = any_type_to_gui(str)
     str_with_gui._can_set_unspecified_or_default = True

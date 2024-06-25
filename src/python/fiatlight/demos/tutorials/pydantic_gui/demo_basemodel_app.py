@@ -28,9 +28,10 @@ class GeographicInfo(BaseModel):
 
 
 # A custom validator, which will be used to validate the short description
-def validate_short_description(value: str) -> None:
+def validate_short_description(value: str) -> str:
     if len(value) > 30:
         raise ValueError("Description is too long")
+    return value
 
 
 # A second model, which nests the first one (GeographicInfo)
