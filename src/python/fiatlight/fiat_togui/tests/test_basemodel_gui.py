@@ -1,5 +1,5 @@
 import pytest
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 import fiatlight as fl
 import fiatlight.fiat_togui.primitives_gui
@@ -145,6 +145,56 @@ def test_base_model_with_validation_errors() -> None:
     assert isinstance(x_gui.value, Invalid)
     assert x_gui.value.invalid_value == [1, 2, 3]
     assert x_gui.value.error_message == "Input should be a valid integer"
+
+
+def test_base_model_with_no_default_constructor_but_constructible_type() -> None:
+    class MyParam(BaseModel):
+        # x does not have a default value.
+        # However, its type can be constructed by default. We will use that.
+        x: int
+
+    register_base_model(MyParam)
+    my_param_gui = BaseModelGui(MyParam)
+    assert my_param_gui._type == MyParam
+    assert my_param_gui.can_construct_default_value()
+    assert my_param_gui.callbacks.default_value_provider is not None
+    default_value = my_param_gui.callbacks.default_value_provider()
+    assert default_value.x == 0
+
+
+def test_base_model_with_no_default_constructor_and_unconstructible_type() -> None:
+    class Foo(BaseModel):
+        x: int
+
+    class MyParam(BaseModel):
+        # x does not have a default value.
+        # Moreover, its type cannot be constructed by default.
+        x: Foo
+
+    register_base_model(MyParam)
+    my_param_gui = BaseModelGui(MyParam)
+    assert my_param_gui._type == MyParam
+    assert my_param_gui.callbacks.default_value_provider is not None
+    with pytest.raises(ValueError):
+        _default_value = my_param_gui.callbacks.default_value_provider()
+
+
+def test_base_model_with_invalid_default() -> None:
+    class MyParam(BaseModel):
+        x: int
+
+        @field_validator("x")
+        def check_odd(cls, value: int) -> int:
+            if value % 2 == 0:
+                raise ValueError("x must be odd")
+            return value
+
+    register_base_model(MyParam)
+    my_param_gui = BaseModelGui(MyParam)
+    assert my_param_gui._type == MyParam
+    assert my_param_gui.callbacks.default_value_provider is not None
+    with pytest.raises(ValueError):
+        _default_value = my_param_gui.callbacks.default_value_provider()
 
 
 def test_decorators() -> None:
