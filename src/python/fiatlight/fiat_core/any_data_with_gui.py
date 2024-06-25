@@ -188,9 +188,9 @@ class AnyDataWithGui(Generic[DataType]):
     tooltip: str | None = None
     status_tooltip: str | None = None
 
-    class CollapseOrExpand(Enum):
-        collapse = "Collapse All"
-        expand = "Expand All"
+    class CollapseOrExpandChildren(Enum):
+        collapse = "Collapse all children"
+        expand = "Expand all children"
 
     class PresentOrEdit(Enum):
         present = "View"
@@ -368,13 +368,13 @@ class AnyDataWithGui(Generic[DataType]):
         """Overwrite this in derived classes if they provide multiple sub-items that can be collapsed"""
         return False
 
-    def sub_items_collapse_or_expand(self, _collapse_or_expand: CollapseOrExpand) -> None:
+    def sub_items_collapse_or_expand(self, _collapse_or_expand: CollapseOrExpandChildren) -> None:
         """Overwrite this in derived classes if they provide multiple sub-items that can be collapsed"""
         return
 
-    def sub_items_will_collapse_or_expand(self, _present_or_edit: PresentOrEdit) -> CollapseOrExpand:
+    def sub_items_will_collapse_or_expand(self, _present_or_edit: PresentOrEdit) -> CollapseOrExpandChildren:
         """Overwrite this in derived classes if they provide multiple sub-items that can be collapsed"""
-        return self.CollapseOrExpand.collapse
+        return self.CollapseOrExpandChildren.collapse
 
     def _show_collapse_sub_items_buttons(self, present_or_edit: PresentOrEdit) -> None:
         if not get_fiat_config().any_gui_with_data_settings().show_collapse_button:

@@ -117,10 +117,10 @@ class TupleWithGui(AnyDataWithGui[tuple[Any, ...]]):
                 return True
         return False
 
-    def sub_items_collapse_or_expand(self, collapse_or_expand: AnyDataWithGui.CollapseOrExpand) -> None:
+    def sub_items_collapse_or_expand(self, collapse_or_expand: AnyDataWithGui.CollapseOrExpandChildren) -> None:
         from fiatlight.fiat_togui.dataclass_like_gui import DataclassLikeGui
 
-        new_expanded_state = collapse_or_expand == AnyDataWithGui.CollapseOrExpand.expand
+        new_expanded_state = collapse_or_expand == AnyDataWithGui.CollapseOrExpandChildren.expand
 
         for inner_gui in self._inner_guis:
             if inner_gui.callbacks.present_collapsible:
@@ -130,21 +130,21 @@ class TupleWithGui(AnyDataWithGui[tuple[Any, ...]]):
 
     def sub_items_will_collapse_or_expand(
         self, present_or_edit: AnyDataWithGui.PresentOrEdit
-    ) -> AnyDataWithGui.CollapseOrExpand:
+    ) -> AnyDataWithGui.CollapseOrExpandChildren:
         for inner_gui in self._inner_guis:
             if (
                 inner_gui.callbacks.present_collapsible
                 and present_or_edit == AnyDataWithGui.PresentOrEdit.present
                 and inner_gui._expanded
             ):
-                return AnyDataWithGui.CollapseOrExpand.collapse
+                return AnyDataWithGui.CollapseOrExpandChildren.collapse
             if (
                 inner_gui.callbacks.edit_collapsible
                 and present_or_edit == AnyDataWithGui.PresentOrEdit.edit
                 and inner_gui._expanded
             ):
-                return AnyDataWithGui.CollapseOrExpand.collapse
-        return AnyDataWithGui.CollapseOrExpand.expand
+                return AnyDataWithGui.CollapseOrExpandChildren.collapse
+        return AnyDataWithGui.CollapseOrExpandChildren.expand
 
     class _Callbacks_Section:  # Dummy class to create a section in the IDE # noqa
         """

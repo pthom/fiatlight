@@ -13,7 +13,7 @@ def types(query: str | None = None) -> None:
 
 
 def gui_info(gui_or_data_typename: str) -> None:
-    """Print the GUI info for a given type. Add the GUI type name as an argument (if not provided, all Gui widgets names are printed)"""
+    """Print the info and custom attributes available for a given type. Add the datatype or Gui type name as an argument (if not provided, all Gui widgets names are printed)"""
     info = _GUI_FACTORIES.get_gui_info(gui_or_data_typename)
     print(info)
 
