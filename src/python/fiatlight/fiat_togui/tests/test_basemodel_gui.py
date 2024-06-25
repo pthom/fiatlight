@@ -112,27 +112,28 @@ def test_model_with_annotated_range() -> None:
 def test_base_model_with_validation_errors() -> None:
     @fl.base_model_with_gui_registration()
     class MyParam(BaseModel):
-        x: int = Field(gt=0, default=0)
+        x: int = Field(gt=0, default=1)
 
     my_param_gui = fl.fiat_togui.any_type_to_gui(MyParam)
     assert isinstance(my_param_gui, BaseModelGui)
     x_gui = my_param_gui.param_of_name("x").data_with_gui
 
     # Try factor when no value is given for x
-    with pytest.raises(ValueError):
-        # Factoring is impossible
-        my_param_gui.factor_dataclass_instance()
+    # Factoring is possible if x > 0 (x has a default value of 1)
+    my_param_gui.value = my_param_gui.construct_default_value()
+    assert my_param_gui.value.x == 1
+    my_param_gui.factor_dataclass_instance_with_edited_values()
 
     # Factoring should be possible if x has a positive value
     x_gui.value = 3
-    p = my_param_gui.factor_dataclass_instance()
+    p = my_param_gui.factor_dataclass_instance_with_edited_values()
     assert isinstance(p, MyParam)
     assert p.x == 3
 
     # If x is negative, factoring should return an error
     # and x_gui should be noted as an Invalid with the correct error message
     x_gui.value = -3
-    factored_instance = my_param_gui.factor_dataclass_instance()
+    factored_instance = my_param_gui.factor_dataclass_instance_with_edited_values()
     assert isinstance(factored_instance, Invalid)
     assert isinstance(x_gui.value, Invalid)
     assert x_gui.value.invalid_value == -3
@@ -140,7 +141,7 @@ def test_base_model_with_validation_errors() -> None:
 
     # If x is not of the correct type, we should catch it also
     x_gui.value = [1, 2, 3]
-    factored_instance = my_param_gui.factor_dataclass_instance()
+    factored_instance = my_param_gui.factor_dataclass_instance_with_edited_values()
     assert isinstance(factored_instance, Invalid)
     assert isinstance(x_gui.value, Invalid)
     assert x_gui.value.invalid_value == [1, 2, 3]
@@ -179,6 +180,44 @@ def test_base_model_with_no_default_constructor_and_unconstructible_type() -> No
         _default_value = my_param_gui.callbacks.default_value_provider()
 
 
+def test_base_model_factor_with_invalid_value() -> None:
+    class MyParam(BaseModel):
+        x: int = 0
+        y: int = 0
+
+        @field_validator("x")
+        def check_even(cls, value: int) -> int:
+            if value % 2 != 0:
+                raise ValueError("x must be even")
+            return value
+
+    register_base_model(MyParam)
+    my_param_gui = BaseModelGui(MyParam)
+    my_param_gui.value = my_param_gui.construct_default_value()
+    assert my_param_gui.value.x == 0
+
+    # We simulate an edition with an invalid value
+    my_param_gui._parameters_with_gui[0].data_with_gui.value = 1
+
+    # But if we try to factor, we should get an Invalid
+    invalid_value = my_param_gui.factor_dataclass_instance_with_edited_values()
+    assert isinstance(invalid_value, Invalid)
+    # However, we should have access to the invalid value
+    # (even if this is not a validated instance of MyParam)
+    assert isinstance(invalid_value.invalid_value, MyParam)
+    assert isinstance(invalid_value.invalid_value.x, Invalid)
+    assert invalid_value.invalid_value.x.invalid_value == 1
+
+    # We also edit y
+    my_param_gui._parameters_with_gui[1].data_with_gui.value = 2
+    invalid_value = my_param_gui.factor_dataclass_instance_with_edited_values()
+    assert isinstance(invalid_value, Invalid)
+    assert isinstance(invalid_value.invalid_value, MyParam)
+    assert isinstance(invalid_value.invalid_value.x, Invalid)
+    assert invalid_value.invalid_value.x.invalid_value == 1
+    assert invalid_value.invalid_value.y == 2
+
+
 def test_base_model_with_invalid_default() -> None:
     class MyParam(BaseModel):
         x: int
@@ -193,8 +232,35 @@ def test_base_model_with_invalid_default() -> None:
     my_param_gui = BaseModelGui(MyParam)
     assert my_param_gui._type == MyParam
     assert my_param_gui.callbacks.default_value_provider is not None
-    with pytest.raises(ValueError):
+    with pytest.raises((ValueError, TypeError)):
         _default_value = my_param_gui.callbacks.default_value_provider()
+
+
+def test_base_model_validation_optional() -> None:
+    @fl.base_model_with_gui_registration()
+    class MyData(BaseModel):
+        x: int = 0
+
+        @field_validator("x")
+        def check_even(cls, value: int) -> int:
+            if value % 2 != 0:
+                raise ValueError("x must be even")
+            return value
+
+    from fiatlight.fiat_togui.optional_with_gui import OptionalWithGui
+
+    inner_gui = fl.fiat_togui.any_type_to_gui(MyData)
+    my_data_opt_gui = OptionalWithGui(inner_gui)
+
+    assert isinstance(my_data_opt_gui.value, fl.fiat_types.Unspecified)
+    my_data_opt_gui.value = my_data_opt_gui.construct_default_value()
+    assert my_data_opt_gui.value is None
+
+    my_data_opt_gui.value = MyData(x=2)
+
+    my_data_opt_gui_value = my_data_opt_gui.value
+    assert isinstance(my_data_opt_gui_value, MyData)
+    assert my_data_opt_gui_value.x == 2
 
 
 def test_decorators() -> None:

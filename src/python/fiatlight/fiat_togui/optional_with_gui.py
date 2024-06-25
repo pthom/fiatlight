@@ -31,11 +31,9 @@ class OptionalWithGui(AnyDataWithGui[DataType | None]):
 
         self.callbacks.on_heartbeat = self._on_heartbeat
 
-    def default_provider(self) -> DataType | None:
-        if not self.inner_gui.can_construct_default_value():
-            return None
-        else:
-            return self.inner_gui.construct_default_value()
+    @staticmethod
+    def default_provider() -> DataType | None:
+        return None
 
     def present_str(self, value: DataType | None) -> str:
         if value is None:
@@ -63,7 +61,8 @@ class OptionalWithGui(AnyDataWithGui[DataType | None]):
 
     def edit(self, value: DataType | None) -> tuple[bool, DataType | None]:
         assert not isinstance(value, (Unspecified, Error))
-        assert self.inner_gui.can_construct_default_value()
+        if value is None:
+            assert self.inner_gui.can_construct_default_value()
         fn_edit = self.inner_gui.callbacks.edit
 
         changed = False

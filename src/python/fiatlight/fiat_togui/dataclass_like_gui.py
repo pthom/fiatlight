@@ -1,6 +1,6 @@
 from fiatlight.fiat_core import AnyDataWithGui, FunctionWithGui, ParamWithGui
 from fiatlight.fiat_core.any_data_with_gui import GuiHeaderLineParams
-from fiatlight.fiat_types import JsonDict, Unspecified, Error, Invalid, UnspecifiedValue
+from fiatlight.fiat_types import JsonDict, Unspecified, Error, Invalid
 from fiatlight.fiat_types.base_types import FiatAttributes
 from fiatlight.fiat_config import get_fiat_config, FiatColorType
 from imgui_bundle import imgui_ctx
@@ -81,53 +81,75 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
         # ------------------------------------------------------------------------------------------------------------------
         """
 
-    @staticmethod
-    def factor_dataclass_instance_from_values__handle_invalid(
-        type_: Type[DataclassLikeType],
-        param_values: dict[str, Any],
-    ) -> DataclassLikeType | Invalid[DataclassLikeType]:
-        # Check for invalid values
-        invalid_params_names = []
-        for param_name, param_value in param_values.items():
-            if isinstance(param_value, Invalid):
-                invalid_params_names.append(param_name)
-            if isinstance(param_value, (Unspecified, Error)):
-                raise ValueError(f"Parameter {param_name} is unspecified in class {type_}")
-        if len(invalid_params_names) > 0:
-            # The typing below isn't correct because we are in a complex case:
-            # we have a dataclass that has a parameter that is invalid, so we cannot construct it
-            return Invalid(
-                error_message="Invalid!",  # : {', '.join(invalid_params_names)}"
-                # invalid_value should be of type DataclassLikeType, but we cannot construct it
-                invalid_value=UnspecifiedValue,  # type: ignore
+    def factor_invalid_instance_with_edited_values(self) -> Invalid[DataclassLikeType]:
+        edited_param_values = self._get_edited_param_values()
+
+        invalid_instance: DataclassLikeType
+        if self.can_construct_default_value():
+            try:
+                invalid_instance = self.construct_default_value()
+                for param_name, param_value in edited_param_values.items():
+                    # param_value is either Invalid or a valid value: invalid_instance is indeed invalid!
+                    invalid_instance.__setattr__(param_name, param_value)
+                invalid_result = Invalid(invalid_value=invalid_instance, error_message="Invalid values")
+                return invalid_result
+            except Exception:
+                raise TypeError(
+                    f"""
+                    factor_invalid_instance_with_edited_values() for class {self.datatype_qualified_name()}
+                    construct_default_value() raised an exception, so cannot transmit invalid values
+                """
+                )
+        else:
+            raise TypeError(
+                f"""
+                factor_invalid_instance_with_edited_values() for class {self.datatype_qualified_name()}
+                Cannot construct a default value for the dataclass, so cannot transmit invalid values
+            """
             )
 
-        r = type_(**param_values)
-        return r
-
-    def factor_dataclass_instance(self) -> DataclassLikeType | Invalid[DataclassLikeType]:
+    def factor_dataclass_instance_with_edited_values(self) -> DataclassLikeType | Invalid[DataclassLikeType]:
         assert self._type is not None
 
-        param_values = {}
-        for param_gui in self._parameters_with_gui:
-            param_values[param_gui.name] = param_gui.data_with_gui.value
+        param_values = self._get_edited_param_values()
+        if any(isinstance(param_value, (Error, Unspecified)) for param_value in param_values.values()):
+            raise ValueError("Cannot construct a dataclass instance with an Error or Unspecified value")
 
-        r = self.factor_dataclass_instance_from_values__handle_invalid(self._type, param_values)
-        return r
+        if not any(isinstance(param_value, Invalid) for param_value in param_values.values()):
+            instance = self._type(**param_values)
+            return instance
+        else:
+            # Handle invalid values
+            return self.factor_invalid_instance_with_edited_values()
 
     def default_value_provider(self) -> DataclassLikeType:
-        param_values = {}
+        assert self._type is not None
+
+        default_param_values = {}
         for param_gui in self._parameters_with_gui:
             param_name = param_gui.name
             if not isinstance(param_gui.default_value, Unspecified):
-                param_values[param_name] = param_gui.default_value
+                default_param_values[param_name] = param_gui.default_value
             else:
                 if not param_gui.data_with_gui.can_construct_default_value():
                     raise ValueError(f"Parameter {param_gui.name} has no default value provider in class {self._type}")
-                param_values[param_name] = param_gui.data_with_gui.construct_default_value()
+                default_param_values[param_name] = param_gui.data_with_gui.construct_default_value()
 
-        assert self._type is not None
-        default_value = self.factor_dataclass_instance_from_values__handle_invalid(self._type, param_values)
+        current_param_values = self._get_edited_param_values()
+        self._set_edited_param_values(default_param_values)
+        try:
+            default_value = self.factor_dataclass_instance_with_edited_values()
+        except ValueError as e:
+            raise ValueError(
+                f"""
+                DataclassLikeGui({self.datatype_qualified_name()}).default_value_provider()
+                raised an exception!
+                It probably returns a default value that does not pass validation! Please check your default values.
+                {e}
+            """
+            ) from e
+        self._set_edited_param_values(current_param_values)
+
         if isinstance(default_value, (Error, Invalid)):
             raise ValueError(
                 f"""
@@ -165,6 +187,16 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
                 has_unspecified = True
                 break
         return not has_unspecified
+
+    def _get_edited_param_values(self) -> dict[str, Any]:
+        param_values = {}
+        for param_gui in self._parameters_with_gui:
+            param_values[param_gui.name] = param_gui.data_with_gui.value
+        return param_values
+
+    def _set_edited_param_values(self, values: dict[str, Any]) -> None:
+        for param_gui in self._parameters_with_gui:
+            param_gui.data_with_gui.value = values[param_gui.name]
 
     class _SubItemsCollapse_Section:  # Dummy class to create a section in the IDE # noqa
         """
@@ -318,7 +350,7 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
                     changed = True
 
         if changed:
-            r = self.factor_dataclass_instance()
+            r = self.factor_dataclass_instance_with_edited_values()
             if isinstance(r, (Error, Unspecified)):
                 # This should not happen, because we have checked for Unspecified and Error values
                 return False, original_value

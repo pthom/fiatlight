@@ -36,8 +36,9 @@ _Or with `register_base_model`:_
 
 import logging
 
+
 from .dataclass_like_gui import DataclassLikeGui, DataclassLikeType
-from fiatlight.fiat_types.error_types import Error, Unspecified, Invalid, UnspecifiedValue
+from fiatlight.fiat_types.error_types import Error, Unspecified, Invalid
 from fiatlight.fiat_types.base_types import JsonDict, FiatAttributes
 from fiatlight.fiat_core import FiatToGuiException
 from typing import Type
@@ -62,9 +63,9 @@ class BaseModelGui(DataclassLikeGui[DataclassLikeType]):
         # Look for fields with default_factory
         self._initialize_fields()
 
-    def factor_dataclass_instance(self) -> DataclassLikeType | Invalid[DataclassLikeType]:
+    def factor_dataclass_instance_with_edited_values(self) -> DataclassLikeType | Invalid[DataclassLikeType]:
         try:
-            instance = super().factor_dataclass_instance()
+            instance = super().factor_dataclass_instance_with_edited_values()
             if isinstance(instance, Invalid):
                 logging.debug(
                     f"DataclassLikeGui.factor_dataclass_instance() returned an Invalid value for {self.datatype_basename()}, transmitting it"
@@ -75,7 +76,7 @@ class BaseModelGui(DataclassLikeGui[DataclassLikeType]):
             # Here we catch the Pydantic validation errors.
             logging.warning(
                 f"""
-                In BaseModelGui({self.datatype_qualified_name()})
+                factor_dataclass_instance_with_edited_values() In BaseModelGui({self.datatype_qualified_name()})
                 ValidationError:
                 {e}"""
             )
@@ -106,12 +107,20 @@ class BaseModelGui(DataclassLikeGui[DataclassLikeType]):
                     else:
                         param.data_with_gui.value = Invalid(invalid_value=error_input, error_message=error_msg)
 
-            return Invalid(
-                # Intentional typing error below:
-                # we cannot set invalid_value to an instance of BaseModel, because we cannot construct it
-                invalid_value=UnspecifiedValue,  # type: ignore
-                error_message="Pydantic validation error",
-            )
+            # Check that the default values are valid
+            try:
+                assert self._type is not None
+                _default_instance = self._type()
+            except (ValidationError, TypeError) as e:
+                raise ValidationError(
+                    f"""
+                    factor_dataclass_instance_with_edited_values() In BaseModelGui({self.datatype_qualified_name()})
+                    Failed to construct a default value: please check you default values in the model!
+                    {e}
+                  """
+                ) from e
+
+            return self.factor_invalid_instance_with_edited_values()
 
     def _initialize_fields(self) -> None:
         basemodel_type = self._type
