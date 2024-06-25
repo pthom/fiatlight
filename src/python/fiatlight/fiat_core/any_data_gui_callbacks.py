@@ -102,12 +102,13 @@ class AnyDataGuiCallbacks(Generic[DataType]):
     # or other side effects.
     on_change: Callable[[DataType], None] | None = None
 
-    # validate_value (Optional)
+    # validators (Optional)
     # List of functions that will be called when the user tries to set a value.
     # You can add to it a validation function to check if the value is valid:
-    #     It should raise a ValueError exception with a nice error message if the value is invalid.
-    #     The error message will be shown to the user.
-    validate_value: list[Callable[[DataType], DataType]]
+    #     - It should raise a ValueError exception with a nice error message if the value is invalid.
+    #       (the error message will be shown to the user)
+    #     - It should return the value if it is valid (or a modified version of it)
+    validators: list[Callable[[DataType], DataType]]
 
     # on_exit (Optional)
     # if provided, this function will be called when the application is closed.
@@ -162,4 +163,4 @@ class AnyDataGuiCallbacks(Generic[DataType]):
     # ---------------------------------------------------------------------------------------------
 
     def __init__(self) -> None:
-        self.validate_value = []
+        self.validators = []

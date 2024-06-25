@@ -84,7 +84,7 @@ fl.add_fiat_attributes(
     hello_rosetta,
     age__range=(0, 125),
     name__hint="Enter your name",
-    name__validate_value=validate_name,
+    name__validator=validate_name,
     doc_display=True,
 )
 

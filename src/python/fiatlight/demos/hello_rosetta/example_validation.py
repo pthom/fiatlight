@@ -8,7 +8,7 @@ def only_lowercase(s: str) -> str:
 
 
 def main() -> None:
-    @fl.with_fiat_attributes(s__validate_value=only_lowercase)
+    @fl.with_fiat_attributes(s__validator=only_lowercase)
     def f(s: str = "") -> str:
         return s
 

@@ -2,11 +2,11 @@
     "user_inputs": {
         "functions_nodes": {
             "f": {
-                "value": {
-                    "name": "value",
+                "odd_int": {
+                    "name": "odd_int",
                     "data": {
                         "type": "Primitive",
-                        "value": 54
+                        "value": 1
                     }
                 }
             }
@@ -22,7 +22,7 @@
                 "_internal_state_gui_expanded": true,
                 "_function_node": {
                     "inputs": {
-                        "value": {
+                        "odd_int": {
                             "cb_options": {},
                             "expanded": true
                         }
@@ -37,7 +37,7 @@
             },
             "function_node": {
                 "inputs": {
-                    "value": {
+                    "odd_int": {
                         "cb_options": {},
                         "expanded": true
                     }

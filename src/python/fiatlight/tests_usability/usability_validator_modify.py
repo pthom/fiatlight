@@ -10,10 +10,10 @@ def pick_closest_multiple_of_6(x: int) -> int:
 
 @fl.with_fiat_attributes(
     value__range=(0, 100),
-    value__validate_value=pick_closest_multiple_of_6,
+    value__validator=pick_closest_multiple_of_6,
 )
-def f(multiple_of_6: int) -> int:
-    return multiple_of_6
+def f(value: int) -> int:
+    return value
 
 
 fl.run(f)

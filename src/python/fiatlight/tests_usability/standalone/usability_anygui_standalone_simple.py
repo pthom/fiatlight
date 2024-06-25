@@ -12,7 +12,7 @@ def validate_odd_number(x: int) -> int:
     return x
 
 
-@fl.base_model_with_gui_registration(x__range=(0, 10), x__validate_value=validate_odd_number)
+@fl.base_model_with_gui_registration(x__range=(0, 10), x__validator=validate_odd_number)
 class MyParam(BaseModel):
     x: int = 3
 
@@ -33,7 +33,7 @@ def edit_value_with_gui(label: str, value_with_gui: fl.AnyDataWithGui[Any]) -> b
 def main() -> None:
     my_param_with_gui = fl.fiat_togui.to_data_with_gui(MyParam())
     my_param_with_gui._can_set_unspecified_or_default = True
-    # my_param_with_gui.add_validate_value_callback(odd_validator)
+    # my_param_with_gui.add_validator_callback(odd_validator)
 
     def gui() -> None:
         with imgui_ctx.begin_vertical("main"):

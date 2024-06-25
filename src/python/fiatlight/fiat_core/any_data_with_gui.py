@@ -28,7 +28,7 @@ class AnyDataWithGuiGenericPossibleFiatAttributes(PossibleFiatAttributes):
         super().__init__("AnyDataWithGui Generic attributes")
         self.add_explained_section("Generic attributes")
         self.add_explained_attribute(
-            name="validate_value",
+            name="validator",
             type_=object,
             explanation="Function to validate a parameter value: should raise a ValueError if invalid, or return the value (possibly modified)",
             default_value=None,
@@ -236,21 +236,21 @@ class AnyDataWithGui(Generic[DataType]):
 
         # If value is of type DataType, run validators
         # (this may change self.value to an Invalid)
-        if len(self.callbacks.validate_value) > 0:
+        if len(self.callbacks.validators) > 0:
             error_messages = []
-            for validate_value in self.callbacks.validate_value:
+            for validator in self.callbacks.validators:
                 is_valid = True
                 error_message = ""
                 try:
-                    new_value_after_validation = validate_value(new_value)
+                    new_value_after_validation = validator(new_value)
                     if new_value_after_validation is None and new_value is not None:
                         import inspect
 
-                        validator_info = inspect.getsourcelines(validate_value)
-                        file_name = inspect.getfile(validate_value)
+                        validator_info = inspect.getsourcelines(validator)
+                        file_name = inspect.getfile(validator)
                         raise RuntimeError(
                             f"""
-                            The validator "{validate_value}" for the value "{self.label}" returned None.
+                            The validator "{validator}" for the value "{self.label}" returned None.
                             A validator should either:
                                 - raise a ValueError if the value is invalid, with a nice error message.
                                   (the error message will be shown to the user)
@@ -269,10 +269,10 @@ class AnyDataWithGui(Generic[DataType]):
             if len(error_messages) > 0:
                 all_error_messages = " - ".join(error_messages)
                 self._value = Invalid(error_message=all_error_messages, invalid_value=new_value)
-
-        # Since the validators may have changed the value, we need to set it again
-        # We do it by using the _value member, not the value property, to avoid calling the validators again
-        self._value = new_value
+            else:
+                # Since the validators may have changed the value, we need to set it again
+                # We do it by using the _value member, not the value property, to avoid calling the validators again
+                self._value = new_value
 
         # Call on_change callback if everything is fine
         if not isinstance(self.value, Invalid) and self.callbacks.on_change is not None:
@@ -357,11 +357,11 @@ class AnyDataWithGui(Generic[DataType]):
             self.label = self.fiat_attributes["label"]
         if "tooltip" in self.fiat_attributes:
             self.tooltip = self.fiat_attributes["tooltip"]
-        if "validate_value" in self.fiat_attributes:
-            validate_value = self.fiat_attributes["validate_value"]
-            if not callable(validate_value):
-                raise ValueError("validate_value is not a callable for parameter output")
-            self.callbacks.validate_value.append(validate_value)
+        if "validator" in self.fiat_attributes:
+            validator = self.fiat_attributes["validator"]
+            if not callable(validator):
+                raise ValueError("validator is not a callable for parameter output")
+            self.callbacks.validators.append(validator)
 
     @staticmethod
     def propagate_label_and_tooltip(a: "AnyDataWithGui[Any]", b: "AnyDataWithGui[Any]") -> None:
@@ -823,8 +823,8 @@ class AnyDataWithGui(Generic[DataType]):
         if present_node_compatible is not None:
             self.callbacks.present_node_compatible = present_node_compatible
 
-    def add_validate_value_callback(self, cb: Callable[[DataType], DataType]) -> None:
-        self.callbacks.validate_value.append(cb)
+    def add_validator_callback(self, cb: Callable[[DataType], DataType]) -> None:
+        self.callbacks.validators.append(cb)
 
     def _Serialization_Section(self) -> None:
         """

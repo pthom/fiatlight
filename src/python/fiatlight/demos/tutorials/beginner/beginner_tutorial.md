@@ -20,3 +20,5 @@
 - Run options:
   - theme
   - notebook
+
+- Validate function inputs

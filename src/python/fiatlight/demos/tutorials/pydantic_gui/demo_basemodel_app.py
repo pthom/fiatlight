@@ -40,7 +40,7 @@ def validate_short_description(value: str) -> str:
     width__range=(0, 2000),
     height__range=(0, 2000),
     description__label="Description",
-    description__validate_value=validate_short_description,
+    description__validator=validate_short_description,
     geo_info__label="Geographic Info",
 )
 class ImageInfo(BaseModel):

@@ -54,8 +54,8 @@ def validate_lower_case(s: str) -> str:
 
 
 @fl.base_model_with_gui_registration(
-    x__validate_value=validate_even,
-    name__validate_value=validate_lower_case,
+    x__validator=validate_even,
+    name__validator=validate_lower_case,
 )
 class MyParam(BaseModel):
     x: int = 0

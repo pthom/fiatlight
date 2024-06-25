@@ -67,7 +67,7 @@ def usability_int_with_gui() -> None:
             raise ValueError("Must be even")
         return x
 
-    int_with_gui.add_validate_value_callback(even_validator)
+    int_with_gui.add_validator_callback(even_validator)
 
     def validate_short_string(s: str) -> str:
         if len(s) >= 5:
@@ -77,12 +77,12 @@ def usability_int_with_gui() -> None:
     str_with_gui = any_type_to_gui(str)
     str_with_gui._can_set_unspecified_or_default = True
     # str_with_gui.value = "Hello"
-    str_with_gui.add_validate_value_callback(validate_short_string)
+    str_with_gui.add_validator_callback(validate_short_string)
 
     my_param_with_gui = fl.fiat_togui.any_type_to_gui(MyParam)
     my_param_with_gui._can_set_unspecified_or_default = True
     # my_param_with_gui.value = MyParam()
-    my_param_with_gui.add_validate_value_callback(odd_validator)
+    my_param_with_gui.add_validator_callback(odd_validator)
 
     def gui() -> None:
         with imgui_ctx.begin_vertical("main"):
