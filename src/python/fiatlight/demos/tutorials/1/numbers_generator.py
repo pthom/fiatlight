@@ -7,7 +7,7 @@ import fiatlight as fl
 
 
 class GenerationType(str, Enum):
-    """Different types of generation"""
+    """Enumeration of the different types of generation"""
 
     RANDOM = "Random"
     INCREASING = "Increasing"
@@ -15,37 +15,31 @@ class GenerationType(str, Enum):
     HAT = "Hat"
 
 
-# Register our BaseModel, i.e. associate it with a GUI provided by Fiatlight
-# We also add fiat_attributes, which are options for the GUI, and enable to set the range of the sliders, the labels, etc.
 @fl.base_model_with_gui_registration(
-    # Options for the nb_values member
     nb_values__range=(1, 100_000),  # range of the number of values. When the range is provided, a slider is displayed
     nb_values__slider_logarithmic=True,  # use a logarithmic scale for the slider
     nb_values__label="Nb values",  # label of the widget
-    # nb_values_validator=pick_closest_multiple_of_7,  # example validator that modifies the value
-    # Options for the seed member
-    #    (The range of the seed is inferred from the pydantic Field annotation!)
+    # Note: the range of the seed is inferred from the pydantic Field annotation!
     seed__label="Random seed",
-    seed_range=(0, 100),  # range of the seed (Note, will be set by Pydantic annotation later)
-    seed__edit_type="knob",  # use a knob to edit the value
-    # Options for the generation_type member
     generation_type__label="Generation type",
 )
 class NumbersGenerationOptions(BaseModel):
     nb_values: int = 10  # number of values in the list
-
-    # seed for the random number generator
-    # `ge` and `le` signify that pydantic will validate that the value is greater or equal to 0 and less or equal to 100
-    # Fiatlight will detect their presence, and set the range of the slider accordingly!
-    seed: int = Field(default=1, ge=0, le=100)
-
+    seed: int = Field(default=1, ge=0, le=100)  # seed for the random number generator
     generation_type: GenerationType = GenerationType.RANDOM  # type of generation
 
 
+# Add Fiat attribute to the function make_random_number_list
+#   - invoke_manually=True: the function will not be called automatically
+#     (you have to click on the "Call Manually" button to call it)
+#   - invoke_always_dirty=True: the function can be called even if the input has not changed
+#     (so that we can re-launch the generation of random numbers, and the sorting algorithms)
+@fl.with_fiat_attributes(
+    invoke_manually=True,
+    invoke_always_dirty=True,
+)
 def make_random_number_list(options: NumbersGenerationOptions | None = None) -> NumbersList:
-    """Create an unordered set of numbers between 1 and a given maximum.
-    Depending on the options, the numbers can be generated in increasing, decreasing or random order.
-    """
+    """Create a random unordered set of numbers between 1 and a given maximum"""
     if options is None:
         options = NumbersGenerationOptions()
     import random

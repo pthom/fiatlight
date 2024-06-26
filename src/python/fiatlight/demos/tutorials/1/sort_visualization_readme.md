@@ -62,6 +62,4 @@ Part 6:
 
 
 
-
-
-
+/ On this website, you can find many demos, together with their code in C++ / The python API is a simple line by line transcription of the C++ API, changing CamelCase to snake_case

@@ -1,0 +1,61 @@
+{
+    "user_inputs": {
+        "functions_nodes": {
+            "make_random_number_list": {
+                "options": {
+                    "name": "options",
+                    "data": {
+                        "type": "Optional",
+                        "value": {
+                            "type": "Pydantic",
+                            "value": {
+                                "nb_values": 8163,
+                                "seed": 17,
+                                "generation_type": "Random"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "gui_options": {
+        "make_random_number_list": {
+            "function_node_with_gui": {
+                "_inputs_expanded": true,
+                "_outputs_expanded": true,
+                "_doc_expanded": false,
+                "fiat_tuning_expanded": true,
+                "_internal_state_gui_expanded": true,
+                "_function_node": {
+                    "inputs": {
+                        "options": {
+                            "cb_options": {},
+                            "expanded": true
+                        }
+                    },
+                    "outputs": {
+                        "0": {
+                            "cb_options": {},
+                            "expanded": true
+                        }
+                    }
+                }
+            },
+            "function_node": {
+                "inputs": {
+                    "options": {
+                        "cb_options": {},
+                        "expanded": true
+                    }
+                },
+                "outputs": {
+                    "0": {
+                        "cb_options": {},
+                        "expanded": true
+                    }
+                }
+            }
+        }
+    }
+}
