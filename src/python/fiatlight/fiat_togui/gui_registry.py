@@ -294,6 +294,7 @@ class GuiFactories:
     def register_typing_new_type(self, type_: Any, factory: GuiFactory[Any]) -> None:
         """Registers a factory for a type created with typing.NewType."""
         full_typename = typename_utils.fully_qualified_typename(type_)
+        base_typename = typename_utils.base_typename(type_)
 
         def matcher_function(tested_typename: Typename) -> bool:
             return full_typename == tested_typename
@@ -302,35 +303,21 @@ class GuiFactories:
         if new_type_doc.startswith("NewType creates simple"):
             raise ValueError(
                 f"""
-            Please add a docstring to the NewType {full_typename}
+            Please add a docstring to the NewType {base_typename}
             Example:
-                {full_typename}.__doc__ = "MyType is a synonym for ... (NewType)"
+                {base_typename}.__doc__ = "MyType is a synonym for ... (NewType)"
             """
             )
         self.register_matcher_factory(matcher_function, factory, type_, new_type_doc)
 
-    def register_real_type(
-        self, type_: Type[Any], factory: GuiFactory[Any], datatype_explanation: str | None = None
-    ) -> None:
-        """Registers a factory for a type."""
-        assert isinstance(type_, type)
-        full_typename = typename_utils.fully_qualified_typename(type_)
-
-        def matcher_function(tested_typename: Typename) -> bool:
-            return full_typename == tested_typename
-
-        self.register_matcher_factory(matcher_function, factory, type_, datatype_explanation)
-
-    def register_type(
-        self, type_: Type[Any], factory: GuiFactory[Any], datatype_explanation: str | None = None
-    ) -> None:
+    def register_type(self, type_: Type[Any], factory: GuiFactory[Any]) -> None:
         """Registers a factory for a type (real type or NewType)."""
         full_typename = typename_utils.fully_qualified_typename(type_)
 
         def matcher_function(tested_typename: Typename) -> bool:
             return full_typename == tested_typename
 
-        self.register_matcher_factory(matcher_function, factory, type_, datatype_explanation)
+        self.register_matcher_factory(matcher_function, factory, type_)
 
     def register_factory_name_start_with(self, typename_prefix: Typename, factory: GuiFactory[Any]) -> None:
         """Registers a factory for all types whose name starts with the given prefix."""
@@ -415,17 +402,23 @@ def gui_factories() -> GuiFactories:
 
 
 def register_type(type_: Type[Any], factory: GuiFactory[Any]) -> None:
-    """Register a type with its GUI implementation."""
+    """Register a type with its GUI implementation.
+
+    This is the main entry point to associate a type with its GUI representation inside Fiatlight.
+
+    * type_:   can be any type, including NewType, Enum, dataclass, pydantic BaseModel, etc.
+
+    * factory: most of the time simply pass class that inherits from AnyDataWithGui.
+      In more complex cases, you can pass a function that returns an instance of AnyDataWithGui.
+
+    """
     gui_factories().register_type(type_, factory)
 
 
-def register_real_type(type_: Type[Any], factory: GuiFactory[Any]) -> None:
-    """Register a real type with its GUI implementation."""
-    gui_factories().register_real_type(type_, factory)
-
-
 def register_typing_new_type(type_: Any, factory: GuiFactory[Any]) -> None:
-    """Register a type created with typing.NewType with its GUI implementation."""
+    """Register a type created with typing.NewType with its GUI implementation,
+    while making sure it is properly documented.
+    """
     gui_factories().register_typing_new_type(type_, factory)
 
 
@@ -438,7 +431,7 @@ def register_dataclass(dataclass_type: Type[DataclassLikeType], **kwargs) -> Non
         r = DataclassGui(dataclass_type, kwargs)
         return r
 
-    gui_factories().register_real_type(dataclass_type, factory)
+    gui_factories().register_type(dataclass_type, factory)
 
 
 # Decorators for registered dataclasses and pydantic models
@@ -472,7 +465,7 @@ def register_base_model(base_model_type: Type[DataclassLikeType], **fiat_attrs) 
         r = BaseModelGui(base_model_type, attrs_as_dict)
         return r
 
-    gui_factories().register_real_type(base_model_type, factory)
+    gui_factories().register_type(base_model_type, factory)
 
 
 def base_model_with_gui_registration(**kwargs) -> Callable[[Type[pydantic.BaseModel]], Type[pydantic.BaseModel]]:  # type: ignore
@@ -483,16 +476,6 @@ def base_model_with_gui_registration(**kwargs) -> Callable[[Type[pydantic.BaseMo
         return cls
 
     return actual_decorator
-
-
-def register_bound_float(type_: Type[Any], interval: FloatInterval) -> None:
-    """Registers a float type inside an interval (will use FloatWithGui)"""
-    gui_factories().register_bound_float(type_, interval)
-
-
-def register_bound_int(type_: Type[Any], interval: IntInterval) -> None:
-    """Registers an int type inside an interval (will use IntWithGui)"""
-    gui_factories().register_bound_int(type_, interval)
 
 
 # ----------------------------------------------------------------------------------------------------------------------
