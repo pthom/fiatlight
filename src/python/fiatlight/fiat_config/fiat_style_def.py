@@ -115,37 +115,86 @@ class FiatStrTruncationParams(BaseModel):
     """FiatTextTruncation: Configuration for text truncation in the GUI"""
 
     # Header line (when presenting a value as a string)
-    present_header_line: TruncationParams = TruncationParams(max_characters=40, max_lines=1)
+    present_header_line: TruncationParams = TruncationParams(max_characters=80, max_lines=1)
     # Next lines (when presenting a value as a string, and expanded)
-    present_next_lines: TruncationParams = TruncationParams(max_characters=40, max_lines=5)
+    present_next_lines: TruncationParams = TruncationParams(max_characters=80, max_lines=5)
     # When a string is presented in expanded mode inside a node
-    str_expanded_in_node: TruncationParams = TruncationParams(max_characters=40, max_lines=5)
+    str_expanded_in_node: TruncationParams = TruncationParams(max_characters=80, max_lines=5)
     # Invalid value message
-    invalid_value_message: TruncationParams = TruncationParams(max_characters=40, max_lines=1)
+    invalid_value_message: TruncationParams = TruncationParams(max_characters=80, max_lines=1)
     # Exceptions
-    exceptions: TruncationParams = TruncationParams(max_characters=70, max_lines=7)
+    exceptions: TruncationParams = TruncationParams(max_characters=80, max_lines=7)
+    # max width of the param labels, in em units
+    param_label_max_width_em: float = 10.0
+
+    @staticmethod
+    def default_in_function_graph() -> "FiatStrTruncationParams":
+        return FiatStrTruncationParams(
+            present_header_line=TruncationParams(max_characters=40, max_lines=1),
+            present_next_lines=TruncationParams(max_characters=40, max_lines=5),
+            str_expanded_in_node=TruncationParams(max_characters=40, max_lines=5),
+            invalid_value_message=TruncationParams(max_characters=60, max_lines=1),
+            exceptions=TruncationParams(max_characters=70, max_lines=7),
+            param_label_max_width_em=7.0,
+        )
+
+
+class AnyGuiWithDataSettings(BaseModel):
+    # show_collapse_button:
+    # If true, display a button that enables the user to collapse a widget
+    show_collapse_button: bool = True
+
+    # show_popup_button:
+    # If true, display a button that enables the user to open a popup
+    # for presentation or edition of a collapsible widgets
+    show_popup_button: bool = True
+
+    # show_clipboard_button:
+    # If true, display a button that enables the user to copy the content of a widget to the clipboard
+    show_clipboard_button: bool = True
+
+    @staticmethod
+    def default_in_function_graph() -> "AnyGuiWithDataSettings":
+        return AnyGuiWithDataSettings(
+            show_collapse_button=True,
+            show_popup_button=True,
+            show_clipboard_button=True,
+        )
+
+    @staticmethod
+    def default_in_standalone_app() -> "AnyGuiWithDataSettings":
+        return AnyGuiWithDataSettings(
+            show_collapse_button=True,
+            show_popup_button=False,
+            show_clipboard_button=False,
+        )
 
 
 class FiatStyle(BaseModel):
     # colors used in the GUI
     colors: Dict[FiatColorType, ColorRgbaFloat] = Field(default_factory=dict)
+    # text truncation parameters
+    str_truncation: FiatStrTruncationParams = FiatStrTruncationParams()
+
+    # indentation between header line and edition / present
+    indentation_em: float = 1.75
+
+    #
+    # Node specific settings
+    #
     # minimum width of a node, in em units
     node_minimum_width_em: float = 9.0
     # max number of elements to display in node, for list-like data
     list_maximum_elements_in_node: int = 10
 
-    # text truncation parameters
-    str_truncation: FiatStrTruncationParams = FiatStrTruncationParams()
-
-    # max width of the param labels, in em units
-    # (if too big, they will be truncated and the full name will be displayed in a tooltip)
-    param_label_max_width_em: float = 7.0
-    # indentation between header line and edition / present
-    indentation_em: float = 1.75
+    #
+    # Setting for AnyGuiWithData (which buttons to display)
+    #
+    any_gui_with_data_settings: AnyGuiWithDataSettings = AnyGuiWithDataSettings.default_in_standalone_app()
 
     def __init__(self, **data: Any):
         super().__init__(**data)
-        self.fill_with_default_style()
+        self.fill_with_default_colors_depending_on_theme()
 
     def is_dark_theme(self) -> bool:
         if ed.get_current_editor() is None:
@@ -157,9 +206,9 @@ class FiatStyle(BaseModel):
         return is_dark
 
     def update_colors_from_imgui_colors(self) -> None:
-        self.fill_with_default_style()
+        self.fill_with_default_colors_depending_on_theme()
 
-    def fill_with_default_style(self) -> None:
+    def fill_with_default_colors_depending_on_theme(self) -> None:
         is_dark_theme = self.is_dark_theme()
         colors = _STANDARD_COLORS_DARK_THEME if is_dark_theme else _STANDARD_COLORS_LIGHT_THEME
         default_colors = {

@@ -255,6 +255,8 @@ class FiatGui:
         theme: ImGuiTheme_ | None = None,
         remember_theme: bool = False,
     ) -> None:
+        self.apply_fiat_style_graph()
+
         if theme is None:
             theme = hello_imgui.ImGuiTheme_.darcula_darker
         if params is None:
@@ -292,6 +294,13 @@ class FiatGui:
 
         logo_path = demo_assets_dir() + "/logo/logo.jpg"
         self._logo_image = cv2.imread(logo_path)  # type: ignore
+
+    @staticmethod
+    def apply_fiat_style_graph() -> None:
+        from fiatlight.fiat_config.fiat_style_def import AnyGuiWithDataSettings, FiatStrTruncationParams
+
+        get_fiat_config().style.any_gui_with_data_settings = AnyGuiWithDataSettings.default_in_function_graph()
+        get_fiat_config().style.str_truncation = FiatStrTruncationParams.default_in_function_graph()
 
     # ==================================================================================================================
     #                                  Run

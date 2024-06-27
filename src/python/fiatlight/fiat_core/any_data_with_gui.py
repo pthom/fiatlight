@@ -74,7 +74,7 @@ def _draw_label_with_max_width(
     if "##" in label:
         label = label.split("##")[0]
     shortened_label = label
-    max_width_pixels = hello_imgui.em_size(get_fiat_config().style.param_label_max_width_em)
+    max_width_pixels = hello_imgui.em_size(get_fiat_config().style.str_truncation.param_label_max_width_em)
     while True:
         size = imgui.calc_text_size(shortened_label)
         if size.x < max_width_pixels:
