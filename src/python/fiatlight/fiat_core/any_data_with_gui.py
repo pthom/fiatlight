@@ -859,7 +859,14 @@ class AnyDataWithGui(Generic[DataType]):
         elif isinstance(value, pydantic.BaseModel):
             return {"type": "Pydantic", "value": value.model_dump(mode="json")}
         else:
-            logging.warning(f"Cannot serialize {value}")
+            logging.warning(
+                f"""
+            AnyDataWithGui.call_save_to_dict():
+                Cannot serialize type {typename_utils.base_typename(self._type)}
+                with value =
+                   {value}
+            """
+            )
             return {"type": "Error"}
 
     @final
