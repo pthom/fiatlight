@@ -96,7 +96,8 @@ class AnyDataGuiCallbacks(Generic[DataType]):
     #                        Events callbacks
     # ---------------------------------------------------------------------------------------------
     # on_change (Optional)
-    # if provided, this function will be called when the value changes.
+    # if provided, this function will be called when the value changes
+    # (iif the value was changed, and is not Error/Unspecified/Invalid)
     # Can be used in more advanced cases,
     # for example when `present` has an internal cache that needs to be updated,
     # or other side effects.
