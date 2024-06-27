@@ -134,6 +134,9 @@ class StrWithGui(AnyDataWithGui[str]):
         return False
 
     def on_change(self, value: str) -> None:
+        self._store_text_value_in_cache(value)
+
+    def _store_text_value_in_cache(self, value: str):
         self._input_text_in_node.text = value
         self._input_text_classic.text = value
 
@@ -175,6 +178,10 @@ class StrWithGui(AnyDataWithGui[str]):
         self.params.user_params = StrWithGuiUserParams.model_validate(json)
 
     def present(self, text_value: str) -> None:
+        # We need to change the cache: on_change is not called when the value is Invalid,
+        # but we want the user to be able to correct an invalid value)
+        self._store_text_value_in_cache(text_value)
+
         if fiatlight.is_rendering_in_fiatlight_detached_window():
             text_edit_size = ImVec2(
                 imgui.get_window_width() - hello_imgui.em_size(3), imgui.get_window_height() - hello_imgui.em_size(4)
@@ -207,6 +214,11 @@ class StrWithGui(AnyDataWithGui[str]):
     def edit(self, value: str) -> tuple[bool, str]:
         if not isinstance(value, str):
             raise ValueError(f"StrWithResizableGui expects a string, got: {type(value)}")
+
+        # We need to change the cache: on_change is not called when the value is Invalid,
+        # but we want the user to be able to correct an invalid value)
+        self._store_text_value_in_cache(value)
+
         changed: bool
         with fontawesome_6_ctx():
             is_in_node = fiatlight.is_rendering_in_node()
