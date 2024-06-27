@@ -1,0 +1,137 @@
+{
+    "user_inputs": {
+        "functions_nodes": {
+            "f_pydantic": {
+                "person": {
+                    "name": "person",
+                    "data": {
+                        "type": "Unspecified"
+                    }
+                }
+            }
+        }
+    },
+    "gui_options": {
+        "f_pydantic": {
+            "function_node_with_gui": {
+                "_inputs_expanded": true,
+                "_outputs_expanded": true,
+                "_doc_expanded": false,
+                "fiat_tuning_expanded": true,
+                "_internal_state_gui_expanded": true,
+                "_function_node": {
+                    "inputs": {
+                        "person": {
+                            "cb_options": {
+                                "name": {
+                                    "cb_options": {
+                                        "width_em": 15.0,
+                                        "size_multiline_em": [
+                                            60.0,
+                                            15.0
+                                        ],
+                                        "wrap_multiline": false,
+                                        "wrap_multiline_width": 80
+                                    },
+                                    "expanded": true
+                                },
+                                "age": {
+                                    "cb_options": {},
+                                    "expanded": true
+                                },
+                                "preferred_number": {
+                                    "cb_options": {},
+                                    "expanded": true
+                                }
+                            },
+                            "expanded": true
+                        }
+                    },
+                    "outputs": {
+                        "0": {
+                            "cb_options": {
+                                "name": {
+                                    "cb_options": {
+                                        "width_em": 15.0,
+                                        "size_multiline_em": [
+                                            60.0,
+                                            15.0
+                                        ],
+                                        "wrap_multiline": false,
+                                        "wrap_multiline_width": 80
+                                    },
+                                    "expanded": true
+                                },
+                                "age": {
+                                    "cb_options": {},
+                                    "expanded": true
+                                },
+                                "preferred_number": {
+                                    "cb_options": {},
+                                    "expanded": true
+                                }
+                            },
+                            "expanded": true
+                        }
+                    }
+                }
+            },
+            "function_node": {
+                "inputs": {
+                    "person": {
+                        "cb_options": {
+                            "name": {
+                                "cb_options": {
+                                    "width_em": 15.0,
+                                    "size_multiline_em": [
+                                        60.0,
+                                        15.0
+                                    ],
+                                    "wrap_multiline": false,
+                                    "wrap_multiline_width": 80
+                                },
+                                "expanded": true
+                            },
+                            "age": {
+                                "cb_options": {},
+                                "expanded": true
+                            },
+                            "preferred_number": {
+                                "cb_options": {},
+                                "expanded": true
+                            }
+                        },
+                        "expanded": true
+                    }
+                },
+                "outputs": {
+                    "0": {
+                        "cb_options": {
+                            "name": {
+                                "cb_options": {
+                                    "width_em": 15.0,
+                                    "size_multiline_em": [
+                                        60.0,
+                                        15.0
+                                    ],
+                                    "wrap_multiline": false,
+                                    "wrap_multiline_width": 80
+                                },
+                                "expanded": true
+                            },
+                            "age": {
+                                "cb_options": {},
+                                "expanded": true
+                            },
+                            "preferred_number": {
+                                "cb_options": {},
+                                "expanded": true
+                            }
+                        },
+                        "expanded": true
+                    }
+                }
+            }
+        }
+    }
+}

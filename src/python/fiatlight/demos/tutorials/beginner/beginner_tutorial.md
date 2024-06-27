@@ -10,6 +10,7 @@
   - inputs
   - function
   - outputs
+  - validators
 
 - Add Documentation in the graph (for function and graph)
 

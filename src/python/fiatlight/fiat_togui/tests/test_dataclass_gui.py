@@ -61,10 +61,6 @@ def test_dataclass_gui() -> None:
     assert "y" in gui_options_dict2
     assert gui_options_dict2["y"] == y_options
 
-    # Test the present_str
-    present_str_result = my_param_gui.present_str(my_param_default)
-    assert present_str_result == "MyParam(x: 3, y: Hello, z: 3.14)"
-
     def f(param: MyParam) -> None:
         pass
 

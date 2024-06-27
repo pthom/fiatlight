@@ -136,7 +136,7 @@ class StrWithGui(AnyDataWithGui[str]):
     def on_change(self, value: str) -> None:
         self._store_text_value_in_cache(value)
 
-    def _store_text_value_in_cache(self, value: str):
+    def _store_text_value_in_cache(self, value: str) -> None:
         self._input_text_in_node.text = value
         self._input_text_classic.text = value
 
