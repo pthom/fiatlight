@@ -43,7 +43,6 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
             self.on_fiat_attributes_changed(fiat_attributes)
 
     def fill_callbacks(self) -> None:
-        self.callbacks.present_str = self.present_str
         self.callbacks.present = self.present
         self.callbacks.edit = self.edit
 
@@ -308,25 +307,6 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
         #            GUI
         # ------------------------------------------------------------------------------------------------------------------
         """
-
-    def present_str(self, value: DataclassLikeType) -> str:
-        strs: dict[str, str] = {}
-        for param_gui in self._parameters_with_gui:
-            param_name = param_gui.name
-            if not hasattr(value, param_name):
-                raise ValueError(
-                    f"""
-                Object does not have attribute {param_name}
-                in class {self.datatype_qualified_name()}
-            """
-                )
-            param_value = value.__getattribute__(param_name)
-            assert not isinstance(param_value, (Error, Unspecified))
-            param_str = param_gui.data_with_gui.datatype_value_to_str(param_value)
-            strs[param_gui.name] = param_str
-        joined_strs = ", ".join(f"{k}: {v}" for k, v in strs.items())
-        r = f"{self.datatype_basename()}({joined_strs})"
-        return r
 
     def present(self, _: DataclassLikeType) -> None:
         # the parameter is not used, because we have the data in self._parameters_with_gui
