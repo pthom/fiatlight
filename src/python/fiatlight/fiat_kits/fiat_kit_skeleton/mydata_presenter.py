@@ -7,11 +7,14 @@ class MydataPossibleFiatAttributes(PossibleFiatAttributes):
     def __init__(self) -> None:
         super().__init__("DataFrameWithGui")
 
+        self.add_explained_attribute(name="width", type_=int, default_value=100, explanation="Width of the table")
+
 
 _MYDATA_POSSIBLE_FIAT_ATTRIBUTES = MydataPossibleFiatAttributes()
 
 
 class MydataPresenterParams(BaseModel):
+    # Parameters for the MydataPresenter
     width: int = 100
 
 
