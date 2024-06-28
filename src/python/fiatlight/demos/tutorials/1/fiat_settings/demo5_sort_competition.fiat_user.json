@@ -9,7 +9,7 @@
                         "value": {
                             "type": "Pydantic",
                             "value": {
-                                "nb_values": 141,
+                                "nb_values": 167,
                                 "seed": 46,
                                 "generation_type": "Random"
                             }

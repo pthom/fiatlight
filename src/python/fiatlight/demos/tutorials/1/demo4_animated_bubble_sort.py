@@ -33,7 +33,7 @@ def draw_bars(numbers: NumbersList) -> None:
 
 
 class NumbersListWithLatency_Gui(fl.AnyDataWithGui[NumbersList]):
-    """NumbersListWithLatency_Gui is used to present a NumbersList object.
+    """NumbersListWithGui is used to present a NumbersList object.
     It does so by inheriting from AnyDataWithGui and setting the present callback to draw_bars.
     """
 
@@ -68,7 +68,7 @@ def bubble_sort_wrapper(numbers: NumbersList) -> float:
     # - Inside this dictionary we can store:
     #   - either raw values (int, float, string, etc.)
     #   - or instance of classes that inherit from AnyDataWithGui
-    # Step 1: create an instance of NumbersListWithLatency_Gui
+    # Step 1: create an instance of NumbersListWithGui
     current_status_gui = NumbersListWithLatency_Gui()
     # The GUI will show the numbers being sorted.
     # (and they will be updated in the background by the sorting function)
@@ -89,7 +89,7 @@ def bubble_sort_wrapper(numbers: NumbersList) -> float:
     return time.time() - start_time
 
 
-# Here we register the type NumbersList with its GUI NumbersListWithLatency_Gui
+# Here we register the type NumbersList with its GUI NumbersListWithGui
 fl.register_type(NumbersList, NumbersListWithLatency_Gui)
 
 # Disable idling, to make animations smoother

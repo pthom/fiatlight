@@ -1,9 +1,9 @@
 from .number_list import NumbersList
 from .sort_algorithms import set_aborting
-from pydantic import BaseModel, Field
 from enum import Enum
 import numpy as np
 import fiatlight as fl
+from pydantic import BaseModel, Field
 
 
 class GenerationType(str, Enum):
@@ -22,11 +22,8 @@ class GenerationType(str, Enum):
     nb_values__range=(1, 100_000),  # range of the number of values. When the range is provided, a slider is displayed
     nb_values__slider_logarithmic=True,  # use a logarithmic scale for the slider
     nb_values__label="Nb values",  # label of the widget
-    # nb_values_validator=pick_closest_multiple_of_7,  # example validator that modifies the value
     # Options for the seed member
-    #    (The range of the seed is inferred from the pydantic Field annotation!)
     seed__label="Random seed",
-    seed_range=(0, 100),  # range of the seed (Note, will be set by Pydantic annotation later)
     seed__edit_type="knob",  # use a knob to edit the value
     # Options for the generation_type member
     generation_type__label="Generation type",
