@@ -3,7 +3,7 @@ from fiatlight.fiat_core.possible_fiat_attributes import PossibleFiatAttributes
 
 
 class MydataPossibleFiatAttributes(PossibleFiatAttributes):
-    # Here we will add all the possible custom attributes for presentation and other options.
+    # Here we will add all the possible fiat attributes for presentation and other options.
     def __init__(self) -> None:
         super().__init__("DataFrameWithGui")
 

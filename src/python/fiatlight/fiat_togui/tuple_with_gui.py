@@ -1,3 +1,5 @@
+"""TupleWithGui: adds a GUI to a tuple of elements, each with its own GUI"""
+
 from fiatlight.fiat_config import get_fiat_config
 from fiatlight.fiat_core.any_data_with_gui import GuiHeaderLineParams
 from fiatlight.fiat_types import Unspecified, Error, JsonDict

@@ -7,6 +7,8 @@ from types import NoneType
 
 
 class OptionalWithGui(AnyDataWithGui[DataType | None]):
+    """Transform a GUI for a DataType into a GUI for an Optional[DataType]"""
+
     inner_gui: AnyDataWithGui[DataType]
 
     def __init__(self, inner_gui: AnyDataWithGui[DataType]) -> None:
