@@ -55,9 +55,9 @@ def validate_name(name: str) -> str:
 
 def validate_preferred_number(number: int) -> int:
     """An example validator that modifies the user input.
-    Here, this validator will force the number to be even
+    Here, this validator will force the number to be a multiple of 5
     """
-    return int(number / 2) * 2
+    return int(number / 5) * 5
 
 
 # Option 1: add the @fl.base_model_with_gui_registration decorator to the model
@@ -67,7 +67,8 @@ def validate_preferred_number(number: int) -> int:
     name__hint="Name (start with a capital letter)",
     age__label="Age",
     # age__range=(0, 100),   # We do not need to specify the range here, as it is already specified in the model
-    preferred_number__range=(0, 20),
+    preferred_number__range=(0, 30),
+    preferred_number__label="Pref number",
     # Validators
     # name__validator=validate_name,  # We may choose to use the pydantic field_validator decorator instead
     preferred_number__validator=validate_preferred_number,  # or we use a fiatlight validator (which will run in the GUI only)
@@ -87,17 +88,18 @@ class PersonPydantic(BaseModel):
 
 # Option 2: call fl.register_base_model with the model as argument
 # ----------------------------------------------------------------
-fl.register_base_model(
-    PersonPydantic,
-    name__label="Name",
-    name__hint="Name (start with a capital letter)",
-    age__label="Age",
-    # age__range=(0, 100),   # We do not need to specify the range here, as it is already specified in the model
-    preferred_number__range=(0, 20),
-    # Validators
-    # name__validator=validate_name,  # We may choose to use the pydantic field_validator decorator instead
-    preferred_number__validator=validate_preferred_number,  # or we use a fiatlight validator (which will run in the GUI only)
-)
+# fl.register_base_model(
+#     PersonPydantic,
+#     name__label="Name",
+#     name__hint="Name (start with a capital letter)",
+#     age__label="Age",
+#     # age__range=(0, 100),   # We do not need to specify the range here, as it is already specified in the model
+#     preferred_number__range=(0, 30),
+#     preferred_number__label = "Pref number",
+#     # Validators
+#     # name__validator=validate_name,  # We may choose to use the pydantic field_validator decorator instead
+#     preferred_number__validator=validate_preferred_number,  # or we use a fiatlight validator (which will run in the GUI only)
+# )
 
 
 # Display a function that uses the model as an input and output:

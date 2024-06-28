@@ -5,7 +5,12 @@
                 "person": {
                     "name": "person",
                     "data": {
-                        "type": "Unspecified"
+                        "type": "Pydantic",
+                        "value": {
+                            "name": "A",
+                            "age": 22,
+                            "preferred_number": 0
+                        }
                     }
                 }
             }

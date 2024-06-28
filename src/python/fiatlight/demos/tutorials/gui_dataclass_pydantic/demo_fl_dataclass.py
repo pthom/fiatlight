@@ -46,7 +46,6 @@ In the example below we query the available attributes for a string.
 """
 
 import fiatlight as fl
-from dataclasses import dataclass
 
 
 def validate_name(name: str) -> str:
@@ -60,20 +59,21 @@ def validate_name(name: str) -> str:
 
 def validate_preferred_number(number: int) -> int:
     """An example validator that modifies the user input.
-    Here, this validator will force the number to be even
+    Here, this validator will force the number to be a multiple of 5
     """
-    return int(number / 2) * 2
+    return int(number / 5) * 5
 
 
 # Option 1: replace the @dataclass decorator with @fl.dataclass_with_gui_registration
 # ------------------------------------------------------------------------------------
-@dataclass
-@fl.dataclass_with_gui_registration(
+# @dataclass
+@fl.dataclass_with_gui_registration(  # This also applies the @dataclass decorator
     name__label="Name",
     name__hint="Name (start with a capital letter)",
     age__label="Age",
     age__range=(0, 100),
-    preferred_number__range=(0, 20),
+    preferred_number__range=(0, 30),
+    preferred_number__label="Pref number",
     # Validators
     name__validator=validate_name,
     preferred_number__validator=validate_preferred_number,
@@ -89,16 +89,18 @@ class PersonDataclass:
 
 # Option 2: call fl.register_dataclass with the dataclass as argument
 # --------------------------------------------------------------------
-fl.register_dataclass(
-    PersonDataclass,
-    name__label="Name",
-    name__hint="Name (start with a capital letter)",
-    age__label="Age",
-    age__range=(0, 100),
-    # Validators
-    name__validator=validate_name,
-    preferred_number__validator=validate_preferred_number,
-)
+# fl.register_dataclass(
+#     PersonDataclass,
+#     name__label="Name",
+#     name__hint="Name (start with a capital letter)",
+#     age__label="Age",
+#     age__range=(0, 100),
+#     preferred_number__range=(0, 30),
+#     preferred_number__label = "Pref number",
+#     # Validators
+#     name__validator=validate_name,
+#     preferred_number__validator=validate_preferred_number,
+# )
 
 
 # Display a function that uses the dataclass as an input and output:
