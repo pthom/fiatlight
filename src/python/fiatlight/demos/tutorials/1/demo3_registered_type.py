@@ -29,9 +29,8 @@ def draw_bars(numbers: NumbersList) -> None:
             implot.end_plot()
 
 
-# 1. Show AnyDataWithGui
 class NumbersListWithLatency_Gui(fl.AnyDataWithGui[NumbersList]):
-    """NumbersListWithLatency_Gui is used to present a NumbersList object.
+    """NumbersListWithGui is used to present a NumbersList object.
     It does so by inheriting from AnyDataWithGui and setting the present callback to draw_bars.
     """
 
@@ -41,8 +40,7 @@ class NumbersListWithLatency_Gui(fl.AnyDataWithGui[NumbersList]):
         self.callbacks.present = draw_bars
 
 
-# 2. Show how to register a type
-# Here we register the type NumbersList with its GUI NumbersListWithLatency_Gui
+# Here we register the type NumbersList with its GUI NumbersListWithGui
 fl.register_type(NumbersList, NumbersListWithLatency_Gui)
 # Simply run the function with Fiatlight
 fl.run(make_random_number_list)

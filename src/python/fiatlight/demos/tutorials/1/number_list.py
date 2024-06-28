@@ -3,7 +3,7 @@ from numpy.typing import NDArray
 import time
 
 
-LATENCY = 0.0001
+LATENCY = 0.000005
 
 
 def set_latency(latency: float) -> None:

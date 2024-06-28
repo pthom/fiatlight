@@ -20,15 +20,9 @@ The visualizations will show various sorting algorithms. You can see their statu
 Their output is the total execution time after the sorting is finished.
 
 """
-from typing import Callable
 
 import fiatlight as fl
-from imgui_bundle import implot, hello_imgui, imgui_ctx, imgui, immapp, imgui_md, imspinner, ImVec2
-from fiatlight.demos.tutorials.sort_competition.number_list import NumbersList
-from fiatlight.demos.tutorials.sort_competition.numbers_generator import (
-    make_random_number_list,
-    NumbersGenerationOptions,
-)
+from fiatlight.demos.tutorials.sort_competition.numbers_generator import make_random_number_list
 from fiatlight.demos.tutorials.sort_competition.sort_algorithms import (
     bubble_sort,
     selection_sort,
@@ -37,50 +31,47 @@ from fiatlight.demos.tutorials.sort_competition.sort_algorithms import (
     quick_sort,
     quick_sort_median_of_three,
 )
+from fiatlight.demos.tutorials.sort_competition.number_list import NumbersList
+from imgui_bundle import hello_imgui, imgui_ctx, implot, imgui
 import time
-from threading import Thread
-from dataclasses import dataclass
+from typing import Callable
 
 
 def draw_bars(numbers: NumbersList) -> None:
     """Draw a bar chart of the numbers"""
 
     # The ID passed to implot.begin_plot should be unique, or use ##
-    # As an alternative, you can use imgui_ctx.push_obj_id
+    # As an alternative, we can use imgui_ctx.push_obj_id to change the ImGui ID context before calling begin_plot
     with imgui_ctx.push_obj_id(numbers):
-        # We will specify the block size
-        # In order to have a size which is independent of the screen DPI scaling,
-        # We will specify the size in EM units. 1 EM unit is the height of the font.
-        plot_size = hello_imgui.em_to_vec2(22, 15)
+        # In order to have a plot size which is independent of the screen DPI scaling,
+        # we will specify its size in EM units. 1 EM unit is the height of the font.
+        plot_size = hello_imgui.em_to_vec2(25, 15)
 
         # Draw our plot (only if begin_plot returns True)
-        # 3.1 Show definition of begin_plot:
-        #    - the return value of begin_plot is a boolean
-        #    - the title should be unique or (use ## or push_id)
-        if implot.begin_plot("Numbers", plot_size):
+        # The title should be unique!!! Solutions:
+        #    - either use a title like "Label##SomeHiddenId"
+        #    - or imgui_ctx.push_obj_id(some_object))
+        if implot.begin_plot(title_id="Numbers", size=plot_size):
             # With those two lines we ensure that the plotted values will always be fully visible,
             # even if  their range changes after the initial drawing.
             axis_flags = implot.AxisFlags_.auto_fit.value
-            implot.setup_axes("x", "y", axis_flags, axis_flags)
+            implot.setup_axes(x_label="x", y_label="y", x_flags=axis_flags, y_flags=axis_flags)
+
             # Draw the set of numbers as a bar chart
-            implot.plot_bars("", numbers.values)
+            implot.plot_bars(label_id="", values=numbers.values)
+
             # Don't forget to call end_plot (iif begin_plot returned True)
             implot.end_plot()
 
 
 class NumbersListWithGui(fl.AnyDataWithGui[NumbersList]):
-    """NumbersListWithGui is used to present a NumbersList object.
-    It does so by inheriting from AnyDataWithGui and setting the present callback to draw_bars.
+    """NumbersListWithGui is used to present a NumbersList object. It does so by inheriting from AnyDataWithGui.
+    In this case, we only want to change how this data is presented, and thus it is enough to set the present callback.
     """
 
     def __init__(self) -> None:
         super().__init__(NumbersList)
-        # Show how to set the present callback
         self.callbacks.present = draw_bars
-
-
-# Here we register the type NumbersList with its GUI NumbersListWithGui
-fl.register_type(NumbersList, NumbersListWithGui)
 
 
 def make_sort_function_visualizer(
@@ -94,21 +85,18 @@ def make_sort_function_visualizer(
     # We use the decorator with_fiat_attributes to add an attribute "invoke_async=True" to the function
     # With this attribute, the function will be called asynchronously, so that the GUI can be updated
     # while the function is running
-    @fl.with_fiat_attributes(
-        invoke_async=True,
-        label=sort_function.__name__ + " - view",
-        doc_display=True,
-    )
+    @fl.with_fiat_attributes(invoke_async=True)
     def sort_wrapper(numbers: NumbersList) -> float:
+        """Wrapper function of the sort function that visually track the current status and returns the elapsed time"""
+
         # Start a timer, to measure the elapsed time
         start_time = time.time()
 
-        # We need to make a copy of the numbers because we will be modifying them,
-        # and we do not want to modify the original set of numbers
+        # We make a copy of the numbers because we do not want to modify the original set of numbers
         numbers_being_sorted = numbers.copy()
 
         # Add the current status to the fiat_tuning dictionary:
-        # we simply add a static attribute `fiat_tuning` to the function.
+        # we simply add an attribute `fiat_tuning` to the function.
         # Notes:
         # - At each frame, Fiatlight will display the content of this dictionary.
         #   (even if the function is running asynchronously!)
@@ -117,15 +105,10 @@ def make_sort_function_visualizer(
         #   - or instance of classes that inherit from AnyDataWithGui
         # Step 1: create an instance of NumbersListWithGui
         current_status_gui = NumbersListWithGui()
-        # The GUI will show the numbers being sorted.
-        # (and they will be updated in the background by the sorting function)
+        # The GUI will show the numbers being sorted (and they will be updated in the background)
         current_status_gui.value = numbers_being_sorted
         # Step 2: add the instance to the fiat_tuning dictionary
-        # (we need to add type: ignore because the fiat_tuning attribute
-        # is not expected by type checkers such as mypy)
-        sort_wrapper.fiat_tuning = {  # type: ignore
-            "sort_status": current_status_gui
-        }
+        fl.add_fiat_attributes(sort_wrapper, fiat_tuning={"sort_status": current_status_gui})
 
         # Finally call our sorting function
         # (the sorting function will modify the numbers_being_sorted in place,
@@ -135,10 +118,10 @@ def make_sort_function_visualizer(
         # Return the elapsed time
         return time.time() - start_time
 
-    sort_function_visualizer = sort_wrapper
-    sort_function_visualizer.__name__ = sort_function.__name__ + " visualization"
-    sort_function_visualizer.__doc__ = sort_function.__doc__
-    return sort_function_visualizer
+    # Preserve the original function name and docstring, so that they can be displayed in the functions graph
+    sort_wrapper.__doc__ = sort_function.__doc__
+    sort_wrapper.__name__ = sort_function.__name__ + " visualization"
+    return sort_wrapper
 
 
 def gui_latency() -> None:
@@ -146,12 +129,13 @@ def gui_latency() -> None:
     from fiatlight.demos.tutorials.sort_competition.number_list import set_latency, get_latency
 
     latency_us = get_latency() * 1000000.0
+
     # Edit the latency via a slider
     # First we need to set its width because sliders will occupy the full window width by default
     # (the window width is much larger than the function node)
     # We will specify this within EM units. 1 EM unit is the height of the font.
     imgui.set_next_item_width(hello_imgui.em_size(10))
-    changed, latency_ms = imgui.slider_float("Latency (us)", latency_us, 0.0, 100.0)
+    changed, latency_ms = imgui.slider_float("Latency (us)", latency_us, 0.0, 50.0)
 
     if changed:
         set_latency(latency_ms / 1000000)
@@ -167,9 +151,23 @@ def gui_latency() -> None:
             set_aborting(False)
 
 
-# The code before this is identical to the "Function Graph" code in demo5_sort_competition.py
+# ---------                   Main part of the script                   --------- #
+
+
+# Here we register the type NumbersList with its GUI
+fl.register_type(NumbersList, NumbersListWithGui)
+
+
+# The code before this is identical to the "Function Graph" code in tutorial_sort_finished_graph.py
+# (except for the docstring which is a bit different)
 # ======================================================================================================================
 # The code below is new and is used to create a standalone application
+# (The additional imports are voluntarily placed here to make the diff easier to read:
+#    noqa: E402 is used to ignore the "Module level import not at top of file" error)
+from fiatlight.demos.tutorials.sort_competition.numbers_generator import NumbersGenerationOptions  # noqa: E402
+from dataclasses import dataclass  # noqa: E402
+from threading import Thread  # noqa: E402
+from imgui_bundle import imspinner, imgui_md, immapp  # noqa: E402
 
 
 @dataclass
@@ -192,6 +190,8 @@ class AppGui:
 
     # Current numbers list
     current_numbers_list: NumbersList
+
+    show_theme_window: bool = False
 
     def __init__(self) -> None:
         self.numbers_generation_options_gui = fl.to_data_with_gui(NumbersGenerationOptions())
@@ -236,43 +236,18 @@ class AppGui:
         for tv_ in self.threaded_visualizers:
             launch_thread(tv_)
 
-    def gui_commands(self) -> None:
-        # Shows
-        # - the GUI of the NumbersGenerationOptions (this uses the GUI generated by Fiatlight)
-        # - a button to generate new numbers and launch the sorting algorithms
-
-        with imgui_ctx.begin_group():
-            self.gui_latency()
-
-        imgui.same_line()
-
-        with imgui_ctx.begin_group():
-            imgui_md.render("# Numbers generation options")
-            _changed = self.numbers_generation_options_gui.gui_edit()
-            is_running = self._is_any_sort_thread_running()
-            if is_running:
-                imgui.begin_disabled(True)
-            if imgui.button("Generate new numbers and sort them"):
-                self._launch_sort_threads()
-            if is_running:
-                imgui.end_disabled()
-
-        imgui.same_line()
-
-        with imgui_ctx.begin_group():
-            imgui.text("Generated numbers")
-            draw_bars(self.current_numbers_list)
-
-    @staticmethod
-    def gui_latency() -> None:
-        # Shows the latency GUI
-        imgui_md.render("# Latency")
-        gui_latency()
+    def gui_numbers_generation(self) -> None:
+        _changed = self.numbers_generation_options_gui.gui_edit()
+        is_running = self._is_any_sort_thread_running()
+        if is_running:
+            imgui.begin_disabled(True)
+        if imgui.button("Generate new numbers and sort them"):
+            self._launch_sort_threads()
+        if is_running:
+            imgui.end_disabled()
 
     def gui_visualizations(self) -> None:
         # Shows the visualization of the sorting algorithms + their status and duration
-        imgui_md.render("# Visualization")
-
         for i, threaded_visualizer in enumerate(self.threaded_visualizers):
             # We place each visualizer in a group, so that the call to imgui.same_line()
             # after this will align with the whole group
@@ -302,30 +277,46 @@ class AppGui:
             if i % 3 != 2:
                 imgui.same_line()
 
-    @staticmethod
-    def gui_doc() -> None:
-        # Render the documentation as Markdown
-        imgui.begin_child("doc", ImVec2(200, 0))
-        imgui_md.render(__doc__)
-        imgui.end_child()
-
-    def gui(self) -> None:
+    def layout_guis(self) -> None:
         # Full GUI function of the application: it does the layout by using groups
         # We use begin_group() to create "groups" that we can then align horizontally (using same_line())
 
-        # Left columns: doc
+        # Left column: doc + theme window
         with imgui_ctx.begin_group():
-            self.gui_doc()
+            # Show doc in a child window, to force the width
+            with imgui_ctx.begin_child("doc", hello_imgui.em_to_vec2(15, 50)):
+                imgui_md.render(__doc__)
+            # Button to the theme window
+            _, self.show_theme_window = imgui.checkbox("Show Theme Window", self.show_theme_window)
+            if self.show_theme_window:
+                hello_imgui.show_theme_tweak_gui_window()
 
+        # We call same_line() before showing the right column
+        # (ImGui adds a new line by default)
         imgui.same_line()
 
-        # Right columns: commands and visualization
+        # Right column: commands and visualization
         with imgui_ctx.begin_group():
-            self.gui_commands()
+            # Commands: we have three blocks on the same line
+            #           (see calls to imgui.same_line() below)
+            with imgui_ctx.begin_group():
+                imgui_md.render("# Latency")
+                gui_latency()
+            imgui.same_line()
+            with imgui_ctx.begin_group():
+                imgui_md.render("# Numbers generation options")
+                self.gui_numbers_generation()
+            imgui.same_line()
+            with imgui_ctx.begin_group():
+                imgui.text("Generated numbers")
+                draw_bars(self.current_numbers_list)
+
+            # Visualizations: we have a single block
+            imgui_md.render("# Visualization")
             self.gui_visualizations()
 
 
-def main_using_standard_layout() -> None:
+def main() -> None:
     # Main function of the application
     # 1. We create an instance of AppGui and we run the application
     app_gui = AppGui()
@@ -340,85 +331,13 @@ def main_using_standard_layout() -> None:
     runner_params.app_window_params.window_title = "Sort Competition"
     runner_params.app_window_params.window_geometry.size = (1600, 900)
     runner_params.fps_idling.enable_idling = False
+    runner_params.imgui_window_params.tweaked_theme.theme = hello_imgui.ImGuiTheme_.material_flat
     # 2.c Set the GUI function
-    runner_params.callbacks.show_gui = app_gui.gui
+    runner_params.callbacks.show_gui = app_gui.layout_guis
 
     # 2.d Run the application
     immapp.run(runner_params, addons)
 
 
-def main_using_dockable_windows() -> None:
-    # An alternative version where we use dockable windows
-
-    # 1. We create an instance of AppGui and we run the application
-    app_gui = AppGui()
-
-    # 2. We run the application using HelloImGui and ImmApp
-    # 2.a Set the AddOns we will be using
-    addons = immapp.AddOnsParams()
-    addons.with_implot = True
-    addons.with_markdown = True
-    # 2.b Set the Hello ImGui runner params
-    runner_params = immapp.RunnerParams()
-    runner_params.app_window_params.window_title = "Sort Competition"
-    runner_params.app_window_params.window_geometry.size = (1600, 1100)
-    runner_params.fps_idling.enable_idling = False
-
-    # 3. Set the dockable windows
-    runner_params.imgui_window_params.default_imgui_window_type = (
-        hello_imgui.DefaultImGuiWindowType.provide_full_screen_dock_space
-    )
-    # We want this to create this Dockable spaces:
-    #    ___________________________________________
-    #    |         |                                |  # The Dockable Space "MainDockSpace" is provided automatically,
-    #    | Doc     |    Commands                    |  # The Commands will be place here
-    #    |         |    (aka "MainDockSpace")       |  # after it was split into three parts with the code below.
-    #    |         |________________________________|
-    #    |         |                                |
-    #    |         |     Visualizations             |
-    #    |         |                                |
-    #    --------------------------------------------
-    split_main_doc = hello_imgui.DockingSplit()
-    split_main_doc.initial_dock = "MainDockSpace"
-    split_main_doc.new_dock = "Doc"
-    split_main_doc.direction = imgui.Dir_.left
-    split_main_doc.ratio = 0.2
-
-    split_commands_and_visualization = hello_imgui.DockingSplit()
-    split_commands_and_visualization.initial_dock = "MainDockSpace"
-    split_commands_and_visualization.new_dock = "Visualizations"
-    split_commands_and_visualization.direction = imgui.Dir_.down
-    split_commands_and_visualization.ratio = 0.8
-
-    runner_params.docking_params.docking_splits = [split_main_doc, split_commands_and_visualization]
-
-    # 4. show more elements
-    runner_params.imgui_window_params.show_menu_bar = True
-    runner_params.imgui_window_params.show_status_bar = True
-
-    # D. Dockable windows content
-    # * Doc window
-    doc_window = hello_imgui.DockableWindow()
-    doc_window.label = "Doc"
-    doc_window.dock_space_name = "Doc"
-    doc_window.gui_function = app_gui.gui_doc
-    # * Commands window
-    commands_window = hello_imgui.DockableWindow()
-    commands_window.label = "Commands"
-    commands_window.dock_space_name = "MainDockSpace"
-    commands_window.gui_function = app_gui.gui_commands
-    # * Visualizations window
-    visualizations_window = hello_imgui.DockableWindow()
-    visualizations_window.label = "Visualizations"
-    visualizations_window.dock_space_name = "Visualizations"
-    visualizations_window.gui_function = app_gui.gui_visualizations
-
-    runner_params.docking_params.dockable_windows = [doc_window, commands_window, visualizations_window]
-
-    # 2.c Run the application
-    immapp.run(runner_params, addons)
-
-
 if __name__ == "__main__":
-    # main_using_standard_layout()
-    main_using_dockable_windows()
+    main()

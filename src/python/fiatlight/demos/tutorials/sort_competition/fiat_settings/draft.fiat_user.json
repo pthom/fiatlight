@@ -9,15 +9,14 @@
                         "value": {
                             "type": "Pydantic",
                             "value": {
-                                "nb_values": 58,
-                                "seed": 0,
+                                "nb_values": 160,
+                                "seed": 1,
                                 "generation_type": "Random"
                             }
                         }
                     }
                 }
-            },
-            "bubble_sort_wrapper": {}
+            }
         }
     },
     "gui_options": {
@@ -25,7 +24,7 @@
             "function_node_with_gui": {
                 "_inputs_expanded": true,
                 "_outputs_expanded": true,
-                "_doc_expanded": true,
+                "_doc_expanded": false,
                 "fiat_tuning_expanded": true,
                 "_internal_state_gui_expanded": true,
                 "_function_node": {
@@ -54,43 +53,6 @@
                     "0": {
                         "cb_options": {},
                         "expanded": true
-                    }
-                }
-            }
-        },
-        "bubble_sort_wrapper": {
-            "function_node_with_gui": {
-                "_inputs_expanded": true,
-                "_outputs_expanded": true,
-                "_doc_expanded": true,
-                "fiat_tuning_expanded": true,
-                "_internal_state_gui_expanded": true,
-                "_function_node": {
-                    "inputs": {
-                        "numbers": {
-                            "cb_options": {},
-                            "expanded": false
-                        }
-                    },
-                    "outputs": {
-                        "0": {
-                            "cb_options": {},
-                            "expanded": false
-                        }
-                    }
-                }
-            },
-            "function_node": {
-                "inputs": {
-                    "numbers": {
-                        "cb_options": {},
-                        "expanded": false
-                    }
-                },
-                "outputs": {
-                    "0": {
-                        "cb_options": {},
-                        "expanded": false
                     }
                 }
             }

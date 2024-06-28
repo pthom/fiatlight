@@ -83,19 +83,17 @@ class _SdxlTurboWrapper:
 _stable_diffusion_xl_wrapper: _SdxlTurboWrapper | None = None
 
 
-@with_fiat_attributes(seed__range=(0, 1000))
+@with_fiat_attributes(seed__range=(0, 1000), label="Generate Image")  # --->
 def invoke_sdxl_turbo(
     prompt: Prompt,
     seed: int = 0,
-    # num_inference_steps: int = 1,
-    # guidance_scale: float = 0.0,
 ) -> ImageU8:
-    """Generates an image using the Stable Diffusion XL model.
+    """Generates an image using the Stable Diffusion XL model
+
+    * **prompt:** Prompt for the image generation. You can use a prompt like "A beautiful sunset over the ocean."
+    * **seed:** Seed for the random number generator. Each seed will generate a different image, for the same prompt.
 
     If you are looking for inspiration with your prompts, look at Lexica: https://lexica.art
-
-    :param prompt: Prompt for the image generation. You can use a prompt like "A beautiful sunset over the ocean."
-    :param seed: Seed for the random number generator. Each seed will generate a different image, for the same prompt.
     """
     global _stable_diffusion_xl_wrapper
     if _stable_diffusion_xl_wrapper is None:

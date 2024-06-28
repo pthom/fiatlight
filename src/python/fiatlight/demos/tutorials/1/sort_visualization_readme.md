@@ -106,12 +106,37 @@ Part 6:
 
 ======================================================================================
 
-- Add info / dataclass gui generation
-- Add info / attributes for a function
+Quick-look at the architecture of Fiatlight from 10,000 feet
+============================================================
+
+First, let's take a quick look at the class diagram architecture for Fiatlight
+------------------------------------------------------------------------------
+
+- **AnyDataWithGui**: This class can wrap any data type into a GUI, providing a lot of customizable callbacks.
+
+- **FunctionWithGui**: This class wraps a function into a GUI. It contains several instances of AnyDataWithGui, one for each input and output of the function.
+
+- **FunctionGraph**: This represents a graph of functions. It contains multiple instances of FunctionWithGui, one for each function in the graph, with the corresponding connections between them.
+
+- **fiat_togui module**: This module provides functions to register data types, associating them with a GUI. It contains a singleton where all the registered types are stored. The "register_type" function is the main entry point to associate a new data type with its GUI.
+
+Primitive types - str, int, float, etc. - and enums are already registered by default. If a type is registered, its optional variant (optional[Type]) is also registered by default. As we saw before, dataclasses, Pydantic BaseModel, and tuple types are also handled nicely, provided their members are registered.
+
+Let's now take a look at AnyDataWithGui and its callbacks
+----------------------------------------------------------
+
+- **AnyDataWithGui**: Handles a value, which is an instance of a given DataType. However, it can also handle instances of Unspecified (if the user did not enter any value), Invalid[DataType] (if validation failed), or Error.
+
+- **AnyDataGuiCallbacks**: Provides numerous customizable callbacks. The most important ones are:
+  - **present**: Presents a value with a nice GUI.
+  - **edit**: Edits a value with a nice GUI, returning a bool indicating if the value was changed, along with the new value.
+
+Let's now look at the fiat_kits module and the kit skeleton
+------------------------------------------------------------
+
+fiat_kits provides several submodules adapted to different domains. For example, fiat_dataframe provides a GUI for pandas DataFrame, and fiat_implot provides a GUI for Matplotlib figures, etc.
+
+**fiat_kit_skeleton** is a template to helps in the creation of new kits. In this skeleton, MyData is a simple example of a custom data type to be registered into Fiatlight. MyDataWithGui is A descendant of AnyDataWithGui that provides the GUI for MyData. It can implement several callbacks; and MyDataPresenter is an example of best practices for separating GUI handling from the implementation of AnyDataWithGui.
+ As mentioned before, MyData is registered into Fiatlight by calling fiat_togui.register_type(MyData, MyDataWithGui).
 
 
-- What is the GUI registry? How to register a new type into Fiatlight
-- How does AnyDataWithGui work? What are the available callbacks?
-- Qick-look at the architecture of Fiatlight from 10,000 feet
-- How to create a custom widget class ?
-- Look at fiat_kit_skeleton

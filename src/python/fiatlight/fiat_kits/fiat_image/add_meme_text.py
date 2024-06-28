@@ -1,6 +1,6 @@
 import fiatlight as fl
 from fiatlight.fiat_kits.fiat_image import ImageU8
-from fiatlight.fiat_types import Float_0_1, ColorRgb
+from fiatlight.fiat_types import ColorRgb
 
 from PIL import Image, ImageDraw, ImageFont
 from enum import Enum
@@ -25,26 +25,27 @@ class MemeTextParams(BaseModel):
     text: str = "Hello!"
     font_size: int = 20
     font_type: MemeFont = MemeFont.Anton
-    x: Float_0_1 = Float_0_1(0.35)
-    y: Float_0_1 = Float_0_1(0.75)
-    text_color: ColorRgb = ColorRgb((255, 255, 255))
+    x: float = 0.35
+    y: float = 0.75
+    text_color: ColorRgb = ColorRgb((255, 255, 255))  # ------>
     outline_color: ColorRgb = ColorRgb((0, 0, 0))
     is_image_bgr: bool = True
 
 
+@fl.with_fiat_attributes(label="Add Meme Text")
 def add_meme_text(image: ImageU8, params: MemeTextParams) -> ImageU8:
     """Add text to an image, with a look that is reminiscent of old-school memes.
 
-    :param image: The image to which the text will be added.
-    :param text: The text to add to the image.
-    :param font_size: The size of the font.
-    :param font_type: The font to use for the text. You can choose between "Stadium", "Anton" and "SaoTorpes".
-    :param x: The x position of the text, as a fraction of the image width.
-    :param y: The y position of the text, as a fraction of the image height.
-    :param text_color: The color of the text.
-    :param outline_color: The color of the text outline.
+    * **image:** The image to which the text will be added.
+    * **text:** The text to add to the image.
+    * **font_size:** The size of the font.
+    * **font_type:** The font to use for the text. You can choose between "Stadium", "Anton" and "SaoTorpes".
+    * **x:** The x position of the text, as a fraction of the image width.
+    * **y:** The y position of the text, as a fraction of the image height.
+    * **text_color:** The color of the text.
+    * **outline_color:** The color of the text outline.
 
-    :return: The image with the text added.
+    * **return:** The image with the text added.
     """
 
     image_pil = Image.fromarray(image)

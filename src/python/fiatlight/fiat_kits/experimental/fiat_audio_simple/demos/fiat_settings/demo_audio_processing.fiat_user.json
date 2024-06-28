@@ -20,6 +20,7 @@
             "function_node_with_gui": {
                 "_inputs_expanded": true,
                 "_outputs_expanded": true,
+                "_doc_expanded": true,
                 "fiat_tuning_expanded": false,
                 "_internal_state_gui_expanded": true,
                 "_function_node": {
@@ -29,8 +30,7 @@
                             "expanded": false
                         }
                     },
-                    "outputs": {},
-                    "internal_gui_options": {}
+                    "outputs": {}
                 }
             },
             "function_node": {
@@ -40,14 +40,14 @@
                         "expanded": false
                     }
                 },
-                "outputs": {},
-                "internal_gui_options": {}
+                "outputs": {}
             }
         },
         "MicrophoneGui": {
             "function_node_with_gui": {
                 "_inputs_expanded": true,
                 "_outputs_expanded": true,
+                "_doc_expanded": true,
                 "fiat_tuning_expanded": false,
                 "_internal_state_gui_expanded": true,
                 "_function_node": {
@@ -57,8 +57,7 @@
                             "cb_options": {},
                             "expanded": false
                         }
-                    },
-                    "internal_gui_options": {}
+                    }
                 }
             },
             "function_node": {
@@ -68,14 +67,14 @@
                         "cb_options": {},
                         "expanded": false
                     }
-                },
-                "internal_gui_options": {}
+                }
             }
         },
         "evaluate_note": {
             "function_node_with_gui": {
                 "_inputs_expanded": true,
                 "_outputs_expanded": true,
+                "_doc_expanded": true,
                 "fiat_tuning_expanded": false,
                 "_internal_state_gui_expanded": true,
                 "_function_node": {
@@ -90,8 +89,8 @@
                                     10.0
                                 ],
                                 "selection": {
-                                    "start": 0.2234920634920635,
-                                    "end": 0.6704761904761904
+                                    "start": 0.5108390022675737,
+                                    "end": 1.5325170068027212
                                 }
                             },
                             "expanded": false
@@ -110,8 +109,7 @@
                             },
                             "expanded": true
                         }
-                    },
-                    "internal_gui_options": {}
+                    }
                 }
             },
             "function_node": {
@@ -126,8 +124,8 @@
                                 10.0
                             ],
                             "selection": {
-                                "start": 0.2234920634920635,
-                                "end": 0.6704761904761904
+                                "start": 0.5108390022675737,
+                                "end": 1.5325170068027212
                             }
                         },
                         "expanded": false
@@ -146,14 +144,14 @@
                         },
                         "expanded": true
                     }
-                },
-                "internal_gui_options": {}
+                }
             }
         },
         "show_fundamental_freq_graph": {
             "function_node_with_gui": {
                 "_inputs_expanded": true,
                 "_outputs_expanded": true,
+                "_doc_expanded": true,
                 "fiat_tuning_expanded": false,
                 "_internal_state_gui_expanded": true,
                 "_function_node": {
@@ -168,8 +166,8 @@
                                     10.0
                                 ],
                                 "selection": {
-                                    "start": 0.2234920634920635,
-                                    "end": 0.6704761904761904
+                                    "start": 0.5108390022675737,
+                                    "end": 1.5325170068027212
                                 }
                             },
                             "expanded": false
@@ -185,8 +183,7 @@
                             },
                             "expanded": true
                         }
-                    },
-                    "internal_gui_options": {}
+                    }
                 }
             },
             "function_node": {
@@ -201,8 +198,8 @@
                                 10.0
                             ],
                             "selection": {
-                                "start": 0.2234920634920635,
-                                "end": 0.6704761904761904
+                                "start": 0.5108390022675737,
+                                "end": 1.5325170068027212
                             }
                         },
                         "expanded": false
@@ -218,14 +215,14 @@
                         },
                         "expanded": true
                     }
-                },
-                "internal_gui_options": {}
+                }
             }
         },
         "show_harmonic_percussive_graph": {
             "function_node_with_gui": {
                 "_inputs_expanded": true,
                 "_outputs_expanded": true,
+                "_doc_expanded": true,
                 "fiat_tuning_expanded": false,
                 "_internal_state_gui_expanded": true,
                 "_function_node": {
@@ -240,8 +237,8 @@
                                     10.0
                                 ],
                                 "selection": {
-                                    "start": 0.2234920634920635,
-                                    "end": 0.6704761904761904
+                                    "start": 0.5108390022675737,
+                                    "end": 1.5325170068027212
                                 }
                             },
                             "expanded": false
@@ -257,8 +254,7 @@
                             },
                             "expanded": true
                         }
-                    },
-                    "internal_gui_options": {}
+                    }
                 }
             },
             "function_node": {
@@ -273,8 +269,8 @@
                                 10.0
                             ],
                             "selection": {
-                                "start": 0.2234920634920635,
-                                "end": 0.6704761904761904
+                                "start": 0.5108390022675737,
+                                "end": 1.5325170068027212
                             }
                         },
                         "expanded": false
@@ -290,8 +286,7 @@
                         },
                         "expanded": true
                     }
-                },
-                "internal_gui_options": {}
+                }
             }
         }
     }
