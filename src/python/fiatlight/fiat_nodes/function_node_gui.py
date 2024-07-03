@@ -893,7 +893,7 @@ class FunctionNodeGui:
     def load_gui_options_from_json(self, json_data: JsonDict) -> None:
         self._inputs_expanded = json_data.get("_inputs_expanded", True)
         self._outputs_expanded = json_data.get("_outputs_expanded", True)
-        self._doc_expanded = json_data.get("_doc_expanded", True)
+        self._doc_expanded = json_data.get("_doc_expanded", False)
         self.fiat_tuning_expanded = json_data.get("fiat_tuning_expanded", False)
         self._internal_state_gui_expanded = json_data.get("_internal_state_gui_expanded", True)
         self._function_node.load_gui_options_from_json(json_data["_function_node"])
