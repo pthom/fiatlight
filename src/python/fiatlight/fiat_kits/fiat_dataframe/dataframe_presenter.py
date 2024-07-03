@@ -97,7 +97,7 @@ class DataFramePresenterParams(BaseModel):
         new_params.sort_by = [(col, asc) for col, asc in self.sort_by if col in valid_columns]
 
         # Use dict() method to convert models to dictionaries for comparison
-        changed = new_params.dict() != self.dict()
+        changed = new_params.model_dump() != self.model_dump()
 
         if changed:
             # self.visible_columns = new_params.visible_columns
@@ -178,7 +178,7 @@ class DataFramePresenter:
         start_idx = self.params.current_page_start_idx
         end_idx = start_idx + self.params.rows_per_page
 
-        if total_pages > 1:
+        if True:  # total_pages > 1:
             with imgui_ctx.begin_horizontal("DataFramePagination"):
                 with fontawesome_6_ctx():
                     page_label = f"{current_page} / {total_pages}"
@@ -223,9 +223,7 @@ class DataFramePresenter:
                     imgui.spring()
                     imgui.text("Rows per page:")
                     imgui.set_next_item_width(hello_imgui.em_size(6.0))
-                    _, self.params.rows_per_page = imgui.slider_int(
-                        "##Rows per page", self.params.rows_per_page, 5, 100
-                    )
+                    _, self.params.rows_per_page = imgui.slider_int("##Rows per page", self.params.rows_per_page, 5, 70)
 
                     imgui.pop_button_repeat()
 
@@ -327,10 +325,10 @@ class DataFramePresenter:
 
     def _show_resizable_table(self) -> None:
         # Draw the table lambda, with a resize handle
-        new_table_size_pixels = immapp.widget_with_resize_handle_in_node_editor("DataFrameTable", self._show_table)  # type: ignore  #  noqa
-        # update the widget size in em
-        new_table_size_em = hello_imgui.pixels_to_em(new_table_size_pixels)
-        self.params.widget_size_em = (new_table_size_em.x, new_table_size_em.y)
+        new_table_size_em = immapp.widget_with_resize_handle_in_node_editor_em(
+            "DataFrameTable", self._show_table, resize_handle_size_em=1.5
+        )  # type: ignore  #  noqa
+        self.params.widget_size_em = (new_table_size_em.x, hello_imgui.em_size(1.0))  # new_table_size_em.y)
 
     def present(self, _value: pd.DataFrame) -> None:
         # We ignore the value parameter since the data frame is cached inside self.dataframe
