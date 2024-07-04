@@ -6,7 +6,7 @@ Introduction
 
 AnyDataGuiCallbacks provides a set of callbacks that define how a particular data type should be presented, edited, and managed within the Fiatlight GUI framework.
 
-These callbacks are used by [AnyDataWithGui](any_data_with_gui).
+These callbacks are used by [AnyDataWithGui](api_any_data_with_gui).
 
 Source
 ------
@@ -22,7 +22,7 @@ Architecture
 ------------
 
 Below is a PlantUML diagram showing the architecture of the `fiat_core` module.
-See the [architecture page](architecture) for the full architecture diagrams.
+See the [architecture page](api_architecture) for the full architecture diagrams.
 
     ```python
     from fiatlight.fiat_doc import plantuml_magic

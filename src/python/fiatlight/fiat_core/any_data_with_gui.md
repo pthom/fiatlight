@@ -6,7 +6,7 @@ Introduction
 
 AnyDataWithGui associate a GUI to any type, with associated GUI callbacks, allowing for custom rendering, editing, serialization, and event handling within the Fiatlight framework.
 
-It uses callbacks which are stored inside [AnyDataGuiCallback](any_data_gui_callbacks.ipynb).
+It uses callbacks which are stored inside [AnyDataGuiCallback](api_any_data_gui_callbacks.ipynb).
 
 Signature
 ---------
@@ -24,7 +24,7 @@ Architecture
 ------------
 
 Below is a PlantUML diagram showing the architecture of the `fiat_core` module.
-See the [architecture page](architecture) for the full architecture diagrams.
+See the [architecture page](api_architecture) for the full architecture diagrams.
 
     ```python
     from fiatlight.fiat_doc import plantuml_magic

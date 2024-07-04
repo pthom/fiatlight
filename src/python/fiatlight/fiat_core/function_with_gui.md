@@ -6,7 +6,7 @@ Introduction
 
 `FunctionWithGui` is one of the core classes of FiatLight: it wraps a function with a GUI that presents its inputs and outputs.
 
-* **Manual**: Read the [manual](tutorials_function) for a detailed guide on how to use it.
+* **Manual**: Read the [manual](manual_function) for a detailed guide on how to use it.
 * **Source code**: View its full code [online](FL_GH_ROOT/fiat_core/function_with_gui.py).
 
 
@@ -27,7 +27,7 @@ Architecture
 ------------
 
 Below is a PlantUML diagram showing the architecture of the `fiat_core` module.
-See the [architecture page](architecture) for the full architecture diagrams.
+See the [architecture page](api_architecture) for the full architecture diagrams.
 
 ```python
 from fiatlight.fiat_doc import plantuml_magic

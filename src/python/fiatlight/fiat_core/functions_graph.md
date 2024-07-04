@@ -5,7 +5,7 @@ FunctionsGraph
 where the output of one function can be linked to the input of another function.
 
 * **Source**: see its full code [online](FL_GH_ROOT/fiat_core/functions_graph.py)
-* **Manual**: [FunctionsGraph API](tutorials_functions_graph)
+* **Manual**: [FunctionsGraph API](manual_functions_graph)
 
 Signature
 ---------
@@ -24,7 +24,7 @@ Architecture
 ------------
 
 Below is a PlantUML diagram showing the architecture of the `fiat_core` module.
-See the [architecture page](architecture) for the full architecture diagrams.
+See the [architecture page](api_architecture) for the full architecture diagrams.
 
     ```python
     from fiatlight.fiat_doc import plantuml_magic
