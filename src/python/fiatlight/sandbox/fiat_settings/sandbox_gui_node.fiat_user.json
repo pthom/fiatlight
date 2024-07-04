@@ -1,0 +1,81 @@
+{
+    "user_inputs": {
+        "functions_nodes": {
+            "heart_curve": {
+                "t": {
+                    "name": "t",
+                    "data": {
+                        "type": "Unspecified"
+                    }
+                }
+            },
+            "gui_draw_curve": {}
+        }
+    },
+    "gui_options": {
+        "heart_curve": {
+            "function_node_with_gui": {
+                "_inputs_expanded": true,
+                "_outputs_expanded": true,
+                "_doc_expanded": false,
+                "fiat_tuning_expanded": true,
+                "_internal_state_gui_expanded": true,
+                "_function_node": {
+                    "inputs": {
+                        "t": {
+                            "cb_options": {},
+                            "expanded": true
+                        }
+                    },
+                    "outputs": {
+                        "0": {
+                            "cb_options": {},
+                            "expanded": true
+                        }
+                    }
+                }
+            },
+            "function_node": {
+                "inputs": {
+                    "t": {
+                        "cb_options": {},
+                        "expanded": true
+                    }
+                },
+                "outputs": {
+                    "0": {
+                        "cb_options": {},
+                        "expanded": true
+                    }
+                }
+            }
+        },
+        "gui_draw_curve": {
+            "function_node_with_gui": {
+                "_inputs_expanded": true,
+                "_outputs_expanded": true,
+                "_doc_expanded": false,
+                "fiat_tuning_expanded": true,
+                "_internal_state_gui_expanded": true,
+                "_function_node": {
+                    "inputs": {
+                        "points": {
+                            "cb_options": {},
+                            "expanded": false
+                        }
+                    },
+                    "outputs": {}
+                }
+            },
+            "function_node": {
+                "inputs": {
+                    "points": {
+                        "cb_options": {},
+                        "expanded": false
+                    }
+                },
+                "outputs": {}
+            }
+        }
+    }
+}

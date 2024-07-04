@@ -13,7 +13,7 @@ Signature
 
 Below, we display the class header, i.e., the class without its methods bodies, to give a quick overview of its structure.
 
-You can see its full code at [AnyDataWithGui](https://github.com/pthom/fiatlight/blob/refact_io/src/python/fiatlight/fiat_core/any_data_with_gui.py).
+You can see its full code at [AnyDataWithGui](FL_GH_ROOT/fiat_core/any_data_with_gui.py).
 
 ```python
 from fiatlight.fiat_doc import look_at_code

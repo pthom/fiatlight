@@ -11,7 +11,7 @@ These callbacks are used by [AnyDataWithGui](any_data_with_gui).
 Source
 ------
 
-Below, is the class source, which you can also see [online](https://github.com/pthom/fiatlight/blob/refact_io/src/python/fiatlight/fiat_core/any_data_gui_callbacks.py).
+Below, is the class source, which you can also see [online](FL_GH_ROOT/fiat_core/any_data_gui_callbacks.py).
 
 ```python
 from fiatlight.fiat_doc import look_at_code

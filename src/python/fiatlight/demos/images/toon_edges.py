@@ -135,15 +135,18 @@ def add_toon_edges(image: ImageU8_3, params: ToonEdgesParams) -> ImageU8_3:
     # Add to fiat_tuning any variable you want to be able to fine-tune or debug in the function node
     #     * Either a raw type (int, float, str, etc.): see durations
     #     * Or a descendant of AnyDataWithGui: see "canny", "dilate", "image_with_edges"
-    add_toon_edges.fiat_tuning = {  # type: ignore
-        "duration_canny": duration_canny,
-        "duration_dilate": duration_dilate,
-        "duration_blur": duration_blur,
-        "duration_merge": duration_merge,
-        "canny": ImageWithGui(edges),
-        "dilate": ImageWithGui(dilated_edges),
-        "image_with_edges": ImageWithGui(image_with_edges),
-    }
+    fl.add_fiat_attributes(
+        add_toon_edges,
+        fiat_tuning={
+            "duration_canny": duration_canny,
+            "duration_dilate": duration_dilate,
+            "duration_blur": duration_blur,
+            "duration_merge": duration_merge,
+            "canny": ImageWithGui(edges),
+            "dilate": ImageWithGui(dilated_edges),
+            "image_with_edges": ImageWithGui(image_with_edges),
+        },
+    )
 
     # return
     return image_with_edges
