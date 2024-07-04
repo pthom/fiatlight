@@ -64,7 +64,7 @@ def _to_param_with_gui(name: str, param: inspect.Parameter, fiat_attributes: Fia
 
 
 def _get_input_param_fiat_attributes(fn_attributes: JsonDict, param_name: str) -> FiatAttributes:
-    """Get the optional custom attributes for the parameter.
+    """Get the optional fiat attributes for the parameter.
     Those parameters are defined in the function attributes, and may be passed:
 
     * either by manually adding attributes some time after the function definition:
@@ -87,7 +87,7 @@ def _get_input_param_fiat_attributes(fn_attributes: JsonDict, param_name: str) -
 
 
 def get_output_fiat_attributes(fn_attributes: JsonDict, idx_output: int = 0) -> FiatAttributes:
-    """Get the optional custom attributes for the return value.
+    """Get the optional fiat attributes for the return value.
     For example:
         @with_fiat_attributes(return__range=(0, 1))
         def f() -> float:

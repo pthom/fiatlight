@@ -70,7 +70,7 @@ def test_fiat_attr_doc() -> None:
     code_utils.assert_are_codes_equal(
         doc,
         """
-    Available custom attributes for Foo:
+    Available fiat attributes for Foo:
     --------------------------------------------------------------------------------
     +--------+-----------------+-----------+--------------------------+
     | Name   | Type            | Default   | Explanation              |
@@ -112,7 +112,7 @@ def test_possible_fiat_attr_in_function() -> None:
     fl.register_type(Foo, FooWithGui)
 
     #
-    # Test register a function with correct custom attributes
+    # Test register a function with correct fiat attributes
     #
     @fl.with_fiat_attributes(foo__xrange=(5, 10))
     def f(foo: Foo) -> Foo:

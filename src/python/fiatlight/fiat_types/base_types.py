@@ -29,5 +29,5 @@ JsonPrimitive = str | int | float | bool | None
 JsonDict = dict[str, Any]
 JsonPrimitiveOrDict = JsonPrimitive | JsonDict
 
-# Type for custom attributes
+# Type for fiat attributes
 FiatAttributes = NewType("FiatAttributes", dict[str, Any])

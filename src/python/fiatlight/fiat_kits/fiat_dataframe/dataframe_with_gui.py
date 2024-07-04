@@ -92,10 +92,10 @@ class DataFrameWithGui(AnyDataWithGui[pd.DataFrame]):
         # Probably nothing to do here.
         return False
 
-    class _CustomAttributesSection:
+    class _FiatAttributesSection:
         """
         # --------------------------------------------------------------------------------------------
-        #        Custom Attributes
+        #        Fiat Attributes
         # --------------------------------------------------------------------------------------------
         """
 

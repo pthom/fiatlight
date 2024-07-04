@@ -11,7 +11,7 @@ from fiatlight.fiat_utils.str_utils import memory_readable_str
 
 
 class DataFramePossibleFiatAttributes(PossibleFiatAttributes):
-    # Here we will add all the possible custom attributes for the DataFrame
+    # Here we will add all the possible fiat attributes for the DataFrame
     # so that the user can customize the presentation of the DataFrame
     # (probably by settings params in DataFramePresenterParams)
     def __init__(self) -> None:
@@ -155,7 +155,7 @@ class DataFramePresenter:
         self.dataframe = copy.copy(self.dataframe_original)
 
     def on_fiat_attributes_changes(self, fiat_attrs: FiatAttributes) -> None:
-        # Update the params with the custom attributes
+        # Update the params with the fiat attributes
         for key, value in fiat_attrs.items():
             if hasattr(self.params, key):
                 setattr(self.params, key, value)

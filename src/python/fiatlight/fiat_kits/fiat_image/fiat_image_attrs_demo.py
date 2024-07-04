@@ -1,10 +1,10 @@
 """Demo how to set custom presentation attributes for the Image Widget (ImageWithGui)
 
 Notes:
-    - The custom attributes can be set using the decorator fl.with_fiat_attributes
-    - In these examples, we intend to set custom attributes for the output of the
+    - The fiat attributes can be set using the decorator fl.with_fiat_attributes
+    - In these examples, we intend to set fiat attributes for the output of the
       functions, i.e. the returned value.
-      As a consequence, the custom attributes are set in the return__...
+      As a consequence, the fiat attributes are set in the return__...
       arguments of the decorator.
 """
 
@@ -38,7 +38,7 @@ def show_image_different_zoom_key(image: ImageU8_3 = demo_image) -> ImageU8_3:
     return image
 
 
-# A function that will use the Image Widget with custom attributes:
+# A function that will use the Image Widget with fiat attributes:
 # - the image is displayed only (it cannot be zoomed or panned,
 #   and the pixel values are not shown)
 # - the image is displayed with a height of 300 pixels

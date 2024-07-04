@@ -41,7 +41,7 @@ Part 1 - Automatic GUI for dataclasses and pydantic models
 The "gui_dataclass_pydantic" tutorial examples provide a detailed explanation on how to automatically create a GUI for a dataclass or a pydantic model.
 Note that pydantic models are preferable since Fiatlight will be able to serialize and deserialize them, and thus save user inputs that use them.
 
-These examples show how to use custom attributes to customize the widgets appearance (label, numeric range, etc.).
+These examples show how to use fiat attributes to customize the widgets appearance (label, numeric range, etc.).
 Let's see them in action.
 
 It also shows how to use validators to ensure that the user inputs are correct. This is possible for dataclasses, and Pydantic validators are also gracefully handled.

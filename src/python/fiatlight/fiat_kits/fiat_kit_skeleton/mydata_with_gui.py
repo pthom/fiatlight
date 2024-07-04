@@ -25,7 +25,7 @@ class MydataWithGui(AnyDataWithGui[Mydata]):
         # on_change callback
         self.callbacks.on_change = self.on_change
         self.callbacks.on_heartbeat = self.on_heartbeat
-        # custom attributes
+        # fiat attributes
         self.callbacks.on_fiat_attributes_changed = self.on_fiat_attributes_changes
         # serialization and deserialization of presentation options
         self.callbacks.save_gui_options_to_json = self.save_gui_options_to_json
@@ -101,10 +101,10 @@ class MydataWithGui(AnyDataWithGui[Mydata]):
         # Probably nothing to do here.
         return False
 
-    class _CustomAttributesSection:  # Dummy class to create a section in the IDE # noqa
+    class _FiatAttributesSection:  # Dummy class to create a section in the IDE # noqa
         """
         # --------------------------------------------------------------------------------------------
-        #        Custom Attributes
+        #        Fiat Attributes
         # --------------------------------------------------------------------------------------------
         """
 
@@ -115,7 +115,7 @@ class MydataWithGui(AnyDataWithGui[Mydata]):
         return MydataPresenter.possible_fiat_attributes()
 
     def on_fiat_attributes_changes(self, fiat_attrs: FiatAttributes) -> None:
-        # Here we should update the presenter with the new custom attributes
+        # Here we should update the presenter with the new fiat attributes
         pass
 
     class _SerializationAndDeserializationSection:  # Dummy class to create a section in the IDE # noqa

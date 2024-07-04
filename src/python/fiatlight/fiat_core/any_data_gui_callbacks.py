@@ -122,8 +122,8 @@ class AnyDataGuiCallbacks(Generic[DataType]):
     on_heartbeat: BoolFunction | None = None
 
     # on_fiat_attributes_changed (Optional)
-    # if provided, this function will be called when the custom attributes of the data change.
-    # Used in more advanced cases, when the data presentation depends on custom attributes.
+    # if provided, this function will be called when the fiat attributes of the data change.
+    # Used in more advanced cases, when the data presentation depends on fiat attributes.
     on_fiat_attributes_changed: Callable[[FiatAttributes], None] | None = None
 
     # ---------------------------------------------------------------------------------------------

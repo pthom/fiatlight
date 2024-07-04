@@ -13,13 +13,13 @@ def types(query: str | None = None) -> None:
 
 
 def gui_info(gui_or_data_typename: str) -> None:
-    """Print the info and custom attributes available for a given type. Add the datatype or Gui type name as an argument (if not provided, all Gui widgets names are printed)"""
+    """Print the info and fiat attributes available for a given type. Add the datatype or Gui type name as an argument (if not provided, all Gui widgets names are printed)"""
     info = _GUI_FACTORIES.get_gui_info(gui_or_data_typename)
     print(info)
 
 
 def fn_attrs() -> None:
-    """Display the available custom attributes for a function"""
+    """Display the available fiat attributes for a function"""
     from fiatlight.fiat_core.function_with_gui import _FUNCTION_POSSIBLE_FIAT_ATTRIBUTES
 
     print(_FUNCTION_POSSIBLE_FIAT_ATTRIBUTES.documentation())

@@ -10,7 +10,7 @@ def only_lowercase(s: str) -> str:
 @fl.with_fiat_attributes(
     #  Validation
     name__validator=only_lowercase,
-    #  Custom attributes
+    #  Fiat attributes
     name__width_em=10.0,
     name__hint="Enter your name",
     name__allow_multiline_edit=False,

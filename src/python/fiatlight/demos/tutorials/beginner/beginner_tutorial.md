@@ -6,7 +6,7 @@
 
 - Preferences saved: what & where
 
-- Custom attributes / Command line
+- Fiat attributes / Command line
   - inputs
   - function
   - outputs

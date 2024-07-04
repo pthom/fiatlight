@@ -182,7 +182,7 @@ class AnyDataWithGui(Generic[DataType]):
     # Unspecified stands for a function parameter that has not been set by the user
     _can_set_unspecified_or_default: bool = False
 
-    # Label and tooltip (can be set via custom attributes)
+    # Label and tooltip (can be set via fiat attributes)
     label: str | None = None
     label_color: ImVec4 | None = None
     tooltip: str | None = None
@@ -303,10 +303,10 @@ class AnyDataWithGui(Generic[DataType]):
         else:
             return self.value
 
-    class _CustomAttributes_Section:  # Dummy class to create a section in the IDE  # noqa
+    class _FiatAttributes_Section:  # Dummy class to create a section in the IDE  # noqa
         """
         # ------------------------------------------------------------------------------------------------------------------
-        #            Custom Attributes
+        #            Fiat Attributes
         # ------------------------------------------------------------------------------------------------------------------
         """
 
@@ -314,8 +314,8 @@ class AnyDataWithGui(Generic[DataType]):
 
     @staticmethod
     def possible_fiat_attributes() -> PossibleFiatAttributes | None:
-        """Return the possible custom attributes for this type, if available.
-        Should be overridden in subclasses, when custom attributes are available.
+        """Return the possible fiat attributes for this type, if available.
+        Should be overridden in subclasses, when fiat attributes are available.
 
         It is strongly advised to return a class variable, or a global variable
         to avoid creating a new instance each time this method is called.
@@ -334,12 +334,12 @@ class AnyDataWithGui(Generic[DataType]):
         return self._fiat_attributes
 
     def merge_fiat_attributes(self, fiat_attrs: FiatAttributes) -> None:
-        """Merge custom attributes with the existing ones"""
+        """Merge fiat attributes with the existing ones"""
         if len(fiat_attrs) == 0:
             return
         possible_fiat_attrs, _generic_possible_fiat_attrs = self.possible_fiat_attributes_with_generic()
 
-        # Create a version that holds all custom attributes
+        # Create a version that holds all fiat attributes
         all_possible_fiat_attrs = copy.deepcopy(_generic_possible_fiat_attrs)
         if possible_fiat_attrs is not None:
             all_possible_fiat_attrs.merge_attributes(copy.copy(possible_fiat_attrs))
@@ -352,7 +352,7 @@ class AnyDataWithGui(Generic[DataType]):
             self.callbacks.on_fiat_attributes_changed(self.fiat_attributes)
 
     def _handle_generic_attrs(self) -> None:
-        """Handle generic custom attributes"""
+        """Handle generic fiat attributes"""
         if "label" in self.fiat_attributes:
             self.label = self.fiat_attributes["label"]
         if "tooltip" in self.fiat_attributes:

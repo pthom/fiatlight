@@ -20,7 +20,7 @@ fiat_image_attrs_demo.main()
 
 
 
-Custom attributes available for the ImageWithGui widget
+Fiat attributes available for the ImageWithGui widget
 -------------------------------------------------------
 
 The image widget provided with fiat_image is extremely customizable. Here is a list of all the possible customizations options:

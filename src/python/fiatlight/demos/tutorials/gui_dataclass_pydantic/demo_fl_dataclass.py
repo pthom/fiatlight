@@ -36,7 +36,7 @@ In the example below we query the available attributes for a string.
 ...
 ... Outputs lots of other possible attributes
 ...
- Available custom attributes for AnyDataWithGui Generic attributes:
+ Available fiat attributes for AnyDataWithGui Generic attributes:
   +-------------+--------+---------------------+------------------------------------------------+
   | label       | str    |                     | A label for the parameter. If empty, the       |
   |             |        |                     | function parameter name is used                |

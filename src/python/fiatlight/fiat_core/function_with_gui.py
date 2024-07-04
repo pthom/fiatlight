@@ -358,15 +358,15 @@ class FunctionWithGui:
         pass
 
     def handle_fiat_attributes(self, fiat_attributes: dict[str, Any]) -> None:
-        """Handle custom attributes for the function"""
-        # Filter out the custom attributes for parameters and outputs
+        """Handle fiat attributes for the function"""
+        # Filter out the attributes for parameters and outputs
         # (they contain a double underscore "__" in their name)
         fn_fiat_attributes = {key: value for key, value in fiat_attributes.items() if "__" not in key}
         # We accept wrong keys, because other libraries, such as Pydantic, may add custom attributes
         # that would not be recognized by FiatLight
         _FUNCTION_POSSIBLE_FIAT_ATTRIBUTES.raise_exception_if_bad_fiat_attrs(fn_fiat_attributes)
 
-        # Check that there are no custom attributes for a non-existing parameter or output
+        # Check that there are no attributes for a non-existing parameter or output
         params_fiat_attributes = [key for key in fiat_attributes if "__" in key and not key.startswith("__")]
         for fiat_attribute in params_fiat_attributes:
             assert "__" in fiat_attribute
@@ -386,7 +386,7 @@ class FunctionWithGui:
                         """
                     )
 
-        # Set the custom attributes for the function
+        # Set the fiat attributes for the function
         if "invoke_async" in fn_fiat_attributes:
             self.invoke_async = fn_fiat_attributes["invoke_async"]
         if "invoke_manually" in fn_fiat_attributes:

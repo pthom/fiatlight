@@ -19,7 +19,7 @@ dataframe_with_gui_demo_titanic.main()
 ```
 
 
-Custom attributes available for DataFrameWithGui
+Fiat attributes available for DataFrameWithGui
 ------------------------------------------------
 
 Here is a list of all the possible customizations options:

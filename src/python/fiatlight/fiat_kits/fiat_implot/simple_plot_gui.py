@@ -205,7 +205,7 @@ class SimplePlotGui(AnyDataWithGui[FloatMatrix_Dim1_Or_2]):
         self.callbacks.save_gui_options_to_json = self.save_gui_options_to_json
         self.callbacks.load_gui_options_from_json = self.load_gui_options_from_json
 
-        # custom attributes
+        # fiat attributes
         self.callbacks.on_fiat_attributes_changed = self.on_fiat_attributes_changes
 
     def on_fiat_attributes_changes(self, attributes: FiatAttributes) -> None:

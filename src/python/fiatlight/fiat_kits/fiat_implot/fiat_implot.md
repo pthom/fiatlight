@@ -16,7 +16,7 @@ demo_implot.main()
 ```
 
 
-Custom attributes available for SimplePlotGui
+Fiat attributes available for SimplePlotGui
 ---------------------------------------------
 
 **Here is a list of all the type handled by SimplePlotGui:**

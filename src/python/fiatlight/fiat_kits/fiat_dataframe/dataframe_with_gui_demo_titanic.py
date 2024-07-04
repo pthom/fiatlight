@@ -27,13 +27,13 @@ class Sex(Enum):
 
 
 @fl.with_fiat_attributes(
-    # define the custom attributes for the function parameters
+    # define the fiat attributes for the function parameters
     label="Titanic Data",
     age_min__range=(0, 100),
     age_max__range=(0, 100),
     passenger_class__range=(1, 3),
     passenger_class__label="Passenger Class",
-    # define custom attributes for the function output
+    # define fiat attributes for the function output
     # (i.e. the presentation options for the DataFrame)
     return__widget_size_em=(55.0, 15.0),
     return__rows_per_page_node=15,
@@ -91,7 +91,7 @@ def age_histogram_plot(df: pd.DataFrame) -> None:
             x_flags=implot.AxisFlags_.auto_fit.value,
             y_flags=implot.AxisFlags_.auto_fit.value,
         )
-        implot.plot_histogram("Age", df["Age"].dropna().values, bins=30)
+        implot.plot_histogram("Age", df["Age"].dropna().values, bins=30)  # type: ignore
         implot.end_plot()
 
 

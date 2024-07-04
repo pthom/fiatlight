@@ -89,12 +89,12 @@ class PossibleFiatAttributes:
             msg = ""
             # if len(unwanted_keys) > 0:
             #     unwanted_keys_str = ", ".join(unwanted_keys)
-            #     msg += f"The following custom attributes are not allowed: {unwanted_keys_str}\n\n"
+            #     msg += f"The following fiat attributes are not allowed: {unwanted_keys_str}\n\n"
             if len(attributes_with_wrong_type_msgs) > 0:
-                msg += "The following custom attributes have wrong types:\n    "
+                msg += "The following fiat attributes have wrong types:\n    "
                 msg += "\n    ".join(attributes_with_wrong_type_msgs) + "\n\n"
             if len(attributes_with_failed_validation) > 0:
-                msg += "The following custom attributes failed validation:\n"
+                msg += "The following fiat attributes failed validation:\n"
                 for attr_name, error_msg in attributes_with_failed_validation.items():
                     msg += f"    {attr_name}: {error_msg}\n"
 
@@ -124,7 +124,7 @@ class PossibleFiatAttributes:
     def documentation(self) -> str:
         width = 80
 
-        intro = f"Available custom attributes for {self.parent_name}:"
+        intro = f"Available fiat attributes for {self.parent_name}:"
         intro += "\n" + "-" * width
 
         # Nice table with tabulate

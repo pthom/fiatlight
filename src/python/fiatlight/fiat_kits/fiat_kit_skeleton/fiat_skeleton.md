@@ -11,8 +11,8 @@ fiat_kit_skeleton
 ├── __init__.py
 ├── mydata.py                      # An example data or library that you want to present
 ├── mydata_presenter.py            # The presenter of the data
-|                                  # Also contains a derivate of PossibleCustomAttributes
-|                                  # where all the custom attributes are defined
+|                                  # Also contains a derivate of PossibleFiatAttributes
+|                                  # where all the fiat attributes are defined
 |
 └── mydata_with_gui.py             # MyDataWithGui: the widget that will be displayed in the GUI
                                    # (inherits from AnyDataWithGui, implements all the callbacks
