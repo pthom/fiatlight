@@ -8,6 +8,7 @@ from .param_with_gui import (
 from .output_with_gui import OutputWithGui
 from .function_with_gui import FunctionWithGui
 from .gui_node import GuiNode
+from .task_node import TaskNode
 from .markdown_node import MarkdownNode
 from .function_node import FunctionNode, FunctionNodeLink
 from .functions_graph import FunctionsGraph
@@ -38,6 +39,8 @@ __all__ = [
     "FiatToGuiException",
     # from gui_node
     "GuiNode",
+    # from task_node
+    "TaskNode",
     # from markdown_node
     "MarkdownNode",
 ]

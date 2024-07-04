@@ -4,8 +4,8 @@ import fiatlight as fl
 
 
 def test_no_fiat_attributes() -> None:
-    def f() -> None:
-        pass
+    def f() -> int:
+        return 1
 
     # This should not raise any exception
     _f_gui = fl.FunctionWithGui(f)

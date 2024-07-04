@@ -36,8 +36,8 @@ def test_base_model_gui() -> None:
     assert my_param_default.z == 3.14
 
     # Test register_base_model
-    def f(param: MyParam) -> None:
-        pass
+    def f(param: MyParam) -> int:
+        return param.x
 
     f_gui = FunctionWithGui(f)
     f_gui_param_gui = f_gui.input("param")
@@ -376,8 +376,8 @@ def test_basemodel_in_custom_function() -> None:
             self.foo_gui = _to_data_with_gui_impl(foo, NO_FIAT_ATTRIBUTES)
             self.internal_state_gui = self._internal_state_gui
 
-        def my_function(self) -> None:
-            return
+        def my_function(self) -> int:
+            return 42
 
         def _internal_state_gui(self) -> bool:
             changed = self.foo_gui.gui_edit()

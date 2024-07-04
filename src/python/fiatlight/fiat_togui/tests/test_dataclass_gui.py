@@ -61,8 +61,8 @@ def test_dataclass_gui() -> None:
     assert "y" in gui_options_dict2
     assert gui_options_dict2["y"] == y_options
 
-    def f(param: MyParam) -> None:
-        pass
+    def f(param: MyParam) -> int:
+        return param.x
 
     f_gui = FunctionWithGui(f)
     f_gui_param_gui = f_gui.input("param")

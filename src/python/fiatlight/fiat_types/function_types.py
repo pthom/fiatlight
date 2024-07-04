@@ -11,10 +11,20 @@ VoidFunction = Callable[[], None]
 # inside AnyDataWithGuiCallbacks.
 BoolFunction = Callable[[], bool]
 
-# A Gui function that takes no arguments and returns nothing. Used mainly for "present" callbacks.
+# A Gui function that takes no arguments and returns nothing. It should display ImGui widgets.
+# Used mainly for "present" callbacks.
 GuiFunction = Callable[[], None]
 # A Gui function that takes no arguments and returns a boolean. Used mainly for "edit" callbacks.
 GuiBoolFunction = Callable[[], bool]
+
+# a Gui function that takes inputs and returns nothing. It should display ImGui widgets.
+# Used mainly for GuiNode
+GuiFunctionWithInputs = Callable[..., None]
+
+# a Task function that takes inputs and returns nothing. It should perform a task (e.g. save a file).
+# Used mainly for TaskNode
+TaskFunctionWithInputs = Callable[..., None]
+
 
 # A function that takes a DataType value and returns a tuple of a tuple [modified, new_value]
 # Used

@@ -118,8 +118,9 @@ import copy
 from fiatlight.fiat_core.function_with_gui import FunctionWithGui, FunctionWithGuiFactoryFromName
 from fiatlight.fiat_core.function_node import FunctionNode, FunctionNodeLink
 from fiatlight.fiat_core.gui_node import GuiNode
+from fiatlight.fiat_core.task_node import TaskNode
 from fiatlight.fiat_core.markdown_node import MarkdownNode
-from fiatlight.fiat_types import Function, JsonDict, GuiFunction
+from fiatlight.fiat_types import Function, JsonDict, GuiFunctionWithInputs
 
 from typing import Sequence, Dict, Tuple, Set, List
 from pydantic import BaseModel
@@ -233,10 +234,17 @@ class FunctionsGraph:
             return self._add_function(f)
 
     def add_gui_node(
-        self, gui_function: GuiFunction, label: str | None = None, gui_serializable_data: BaseModel | None = None
+        self,
+        gui_function: GuiFunctionWithInputs,
+        label: str | None = None,
+        gui_serializable_data: BaseModel | None = None,
     ) -> FunctionNode:
         gui_node = GuiNode(gui_function, label=label, gui_serializable_data=gui_serializable_data)
         return self._add_function_with_gui(gui_node)
+
+    def add_task_node(self, task_function: GuiFunctionWithInputs, label: str | None = None) -> FunctionNode:
+        task_node = TaskNode(task_function, label=label)
+        return self._add_function_with_gui(task_node)
 
     def add_markdown_node(
         self,
@@ -418,8 +426,8 @@ class FunctionsGraph:
 
     def add_link(
         self,
-        src_function: str | Function,
-        dst_function: str | Function,
+        src_function: str | Function | FunctionWithGui,
+        dst_function: str | Function | FunctionWithGui,
         dst_input_name: str | None = None,
         src_output_idx: int = 0,
     ) -> None:
@@ -530,23 +538,40 @@ class FunctionsGraph:
             this_function_idx = functions_with_same_name.index(function_node)
             return f"{function_node.function_with_gui.function_name}_{this_function_idx + 1}"
 
-    def _function_node_with_name_or_is_function(self, name_or_function: str | Function) -> FunctionNode:
+    def _function_node_with_name_or_is_function(
+        self, name_or_function: str | Function | FunctionWithGui
+    ) -> FunctionNode:
         """Get the function node with the given name or function"""
         if isinstance(name_or_function, str):
             return self._function_node_with_unique_name(name_or_function)
 
-        function_reference = name_or_function
-        candidate_nodes = []
-        for fn_node in self.functions_nodes:
-            if fn_node.function_with_gui._f_impl is function_reference:
-                candidate_nodes.append(fn_node)
+        elif isinstance(name_or_function, FunctionWithGui):
+            fn_with_gui = name_or_function
+            candidate_nodes = []
+            for fn_node in self.functions_nodes:
+                if fn_node.function_with_gui is fn_with_gui:
+                    candidate_nodes.append(fn_node)
 
-        if len(candidate_nodes) == 0:
-            raise ValueError(f"No function {function_reference}")
-        elif len(candidate_nodes) > 1:
-            raise ValueError(f"Multiple functions {function_reference}")
+            if len(candidate_nodes) == 0:
+                raise ValueError(f"No function {fn_with_gui}")
+            elif len(candidate_nodes) > 1:
+                raise ValueError(f"Multiple functions {fn_with_gui}")
+            else:
+                return candidate_nodes[0]
+
         else:
-            return candidate_nodes[0]
+            function_reference = name_or_function
+            candidate_nodes = []
+            for fn_node in self.functions_nodes:
+                if fn_node.function_with_gui._f_impl is function_reference:
+                    candidate_nodes.append(fn_node)
+
+            if len(candidate_nodes) == 0:
+                raise ValueError(f"No function {function_reference}")
+            elif len(candidate_nodes) > 1:
+                raise ValueError(f"Multiple functions {function_reference}")
+            else:
+                return candidate_nodes[0]
 
     def _function_node_with_unique_name(self, function_name: str) -> FunctionNode:
         """Get the function with the unique name"""
