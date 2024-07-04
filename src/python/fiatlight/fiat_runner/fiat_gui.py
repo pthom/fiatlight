@@ -295,6 +295,8 @@ class FiatGui:
         logo_path = demo_assets_dir() + "/logo/logo.jpg"
         self._logo_image = cv2.imread(logo_path)  # type: ignore
 
+        self.was_post_init_called = False
+
     @staticmethod
     def apply_fiat_style_graph() -> None:
         from fiatlight.fiat_config.fiat_style_def import AnyGuiWithDataSettings, FiatStrTruncationParams
@@ -345,9 +347,16 @@ class FiatGui:
             self._before_exit,
             self.params.runner_params.callbacks.before_exit,
         )
-        self.params.runner_params.callbacks.post_init = functional_utils.sequence_void_functions(
-            self._post_init, self.params.runner_params.callbacks.post_init
-        )
+
+        # We do not call self.post_init here, because it is preferable to call it once an imgui window
+        # is available (otherwise we might get seg faults inside imgui when the user incorrectly
+        # performs imgui calls in non GUI functions)
+        # Instead self.post_init is called once in the first frame, by self._panel_graph
+        #
+        # self.params.runner_params.callbacks.post_init = functional_utils.sequence_void_functions(
+        #     self._post_init, self.params.runner_params.callbacks.post_init
+        # )
+
         self.params.runner_params.callbacks.pre_new_frame = self._pre_new_frame
         self.params.runner_params.callbacks.after_swap = self._after_swap
 
@@ -434,6 +443,13 @@ class FiatGui:
                 imgui.set_tooltip("Save graph definition")
 
     def _panel_graph(self) -> None:
+        if not self.was_post_init_called:
+            # it is preferable to call post_init once an imgui window is available
+            # (otherwise we might get seg faults inside imgui when the user incorrectly performs imgui
+            # calls in non GUI functions)
+            self._post_init()
+            self.was_post_init_called = True
+
         btn_size = self._top_toolbar_btn_size()
         with imgui_ctx.begin_horizontal("_panel_graph"):
             if imgui.button(icons_fontawesome_6.ICON_FA_SITEMAP, btn_size):
