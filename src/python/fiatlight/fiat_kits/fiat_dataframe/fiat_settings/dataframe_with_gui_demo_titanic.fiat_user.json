@@ -1,0 +1,261 @@
+{
+    "user_inputs": {
+        "functions_nodes": {
+            "show_filterable_dataframe": {
+                "passenger_class": {
+                    "name": "passenger_class",
+                    "data": {
+                        "type": "Optional",
+                        "value": {
+                            "type": "Primitive",
+                            "value": 1
+                        }
+                    }
+                },
+                "survived": {
+                    "name": "survived",
+                    "data": {
+                        "type": "Optional",
+                        "value": null
+                    }
+                },
+                "sex": {
+                    "name": "sex",
+                    "data": {
+                        "type": "Optional",
+                        "value": null
+                    }
+                },
+                "age_min": {
+                    "name": "age_min",
+                    "data": {
+                        "type": "Unspecified"
+                    }
+                },
+                "age_max": {
+                    "name": "age_max",
+                    "data": {
+                        "type": "Optional",
+                        "value": {
+                            "type": "Primitive",
+                            "value": 63
+                        }
+                    }
+                }
+            },
+            "age_histogram_plot": {},
+            "survival_rate_plot": {}
+        }
+    },
+    "gui_options": {
+        "show_filterable_dataframe": {
+            "function_node_with_gui": {
+                "_inputs_expanded": true,
+                "_outputs_expanded": true,
+                "_doc_expanded": false,
+                "fiat_tuning_expanded": true,
+                "_internal_state_gui_expanded": true,
+                "_function_node": {
+                    "inputs": {
+                        "passenger_class": {
+                            "cb_options": {},
+                            "expanded": true
+                        },
+                        "survived": {
+                            "cb_options": {},
+                            "expanded": true
+                        },
+                        "sex": {
+                            "cb_options": {},
+                            "expanded": true
+                        },
+                        "age_min": {
+                            "cb_options": {},
+                            "expanded": true
+                        },
+                        "age_max": {
+                            "cb_options": {},
+                            "expanded": true
+                        }
+                    },
+                    "outputs": {
+                        "0": {
+                            "cb_options": {
+                                "widget_size_em": [
+                                    55.0,
+                                    15.0
+                                ],
+                                "column_widths_em": {
+                                    "PassengerId": 5.666666507720947,
+                                    "Survived": 4.133333206176758,
+                                    "Pclass": 3.2666666507720947,
+                                    "Name": 5.4666666984558105,
+                                    "Sex": 2.7333333492279053,
+                                    "Age": 2.3333332538604736,
+                                    "SibSp": 3.066666603088379,
+                                    "Parch": 3.066666603088379,
+                                    "Ticket": 7.400000095367432,
+                                    "Fare": 3.066666603088379,
+                                    "Cabin": 3.133333444595337,
+                                    "Embarked": 4.800000190734863
+                                },
+                                "rows_per_page_node": 36,
+                                "rows_per_page_classic": 20,
+                                "current_page_start_idx": 0,
+                                "sort_by": []
+                            },
+                            "expanded": true
+                        }
+                    }
+                }
+            },
+            "function_node": {
+                "inputs": {
+                    "passenger_class": {
+                        "cb_options": {},
+                        "expanded": true
+                    },
+                    "survived": {
+                        "cb_options": {},
+                        "expanded": true
+                    },
+                    "sex": {
+                        "cb_options": {},
+                        "expanded": true
+                    },
+                    "age_min": {
+                        "cb_options": {},
+                        "expanded": true
+                    },
+                    "age_max": {
+                        "cb_options": {},
+                        "expanded": true
+                    }
+                },
+                "outputs": {
+                    "0": {
+                        "cb_options": {
+                            "widget_size_em": [
+                                55.0,
+                                15.0
+                            ],
+                            "column_widths_em": {
+                                "PassengerId": 5.666666507720947,
+                                "Survived": 4.133333206176758,
+                                "Pclass": 3.2666666507720947,
+                                "Name": 5.4666666984558105,
+                                "Sex": 2.7333333492279053,
+                                "Age": 2.3333332538604736,
+                                "SibSp": 3.066666603088379,
+                                "Parch": 3.066666603088379,
+                                "Ticket": 7.400000095367432,
+                                "Fare": 3.066666603088379,
+                                "Cabin": 3.133333444595337,
+                                "Embarked": 4.800000190734863
+                            },
+                            "rows_per_page_node": 36,
+                            "rows_per_page_classic": 20,
+                            "current_page_start_idx": 0,
+                            "sort_by": []
+                        },
+                        "expanded": true
+                    }
+                }
+            }
+        },
+        "age_histogram_plot": {
+            "function_node_with_gui": {
+                "_inputs_expanded": true,
+                "_outputs_expanded": true,
+                "_doc_expanded": false,
+                "fiat_tuning_expanded": true,
+                "_internal_state_gui_expanded": true,
+                "_function_node": {
+                    "inputs": {
+                        "df": {
+                            "cb_options": {
+                                "widget_size_em": [
+                                    50.0,
+                                    15.0
+                                ],
+                                "column_widths_em": {},
+                                "rows_per_page_node": 10,
+                                "rows_per_page_classic": 20,
+                                "current_page_start_idx": 0,
+                                "sort_by": []
+                            },
+                            "expanded": false
+                        }
+                    },
+                    "outputs": {}
+                }
+            },
+            "function_node": {
+                "inputs": {
+                    "df": {
+                        "cb_options": {
+                            "widget_size_em": [
+                                50.0,
+                                15.0
+                            ],
+                            "column_widths_em": {},
+                            "rows_per_page_node": 10,
+                            "rows_per_page_classic": 20,
+                            "current_page_start_idx": 0,
+                            "sort_by": []
+                        },
+                        "expanded": false
+                    }
+                },
+                "outputs": {}
+            }
+        },
+        "survival_rate_plot": {
+            "function_node_with_gui": {
+                "_inputs_expanded": true,
+                "_outputs_expanded": true,
+                "_doc_expanded": false,
+                "fiat_tuning_expanded": true,
+                "_internal_state_gui_expanded": true,
+                "_function_node": {
+                    "inputs": {
+                        "df": {
+                            "cb_options": {
+                                "widget_size_em": [
+                                    50.0,
+                                    15.0
+                                ],
+                                "column_widths_em": {},
+                                "rows_per_page_node": 10,
+                                "rows_per_page_classic": 20,
+                                "current_page_start_idx": 0,
+                                "sort_by": []
+                            },
+                            "expanded": false
+                        }
+                    },
+                    "outputs": {}
+                }
+            },
+            "function_node": {
+                "inputs": {
+                    "df": {
+                        "cb_options": {
+                            "widget_size_em": [
+                                50.0,
+                                15.0
+                            ],
+                            "column_widths_em": {},
+                            "rows_per_page_node": 10,
+                            "rows_per_page_classic": 20,
+                            "current_page_start_idx": 0,
+                            "sort_by": []
+                        },
+                        "expanded": false
+                    }
+                },
+                "outputs": {}
+            }
+        }
+    }
+}
