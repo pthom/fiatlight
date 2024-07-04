@@ -17,6 +17,7 @@ from fiatlight.fiat_doc import code_utils
 
 THIS_DIR = os.path.dirname(__file__)
 DOC_DIR = os.path.abspath(f"{THIS_DIR}/../doc")
+FL_GH_ROOT = "https://github.com/pthom/fiatlight/tree/refact_io/src/python/fiatlight"
 
 
 @dataclass
@@ -233,9 +234,10 @@ def add_obj_code_to_notebook(obj: object, notebook_filename: str) -> None:
     add_code_cell_to_notebook(code, notebook_filename)
 
 
-def save_notebook_from_markdown_file(md_filename: str, notebook_filename: str, update_existing: bool) -> None:
+def save_notebook_from_markdown_file(md_filename: str, notebook_filename: str, update_existing: bool = True) -> None:
     with open(md_filename) as f:
         md_string = f.read()
+        md_string = md_string.replace("FL_GH_ROOT", FL_GH_ROOT)
     composite_markdown = _CompositeMarkdown(md_string)
     _save_notebook_from_markdown(composite_markdown, update_existing, notebook_filename)
 
@@ -243,6 +245,7 @@ def save_notebook_from_markdown_file(md_filename: str, notebook_filename: str, u
 def display_markdown_from_file(md_filename: str) -> None:
     with open(md_filename) as f:
         content = f.read()
+        content = content.replace("FL_GH_ROOT", FL_GH_ROOT)
     import IPython.display as idisplay
 
     idisplay.display(idisplay.Markdown(content))  # type: ignore

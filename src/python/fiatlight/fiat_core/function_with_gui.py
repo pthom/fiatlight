@@ -1,19 +1,14 @@
 """FunctionWithGui: add GUI to a function
 
-FunctionWithGui
-===============
-
- `FunctionWithGui` is one of the core classes of FiatLight: it wraps a function with a GUI that presents its
- inputs and its output(s).
-
- See its full code [online](../fiat_core/function_with_gui.py).
 
 Creating a FunctionWithGui object
 =================================
 
  For most functions, fiatlight will automatically create the GUI for the inputs and outputs of your functions.
 
- ### Automatic creation example:
+Automatic creation example:
+---------------------------
+
  The code below will provide a GUI for the function `foo` where the user can enter an integer and a float, and
  it will display the result of the function.
 
@@ -28,7 +23,8 @@ Creating a FunctionWithGui object
      *Note: fiatlight handles the default values of the parameters, so the user can leave the float parameter empty,
             or click on the "+" button to set it to the default value, and further change it*
 
- ### Manual creation example
+Manual creation example
+------------------------
  If you want to create the GUI manually, you can use the `FunctionWithGui` class.
  The previous example can be rewritten as follows:
 

@@ -11,7 +11,8 @@ FunctionsGraph
 Creating a FunctionsGraph
 =========================
 
-### When a FunctionsGraph can be created automatically
+When a FunctionsGraph can be created automatically
+--------------------------------------------------
 
 In simple cases (one function, or a list of functions that are chained together), you do not need to create a
 FunctionsGraph. See the examples below.

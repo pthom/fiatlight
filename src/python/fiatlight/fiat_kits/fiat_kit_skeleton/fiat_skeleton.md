@@ -4,7 +4,7 @@ How to create a fully customizable new widget.
 fiat_kit_skeleton
 -----------------
 
-[fiatlight.fiat_kits.fiat_skeleton](https://github.com/pthom/fiatlight/tree/refact_io/src/python/fiatlight/fiat_kits/fiat_kit_skeleton) is a starting point for creating new widgets: it is a minimalistic kit that contains the necessary files to create a new widget.
+[fiatlight.fiat_kits.fiat_skeleton](FL_GH_ROOT/fiat_kits/fiat_kit_skeleton) is a starting point for creating new widgets: it is a minimalistic kit that contains the necessary files to create a new widget.
 
 ```
 fiat_kit_skeleton
@@ -21,15 +21,15 @@ fiat_kit_skeleton
 ```
 
 See files:
-* [mydata.py](https://github.com/pthom/fiatlight/tree/refact_io/src/python/fiatlight/fiat_kits/fiat_kit_skeleton/mydata.py)
-* [mydata_presenter.py](https://github.com/pthom/fiatlight/tree/refact_io/src/python/fiatlight/fiat_kits/fiat_kit_skeleton/mydata_presenter.py)
-* [mydata_with_gui.py](https://github.com/pthom/fiatlight/tree/refact_io/src/python/fiatlight/fiat_kits/fiat_kit_skeleton/mydata_with_gui.py)
+* [mydata.py](FL_GH_ROOT/fiat_kits/fiat_kit_skeleton/mydata.py)
+* [mydata_presenter.py](FL_GH_ROOT/fiat_kits/fiat_kit_skeleton/mydata_presenter.py)
+* [mydata_with_gui.py](FL_GH_ROOT/fiat_kits/fiat_kit_skeleton/mydata_with_gui.py)
 
 
 fiat_kit_skeleton in action
 ---------------------------
 
-[fiatlight.fiat_kits.fiat_dataframe](https://github.com/pthom/fiatlight/tree/refact_io/src/python/fiatlight/fiat_kits/fiat_dataframe) it was developed starting from the skeleton. It is a good example on how it can be customized.
+[fiatlight.fiat_kits.fiat_dataframe](FL_GH_ROOT/fiat_kits/fiat_dataframe) it was developed starting from the skeleton. It is a good example on how it can be customized.
 
 ```
 fiat_dataframe
@@ -44,6 +44,6 @@ fiat_dataframe
 
 See files:
 
-* [dataframe_presenter.py](https://github.com/pthom/fiatlight/tree/refact_io/src/python/fiatlight/fiat_kits/fiat_dataframe/dataframe_presenter.py)
-* [dataframe_with_gui.py](https://github.com/pthom/fiatlight/tree/refact_io/src/python/fiatlight/fiat_kits/fiat_dataframe/dataframe_with_gui.py)
+* [dataframe_presenter.py](FL_GH_ROOT/fiat_kits/fiat_dataframe/dataframe_presenter.py)
+* [dataframe_with_gui.py](FL_GH_ROOT/fiat_kits/fiat_dataframe/dataframe_with_gui.py)
 
