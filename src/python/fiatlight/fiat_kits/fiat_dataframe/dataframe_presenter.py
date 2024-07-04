@@ -325,9 +325,9 @@ class DataFramePresenter:
 
     def _show_resizable_table(self) -> None:
         # Draw the table lambda, with a resize handle
-        new_table_size_em = immapp.widget_with_resize_handle_in_node_editor_em(
+        new_table_size_em = immapp.widget_with_resize_handle_in_node_editor_em(  # type: ignore  #  noqa
             "DataFrameTable", self._show_table, resize_handle_size_em=1.5
-        )  # type: ignore  #  noqa
+        )
         self.params.widget_size_em = (new_table_size_em.x, hello_imgui.em_size(1.0))  # new_table_size_em.y)
 
     def present(self, _value: pd.DataFrame) -> None:
