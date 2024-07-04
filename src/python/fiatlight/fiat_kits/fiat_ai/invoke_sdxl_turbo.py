@@ -83,7 +83,17 @@ class _SdxlTurboWrapper:
 _stable_diffusion_xl_wrapper: _SdxlTurboWrapper | None = None
 
 
-@with_fiat_attributes(seed__range=(0, 1000), label="Generate Image")  # --->
+def validate_prompt(prompt: Prompt) -> Prompt:
+    if len(prompt) < 3:
+        raise ValueError("Prompt must be at least 3 characters long")  # --->
+    return prompt
+
+
+@with_fiat_attributes(
+    seed__range=(0, 1000),
+    label="Generate Image",
+    prompt__validator=validate_prompt,
+)
 def invoke_sdxl_turbo(
     prompt: Prompt,
     seed: int = 0,
