@@ -19,7 +19,7 @@ with its main attributes and methods (but not their bodies)
 Its full source code is [available online](FL_GH_ROOT/fiat_core/function_with_gui.py).
 
 ```python
-from fiatlight.fiat_doc import look_at_code
+from fiatlight.fiat_notebook import look_at_code
 %look_at_class_header fiatlight.fiat_core.FunctionWithGui
 ```
 
@@ -30,6 +30,6 @@ Below is a PlantUML diagram showing the architecture of the `fiat_core` module.
 See the [architecture page](api_architecture) for the full architecture diagrams.
 
 ```python
-from fiatlight.fiat_doc import plantuml_magic
+from fiatlight.fiat_notebook import plantuml_magic
 %plantuml_include class_diagrams/fiat_core.puml
 ```

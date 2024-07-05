@@ -60,7 +60,7 @@ def _replace_python_links_by_github_links(
     # will be replaced by
     #    [fiat_image]({github_base_path}/fiat_kits/fiat_image/__init__.py)
 
-    # Regular expression to find markdown links pointing to python files
+    # Regular expression to find Markdown links pointing to python files
     pattern = re.compile(r"\[([^\]]+)\]\(\.\./([^\)]+)\)")
 
     # Replacement function

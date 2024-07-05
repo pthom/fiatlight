@@ -16,7 +16,7 @@ with its main attributes and methods (but not their bodies)
 Its full source code is [available online](../fiat_core/functions_graph.py).
 
     ```python
-    from fiatlight.fiat_doc import look_at_code
+    from fiatlight.fiat_notebook import look_at_code
     %look_at_class_header fiatlight.fiat_core.FunctionsGraph
     ```
 
@@ -27,7 +27,7 @@ Below is a PlantUML diagram showing the architecture of the `fiat_core` module.
 See the [architecture page](api_architecture) for the full architecture diagrams.
 
     ```python
-    from fiatlight.fiat_doc import plantuml_magic
+    from fiatlight.fiat_notebook import plantuml_magic
     %plantuml_include class_diagrams/fiat_core.puml
     ```
 

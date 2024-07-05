@@ -16,7 +16,7 @@ Below, we display the class header, i.e., the class without its methods bodies, 
 You can see its full code at [AnyDataWithGui](FL_GH_ROOT/fiat_core/any_data_with_gui.py).
 
 ```python
-from fiatlight.fiat_doc import look_at_code
+from fiatlight.fiat_notebook import look_at_code
 %look_at_class_header fiatlight.fiat_core.AnyDataWithGui
 ```
 
@@ -27,6 +27,6 @@ Below is a PlantUML diagram showing the architecture of the `fiat_core` module.
 See the [architecture page](api_architecture) for the full architecture diagrams.
 
     ```python
-    from fiatlight.fiat_doc import plantuml_magic
+    from fiatlight.fiat_notebook import plantuml_magic
     %plantuml_include class_diagrams/fiat_core.puml
     ```

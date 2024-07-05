@@ -1,4 +1,4 @@
-from fiatlight.fiat_doc import notebook_utils
+from fiatlight.fiat_notebook import notebook_utils
 from fiatlight.fiat_doc import code_utils
 import nbformat  # noqa
 

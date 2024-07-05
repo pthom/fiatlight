@@ -40,7 +40,7 @@ Source code for the example
 
 ```python
 import fiatlight
-from fiatlight.fiat_doc import look_at_code  # noqa
+from fiatlight.fiat_notebook import look_at_code  # noqa
 %look_at_python_file fiat_kits/fiat_implot/demo_implot.py
 ```
 

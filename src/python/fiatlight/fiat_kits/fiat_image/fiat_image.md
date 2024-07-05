@@ -35,10 +35,9 @@ Image types
 -----------
 Fiatlight provides several synonyms for Numpy arrays that denote different types of images. Each of these types will be displayed by the image widget.
 
-
 ````python
 import fiatlight
-from fiatlight.fiat_doc import look_at_code  # noqa
+from fiatlight.fiat_notebook import look_at_code
 %look_at_python_file fiat_kits/fiat_image/image_types.py
 ````
 
