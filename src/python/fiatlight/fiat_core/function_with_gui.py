@@ -238,14 +238,6 @@ class FunctionWithGui:
     _last_exception_message: Optional[str] = None
     _last_exception_traceback: Optional[str] = None
 
-    # By default, a function that returns None is not accepted:
-    # The user has to choose between two specializations:
-    # - TaskNode: a function that will perform a task (e.g. a function that will save a file) when the inputs change
-    # - GuiNode: a function that will only display a GUI (e.g. a function that will display a live plot).
-    #            (in this case, the function will be called at each frame, and its GUI will be displayed
-    #             instead of being called when its inputs change)
-    _accept_none_as_output: bool = False
-
     class _Construct_Section:  # Dummy class to create a section in the IDE # noqa
         """
         # --------------------------------------------------------------------------------------------
@@ -318,35 +310,6 @@ class FunctionWithGui:
 
         for output_with_gui in self._outputs_with_gui:
             output_with_gui.data_with_gui._expanded = True
-
-        if len(self._outputs_with_gui) == 0 and not self._accept_none_as_output and not is_dataclass_init_method:
-            raise FiatToGuiException(
-                f"""
-                FunctionWithGui({self.function_name}): this function returns None.
-
-                In this case you have to make a choice between:
-                    - TaskNode: a function that will perform a task when its inputs change
-                                (e.g. a function that will save a file)
-                    - GuiNode: a function that will only display a GUI
-                               (e.g. a function that will display a live plot).
-
-                Usage examples:
-
-                Example 1:
-                    fl.run([f1, f2, fl.GuiNode(my_gui_function)])
-                  or
-                    fl.run([f1, f2, fl.TaskNode(my_task_function)])
-
-                Example 2:
-                    graph = fl.FunctionGraph()
-                    graph.add_function(f1)
-                    graph.add_gui_node(my_gui_function)
-                    graph.add_task_node(my_task_function)
-
-                    # Optional, if the function needs inputs
-                    graph.add_link(f1, my_gui_function)
-                """
-            )
 
     class _FiatAttributes_Section:  # Dummy class to create a section in the IDE # noqa
         """

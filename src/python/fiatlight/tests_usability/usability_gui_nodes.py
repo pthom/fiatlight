@@ -16,7 +16,6 @@ What to verify:
 - Upon restarting, the application should reload the last factor value.
 - The output of a standard function can be customized via Fiatlight callbacks:
   check that the output of the x_times_2_gui function is displayed correctly.
-- The task function should write the input value to a file when the input changes.
 """
 
 import fiatlight as fl
@@ -73,16 +72,6 @@ def gui_x_times_factor(x: int) -> None:
     imgui.text(f"Multiply by a factor: x * {WHAT_TO_MULTIPLY.factor} ={x * WHAT_TO_MULTIPLY.factor}")
 
 
-# ====================== Task Functions =====================
-def task_write_to_file(x: int) -> None:
-    """task_write_to_file:
-    This function returns None, but it is not a GUI function.
-    Instead, it writes the input value to a file, and should be called when the input value changes.
-    """
-    with open("output.txt", "w") as f:
-        f.write(str(x))
-
-
 # =========== MAIN ===========
 
 # Create a new graph
@@ -113,10 +102,6 @@ x_times_2_gui.output().callbacks.present = lambda value: imgui.text_wrapped(
 )
 graph.add_function(x_times_2_gui)
 graph.add_link(input_x, x_times_2_gui)
-
-# Add task function to the graph
-graph.add_task_node(task_write_to_file)
-graph.add_link(input_x, task_write_to_file)
 
 # Run the graph
 fl.run(graph)

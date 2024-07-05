@@ -5,7 +5,6 @@ import copy
 from fiatlight.fiat_core.function_with_gui import FunctionWithGui, FunctionWithGuiFactoryFromName
 from fiatlight.fiat_core.function_node import FunctionNode, FunctionNodeLink
 from fiatlight.fiat_core.gui_node import GuiNode
-from fiatlight.fiat_core.task_node import TaskNode
 from fiatlight.fiat_core.markdown_node import MarkdownNode
 from fiatlight.fiat_types import Function, JsonDict, GuiFunctionWithInputs
 
@@ -128,10 +127,6 @@ class FunctionsGraph:
     ) -> FunctionNode:
         gui_node = GuiNode(gui_function, label=label, gui_serializable_data=gui_serializable_data)
         return self._add_function_with_gui(gui_node)
-
-    def add_task_node(self, task_function: GuiFunctionWithInputs, label: str | None = None) -> FunctionNode:
-        task_node = TaskNode(task_function, label=label)
-        return self._add_function_with_gui(task_node)
 
     def add_markdown_node(
         self,

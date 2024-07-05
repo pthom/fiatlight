@@ -5,7 +5,6 @@ from fiatlight.fiat_core import (
     FunctionsGraph,
     FiatToGuiException,
     GuiNode,
-    TaskNode,
     MarkdownNode,
 )
 from fiatlight.fiat_runner import (
@@ -69,7 +68,6 @@ __all__ = [
     "FunctionWithGui",
     "FiatToGuiException",
     "GuiNode",
-    "TaskNode",
     "MarkdownNode",
     # from to_gui
     "any_type_to_gui",

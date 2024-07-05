@@ -6,7 +6,7 @@
                     "name": "x",
                     "data": {
                         "type": "Primitive",
-                        "value": 2
+                        "value": 3
                     }
                 }
             },
@@ -14,8 +14,7 @@
             "gui_no_param": {},
             "gui_x_times_2": {},
             "gui_x_times_factor": {},
-            "x_times_2_2": {},
-            "task_write_to_file": {}
+            "x_times_2_2": {}
         }
     },
     "gui_options": {
@@ -23,7 +22,7 @@
             "function_node_with_gui": {
                 "_inputs_expanded": true,
                 "_outputs_expanded": true,
-                "_doc_expanded": false,
+                "_doc_expanded": true,
                 "fiat_tuning_expanded": true,
                 "_internal_state_gui_expanded": true,
                 "_function_node": {
@@ -153,7 +152,7 @@
                     },
                     "outputs": {},
                     "internal_gui_options": {
-                        "factor": 3
+                        "factor": 7
                     }
                 }
             },
@@ -166,7 +165,7 @@
                 },
                 "outputs": {},
                 "internal_gui_options": {
-                    "factor": 3
+                    "factor": 7
                 }
             }
         },
@@ -205,33 +204,6 @@
                         "expanded": true
                     }
                 }
-            }
-        },
-        "task_write_to_file": {
-            "function_node_with_gui": {
-                "_inputs_expanded": true,
-                "_outputs_expanded": true,
-                "_doc_expanded": true,
-                "fiat_tuning_expanded": true,
-                "_internal_state_gui_expanded": true,
-                "_function_node": {
-                    "inputs": {
-                        "x": {
-                            "cb_options": {},
-                            "expanded": false
-                        }
-                    },
-                    "outputs": {}
-                }
-            },
-            "function_node": {
-                "inputs": {
-                    "x": {
-                        "cb_options": {},
-                        "expanded": false
-                    }
-                },
-                "outputs": {}
             }
         }
     }

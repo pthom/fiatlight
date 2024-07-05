@@ -21,11 +21,6 @@ GuiBoolFunction = Callable[[], bool]
 # Used mainly for GuiNode
 GuiFunctionWithInputs = Callable[..., None]
 
-# a Task function that takes inputs and returns nothing. It should perform a task (e.g. save a file).
-# Used mainly for TaskNode
-TaskFunctionWithInputs = Callable[..., None]
-
-
 # A function that takes a DataType value and returns a tuple of a tuple [modified, new_value]
 # Used
 DataEditFunction = Callable[[DataType], Tuple[bool, DataType]]
