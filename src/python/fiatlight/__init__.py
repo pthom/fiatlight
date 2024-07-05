@@ -36,11 +36,11 @@ from imgui_bundle import hello_imgui
 ImGuiTheme_ = hello_imgui.ImGuiTheme_
 
 
-def demo_assets_dir() -> str:
+def fiat_assets_dir() -> str:
     import os
 
     this_dir = os.path.dirname(__file__)
-    assets_dir = os.path.abspath(f"{this_dir}/../../fiatlight_assets")
+    assets_dir = os.path.abspath(f"{this_dir}/assets")
     return assets_dir
 
 
@@ -86,7 +86,7 @@ __all__ = [
     "fire_once_at_frame_end",
     "fire_once_at_frame_start",
     # from here
-    "demo_assets_dir",
+    "fiat_assets_dir",
     "fiatlight_dir",
     # fiat_kits subpackages
     "fiat_image",

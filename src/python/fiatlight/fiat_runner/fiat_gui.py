@@ -290,9 +290,9 @@ class FiatGui:
 
         # Read the logo image
         import cv2
-        from fiatlight import demo_assets_dir
+        from fiatlight import fiat_assets_dir
 
-        logo_path = demo_assets_dir() + "/logo/logo.jpg"
+        logo_path = fiat_assets_dir() + "/logo/logo.jpg"
         self._logo_image = cv2.imread(logo_path)  # type: ignore
 
         self.was_post_init_called = False

@@ -14,7 +14,7 @@ import cv2
 
 
 # Our demo image
-demo_image: ImageU8_3 = cv2.imread(fl.demo_assets_dir() + "/images/house.jpg")  # type: ignore
+demo_image: ImageU8_3 = cv2.imread(fl.fiat_assets_dir() + "/images/house.jpg")  # type: ignore
 
 
 # A simple function that will use the Image Widget with its default settings.
