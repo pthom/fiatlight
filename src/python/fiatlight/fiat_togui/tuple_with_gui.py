@@ -25,7 +25,7 @@ class TupleWithGui(AnyDataWithGui[tuple[Any, ...]]):
     def __init__(self, inner_guis: tuple[AnyDataWithGui[Any], ...], fiat_attributes: FiatAttributes) -> None:
         # Constructing a tuple type for all _inner_guis
         types = tuple(inner_gui._type for inner_gui in inner_guis)
-        tuple_type = Tuple[*types]  # type: ignore
+        tuple_type = cast(Tuple[tuple(types)], tuple)  # type: ignore
         super().__init__(tuple_type)
         self._inner_guis = inner_guis
 
