@@ -6,7 +6,7 @@ from fiatlight.fiat_types import Unspecified, Error, JsonDict
 from fiatlight.fiat_core import AnyDataWithGui
 from fiatlight.fiat_types import FiatAttributes
 from imgui_bundle import imgui_ctx, ImVec4
-from typing import Any, Tuple
+from typing import Any, Tuple, cast
 
 
 class TupleWithGui(AnyDataWithGui[tuple[Any, ...]]):
