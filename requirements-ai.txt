@@ -1,4 +1,11 @@
-torch
+
+# Install pytorch:
+# On windows with cuda, see https://pytorch.org/get-started/locally/
+# ==> For **example**:
+#      pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+# On mac:
+# pip install torch ???
+
 diffusers
 transformers
 accelerate
