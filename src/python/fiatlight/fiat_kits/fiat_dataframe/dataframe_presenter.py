@@ -273,7 +273,7 @@ class DataFramePresenter:
         table_inner_width = 0.0  # Use the full width of the table
         if imgui.begin_table(
             str_id="DataFrameTable",
-            column=len(displayed_columns),
+            columns=len(displayed_columns),
             flags=table_flags,
             outer_size=table_outer_size,
             inner_width=table_inner_width,
