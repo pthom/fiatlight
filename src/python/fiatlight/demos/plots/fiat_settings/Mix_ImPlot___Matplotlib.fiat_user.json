@@ -6,28 +6,28 @@
                     "name": "radius_fixed_circle",
                     "data": {
                         "type": "Primitive",
-                        "value": 10.84
+                        "value": 14.065999984741211
                     }
                 },
                 "radius_moving_circle": {
                     "name": "radius_moving_circle",
                     "data": {
                         "type": "Primitive",
-                        "value": 4.320000171661377
+                        "value": 26.899999618530273
                     }
                 },
                 "pen_offset": {
                     "name": "pen_offset",
                     "data": {
                         "type": "Primitive",
-                        "value": 19.44499969482422
+                        "value": 23.316999435424805
                     }
                 },
                 "nb_turns": {
                     "name": "nb_turns",
                     "data": {
                         "type": "Primitive",
-                        "value": 12.40999984741211
+                        "value": 12.550000190734863
                     }
                 }
             },
@@ -46,7 +46,7 @@
                     "name": "mean",
                     "data": {
                         "type": "Primitive",
-                        "value": 2.065999984741211
+                        "value": -1.2869999408721924
                     }
                 },
                 "variance": {
@@ -66,7 +66,7 @@
                     "name": "levels",
                     "data": {
                         "type": "Primitive",
-                        "value": 14
+                        "value": 2
                     }
                 }
             },
@@ -100,7 +100,7 @@
                     "name": "nb_data",
                     "data": {
                         "type": "Primitive",
-                        "value": 4023
+                        "value": 76305
                     }
                 }
             }
@@ -111,6 +111,7 @@
             "function_node_with_gui": {
                 "_inputs_expanded": true,
                 "_outputs_expanded": true,
+                "_doc_expanded": false,
                 "fiat_tuning_expanded": false,
                 "_internal_state_gui_expanded": true,
                 "_function_node": {
@@ -145,8 +146,7 @@
                             },
                             "expanded": true
                         }
-                    },
-                    "internal_gui_options": {}
+                    }
                 }
             },
             "function_node": {
@@ -181,14 +181,14 @@
                         },
                         "expanded": true
                     }
-                },
-                "internal_gui_options": {}
+                }
             }
         },
         "time_seconds": {
             "function_node_with_gui": {
                 "_inputs_expanded": true,
                 "_outputs_expanded": true,
+                "_doc_expanded": false,
                 "fiat_tuning_expanded": false,
                 "_internal_state_gui_expanded": true,
                 "_function_node": {
@@ -198,8 +198,7 @@
                             "cb_options": {},
                             "expanded": false
                         }
-                    },
-                    "internal_gui_options": {}
+                    }
                 }
             },
             "function_node": {
@@ -209,14 +208,14 @@
                         "cb_options": {},
                         "expanded": false
                     }
-                },
-                "internal_gui_options": {}
+                }
             }
         },
         "phase_from_time_seconds": {
             "function_node_with_gui": {
                 "_inputs_expanded": true,
                 "_outputs_expanded": true,
+                "_doc_expanded": false,
                 "fiat_tuning_expanded": false,
                 "_internal_state_gui_expanded": true,
                 "_function_node": {
@@ -231,8 +230,7 @@
                             "cb_options": {},
                             "expanded": false
                         }
-                    },
-                    "internal_gui_options": {}
+                    }
                 }
             },
             "function_node": {
@@ -247,14 +245,14 @@
                         "cb_options": {},
                         "expanded": false
                     }
-                },
-                "internal_gui_options": {}
+                }
             }
         },
         "sin_wave": {
             "function_node_with_gui": {
                 "_inputs_expanded": true,
                 "_outputs_expanded": true,
+                "_doc_expanded": false,
                 "fiat_tuning_expanded": false,
                 "_internal_state_gui_expanded": true,
                 "_function_node": {
@@ -281,8 +279,7 @@
                             },
                             "expanded": true
                         }
-                    },
-                    "internal_gui_options": {}
+                    }
                 }
             },
             "function_node": {
@@ -309,14 +306,14 @@
                         },
                         "expanded": true
                     }
-                },
-                "internal_gui_options": {}
+                }
             }
         },
         "gaussian_heatmap": {
             "function_node_with_gui": {
                 "_inputs_expanded": true,
                 "_outputs_expanded": true,
+                "_doc_expanded": false,
                 "fiat_tuning_expanded": false,
                 "_internal_state_gui_expanded": true,
                 "_function_node": {
@@ -348,8 +345,7 @@
                             },
                             "expanded": true
                         }
-                    },
-                    "internal_gui_options": {}
+                    }
                 }
             },
             "function_node": {
@@ -381,14 +377,14 @@
                         },
                         "expanded": true
                     }
-                },
-                "internal_gui_options": {}
+                }
             }
         },
         "interactive_histogram": {
             "function_node_with_gui": {
                 "_inputs_expanded": true,
                 "_outputs_expanded": true,
+                "_doc_expanded": false,
                 "fiat_tuning_expanded": false,
                 "_internal_state_gui_expanded": true,
                 "_function_node": {
@@ -424,8 +420,7 @@
                             },
                             "expanded": true
                         }
-                    },
-                    "internal_gui_options": {}
+                    }
                 }
             },
             "function_node": {
@@ -461,8 +456,7 @@
                         },
                         "expanded": true
                     }
-                },
-                "internal_gui_options": {}
+                }
             }
         }
     }

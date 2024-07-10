@@ -20,7 +20,7 @@
             "function_node_with_gui": {
                 "_inputs_expanded": true,
                 "_outputs_expanded": true,
-                "_doc_expanded": true,
+                "_doc_expanded": false,
                 "fiat_tuning_expanded": false,
                 "_internal_state_gui_expanded": true,
                 "_function_node": {
@@ -74,7 +74,7 @@
             "function_node_with_gui": {
                 "_inputs_expanded": true,
                 "_outputs_expanded": true,
-                "_doc_expanded": true,
+                "_doc_expanded": false,
                 "fiat_tuning_expanded": false,
                 "_internal_state_gui_expanded": true,
                 "_function_node": {
@@ -89,8 +89,8 @@
                                     10.0
                                 ],
                                 "selection": {
-                                    "start": 0.5108390022675737,
-                                    "end": 1.5325170068027212
+                                    "start": 0.49342403628117915,
+                                    "end": 1.4802721088435375
                                 }
                             },
                             "expanded": false
@@ -124,8 +124,8 @@
                                 10.0
                             ],
                             "selection": {
-                                "start": 0.5108390022675737,
-                                "end": 1.5325170068027212
+                                "start": 0.49342403628117915,
+                                "end": 1.4802721088435375
                             }
                         },
                         "expanded": false
@@ -166,8 +166,8 @@
                                     10.0
                                 ],
                                 "selection": {
-                                    "start": 0.5108390022675737,
-                                    "end": 1.5325170068027212
+                                    "start": 0.49342403628117915,
+                                    "end": 1.4802721088435375
                                 }
                             },
                             "expanded": false
@@ -177,8 +177,8 @@
                         "0": {
                             "cb_options": {
                                 "figure_size": {
-                                    "x": 640.0,
-                                    "y": 480.0
+                                    "x": 430.0,
+                                    "y": 323.0
                                 }
                             },
                             "expanded": true
@@ -198,8 +198,8 @@
                                 10.0
                             ],
                             "selection": {
-                                "start": 0.5108390022675737,
-                                "end": 1.5325170068027212
+                                "start": 0.49342403628117915,
+                                "end": 1.4802721088435375
                             }
                         },
                         "expanded": false
@@ -209,8 +209,8 @@
                     "0": {
                         "cb_options": {
                             "figure_size": {
-                                "x": 640.0,
-                                "y": 480.0
+                                "x": 430.0,
+                                "y": 323.0
                             }
                         },
                         "expanded": true
@@ -237,8 +237,8 @@
                                     10.0
                                 ],
                                 "selection": {
-                                    "start": 0.5108390022675737,
-                                    "end": 1.5325170068027212
+                                    "start": 0.49342403628117915,
+                                    "end": 1.4802721088435375
                                 }
                             },
                             "expanded": false
@@ -248,8 +248,8 @@
                         "0": {
                             "cb_options": {
                                 "figure_size": {
-                                    "x": 1000.0,
-                                    "y": 400.0
+                                    "x": 557.0,
+                                    "y": 223.0
                                 }
                             },
                             "expanded": true
@@ -269,8 +269,8 @@
                                 10.0
                             ],
                             "selection": {
-                                "start": 0.5108390022675737,
-                                "end": 1.5325170068027212
+                                "start": 0.49342403628117915,
+                                "end": 1.4802721088435375
                             }
                         },
                         "expanded": false
@@ -280,8 +280,8 @@
                     "0": {
                         "cb_options": {
                             "figure_size": {
-                                "x": 1000.0,
-                                "y": 400.0
+                                "x": 557.0,
+                                "y": 223.0
                             }
                         },
                         "expanded": true

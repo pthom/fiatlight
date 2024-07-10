@@ -15,10 +15,12 @@ _start_time = time.time()
 
 
 def time_seconds() -> float:
+    """Returns the time in seconds since the start of the application."""
     return time.time() - _start_time
 
 
 def phase_from_time_seconds(time_: float) -> float:
+    """Converts time in seconds to a phase value."""
     return time_ * 15.0
 
 
@@ -26,11 +28,12 @@ time_seconds.invoke_always_dirty = True  # type: ignore
 
 
 @fl.with_fiat_attributes(
+    label="Sine Wave (ImPlot)",
     phase__range=(0.0, 2 * math.pi),
     amplitude__range=(0.0, 4.0),
-    label="Sine Wave (ImPlot)",
 )
 def sin_wave(phase: float, amplitude: float = 1.0) -> fiat_implot.FloatMatrix_Dim2:
+    """A sine wave with adjustable phase and amplitude."""
     x = np.arange(0, 10, 0.1)
     y = np.sin(x + phase) * amplitude
     r = np.stack((x, y))
@@ -38,12 +41,12 @@ def sin_wave(phase: float, amplitude: float = 1.0) -> fiat_implot.FloatMatrix_Di
 
 
 @fl.with_fiat_attributes(
+    label="Spirograph (ImPlot)",
     radius_fixed_circle__range=(0.0, 100.0),
     radius_moving_circle__range=(0.0, 100.0),
     pen_offset__range=(0.0, 100.0),
     nb_turns__range=(0.0, 100.0),
     nb_turns__edit_type="knob",
-    label="Spirograph (ImPlot)",
 )
 def make_spirograph_curve(
     radius_fixed_circle: float = 10.84,
@@ -71,10 +74,10 @@ class ColorMap(Enum):
 
 
 @fl.with_fiat_attributes(
+    label="Gaussian Heatmap (Matplotlib)",
     mean__range=(-5, 5),
     variance__range=(0.1, 5),
     levels__range=(1, 20),
-    label="Gaussian Heatmap (Matplotlib)",
 )
 def gaussian_heatmap(
     mean: float = 0, variance: float = 1, colormap: ColorMap = ColorMap.VIRIDIS, levels: int = 10
@@ -90,13 +93,13 @@ def gaussian_heatmap(
 
 
 @fl.with_fiat_attributes(
+    label="Interactive Histogram (Matplotlib)",
     n_bars__range=(1, 50),
     mu__range=(-5, 5),
     sigma__range=(0.1, 5),
     average__range=(0, 1000),
     nb_data__range=(100, 1_000_000),
     nb_data__slider_logarithmic=True,
-    label="Interactive Histogram (Matplotlib)",
 )
 def interactive_histogram(
     n_bars: int = 10,

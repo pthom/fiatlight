@@ -23,12 +23,12 @@ With fiatlight, we can easily examine the intermediate results of each step.
 """
 
 from typing import List, Tuple
+import fiatlight as fl
 from fiatlight.demos.string.str_functions import (
     text_from_file,
     str_lower,
     remove_non_letters,
     split_words,
-    remove_empty_words,
     sort_words,
 )
 
@@ -56,6 +56,12 @@ def run_length_encode(input_list: List[str]) -> List[WordWithCount]:
     return r
 
 
+def filter_out_short_words(words: List[str], min_length: int = 4) -> List[str]:
+    """Filter out words that are shorter than a given length."""
+    return list(filter(lambda word: len(word) >= min_length, words))
+
+
+@fl.with_fiat_attributes(label="Most common words")
 def sort_word_with_counts(words: List[WordWithCount]) -> List[WordWithCount]:
     """Sort a list of words by frequency, in descending order,
     so that the most frequent words come first."""
@@ -63,14 +69,7 @@ def sort_word_with_counts(words: List[WordWithCount]) -> List[WordWithCount]:
     return r
 
 
-def filter_out_short_words(words: List[str], min_length: int = 4) -> List[str]:
-    """Filter out words that are shorter than a given length."""
-    return list(filter(lambda word: len(word) >= min_length, words))
-
-
 def main() -> None:
-    import fiatlight as fl
-
     fl.run(
         [
             text_from_file,
@@ -78,7 +77,6 @@ def main() -> None:
             remove_non_letters,
             split_words,
             filter_out_short_words,
-            remove_empty_words,
             sort_words,
             run_length_encode,
             sort_word_with_counts,

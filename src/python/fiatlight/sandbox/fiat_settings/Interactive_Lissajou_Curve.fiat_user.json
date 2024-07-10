@@ -6,28 +6,28 @@
                     "name": "freq1",
                     "data": {
                         "type": "Primitive",
-                        "value": 4.664000034332275
+                        "value": 3.9079999923706055
                     }
                 },
                 "freq2": {
                     "name": "freq2",
                     "data": {
                         "type": "Primitive",
-                        "value": 2.6549999713897705
+                        "value": 3.9159998893737793
                     }
                 },
                 "delta": {
                     "name": "delta",
                     "data": {
                         "type": "Primitive",
-                        "value": -1.9149999618530273
+                        "value": 1.8329999446868896
                     }
                 },
                 "nb_periods": {
                     "name": "nb_periods",
                     "data": {
                         "type": "Primitive",
-                        "value": 2.5999999046325684
+                        "value": 10.0
                     }
                 }
             }
@@ -38,6 +38,7 @@
             "function_node_with_gui": {
                 "_inputs_expanded": true,
                 "_outputs_expanded": true,
+                "_doc_expanded": false,
                 "fiat_tuning_expanded": false,
                 "_internal_state_gui_expanded": true,
                 "_function_node": {
@@ -69,8 +70,7 @@
                             },
                             "expanded": true
                         }
-                    },
-                    "internal_gui_options": {}
+                    }
                 }
             },
             "function_node": {
@@ -102,8 +102,7 @@
                         },
                         "expanded": true
                     }
-                },
-                "internal_gui_options": {}
+                }
             }
         }
     }

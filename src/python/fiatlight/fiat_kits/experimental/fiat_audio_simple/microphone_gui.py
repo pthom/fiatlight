@@ -30,7 +30,7 @@ class MicrophoneGui(FunctionWithGui):
     _was_recording_just_stopped: bool = False
 
     def __init__(self) -> None:
-        super().__init__(self._f)
+        super().__init__(self._f, fn_name="Microphone")
         self.function_name = "MicrophoneGui"
         self.internal_state_gui = self._internal_gui
         self.on_heartbeat = self._on_heartbeat

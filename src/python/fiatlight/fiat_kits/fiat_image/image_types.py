@@ -33,6 +33,7 @@ ImageU8_2 = NewType("ImageU8_2", np.ndarray[ShapeHeightWidthChannels, UInt8])
 ImageU8_3 = NewType("ImageU8_3", np.ndarray[ShapeHeightWidthChannels, UInt8])
 ImageU8_4 = NewType("ImageU8_4", np.ndarray[ShapeHeightWidthChannels, UInt8])
 ImageU8_WithNbChannels = Union[ImageU8_1, ImageU8_2, ImageU8_3, ImageU8_4]
+
 # Type definitions based on the roles of the channels
 ImageU8_RGB = NewType("ImageU8_RGB", ImageU8_3)
 ImageU8_RGBA = NewType("ImageU8_RGBA", ImageU8_4)
