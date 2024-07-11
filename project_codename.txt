@@ -1,0 +1,3 @@
+Project Codename: Shine
+Official Project Name: Fiatlight
+This document is to clarify that the project codenamed "Shine" refers to the project officially named "Fiatlight."
