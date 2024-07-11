@@ -80,7 +80,7 @@ class _SdxlTurboWrapper:
         return as_array  # type: ignore
 
 
-_stable_diffusion_xl_wrapper: _SdxlTurboWrapper | None = None
+_stable_diffusion_xl_turbo_wrapper: _SdxlTurboWrapper | None = None
 
 
 def validate_prompt(prompt: Prompt) -> Prompt:
@@ -105,10 +105,10 @@ def invoke_sdxl_turbo(
 
     If you are looking for inspiration with your prompts, look at Lexica: https://lexica.art
     """
-    global _stable_diffusion_xl_wrapper
-    if _stable_diffusion_xl_wrapper is None:
-        _stable_diffusion_xl_wrapper = _SdxlTurboWrapper()
-    return _stable_diffusion_xl_wrapper.query(prompt, seed)
+    global _stable_diffusion_xl_turbo_wrapper
+    if _stable_diffusion_xl_turbo_wrapper is None:
+        _stable_diffusion_xl_turbo_wrapper = _SdxlTurboWrapper()
+    return _stable_diffusion_xl_turbo_wrapper.query(prompt, seed)
 
 
 # Options that will control how the function is invoked in fiatlight
