@@ -19,8 +19,8 @@ if sys.platform == "darwin":
 else:
     INFERENCE_DEVICE_TYPE = "cuda"
 
-# reduce memory usage (cuda only)
-ENABLE_CPU_OFFLOAD = True
+# Set this to true  to reduce memory usage (cuda only, perf will be reduced!)
+ENABLE_CPU_OFFLOAD_CUDA = False
 
 
 #
@@ -53,7 +53,7 @@ class _SdxlTurboWrapper:
             "stabilityai/sdxl-turbo", torch_dtype=torch.float16, variant="fp16"
         )
         self.pipe = self.pipe.to(INFERENCE_DEVICE_TYPE)  # type: ignore
-        if ENABLE_CPU_OFFLOAD and INFERENCE_DEVICE_TYPE == "cuda":
+        if ENABLE_CPU_OFFLOAD_CUDA and INFERENCE_DEVICE_TYPE == "cuda":
             self.pipe.enable_model_cpu_offload()  # type: ignore
         self.generator = torch.Generator(device=INFERENCE_DEVICE_TYPE)
         self.generator.manual_seed(42)
