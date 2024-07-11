@@ -14,7 +14,7 @@ device = "cuda"
 # Will download to ~/.cache/huggingface/transformers
 pipe = AutoPipelineForText2Image.from_pretrained("stabilityai/sdxl-turbo", torch_dtype=torch.float16, variant="fp16")  # type: ignore
 pipe = pipe.to(device)
-pipe.enable_model_cpu_offload()
+# pipe.enable_model_cpu_offload()
 
 generator = torch.Generator(device=device)
 generator.manual_seed(42)
