@@ -4,9 +4,9 @@ import cv2
 import numpy as np
 
 repo_id = "stabilityai/stable-diffusion-2-base"
-pipe = DiffusionPipeline.from_pretrained(repo_id, torch_dtype=torch.float16, variant="fp16")
+pipe = DiffusionPipeline.from_pretrained(repo_id, torch_dtype=torch.float16, variant="fp16")  # type: ignore
 
-pipe.scheduler = DPMSolverMultistepScheduler.from_config(pipe.scheduler.config)
+pipe.scheduler = DPMSolverMultistepScheduler.from_config(pipe.scheduler.config)  # type: ignore
 pipe = pipe.to("cuda")
 
 prompt = "High quality photo of an astronaut riding a horse in space"
