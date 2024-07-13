@@ -11,8 +11,7 @@ from fiatlight.fiat_togui.basemodel_gui import BaseModelGui
 
 class MicrophoneGui(FunctionWithGui):
     # Serialized options
-    _microphone_params_gui: BaseModelGui[SoundStreamParams]
-    _sound_stream_params: SoundStreamParams
+    _sound_stream_params_gui: BaseModelGui[SoundStreamParams]
     _live_plot_size_em: ImVec2
 
     # IO
@@ -30,20 +29,24 @@ class MicrophoneGui(FunctionWithGui):
     _was_recording_just_stopped: bool = False
 
     def __init__(self) -> None:
-        super().__init__(self._f, fn_name="Microphone")
+        super().__init__(self.get_current_sound_wave, fn_name="Microphone")
         self.function_name = "MicrophoneGui"
         self.internal_state_gui = self._internal_gui
         self.on_heartbeat = self._on_heartbeat
 
-        self._microphone_params_gui = BaseModelGui(SoundStreamParams)
-        self._sound_stream_params = SoundStreamParams()
+        self._sound_stream_params_gui = BaseModelGui(SoundStreamParams)
+        self._sound_stream_params_gui.value = SoundStreamParams()
+
         self._microphone_io = AudioProviderMic()
 
         self._displayed_sound_block = None
         self._sound_wave_being_recorded = None
         self._live_plot_size_em = ImVec2(20, 10)
 
-    def _f(self) -> SoundWave | None:
+    def _sound_stream_params(self) -> SoundStreamParams:
+        return self._sound_stream_params_gui.get_actual_value()
+
+    def get_current_sound_wave(self) -> SoundWave | None:
         return self._sound_wave
 
     def _clear(self) -> None:
@@ -72,13 +75,14 @@ class MicrophoneGui(FunctionWithGui):
         return needs_refresh
 
     def _on_start_recording(self) -> None:
-        self._microphone_io.start(self._sound_stream_params)
+        self._microphone_io.start(self._sound_stream_params())
         self._sound_wave = None
         self._is_recording = True
 
     def _on_stop_recording(self) -> None:
         self._microphone_io.stop()
-        self._sound_wave = SoundWave(self._sound_wave_being_recorded, self._sound_stream_params.sample_rate)  # type: ignore
+        assert self._sound_wave_being_recorded is not None
+        self._sound_wave = SoundWave(self._sound_wave_being_recorded, self._sound_stream_params().sample_rate.value)
         self._was_recording_just_stopped = True
         self._is_recording = False
 
@@ -140,7 +144,7 @@ class MicrophoneGui(FunctionWithGui):
             has_data = self._sound_wave is not None or self._sound_wave_being_recorded is not None
 
             imgui.begin_disabled(is_started or has_data)
-            _params_changed = self._microphone_params_gui.edit(self._sound_stream_params)
+            _params_changed = self._sound_stream_params_gui.gui_edit()
             imgui.end_disabled()
             need_refresh = self._draw_control_buttons()
             self._show_live_sound_block()

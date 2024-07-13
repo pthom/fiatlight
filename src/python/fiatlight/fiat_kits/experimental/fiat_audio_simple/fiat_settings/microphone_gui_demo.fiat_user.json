@@ -1,27 +1,36 @@
 {
-    "functions_graph": {
+    "user_inputs": {
         "functions_nodes": {
-            "MicrophoneGui": {
-                "inputs": {},
-                "gui_options": {
-                    "inputs": {},
-                    "outputs": {},
-                    "internal_gui_options": {}
-                }
-            }
+            "MicrophoneGui": {}
         }
     },
-    "functions_gui_settings": {
+    "gui_options": {
         "MicrophoneGui": {
-            "_show_input_details": {},
-            "_inputs_expanded": true,
-            "_show_output_details": {
-                "0": true
+            "function_node_with_gui": {
+                "_inputs_expanded": true,
+                "_outputs_expanded": true,
+                "_doc_expanded": false,
+                "fiat_tuning_expanded": true,
+                "_internal_state_gui_expanded": true,
+                "_function_node": {
+                    "inputs": {},
+                    "outputs": {
+                        "0": {
+                            "cb_options": {},
+                            "expanded": true
+                        }
+                    }
+                }
             },
-            "_outputs_expanded": true,
-            "_show_internals_details": {},
-            "_internals_expanded": true,
-            "_internal_state_gui_expanded": true
+            "function_node": {
+                "inputs": {},
+                "outputs": {
+                    "0": {
+                        "cb_options": {},
+                        "expanded": true
+                    }
+                }
+            }
         }
     }
 }

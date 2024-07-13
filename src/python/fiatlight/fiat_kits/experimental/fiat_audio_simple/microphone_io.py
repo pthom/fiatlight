@@ -12,7 +12,7 @@ class MicrophoneBuffer:
     """Thread-safe buffer for audio data. Used to pass audio data from the microphone to the main thread."""
 
     _queue: Queue[SoundBlock]
-    _sample_rate: SampleRate = SampleRate.Hz44100
+    _sample_rate: SampleRate = SampleRate(44100)
 
     def __init__(self) -> None:
         self._queue = Queue()
@@ -44,7 +44,7 @@ class MicrophoneBuffer:
         except Empty:
             pass
 
-        if len(blocks) > 0 and self._sample_rate.value <= 0:
+        if len(blocks) > 0 and self._sample_rate <= 0:
             raise ValueError("Sample rate not set")
         return SoundBlocksList(blocks, self._sample_rate)
 
@@ -85,7 +85,7 @@ class AudioProviderMic:
             self._sd_stream = sd.InputStream(
                 samplerate=int(stream_params.sample_rate.value),
                 callback=self._audio_callback,
-                blocksize=stream_params.block_size,
+                blocksize=stream_params.block_size.value,
             )
             self._sd_stream.start()
         except Exception as e:

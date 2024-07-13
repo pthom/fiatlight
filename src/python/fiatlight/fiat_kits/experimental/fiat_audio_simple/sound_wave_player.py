@@ -67,7 +67,7 @@ class SoundWavePlayer:
         return self._stream.active if self._stream else False  # type: ignore
 
     def position_seconds(self) -> TimeSeconds:
-        return TimeSeconds(self.position / self.sound_wave.sample_rate.value)
+        return TimeSeconds(self.position / self.sound_wave.sample_rate)
 
     def play(self) -> None:
         self._play_impl()
@@ -82,10 +82,10 @@ class SoundWavePlayer:
         self._init_stream()
 
     def can_advance(self, seconds: float) -> bool:
-        return self.position + seconds * self.sound_wave.sample_rate.value < len(self.sound_wave.wave)
+        return self.position + seconds * self.sound_wave.sample_rate < len(self.sound_wave.wave)
 
     def can_rewind(self, seconds: float) -> bool:
-        return self.position - seconds * self.sound_wave.sample_rate.value >= 0
+        return self.position - seconds * self.sound_wave.sample_rate >= 0
 
     def advance(self, seconds: TimeSeconds) -> None:
         self.seek(TimeSeconds(self.position_seconds() + seconds))
@@ -143,6 +143,10 @@ class SoundWavePlayer:
     def _play_impl(self) -> None:
         self.paused = False
         self._stop_flag = False
+
+        if self.position >= len(self.sound_wave.wave):
+            self.position = 0
+
         try:
             if self._stream is None or not self._stream.active:
                 self._init_stream()
@@ -163,9 +167,9 @@ class SoundWavePlayer:
         while self._stream is not None and self._stream.active:
             if self._stop_flag:
                 break
-            if self.position >= len(self.sound_wave.wave):
-                self.reset_player()  # Reset the player when end of wave is reached
-                break
+            # if self.position >= len(self.sound_wave.wave):
+            #     self.reset_player()  # Reset the player when end of wave is reached
+            #     break
             sd.sleep(100)
 
     def _pause_impl(self) -> None:
@@ -200,7 +204,7 @@ class SoundWavePlayer:
     def _seek_impl(self, position: TimeSeconds) -> None:
         try:
             if 0 <= position <= self.sound_wave.duration():
-                self.position = int(position * self.sound_wave.sample_rate.value)
+                self.position = int(position * self.sound_wave.sample_rate)
             else:
                 logging.error(f"Seek position out of bounds: {position}, duration: {self.sound_wave.duration()}")
         except ValueError as e:
@@ -222,4 +226,4 @@ def create_demo_sound_wave() -> SoundWave:
             wave = np.sin(2 * np.pi * freq * time)
             full_wave = np.concatenate([full_wave, wave])
 
-    return SoundWave(full_wave, sample_rate)  # type: ignore
+    return SoundWave(full_wave, sample_rate)

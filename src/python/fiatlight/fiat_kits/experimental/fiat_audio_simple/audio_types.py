@@ -12,13 +12,23 @@ from pydantic import BaseModel
 from dataclasses import dataclass
 
 
+SampleRate = int
+BlockSize = int
+
+
 # A live block of sound data, with shape (block_size, nb_channels),
 # where block_size is the number of samples per channel, user-defined (typically 512 or 1024),
+# ShapeDim1 = tuple[int]
+# ShapeDim2 = tuple[int, int]
+# SoundBlock = NewType("SoundBlock", np.ndarray[ShapeDim1 | ShapeDim2, np.dtype[np.float32]])
+# SoundData = NewType("SoundData", np.ndarray[ShapeDim1 | ShapeDim2, np.dtype[np.float32]])
 SoundBlock = NDArray[np.float32]
+SoundData = NDArray[np.float32]
 
 
-class SampleRate(Enum):
+class SampleRatesCommon(Enum):
     """Common sample rates for sound data."""
+
     Hz8000 = 8000
     Hz22050 = 22050
     Hz32000 = 32000
@@ -26,8 +36,9 @@ class SampleRate(Enum):
     Hz48000 = 48000
 
 
-class BlockSize(Enum):
+class BlockSizesCommon(Enum):
     """Common block sizes for sound data."""
+
     Size256 = 256
     Size512 = 512
     Size1024 = 1024
@@ -39,8 +50,8 @@ class SoundStreamParams(BaseModel):
     This simple audio library only supports mono sound.
     """
 
-    sample_rate: SampleRate = SampleRate.Hz44100
-    block_size: BlockSize = BlockSize.Size512
+    sample_rate: SampleRatesCommon = SampleRatesCommon.Hz44100
+    block_size: BlockSizesCommon = BlockSizesCommon.Size512
 
 
 @dataclass
@@ -56,13 +67,12 @@ class SoundBlocksList:
         return len(self.blocks) == 0
 
     def __str__(self) -> str:
-        return f"{len(self.blocks)} blocks at {self.sample_rate.value / 1000:.1f} kHz"
-
+        return f"{len(self.blocks)} blocks at {self.sample_rate / 1000:.1f} kHz"
 
 
 @dataclass
 class SoundWave:
-    wave: FloatMatrix_Dim1
+    wave: SoundData
     sample_rate: SampleRate
     _time_array: FloatMatrix_Dim1 | None = None  # cache for time array
     _max_intensity, _min_intensity = 1.0, -1.0
@@ -75,20 +85,19 @@ class SoundWave:
         if self.wave.ndim == 2 and self.wave.shape[1] > 1:
             self.wave = self.wave.mean(axis=0)
             # remove the second dimension
-            self.wave = self.wave.squeeze()  # type: ignore
+            self.wave = self.wave.squeeze()
 
-        time_array = np.arange(0, self.duration(), 1 / self.sample_rate.value, self.wave.dtype)
-        self._time_array = time_array  # type: ignore
+        self._time_array = np.arange(0, self.duration(), 1 / self.sample_rate, self.wave.dtype)  # type: ignore
         self._min_intensity = self.wave.min()
         self._max_intensity = self.wave.max()
 
     @staticmethod
     def make_empty() -> "SoundWave":
-        empty_wave: FloatMatrix_Dim1 = np.array([], dtype=np.float32)  # type: ignore
+        empty_wave = np.zeros((1,), np.float32)
         return SoundWave(empty_wave, SampleRate(44100))
 
     def duration(self) -> TimeSeconds:
-        return len(self.wave) / self.sample_rate  # type: ignore
+        return TimeSeconds(len(self.wave) / self.sample_rate)
 
     def nb_samples(self) -> int:
         return len(self.wave)
@@ -105,7 +114,7 @@ class SoundWave:
 
         num_samples = max_samples
         wave_resampled = scipy.signal.resample(self.wave, max_samples)
-        new_sample_rate = SampleRate(self.sample_rate.value * num_samples / len(self.wave))
+        new_sample_rate = SampleRate(int(self.sample_rate * num_samples / len(self.wave)))
         return SoundWave(wave_resampled, new_sample_rate)
 
     def time_array(self) -> FloatMatrix_Dim1:
@@ -113,7 +122,7 @@ class SoundWave:
         return self._time_array  # noqa
 
     def __str__(self) -> str:
-        return f"{self.duration():.2f}s at {self.sample_rate.value / 1000:.1f} kHz"
+        return f"{self.duration():.2f}s at {self.sample_rate / 1000:.1f} kHz"
 
 
 def sound_wave_from_file(file_path: AudioPath) -> SoundWave:

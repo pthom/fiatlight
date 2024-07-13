@@ -21,7 +21,7 @@ def create_demo_sound_wave() -> fiat_audio_simple.SoundWave:
             wave = np.sin(2 * np.pi * freq * time)
             full_wave = np.concatenate([full_wave, wave])
 
-    return fiat_audio_simple.SoundWave(full_wave, sample_rate)  # type: ignore
+    return fiat_audio_simple.SoundWave(full_wave, sample_rate)
 
 
 def sandbox() -> None:
