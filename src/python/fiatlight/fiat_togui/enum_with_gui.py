@@ -4,6 +4,8 @@ from imgui_bundle import imgui
 from enum import Enum
 from typing import Type
 
+from fiatlight.fiat_widgets import fiat_osd
+
 
 class EnumWithGui(AnyDataWithGui[Enum]):
     """An automatic GUI for any Enum. Will show radio buttons for each enum value, on two columns"""
@@ -30,10 +32,26 @@ class EnumWithGui(AnyDataWithGui[Enum]):
 
         self._check_can_edit_one_line()
 
+    def _enum_value_label(self, enum_value: Enum) -> str:
+        if hasattr(self.enum_type, "use_values_as_labels"):
+            if self.enum_type.use_values_as_labels:
+                return str(enum_value.value)
+
+        custom_label_attr_name = enum_value.name + "__label"
+        if hasattr(self.enum_type, custom_label_attr_name):
+            return str(getattr(self.enum_type, custom_label_attr_name))
+        return enum_value.name
+
+    def _enum_value_tooltip(self, enum_value: Enum) -> str:
+        custom_tooltip_attr_name = enum_value.name + "__tooltip"
+        if hasattr(self.enum_type, custom_tooltip_attr_name):
+            return str(getattr(self.enum_type, custom_tooltip_attr_name))
+        return ""
+
     def _check_can_edit_one_line(self) -> None:
         total_len = 0
         for enum_value in list(self.enum_type):
-            total_len += len(enum_value.name) + 3
+            total_len += len(self._enum_value_label(enum_value)) + 3
         if total_len < 50:
             self._can_edit_one_line = True
             self.callbacks.edit_collapsible = False
@@ -47,9 +65,11 @@ class EnumWithGui(AnyDataWithGui[Enum]):
             for i, enum_value in enumerate(list(self.enum_type)):
                 if i > 0:
                     imgui.same_line()
-                if imgui.radio_button(enum_value.name, value == enum_value):
+                if imgui.radio_button(self._enum_value_label(enum_value), value == enum_value):
                     value = enum_value
                     changed = True
+                if len(self._enum_value_tooltip(enum_value)) > 0:
+                    fiat_osd.set_widget_tooltip(self._enum_value_tooltip(enum_value))
         else:
             shall_show_two_columns = nb_values >= 3
             if shall_show_two_columns:
@@ -60,9 +80,11 @@ class EnumWithGui(AnyDataWithGui[Enum]):
             for i, enum_value in enumerate(list(self.enum_type)):
                 if i == 0:
                     imgui.begin_group()
-                if imgui.radio_button(enum_value.name, value == enum_value):
+                if imgui.radio_button(self._enum_value_label(enum_value), value == enum_value):
                     value = enum_value
                     changed = True
+                if len(self._enum_value_tooltip(enum_value)) > 0:
+                    fiat_osd.set_widget_tooltip(self._enum_value_tooltip(enum_value))
                 if i == end_first_column:
                     imgui.end_group()
                     imgui.same_line()
