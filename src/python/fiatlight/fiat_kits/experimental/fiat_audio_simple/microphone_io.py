@@ -1,11 +1,8 @@
 import sounddevice as sd  # type: ignore
 from typing import Any, Optional
 import logging
-from .audio_types import SoundBlock, SoundStreamParams
-
-
 from queue import Queue, Empty
-from .audio_types import SoundBlocksList, SampleRate
+from .audio_types import SoundBlock, SoundStreamParams, SoundBlocksList, SampleRate
 
 
 class MicrophoneBuffer:
@@ -18,6 +15,7 @@ class MicrophoneBuffer:
         self._queue = Queue()
 
     def enqueue_sound_block(self, block: SoundBlock, sample_rate: SampleRate) -> None:
+        # logging.warning(f"Enqueueing sound block: {block.shape}")
         if not self._queue.empty():
             # Ensure that all blocks have the same sample rate
             if sample_rate != self._sample_rate:
@@ -33,7 +31,7 @@ class MicrophoneBuffer:
     def get_sound_blocks(self) -> SoundBlocksList:
         """Retrieves the latest blocks of audio data from the microphone, if available.
         Should be called repeatedly to get all available data.
-        Ideally, you should call this quickly enough so that the list contains only few block.
+        Ideally, you should call this quickly enough so that the list contains only few blocks.
         Can be called from the main thread.
         """
         blocks = []
@@ -44,7 +42,7 @@ class MicrophoneBuffer:
         except Empty:
             pass
 
-        if len(blocks) > 0 and self._sample_rate <= 0:
+        if len(blocks) > 0 and self._sample_rate <= 0:  # noqa
             raise ValueError("Sample rate not set")
         return SoundBlocksList(blocks, self._sample_rate)
 
@@ -84,6 +82,7 @@ class AudioProviderMic:
         try:
             self._sd_stream = sd.InputStream(
                 samplerate=int(stream_params.sample_rate.value),
+                channels=1,  # we only support mono!
                 callback=self._audio_callback,
                 blocksize=stream_params.block_size.value,
             )
