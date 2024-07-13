@@ -23,11 +23,9 @@
                     "internal_gui_options": {
                         "device_number": 0,
                         "camera_resolution": [
-                            1920,
-                            1080
-                        ],
-                        "brightness": 0.4950000047683716,
-                        "contrast": 0.5
+                            1280,
+                            720
+                        ]
                     }
                 }
             },
@@ -42,11 +40,9 @@
                 "internal_gui_options": {
                     "device_number": 0,
                     "camera_resolution": [
-                        1920,
-                        1080
-                    ],
-                    "brightness": 0.4950000047683716,
-                    "contrast": 0.5
+                        1280,
+                        720
+                    ]
                 }
             }
         }

@@ -9,6 +9,7 @@ from fiatlight.fiat_types import JsonDict
 from fiatlight.fiat_kits.fiat_image import ImageU8_3
 from fiatlight.fiat_core.function_with_gui import FunctionWithGui
 from fiatlight.fiat_core.any_data_with_gui import AnyDataWithGui
+from fiatlight.fiat_utils import add_fiat_attributes
 from fiatlight.fiat_widgets import fontawesome_6_ctx, icons_fontawesome_6
 from enum import Enum
 from imgui_bundle import imgui, imgui_ctx, hello_imgui
@@ -22,14 +23,16 @@ _HACK_MOVIE: str | None = None
 # _HACK_MOVIE = "/Users/pascal/dvp/OpenSource/ImGuiWork/_Bundle/fiatlight/priv_assets/videos_demos/Sintel.2010.720p.mkv"  # noqa
 
 
-def _check_windows_opencv_capture_env_config():
+def _raise_if_incorrect_windows_opencv_capture_env_config() -> None:
     """On  windows, capture startup can be very slow, unless an environment variable is set
     See https://github.com/opencv/opencv/issues/17687
     """
     import platform
-    if  platform.system() != "Windows":
+
+    if platform.system() != "Windows":
         return
     import os
+
     message = """
         On  windows, capture startup ca be very slow, unless an environment variable is set.
         Please set the environment variable OPENCV_VIDEOIO_MSMF_ENABLE_HW_TRANSFORMS to 0
@@ -40,35 +43,36 @@ def _check_windows_opencv_capture_env_config():
         raise ValueError(message)
 
 
-
-
 class CameraResolution(Enum):
     """Some typical camera resolutions"""
 
     HD_1280_720 = [1280, 720]
     FULL_HD_1920_1080 = [1920, 1080]
-    UHD_4K_3840_2160 = [3840, 2160]
     VGA_640_480 = [640, 480]
     QVGA_320_240 = [320, 240]
 
 
-class CameraFps(Enum):
-    """Some typical camera frame rates"""
+add_fiat_attributes(
+    CameraResolution,
+    HD_1280_720__label="1280x720",
+    HD_1280_720__tooltip="High Definition",
+    #
+    FULL_HD_1920_1080__label="1920x1080",
+    FULL_HD_1920_1080__tooltip="Full HD",
+    #
+    VGA_640_480__label="640x480",
+    VGA_640_480__tooltip="VGA",
+    #
+    QVGA_320_240__label="320x240",
+)
 
-    FPS_30 = 30
-    FPS_60 = 60
-    FPS_120 = 120
-    FPS_240 = 240
 
-
-@base_model_with_gui_registration(device_number__range=(0, 5), brightness__range=(0, 1), contrast__range=(0, 1))
+@base_model_with_gui_registration(device_number__range=(0, 5))
 class CameraParams(BaseModel):
     """Parameters for the camera image provider"""
 
     device_number: int = 0
     camera_resolution: CameraResolution = CameraResolution.VGA_640_480
-    brightness: float = 0.5
-    contrast: float = 0.5
 
 
 class CameraImageProvider:
@@ -101,27 +105,10 @@ class CameraImageProvider:
         if self.cv_cap is None:
             self.camera_params = params
             return
-
-        shall_restart = False
-        if self.previous_camera_params is not None:
-            if self.previous_camera_params.device_number != params.device_number:
-                shall_restart = True
-            if self.previous_camera_params.camera_resolution != params.camera_resolution:
-                shall_restart = True
-
         self.previous_camera_params = copy.deepcopy(self.camera_params)
         self.camera_params = params
-
-        if shall_restart:
-            self.stop()
-            self.start()
-        else:
-            brightness_set = self.cv_cap.set(cv2.CAP_PROP_BRIGHTNESS, self.camera_params.brightness)
-            contrast_set = self.cv_cap.set(cv2.CAP_PROP_CONTRAST, self.camera_params.contrast)
-            if not brightness_set:
-                logging.warning("This camera does not support setting brightness")
-            if not contrast_set:
-                logging.warning("This camera does not support setting contrast")
+        self.stop()
+        self.start()
 
     def start(self) -> None:
         logging.info(f"CameraImageProvider start: {self.camera_params}")
@@ -129,20 +116,13 @@ class CameraImageProvider:
         if _HACK_MOVIE is not None and os.path.exists(_HACK_MOVIE):
             self.cv_cap.open(_HACK_MOVIE)
         else:
-            _check_windows_opencv_capture_env_config()
+            _raise_if_incorrect_windows_opencv_capture_env_config()
             self.cv_cap.open(self.camera_params.device_number)
         frame_width_set = self.cv_cap.set(cv2.CAP_PROP_FRAME_WIDTH, self.camera_params.camera_resolution.value[0])
         frame_height_set = self.cv_cap.set(cv2.CAP_PROP_FRAME_HEIGHT, self.camera_params.camera_resolution.value[1])
-        # fps_set = self.cv_cap.set(cv2.CAP_PROP_FPS, self.camera_params.fps.value)
-        brightness_set = self.cv_cap.set(cv2.CAP_PROP_BRIGHTNESS, self.camera_params.brightness)
-        contrast_set = self.cv_cap.set(cv2.CAP_PROP_CONTRAST, self.camera_params.contrast)
 
         if not frame_width_set or not frame_height_set:
             logging.warning("This camera does not support setting frame width and height")
-        if not brightness_set:
-            logging.warning("This camera does not support setting brightness")
-        if not contrast_set:
-            logging.warning("This camera does not support setting contrast")
 
         self.previous_camera_params = copy.deepcopy(self.camera_params)
 
