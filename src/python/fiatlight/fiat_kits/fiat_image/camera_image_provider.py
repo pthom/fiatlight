@@ -1,6 +1,5 @@
 import copy
 import logging
-
 import cv2
 import os  # noqa
 from pydantic import BaseModel
@@ -21,6 +20,26 @@ _HACK_MOVIE: str | None = None
 
 # _HACK_IMAGE: ImageU8_3 = cv2.imread(os.path.dirname(__file__) + "/paris.jpg")  # type: ignore
 # _HACK_MOVIE = "/Users/pascal/dvp/OpenSource/ImGuiWork/_Bundle/fiatlight/priv_assets/videos_demos/Sintel.2010.720p.mkv"  # noqa
+
+
+def _check_windows_opencv_capture_env_config():
+    """On  windows, capture startup can be very slow, unless an environment variable is set
+    See https://github.com/opencv/opencv/issues/17687
+    """
+    import platform
+    if  platform.system() != "Windows":
+        return
+    import os
+    message = """
+        On  windows, capture startup ca be very slow, unless an environment variable is set.
+        Please set the environment variable OPENCV_VIDEOIO_MSMF_ENABLE_HW_TRANSFORMS to 0
+    """
+    if "OPENCV_VIDEOIO_MSMF_ENABLE_HW_TRANSFORMS" not in os.environ:
+        raise ValueError(message)
+    if os.environ["OPENCV_VIDEOIO_MSMF_ENABLE_HW_TRANSFORMS"] != "0":
+        raise ValueError(message)
+
+
 
 
 class CameraResolution(Enum):
@@ -110,6 +129,7 @@ class CameraImageProvider:
         if _HACK_MOVIE is not None and os.path.exists(_HACK_MOVIE):
             self.cv_cap.open(_HACK_MOVIE)
         else:
+            _check_windows_opencv_capture_env_config()
             self.cv_cap.open(self.camera_params.device_number)
         frame_width_set = self.cv_cap.set(cv2.CAP_PROP_FRAME_WIDTH, self.camera_params.camera_resolution.value[0])
         frame_height_set = self.cv_cap.set(cv2.CAP_PROP_FRAME_HEIGHT, self.camera_params.camera_resolution.value[1])

@@ -1,0 +1,54 @@
+{
+    "user_inputs": {
+        "functions_nodes": {
+            "CameraImageProviderGui": {}
+        }
+    },
+    "gui_options": {
+        "CameraImageProviderGui": {
+            "function_node_with_gui": {
+                "_inputs_expanded": true,
+                "_outputs_expanded": true,
+                "_doc_expanded": false,
+                "fiat_tuning_expanded": true,
+                "_internal_state_gui_expanded": true,
+                "_function_node": {
+                    "inputs": {},
+                    "outputs": {
+                        "0": {
+                            "cb_options": {},
+                            "expanded": true
+                        }
+                    },
+                    "internal_gui_options": {
+                        "device_number": 0,
+                        "camera_resolution": [
+                            1920,
+                            1080
+                        ],
+                        "brightness": 0.4950000047683716,
+                        "contrast": 0.5
+                    }
+                }
+            },
+            "function_node": {
+                "inputs": {},
+                "outputs": {
+                    "0": {
+                        "cb_options": {},
+                        "expanded": true
+                    }
+                },
+                "internal_gui_options": {
+                    "device_number": 0,
+                    "camera_resolution": [
+                        1920,
+                        1080
+                    ],
+                    "brightness": 0.4950000047683716,
+                    "contrast": 0.5
+                }
+            }
+        }
+    }
+}
