@@ -35,7 +35,7 @@ def interactive_sine_wave(freq: float = 1.0, phase: float = 0.0, amplitude: floa
     y = amplitude * np.sin(2 * np.pi * freq * x + phase)
     fig, ax = plt.subplots()
     ax.plot(x, y)
-    ax.set_ylim([-1.5, 1.5])  # Adjust the y-axis limits
+    ax.set_ylim((-1.5, 1.5))  # Adjust the y-axis limits
     return fig
 
 

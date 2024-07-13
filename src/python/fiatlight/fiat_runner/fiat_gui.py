@@ -577,7 +577,7 @@ class FiatGui:
         split_main_info = hello_imgui.DockingSplit(
             initial_dock_=self._main_dock_space_id,
             new_dock_=self._info_dock_space_id,
-            direction_=imgui.Dir_.down,
+            direction_=imgui.Dir.down,
             ratio_=0.1,
         )
         return [split_main_info]

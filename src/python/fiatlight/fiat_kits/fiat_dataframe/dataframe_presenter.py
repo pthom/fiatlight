@@ -238,8 +238,8 @@ class DataFramePresenter:
                 for spec_idx in range(sort_specs.specs_count):
                     spec = sort_specs.get_specs(spec_idx)
                     col_name = displayed_columns[spec.column_index]
-                    ascending = spec.get_sort_direction() == imgui.SortDirection_.ascending.value
-                    no_sort = spec.get_sort_direction() == imgui.SortDirection_.none.value
+                    ascending = spec.get_sort_direction() == imgui.SortDirection.ascending
+                    no_sort = spec.get_sort_direction() == imgui.SortDirection.none
                     if not no_sort:
                         sort_order.append((col_name, ascending))
                 self.params.sort_by = sort_order

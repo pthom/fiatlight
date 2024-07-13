@@ -276,13 +276,13 @@ def main() -> None:
     split_main_params = hello_imgui.DockingSplit()
     split_main_params.initial_dock = "MainDockSpace"
     split_main_params.new_dock = "CamParamsAndEffects"
-    split_main_params.direction = imgui.Dir_.left
+    split_main_params.direction = imgui.Dir.left
     split_main_params.ratio = 0.4
 
     split_image_and_effect = hello_imgui.DockingSplit()
     split_image_and_effect.initial_dock = "MainDockSpace"
     split_image_and_effect.new_dock = "ImageWithEffect"
-    split_image_and_effect.direction = imgui.Dir_.down
+    split_image_and_effect.direction = imgui.Dir.down
     split_image_and_effect.ratio = 0.5
 
     runner_params.docking_params.docking_splits = [split_main_params, split_image_and_effect]

@@ -40,7 +40,7 @@ def compute_sobel(image: ImageU8_3, orientation: Orientation) -> ImageFloat:
     blurred = cv2.GaussianBlur(img_float, (0, 0), sigmaX=blur_size, sigmaY=blur_size)
     dx, dy = (1, 0) if orientation == Orientation.Horizontal else (0, 1)
     r = cv2.Sobel(blurred, ddepth=cv2.CV_64F, dx=dx, dy=dy, ksize=3, scale=1.0)
-    return r
+    return r  # type: ignore
 
 
 def main() -> None:
