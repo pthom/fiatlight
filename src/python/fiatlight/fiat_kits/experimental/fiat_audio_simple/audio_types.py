@@ -5,6 +5,7 @@ import soundfile  # type: ignore
 
 from fiatlight.fiat_kits.fiat_implot import FloatMatrix_Dim1
 from fiatlight.fiat_types import AudioPath, TimeSeconds
+from fiatlight.fiat_utils import add_fiat_attributes
 from numpy.typing import NDArray
 import scipy  # type: ignore
 from enum import Enum
@@ -29,11 +30,25 @@ SoundData = NDArray[np.float32]
 class SampleRatesCommon(Enum):
     """Common sample rates for sound data."""
 
-    Hz8000 = 8000
-    Hz22050 = 22050
-    Hz32000 = 32000
-    Hz44100 = 44100
-    Hz48000 = 48000
+    Hz8000 = 8000  # 8kHz: telephone quality
+    Hz22050 = 22050  # 22.05kHz: FM radio quality
+    Hz32000 = 32000  # 32kHz
+    Hz44100 = 44100  # 44.1kHz: CD quality
+    Hz48000 = 48000  # 48kHz: DVD quality
+
+
+add_fiat_attributes(
+    SampleRatesCommon,
+    Hz8000__label="8kHz",
+    Hz8000__tooltip="Telephone quality",
+    Hz22050__label="22.05kHz",
+    Hz22050__tooltip="FM radio quality",
+    Hz32000__label="32kHz",
+    Hz44100__label="44.1kHz",
+    Hz44100__tooltip="CD quality",
+    Hz48000__label="48kHz",
+    Hz48000__tooltip="DVD quality",
+)
 
 
 class BlockSizesCommon(Enum):
@@ -42,6 +57,9 @@ class BlockSizesCommon(Enum):
     Size256 = 256
     Size512 = 512
     Size1024 = 1024
+
+
+add_fiat_attributes(BlockSizesCommon, use_values_as_labels=True)
 
 
 class SoundStreamParams(BaseModel):
