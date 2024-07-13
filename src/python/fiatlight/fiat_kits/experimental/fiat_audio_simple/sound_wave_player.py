@@ -67,7 +67,7 @@ class SoundWavePlayer:
         return self._stream.active if self._stream else False  # type: ignore
 
     def position_seconds(self) -> TimeSeconds:
-        return TimeSeconds(self.position / self.sound_wave.sample_rate)
+        return TimeSeconds(self.position / self.sound_wave.sample_rate.value)
 
     def play(self) -> None:
         self._play_impl()
@@ -82,10 +82,10 @@ class SoundWavePlayer:
         self._init_stream()
 
     def can_advance(self, seconds: float) -> bool:
-        return self.position + seconds * self.sound_wave.sample_rate < len(self.sound_wave.wave)
+        return self.position + seconds * self.sound_wave.sample_rate.value < len(self.sound_wave.wave)
 
     def can_rewind(self, seconds: float) -> bool:
-        return self.position - seconds * self.sound_wave.sample_rate >= 0
+        return self.position - seconds * self.sound_wave.sample_rate.value >= 0
 
     def advance(self, seconds: TimeSeconds) -> None:
         self.seek(TimeSeconds(self.position_seconds() + seconds))
@@ -200,7 +200,7 @@ class SoundWavePlayer:
     def _seek_impl(self, position: TimeSeconds) -> None:
         try:
             if 0 <= position <= self.sound_wave.duration():
-                self.position = int(position * self.sound_wave.sample_rate)
+                self.position = int(position * self.sound_wave.sample_rate.value)
             else:
                 logging.error(f"Seek position out of bounds: {position}, duration: {self.sound_wave.duration()}")
         except ValueError as e:

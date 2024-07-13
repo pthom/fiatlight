@@ -4,33 +4,43 @@ import numpy as np
 import soundfile  # type: ignore
 
 from fiatlight.fiat_kits.fiat_implot import FloatMatrix_Dim1
-from fiatlight.fiat_types import AudioPath, TimeSeconds, ExplainedValue, ExplainedValues
-import scipy  # type: ignore
-from typing import NewType
+from fiatlight.fiat_types import AudioPath, TimeSeconds
 from numpy.typing import NDArray
+import scipy  # type: ignore
+from enum import Enum
+from pydantic import BaseModel
 from dataclasses import dataclass
 
-
-# Possible sample rates for audio (typically 8000, 22050, 44100, 48000),
-SampleRate = NewType("SampleRate", float)
-
-# The number of samples in a block of sound data (typically 512 or 1024),
-BlockSize = NewType("BlockSize", int)
 
 # A live block of sound data, with shape (block_size, nb_channels),
 # where block_size is the number of samples per channel, user-defined (typically 512 or 1024),
 SoundBlock = NDArray[np.float32]
 
 
-@dataclass
-class SoundStreamParams:
+class SampleRate(Enum):
+    """Common sample rates for sound data."""
+    Hz8000 = 8000
+    Hz22050 = 22050
+    Hz32000 = 32000
+    Hz44100 = 44100
+    Hz48000 = 48000
+
+
+class BlockSize(Enum):
+    """Common block sizes for sound data."""
+    Size256 = 256
+    Size512 = 512
+    Size1024 = 1024
+
+
+class SoundStreamParams(BaseModel):
     """A *small* subset of parameters for a sound stream
     (available in the sounddevice library)
     This simple audio library only supports mono sound.
     """
 
-    sample_rate: SampleRate = SampleRate(44100)
-    block_size: BlockSize = BlockSize(512)
+    sample_rate: SampleRate = SampleRate.Hz44100
+    block_size: BlockSize = BlockSize.Size512
 
 
 @dataclass
@@ -44,6 +54,10 @@ class SoundBlocksList:
 
     def is_empty(self) -> bool:
         return len(self.blocks) == 0
+
+    def __str__(self) -> str:
+        return f"{len(self.blocks)} blocks at {self.sample_rate.value / 1000:.1f} kHz"
+
 
 
 @dataclass
@@ -63,7 +77,7 @@ class SoundWave:
             # remove the second dimension
             self.wave = self.wave.squeeze()  # type: ignore
 
-        time_array = np.arange(0, self.duration(), 1 / self.sample_rate, self.wave.dtype)
+        time_array = np.arange(0, self.duration(), 1 / self.sample_rate.value, self.wave.dtype)
         self._time_array = time_array  # type: ignore
         self._min_intensity = self.wave.min()
         self._max_intensity = self.wave.max()
@@ -91,7 +105,7 @@ class SoundWave:
 
         num_samples = max_samples
         wave_resampled = scipy.signal.resample(self.wave, max_samples)
-        new_sample_rate = SampleRate(self.sample_rate * num_samples / len(self.wave))
+        new_sample_rate = SampleRate(self.sample_rate.value * num_samples / len(self.wave))
         return SoundWave(wave_resampled, new_sample_rate)
 
     def time_array(self) -> FloatMatrix_Dim1:
@@ -99,7 +113,7 @@ class SoundWave:
         return self._time_array  # noqa
 
     def __str__(self) -> str:
-        return f"{self.duration():.2f}s at {self.sample_rate / 1000:.1f} kHz"
+        return f"{self.duration():.2f}s at {self.sample_rate.value / 1000:.1f} kHz"
 
 
 def sound_wave_from_file(file_path: AudioPath) -> SoundWave:
@@ -109,22 +123,3 @@ def sound_wave_from_file(file_path: AudioPath) -> SoundWave:
     if wave.ndim == 2:
         wave = wave.mean(axis=1)
     return SoundWave(wave, sample_rate)
-
-
-#  --------------------------------------------------------------------------------------------
-#         Gui Hints for those types
-#  --------------------------------------------------------------------------------------------
-SampleRatesExplained: ExplainedValues[SampleRate] = [
-    ExplainedValue(SampleRate(8000), "8Khz", "Analog telephone"),
-    ExplainedValue(SampleRate(22050), "22kHz", "22050Hz, low quality"),
-    ExplainedValue(SampleRate(32000), "32kHz", "32000Hz"),
-    ExplainedValue(SampleRate(44100), "44kHz", "44100Hz, CD quality"),
-    ExplainedValue(SampleRate(48000), "48kHz", "48000Hz, production quality"),
-]
-
-
-BlockSizesExplained: ExplainedValues[BlockSize] = [
-    ExplainedValue(BlockSize(256), "256", "Small block size"),
-    ExplainedValue(BlockSize(512), "512", "Standard"),
-    ExplainedValue(BlockSize(1024), "1024", "Large block size"),
-]

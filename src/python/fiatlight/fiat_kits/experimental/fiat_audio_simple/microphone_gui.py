@@ -6,12 +6,12 @@ from fiatlight.fiat_widgets import fontawesome_6_ctx, icons_fontawesome_6, fiat_
 
 from .microphone_io import AudioProviderMic
 from .audio_types import SoundBlock, SoundWave, SoundStreamParams
-from fiatlight.fiat_togui.dataclass_gui import DataclassGui
+from fiatlight.fiat_togui.basemodel_gui import BaseModelGui
 
 
 class MicrophoneGui(FunctionWithGui):
     # Serialized options
-    _microphone_params_gui: DataclassGui[SoundStreamParams]
+    _microphone_params_gui: BaseModelGui[SoundStreamParams]
     _sound_stream_params: SoundStreamParams
     _live_plot_size_em: ImVec2
 
@@ -35,7 +35,7 @@ class MicrophoneGui(FunctionWithGui):
         self.internal_state_gui = self._internal_gui
         self.on_heartbeat = self._on_heartbeat
 
-        self._microphone_params_gui = DataclassGui(SoundStreamParams)
+        self._microphone_params_gui = BaseModelGui(SoundStreamParams)
         self._sound_stream_params = SoundStreamParams()
         self._microphone_io = AudioProviderMic()
 
