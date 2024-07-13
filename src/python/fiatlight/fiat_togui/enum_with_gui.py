@@ -33,8 +33,8 @@ class EnumWithGui(AnyDataWithGui[Enum]):
         self._check_can_edit_one_line()
 
     def _enum_value_label(self, enum_value: Enum) -> str:
-        if hasattr(self.enum_type, "use_values_as_labels"):
-            if self.enum_type.use_values_as_labels:
+        if hasattr(self.enum_type, "use_value_as_label"):
+            if self.enum_type.use_value_as_label:
                 return str(enum_value.value)
 
         custom_label_attr_name = enum_value.name + "__label"

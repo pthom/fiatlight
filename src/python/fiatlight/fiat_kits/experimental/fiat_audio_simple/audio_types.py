@@ -59,7 +59,7 @@ class BlockSizesCommon(Enum):
     Size1024 = 1024
 
 
-add_fiat_attributes(BlockSizesCommon, use_values_as_labels=True)
+add_fiat_attributes(BlockSizesCommon, use_value_as_label=True)
 
 
 class SoundStreamParams(BaseModel):
