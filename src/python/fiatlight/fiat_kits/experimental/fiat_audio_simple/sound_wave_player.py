@@ -14,7 +14,6 @@ Usage:
 
 from typing import Any
 import time
-import numpy as np
 import logging
 import sounddevice as sd  # type: ignore
 from threading import Thread, current_thread
@@ -210,20 +209,3 @@ class SoundWavePlayer:
         except ValueError as e:
             logging.error(f"Seek error: {str(e)}")
             raise e
-
-
-def create_demo_sound_wave() -> SoundWave:
-    """create a wave that plays Do Re Mi Fa Sol La Si Do (0.5 second each)"""
-    sample_rate = 44100
-    duration_per_note = 0.5  # duration of each note in seconds
-    freqs = [261.63, 293.66, 329.63, 349.23, 392.00, 440.00, 493.88, 523.25]
-
-    full_wave = np.array([], dtype=np.float32)
-    for i in range(50):
-        for freq in freqs:
-            samples_per_note = int(sample_rate * duration_per_note)
-            time = np.linspace(0, duration_per_note, samples_per_note, endpoint=False)
-            wave = np.sin(2 * np.pi * freq * time)
-            full_wave = np.concatenate([full_wave, wave])
-
-    return SoundWave(full_wave, sample_rate)

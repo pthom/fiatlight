@@ -35,7 +35,7 @@ class Orientation(Enum):
 def compute_sobel(image: ImageU8_3, orientation: Orientation) -> ImageFloat:
     """Compute the Sobel operator on an image, i.e. the gradient of the image in the x or y direction"""
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    img_float = gray / 255.0
+    img_float = gray / 255.0  # type: ignore
     blur_size = 3
     blurred = cv2.GaussianBlur(img_float, (0, 0), sigmaX=blur_size, sigmaY=blur_size)
     dx, dy = (1, 0) if orientation == Orientation.Horizontal else (0, 1)
