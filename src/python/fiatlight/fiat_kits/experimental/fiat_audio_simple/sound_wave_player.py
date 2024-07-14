@@ -16,7 +16,6 @@ from typing import Any
 import time
 import logging
 import sounddevice as sd  # type: ignore
-from threading import Thread, current_thread
 from typing import Optional
 from fiatlight.fiat_kits.fiat_implot import FloatMatrix_Dim1
 from fiatlight.fiat_types import TimeSeconds
@@ -35,7 +34,6 @@ class SoundWavePlayer:
     # Private attributes
     _stop_flag: bool = False
     _stream: Optional[sd.OutputStream] = None
-    _thread: Optional[Thread] = None
 
     #
     # Public API
@@ -102,13 +100,13 @@ class SoundWavePlayer:
             if self._stream is not None:
                 self._stream.close()
             self._stream = sd.OutputStream(
-                samplerate=self.sound_wave.sample_rate, channels=1, callback=self._callback, blocksize=1024 * 64
+                samplerate=self.sound_wave.sample_rate, channels=1, callback=self._callback, blocksize=1024
             )
         except Exception as e:
             logging.error(f"Error initializing the stream: {str(e)}")
             raise RuntimeError("Stream initialization failed") from e
 
-    def _callback(self, outdata: FloatMatrix_Dim1, frames: int, _time: Any, _status: sd.CallbackFlags) -> None:
+    def _callback(self, outdata: FloatMatrix_Dim1, nb_asked_frames: int, _time: Any, _status: sd.CallbackFlags) -> None:
         if self._stop_flag:
             raise sd.CallbackStop
         if self.paused:
@@ -116,7 +114,11 @@ class SoundWavePlayer:
             return
 
         remaining_frames = len(self.sound_wave.wave) - self.position
-        chunksize = min(remaining_frames, frames)
+        chunksize = min(remaining_frames, nb_asked_frames)
+
+        if chunksize <= 0:
+            outdata.fill(0)
+            raise sd.CallbackStop
 
         # Safeguard to ensure we don't exceed the buffer size
         if outdata.shape[0] < chunksize:
@@ -139,6 +141,8 @@ class SoundWavePlayer:
 
         self.position += chunksize
 
+        # logging.warning(f"Playback position: {self.position}/{len(self.sound_wave.wave)} frames")
+
     def _play_impl(self) -> None:
         self.paused = False
         self._stop_flag = False
@@ -154,22 +158,6 @@ class SoundWavePlayer:
         except Exception as e:
             logging.error(f"Error starting the stream: {str(e)}")
             return
-        if self._thread is None or not self._thread.is_alive():
-            try:
-                self._thread = Thread(target=self._stream_monitor)
-                self._thread.start()
-            except Exception as e:
-                logging.error(f"Error starting the monitor thread: {str(e)}")
-
-    def _stream_monitor(self) -> None:
-        """Monitor the stream and trigger a reset when the end is reached."""
-        while self._stream is not None and self._stream.active:
-            if self._stop_flag:
-                break
-            # if self.position >= len(self.sound_wave.wave):
-            #     self.reset_player()  # Reset the player when end of wave is reached
-            #     break
-            sd.sleep(100)
 
     def _pause_impl(self) -> None:
         self.paused = not self.paused
@@ -187,16 +175,6 @@ class SoundWavePlayer:
                 self._stream.stop()
         except Exception as e:
             logging.error(f"Error stopping the stream: {str(e)}")
-        # Only join the thread if it's not the current thread
-        if self._thread is not None and self._thread.is_alive():
-            if self._thread.ident != current_thread().ident:
-                try:
-                    self._thread.join()
-                except Exception as e:
-                    logging.error(f"Error joining the thread: {str(e)}")
-            else:
-                pass
-                # logging.debug("Attempted to join the current thread; skipping join call.")
         self._stream = None
         self._thread = None
 
