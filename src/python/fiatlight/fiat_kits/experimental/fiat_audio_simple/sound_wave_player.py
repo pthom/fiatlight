@@ -19,6 +19,7 @@ import sounddevice as sd  # type: ignore
 from typing import Optional
 from fiatlight.fiat_kits.fiat_implot import FloatMatrix_Dim1
 from fiatlight.fiat_types import TimeSeconds
+import threading
 
 from .audio_types import SoundWave
 
@@ -29,6 +30,7 @@ class SoundWavePlayer:
     position: int = 0
     paused: bool = False
     _volume: float = 1.0
+    _lock: threading.Lock
     VOLUME_MAX = 2.0
 
     # Private attributes
@@ -41,6 +43,7 @@ class SoundWavePlayer:
     def __init__(self, sound_wave: SoundWave) -> None:
         self.sound_wave: SoundWave = sound_wave
         self._init_stream()
+        self._lock = threading.Lock()
 
     @property
     def volume(self) -> float:
@@ -74,8 +77,9 @@ class SoundWavePlayer:
 
     def reset_player(self) -> None:
         self.stop()
-        self.position = 0
-        self.paused = True
+        with self._lock:
+            self.position = 0
+            self.paused = True
         self._init_stream()
 
     def can_advance(self, seconds: float) -> bool:
@@ -107,83 +111,88 @@ class SoundWavePlayer:
             raise RuntimeError("Stream initialization failed") from e
 
     def _callback(self, outdata: FloatMatrix_Dim1, nb_asked_frames: int, _time: Any, _status: sd.CallbackFlags) -> None:
-        if self._stop_flag:
-            raise sd.CallbackStop
-        if self.paused:
-            outdata.fill(0)
-            return
+        with self._lock:
+            if self._stop_flag:
+                raise sd.CallbackStop
+            if self.paused:
+                outdata.fill(0)
+                return
 
-        remaining_frames = len(self.sound_wave.wave) - self.position
-        chunksize = min(remaining_frames, nb_asked_frames)
+            remaining_frames = len(self.sound_wave.wave) - self.position
+            chunksize = min(remaining_frames, nb_asked_frames)
 
-        if chunksize <= 0:
-            outdata.fill(0)
-            raise sd.CallbackStop
+            if chunksize <= 0:
+                outdata.fill(0)
+                raise sd.CallbackStop
 
-        # Safeguard to ensure we don't exceed the buffer size
-        if outdata.shape[0] < chunksize:
-            logging.warning(f"SoundWavePlayer._callback: Buffer size too small: {outdata.shape[0]=} < {chunksize=}")
-            chunksize = outdata.shape[0]
+            # Safeguard to ensure we don't exceed the buffer size
+            if outdata.shape[0] < chunksize:
+                logging.warning(f"SoundWavePlayer._callback: Buffer size too small: {outdata.shape[0]=} < {chunksize=}")
+                chunksize = outdata.shape[0]
 
-        if chunksize <= 0:
-            raise sd.CallbackStop
+            if chunksize <= 0:
+                raise sd.CallbackStop
 
-        # Take into account if the wave is stereo
-        if len(self.sound_wave.wave.shape) > 1 and self.sound_wave.wave.shape[1] == 2:
-            # Assuming the outdata buffer is also set up for stereo playback
-            outdata[:chunksize] = self.sound_wave.wave[self.position : self.position + chunksize] * self.volume
-        else:
-            # Mono playback
-            outdata[:chunksize] = (
-                self.sound_wave.wave[self.position : self.position + chunksize].reshape(chunksize, -1) * self.volume
-            )
-        outdata[chunksize:] = 0  # Fill the rest of the buffer with zeros
+            # Take into account if the wave is stereo
+            if len(self.sound_wave.wave.shape) > 1 and self.sound_wave.wave.shape[1] == 2:
+                # Assuming the outdata buffer is also set up for stereo playback
+                outdata[:chunksize] = self.sound_wave.wave[self.position : self.position + chunksize] * self.volume
+            else:
+                # Mono playback
+                outdata[:chunksize] = (
+                    self.sound_wave.wave[self.position : self.position + chunksize].reshape(chunksize, -1) * self.volume
+                )
+            outdata[chunksize:] = 0  # Fill the rest of the buffer with zeros
 
-        self.position += chunksize
+            self.position += chunksize
 
-        # logging.warning(f"Playback position: {self.position}/{len(self.sound_wave.wave)} frames")
+            # logging.warning(f"Playback position: {self.position}/{len(self.sound_wave.wave)} frames")
 
     def _play_impl(self) -> None:
-        self.paused = False
-        self._stop_flag = False
+        with self._lock:
+            self.paused = False
+            self._stop_flag = False
 
-        if self.position >= len(self.sound_wave.wave):
-            self.position = 0
+            if self.position >= len(self.sound_wave.wave):
+                self.position = 0
 
-        try:
-            if self._stream is None or not self._stream.active:
-                self._init_stream()
-            assert self._stream is not None
-            self._stream.start()
-        except Exception as e:
-            logging.error(f"Error starting the stream: {str(e)}")
-            return
+            try:
+                if self._stream is None or not self._stream.active:
+                    self._init_stream()
+                assert self._stream is not None
+                self._stream.start()
+            except Exception as e:
+                logging.error(f"Error starting the stream: {str(e)}")
+                return
 
     def _pause_impl(self) -> None:
-        self.paused = not self.paused
+        with self._lock:
+            self.paused = not self.paused
         if self.paused and self._stream is not None:
             self._stream.stop()
             self._stream = None
 
     def _stop_impl(self) -> None:
-        if self._stop_flag:
-            return
-        self._stop_flag = True
+        with self._lock:
+            if self._stop_flag:
+                return
+            self._stop_flag = True
         time.sleep(0.1)  # Wait for the callback to finish
         try:
             if self._stream is not None:
                 self._stream.stop()
         except Exception as e:
             logging.error(f"Error stopping the stream: {str(e)}")
-        self._stream = None
-        self._thread = None
+        with self._lock:
+            self._stream = None
 
     def _seek_impl(self, position: TimeSeconds) -> None:
-        try:
-            if 0 <= position <= self.sound_wave.duration():
-                self.position = int(position * self.sound_wave.sample_rate)
-            else:
-                logging.error(f"Seek position out of bounds: {position}, duration: {self.sound_wave.duration()}")
-        except ValueError as e:
-            logging.error(f"Seek error: {str(e)}")
-            raise e
+        with self._lock:
+            try:
+                if 0 <= position <= self.sound_wave.duration():
+                    self.position = int(position * self.sound_wave.sample_rate)
+                else:
+                    logging.error(f"Seek position out of bounds: {position}, duration: {self.sound_wave.duration()}")
+            except ValueError as e:
+                logging.error(f"Seek error: {str(e)}")
+                raise e
