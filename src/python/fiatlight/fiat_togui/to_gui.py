@@ -1,3 +1,5 @@
+from sphinx.util.inspect import isclass
+
 from fiatlight.fiat_types import DataType, FiatAttributes
 from fiatlight.fiat_types import typename_utils
 from fiatlight.fiat_core.any_data_with_gui import AnyDataWithGui, AnyDataWithGui_UnregisteredType
@@ -147,7 +149,7 @@ def _any_type_to_gui_impl(
     elif hasattr(type_, "__supertype__"):  # Check if it's a NewType
         return _any_new_type_to_gui_impl(type_, fiat_attributes)
 
-    elif issubclass(type_, Enum):  #
+    elif isclass(type_) and issubclass(type_, Enum):  #
         return _any_enum_type_to_gui_impl(type_, fiat_attributes)
 
     else:
