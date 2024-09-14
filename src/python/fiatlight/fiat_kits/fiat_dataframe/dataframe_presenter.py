@@ -183,7 +183,7 @@ class DataFramePresenter:
                 with fontawesome_6_ctx():
                     page_label = f"{current_page} / {total_pages}"
 
-                    imgui.push_button_repeat(True)
+                    imgui.push_item_flag(imgui.ItemFlags_.button_repeat.value, True)
 
                     # Backward buttons
                     previous_button_enabled = start_idx > 0
@@ -225,7 +225,7 @@ class DataFramePresenter:
                     imgui.set_next_item_width(hello_imgui.em_size(6.0))
                     _, self.params.rows_per_page = imgui.slider_int("##Rows per page", self.params.rows_per_page, 5, 70)
 
-                    imgui.pop_button_repeat()
+                    imgui.pop_item_flag()
 
     def _handle_table_sorting(self) -> None:
         # Get the sort specs
