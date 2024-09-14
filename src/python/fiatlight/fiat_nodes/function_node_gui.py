@@ -266,19 +266,20 @@ class FunctionNodeGui:
             radius1 = imgui.get_font_size() / 3.5
             imgui.spring()
 
-            def show_async_stop_button():
+            def show_async_stop_button() -> None:
                 fn_with_gui = self._function_node.function_with_gui
                 if not fn_with_gui.invoke_async_stoppable:
                     return
                 fn = fn_with_gui._f_impl
-                shall_stop = hasattr(fn, "invoke_async_shall_stop") and fn.invoke_async_shall_stop
-                if shall_stop:
+                assert fn is not None
+                is_stopping = fiatlight.get_fiat_attribute(fn, "invoke_async_shall_stop", False)
+                if is_stopping:
                     imgui.text("Stopping...")
                     if imgui.button("Cancel"):
-                        fn.invoke_async_shall_stop = False
+                        fiatlight.set_fiat_attribute(fn, "invoke_async_shall_stop", False)
                 else:
                     if imgui.button("Stop"):
-                        fn.invoke_async_shall_stop = True
+                        fiatlight.set_fiat_attribute(fn, "invoke_async_shall_stop", True)
 
             show_async_stop_button()
 
