@@ -27,7 +27,7 @@ from fiatlight.fiat_togui import (
     any_type_to_gui,
     to_data_with_gui,
 )
-from fiatlight.fiat_utils import with_fiat_attributes, add_fiat_attributes
+from fiatlight.fiat_utils import with_fiat_attributes, add_fiat_attributes, get_fiat_attribute, set_fiat_attribute
 from fiatlight.fiat_config import get_fiat_config
 from fiatlight.fiat_types import Error, Unspecified, Invalid, ErrorValue, UnspecifiedValue
 from imgui_bundle import hello_imgui
@@ -99,6 +99,8 @@ __all__ = [
     # from fiat_utils
     "with_fiat_attributes",
     "add_fiat_attributes",
+    "get_fiat_attribute",
+    "set_fiat_attribute",
     # from fiat_types
     "Error",
     "Unspecified",

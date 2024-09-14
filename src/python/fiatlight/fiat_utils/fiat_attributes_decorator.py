@@ -9,6 +9,7 @@ from typing import Any, Callable, TypeVar
 from functools import wraps
 
 FunctionType = TypeVar("FunctionType", bound=Callable[..., Any])
+AttrType = TypeVar("AttrType", bound=Any)
 
 
 def with_fiat_attributes(**kwargs: Any) -> Callable[[FunctionType], FunctionType]:
@@ -28,6 +29,17 @@ def add_fiat_attributes(func: FunctionType, **kwargs: Any) -> FunctionType:
     for key, value in kwargs.items():
         setattr(func, key, value)
     return func
+
+
+def get_fiat_attribute(func: FunctionType, attr_name: str, default_value: AttrType) -> AttrType:
+    if hasattr(func, attr_name):
+        return getattr(func, attr_name)  # type: ignore
+    else:
+        return default_value
+
+
+def set_fiat_attribute(func: FunctionType, attr_name: str, value: AttrType) -> None:
+    setattr(func, attr_name, value)
 
 
 def test_fiatlight_attrs() -> None:
