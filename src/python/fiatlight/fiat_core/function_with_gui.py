@@ -165,6 +165,21 @@ class FunctionWithGui:
     # invoke_async: if true, the function shall be called asynchronously
     invoke_async: bool = False
 
+    # invoke_async_stoppable: if true a GUI button will be displayed to stop the async function while it is running.
+    # In this case, the function body should periodically check whether it should stop,
+    # by checking the value of the flag `invoke_async_shall_stop`
+    # (which is added to the function object by FiatLight)
+    #
+    # Example:
+    #    def my_async_function():
+    #         ...
+    #         while some_condition:  # inner loop of the function processing
+    #             if hasattr(my_async_function, "invoke_async_shall_stop") and my_async_function.invoke_async_shall_stop:
+    #                 my_async_function.invoke_async_shall_stop = False  # reset the flag
+    #                 break
+    #        ...  # continue the function processing
+    invoke_async_stoppable: bool = False
+
     # invoke_manually: if true, the function will be called only if the user clicks on the "invoke" button
     # (if inputs were changed, a "Refresh needed" label will be displayed)
     invoke_manually: bool = False
@@ -352,6 +367,8 @@ class FunctionWithGui:
         # Set the fiat attributes for the function
         if "invoke_async" in fn_fiat_attributes:
             self.invoke_async = fn_fiat_attributes["invoke_async"]
+        if "invoke_async_stoppable" in fn_fiat_attributes:
+            self.invoke_async_stoppable = fn_fiat_attributes["invoke_async_stoppable"]
         if "invoke_manually" in fn_fiat_attributes:
             self.invoke_manually = fn_fiat_attributes["invoke_manually"]
         if "invoke_always_dirty" in fn_fiat_attributes:
