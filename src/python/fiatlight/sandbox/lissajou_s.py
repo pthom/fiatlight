@@ -3,6 +3,7 @@
 import numpy as np
 from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
+import fiatlight as fl
 
 
 def lissajous_curve(freq1: float = 5.0, freq2: float = 4.0, delta: float = np.pi / 2, nb_periods: float = 1) -> Figure:
@@ -10,14 +11,13 @@ def lissajous_curve(freq1: float = 5.0, freq2: float = 4.0, delta: float = np.pi
     t = np.linspace(0, 2 * np.pi * nb_periods, 10_000)
     x = np.sin(freq1 * t + delta)
     y = np.sin(freq2 * t)
-    fig, ax = plt.subplots()
-    ax.plot(x, y)
+    fig = plt.figure(figsize=(5, 5))
+    plt.plot(x, y)
     return fig
 
 
 # Part 2: Add a GUI to the code in a few seconds
 # ----------------------------------------------
-import fiatlight as fl
 
 # Options for widgets
 fl.add_fiat_attributes(

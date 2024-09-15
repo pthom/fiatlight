@@ -6,7 +6,7 @@
                     "name": "freq1",
                     "data": {
                         "type": "Primitive",
-                        "value": 3.9079999923706055
+                        "value": 4.748000144958496
                     }
                 },
                 "freq2": {
@@ -20,14 +20,14 @@
                     "name": "delta",
                     "data": {
                         "type": "Primitive",
-                        "value": 1.8329999446868896
+                        "value": 1.0959999561309814
                     }
                 },
                 "nb_periods": {
                     "name": "nb_periods",
                     "data": {
                         "type": "Primitive",
-                        "value": 10.0
+                        "value": 4.920000076293945
                     }
                 }
             }
@@ -39,33 +39,33 @@
                 "_inputs_expanded": true,
                 "_outputs_expanded": true,
                 "_doc_expanded": false,
-                "fiat_tuning_expanded": false,
+                "fiat_tuning_expanded": true,
                 "_internal_state_gui_expanded": true,
                 "_function_node": {
                     "inputs": {
                         "freq1": {
                             "cb_options": {},
-                            "expanded": false
+                            "expanded": true
                         },
                         "freq2": {
                             "cb_options": {},
-                            "expanded": false
+                            "expanded": true
                         },
                         "delta": {
                             "cb_options": {},
-                            "expanded": false
+                            "expanded": true
                         },
                         "nb_periods": {
                             "cb_options": {},
-                            "expanded": false
+                            "expanded": true
                         }
                     },
                     "outputs": {
                         "0": {
                             "cb_options": {
                                 "figure_size": {
-                                    "x": 640.0,
-                                    "y": 480.0
+                                    "x": 500.0,
+                                    "y": 500.0
                                 }
                             },
                             "expanded": true
@@ -77,27 +77,27 @@
                 "inputs": {
                     "freq1": {
                         "cb_options": {},
-                        "expanded": false
+                        "expanded": true
                     },
                     "freq2": {
                         "cb_options": {},
-                        "expanded": false
+                        "expanded": true
                     },
                     "delta": {
                         "cb_options": {},
-                        "expanded": false
+                        "expanded": true
                     },
                     "nb_periods": {
                         "cb_options": {},
-                        "expanded": false
+                        "expanded": true
                     }
                 },
                 "outputs": {
                     "0": {
                         "cb_options": {
                             "figure_size": {
-                                "x": 640.0,
-                                "y": 480.0
+                                "x": 500.0,
+                                "y": 500.0
                             }
                         },
                         "expanded": true
