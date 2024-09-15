@@ -196,37 +196,40 @@ class FunctionNodeGui:
 
         pass
 
-    def draw_node(self, unique_name: str) -> bool:
+    def draw_node(self, unique_name: str, shall_use_node_editor: bool) -> bool:
         global _CURRENT_FUNCTION_NODE_ID
         inputs_changed: bool
         needs_refresh_for_heartbeat = self._heartbeat()
         with imgui_ctx.push_obj_id(self._function_node):
             try:
-                with ed_ctx.begin_node(self._node_id):
-                    _CURRENT_FUNCTION_NODE_ID = self._node_id
-                    with imgui_ctx.begin_vertical("node_content" + unique_name):
-                        # Title
-                        with imgui_ctx.begin_horizontal("Title"):
-                            self._draw_title(unique_name)
-                        # Doc
-                        self._draw_doc()
-                        # Set minimum width
-                        imgui.dummy(ImVec2(hello_imgui.em_size(get_fiat_config().style.node_minimum_width_em), 1))
+                if shall_use_node_editor:
+                    ed.begin_node(self._node_id)
+                _CURRENT_FUNCTION_NODE_ID = self._node_id
+                with imgui_ctx.begin_vertical("node_content" + unique_name):
+                    # Title
+                    with imgui_ctx.begin_horizontal("Title"):
+                        self._draw_title(unique_name)
+                    # Doc
+                    self._draw_doc()
+                    # Set minimum width
+                    imgui.dummy(ImVec2(hello_imgui.em_size(get_fiat_config().style.node_minimum_width_em), 1))
 
-                        # Inputs
-                        inputs_changed = self._draw_function_inputs(unique_name)
-                        # Function internal state
-                        internal_state_changed = self._draw_function_internal_state(unique_name)
+                    # Inputs
+                    inputs_changed = self._draw_function_inputs(unique_name, shall_use_node_editor)
+                    # Function internal state
+                    internal_state_changed = self._draw_function_internal_state(unique_name, shall_use_node_editor)
 
-                        if inputs_changed or internal_state_changed or needs_refresh_for_heartbeat:
-                            self._function_node.on_inputs_changed()
+                    if inputs_changed or internal_state_changed or needs_refresh_for_heartbeat:
+                        self._function_node.on_inputs_changed()
 
-                        # Internals
-                        self._draw_fiat_tuning()
-                        # Exceptions, if any
-                        self._draw_exception_message()
-                        # Outputs
-                        self._draw_function_outputs(unique_name)
+                    # Fiat tuning
+                    self._draw_fiat_tuning(shall_use_node_editor)
+                    # Exceptions, if any
+                    self._draw_exception_message()
+                    # Outputs
+                    self._draw_function_outputs(unique_name, shall_use_node_editor)
+                if shall_use_node_editor:
+                    ed.end_node()
             except Exception as e:
                 function_with_gui = self._function_node.function_with_gui
                 msg = f"""
@@ -448,7 +451,7 @@ class FunctionNodeGui:
 
         pass
 
-    def _draw_function_inputs(self, unique_name: str) -> bool:
+    def _draw_function_inputs(self, unique_name: str, shall_use_node_editor: bool) -> bool:
         shall_disable_input = (
             self._function_node.is_running_async() and get_fiat_config().run_config.disable_input_during_execution
         )
@@ -478,6 +481,7 @@ class FunctionNodeGui:
         node_separator_params.show_collapse_button = nb_unlinked_inputs > 0
         # Separator collapse all button
         node_separator_params.show_toggle_collapse_all_button = nb_unlinked_inputs > 1 and self._inputs_expanded
+        node_separator_params.shall_use_node_editor = shall_use_node_editor
 
         # Draw the separator
         node_separator_output = fiat_widgets.node_separator(node_separator_params)
@@ -494,7 +498,7 @@ class FunctionNodeGui:
         #
         for param_name in self._function_node.function_with_gui.all_inputs_names():
             input_param = self._function_node.function_with_gui.param(param_name)
-            if self._draw_one_input(input_param, unique_name):
+            if self._draw_one_input(input_param, unique_name, shall_use_node_editor):
                 changed = True
 
         if shall_disable_input:
@@ -502,7 +506,7 @@ class FunctionNodeGui:
 
         return changed
 
-    def _draw_one_input(self, input_param: ParamWithGui[Any], unique_name: str) -> bool:
+    def _draw_one_input(self, input_param: ParamWithGui[Any], unique_name: str, shall_use_node_editor: bool) -> bool:
         with imgui_ctx.push_obj_id(input_param):
             input_name = input_param.name
 
@@ -520,7 +524,8 @@ class FunctionNodeGui:
             input_param.data_with_gui.status_tooltip = header_elements.param_label_tooltip
 
             header_params = GuiHeaderLineParams[Any](parent_name=self._function_node.function_with_gui.label)
-            header_params.prefix_gui = lambda: self._draw_input_pin(header_elements)
+            if shall_use_node_editor:
+                header_params.prefix_gui = lambda: self._draw_input_pin(header_elements)
             header_params.default_value_if_unspecified = input_param.default_value
 
             if can_edit:
@@ -539,7 +544,7 @@ class FunctionNodeGui:
 
         pass
 
-    def _draw_function_outputs(self, unique_name: str) -> None:
+    def _draw_function_outputs(self, unique_name: str, shall_use_node_editor: bool) -> None:
         nb_outputs = self._function_node.function_with_gui.nb_outputs()
         nb_unlinked_outputs = self._function_node.nb_unlinked_outputs()
 
@@ -563,6 +568,7 @@ class FunctionNodeGui:
         node_separator_params.show_toggle_collapse_all_button = (
             self._outputs_expanded and self.nb_outputs_with_custom_present() > 0
         )
+        node_separator_params.shall_use_node_editor = shall_use_node_editor
 
         # Draw the separator
         node_separator_output = fiat_widgets.node_separator(node_separator_params)
@@ -582,9 +588,9 @@ class FunctionNodeGui:
             if not has_link and not self._outputs_expanded:
                 continue
             with imgui_ctx.begin_group():
-                self._draw_one_output(idx_output)
+                self._draw_one_output(idx_output, shall_use_node_editor)
 
-    def _draw_one_output(self, idx_output: int) -> None:
+    def _draw_one_output(self, idx_output: int, shall_use_node_editor: bool) -> None:
         output_param = self._function_node.function_with_gui.output(idx_output)
 
         bof_header_elements = self._output_header_elements(idx_output)
@@ -593,7 +599,8 @@ class FunctionNodeGui:
         output_param.status_tooltip = bof_header_elements.value_tooltip
 
         header_params = GuiHeaderLineParams[Any](parent_name=self._function_node.function_with_gui.label)
-        header_params.suffix_gui = lambda: self._draw_output_pin(bof_header_elements, idx_output)
+        if shall_use_node_editor:
+            header_params.suffix_gui = lambda: self._draw_output_pin(bof_header_elements, idx_output)
 
         output_param.gui_present_customizable(header_params)
 
@@ -636,7 +643,7 @@ class FunctionNodeGui:
 
         pass
 
-    def _draw_function_internal_state(self, unique_name: str) -> bool:
+    def _draw_function_internal_state(self, unique_name: str, shall_use_node_editor: bool) -> bool:
         fn_with_gui = self._function_node.function_with_gui
         internal_state_fn = fn_with_gui.internal_state_gui
         if internal_state_fn is None:
@@ -662,6 +669,8 @@ class FunctionNodeGui:
         node_separator_params.show_collapse_button = can_collapse
         # Separator collapse all button
         node_separator_params.show_toggle_collapse_all_button = False
+        node_separator_params.shall_use_node_editor = shall_use_node_editor
+
         # Draw the separator
         node_separator_output = fiat_widgets.node_separator(node_separator_params)
         # Update the expanded state
@@ -688,7 +697,7 @@ class FunctionNodeGui:
 
         return changed
 
-    def _draw_fiat_tuning(self) -> None:
+    def _draw_fiat_tuning(self, shall_use_node_editor: bool) -> None:
         """Draw the internals of the function (for debugging)
         They should be stored in a dictionary fiat_tuning inside the function.
         See example inside toon_edges.py
@@ -718,6 +727,7 @@ class FunctionNodeGui:
         node_separator_params.show_toggle_collapse_all_button = self.fiat_tuning_expanded
         if not self.fiat_tuning_expanded:
             node_separator_params.text += f" ({len(fn_fiat_tuning)} hidden)"
+        node_separator_params.shall_use_node_editor = shall_use_node_editor
 
         # Draw the separator
         node_separator_output = fiat_widgets.node_separator(node_separator_params)
@@ -1003,7 +1013,7 @@ def sandbox() -> None:
 
     def gui() -> None:
         with ed_ctx.begin("Functions Graph"):
-            function_node_gui.draw_node("add")
+            function_node_gui.draw_node("add", shall_use_node_editor=True)
         fiat_osd.render_all_osd()  # noqa
 
     immapp.run(gui, with_node_editor=True, window_title="function_node_gui_sandbox")

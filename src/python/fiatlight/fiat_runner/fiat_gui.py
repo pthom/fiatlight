@@ -496,9 +496,9 @@ class FiatGui:
         layout_width = imgui.get_window_width() - hello_imgui.em_size(0.4)
 
         # Move the cursor up a bit
-        cursor_pos = imgui.get_cursor_pos()
+        cursor_pos = imgui.get_cursor_screen_pos()
         cursor_pos.y -= hello_imgui.em_size(0.5)
-        imgui.set_cursor_pos(cursor_pos)
+        imgui.set_cursor_screen_pos(cursor_pos)
 
         with imgui_ctx.begin_horizontal("TopToolbar", ImVec2(layout_width, 0)):
             with fontawesome_6_ctx():

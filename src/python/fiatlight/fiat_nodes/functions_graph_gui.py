@@ -1,6 +1,4 @@
 from __future__ import annotations
-
-
 from fiatlight.fiat_types import JsonDict
 from fiatlight.fiat_core import FunctionsGraph, FunctionWithGui
 from fiatlight.fiat_core.function_with_gui import FunctionWithGuiFactoryFromName
@@ -20,6 +18,7 @@ class FunctionsGraphGui:
     can_edit_graph: bool = False
 
     _idx_frame: int = 0
+    _function_no_node_editor_rect: imgui.internal.ImRect | None = None
 
     # ======================================================================================================================
     # Constructor
@@ -44,12 +43,31 @@ class FunctionsGraphGui:
     class _Drawing_Section:  # Dummy class to create a section in the IDE # noqa
         pass
 
+    def shall_use_node_editor(self) -> bool:
+        return len(self.function_nodes_gui) > 1
+
+    def draw_zoom_button_if_no_node_editor(self) -> None:
+        imgui.push_item_flag(imgui.ItemFlags_.button_repeat.value, True)
+        imgui.begin_horizontal("Zoom")
+        if imgui.button("Zoom+"):
+            imgui.get_io().font_global_scale *= 1.1
+        imgui.spring()
+        if imgui.button("Zoom-"):
+            imgui.get_io().font_global_scale /= 1.1
+        imgui.end_horizontal()
+        imgui.pop_item_flag()
+
     def draw(self) -> bool:
+        shall_use_node_editor = self.shall_use_node_editor()
+
         def draw_nodes() -> bool:
             changed = False
             for fn in self.function_nodes_gui:
                 imgui.push_id(str(id(fn)))
-                if fn.draw_node(self.functions_graph.function_node_unique_name(fn._function_node)):
+                if fn.draw_node(
+                    self.functions_graph.function_node_unique_name(fn._function_node),
+                    shall_use_node_editor=shall_use_node_editor,
+                ):
                     changed = True
                 imgui.pop_id()
             return changed
@@ -58,16 +76,28 @@ class FunctionsGraphGui:
             for link in self.functions_links_gui:
                 link.draw()
 
+        if not shall_use_node_editor:
+            self.draw_zoom_button_if_no_node_editor()
+
         self._layout_graph_if_required()
         nodes_changed = False
         with imgui_ctx.push_obj_id(self):
-            ed.begin("FunctionsGraphGui")
+            if shall_use_node_editor:
+                ed.begin("FunctionsGraphGui")
+            else:
+                imgui.begin_group()
             if draw_nodes():
                 nodes_changed = True
             draw_links()
             if self.can_edit_graph:
                 self._handle_graph_edition()
-            ed.end()
+            if shall_use_node_editor:
+                ed.end()
+            else:
+                imgui.end_group()
+                self._function_no_node_editor_rect = imgui.internal.ImRect(
+                    imgui.get_item_rect_min(), imgui.get_item_rect_max()
+                )
         self._idx_frame += 1
         return nodes_changed
 
@@ -258,6 +288,17 @@ class FunctionsGraphGui:
                     current_row_height = 0
 
     def _get_node_screenshot_boundings(self) -> imgui.internal.ImRect:
+        if not self.shall_use_node_editor():
+            assert self._function_no_node_editor_rect is not None
+            r = self._function_no_node_editor_rect
+            main_viewport_pos = imgui.get_main_viewport().pos
+            fbs = imgui.get_io().display_framebuffer_scale
+            r.min -= main_viewport_pos
+            r.max -= main_viewport_pos
+            r.min = r.min * fbs
+            r.max = r.max * fbs
+            return r
+
         all_nodes_boundings = []
         for fn in self.function_nodes_gui:
             node_id = fn.node_id()

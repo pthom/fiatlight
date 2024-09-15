@@ -25,6 +25,8 @@ class NodeSeparatorParams:
     # The parent node
     parent_node: ed.NodeId | None = None
 
+    shall_use_node_editor: bool = True
+
 
 @dataclass
 class NodeSeparatorOutput:
@@ -79,8 +81,12 @@ def node_separator(params: NodeSeparatorParams) -> NodeSeparatorOutput:
     spacing_x = imgui.get_style().item_spacing.x / 2.0
 
     cur_pos = imgui.get_cursor_screen_pos()
-    p1 = ImVec2(node_pos.x + spacing_x, cur_pos.y + spacing_y / 2)
-    p2 = ImVec2(p1.x + node_size.x - 1.0 - 2 * spacing_x, p1.y)
+    if params.shall_use_node_editor:
+        p1 = ImVec2(node_pos.x + spacing_x, cur_pos.y + spacing_y / 2)
+        p2 = ImVec2(p1.x + node_size.x - 1.0 - 2 * spacing_x, p1.y)
+    else:
+        p1 = ImVec2(cur_pos.x + spacing_x, cur_pos.y + spacing_y / 2)
+        p2 = ImVec2(p1.x + imgui.get_content_region_avail().x - 1.0 - 2 * spacing_x, p1.y)
 
     # Collapse buttons placement
     btn_collapse_pos: ImVec2 | None = None
@@ -131,7 +137,7 @@ def node_separator(params: NodeSeparatorParams) -> NodeSeparatorOutput:
     else:
         with fontawesome_6_ctx():
             assert btn_collapse_pos is not None
-            imgui.set_cursor_pos(btn_collapse_pos)
+            imgui.set_cursor_screen_pos(btn_collapse_pos)
             if params.expanded:
                 visible = not imgui.button(icons_fontawesome_6.ICON_FA_EYE + "##" + params.text)
                 fiat_osd.set_widget_tooltip("Hide " + params.text)
@@ -147,11 +153,11 @@ def node_separator(params: NodeSeparatorParams) -> NodeSeparatorOutput:
     if params.show_toggle_collapse_all_button:
         with fontawesome_6_ctx():
             assert btn_collapse_all_pos is not None
-            imgui.set_cursor_pos(btn_collapse_all_pos)
+            imgui.set_cursor_screen_pos(btn_collapse_all_pos)
             if imgui.button(icons_fontawesome_6.ICON_FA_COMPRESS + "##" + params.text):
                 result.was_toggle_collapse_all_clicked = True
             fiat_osd.set_widget_tooltip("Toggle collapse state")
 
-    imgui.set_cursor_pos(ImVec2(cur_pos.x, cur_pos.y + spacing_y))
+    imgui.set_cursor_screen_pos(ImVec2(cur_pos.x, cur_pos.y + spacing_y))
 
     return result
