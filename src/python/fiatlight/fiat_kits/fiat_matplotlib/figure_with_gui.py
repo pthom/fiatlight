@@ -14,6 +14,7 @@ class FigureWithGui(AnyDataWithGui[Figure]):
     _figure_size: ImVec2
     should_refresh_fig: bool = False
     _save_file_dialog: pfd.save_file | None = None
+    _last_fig_id: int | None = None
 
     def __init__(self) -> None:
         super().__init__(Figure)
@@ -25,20 +26,23 @@ class FigureWithGui(AnyDataWithGui[Figure]):
         self.callbacks.on_change = self._on_change
 
     def _present(self, figure: Figure) -> None:
+        self.should_refresh_fig = self._last_fig_id != id(figure)
+        self._last_fig_id = id(figure)
+
         imgui_fig.fig("##Figure", figure, self._figure_size, refresh_image=self.should_refresh_fig)
         self.should_refresh_fig = False
 
         # Handle saving
         with fontawesome_6_ctx():
-            cursor_pos = imgui.get_cursor_pos()
+            cursor_pos = imgui.get_cursor_screen_pos()
             fig_pos = imgui.get_item_rect_min()
             margin = hello_imgui.em_size(0.3)
-            imgui.set_cursor_pos(ImVec2(fig_pos.x + margin, fig_pos.y + margin))
+            imgui.set_cursor_screen_pos(ImVec2(fig_pos.x + margin, fig_pos.y + margin))
             if imgui.button(icons_fontawesome_6.ICON_FA_FLOPPY_DISK):
                 self._save_file_dialog = pfd.save_file(
                     "Save figure as image", "", ["*.png", "*.jpg", "*.jpeg", "*.gif"]
                 )
-            imgui.set_cursor_pos(cursor_pos)
+            imgui.set_cursor_screen_pos(cursor_pos)
         if self._save_file_dialog is not None and self._save_file_dialog.ready():
             file_path = self._save_file_dialog.result()
             if file_path:
