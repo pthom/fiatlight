@@ -1,5 +1,23 @@
 # type: ignore
 """Grokking with a simple model on modular addition in Z/53Z
+=========================================================
+
+Context
+-------
+We train a simple model on the modular addition in Z/53Z, i.e. the addition modulo 53.
+At the start, the model learn the training set "by heart", and is unable to generalize to the test set.
+
+After a few epochs, the model starts to generalize, and a PCA of the embeddings shows that the model has learned
+a representation of the integers modulo 53 in a circular fashion.
+
+What FiatLight brings to this example
+-------------------------------------
+- A few hyperparameters can be tuned via the GUI: the number of epochs, the learning rate, and the weight decay.
+- During the training process several figures are displayed in the GUI
+    - a figure showing the accuracy and loss curves
+    -  a PCA of the embeddings is also displayed, showing the evolution of the embeddings during training
+       and how the model learns to represent the integers modulo 53 in a circular fashion.
+- The training can be stopped at any time by clicking on the "Stop" button in the GUI.
 """
 
 # Preliminaries
@@ -18,6 +36,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from sklearn.decomposition import PCA  # type: ignore
 from pydantic import BaseModel
+import logging
 
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -108,7 +127,7 @@ class EmbeddingConcatFFModel(nn.Module):
 # ==================
 @fl.base_model_with_gui_registration(
     NB_EPOCHS__range=(100, 10000),
-    LEARNING_RATE__range=(0.0001, 0.01),
+    LEARNING_RATE__range=(0.00001, 0.01),
     LEARNING_RATE__slider_logarithmic=True,
     LEARNING_RATE__format="%.5f",  # Fix this (should be inferred from the range)
     WEIGHT_DECAY__range=(0.5, 3),
@@ -182,9 +201,20 @@ def perform_training(learn_parameters: LearnParameters) -> None:
             test_acc /= len(test_data)
             test_acc_history.append(test_acc)
 
+        logging.warning(
+            f"""Epoch [{epoch+1}/{learn_parameters.NB_EPOCHS}],
+            Train Loss: {train_loss:.6f}, Train Accuracy: {train_acc:.6f},
+            Test Loss:  {test_loss:.6f},  Test Accuracy: {test_acc:.6f}"""
+        )
+
         # Draw graph via fiat_tuning
         from matplotlib.figure import Figure
 
+        #
+        # draw_accuracy_loss_fig / draw_pca_fig:
+        # -------------------------------------
+        # Figures that will be displayed in the tuning interface
+        # during the training process.
         def draw_accuracy_loss_fig() -> Figure:
             fig, axs = plt.subplots(1, 2, figsize=(6, 2.5))  # Create 1 row and 2 columns of subplots
 
@@ -241,7 +271,8 @@ def perform_training(learn_parameters: LearnParameters) -> None:
             plt.tight_layout()
             return fig
 
-        if epoch % 5 == 0:
+        # Display the figures in fiat_tuning
+        if epoch % 10 == 0:
             import time
 
             t0 = time.time()
@@ -259,4 +290,5 @@ def perform_training(learn_parameters: LearnParameters) -> None:
             )
 
 
+perform_training.__doc__ = __doc__
 fl.run(perform_training)
