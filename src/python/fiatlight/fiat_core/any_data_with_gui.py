@@ -18,6 +18,7 @@ from imgui_bundle import imgui, imgui_ctx, ImVec4, hello_imgui, ImVec2
 from fiatlight.fiat_config import get_fiat_config, FiatColorType
 from fiatlight.fiat_widgets.fontawesome6_ctx_utils import icons_fontawesome_6, fontawesome_6_ctx
 from fiatlight.fiat_widgets import fiat_osd
+from fiatlight import fiat_utils
 from fiatlight.fiat_widgets.text_truncated import text_maybe_truncated
 from typing import Generic, Any, Type, final, Callable
 import logging
@@ -410,14 +411,14 @@ class AnyDataWithGui(Generic[DataType]):
     def can_show_present_popup(self) -> bool:
         if self.callbacks.present_collapsible:
             return True
-        if fiat_osd.is_rendering_in_node() and not self.callbacks.present_node_compatible:
+        if fiat_utils.is_rendering_in_node() and not self.callbacks.present_node_compatible:
             return True
         return False
 
     def can_show_edit_popup(self) -> bool:
         if self.callbacks.edit_collapsible:
             return True
-        if fiat_osd.is_rendering_in_node() and not self.callbacks.edit_node_compatible:
+        if fiat_utils.is_rendering_in_node() and not self.callbacks.edit_node_compatible:
             return True
         return False
 
@@ -446,38 +447,38 @@ class AnyDataWithGui(Generic[DataType]):
     def can_collapse_present(self) -> bool:
         if isinstance(self.value, (Unspecified, Error)):
             return False
-        disabled_in_node = fiat_osd.is_rendering_in_node() and not self.callbacks.present_node_compatible
+        disabled_in_node = fiat_utils.is_rendering_in_node() and not self.callbacks.present_node_compatible
         return self.callbacks.present_collapsible and not disabled_in_node
 
     def can_collapse_edit(self) -> bool:
         if isinstance(self.value, (Unspecified, Error)):
             return False
-        disabled_in_node = fiat_osd.is_rendering_in_node() and not self.callbacks.edit_node_compatible
+        disabled_in_node = fiat_utils.is_rendering_in_node() and not self.callbacks.edit_node_compatible
         return self.callbacks.edit_collapsible and not disabled_in_node
 
     def can_edit_on_header_line(self) -> bool:
         has_small_edit = self.callbacks.edit is not None and not self.callbacks.edit_collapsible
-        disabled_in_node = fiat_osd.is_rendering_in_node() and not self.callbacks.edit_node_compatible
+        disabled_in_node = fiat_utils.is_rendering_in_node() and not self.callbacks.edit_node_compatible
         return has_small_edit and not disabled_in_node
 
     def can_present_on_header_line(self) -> bool:
         # we do not test self.callbacks.present is None because if not provided, it will be presented with str()
         has_small_present = not self.callbacks.present_collapsible
-        disabled_in_node = fiat_osd.is_rendering_in_node() and not self.callbacks.present_node_compatible
+        disabled_in_node = fiat_utils.is_rendering_in_node() and not self.callbacks.present_node_compatible
         return has_small_present and not disabled_in_node
 
     def _can_edit_on_next_lines_if_expanded(self) -> bool:
         is_datatype_or_invalid = not isinstance(self.value, (Unspecified, Error))
         has_callback = self.callbacks.edit is not None
         # collapsible = self.callbacks.edit_collapsible
-        disabled_in_node = fiat_osd.is_rendering_in_node() and not self.callbacks.edit_node_compatible
+        disabled_in_node = fiat_utils.is_rendering_in_node() and not self.callbacks.edit_node_compatible
         return has_callback and is_datatype_or_invalid and not disabled_in_node
 
     def _can_present_on_next_lines_if_expanded(self) -> bool:
         # we do not test self.callbacks.present is None because if not provided, it will be presented with str()
         is_datatype_or_invalid = not isinstance(self.value, (Unspecified, Error))
         # collapsible = self.callbacks.present_collapsible
-        disabled_in_node = fiat_osd.is_rendering_in_node() and not self.callbacks.present_node_compatible
+        disabled_in_node = fiat_utils.is_rendering_in_node() and not self.callbacks.present_node_compatible
         return is_datatype_or_invalid and not disabled_in_node
 
     def _is_editing_on_next_lines(self) -> bool:

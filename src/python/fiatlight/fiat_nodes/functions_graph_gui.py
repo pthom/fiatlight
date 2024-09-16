@@ -64,6 +64,8 @@ class FunctionsGraphGui:
         imgui.get_io().font_global_scale *= k
 
     def draw(self) -> bool:
+        from fiatlight.fiat_utils import fiat_node_semaphore
+
         shall_use_node_editor = self.shall_use_node_editor()
 
         def draw_nodes() -> bool:
@@ -90,6 +92,7 @@ class FunctionsGraphGui:
         with imgui_ctx.push_obj_id(self):
             if shall_use_node_editor:
                 ed.begin("FunctionsGraphGui")
+                fiat_node_semaphore._IS_RENDERING_IN_NODE = True
             else:
                 imgui.begin_group()
             if draw_nodes():
@@ -99,6 +102,7 @@ class FunctionsGraphGui:
                 self._handle_graph_edition()
             if shall_use_node_editor:
                 ed.end()
+                fiat_node_semaphore._IS_RENDERING_IN_NODE = False
             else:
                 imgui.end_group()
                 self._function_no_node_editor_rect = imgui.internal.ImRect(

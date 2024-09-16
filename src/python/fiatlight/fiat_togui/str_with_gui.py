@@ -182,7 +182,7 @@ class StrWithGui(AnyDataWithGui[str]):
         # but we want the user to be able to correct an invalid value)
         self._store_text_value_in_cache(text_value)
 
-        if fiatlight.is_rendering_in_fiatlight_detached_window():
+        if not fiatlight.is_rendering_in_node():
             text_edit_size = ImVec2(
                 imgui.get_window_width() - hello_imgui.em_size(3), imgui.get_window_height() - hello_imgui.em_size(4)
             )
@@ -246,7 +246,7 @@ class StrWithGui(AnyDataWithGui[str]):
                         self._input_text_classic.size_em = ImVec2(self.params.user_params.width_em, 0)
 
                     # Special case: if we are in a detached window, we need to adjust the width of the input text
-                    if fiatlight.is_rendering_in_fiatlight_detached_window():
+                    if not fiatlight.is_rendering_in_node():
                         window_width = imgui.get_window_width()
                         window_width_em = hello_imgui.pixel_size_to_em(window_width)
                         self._input_text_classic.size_em.x = window_width_em - 12.0

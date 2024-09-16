@@ -6,8 +6,8 @@ from fiatlight.fiat_core.possible_fiat_attributes import PossibleFiatAttributes
 from fiatlight.fiat_types import FiatAttributes, JsonDict
 from fiatlight.fiat_widgets.fontawesome6_ctx_utils import fontawesome_6_ctx, icons_fontawesome_6
 from imgui_bundle import imgui, imgui_ctx, hello_imgui, immapp
-from fiatlight.fiat_widgets.fiat_osd import is_rendering_in_node
 from fiatlight.fiat_utils.str_utils import memory_readable_str
+from fiatlight.fiat_utils import is_rendering_in_node
 
 
 class DataFramePossibleFiatAttributes(PossibleFiatAttributes):

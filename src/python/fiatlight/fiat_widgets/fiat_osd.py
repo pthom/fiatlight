@@ -6,42 +6,10 @@ This avoids issues with the canvas's zooming feature, which is incompatible with
 """
 
 from fiatlight.fiat_types import GuiFunction, GuiBoolFunction
+from fiatlight.fiat_utils import is_rendering_in_node
 from imgui_bundle import imgui, ImVec2, imgui_node_editor, hello_imgui, imgui_ctx, ImVec4
 from .fontawesome6_ctx_utils import fontawesome_6_ctx, icons_fontawesome_6
 from dataclasses import dataclass
-
-_IS_PRESENTLY_IN_DETACHED_WINDOW = False
-
-
-def is_rendering_in_node() -> bool:
-    """Check if we are currently rendering inside a Node.
-
-    You may want to check this value when implementing `present` or `edit`
-    callbacks inside `AnyDataGuiCallbacks` for several possible reasons:
-
-        - Some widgets cannot be presented in a Node (e.g., a multiline text input),
-          be can be presented in a detached window.
-        - When inside a Node, you may want to render a smaller version, to save space
-          (as opposed to rendering a larger version in a detached window).
-    """
-    if imgui_node_editor.get_current_editor() is None:
-        return False
-    return not _IS_PRESENTLY_IN_DETACHED_WINDOW
-
-
-def is_rendering_in_fiatlight_detached_window() -> bool:
-    """Check if we are currently rendering inside a regular ImGui window.
-    You may want to check this value when implementing `present` or `edit`
-    callbacks inside `AnyDataGuiCallbacks` for several possible reasons:
-
-    - Some widgets cannot be presented in a Node (e.g., a multiline text input),
-      be can be presented in a detached window.
-    - When inside a Node, you may want to render a smaller version, to save space
-      (as opposed to rendering a larger version in a detached window).
-    """
-    if imgui_node_editor.get_current_editor() is None:
-        return False
-    return _IS_PRESENTLY_IN_DETACHED_WINDOW
 
 
 # ======================================================================================================================
@@ -128,7 +96,6 @@ class _OsdDetachedWindows:
         self.detached_windows = []
 
     def _render_detached_windows(self) -> None:
-        global _IS_PRESENTLY_IN_DETACHED_WINDOW
         alive_windows = []  # remove windows that are closed
         for detached_info in self.detached_windows:
             window_flags = imgui.WindowFlags_.no_collapse.value
@@ -144,7 +111,6 @@ class _OsdDetachedWindows:
             window_label_unique = detached_info.params.window_name + "##" + detached_info.params.unique_id
             show, flag_open = imgui.begin(window_label_unique, True, window_flags)
             if show and flag_open:
-                _IS_PRESENTLY_IN_DETACHED_WINDOW = True
                 with fontawesome_6_ctx():
                     with imgui_ctx.push_style_var(imgui.StyleVar_.frame_rounding.value, 50.0):
                         cur_pos = imgui.get_cursor_pos()
@@ -155,7 +121,6 @@ class _OsdDetachedWindows:
                         cur_pos.x += hello_imgui.em_size(3)
                         imgui.set_cursor_pos(cur_pos)
                 detached_info.bool_returned = detached_info.params.gui_function()
-                _IS_PRESENTLY_IN_DETACHED_WINDOW = False
                 if not shall_close:
                     alive_windows.append(detached_info)
             imgui.end()
