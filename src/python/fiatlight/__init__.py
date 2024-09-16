@@ -9,9 +9,6 @@ from fiatlight.fiat_core import (
 )
 from fiatlight.fiat_runner import (
     run,
-    fiat_run,
-    fiat_run_composition,
-    fiat_run_graph,
     FiatGuiParams,
     fire_once_at_frame_end,
     fire_once_at_frame_start,
@@ -84,9 +81,6 @@ __all__ = [
     "base_model_with_gui_registration",
     # from fiat_runner
     "run",
-    "fiat_run",
-    "fiat_run_composition",
-    "fiat_run_graph",
     "FiatGuiParams",
     "fire_once_at_frame_end",
     "fire_once_at_frame_start",

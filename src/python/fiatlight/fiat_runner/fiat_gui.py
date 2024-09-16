@@ -247,6 +247,7 @@ class FiatGui:
         app_name: str | None = None,
         theme: ImGuiTheme_ | None = None,
         remember_theme: bool = False,
+        use_node_editor_if_one_function: bool = False,
     ) -> None:
         self.apply_fiat_style_graph()
 
@@ -272,7 +273,7 @@ class FiatGui:
             )
 
         self.params = params
-        self._functions_graph_gui = FunctionsGraphGui(functions_graph)
+        self._functions_graph_gui = FunctionsGraphGui(functions_graph, use_node_editor_if_one_function)
 
         if self.params.customizable_graph:
             self._functions_graph_gui.can_edit_graph = True
@@ -698,12 +699,13 @@ class FiatGui:
         self._save_data(filename, _SaveType.GraphComposition)
 
 
-def fiat_run_graph(
+def _fiat_run_graph(
     functions_graph: FunctionsGraph,
-    params: FiatGuiParams | None = None,
-    app_name: str | None = None,
-    theme: ImGuiTheme_ | None = None,
-    remember_theme: bool = False,
+    params: FiatGuiParams | None,
+    app_name: str | None,
+    theme: ImGuiTheme_ | None,
+    remember_theme: bool,
+    use_node_editor_if_one_function: bool,
 ) -> None:
     if is_running_in_notebook():
         from fiatlight.fiat_runner.fiat_run_notebook import _fiat_run_graph_nb, NotebookRunnerParams
@@ -722,39 +724,56 @@ def fiat_run_graph(
             notebook_runner_params=notebook_runner_params,
             theme=theme,
             remember_theme=remember_theme,
+            use_node_editor_if_one_function=use_node_editor_if_one_function,
         )
     else:
         fiat_gui = FiatGui(
-            functions_graph, params=params, app_name=app_name, theme=theme, remember_theme=remember_theme
+            functions_graph,
+            params=params,
+            app_name=app_name,
+            theme=theme,
+            remember_theme=remember_theme,
+            use_node_editor_if_one_function=use_node_editor_if_one_function,
         )
         fiat_gui.run()
 
 
-def fiat_run(
+def _fiat_run(
     fn: Function | FunctionWithGui,
-    params: FiatGuiParams | None = None,
-    app_name: str | None = None,
-    theme: ImGuiTheme_ | None = None,
-    remember_theme: bool = False,
+    params: FiatGuiParams | None,
+    app_name: str | None,
+    theme: ImGuiTheme_ | None,
+    remember_theme: bool,
+    use_node_editor_if_one_function: bool,
 ) -> None:
     functions_graph = FunctionsGraph.from_function(fn)
-    fiat_run_graph(functions_graph, params=params, app_name=app_name, theme=theme, remember_theme=remember_theme)
+    _fiat_run_graph(
+        functions_graph,
+        params=params,
+        app_name=app_name,
+        theme=theme,
+        remember_theme=remember_theme,
+        use_node_editor_if_one_function=use_node_editor_if_one_function,
+    )
 
 
-def fiat_run_composition(
+def _fiat_run_composition(
     composition: List[Function | FunctionWithGui],
-    params: FiatGuiParams | None = None,
-    app_name: str | None = None,
-    theme: ImGuiTheme_ | None = None,
-    remember_theme: bool = False,
+    params: FiatGuiParams | None,
+    app_name: str | None,
+    theme: ImGuiTheme_ | None,
+    remember_theme: bool,
+    use_node_editor_if_one_function: bool,
 ) -> None:
-    """Runs a composition of functions in the Fiat GUI.
-    - app_name: will be displayed in the window title, and used to save/load the user inputs and graph composition.
-                if it is None, then the name of the calling module will be used.
-                Note: inside a notebook, specifying app_name is mandatory, since the module name is not available.
-    """
     functions_graph = FunctionsGraph.from_function_composition(composition)
-    fiat_run_graph(functions_graph, params=params, app_name=app_name, theme=theme, remember_theme=remember_theme)
+    _fiat_run_graph(
+        functions_graph,
+        params=params,
+        app_name=app_name,
+        theme=theme,
+        remember_theme=remember_theme,
+        use_node_editor_if_one_function=use_node_editor_if_one_function,
+    )
 
 
 def run(
@@ -763,6 +782,7 @@ def run(
     app_name: str | None = None,
     theme: ImGuiTheme_ | None = None,
     remember_theme: bool = False,
+    use_node_editor_if_one_function: bool = False,
 ) -> None:
     """Runs a function, a composition of functions, or a functions graph in the Fiat GUI.
 
@@ -774,10 +794,29 @@ def run(
                       (this will bypass the theme parameter)
     """
     if isinstance(fn, FunctionsGraph):
-        fiat_run_graph(fn, params=params, app_name=app_name, theme=theme, remember_theme=remember_theme)
+        _fiat_run_graph(
+            fn,
+            params=params,
+            app_name=app_name,
+            theme=theme,
+            remember_theme=remember_theme,
+            use_node_editor_if_one_function=use_node_editor_if_one_function,
+        )
     elif isinstance(fn, list):
-        fiat_run_composition(fn, params=params, app_name=app_name, theme=theme, remember_theme=remember_theme)
-    elif isinstance(fn, FunctionWithGui):
-        fiat_run(fn, params=params, app_name=app_name, theme=theme, remember_theme=remember_theme)
+        _fiat_run_composition(
+            fn,
+            params=params,
+            app_name=app_name,
+            theme=theme,
+            remember_theme=remember_theme,
+            use_node_editor_if_one_function=use_node_editor_if_one_function,
+        )
     else:
-        fiat_run(fn, params=params, app_name=app_name, theme=theme, remember_theme=remember_theme)
+        _fiat_run(
+            fn,
+            params=params,
+            app_name=app_name,
+            theme=theme,
+            remember_theme=remember_theme,
+            use_node_editor_if_one_function=use_node_editor_if_one_function,
+        )

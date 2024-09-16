@@ -19,11 +19,13 @@ class FunctionsGraphGui:
 
     _idx_frame: int = 0
     _function_no_node_editor_rect: imgui.internal.ImRect | None = None
+    _use_node_editor_if_one_function: bool = False
 
     # ======================================================================================================================
     # Constructor
     # ======================================================================================================================
-    def __init__(self, functions_graph: FunctionsGraph) -> None:
+    def __init__(self, functions_graph: FunctionsGraph, use_node_editor_if_one_function: bool) -> None:
+        self._use_node_editor_if_one_function = use_node_editor_if_one_function
         self.functions_graph = functions_graph
         self._create_function_nodes_and_links_gui()
 
@@ -44,7 +46,9 @@ class FunctionsGraphGui:
         pass
 
     def shall_use_node_editor(self) -> bool:
-        return len(self.function_nodes_gui) > 1
+        if len(self.function_nodes_gui) > 1:
+            return True
+        return self._use_node_editor_if_one_function
 
     @staticmethod
     def _handle_global_zoom_if_no_node_editor() -> None:
@@ -450,28 +454,3 @@ class FunctionsGraphGui:
     ) -> None:
         self.functions_graph.load_graph_composition_from_json(json_data, function_factory)
         self._create_function_nodes_and_links_gui()
-
-
-def sandbox() -> None:
-    def add(a: int, b: int = 2) -> int:
-        return a + b
-
-    def mul2(x: int) -> int:
-        return x * 2
-
-    def div3(x: int) -> float:
-        return x / 3
-
-    fg = FunctionsGraph.from_function_composition([add, mul2, div3])
-    fgg = FunctionsGraphGui(fg)
-
-    from imgui_bundle import immapp
-
-    def gui() -> None:
-        fgg.draw()
-
-    immapp.run(gui, with_node_editor=True)
-
-
-if __name__ == "__main__":
-    sandbox()

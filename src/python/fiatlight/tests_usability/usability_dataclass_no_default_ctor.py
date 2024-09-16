@@ -46,7 +46,7 @@ def usability_dataclass_no_ctor_but_registered_types() -> None:
     def f(param: MyData) -> MyData:
         return param
 
-    fl.fiat_run(f, app_name="usability_no_ctor_but_registered_types")
+    fl.run(f, app_name="usability_no_ctor_but_registered_types")
 
 
 if __name__ == "__main__":
