@@ -72,10 +72,7 @@ class FunctionsGraphGui:
             changed = False
             for fn in self.function_nodes_gui:
                 imgui.push_id(str(id(fn)))
-                if fn.draw_node(
-                    self.functions_graph.function_node_unique_name(fn._function_node),
-                    shall_use_node_editor=shall_use_node_editor,
-                ):
+                if fn.draw_node(self.functions_graph.function_node_unique_name(fn._function_node)):
                     changed = True
                 imgui.pop_id()
             return changed

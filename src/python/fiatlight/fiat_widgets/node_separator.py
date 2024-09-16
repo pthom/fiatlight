@@ -1,6 +1,7 @@
 from imgui_bundle import imgui
 from imgui_bundle import imgui_node_editor as ed, ImVec2, hello_imgui
 from typing import Callable
+from fiatlight import fiat_utils
 
 from dataclasses import dataclass
 
@@ -24,8 +25,6 @@ class NodeSeparatorParams:
 
     # The parent node
     parent_node: ed.NodeId | None = None
-
-    shall_use_node_editor: bool = True
 
 
 @dataclass
@@ -81,7 +80,7 @@ def node_separator(params: NodeSeparatorParams) -> NodeSeparatorOutput:
     spacing_x = imgui.get_style().item_spacing.x / 2.0
 
     cur_pos = imgui.get_cursor_screen_pos()
-    if params.shall_use_node_editor:
+    if fiat_utils.is_rendering_in_node():
         p1 = ImVec2(node_pos.x + spacing_x, cur_pos.y + spacing_y / 2)
         p2 = ImVec2(p1.x + node_size.x - 1.0 - 2 * spacing_x, p1.y)
     else:
