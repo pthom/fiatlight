@@ -46,16 +46,22 @@ class FunctionsGraphGui:
     def shall_use_node_editor(self) -> bool:
         return len(self.function_nodes_gui) > 1
 
-    def draw_zoom_button_if_no_node_editor(self) -> None:
-        imgui.push_item_flag(imgui.ItemFlags_.button_repeat.value, True)
-        imgui.begin_horizontal("Zoom")
-        if imgui.button("Zoom+"):
-            imgui.get_io().font_global_scale *= 1.1
-        imgui.spring()
-        if imgui.button("Zoom-"):
-            imgui.get_io().font_global_scale /= 1.1
-        imgui.end_horizontal()
-        imgui.pop_item_flag()
+    @staticmethod
+    def _handle_global_zoom_if_no_node_editor() -> None:
+        imgui.text("(?)")
+        fiat_osd.set_widget_tooltip("Ctrl+Alt+Wheel to zoom")
+
+        ctrl_down = imgui.is_key_down(imgui.Key.left_ctrl) or imgui.is_key_down(imgui.Key.right_ctrl)
+        alt_down = imgui.is_key_down(imgui.Key.left_alt) or imgui.is_key_down(imgui.Key.right_alt)
+        mod_ok = ctrl_down and alt_down
+        if not mod_ok:
+            return
+
+        wheel_amount = imgui.get_io().mouse_wheel
+        if wheel_amount == 0:
+            return
+        k = 1.0 + wheel_amount / 20
+        imgui.get_io().font_global_scale *= k
 
     def draw(self) -> bool:
         shall_use_node_editor = self.shall_use_node_editor()
@@ -77,7 +83,7 @@ class FunctionsGraphGui:
                 link.draw()
 
         if not shall_use_node_editor:
-            self.draw_zoom_button_if_no_node_editor()
+            self._handle_global_zoom_if_no_node_editor()
 
         self._layout_graph_if_required()
         nodes_changed = False
