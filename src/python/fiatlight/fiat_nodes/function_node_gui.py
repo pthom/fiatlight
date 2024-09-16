@@ -255,7 +255,9 @@ class FunctionNodeGui:
 
     def _draw_title(self, unique_name: str) -> None:
         fn_label = self._function_node.function_with_gui.label
-        imgui.text(fn_label)
+        imgui.text("    ")
+        imgui.same_line()
+        imgui_md.render(f"**{fn_label}**")
         if unique_name != fn_label:
             fiat_osd.set_widget_tooltip(f" (id: {unique_name})")
 
