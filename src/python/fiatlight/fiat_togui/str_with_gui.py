@@ -77,7 +77,7 @@ def _lines_max_width(text: str) -> int:
 class StrWithGuiUserParams(BaseModel):
     # Saved parameters (user pref)
     width_em: float = 15.0  # single line editing width
-    size_multiline_em: tuple[float, float] = (60.0, 15.0)  # multiline editing size
+    size_multiline_em: tuple[float, float] = (60.0, 10.0)  # multiline editing size
     wrap_multiline: bool = False  # whether the text is wrapped when presented as a multiline string
     wrap_multiline_width: int = 80
 
@@ -250,11 +250,7 @@ class StrWithGui(AnyDataWithGui[str]):
                         window_width = imgui.get_window_width()
                         window_width_em = hello_imgui.pixel_size_to_em(window_width)
                         self._input_text_classic.size_em.x = window_width_em - 12.0
-
-                        was_resizable_in_node = self._input_text_classic.resizable
-                        self._input_text_classic.resizable = False
                         changed = hello_imgui.input_text_resizable("##StringPopup", self._input_text_classic)
-                        self._input_text_classic.resizable = was_resizable_in_node
                     else:
                         changed = hello_imgui.input_text_resizable("##StringPopup", self._input_text_classic)
 

@@ -7,7 +7,7 @@ def main() -> None:
 
     import fiatlight
 
-    fiatlight.run(f)
+    fiatlight.run(f, use_node_editor_if_one_function=False)
 
 
 if __name__ == "__main__":

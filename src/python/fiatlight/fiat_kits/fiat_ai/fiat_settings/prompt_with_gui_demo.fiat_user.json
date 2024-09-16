@@ -6,7 +6,7 @@
                     "name": "prompt",
                     "data": {
                         "type": "Primitive",
-                        "value": "lmqdlmslm\u00f9lxkwl<xkw<lmxklwm\nl<m\u00f9lwxm\u00f9clm\u00f9"
+                        "value": "blh"
                     }
                 }
             }
@@ -17,7 +17,8 @@
             "function_node_with_gui": {
                 "_inputs_expanded": true,
                 "_outputs_expanded": true,
-                "fiat_tuning_expanded": false,
+                "_doc_expanded": false,
+                "fiat_tuning_expanded": true,
                 "_internal_state_gui_expanded": true,
                 "_function_node": {
                     "inputs": {
@@ -26,15 +27,15 @@
                                 "_str_with_resizable_gui": {
                                     "width_em": 15.0,
                                     "size_multiline_em": [
-                                        28.0,
-                                        15.0
+                                        94.66666412353516,
+                                        4.199999809265137
                                     ],
                                     "wrap_multiline": false,
                                     "wrap_multiline_width": 80
                                 },
-                                "submit_continuously": true
+                                "submit_continuously": false
                             },
-                            "expanded": false
+                            "expanded": true
                         }
                     },
                     "outputs": {
@@ -43,15 +44,14 @@
                                 "width_em": 15.0,
                                 "size_multiline_em": [
                                     60.0,
-                                    15.0
+                                    10.0
                                 ],
                                 "wrap_multiline": false,
                                 "wrap_multiline_width": 80
                             },
-                            "expanded": false
+                            "expanded": true
                         }
-                    },
-                    "internal_gui_options": {}
+                    }
                 }
             },
             "function_node": {
@@ -61,15 +61,15 @@
                             "_str_with_resizable_gui": {
                                 "width_em": 15.0,
                                 "size_multiline_em": [
-                                    28.0,
-                                    15.0
+                                    94.66666412353516,
+                                    4.199999809265137
                                 ],
                                 "wrap_multiline": false,
                                 "wrap_multiline_width": 80
                             },
-                            "submit_continuously": true
+                            "submit_continuously": false
                         },
-                        "expanded": false
+                        "expanded": true
                     }
                 },
                 "outputs": {
@@ -78,15 +78,14 @@
                             "width_em": 15.0,
                             "size_multiline_em": [
                                 60.0,
-                                15.0
+                                10.0
                             ],
                             "wrap_multiline": false,
                             "wrap_multiline_width": 80
                         },
-                        "expanded": false
+                        "expanded": true
                     }
-                },
-                "internal_gui_options": {}
+                }
             }
         }
     }
