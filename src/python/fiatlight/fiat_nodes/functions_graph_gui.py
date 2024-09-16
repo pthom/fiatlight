@@ -303,10 +303,10 @@ class FunctionsGraphGui:
             r = self._function_no_node_editor_rect
             main_viewport_pos = imgui.get_main_viewport().pos
             fbs = imgui.get_io().display_framebuffer_scale
-            r.min -= main_viewport_pos
-            r.max -= main_viewport_pos
-            r.min = r.min * fbs
-            r.max = r.max * fbs
+            r.min -= main_viewport_pos  # type: ignore # noqa
+            r.max -= main_viewport_pos  # type: ignore
+            r.min = r.min * fbs  # type: ignore
+            r.max = r.max * fbs  # type: ignore
             return r
 
         all_nodes_boundings = []

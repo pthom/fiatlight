@@ -391,7 +391,7 @@ class FloatWithGui(AnyDataWithGui[float]):
                 )
             self.params.slider_logarithmic = self.fiat_attributes["slider_logarithmic"]
 
-        def auto_handle_format_and_logarithmic():
+        def auto_handle_format_and_logarithmic() -> None:
             # When both v_min and v_max are positive and not zero,
             # we can infer the format and slider_logarithmic:
             # - format: we need to display the number with enough precision
