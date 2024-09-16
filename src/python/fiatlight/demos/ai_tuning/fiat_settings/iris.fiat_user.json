@@ -1,0 +1,119 @@
+{
+    "user_inputs": {
+        "functions_nodes": {
+            "perform_training": {
+                "dataset_params": {
+                    "name": "dataset_params",
+                    "data": {
+                        "type": "Pydantic",
+                        "value": {
+                            "test_size": 0.30000001192092896,
+                            "random_state": 46
+                        }
+                    }
+                },
+                "hyper_params": {
+                    "name": "hyper_params",
+                    "data": {
+                        "type": "Pydantic",
+                        "value": {
+                            "num_epochs": 93,
+                            "hidden_size": 12,
+                            "learning_rate": 0.012374309822916985,
+                            "update_plots_every": 24
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "gui_options": {
+        "perform_training": {
+            "function_node_with_gui": {
+                "_inputs_expanded": true,
+                "_outputs_expanded": true,
+                "_doc_expanded": false,
+                "fiat_tuning_expanded": true,
+                "_internal_state_gui_expanded": true,
+                "_function_node": {
+                    "inputs": {
+                        "dataset_params": {
+                            "cb_options": {
+                                "test_size": {
+                                    "cb_options": {},
+                                    "expanded": true
+                                },
+                                "random_state": {
+                                    "cb_options": {},
+                                    "expanded": true
+                                }
+                            },
+                            "expanded": true
+                        },
+                        "hyper_params": {
+                            "cb_options": {
+                                "num_epochs": {
+                                    "cb_options": {},
+                                    "expanded": true
+                                },
+                                "hidden_size": {
+                                    "cb_options": {},
+                                    "expanded": true
+                                },
+                                "learning_rate": {
+                                    "cb_options": {},
+                                    "expanded": true
+                                },
+                                "update_plots_every": {
+                                    "cb_options": {},
+                                    "expanded": true
+                                }
+                            },
+                            "expanded": true
+                        }
+                    },
+                    "outputs": {}
+                }
+            },
+            "function_node": {
+                "inputs": {
+                    "dataset_params": {
+                        "cb_options": {
+                            "test_size": {
+                                "cb_options": {},
+                                "expanded": true
+                            },
+                            "random_state": {
+                                "cb_options": {},
+                                "expanded": true
+                            }
+                        },
+                        "expanded": true
+                    },
+                    "hyper_params": {
+                        "cb_options": {
+                            "num_epochs": {
+                                "cb_options": {},
+                                "expanded": true
+                            },
+                            "hidden_size": {
+                                "cb_options": {},
+                                "expanded": true
+                            },
+                            "learning_rate": {
+                                "cb_options": {},
+                                "expanded": true
+                            },
+                            "update_plots_every": {
+                                "cb_options": {},
+                                "expanded": true
+                            }
+                        },
+                        "expanded": true
+                    }
+                },
+                "outputs": {}
+            }
+        }
+    }
+}

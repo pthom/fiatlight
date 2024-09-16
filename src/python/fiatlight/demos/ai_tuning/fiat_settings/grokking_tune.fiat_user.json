@@ -1,0 +1,74 @@
+{
+    "user_inputs": {
+        "functions_nodes": {
+            "perform_training": {
+                "learn_parameters": {
+                    "name": "learn_parameters",
+                    "data": {
+                        "type": "Pydantic",
+                        "value": {
+                            "NB_EPOCHS": 183,
+                            "LEARNING_RATE": 0.010400000028312206,
+                            "WEIGHT_DECAY": 0.6639999747276306
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "gui_options": {
+        "perform_training": {
+            "function_node_with_gui": {
+                "_inputs_expanded": true,
+                "_outputs_expanded": true,
+                "_doc_expanded": false,
+                "fiat_tuning_expanded": true,
+                "_internal_state_gui_expanded": true,
+                "_function_node": {
+                    "inputs": {
+                        "learn_parameters": {
+                            "cb_options": {
+                                "NB_EPOCHS": {
+                                    "cb_options": {},
+                                    "expanded": true
+                                },
+                                "LEARNING_RATE": {
+                                    "cb_options": {},
+                                    "expanded": true
+                                },
+                                "WEIGHT_DECAY": {
+                                    "cb_options": {},
+                                    "expanded": true
+                                }
+                            },
+                            "expanded": true
+                        }
+                    },
+                    "outputs": {}
+                }
+            },
+            "function_node": {
+                "inputs": {
+                    "learn_parameters": {
+                        "cb_options": {
+                            "NB_EPOCHS": {
+                                "cb_options": {},
+                                "expanded": true
+                            },
+                            "LEARNING_RATE": {
+                                "cb_options": {},
+                                "expanded": true
+                            },
+                            "WEIGHT_DECAY": {
+                                "cb_options": {},
+                                "expanded": true
+                            }
+                        },
+                        "expanded": true
+                    }
+                },
+                "outputs": {}
+            }
+        }
+    }
+}

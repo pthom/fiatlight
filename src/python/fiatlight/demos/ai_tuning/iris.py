@@ -1,3 +1,4 @@
+# type: ignore
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -123,9 +124,11 @@ def perform_training(
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=hyper_params.learning_rate)
 
-    # Training parameters
+    # Lists to store loss and accuracy (for plotting)
     train_loss_list = []
     train_acc_list = []
+    test_loss_list = []
+    test_acc_list = []
 
     # Training loop
     for epoch in range(hyper_params.num_epochs):
@@ -152,9 +155,22 @@ def perform_training(
         accuracy = correct / y_train.size(0)
         train_acc_list.append(accuracy)
 
+        # Compute loss and accuracy on the test set
+        model.eval()
+        with torch.no_grad():
+            outputs_test = model(X_test)
+            loss_test = criterion(outputs_test, y_test)
+            test_loss_list.append(loss_test.item())
+            _, predicted_test = torch.max(outputs_test, 1)
+            correct_test = (predicted_test == y_test).sum().item()
+            test_accuracy = correct_test / y_test.size(0)
+            test_acc_list.append(test_accuracy)
+
         # Logging loss and accuracy
         logging.warning(
-            f"Epoch [{epoch+1}/{hyper_params.num_epochs}], Loss: {loss.item():.4f}, Accuracy: {accuracy:.4f}"
+            f"""Epoch [{epoch+1}/{hyper_params.num_epochs}],
+                Train Loss: {loss.item():.4f}, Accuracy: {accuracy:.4f}
+                Test Loss: {loss_test.item():.4f}, Test Accuracy: {test_accuracy:.4f}"""
         )
 
         # Update loss/accuracy plots in real-time
@@ -165,14 +181,18 @@ def perform_training(
 
             plt.subplot(1, 2, 1)
             plt.plot(train_loss_list, label="Train Loss")
+            plt.plot(test_loss_list, label="Test Loss")
             plt.xlabel("Epoch")
             plt.ylabel("Loss")
+            plt.legend()
             plt.title("Loss vs. Epochs")
 
             plt.subplot(1, 2, 2)
             plt.plot(train_acc_list, label="Train Accuracy")
+            plt.plot(test_acc_list, label="Test Accuracy")
             plt.xlabel("Epoch")
             plt.ylabel("Accuracy")
+            plt.legend()
             plt.title("Accuracy vs. Epochs")
 
             plt.tight_layout()
