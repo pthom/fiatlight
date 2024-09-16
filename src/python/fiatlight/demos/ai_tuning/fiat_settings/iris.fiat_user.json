@@ -7,8 +7,8 @@
                     "data": {
                         "type": "Pydantic",
                         "value": {
-                            "test_size": 0.30000001192092896,
-                            "random_state": 46
+                            "test_size": 0.3,
+                            "random_state": 42
                         }
                     }
                 },
@@ -17,10 +17,10 @@
                     "data": {
                         "type": "Pydantic",
                         "value": {
-                            "num_epochs": 93,
-                            "hidden_size": 12,
-                            "learning_rate": 0.012374309822916985,
-                            "update_plots_every": 24
+                            "num_epochs": 100,
+                            "hidden_size": 10,
+                            "learning_rate": 0.01,
+                            "update_plots_every": 10
                         }
                     }
                 }

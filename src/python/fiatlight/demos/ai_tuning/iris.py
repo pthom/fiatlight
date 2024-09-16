@@ -1,4 +1,14 @@
 # type: ignore
+"""Irises classification with a simple MLP model
+================================================
+We train a simple MLP model to classify the Iris dataset. The model has one hidden layer with ReLU activation.
+
+What FiatLight brings to this example
+-------------------------------------
+- A few hyperparameters can be tuned via the GUI: the number of epochs, the learning rate, and the weight decay, etc.
+- During the training process several, a figure shows the accuracy and loss curves, for both training and test sets.
+- The training can be stopped at any time by clicking on the "Stop" button in the GUI.
+"""
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -211,4 +221,5 @@ def perform_training(
         logging.warning(f"Test Accuracy: {test_accuracy:.4f}")
 
 
-fl.run(perform_training)
+perform_training.__doc__ = __doc__
+fl.run(perform_training, use_node_editor_if_one_function=False)
