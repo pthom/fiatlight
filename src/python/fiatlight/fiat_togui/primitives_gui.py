@@ -4,6 +4,7 @@ from fiatlight.fiat_types.color_types import ColorRgb, ColorRgba, ColorRgbFloat,
 from fiatlight.fiat_types import FiatAttributes
 from typing import Callable, TypeAlias
 from dataclasses import dataclass
+import math
 from enum import Enum
 
 
@@ -389,6 +390,29 @@ class FloatWithGui(AnyDataWithGui[float]):
                     f"slider_logarithmic must be a boolean, got: {self.fiat_attributes['slider_logarithmic']}"
                 )
             self.params.slider_logarithmic = self.fiat_attributes["slider_logarithmic"]
+
+        def auto_handle_format_and_logarithmic():
+            # When both v_min and v_max are positive and not zero,
+            # we can infer the format and slider_logarithmic:
+            # - format: we need to display the number with enough precision
+            # - slider_logarithmic: if the difference in log10 value is large a logarithmic scale is more appropriate
+            both_positive_not_zero = self.params.v_min > 0 and self.params.v_max > 0
+            if both_positive_not_zero:
+                v_min = self.params.v_min
+                if "format" not in self.fiat_attributes:
+                    # Update format if the range requires more precision
+                    epsilon = 0.01  # minimum reachable by default format "%.3f" is 0.001
+                    if self.params.v_min < epsilon:
+                        nb_digits_after_dot = int(-math.log10(v_min)) + 1 + 3
+                        self.params.format = f"%.{nb_digits_after_dot}f"
+                if "slider_logarithmic" not in self.fiat_attributes:
+                    # Update slider_logarithmic if difference in log10 value is large and both values are same sign
+                    log10_max_diff = 3
+                    vmax_min_log_diff = math.log10(self.params.v_max) - math.log10(self.params.v_min)
+                    if vmax_min_log_diff > log10_max_diff:
+                        self.params.slider_logarithmic = True
+
+        auto_handle_format_and_logarithmic()
 
     def present_str(self, value: float) -> str:
         if self.params.nb_significant_digits >= 0:
