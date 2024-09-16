@@ -52,9 +52,8 @@ class FunctionsGraphGui:
 
     @staticmethod
     def _handle_global_zoom_if_no_node_editor() -> None:
-        imgui.text("(?)")
-        fiat_osd.set_widget_tooltip("Ctrl+Alt+Wheel to zoom")
-
+        # imgui.text("(?)")
+        # fiat_osd.set_widget_tooltip("Ctrl+Alt+Wheel to zoom")
         ctrl_down = imgui.is_key_down(imgui.Key.left_ctrl) or imgui.is_key_down(imgui.Key.right_ctrl)
         alt_down = imgui.is_key_down(imgui.Key.left_alt) or imgui.is_key_down(imgui.Key.right_alt)
         mod_ok = ctrl_down and alt_down
