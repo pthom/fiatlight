@@ -255,14 +255,14 @@ class FunctionNodeGui:
 
     def _draw_title(self, unique_name: str) -> None:
         fn_label = self._function_node.function_with_gui.label
-        imgui.text("    ")
-        imgui.same_line()
-        imgui_md.render(f"**{fn_label}**")
+        bold_font = imgui_md.get_font(imgui_md.MarkdownFontSpec(bold_=True))
+        with imgui_ctx.push_font(bold_font):
+            imgui.text("      " + fn_label)
         if unique_name != fn_label:
             fiat_osd.set_widget_tooltip(f" (id: {unique_name})")
 
-        self._draw_async_status_on_title_line()
         self._draw_doc_info_icon_on_title_line()
+        self._draw_async_status_on_title_line()
 
     def _draw_async_status_on_title_line(self) -> None:
         if self._function_node.is_running_async():
@@ -839,7 +839,6 @@ class FunctionNodeGui:
         doc = fn_with_gui.get_function_doc()
         if doc.user_doc is None:
             return
-        imgui.spring()
         with fontawesome_6_ctx():
             if imgui.button(icons_fontawesome_6.ICON_FA_CIRCLE_INFO):
                 self._doc_expanded = not self._doc_expanded
