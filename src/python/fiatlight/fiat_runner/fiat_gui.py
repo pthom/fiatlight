@@ -5,14 +5,14 @@ from fiatlight.fiat_nodes.functions_graph_gui import FunctionsGraphGui
 from fiatlight.fiat_core import FunctionsGraph, FunctionWithGui
 from fiatlight.fiat_types.function_types import VoidFunction
 from fiatlight.fiat_types.function_types import Function
-from fiatlight.fiat_widgets import fontawesome_6_ctx, icons_fontawesome_6, fiat_osd
+from fiatlight.fiat_widgets import fiat_osd
 from fiatlight.fiat_utils import functional_utils
 from fiatlight.fiat_runner.functions_collection import FunctionCollectionGui
 from fiatlight.fiat_kits.fiat_image.image_types import ImageU8_3
 from fiatlight.fiat_config import get_fiat_config
-from imgui_bundle import immapp, imgui, imgui_ctx, ImVec4, portable_file_dialogs as pfd, imgui_node_editor as ed
+from imgui_bundle import immapp, imgui, portable_file_dialogs as pfd, imgui_node_editor as ed
 from typing import Any, Callable
-from imgui_bundle import hello_imgui, ImVec2, immvision
+from imgui_bundle import hello_imgui, ImVec2, immvision, imgui_md
 
 
 import json
@@ -203,8 +203,6 @@ class FiatGuiParams:
             runner_params.app_window_params.restore_previous_geometry = True
             runner_params.imgui_window_params.show_status_bar = True
             runner_params.imgui_window_params.enable_viewports = True
-            runner_params.imgui_window_params.show_menu_bar = True
-            runner_params.imgui_window_params.show_menu_view = True
 
         self._runner_params = runner_params
 
@@ -235,7 +233,7 @@ class FiatGui:
 
     _functions_collection_gui: FunctionCollectionGui
 
-    _logo_image: ImageU8_3
+    _logo_texture: immvision.GlTexture
 
     # ==================================================================================================================
     #                                  Constructor
@@ -282,13 +280,14 @@ class FiatGui:
 
         self._functions_collection_gui.on_add_function = lambda fn: self._functions_graph_gui.add_function_with_gui(fn)
 
-        # Read the logo image
-        import cv2
-        from fiatlight import fiat_assets_dir
+        def setup_menus() -> None:
+            # We redefine the menus completely inside _show_menus
+            self.params.runner_params.imgui_window_params.show_menu_bar = True
+            self.params.runner_params.imgui_window_params.show_menu_view = False
+            self.params.runner_params.imgui_window_params.show_menu_app = False
+            self.params.runner_params.callbacks.show_menus = self._show_menus
 
-        logo_path = fiat_assets_dir() + "/logo/logo.jpg"
-        self._logo_image = cv2.imread(logo_path)  # type: ignore
-
+        setup_menus()
         self.was_post_init_called = False
 
     @staticmethod
@@ -354,12 +353,12 @@ class FiatGui:
             hello_imgui.imgui_default_settings.load_default_font_with_font_awesome_icons, _load_font_awesome_6
         )
 
-        top_toolbar_options = hello_imgui.EdgeToolbarOptions(size_em=2.5, window_bg=ImVec4(0.3, 0.3, 0.3, 1.0))
-        self.params.runner_params.callbacks.add_edge_toolbar(
-            edge_toolbar_type=hello_imgui.EdgeToolbarType.top,
-            gui_function=lambda: self._top_toolbar(),
-            options=top_toolbar_options,
-        )
+        # top_toolbar_options = hello_imgui.EdgeToolbarOptions(size_em=2.5, window_bg=ImVec4(0.3, 0.3, 0.3, 1.0))
+        # self.params.runner_params.callbacks.add_edge_toolbar(
+        #     edge_toolbar_type=hello_imgui.EdgeToolbarType.top,
+        #     gui_function=lambda: self._top_toolbar(),
+        #     options=top_toolbar_options,
+        # )
 
         self.params.runner_params.callbacks.post_render_dockable_windows = self._heartbeat_post_render_dockable_windows
 
@@ -396,41 +395,7 @@ class FiatGui:
     class _Gui_Section:  # Dummy class to create a section in the IDE # noqa
         pass
 
-    @staticmethod
-    def _top_toolbar_btn_size() -> ImVec2:
-        return hello_imgui.em_to_vec2(1.5, 1.5)
-
-    def _panel_save_load_user_inputs(self) -> None:
-        btn_size = self._top_toolbar_btn_size()
-        with imgui_ctx.begin_horizontal("UserInputs"):
-            if imgui.button(icons_fontawesome_6.ICON_FA_FILE_IMPORT, btn_size):
-                self.load_dialog = pfd.open_file(title="Load user inputs")
-                self.load_dialog_callback = self._load_user_inputs_during_execution
-            if imgui.is_item_hovered():
-                imgui.set_tooltip("Load user inputs")
-
-            if imgui.button(icons_fontawesome_6.ICON_FA_FILE_PEN, btn_size):
-                self.save_dialog = pfd.save_file(title="Save user inputs")
-                self.save_dialog_callback = self._save_user_inputs
-            if imgui.is_item_hovered():
-                imgui.set_tooltip("Save user inputs")
-
-    def _panel_save_load_graph_composition(self) -> None:
-        btn_size = self._top_toolbar_btn_size()
-        with imgui_ctx.begin_horizontal("GraphComposition"):
-            if imgui.button(icons_fontawesome_6.ICON_FA_FILE_IMPORT, btn_size):
-                self.load_dialog = pfd.open_file(title="Load graph definition")
-                self.load_dialog_callback = self._load_graph_composition_during_execution
-            if imgui.is_item_hovered():
-                imgui.set_tooltip("Load graph definition")
-
-            if imgui.button(icons_fontawesome_6.ICON_FA_FILE_PEN, btn_size):
-                self.save_dialog = pfd.save_file(title="Save graph definition")
-                self.save_dialog_callback = self._save_graph_composition
-            if imgui.is_item_hovered():
-                imgui.set_tooltip("Save graph definition")
-
-    def _panel_graph(self) -> None:
+    def _show_menus(self) -> None:
         if not self.was_post_init_called:
             # it is preferable to call post_init once an imgui window is available
             # (otherwise we might get seg faults inside imgui when the user incorrectly performs imgui
@@ -438,82 +403,94 @@ class FiatGui:
             self._post_init()
             self.was_post_init_called = True
 
-        btn_size = self._top_toolbar_btn_size()
-        with imgui_ctx.begin_horizontal("_panel_graph"):
-            if imgui.button(icons_fontawesome_6.ICON_FA_SITEMAP, btn_size):
+        if imgui.begin_menu("File"):
+            if imgui.menu_item_simple("Load user inputs"):
+                self.load_dialog = pfd.open_file(title="Load user inputs")
+                self.load_dialog_callback = self._load_user_inputs_during_execution
+            if imgui.menu_item_simple("Save user inputs"):
+                self.save_dialog = pfd.save_file(title="Save user inputs")
+                self.save_dialog_callback = self._save_user_inputs
+
+            if self.params.customizable_graph:
+                imgui.separator()
+                if imgui.menu_item_simple("Load graph definition"):
+                    self.load_dialog = pfd.open_file(title="Load graph definition")
+                    self.load_dialog_callback = self._load_graph_composition_during_execution
+
+                if imgui.menu_item_simple("Save graph definition"):
+                    self.save_dialog = pfd.save_file(title="Save graph definition")
+                    self.save_dialog_callback = self._save_graph_composition
+
+            imgui.separator()
+            if imgui.menu_item_simple("Quit"):
+                hello_imgui.get_runner_params().app_shall_exit = True
+
+            imgui.end_menu()
+
+        if imgui.begin_menu("Graph"):
+            if imgui.menu_item_simple("Auto-Layout graph"):
                 self._functions_graph_gui.shall_layout_graph = True
-            if imgui.is_item_hovered():
-                imgui.set_tooltip("Layout graph")
+            imgui.end_menu()
 
-    def _show_ribbon_dirty_if_needed(self) -> None:
-        has_dirty_functions = self._functions_graph_gui.functions_graph.shall_display_refresh_needed_label()
-        if not has_dirty_functions:
-            return
+        hello_imgui.show_view_menu(self.params.runner_params)
 
-        from fiatlight.fiat_widgets.ribbon_panel import ribbon_panel, vertical_separator  # noqa
-        from fiatlight.fiat_config import FiatColorType, get_fiat_config
+    def _show_help_and_logo_tooltip_window(self):
+        def _read_logo_texture():
+            if not hasattr(self, "_logo_texture"):
+                import cv2
+                from fiatlight import fiat_assets_dir
 
-        def ribbon_fn() -> None:
-            btn_size = self._top_toolbar_btn_size()
-            dirty_color = get_fiat_config().style.color_as_vec4(FiatColorType.OutputValueDirty)
-            with imgui_ctx.push_style_color(imgui.Col_.text.value, dirty_color):
-                if imgui.button(icons_fontawesome_6.ICON_FA_ROTATE, btn_size):
-                    self._functions_graph_gui.invoke_all_functions(also_invoke_manual_function=True)
-            if imgui.is_item_hovered():
-                imgui.set_tooltip("Some functions needs to be refreshed! Click to recompute them.")
+                logo_path = fiat_assets_dir() + "/logo/LogoBeam2.jpg"
+                logo_image = cv2.imread(logo_path)
+                self._logo_texture = immvision.GlTexture(logo_image, True)
 
-        ribbon_panel("Refresh!", ribbon_fn)
-        vertical_separator()
+        _read_logo_texture()
+        # from fiatlight.fiat_widgets.permanent_tooltip_window import PermanentTooltipOptions, CornerPosition, show_permanent_tooltip_window
+        # def gui():
+        #     logo_ratio = 600.0 / 800.0
+        #     logo_height_em = 4.0
+        #     logo_size = hello_imgui.em_to_vec2(logo_height_em * logo_ratio, logo_height_em)
+        #     imgui.image(self._logo_texture.texture_id, logo_size)
+        #     # fiat_osd.set_tooltip("FiatLight: A Python library for creating image processing pipelines")
+        #     imgui.set_item_tooltip("FiatLight: A Python library for creating image processing pipelines")
+        #
+        # options = PermanentTooltipOptions(
+        #     no_border=True,
+        #     no_background=True,
+        #     padding_em=(0.5, 2.0),
+        #     position=CornerPosition.TOP_RIGHT,
+        # )
+        # show_permanent_tooltip_window(gui, options)
 
-    def _display_logo(self) -> None:
-        with imgui_ctx.begin_vertical("Logo"):
-            logo_display_size = self._top_toolbar_btn_size()
-            logo_display_size_tuple = (int(logo_display_size.x), int(logo_display_size.y))
-            immvision.image_display("##logo", self._logo_image, logo_display_size_tuple)
-            if imgui.begin_item_tooltip():
-                logo_display_size_big = int(hello_imgui.em_size(40))
-                immvision.image_display("##logo_big", self._logo_image, (logo_display_size_big, logo_display_size_big))
+        from fiatlight.fiat_widgets.permanent_tooltip_window import compute_corner_position_from_window, CornerPosition
+
+        logo_ratio = 600.0 / 800.0
+        logo_height_em = 4.0
+        logo_size = hello_imgui.em_to_vec2(logo_height_em * logo_ratio, logo_height_em)
+        logo_pos = compute_corner_position_from_window(
+            logo_size,
+            padding_em=ImVec2(0.7, 2.1),
+            position=CornerPosition.TOP_RIGHT,
+        )
+        logo_rect = imgui.internal.ImRect(logo_pos, logo_pos + logo_size)
+        alpha = 0.5
+        is_hovering = imgui.is_mouse_hovering_rect(logo_rect.min, logo_rect.max)
+        if is_hovering:
+            alpha = 1.0
+        col = imgui.IM_COL32(255, 255, 255, int(255 * alpha))
+        imgui.get_window_draw_list().add_image(self._logo_texture.texture_id, logo_pos, logo_pos + logo_size, col=col)
+        if is_hovering:
+            if imgui.begin_tooltip():
+                logo_height_em_big = 16.0
+                logo_size_big = hello_imgui.em_to_vec2(logo_height_em_big * logo_ratio, logo_height_em_big)
+                imgui.image(self._logo_texture.texture_id, logo_size_big)
+                imgui_md.render_unindented(
+                    """
+                    * Use the mouse wheel to zoom in and out in the graph
+                    * Use the right mouse button to move the graph
+                """
+                )
                 imgui.end_tooltip()
-            imgui.text_disabled("fiatlight")
-
-    def _top_toolbar(self) -> None:
-        from fiatlight.fiat_widgets.ribbon_panel import ribbon_panel, vertical_separator  # noqa
-
-        btn_size = self._top_toolbar_btn_size()
-
-        layout_width = imgui.get_window_width() - hello_imgui.em_size(0.4)
-
-        # Move the cursor up a bit
-        cursor_pos = imgui.get_cursor_screen_pos()
-        cursor_pos.y -= hello_imgui.em_size(0.5)
-        imgui.set_cursor_screen_pos(cursor_pos)
-
-        with imgui_ctx.begin_horizontal("TopToolbar", ImVec2(layout_width, 0)):
-            with fontawesome_6_ctx():
-                self._display_logo()
-                imgui.dummy(ImVec2(hello_imgui.em_size(3), 0))
-
-                # Layout graph
-                ribbon_panel("Graph", self._panel_graph)
-                vertical_separator()
-
-                imgui.spring()
-                vertical_separator()
-                self._show_ribbon_dirty_if_needed()
-
-                # Load and save user inputs
-                ribbon_panel("User Inputs", self._panel_save_load_user_inputs)
-                vertical_separator()
-
-                if self.params.customizable_graph:
-                    with imgui_ctx.push_id("GraphComposition"):
-                        ribbon_panel("Graph", self._panel_save_load_graph_composition)
-                        vertical_separator()
-
-                if imgui.button(icons_fontawesome_6.ICON_FA_POWER_OFF, btn_size):
-                    hello_imgui.get_runner_params().app_shall_exit = True
-                if imgui.is_item_hovered():
-                    imgui.set_tooltip("Exit")
 
     def _draw_functions_graph(self) -> None:
         self._idx_frame += 1
@@ -526,6 +503,8 @@ class FiatGui:
             any_change = self._functions_graph_gui.draw()
             if any_change:
                 self._notify_if_dirty_functions()
+
+        self._show_help_and_logo_tooltip_window()
 
     def _handle_file_dialogs(self) -> None:
         if self.save_dialog is not None and self.save_dialog.ready():
