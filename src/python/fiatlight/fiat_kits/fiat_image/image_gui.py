@@ -3,7 +3,7 @@ from fiatlight.fiat_types import JsonDict, ImagePath, FiatAttributes, Unspecifie
 from fiatlight.fiat_core import AnyDataWithGui, PossibleFiatAttributes
 from fiatlight.fiat_kits.fiat_image.image_types import Image, ImageU8
 from imgui_bundle import immvision, imgui, ImVec2
-from imgui_bundle import portable_file_dialogs as pfd
+from imgui_bundle import portable_file_dialogs as pfd, hello_imgui
 
 from typing import Optional, Sequence, TypeAlias, Any
 import numpy as np
@@ -132,6 +132,7 @@ class ImagePresenter:
     only_display: bool = False
     size_when_only_display: ImVec2
     show_inspect_button: bool = True
+    was_inspect_window_opened_on_first_log = False
 
     _was_image_size_fiat_attr_handled: bool = False
 
@@ -197,6 +198,11 @@ class ImagePresenter:
         if len(image.shape) == 3:
             self.image_channels = cv2.split(image)  # type: ignore
 
+    def _show_image_inspector_on_first_call(self) -> None:
+        if not self.was_inspect_window_opened_on_first_log:
+            hello_imgui.get_runner_params().docking_params.dockable_window_of_name("Image Inspector").is_visible = True
+            self.was_inspect_window_opened_on_first_log = True
+
     def _gui_channels(self) -> None:
         for i, image_channel in enumerate(self.image_channels):
             imgui.push_id(str(i))
@@ -218,6 +224,7 @@ class ImagePresenter:
                 if imgui.small_button("Inspect"):
                     global _INSPECT_ID
                     immvision.inspector_add_image(image_channel, f"inspect {_INSPECT_ID} _ channel {i}")
+                    self._show_image_inspector_on_first_call()
                     _INSPECT_ID += 1
             imgui.end_group()
             if not self.channel_layout_vertically:
@@ -254,6 +261,7 @@ class ImagePresenter:
             if imgui.small_button("Inspect"):
                 global _INSPECT_ID
                 immvision.inspector_add_image(self.image, f"inspect {_INSPECT_ID}")
+                self._show_image_inspector_on_first_call()
                 _INSPECT_ID += 1
 
     def gui(self) -> None:
