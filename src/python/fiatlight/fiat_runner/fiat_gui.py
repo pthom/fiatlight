@@ -439,8 +439,8 @@ class FiatGui:
 
         hello_imgui.show_view_menu(self.params.runner_params)
 
-    def _show_help_and_logo_tooltip_window(self):
-        def _read_logo_texture():
+    def _show_help_and_logo_tooltip_window(self) -> None:
+        def _read_logo_texture() -> None:
             if not hasattr(self, "_logo_texture"):
                 import cv2
                 from fiatlight import fiat_assets_dir
@@ -450,23 +450,6 @@ class FiatGui:
                 self._logo_texture = immvision.GlTexture(logo_image, True)
 
         _read_logo_texture()
-        # from fiatlight.fiat_widgets.permanent_tooltip_window import PermanentTooltipOptions, CornerPosition, show_permanent_tooltip_window
-        # def gui():
-        #     logo_ratio = 600.0 / 800.0
-        #     logo_height_em = 4.0
-        #     logo_size = hello_imgui.em_to_vec2(logo_height_em * logo_ratio, logo_height_em)
-        #     imgui.image(self._logo_texture.texture_id, logo_size)
-        #     # fiat_osd.set_tooltip("FiatLight: A Python library for creating image processing pipelines")
-        #     imgui.set_item_tooltip("FiatLight: A Python library for creating image processing pipelines")
-        #
-        # options = PermanentTooltipOptions(
-        #     no_border=True,
-        #     no_background=True,
-        #     padding_em=(0.5, 2.0),
-        #     position=CornerPosition.TOP_RIGHT,
-        # )
-        # show_permanent_tooltip_window(gui, options)
-
         from fiatlight.fiat_widgets.permanent_tooltip_window import compute_corner_position_from_window, CornerPosition
 
         logo_ratio = 600.0 / 800.0
@@ -477,13 +460,13 @@ class FiatGui:
             padding_em=ImVec2(0.7, 2.1),
             position=CornerPosition.TOP_RIGHT,
         )
-        logo_rect = imgui.internal.ImRect(logo_pos, logo_pos + logo_size)
+        logo_rect = imgui.internal.ImRect(logo_pos, logo_pos + logo_size)  # type: ignore
         alpha = 0.5
         is_hovering = imgui.is_mouse_hovering_rect(logo_rect.min, logo_rect.max)
         if is_hovering:
             alpha = 1.0
         col = imgui.IM_COL32(255, 255, 255, int(255 * alpha))
-        imgui.get_window_draw_list().add_image(self._logo_texture.texture_id, logo_pos, logo_pos + logo_size, col=col)
+        imgui.get_window_draw_list().add_image(self._logo_texture.texture_id, logo_pos, logo_pos + logo_size, col=col)  # type: ignore
         if is_hovering:
             if imgui.begin_tooltip():
                 logo_height_em_big = 16.0

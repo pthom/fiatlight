@@ -12,8 +12,8 @@ class CornerPosition(Enum):
 
 
 def compute_corner_position_from_window(
-    gui_size: ImVec2, padding_em: ImVec2, position: CornerPosition, parent_window: imgui.internal.Window = None
-):
+    gui_size: ImVec2, padding_em: ImVec2, position: CornerPosition, parent_window: imgui.internal.Window | None = None
+) -> ImVec2:
     if parent_window is None:
         parent_window = imgui.internal.get_current_window()
     parent_window_pos = parent_window.pos
@@ -51,7 +51,7 @@ class PermanentTooltipOptions:
 
 def show_permanent_tooltip_window(
     gui_func: Callable[[], None], options: PermanentTooltipOptions = PermanentTooltipOptions()
-):
+) -> None:
     parent_window = imgui.internal.get_current_window()
 
     flags = (
@@ -68,7 +68,7 @@ def show_permanent_tooltip_window(
     if options.no_background:
         flags |= imgui.WindowFlags_.no_background.value
     if options.no_border:
-        imgui.push_style_var(imgui.StyleVar_.window_border_size, 0.0)
+        imgui.push_style_var(imgui.StyleVar_.window_border_size.value, 0.0)
     with imgui_ctx.begin("##TopRightTooltip", None, flags):
         gui_func()
         child_window_size = imgui.get_window_size()
