@@ -104,9 +104,14 @@ class SimpleMLP(nn.Module):
 )
 @fl.with_fiat_attributes(invoke_async=True, invoke_manually=True)
 def perform_training(
-    dataset_params: DatasetParams,
-    hyper_params: HyperParams,
+    dataset_params: DatasetParams | None = None,
+    hyper_params: HyperParams | None = None,
 ) -> None:
+    if dataset_params is None:
+        dataset_params = DatasetParams()
+    if hyper_params is None:
+        hyper_params = HyperParams()
+
     # Load and preprocess data
     iris = load_iris()
     X = iris.data
