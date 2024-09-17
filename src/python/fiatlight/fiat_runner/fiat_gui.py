@@ -89,6 +89,8 @@ def _is_running_in_documentation() -> bool:
 #                                  Logging
 # ==================================================================================================================
 class HelloImGuiLogHandler(logging.Handler):
+    was_log_window_opened_on_first_log: bool = False
+
     def emit(self, record: Any) -> None:
         # Map the logging level to the LogLevel enum
         level = hello_imgui.LogLevel.info
@@ -100,6 +102,9 @@ class HelloImGuiLogHandler(logging.Handler):
             level = hello_imgui.LogLevel.error
         # Call the log function
         msg = self.format(record)
+        if not self.was_log_window_opened_on_first_log:
+            hello_imgui.get_runner_params().docking_params.dockable_window_of_name("Log").is_visible = True
+            self.was_log_window_opened_on_first_log = True
         hello_imgui.log(level, msg)
 
 
@@ -531,10 +536,13 @@ class FiatGui:
             label_="Image Inspector",
             dock_space_name_=self._main_dock_space_id,
             gui_function_=lambda: immvision.inspector_show(),
-            # is_visible_=False,
+            is_visible_=False,
         )
         logger_window = hello_imgui.DockableWindow(
-            label_="Log", dock_space_name_=self._info_dock_space_id, gui_function_=lambda: hello_imgui.log_gui()
+            label_="Log",
+            dock_space_name_=self._info_dock_space_id,
+            gui_function_=lambda: hello_imgui.log_gui(),
+            is_visible_=False,
         )
         r = [main_window, image_inspector, logger_window]
         return r
