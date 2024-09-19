@@ -263,6 +263,13 @@ class FunctionNodeGui:
 
         self._draw_doc_info_icon_on_title_line()
         self._draw_async_status_on_title_line()
+        self._draw_focus_on_function_btn()
+
+    def _draw_focus_on_function_btn(self) -> None:
+        from fiatlight.fiat_nodes.focused_functions_in_tabs import FOCUSED_FUNCTIONS_IN_TABS
+
+        imgui.spring()
+        FOCUSED_FUNCTIONS_IN_TABS.draw_focus_on_function_btn(self)
 
     def _draw_async_status_on_title_line(self) -> None:
         if self._function_node.is_running_async():
@@ -980,41 +987,3 @@ class _OutputHeaderLineElements:
 
     value_color: FiatColorType = FiatColorType.OutputValueOk
     value_tooltip: str | None = None
-
-
-# ==================================================================================================================
-# Sandbox
-# ==================================================================================================================
-def sandbox() -> None:
-    import fiatlight
-    from imgui_bundle import immapp
-    from enum import Enum
-
-    class MyEnum(Enum):  # noqa
-        ONE = 1
-        TWO = 2
-        THREE = 3
-
-    def add(
-        # a: int | None = None,
-        e: MyEnum = MyEnum.ONE,
-        # x: int = 1,
-        # y: int = 2,
-        # s: str = "Hello",
-    ) -> List[str]:
-        return ["Hello", "World", "!"]
-
-    function_with_gui = fiatlight.FunctionWithGui(add)
-    function_node = FunctionNode(function_with_gui)
-    function_node_gui = FunctionNodeGui(function_node)
-
-    def gui() -> None:
-        with ed_ctx.begin("Functions Graph"):
-            function_node_gui.draw_node("add")
-        fiat_osd.render_all_osd()  # noqa
-
-    immapp.run(gui, with_node_editor=True, window_title="function_node_gui_sandbox")
-
-
-if __name__ == "__main__":
-    sandbox()

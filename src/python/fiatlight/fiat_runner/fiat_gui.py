@@ -322,8 +322,12 @@ class FiatGui:
             self._save_graph_composition(self._graph_composition_filename())
         self._save_user_inputs(self._user_settings_filename())
 
-    @staticmethod
-    def _pre_new_frame() -> None:
+    def _pre_new_frame(self) -> None:
+        from fiatlight.fiat_nodes.focused_functions_in_tabs import FOCUSED_FUNCTIONS_IN_TABS
+
+        if FOCUSED_FUNCTIONS_IN_TABS.did_any_change_happen():
+            self._notify_if_dirty_functions()
+
         _ENQUEUED_CALLBACKS.run_pre_frame_callbacks()
         get_fiat_config().style.update_colors_from_imgui_colors()
 

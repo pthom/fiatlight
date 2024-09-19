@@ -8,6 +8,9 @@ from imgui_bundle import imgui, imgui_node_editor as ed, hello_imgui, ImVec2, im
 from typing import List, Dict, Tuple
 
 
+KK_STATIC_FunctionsGraphGui: FunctionsGraphGui | None = None
+
+
 class FunctionsGraphGui:
     functions_graph: FunctionsGraph
 
@@ -28,6 +31,8 @@ class FunctionsGraphGui:
         self._use_node_editor_if_one_function = use_node_editor_if_one_function
         self.functions_graph = functions_graph
         self._create_function_nodes_and_links_gui()
+        global KK_STATIC_FunctionsGraphGui
+        KK_STATIC_FunctionsGraphGui = self
 
     def _create_function_nodes_and_links_gui(self) -> None:
         self.function_nodes_gui = []
@@ -75,7 +80,8 @@ class FunctionsGraphGui:
             changed = False
             for fn in self.function_nodes_gui:
                 imgui.push_id(str(id(fn)))
-                if fn.draw_node(self.functions_graph.function_node_unique_name(fn._function_node)):
+                unique_fn_name = self.functions_graph.function_node_unique_name(fn._function_node)
+                if fn.draw_node(unique_fn_name):
                     changed = True
                 imgui.pop_id()
             return changed
