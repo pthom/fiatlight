@@ -7,9 +7,9 @@
                     "data": {
                         "type": "Pydantic",
                         "value": {
-                            "NB_EPOCHS": 183,
-                            "LEARNING_RATE": 0.010400000028312206,
-                            "WEIGHT_DECAY": 0.6639999747276306
+                            "NB_EPOCHS": 932,
+                            "LEARNING_RATE": 0.0009299999801442027,
+                            "WEIGHT_DECAY": 0.9589999914169312
                         }
                     }
                 }
@@ -19,11 +19,26 @@
     "gui_options": {
         "perform_training": {
             "function_node_with_gui": {
-                "_inputs_expanded": true,
-                "_outputs_expanded": true,
-                "_doc_expanded": false,
-                "fiat_tuning_expanded": true,
-                "_internal_state_gui_expanded": true,
+                "_inputs_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_outputs_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_doc_expanded": {
+                    "inside_node": false,
+                    "focused": false
+                },
+                "fiat_tuning_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_internal_state_gui_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
                 "_function_node": {
                     "inputs": {
                         "learn_parameters": {
@@ -45,6 +60,10 @@
                         }
                     },
                     "outputs": {}
+                },
+                "_backup_expanded_states": {
+                    "inside_node": null,
+                    "focused": null
                 }
             },
             "function_node": {
