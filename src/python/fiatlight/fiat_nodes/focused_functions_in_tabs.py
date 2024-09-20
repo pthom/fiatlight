@@ -17,19 +17,35 @@ class FocusedFunctionsInTabs:
         return self.did_any_function_return_true_this_frame
 
     def _add_focused_function(self, fn: FunctionNodeGui) -> None:
-        hello_imgui.add_dockable_window(self._make_dockable_window(fn))
+        if self._has_opened_dockable_window(fn):
+            return
+        maybe_previous_dockable_window = self._get_dockable_window(fn)
+        if maybe_previous_dockable_window is not None:
+            maybe_previous_dockable_window.is_visible = True
+        else:
+            hello_imgui.add_dockable_window(self._make_dockable_window(fn))
 
     def _remove_focused_function(self, fn: FunctionNodeGui) -> None:
-        hello_imgui.remove_dockable_window(self._dockable_window_label(fn))
+        maybe_previous_dockable_window = self._get_dockable_window(fn)
+        assert maybe_previous_dockable_window is not None
+        maybe_previous_dockable_window.is_visible = False
+        # hello_imgui.remove_dockable_window(self._dockable_window_label(fn))
 
-    def _has_focused_function(self, fn: FunctionNodeGui) -> bool:
+    def _get_dockable_window(self, fn: FunctionNodeGui) -> hello_imgui.DockableWindow | None:
         dockable_windows = hello_imgui.get_runner_params().docking_params.dockable_windows
-        dockable_windows_labels = [dw.label for dw in dockable_windows]
-        new_window_label = self._dockable_window_label(fn)
-        return new_window_label in dockable_windows_labels
+        result = None
+        for dockable_window in dockable_windows:
+            if dockable_window.label == self._dockable_window_label(fn):
+                result = dockable_window
+                break
+        return result
+
+    def _has_opened_dockable_window(self, fn: FunctionNodeGui) -> bool:
+        dockable_window = self._get_dockable_window(fn)
+        return dockable_window is not None and dockable_window.is_visible
 
     def _draw_focus_on_function_btn(self, fn: FunctionNodeGui) -> None:
-        is_new_focus = not self._has_focused_function(fn)
+        is_new_focus = not self._has_opened_dockable_window(fn)
         with fontawesome_6_ctx():
             clicked = imgui.button(icons_fontawesome_6.ICON_FA_WINDOW_RESTORE, ImVec2(0, 0))
             if is_new_focus:
