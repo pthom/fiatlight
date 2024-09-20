@@ -1055,7 +1055,8 @@ class FunctionNodeGui:
         self._internal_state_gui_expanded = ExpandedFlagInNodeVsFocused.load_from_dict(
             json_data["_internal_state_gui_expanded"]
         )
-        self._backup_expanded_states = FlagsDictInNodeVsFocused.load_from_dict(json_data["_backup_expanded_states"])
+        if "_backup_expanded_states" in json_data:
+            self._backup_expanded_states = FlagsDictInNodeVsFocused.load_from_dict(json_data["_backup_expanded_states"])
         self._function_node.load_gui_options_from_json(json_data["_function_node"])
         # fiat_tuning_options = json_data.get("_fiat_tuning_with_gui", {})
         # for name, data_with_gui in self._fiat_tuning_with_gui.items():
