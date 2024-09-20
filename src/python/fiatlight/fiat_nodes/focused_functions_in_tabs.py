@@ -25,11 +25,15 @@ class FocusedFunctionsInTabs:
         else:
             hello_imgui.add_dockable_window(self._make_dockable_window(fn))
 
-    def _remove_focused_function(self, fn: FunctionNodeGui) -> None:
-        maybe_previous_dockable_window = self._get_dockable_window(fn)
-        assert maybe_previous_dockable_window is not None
-        maybe_previous_dockable_window.is_visible = False
-        # hello_imgui.remove_dockable_window(self._dockable_window_label(fn))
+    def _highlight_dockable_window(self, fn: FunctionNodeGui) -> None:
+        dockable_window = self._get_dockable_window(fn)
+        assert dockable_window is not None
+        hello_imgui.get_runner_params().docking_params.focus_dockable_window(dockable_window.label)
+
+    # def _remove_focused_function(self, fn: FunctionNodeGui) -> None:
+    #     maybe_previous_dockable_window = self._get_dockable_window(fn)
+    #     assert maybe_previous_dockable_window is not None
+    #     maybe_previous_dockable_window.is_visible = False
 
     def _get_dockable_window(self, fn: FunctionNodeGui) -> hello_imgui.DockableWindow | None:
         dockable_windows = hello_imgui.get_runner_params().docking_params.dockable_windows
@@ -45,19 +49,16 @@ class FocusedFunctionsInTabs:
         return dockable_window is not None and dockable_window.is_visible
 
     def _draw_focus_on_function_btn(self, fn: FunctionNodeGui) -> None:
-        is_new_focus = not self._has_opened_dockable_window(fn)
+        has_opened_dockable_window = not self._has_opened_dockable_window(fn)
         with fontawesome_6_ctx():
             clicked = imgui.button(icons_fontawesome_6.ICON_FA_UP_RIGHT_FROM_SQUARE, ImVec2(0, 0))
-            if is_new_focus:
-                fiat_osd.set_widget_tooltip("Focus on function in new tab")
-            else:
-                fiat_osd.set_widget_tooltip("Un-focus function")
+            fiat_osd.set_widget_tooltip("Focus on function in new tab")
 
             if clicked:
-                if is_new_focus:
+                if has_opened_dockable_window:
                     self._add_focused_function(fn)
                 else:
-                    self._remove_focused_function(fn)
+                    self._highlight_dockable_window(fn)
 
     def _dockable_window_label(self, fn: FunctionNodeGui) -> str:
         function_name = fn.get_function_node().function_with_gui.function_name

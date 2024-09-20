@@ -287,7 +287,8 @@ class FunctionNodeGui:
     def _draw_focus_on_function_btn(self) -> None:
         from fiatlight.fiat_nodes.focused_functions_in_tabs import FOCUSED_FUNCTIONS_IN_TABS
 
-        FOCUSED_FUNCTIONS_IN_TABS.draw_focus_on_function_btn(self)
+        if fiat_utils.is_rendering_in_node():
+            FOCUSED_FUNCTIONS_IN_TABS.draw_focus_on_function_btn(self)
 
     def _draw_minimize_btn(self) -> None:
         """

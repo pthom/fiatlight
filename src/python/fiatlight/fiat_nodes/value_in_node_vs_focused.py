@@ -60,7 +60,7 @@ class ExpandedFlagInNodeVsFocused(ValueInNodeVsFocused[bool]):
     (i.e. a function that is being displayed in a separate tab).
     """
 
-    def __init__(self, expanded_inside_node: bool = False, expanded_focused: bool = False) -> None:
+    def __init__(self, expanded_inside_node: bool = False, expanded_focused: bool = True) -> None:
         super().__init__(expanded_inside_node, expanded_focused)
 
     def save_to_dict(self) -> JsonDict:
