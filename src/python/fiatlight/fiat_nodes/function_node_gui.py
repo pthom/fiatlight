@@ -689,7 +689,7 @@ class FunctionNodeGui:
         if nb_unlinked_outputs > 0 and not self._outputs_expanded.current_value():
             node_separator_params.text += f" ({nb_unlinked_outputs} hidden)"
         # show collapse button
-        node_separator_params.show_collapse_button = nb_unlinked_outputs > 0
+        node_separator_params.show_collapse_button = nb_outputs > 0
         # show collapse all button
         node_separator_params.show_toggle_collapse_all_button = (
             self._outputs_expanded.current_value() and self.nb_outputs_with_custom_present() > 0
