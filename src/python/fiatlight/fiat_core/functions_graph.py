@@ -8,7 +8,7 @@ from fiatlight.fiat_core.gui_node import GuiNode
 from fiatlight.fiat_core.markdown_node import MarkdownNode
 from fiatlight.fiat_types import Function, JsonDict, GuiFunctionWithInputs
 
-from typing import Sequence, Dict, Tuple, Set, List
+from typing import Sequence, Tuple, Set, List
 from pydantic import BaseModel
 
 
@@ -148,6 +148,25 @@ class FunctionsGraph:
         pass
 
     def _add_function_with_gui(self, f_gui: FunctionWithGui) -> FunctionNode:
+        def has_already_function_with_same_name() -> bool:
+            for fn in self.functions_nodes:
+                if fn.function_with_gui.function_name == f_gui.function_name:
+                    return True
+            return False
+
+        if has_already_function_with_same_name():
+            raise ValueError(
+                """Cannot add two functions with the same name to the graph.
+            If you want to add the same function twice, you can give it a different name, for example:
+                graph = fl.FunctionsGraph()
+                graph.add_function(my_function)
+                graph.add_function(fl.FunctionWithGui(my_function, function_name="my_function##2"))
+
+            Note: if you add "##" before the suffix, the suffix will be hidden in the GUI.
+                ...
+            """
+            )
+
         f_node = FunctionNode(f_gui)
         self.functions_nodes.append(f_node)
         return f_node
@@ -313,11 +332,7 @@ class FunctionsGraph:
         dst_input_name: str | None = None,
         src_output_idx: int = 0,
     ) -> None:
-        """Add a link between two functions, which are identified by their *unique* names
-
-        If a graph reuses several times the same function "f",
-        the unique names for this functions will be "f_1", "f_2", "f_3", etc.
-        """
+        """Add a link between two functions, which are identified by their *unique* names"""
         src_function_node = self._function_node_with_name_or_is_function(src_function)
         dst_function_node = self._function_node_with_name_or_is_function(dst_function)
         self._add_link_from_function_nodes(
@@ -402,30 +417,12 @@ class FunctionsGraph:
 
         pass
 
-    def function_node_unique_name(self, function_node: FunctionNode) -> str:
-        """Return the unique name of a function node:
-        If a graph reuses several times the same function "f",
-        the unique names for this functions will be "f_1", "f_2", "f_3", etc.
-        """
-        names = [fn.function_with_gui.function_name for fn in self.functions_nodes]
-        duplicated_names = [name for name in names if names.count(name) > 1]
-        if function_node.function_with_gui.function_name not in duplicated_names:
-            return function_node.function_with_gui.function_name
-        else:
-            functions_with_same_name = [
-                fn
-                for fn in self.functions_nodes
-                if fn.function_with_gui.function_name == function_node.function_with_gui.function_name
-            ]
-            this_function_idx = functions_with_same_name.index(function_node)
-            return f"{function_node.function_with_gui.function_name}_{this_function_idx + 1}"
-
     def _function_node_with_name_or_is_function(
         self, name_or_function: str | Function | FunctionWithGui
     ) -> FunctionNode:
         """Get the function node with the given name or function"""
         if isinstance(name_or_function, str):
-            return self._function_node_with_unique_name(name_or_function)
+            return self._function_node_with_name(name_or_function)
 
         elif isinstance(name_or_function, FunctionWithGui):
             fn_with_gui = name_or_function
@@ -455,16 +452,12 @@ class FunctionsGraph:
             else:
                 return candidate_nodes[0]
 
-    def _function_node_with_unique_name(self, function_name: str) -> FunctionNode:
+    def _function_node_with_name(self, function_name: str) -> FunctionNode:
         """Get the function with the unique name"""
         for fn in self.functions_nodes:
-            if self.function_node_unique_name(fn) == function_name:
+            if fn.function_with_gui.function_name == function_name:
                 return fn
         raise ValueError(f"No function with the name {function_name}")
-
-    def all_function_nodes_with_unique_names(self) -> Dict[str, FunctionNode]:
-        """Return a dict of all the function nodes, with their unique names as keys (private)"""
-        return {self.function_node_unique_name(fn): fn for fn in self.functions_nodes}
 
     def shall_display_refresh_needed_label(self) -> bool:
         """Returns True if any function node shall display a "Refresh needed" label"""
@@ -488,7 +481,7 @@ class FunctionsGraph:
         (this excludes the params that are set by the links between the functions)"""
         fn_data = {}
         for function_node in self.functions_nodes:
-            fn_data[self.function_node_unique_name(function_node)] = function_node.save_user_inputs_to_json()
+            fn_data[function_node.function_with_gui.function_name] = function_node.save_user_inputs_to_json()
         return {"functions_nodes": fn_data}
 
     def load_user_inputs_from_json(self, json_data: JsonDict) -> None:
@@ -496,8 +489,8 @@ class FunctionsGraph:
         if "functions_nodes" not in json_data:
             return
         fn_data = json_data["functions_nodes"]
-        for unique_name, fn_json in fn_data.items():
-            fn = self._function_node_with_unique_name(unique_name)
+        for function_name, fn_json in fn_data.items():
+            fn = self._function_node_with_name(function_name)
             fn.load_user_inputs_from_json(fn_json)
 
     def save_graph_composition_to_json(self) -> JsonDict:
@@ -512,8 +505,8 @@ class FunctionsGraph:
         for link in self.functions_nodes_links:
             src_function_node = link.src_function_node
             dst_function_node = link.dst_function_node
-            src_function_name = self.function_node_unique_name(src_function_node)
-            dst_function_name = self.function_node_unique_name(dst_function_node)
+            src_function_name = src_function_node.function_with_gui.function_name
+            dst_function_name = dst_function_node.function_with_gui.function_name
             links_data.append(
                 {
                     "src_function_name": src_function_name,

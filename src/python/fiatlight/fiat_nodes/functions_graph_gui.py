@@ -8,9 +8,6 @@ from imgui_bundle import imgui, imgui_node_editor as ed, hello_imgui, ImVec2, im
 from typing import List, Dict, Tuple
 
 
-KK_STATIC_FunctionsGraphGui: FunctionsGraphGui | None = None
-
-
 class FunctionsGraphGui:
     functions_graph: FunctionsGraph
 
@@ -31,8 +28,6 @@ class FunctionsGraphGui:
         self._use_node_editor_if_one_function = use_node_editor_if_one_function
         self.functions_graph = functions_graph
         self._create_function_nodes_and_links_gui()
-        global KK_STATIC_FunctionsGraphGui
-        KK_STATIC_FunctionsGraphGui = self
 
     def _create_function_nodes_and_links_gui(self) -> None:
         self.function_nodes_gui = []
@@ -80,8 +75,7 @@ class FunctionsGraphGui:
             changed = False
             for fn in self.function_nodes_gui:
                 imgui.push_id(str(id(fn)))
-                unique_fn_name = self.functions_graph.function_node_unique_name(fn._function_node)
-                if fn.draw_node(unique_fn_name):
+                if fn.draw_node():
                     changed = True
                 imgui.pop_id()
             return changed
@@ -360,14 +354,14 @@ class FunctionsGraphGui:
     class _Utilities_Section:  # Dummy class to create a section in the IDE # noqa
         pass
 
-    def function_node_unique_name(self, function_node_gui: FunctionNodeGui) -> str:
-        return self.functions_graph.function_node_unique_name(function_node_gui._function_node)  # noqa
+    def function_name(self, function_node_gui: FunctionNodeGui) -> str:
+        return function_node_gui.get_function_node().function_with_gui.function_name
 
-    def function_node_with_unique_name(self, function_name: str) -> FunctionNodeGui:
-        return next(fn for fn in self.function_nodes_gui if self.function_node_unique_name(fn) == function_name)
+    def function_node_name(self, function_name: str) -> FunctionNodeGui:
+        return next(fn for fn in self.function_nodes_gui if self.function_name(fn) == function_name)
 
-    def all_function_nodes_with_unique_names(self) -> Dict[str, FunctionNodeGui]:
-        return {self.function_node_unique_name(fn): fn for fn in self.function_nodes_gui}
+    def _dict_function_nodes(self) -> Dict[str, FunctionNodeGui]:
+        return {self.function_name(fn): fn for fn in self.function_nodes_gui}
 
     def _function_node_gui_from_input_pin_id(self, pin_id: ed.PinId) -> Tuple[FunctionNodeGui | None, str]:
         matching_nodes = []
@@ -437,7 +431,7 @@ class FunctionsGraphGui:
 
     def save_gui_options_to_json(self) -> JsonDict:
         function_gui_settings_dict = {}
-        for name, fn_node_with_gui in self.all_function_nodes_with_unique_names().items():
+        for name, fn_node_with_gui in self._dict_function_nodes().items():
             function_gui_settings_dict[name] = {
                 "function_node_with_gui": fn_node_with_gui.save_gui_options_to_json(),
                 "function_node": fn_node_with_gui.get_function_node().save_gui_options_to_json(),
@@ -445,7 +439,7 @@ class FunctionsGraphGui:
         return function_gui_settings_dict
 
     def load_gui_options_from_json(self, json_dict: JsonDict) -> None:
-        for name, fn_node_with_gui in self.all_function_nodes_with_unique_names().items():
+        for name, fn_node_with_gui in self._dict_function_nodes().items():
             if name in json_dict:
                 json_data = json_dict[name]
                 fn_node_with_gui.load_gui_options_from_json(json_data["function_node_with_gui"])

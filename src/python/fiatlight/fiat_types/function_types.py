@@ -2,7 +2,9 @@ from typing import Any, Callable, TypeAlias, Tuple, List
 from fiatlight.fiat_types.base_types import DataType
 
 
+# A function that takes any arguments and returns any value.
 Function: TypeAlias = Callable[..., Any]
+# A list of functions.
 FunctionList: TypeAlias = List[Function]
 
 # A function that takes no arguments and returns nothing.
@@ -22,7 +24,7 @@ GuiBoolFunction = Callable[[], bool]
 GuiFunctionWithInputs = Callable[..., None]
 
 # A function that takes a DataType value and returns a tuple of a tuple [modified, new_value]
-# Used
+# Used mainly for "edit" callbacks.
 DataEditFunction = Callable[[DataType], Tuple[bool, DataType]]
 
 # A function that takes a DataType value and returns nothing. Used mainly for "present" callbacks.

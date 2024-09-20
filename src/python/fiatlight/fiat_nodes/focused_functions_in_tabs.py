@@ -43,24 +43,16 @@ class FocusedFunctionsInTabs:
                 else:
                     self._remove_focused_function(fn)
 
-    def _function_unique_name(self, fn: FunctionNodeGui) -> str:
-        from fiatlight.fiat_nodes.functions_graph_gui import KK_STATIC_FunctionsGraphGui
-
-        assert KK_STATIC_FunctionsGraphGui is not None
-        unique_name = KK_STATIC_FunctionsGraphGui.function_node_unique_name(fn)
-        return unique_name
-
     def _dockable_window_label(self, fn: FunctionNodeGui) -> str:
-        return self._function_unique_name(fn) + "##FocusedFunctionsInTabs_" + str(id(fn))
+        function_name = fn.get_function_node().function_with_gui.function_name
+        return function_name + "##FocusedFunctionsInTabs_" + str(id(fn))
 
     def _make_dockable_window(self, fn: FunctionNodeGui) -> hello_imgui.DockableWindow:
-        unique_name = self._function_unique_name(fn)
-
         def _wrap_gui_store_change() -> None:
             if self.last_frame_idx != imgui.get_frame_count():
                 self.did_any_function_return_true_this_frame = False
                 self.last_frame_idx = imgui.get_frame_count()
-            changed = fn.draw_node(unique_name)
+            changed = fn.draw_node()
             if changed:
                 self.did_any_function_return_true_this_frame = True
 

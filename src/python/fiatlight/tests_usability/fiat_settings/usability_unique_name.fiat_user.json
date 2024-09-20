@@ -1,0 +1,130 @@
+{
+    "user_inputs": {
+        "functions_nodes": {
+            "float_source": {
+                "x": {
+                    "name": "x",
+                    "data": {
+                        "type": "Primitive",
+                        "value": 2.5339999198913574
+                    }
+                }
+            },
+            "my_sin": {},
+            "my_sin##2": {}
+        }
+    },
+    "gui_options": {
+        "float_source": {
+            "function_node_with_gui": {
+                "_inputs_expanded": true,
+                "_outputs_expanded": true,
+                "_doc_expanded": false,
+                "fiat_tuning_expanded": true,
+                "_internal_state_gui_expanded": true,
+                "_function_node": {
+                    "inputs": {
+                        "x": {
+                            "cb_options": {},
+                            "expanded": true
+                        }
+                    },
+                    "outputs": {
+                        "0": {
+                            "cb_options": {},
+                            "expanded": true
+                        }
+                    }
+                }
+            },
+            "function_node": {
+                "inputs": {
+                    "x": {
+                        "cb_options": {},
+                        "expanded": true
+                    }
+                },
+                "outputs": {
+                    "0": {
+                        "cb_options": {},
+                        "expanded": true
+                    }
+                }
+            }
+        },
+        "my_sin": {
+            "function_node_with_gui": {
+                "_inputs_expanded": true,
+                "_outputs_expanded": true,
+                "_doc_expanded": false,
+                "fiat_tuning_expanded": true,
+                "_internal_state_gui_expanded": true,
+                "_function_node": {
+                    "inputs": {
+                        "x": {
+                            "cb_options": {},
+                            "expanded": false
+                        }
+                    },
+                    "outputs": {
+                        "0": {
+                            "cb_options": {},
+                            "expanded": false
+                        }
+                    }
+                }
+            },
+            "function_node": {
+                "inputs": {
+                    "x": {
+                        "cb_options": {},
+                        "expanded": false
+                    }
+                },
+                "outputs": {
+                    "0": {
+                        "cb_options": {},
+                        "expanded": false
+                    }
+                }
+            }
+        },
+        "my_sin##2": {
+            "function_node_with_gui": {
+                "_inputs_expanded": true,
+                "_outputs_expanded": true,
+                "_doc_expanded": false,
+                "fiat_tuning_expanded": true,
+                "_internal_state_gui_expanded": true,
+                "_function_node": {
+                    "inputs": {
+                        "x": {
+                            "cb_options": {},
+                            "expanded": false
+                        }
+                    },
+                    "outputs": {
+                        "0": {
+                            "cb_options": {},
+                            "expanded": true
+                        }
+                    }
+                }
+            },
+            "function_node": {
+                "inputs": {
+                    "x": {
+                        "cb_options": {},
+                        "expanded": false
+                    }
+                },
+                "outputs": {
+                    "0": {
+                        "cb_options": {},
+                        "expanded": true
+                    }
+                }
+            }
+        }
+    }
+}

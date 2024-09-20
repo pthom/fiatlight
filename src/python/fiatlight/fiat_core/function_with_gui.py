@@ -154,7 +154,9 @@ class FunctionWithGui:
     # --------------------------------------------------------------------------------------------
     #        Public Members
     # --------------------------------------------------------------------------------------------
-    # the name of the function
+    # the name of the function: this is usually inferred from the name of the function in the source code
+    # It should be unique in a function graph: add a hidden "##suffix" to make it unique if needed, e.g.
+    #    "my_function##123"
     function_name: str = ""
     # the display name of the function (will use the function name if empty)
     label: str = ""

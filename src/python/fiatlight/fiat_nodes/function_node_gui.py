@@ -196,7 +196,7 @@ class FunctionNodeGui:
 
         pass
 
-    def draw_node(self, unique_name: str) -> bool:
+    def draw_node(self) -> bool:
         global _CURRENT_FUNCTION_NODE_ID
         inputs_changed: bool
         needs_refresh_for_heartbeat = self._heartbeat()
@@ -205,19 +205,19 @@ class FunctionNodeGui:
                 if fiat_utils.is_rendering_in_node():
                     ed.begin_node(self._node_id)
                 _CURRENT_FUNCTION_NODE_ID = self._node_id
-                with imgui_ctx.begin_vertical("node_content" + unique_name):
+                with imgui_ctx.begin_vertical("node_content"):
                     # Title
                     with imgui_ctx.begin_horizontal("Title"):
-                        self._draw_title(unique_name)
+                        self._draw_title()
                     # Doc
                     self._draw_doc()
                     # Set minimum width
                     imgui.dummy(ImVec2(hello_imgui.em_size(get_fiat_config().style.node_minimum_width_em), 1))
 
                     # Inputs
-                    inputs_changed = self._draw_function_inputs(unique_name)
+                    inputs_changed = self._draw_function_inputs()
                     # Function internal state
-                    internal_state_changed = self._draw_function_internal_state(unique_name)
+                    internal_state_changed = self._draw_function_internal_state()
 
                     if inputs_changed or internal_state_changed or needs_refresh_for_heartbeat:
                         self._function_node.on_inputs_changed()
@@ -227,14 +227,14 @@ class FunctionNodeGui:
                     # Exceptions, if any
                     self._draw_exception_message()
                     # Outputs
-                    self._draw_function_outputs(unique_name)
+                    self._draw_function_outputs()
                 if fiat_utils.is_rendering_in_node():
                     ed.end_node()
             except Exception as e:
                 function_with_gui = self._function_node.function_with_gui
                 msg = f"""
                 Error while drawing node for Function:
-                    Function Name={unique_name}
+                    Function Name={self._function_node.function_with_gui.function_name}
                     Function Label={function_with_gui.label}
                     FunctionWithGui Type={type(function_with_gui)}
                 Exception Message:
@@ -253,13 +253,17 @@ class FunctionNodeGui:
 
         pass
 
-    def _draw_title(self, unique_name: str) -> None:
+    def _draw_title(self) -> None:
         fn_label = self._function_node.function_with_gui.label
+        # Hide ## suffix
+        fn_label = fn_label.split("##")[0]
+
         bold_font = imgui_md.get_font(imgui_md.MarkdownFontSpec(bold_=True))
         with imgui_ctx.push_font(bold_font):
             imgui.text("      " + fn_label)
-        if unique_name != fn_label:
-            fiat_osd.set_widget_tooltip(f" (id: {unique_name})")
+        function_name = self._function_node.function_with_gui.function_name
+        if function_name != fn_label:
+            fiat_osd.set_widget_tooltip(f" (id: {function_name})")
 
         self._draw_doc_info_icon_on_title_line()
         self._draw_async_status_on_title_line()
@@ -460,7 +464,7 @@ class FunctionNodeGui:
 
         pass
 
-    def _draw_function_inputs(self, unique_name: str) -> bool:
+    def _draw_function_inputs(self) -> bool:
         shall_disable_input = (
             self._function_node.is_running_async() and get_fiat_config().run_config.disable_input_during_execution
         )
@@ -506,7 +510,7 @@ class FunctionNodeGui:
         #
         for param_name in self._function_node.function_with_gui.all_inputs_names():
             input_param = self._function_node.function_with_gui.param(param_name)
-            if self._draw_one_input(input_param, unique_name):
+            if self._draw_one_input(input_param):
                 changed = True
 
         if shall_disable_input:
@@ -514,7 +518,7 @@ class FunctionNodeGui:
 
         return changed
 
-    def _draw_one_input(self, input_param: ParamWithGui[Any], unique_name: str) -> bool:
+    def _draw_one_input(self, input_param: ParamWithGui[Any]) -> bool:
         with imgui_ctx.push_obj_id(input_param):
             input_name = input_param.name
 
@@ -552,7 +556,7 @@ class FunctionNodeGui:
 
         pass
 
-    def _draw_function_outputs(self, unique_name: str) -> None:
+    def _draw_function_outputs(self) -> None:
         nb_outputs = self._function_node.function_with_gui.nb_outputs()
         nb_unlinked_outputs = self._function_node.nb_unlinked_outputs()
 
@@ -650,7 +654,7 @@ class FunctionNodeGui:
 
         pass
 
-    def _draw_function_internal_state(self, unique_name: str) -> bool:
+    def _draw_function_internal_state(self) -> bool:
         fn_with_gui = self._function_node.function_with_gui
         internal_state_fn = fn_with_gui.internal_state_gui
         if internal_state_fn is None:
