@@ -215,6 +215,8 @@ class FunctionNodeGui:
         needs_refresh_for_heartbeat = self._heartbeat()
         with imgui_ctx.push_obj_id(self._function_node):
             try:
+                id_node_or_focused = "node" if fiat_utils.is_rendering_in_node() else "focused"
+                imgui.push_id(id_node_or_focused)
                 if fiat_utils.is_rendering_in_node():
                     ed.begin_node(self._node_id)
                 _CURRENT_FUNCTION_NODE_ID = self._node_id
@@ -243,6 +245,7 @@ class FunctionNodeGui:
                     self._draw_function_outputs()
                 if fiat_utils.is_rendering_in_node():
                     ed.end_node()
+                imgui.pop_id()
             except Exception as e:
                 function_with_gui = self._function_node.function_with_gui
                 msg = f"""
