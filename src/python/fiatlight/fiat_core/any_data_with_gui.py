@@ -104,6 +104,9 @@ class GuiHeaderLineParams(Generic[DataType]):
     prefix_gui: Callable[[], None] | None = None
     suffix_gui: Callable[[], None] | None = None
     default_value_if_unspecified: DataType | Unspecified = UnspecifiedValue
+    is_expand_disabled: bool = (
+        False  # expand will be disabled when a whole region is collapsed (e.g. inputs, outputs, fiat_tuning, etc.)
+    )
 
 
 class AnyDataWithGui(Generic[DataType]):
@@ -444,13 +447,17 @@ class AnyDataWithGui(Generic[DataType]):
                 imgui.set_clipboard_text(clipboard_str)
             fiat_osd.set_widget_tooltip("Copy value to clipboard")
 
-    def can_collapse_present(self) -> bool:
+    def can_collapse_present(self, is_expand_disabled: bool) -> bool:
+        if is_expand_disabled:
+            return False
         if isinstance(self.value, (Unspecified, Error)):
             return False
         disabled_in_node = fiat_utils.is_rendering_in_node() and not self.callbacks.present_node_compatible
         return self.callbacks.present_collapsible and not disabled_in_node
 
-    def can_collapse_edit(self) -> bool:
+    def can_collapse_edit(self, is_expand_disabled: bool) -> bool:
+        if is_expand_disabled:
+            return False
         if isinstance(self.value, (Unspecified, Error)):
             return False
         disabled_in_node = fiat_utils.is_rendering_in_node() and not self.callbacks.edit_node_compatible
@@ -467,29 +474,37 @@ class AnyDataWithGui(Generic[DataType]):
         disabled_in_node = fiat_utils.is_rendering_in_node() and not self.callbacks.present_node_compatible
         return has_small_present and not disabled_in_node
 
-    def _can_edit_on_next_lines_if_expanded(self) -> bool:
+    def _can_edit_on_next_lines_if_expanded(self, is_expand_disabled: bool) -> bool:
+        if is_expand_disabled:
+            return False
         is_datatype_or_invalid = not isinstance(self.value, (Unspecified, Error))
         has_callback = self.callbacks.edit is not None
         # collapsible = self.callbacks.edit_collapsible
         disabled_in_node = fiat_utils.is_rendering_in_node() and not self.callbacks.edit_node_compatible
         return has_callback and is_datatype_or_invalid and not disabled_in_node
 
-    def _can_present_on_next_lines_if_expanded(self) -> bool:
+    def _can_present_on_next_lines_if_expanded(self, is_expand_disabled: bool) -> bool:
+        if is_expand_disabled:
+            return False
         # we do not test self.callbacks.present is None because if not provided, it will be presented with str()
         is_datatype_or_invalid = not isinstance(self.value, (Unspecified, Error))
         # collapsible = self.callbacks.present_collapsible
         disabled_in_node = fiat_utils.is_rendering_in_node() and not self.callbacks.present_node_compatible
         return is_datatype_or_invalid and not disabled_in_node
 
-    def _is_editing_on_next_lines(self) -> bool:
+    def _is_editing_on_next_lines(self, is_expand_disabled: bool) -> bool:
+        if is_expand_disabled:
+            return False
         if not self.callbacks.edit_collapsible:
             return False
-        return self._expanded and self._can_edit_on_next_lines_if_expanded()
+        return self._expanded and self._can_edit_on_next_lines_if_expanded(is_expand_disabled)
 
-    def _is_presenting_on_next_lines(self) -> bool:
+    def _is_presenting_on_next_lines(self, is_expand_disabled: bool) -> bool:
+        if is_expand_disabled:
+            return False
         if not self.callbacks.present_collapsible:
             return False
-        return self._expanded and self._can_present_on_next_lines_if_expanded()
+        return self._expanded and self._can_present_on_next_lines_if_expanded(is_expand_disabled)
 
     def _popup_window_name(self, params: GuiHeaderLineParams[DataType], present_or_edit: PresentOrEdit) -> str:
         window_name = ""
@@ -523,14 +538,14 @@ class AnyDataWithGui(Generic[DataType]):
                 )
                 _draw_label_with_max_width(self.label, label_color, self.tooltip, self.status_tooltip)
             # Expand button
-            if self.can_collapse_present():
+            if self.can_collapse_present(params.is_expand_disabled) and not params.is_expand_disabled:
                 self._show_collapse_button()
                 if self._expanded:
                     if self.sub_items_can_collapse(self.PresentOrEdit.present):
                         self._show_collapse_sub_items_buttons(self.PresentOrEdit.present)
 
             # Value as string or widget
-            if not self._is_presenting_on_next_lines():
+            if not self._is_presenting_on_next_lines(params.is_expand_disabled):
                 if isinstance(self.value, Unspecified):
                     if isinstance(params.default_value_if_unspecified, Unspecified):
                         imgui.text_colored(
@@ -571,7 +586,7 @@ class AnyDataWithGui(Generic[DataType]):
             if can_present_in_popup:
 
                 def gui_present_in_popup() -> None:
-                    self._gui_present_next_lines(in_popup=True)
+                    self._gui_present_next_lines(in_popup=True, is_expand_disabled=params.is_expand_disabled)
 
                 detached_window_params = fiat_osd.DetachedWindowParams(
                     unique_id="##present_in_popup" + str(id(self)),
@@ -617,14 +632,14 @@ class AnyDataWithGui(Generic[DataType]):
                 )
                 _draw_label_with_max_width(self.label, label_color, self.tooltip, self.status_tooltip)
             # Expand button
-            if self.can_collapse_edit():
+            if self.can_collapse_edit(params.is_expand_disabled):
                 self._show_collapse_button()
                 if self._expanded:
                     if self.sub_items_can_collapse(self.PresentOrEdit.edit):
                         self._show_collapse_sub_items_buttons(self.PresentOrEdit.edit)
 
             # Value as string or widget
-            if not self._is_editing_on_next_lines():
+            if not self._is_editing_on_next_lines(params.is_expand_disabled):
                 if isinstance(self.value, Unspecified):
                     if isinstance(params.default_value_if_unspecified, Unspecified):
                         imgui.text_colored(
@@ -670,7 +685,7 @@ class AnyDataWithGui(Generic[DataType]):
                             logging.warning("Value unspecified: setting to default value before editing in popup")
                             self.value = self.construct_default_value()
                     # Edit in popup
-                    changed = self._gui_edit_next_lines(in_popup=True)
+                    changed = self._gui_edit_next_lines(in_popup=True, is_expand_disabled=params.is_expand_disabled)
 
                     return changed
 
@@ -740,10 +755,14 @@ class AnyDataWithGui(Generic[DataType]):
 
         return changed
 
-    def _gui_edit_next_lines(self, in_popup: bool) -> bool:
+    def _gui_edit_next_lines(self, in_popup: bool, is_expand_disabled: bool) -> bool:
         # Line 2 and beyond: edit (if one line present is impossible)
         changed = False
-        can_edit = self._is_editing_on_next_lines() if not in_popup else self._can_edit_on_next_lines_if_expanded()
+        can_edit = (
+            self._is_editing_on_next_lines(is_expand_disabled)
+            if not in_popup
+            else self._can_edit_on_next_lines_if_expanded(is_expand_disabled)
+        )
         if can_edit:
             assert self.callbacks.edit is not None
             with imgui_ctx.begin_horizontal("left_margin_edit"):
@@ -756,10 +775,12 @@ class AnyDataWithGui(Generic[DataType]):
                         self.value = new_value  # this will call the setter and trigger the validation
         return changed
 
-    def _gui_present_next_lines(self, in_popup: bool) -> None:
+    def _gui_present_next_lines(self, in_popup: bool, is_expand_disabled: bool) -> None:
         # Line 2 and beyond: present (if one line present is impossible)
         can_present = (
-            self._is_presenting_on_next_lines() if not in_popup else self._can_present_on_next_lines_if_expanded()
+            self._is_presenting_on_next_lines(is_expand_disabled)
+            if not in_popup
+            else self._can_present_on_next_lines_if_expanded(is_expand_disabled)
         )
         if can_present:
             with imgui_ctx.begin_horizontal("left_margin_present"):
@@ -780,7 +801,7 @@ class AnyDataWithGui(Generic[DataType]):
         with imgui_ctx.push_obj_id(self):
             with fontawesome_6_ctx():
                 self._gui_present_header_line(params)
-                self._gui_present_next_lines(in_popup=False)
+                self._gui_present_next_lines(in_popup=False, is_expand_disabled=params.is_expand_disabled)
 
     # def gui_present(self, label: str) -> None:
     def gui_present(self) -> None:
@@ -796,7 +817,7 @@ class AnyDataWithGui(Generic[DataType]):
             with fontawesome_6_ctx():
                 if self._gui_edit_header_line(params):
                     changed = True
-                if self._gui_edit_next_lines(in_popup=False):
+                if self._gui_edit_next_lines(in_popup=False, is_expand_disabled=params.is_expand_disabled):
                     changed = True
 
         return changed

@@ -189,7 +189,9 @@ class FunctionNodeGui:
         r = 0
         nb_outputs = self._function_node.function_with_gui.nb_outputs()
         for i in range(nb_outputs):
-            if self._function_node.function_with_gui.output(i)._can_present_on_next_lines_if_expanded():
+            if self._function_node.function_with_gui.output(i)._can_present_on_next_lines_if_expanded(
+                is_expand_disabled=False
+            ):
                 r += 1
         return r
 
@@ -335,7 +337,7 @@ class FunctionNodeGui:
                 else:
                     if has_backup:
                         clicked_restore = imgui.button(icons_fontawesome_6.ICON_FA_WINDOW_RESTORE)
-                        fiat_osd.set_widget_tooltip("Restore previous state")
+                        fiat_osd.set_widget_tooltip("Restore previous view")
                         if clicked_restore:
                             result = PossibleAction.Restore
 
@@ -654,6 +656,8 @@ class FunctionNodeGui:
                 header_params.prefix_gui = lambda: self._draw_input_pin(header_elements)
             header_params.default_value_if_unspecified = input_param.default_value
 
+            header_params.is_expand_disabled = not self._inputs_expanded.current_value()
+
             if can_edit:
                 changed = input_param.data_with_gui.gui_edit_customizable(header_params)
                 return changed
@@ -726,6 +730,8 @@ class FunctionNodeGui:
         header_params = GuiHeaderLineParams[Any](parent_name=self._function_node.function_with_gui.label)
         if fiat_utils.is_rendering_in_node():
             header_params.suffix_gui = lambda: self._draw_output_pin(bof_header_elements, idx_output)
+
+        header_params.is_expand_disabled = not self._outputs_expanded.current_value()
 
         output_param.gui_present_customizable(header_params)
 
