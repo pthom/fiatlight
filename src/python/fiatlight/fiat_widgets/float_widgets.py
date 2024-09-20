@@ -161,14 +161,14 @@ def slider_float_any_range(
             interval.set_target_value(new_value_abs)
 
             if accept_negative:
-                cur_pos = imgui.get_cursor_pos()
+                cur_pos = imgui.get_cursor_screen_pos()
                 cur_pos.x -= hello_imgui.em_size(0.5)
-                imgui.set_cursor_pos(cur_pos)
+                imgui.set_cursor_screen_pos(cur_pos)
                 if mini_buttons.show_sign_button():
                     sign *= -1
                     changed_via_button = True
                 cur_pos.x += hello_imgui.em_size(1.5)
-                imgui.set_cursor_pos(cur_pos)
+                imgui.set_cursor_screen_pos(cur_pos)
 
             label = _str_until_double_hash(label)
             if len(label) > 0:

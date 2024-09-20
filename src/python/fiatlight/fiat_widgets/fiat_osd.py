@@ -113,13 +113,13 @@ class _OsdDetachedWindows:
             if show and flag_open:
                 with fontawesome_6_ctx():
                     with imgui_ctx.push_style_var(imgui.StyleVar_.frame_rounding.value, 50.0):
-                        cur_pos = imgui.get_cursor_pos()
+                        cur_pos = imgui.get_cursor_screen_pos()
                         window_tl = cur_pos - imgui.get_style().window_padding  # type: ignore
-                        imgui.set_cursor_pos(window_tl)
+                        imgui.set_cursor_screen_pos(window_tl)
                         shall_close = imgui.button(icons_fontawesome_6.ICON_FA_CIRCLE_XMARK)
                         set_widget_tooltip("Close ")
                         cur_pos.x += hello_imgui.em_size(3)
-                        imgui.set_cursor_pos(cur_pos)
+                        imgui.set_cursor_screen_pos(cur_pos)
                 detached_info.bool_returned = detached_info.params.gui_function()
                 if not shall_close:
                     alive_windows.append(detached_info)
@@ -160,7 +160,7 @@ class _OsdDetachedWindows:
         if self.detached_window_exists(params):
             return
         if is_rendering_in_node():
-            location = imgui_node_editor.canvas_to_screen(imgui.get_cursor_pos())
+            location = imgui_node_editor.canvas_to_screen(imgui.get_cursor_screen_pos())
         else:
             location = imgui.get_cursor_screen_pos()
         new_popup = _DetachedWindowInfo(

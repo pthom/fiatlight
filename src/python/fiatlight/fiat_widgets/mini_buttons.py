@@ -70,7 +70,7 @@ def show_buttons_range(tooltip_mul: str, tooltip_div: str) -> ButtonRangeAction:
     r = ButtonRangeAction.NONE
     from fiatlight.fiat_widgets import fiat_osd
 
-    orig_cursor_pos = imgui.get_cursor_pos()
+    orig_cursor_pos = imgui.get_cursor_screen_pos()
     cur_pos = copy.copy(orig_cursor_pos)
 
     btn_size = hello_imgui.em_to_vec2(1.0, 0.65)
@@ -79,7 +79,7 @@ def show_buttons_range(tooltip_mul: str, tooltip_div: str) -> ButtonRangeAction:
     _draw_symbol(cur_pos, btn_size, _SymbolDrawing.ArrowUp)
     fiat_osd.set_widget_tooltip(tooltip_mul)
     cur_pos.y += hello_imgui.em_size(0.7)
-    imgui.set_cursor_pos(cur_pos)
+    imgui.set_cursor_screen_pos(cur_pos)
     if imgui.button("##10-", btn_size):
         r = ButtonRangeAction.DIVIDE
     _draw_symbol(cur_pos, btn_size, _SymbolDrawing.ArrowDown)
@@ -87,7 +87,7 @@ def show_buttons_range(tooltip_mul: str, tooltip_div: str) -> ButtonRangeAction:
 
     final_cursor_pos = orig_cursor_pos
     final_cursor_pos.x += btn_size.x
-    imgui.set_cursor_pos(final_cursor_pos)
+    imgui.set_cursor_screen_pos(final_cursor_pos)
 
     return r
 
@@ -96,12 +96,12 @@ def show_symbol_button(symbol: _SymbolDrawing, tooltip: str, w_em: float = 0.9, 
     clicked = False
     from fiatlight.fiat_widgets import fiat_osd
 
-    orig_cursor_pos = imgui.get_cursor_pos()
+    orig_cursor_pos = imgui.get_cursor_screen_pos()
     btn_pos = copy.copy(orig_cursor_pos)
 
     btn_pos.y += hello_imgui.em_size((1.1 - h_em) * 1)
 
-    imgui.set_cursor_pos(btn_pos)
+    imgui.set_cursor_screen_pos(btn_pos)
     btn_size = hello_imgui.em_to_vec2(w_em, h_em)
     if imgui.button("##0" + str(symbol), btn_size):
         clicked = True
@@ -110,7 +110,7 @@ def show_symbol_button(symbol: _SymbolDrawing, tooltip: str, w_em: float = 0.9, 
 
     final_cursor_pos = orig_cursor_pos
     final_cursor_pos.x += btn_size.x
-    imgui.set_cursor_pos(final_cursor_pos)
+    imgui.set_cursor_screen_pos(final_cursor_pos)
 
     return clicked
 

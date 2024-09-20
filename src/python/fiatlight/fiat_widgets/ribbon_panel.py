@@ -15,9 +15,9 @@ def vertical_separator() -> None:
     )
 
     # update cursor position
-    cursor_pos = imgui.get_cursor_pos()
+    cursor_pos = imgui.get_cursor_screen_pos()
     cursor_pos.x += imgui.get_style().item_spacing.x
-    imgui.set_cursor_pos(cursor_pos)
+    imgui.set_cursor_screen_pos(cursor_pos)
 
 
 def ribbon_panel(title: str, gui: GuiFunction) -> None:
@@ -28,9 +28,9 @@ def ribbon_panel(title: str, gui: GuiFunction) -> None:
                     gui()
 
             # Move the title closer to the gui
-            cursor_pos = imgui.get_cursor_pos()
+            cursor_pos = imgui.get_cursor_screen_pos()
             cursor_pos.y -= imgui.get_style().item_spacing.y * 0.7
-            imgui.set_cursor_pos(cursor_pos)
+            imgui.set_cursor_screen_pos(cursor_pos)
 
             # Draw the title, centered
             with imgui_ctx.begin_horizontal("RibbonH", None):

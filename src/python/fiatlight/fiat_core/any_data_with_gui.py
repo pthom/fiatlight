@@ -71,7 +71,7 @@ def _draw_label_with_max_width(
     else:
         tooltip = ""
 
-    cur_pos = imgui.get_cursor_pos()
+    cur_pos = imgui.get_cursor_screen_pos()
     if "##" in label:
         label = label.split("##")[0]
     shortened_label = label
@@ -94,7 +94,7 @@ def _draw_label_with_max_width(
         fiat_osd.set_widget_tooltip(tooltip)
 
     new_cursor_pos = ImVec2(cur_pos.x + max_width_pixels, cur_pos.y)
-    imgui.set_cursor_pos(new_cursor_pos)
+    imgui.set_cursor_screen_pos(new_cursor_pos)
 
 
 @dataclass
