@@ -29,7 +29,7 @@ Notes:
 """
 
 from __future__ import annotations
-
+from enum import Enum
 
 import fiatlight
 from fiatlight.fiat_types import Error, Unspecified, UnspecifiedValue, JsonDict
@@ -38,6 +38,7 @@ from fiatlight.fiat_core.gui_node import GuiNode
 from fiatlight.fiat_core.any_data_with_gui import GuiHeaderLineParams
 from fiatlight.fiat_config import FiatColorType, get_fiat_config
 from fiatlight.fiat_core.param_with_gui import ParamWithGui
+from fiatlight.fiat_nodes.value_in_node_vs_focused import ExpandedFlagInNodeVsFocused, FlagsDictInNodeVsFocused
 from imgui_bundle import (
     imgui,
     imgui_node_editor as ed,
@@ -94,11 +95,15 @@ class FunctionNodeGui:
     # user settings:
     #   Flags that indicate whether the details of the inputs/outputs/internals are shown or not
     #   (those settings are saved in the user settings file)
-    _inputs_expanded: bool = True
-    _outputs_expanded: bool = True
-    _doc_expanded: bool = False
-    fiat_tuning_expanded: bool = True  # This is for the debug internals
-    _internal_state_gui_expanded: bool = True  # This is for the function's internal state gui
+    _inputs_expanded: ExpandedFlagInNodeVsFocused
+    _outputs_expanded: ExpandedFlagInNodeVsFocused
+    _doc_expanded: ExpandedFlagInNodeVsFocused
+    fiat_tuning_expanded: ExpandedFlagInNodeVsFocused  # This is for the debug internals
+    _internal_state_gui_expanded: ExpandedFlagInNodeVsFocused  # This is for the function's internal state gui
+
+    # Backup of the expanded states when the user clicks on the minimize button
+    # (two sets of flags: one for the node mode, one for the focused mode)
+    _backup_expanded_states: FlagsDictInNodeVsFocused
 
     # ==================================================================================================================
     #                                            Constructor
@@ -125,6 +130,14 @@ class FunctionNodeGui:
                 param.data_with_gui._expanded = False  # No need to expand linked field by default
 
         self._fiat_tuning_with_gui = {}
+
+        self._inputs_expanded = ExpandedFlagInNodeVsFocused(True)
+        self._outputs_expanded = ExpandedFlagInNodeVsFocused(True)
+        self._doc_expanded = ExpandedFlagInNodeVsFocused(False)
+        self.fiat_tuning_expanded = ExpandedFlagInNodeVsFocused(False)
+
+        self._internal_state_gui_expanded = ExpandedFlagInNodeVsFocused(True)
+        self._backup_expanded_states = FlagsDictInNodeVsFocused(None, None)
 
     class _Node_Info_Section:  # Dummy class to create a section in the IDE # noqa
         """
@@ -267,13 +280,108 @@ class FunctionNodeGui:
 
         self._draw_doc_info_icon_on_title_line()
         self._draw_async_status_on_title_line()
+        imgui.spring()
+        self._draw_minimize_btn()
         self._draw_focus_on_function_btn()
 
     def _draw_focus_on_function_btn(self) -> None:
         from fiatlight.fiat_nodes.focused_functions_in_tabs import FOCUSED_FUNCTIONS_IN_TABS
 
-        imgui.spring()
         FOCUSED_FUNCTIONS_IN_TABS.draw_focus_on_function_btn(self)
+
+    def _draw_minimize_btn(self) -> None:
+        """
+        The minimize button enable to collapse / expand the different sections:
+              _inputs_expanded, _outputs_expanded, _doc_expanded, fiat_tuning_expanded, _internal_state_gui_expanded
+        Its behavior is as follows:
+            if any expanded => collapse all and save state
+            if all collapsed
+                if any saved state => restore saved state | destroy saved state
+                else => expand all
+        """
+        has_inputs = self._function_node.function_with_gui.nb_inputs() > 0
+        has_outputs = self._function_node.function_with_gui.nb_outputs() > 0
+        has_doc = self._function_node.function_with_gui.get_function_doc().user_doc is not None
+        has_fiat_tuning = len(self._fiat_tuning_with_gui) > 0
+        has_internal_state_gui = self._function_node.function_with_gui.internal_state_gui is not None
+        any_expanded = (
+            False
+            or (self._inputs_expanded.current_value() and has_inputs)
+            or (self._outputs_expanded.current_value() and has_outputs)
+            or (self._doc_expanded.current_value() and has_doc)
+            or (self.fiat_tuning_expanded.current_value() and has_fiat_tuning)
+            or (self._internal_state_gui_expanded.current_value() and has_internal_state_gui)
+        )
+        has_backup = self._backup_expanded_states.current_value() is not None
+
+        class PossibleAction(Enum):
+            None_ = 0
+            CollapseAll = 1
+            Restore = 2
+            ExpandAll = 3
+
+        def display_btn() -> PossibleAction:
+            result = PossibleAction.None_
+            with fontawesome_6_ctx():
+                if any_expanded:
+                    clicked_minimize = imgui.button(icons_fontawesome_6.ICON_FA_WINDOW_MINIMIZE)
+                    fiat_osd.set_widget_tooltip("Collapse all")
+                    if clicked_minimize:
+                        result = PossibleAction.CollapseAll
+                else:
+                    if has_backup:
+                        clicked_restore = imgui.button(icons_fontawesome_6.ICON_FA_WINDOW_RESTORE)
+                        fiat_osd.set_widget_tooltip("Restore previous state")
+                        if clicked_restore:
+                            result = PossibleAction.Restore
+
+                    clicked_maximize = imgui.button(icons_fontawesome_6.ICON_FA_WINDOW_MAXIMIZE)
+                    fiat_osd.set_widget_tooltip("Expand all")
+                    if clicked_maximize:
+                        result = PossibleAction.ExpandAll
+                return result
+
+        def handle_action(action: PossibleAction) -> None:
+            if action == PossibleAction.None_:
+                return
+            elif action == PossibleAction.CollapseAll:
+                self._backup_expanded_states.set_current_value(
+                    {
+                        "inputs": self._inputs_expanded.current_value(),
+                        "outputs": self._outputs_expanded.current_value(),
+                        "doc": self._doc_expanded.current_value(),
+                        "fiat_tuning": self.fiat_tuning_expanded.current_value(),
+                        "internal_state_gui": self._internal_state_gui_expanded.current_value(),
+                    }
+                )
+                self._inputs_expanded.set_current_value(False)
+                self._outputs_expanded.set_current_value(False)
+                self._doc_expanded.set_current_value(False)
+                self.fiat_tuning_expanded.set_current_value(False)
+                self._internal_state_gui_expanded.set_current_value(False)
+            elif action == PossibleAction.Restore:
+                backup = self._backup_expanded_states.current_value()
+                assert backup is not None
+                self._inputs_expanded.set_current_value(backup["inputs"])
+                self._outputs_expanded.set_current_value(backup["outputs"])
+                self._doc_expanded.set_current_value(backup["doc"])
+                self.fiat_tuning_expanded.set_current_value(backup["fiat_tuning"])
+                self._internal_state_gui_expanded.set_current_value(backup["internal_state_gui"])
+                self._backup_expanded_states.set_current_value(None)
+            elif action == PossibleAction.ExpandAll:
+                if has_inputs:
+                    self._inputs_expanded.set_current_value(True)
+                if has_outputs:
+                    self._outputs_expanded.set_current_value(True)
+                if has_doc:
+                    self._doc_expanded.set_current_value(True)
+                if has_fiat_tuning:
+                    self.fiat_tuning_expanded.set_current_value(True)
+                if has_internal_state_gui:
+                    self._internal_state_gui_expanded.set_current_value(True)
+
+        action_ = display_btn()
+        handle_action(action_)
 
     def _draw_async_status_on_title_line(self) -> None:
         if self._function_node.is_running_async():
@@ -485,21 +593,23 @@ class FunctionNodeGui:
         node_separator_params = fiat_widgets.NodeSeparatorParams()
         node_separator_params.parent_node = self._node_id
         # expanded state
-        node_separator_params.expanded = self._inputs_expanded
+        node_separator_params.expanded = self._inputs_expanded.current_value()
         # Separator text
         node_separator_params.text = "Params" if nb_inputs > 1 else "Param"
-        if nb_unlinked_inputs > 0 and not self._inputs_expanded:
+        if nb_unlinked_inputs > 0 and not self._inputs_expanded.current_value():
             node_separator_params.text += f" ({nb_unlinked_inputs} hidden)"
         # Separator collapse button
         node_separator_params.show_collapse_button = nb_unlinked_inputs > 0
         # Separator collapse all button
-        node_separator_params.show_toggle_collapse_all_button = nb_unlinked_inputs > 1 and self._inputs_expanded
+        node_separator_params.show_toggle_collapse_all_button = (
+            nb_unlinked_inputs > 1 and self._inputs_expanded.current_value()
+        )
 
         # Draw the separator
         node_separator_output = fiat_widgets.node_separator(node_separator_params)
 
         # Update the expanded state
-        self._inputs_expanded = node_separator_output.expanded
+        self._inputs_expanded.set_current_value(node_separator_output.expanded)
 
         # Update the inputs expanded state
         if node_separator_output.was_toggle_collapse_all_clicked:
@@ -523,7 +633,7 @@ class FunctionNodeGui:
             input_name = input_param.name
 
             has_link = self._function_node.has_input_link(input_name)
-            if not has_link and not self._inputs_expanded:
+            if not has_link and not self._inputs_expanded.current_value():
                 return False
 
             can_edit = not has_link
@@ -569,23 +679,23 @@ class FunctionNodeGui:
         node_separator_params = fiat_widgets.NodeSeparatorParams()
         node_separator_params.parent_node = self._node_id
         # expanded state
-        node_separator_params.expanded = self._outputs_expanded
+        node_separator_params.expanded = self._outputs_expanded.current_value()
         # Separator text
         node_separator_params.text = "Outputs" if nb_outputs > 1 else "Output"
-        if nb_unlinked_outputs > 0 and not self._outputs_expanded:
+        if nb_unlinked_outputs > 0 and not self._outputs_expanded.current_value():
             node_separator_params.text += f" ({nb_unlinked_outputs} hidden)"
         # show collapse button
         node_separator_params.show_collapse_button = nb_unlinked_outputs > 0
         # show collapse all button
         node_separator_params.show_toggle_collapse_all_button = (
-            self._outputs_expanded and self.nb_outputs_with_custom_present() > 0
+            self._outputs_expanded.current_value() and self.nb_outputs_with_custom_present() > 0
         )
 
         # Draw the separator
         node_separator_output = fiat_widgets.node_separator(node_separator_params)
 
         # Update the expanded state
-        self._outputs_expanded = node_separator_output.expanded
+        self._outputs_expanded.set_current_value(node_separator_output.expanded)
         # If the collapse all button was clicked, we update the state of all outputs
         if node_separator_output.was_toggle_collapse_all_clicked:
             self._function_node.function_with_gui.toggle_expand_outputs()
@@ -596,7 +706,7 @@ class FunctionNodeGui:
         # Outputs
         for idx_output in range(self._function_node.function_with_gui.nb_outputs()):
             has_link = len(self._function_node.output_links_for_idx(idx_output)) > 0
-            if not has_link and not self._outputs_expanded:
+            if not has_link and not self._outputs_expanded.current_value():
                 continue
             with imgui_ctx.begin_group():
                 self._draw_one_output(idx_output)
@@ -662,7 +772,7 @@ class FunctionNodeGui:
 
         is_node_compatible = fn_with_gui.internal_state_gui_node_compatible
         can_collapse = is_node_compatible
-        expanded = self._internal_state_gui_expanded or not is_node_compatible
+        expanded = self._internal_state_gui_expanded.current_value() or not is_node_compatible
 
         #
         # Draw the separator
@@ -684,7 +794,7 @@ class FunctionNodeGui:
         # Draw the separator
         node_separator_output = fiat_widgets.node_separator(node_separator_params)
         # Update the expanded state
-        self._internal_state_gui_expanded = node_separator_output.expanded
+        self._internal_state_gui_expanded.set_current_value(node_separator_output.expanded)
 
         #
         # Invoke the internal state gui
@@ -702,7 +812,7 @@ class FunctionNodeGui:
         if fiat_osd.get_detached_window_bool_return(detached_window_params):
             changed = True
 
-        if self._internal_state_gui_expanded and is_node_compatible:
+        if self._internal_state_gui_expanded.current_value() and is_node_compatible:
             changed = internal_state_fn()
 
         return changed
@@ -731,18 +841,18 @@ class FunctionNodeGui:
         #
         node_separator_params = fiat_widgets.NodeSeparatorParams()
         node_separator_params.parent_node = self._node_id
-        node_separator_params.expanded = self.fiat_tuning_expanded
+        node_separator_params.expanded = self.fiat_tuning_expanded.current_value()
         node_separator_params.text = "Fiat Tuning"
         node_separator_params.show_collapse_button = True
-        node_separator_params.show_toggle_collapse_all_button = self.fiat_tuning_expanded
-        if not self.fiat_tuning_expanded:
+        node_separator_params.show_toggle_collapse_all_button = self.fiat_tuning_expanded.current_value()
+        if not self.fiat_tuning_expanded.current_value():
             node_separator_params.text += f" ({len(fn_fiat_tuning)} hidden)"
 
         # Draw the separator
         node_separator_output = fiat_widgets.node_separator(node_separator_params)
 
         # Update the expanded state
-        self.fiat_tuning_expanded = node_separator_output.expanded
+        self.fiat_tuning_expanded.set_current_value(node_separator_output.expanded)
 
         # Update the internals expanded state
         if node_separator_output.was_toggle_collapse_all_clicked:
@@ -758,7 +868,7 @@ class FunctionNodeGui:
                 new_fiat_tuning_with_gui[name] = self._fiat_tuning_with_gui[name]
         self._fiat_tuning_with_gui = new_fiat_tuning_with_gui
 
-        if not self.fiat_tuning_expanded:
+        if not self.fiat_tuning_expanded.current_value():
             return
 
         # display the internals
@@ -852,8 +962,8 @@ class FunctionNodeGui:
             return
         with fontawesome_6_ctx():
             if imgui.button(icons_fontawesome_6.ICON_FA_CIRCLE_INFO):
-                self._doc_expanded = not self._doc_expanded
-            tooltip = "Show documentation" if not self._doc_expanded else "Hide documentation"
+                self._doc_expanded.set_current_value(not self._doc_expanded.current_value())
+            tooltip = "Show documentation" if not self._doc_expanded.current_value() else "Hide documentation"
             fiat_osd.set_widget_tooltip(tooltip)
 
     def _draw_doc(self) -> None:
@@ -861,7 +971,7 @@ class FunctionNodeGui:
 
         doc = fn_with_gui.get_function_doc()
 
-        if doc.user_doc is None or not self._doc_expanded:
+        if doc.user_doc is None or not self._doc_expanded.current_value():
             return
 
         def render_user_doc() -> None:
@@ -916,22 +1026,26 @@ class FunctionNodeGui:
         #     for name, data_with_gui in self._fiat_tuning_with_gui.items():
         #         fiat_tuning_options[name] = data_with_gui.save_gui_options_to_json()
         r = {
-            "_inputs_expanded": self._inputs_expanded,
-            "_outputs_expanded": self._outputs_expanded,
-            "_doc_expanded": self._doc_expanded,
-            "fiat_tuning_expanded": self.fiat_tuning_expanded,
-            "_internal_state_gui_expanded": self._internal_state_gui_expanded,
+            "_inputs_expanded": self._inputs_expanded.save_to_dict(),
+            "_outputs_expanded": self._outputs_expanded.save_to_dict(),
+            "_doc_expanded": self._doc_expanded.save_to_dict(),
+            "fiat_tuning_expanded": self.fiat_tuning_expanded.save_to_dict(),
+            "_internal_state_gui_expanded": self._internal_state_gui_expanded.save_to_dict(),
             "_function_node": self._function_node.save_gui_options_to_json(),
+            "_backup_expanded_states": self._backup_expanded_states.save_to_dict(),
             # "_fiat_tuning_with_gui": fiat_tuning_options,
         }
         return r
 
     def load_gui_options_from_json(self, json_data: JsonDict) -> None:
-        self._inputs_expanded = json_data.get("_inputs_expanded", True)
-        self._outputs_expanded = json_data.get("_outputs_expanded", True)
-        self._doc_expanded = json_data.get("_doc_expanded", False)
-        self.fiat_tuning_expanded = json_data.get("fiat_tuning_expanded", False)
-        self._internal_state_gui_expanded = json_data.get("_internal_state_gui_expanded", True)
+        self._inputs_expanded = ExpandedFlagInNodeVsFocused.load_from_dict(json_data["_inputs_expanded"])
+        self._outputs_expanded = ExpandedFlagInNodeVsFocused.load_from_dict(json_data["_outputs_expanded"])
+        self._doc_expanded = ExpandedFlagInNodeVsFocused.load_from_dict(json_data["_doc_expanded"])
+        self.fiat_tuning_expanded = ExpandedFlagInNodeVsFocused.load_from_dict(json_data["fiat_tuning_expanded"])
+        self._internal_state_gui_expanded = ExpandedFlagInNodeVsFocused.load_from_dict(
+            json_data["_internal_state_gui_expanded"]
+        )
+        self._backup_expanded_states = FlagsDictInNodeVsFocused.load_from_dict(json_data["_backup_expanded_states"])
         self._function_node.load_gui_options_from_json(json_data["_function_node"])
         # fiat_tuning_options = json_data.get("_fiat_tuning_with_gui", {})
         # for name, data_with_gui in self._fiat_tuning_with_gui.items():

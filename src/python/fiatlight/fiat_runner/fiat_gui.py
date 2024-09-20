@@ -14,7 +14,6 @@ from imgui_bundle import immapp, imgui, portable_file_dialogs as pfd, imgui_node
 from typing import Any, Callable
 from imgui_bundle import hello_imgui, ImVec2, immvision, imgui_md
 
-
 import json
 import logging
 import pathlib

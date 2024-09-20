@@ -47,7 +47,7 @@ class FocusedFunctionsInTabs:
     def _draw_focus_on_function_btn(self, fn: FunctionNodeGui) -> None:
         is_new_focus = not self._has_opened_dockable_window(fn)
         with fontawesome_6_ctx():
-            clicked = imgui.button(icons_fontawesome_6.ICON_FA_WINDOW_RESTORE, ImVec2(0, 0))
+            clicked = imgui.button(icons_fontawesome_6.ICON_FA_UP_RIGHT_FROM_SQUARE, ImVec2(0, 0))
             if is_new_focus:
                 fiat_osd.set_widget_tooltip("Focus on function in new tab")
             else:
