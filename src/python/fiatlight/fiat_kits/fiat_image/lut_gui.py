@@ -3,6 +3,7 @@ import math
 from fiatlight.fiat_core import AnyDataWithGui
 from fiatlight.fiat_kits.fiat_image import ImageU8
 from fiatlight.fiat_kits.fiat_image.lut_types import LutParams, LutTable
+from fiatlight.fiat_widgets.cache_per_imgui_view import CachePerImGuiView
 from imgui_bundle import immapp, imgui, immvision
 
 
@@ -13,7 +14,7 @@ class LutParamsWithGui(AnyDataWithGui[LutParams]):
     """A GUI for LutParams, allowing to visually edit a curve representing Look-Up Table transformation."""
 
     _lut_graph: ImageU8
-    _lut_graph_needs_refresh: bool = True
+    _lut_graph_needs_refresh: CachePerImGuiView[bool] = CachePerImGuiView("lut_graph_needs_refresh", True)
     _lut_graph_size_em: float = 3.5
 
     def __init__(self) -> None:
@@ -37,7 +38,7 @@ class LutParamsWithGui(AnyDataWithGui[LutParams]):
         return changed, self.value
 
     def on_change(self, _lut_params: LutParams) -> None:
-        self._lut_graph_needs_refresh = True
+        self._lut_graph_needs_refresh.set_for_all_views(True)
 
     def lut_params(self) -> LutParams:
         assert isinstance(self.value, LutParams)
@@ -47,10 +48,11 @@ class LutParamsWithGui(AnyDataWithGui[LutParams]):
         return int(immapp.em_size(self._lut_graph_size_em))
 
     def _show_lut_graph(self) -> Point2d:
-        refresh_image = self._lut_graph_needs_refresh
-        if refresh_image:
+        lut_graph_needs_refresh = self._lut_graph_needs_refresh.get_for_current_view()
+        if lut_graph_needs_refresh:
             self._prepare_lut_graph()
-        mouse_position = immvision.image_display("##lut", self._lut_graph, refresh_image=refresh_image)
+            self._lut_graph_needs_refresh.set_for_current_view(False)
+        mouse_position = immvision.image_display("##lut", self._lut_graph, refresh_image=lut_graph_needs_refresh)
         return mouse_position
 
     def lut_table(self) -> LutTable:
@@ -61,7 +63,6 @@ class LutParamsWithGui(AnyDataWithGui[LutParams]):
 
         lut_table = self.lut_table()
         self._lut_graph = lut_table_graph(lut_table, self._lut_graph_size())
-        self._lut_graph_needs_refresh = False
 
     def handle_graph_mouse_edit(self, mouse_position: Point2d) -> bool:
         drag_threshold = 0
@@ -156,6 +157,6 @@ class LutParamsWithGui(AnyDataWithGui[LutParams]):
         )
 
         if changed:
-            self._lut_graph_needs_refresh = True
+            self._lut_graph_needs_refresh.set_for_all_views(True)
         imgui.end_group()
         return changed

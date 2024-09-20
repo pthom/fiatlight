@@ -2,6 +2,7 @@ from fiatlight.fiat_utils.fiat_attributes_decorator import with_fiat_attributes
 from fiatlight.fiat_types import JsonDict, ImagePath, FiatAttributes, Unspecified, UnspecifiedValue
 from fiatlight.fiat_core import AnyDataWithGui, PossibleFiatAttributes
 from fiatlight.fiat_kits.fiat_image.image_types import Image, ImageU8
+from fiatlight.fiat_widgets.cache_per_imgui_view import CachePerImGuiView
 from imgui_bundle import immvision, imgui, ImVec2
 from imgui_bundle import portable_file_dialogs as pfd, hello_imgui
 
@@ -125,6 +126,8 @@ class ImagePresenter:
     # Cached image and channels
     image: Image
     image_channels: Sequence[Image]
+    # Cache
+    need_refresh_cache_per_view: CachePerImGuiView[bool]
     # User preferences below
     image_params: ImagePresenterParams
     show_channels: bool = False
@@ -139,6 +142,7 @@ class ImagePresenter:
     def __init__(self) -> None:
         self.image_params = default_image_params()
         self.size_when_only_display = ImVec2(200, 0)
+        self.need_refresh_cache_per_view = CachePerImGuiView("ImagePresenter_need_refresh", True)
 
     def handle_fiat_attrs(self, fiat_attrs: dict[str, Any]) -> None:
         if "image_display_size" in fiat_attrs:
@@ -194,8 +198,8 @@ class ImagePresenter:
 
     def set_image(self, image: Image) -> None:
         self.image = image
-        self.image_params.refresh_image = True
-        if len(image.shape) == 3:
+        self.need_refresh_cache_per_view.set_for_all_views(True)
+        if len(image.shape) == 3 or len(image.shape) == 4:
             self.image_channels = cv2.split(image)  # type: ignore
 
     def _show_image_inspector_on_first_call(self) -> None:
@@ -204,6 +208,7 @@ class ImagePresenter:
             self.was_inspect_window_opened_on_first_log = True
 
     def _gui_channels(self) -> None:
+        need_refresh = self.need_refresh_cache_per_view.get_for_current_view()
         for i, image_channel in enumerate(self.image_channels):
             imgui.push_id(str(i))
             label = f"channel {i}"
@@ -212,13 +217,14 @@ class ImagePresenter:
                 immvision.image_display_resizable(
                     label_id=label,
                     mat=image_channel,
-                    refresh_image=self.image_params.refresh_image,
+                    refresh_image=need_refresh,
                     resizable=self.image_params.can_resize,
                     size=self.size_when_only_display,
                     is_bgr_or_bgra=self.image_params.is_color_order_bgr,
                     show_options_button=False,
                 )
             else:
+                self.image_params.refresh_image = need_refresh
                 immvision.image(label, image_channel, self.image_params)
             if self.show_inspect_button and not self.only_display:
                 if imgui.small_button("Inspect"):
@@ -232,30 +238,25 @@ class ImagePresenter:
             imgui.pop_id()
         if not self.channel_layout_vertically:
             imgui.new_line()
+        self.need_refresh_cache_per_view.set_for_current_view(False)
 
     def _gui_image(self) -> None:
+        need_refresh = self.need_refresh_cache_per_view.get_for_current_view()
         if self.only_display:
             immvision.image_display_resizable(
                 "##output",
                 self.image,
-                refresh_image=self.image_params.refresh_image,
+                refresh_image=need_refresh,
                 resizable=self.image_params.can_resize,
                 size=self.size_when_only_display,
                 is_bgr_or_bgra=self.image_params.is_color_order_bgr,
                 show_options_button=False,
             )
         else:
+            self.image_params.refresh_image = need_refresh
             immvision.image("##output", self.image, self.image_params)
 
-        # Cancel refresh_image at the end of the frame
-        # We need to delay that in case there is an opened pop-up with the same widget.
-        def cancel_refresh_image() -> None:
-            self.image_params.refresh_image = False
-
-        if self.image_params.refresh_image:
-            from fiatlight.fiat_runner.fiat_gui import fire_once_at_frame_end
-
-            fire_once_at_frame_end(cancel_refresh_image)
+        self.need_refresh_cache_per_view.set_for_current_view(False)
 
         if self.show_inspect_button and not self.only_display:
             if imgui.small_button("Inspect"):
