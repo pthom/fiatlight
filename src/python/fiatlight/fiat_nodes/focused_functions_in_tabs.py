@@ -62,7 +62,11 @@ class FocusedFunctionsInTabs:
 
     def _dockable_window_label(self, fn: FunctionNodeGui) -> str:
         function_name = fn.get_function_node().function_with_gui.function_name
-        return function_name + "##FocusedFunctionsInTabs_" + str(id(fn))
+        function_label = fn.get_function_node().function_with_gui.label
+        label = function_label
+        if label != function_name:
+            label += " (" + function_name + ")"
+        return label + "##FocusedFunctionsInTabs"
 
     def _make_dockable_window(self, fn: FunctionNodeGui) -> hello_imgui.DockableWindow:
         def _wrap_gui_store_change() -> None:
