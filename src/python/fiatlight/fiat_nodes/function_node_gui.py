@@ -309,6 +309,8 @@ class FunctionNodeGui:
                 if any saved state => restore saved state | destroy saved state
                 else => expand all
         """
+        if self._function_node.function_with_gui.function_name == "run_length_encode":
+            print("a")
         has_inputs = self._function_node.function_with_gui.nb_inputs() > 0
         has_outputs = self._function_node.function_with_gui.nb_outputs() > 0
         has_doc = self._function_node.function_with_gui.get_function_doc().user_doc is not None
@@ -609,7 +611,7 @@ class FunctionNodeGui:
         if nb_unlinked_inputs > 0 and not self._inputs_expanded.current_value():
             node_separator_params.text += f" ({nb_unlinked_inputs} hidden)"
         # Separator collapse button
-        node_separator_params.show_collapse_button = nb_unlinked_inputs > 0
+        node_separator_params.show_collapse_button = nb_inputs >= 1
         # Separator collapse all button
         node_separator_params.show_toggle_collapse_all_button = (
             nb_unlinked_inputs > 1 and self._inputs_expanded.current_value()
