@@ -32,7 +32,9 @@ class FunctionsGraphGui:
     def _create_function_nodes_and_links_gui(self) -> None:
         self.function_nodes_gui = []
         for f in self.functions_graph.functions_nodes:
-            self.function_nodes_gui.append(FunctionNodeGui(f))
+            fn_node_gui = FunctionNodeGui(f)
+            self.function_nodes_gui.append(fn_node_gui)
+            fn_node_gui.focused_window_create_dockable()
 
         self.functions_links_gui = []
         for link in self.functions_graph.functions_nodes_links:
@@ -108,8 +110,13 @@ class FunctionsGraphGui:
                 self._function_no_node_editor_rect = imgui.internal.ImRect(
                     imgui.get_item_rect_min(), imgui.get_item_rect_max()
                 )
+        self._restore_focused_windows_visibility_at_startup()
         self._idx_frame += 1
         return nodes_changed
+
+    def _restore_focused_windows_visibility_at_startup(self) -> None:
+        for fn in self.function_nodes_gui:
+            fn.focused_windows_restore_visibility_at_startup()
 
     def _handle_graph_edition(self) -> None:
         #
@@ -184,6 +191,7 @@ class FunctionsGraphGui:
         function_node = self.functions_graph.add_function(function)
         function_node_gui = FunctionNodeGui(function_node)
         self.function_nodes_gui.append(function_node_gui)
+        function_node_gui.focused_window_create_dockable()
 
     def _can_add_link(self, input_pin_id: ed.PinId, output_pin_id: ed.PinId) -> Tuple[bool, str]:
         # 1. Look for the function node GUIs that correspond to the input and output pins
@@ -262,6 +270,9 @@ class FunctionsGraphGui:
                 links_to_remove.append(link_gui)
         for link_gui in links_to_remove:
             self.functions_links_gui.remove(link_gui)
+
+        # 4. Remove the dockable window if it exists
+        fn_gui.focused_window_remove_dockable()
 
     # ======================================================================================================================
     # Graph layout
@@ -413,6 +424,15 @@ class FunctionsGraphGui:
     def on_exit(self) -> None:
         for fn in self.functions_graph.functions_nodes:
             fn.function_with_gui.on_exit()
+
+    def did_any_focused_window_change_something(self) -> bool:
+        frame_count = imgui.get_frame_count()
+        # changed = any(fn.focused_window_change_frame_id == frame_count for fn in self.function_nodes_gui)
+        changed = False
+        for fn in self.function_nodes_gui:
+            if fn._focused_window_change_frame_id == frame_count:
+                changed = True
+        return changed
 
     class _Serialization_Section:  # Dummy class to create a section in the IDE # noqa
         """

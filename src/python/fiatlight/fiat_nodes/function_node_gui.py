@@ -30,6 +30,7 @@ Notes:
 
 from __future__ import annotations
 from enum import Enum
+import logging
 
 import fiatlight
 from fiatlight.fiat_types import Error, Unspecified, UnspecifiedValue, JsonDict
@@ -104,6 +105,10 @@ class FunctionNodeGui:
     # Backup of the expanded states when the user clicks on the minimize button
     # (two sets of flags: one for the node mode, one for the focused mode)
     _backup_expanded_states: FlagsDictInNodeVsFocused
+
+    # id of the imgui frame_count where a change in the focused window happened
+    _focused_window_change_frame_id: int = 0
+    _focused_window_was_visible_at_exit: bool | None = None
 
     # ==================================================================================================================
     #                                            Constructor
@@ -250,14 +255,19 @@ class FunctionNodeGui:
                 imgui.pop_id()
             except Exception as e:
                 function_with_gui = self._function_node.function_with_gui
+                # Capture the callstack on your library's side first
+                import traceback
+
+                user_stack_trace = traceback.format_exc()
                 msg = f"""
+                User code stack trace:
+                {user_stack_trace}
+
                 Error while drawing node for Function:
                     Function Name={self._function_node.function_with_gui.function_name}
                     Function Label={function_with_gui.label}
                     FunctionWithGui Type={type(function_with_gui)}
-                Exception Message:
-                    {e}
-                """
+            """
                 raise Exception(msg) from e
             self._node_size = ed.get_node_size(self._node_id)
         return inputs_changed
@@ -287,13 +297,7 @@ class FunctionNodeGui:
         self._draw_async_status_on_title_line()
         imgui.spring()
         self._draw_minimize_btn()
-        self._draw_focus_on_function_btn()
-
-    def _draw_focus_on_function_btn(self) -> None:
-        from fiatlight.fiat_nodes.focused_functions_in_tabs import FOCUSED_FUNCTIONS_IN_TABS
-
-        if fiat_utils.is_rendering_in_node():
-            FOCUSED_FUNCTIONS_IN_TABS.draw_focus_on_function_btn(self)
+        self.focused_window_draw_button()
 
     def _draw_minimize_btn(self) -> None:
         """
@@ -1016,6 +1020,84 @@ class FunctionNodeGui:
             fiat_osd.show_void_detached_window_button(detached_window_params)
             render_user_doc()
 
+    class _FocusedWindow_Section:  # Dummy class to create a section in the IDE # noqa
+        """
+        # ==================================================================================================================
+        # Focused window Section: function nodes can also be displayed in a separate window
+        # known as focused window.
+        # ==================================================================================================================
+        """
+
+    def focused_window_create_dockable(self) -> None:
+        def _wrap_gui_store_change() -> None:
+            changed = self.draw_node()
+            if changed:
+                self._focused_window_change_frame_id = imgui.get_frame_count()
+
+        dockable_window = hello_imgui.DockableWindow()
+        dockable_window.dock_space_name = "MainDockSpace"
+        dockable_window.gui_function = _wrap_gui_store_change
+        dockable_window.label = self.focused_window_label()
+        dockable_window.is_visible = False
+        dockable_window.include_in_view_menu = True
+        hello_imgui.add_dockable_window(dockable_window)
+
+    def focused_window_remove_dockable(self) -> None:
+        hello_imgui.remove_dockable_window(self.focused_window_label())
+
+    def focused_window_get_dockable(self) -> hello_imgui.DockableWindow | None:
+        # May return None (the dockable window is created only after a few frames)
+        window_label = self.focused_window_label()
+        dockable_window = hello_imgui.get_runner_params().docking_params.dockable_window_of_name(window_label)
+        return dockable_window
+
+    def focused_window_is_visible(self) -> bool:
+        dockable_window = self.focused_window_get_dockable()
+        if dockable_window is None:
+            logging.warning(f"Dockable window not found for {self._function_node.function_with_gui.function_name}")
+            return False
+        return dockable_window.is_visible
+
+    def focused_window_set_visible(self, visible: bool) -> None:
+        dockable_window = self.focused_window_get_dockable()
+        if dockable_window is None:
+            logging.warning(f"Dockable window not found for {self._function_node.function_with_gui.function_name}")
+            return
+        dockable_window.is_visible = visible
+
+    def focused_windows_restore_visibility_at_startup(self) -> None:
+        """Restore the visibility of the focused window at startup
+        Once done, the _focused_window_was_visible_at_exit is set to None
+        Since the dockable windows are not created at startup, this will happen after a few frames
+        """
+        if self._focused_window_was_visible_at_exit is None:
+            return
+        window_label = self.focused_window_label()
+        dockable_window = hello_imgui.get_runner_params().docking_params.dockable_window_of_name(window_label)
+        if dockable_window is None:
+            return
+        dockable_window.is_visible = self._focused_window_was_visible_at_exit
+        self._focused_window_was_visible_at_exit = None
+
+    def focused_window_label(self) -> str:
+        function_name = self.get_function_node().function_with_gui.function_name
+        function_label = self.get_function_node().function_with_gui.label
+        label = function_label
+        if label != function_name:
+            label += " (" + function_name + ")"
+        return label + "##FocusedFunctionsInTabs"
+
+    def focused_window_highlight(self) -> None:
+        self.focused_window_set_visible(True)
+        hello_imgui.get_runner_params().docking_params.focus_dockable_window(self.focused_window_label())
+
+    def focused_window_draw_button(self) -> None:
+        with fontawesome_6_ctx():
+            clicked = imgui.button(icons_fontawesome_6.ICON_FA_UP_RIGHT_FROM_SQUARE, ImVec2(0, 0))
+            fiat_osd.set_widget_tooltip("Focus on function in new tab")
+            if clicked:
+                self.focused_window_highlight()
+
     class _Serialization_Section:  # Dummy class to create a section in the IDE # noqa
         """
         # ==================================================================================================================
@@ -1035,6 +1117,7 @@ class FunctionNodeGui:
         #     fiat_tuning_options = {}
         #     for name, data_with_gui in self._fiat_tuning_with_gui.items():
         #         fiat_tuning_options[name] = data_with_gui.save_gui_options_to_json()
+        self._focused_window_was_visible_at_exit = self.focused_window_is_visible()
         r = {
             "_inputs_expanded": self._inputs_expanded.save_to_dict(),
             "_outputs_expanded": self._outputs_expanded.save_to_dict(),
@@ -1043,6 +1126,7 @@ class FunctionNodeGui:
             "_internal_state_gui_expanded": self._internal_state_gui_expanded.save_to_dict(),
             "_function_node": self._function_node.save_gui_options_to_json(),
             "_backup_expanded_states": self._backup_expanded_states.save_to_dict(),
+            "_focused_window_was_visible_at_exit": self._focused_window_was_visible_at_exit,
             # "_fiat_tuning_with_gui": fiat_tuning_options,
         }
         return r
@@ -1057,6 +1141,10 @@ class FunctionNodeGui:
         )
         if "_backup_expanded_states" in json_data:
             self._backup_expanded_states = FlagsDictInNodeVsFocused.load_from_dict(json_data["_backup_expanded_states"])
+
+        if "_focused_window_was_visible_at_exit" in json_data:
+            self._focused_window_was_visible_at_exit = json_data["_focused_window_was_visible_at_exit"]
+
         self._function_node.load_gui_options_from_json(json_data["_function_node"])
         # fiat_tuning_options = json_data.get("_fiat_tuning_with_gui", {})
         # for name, data_with_gui in self._fiat_tuning_with_gui.items():

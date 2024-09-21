@@ -227,7 +227,6 @@ class FiatGui:
     _functions_graph_gui: FunctionsGraphGui
     _main_dock_space_id: str
     _info_dock_space_id: str = "info_dock"
-    _idx_frame: int = 0
     _show_inspector: bool = False
 
     save_dialog: pfd.save_file | None = None
@@ -322,17 +321,20 @@ class FiatGui:
         self._save_user_inputs(self._user_settings_filename())
 
     def _pre_new_frame(self) -> None:
-        from fiatlight.fiat_nodes.focused_functions_in_tabs import FOCUSED_FUNCTIONS_IN_TABS
-
-        if FOCUSED_FUNCTIONS_IN_TABS.did_any_change_happen():
-            self._notify_if_dirty_functions()
-
         _ENQUEUED_CALLBACKS.run_pre_frame_callbacks()
         get_fiat_config().style.update_colors_from_imgui_colors()
 
-    @staticmethod
-    def _after_swap() -> None:
+    def _before_imgui_render(self) -> None:
+        # We focus the functions graph window after a few frames,
+        # because the functions' dockable focused windows are created in the first few frames and may
+        # have taken the focus
+        if imgui.get_frame_count() == 7:
+            hello_imgui.get_runner_params().docking_params.focus_dockable_window("Functions Graph")
+
+    def _after_swap(self) -> None:
         _ENQUEUED_CALLBACKS.run_post_frame_callbacks()
+        if self._functions_graph_gui.did_any_focused_window_change_something():
+            self._notify_if_dirty_functions()
 
     def run(self) -> None:
         self.params.runner_params.docking_params.docking_splits += self._docking_splits()
@@ -354,6 +356,7 @@ class FiatGui:
 
         self.params.runner_params.callbacks.pre_new_frame = self._pre_new_frame
         self.params.runner_params.callbacks.after_swap = self._after_swap
+        self.params.runner_params.callbacks.before_imgui_render = self._before_imgui_render
 
         from fiatlight.fiat_widgets.fontawesome6_ctx_utils import _load_font_awesome_6  # noqa
 
@@ -484,10 +487,7 @@ class FiatGui:
                 imgui.end_tooltip()
 
     def _draw_functions_graph(self) -> None:
-        self._idx_frame += 1
-        if self._idx_frame == 1:
-            hello_imgui.get_runner_params().docking_params.focus_dockable_window("Functions Graph")
-        if self._idx_frame >= 3:
+        if imgui.get_frame_count() >= 3:
             # the window size is not available on the first frames,
             # and the node editor uses it to compute the initial position of the nodes
             # window_size = imgui.get_window_size()
