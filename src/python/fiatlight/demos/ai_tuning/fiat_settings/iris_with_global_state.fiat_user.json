@@ -1,0 +1,414 @@
+{
+    "user_inputs": {
+        "functions_nodes": {
+            "gui_edit_split_params": {
+                "split_params": {
+                    "name": "split_params",
+                    "data": {
+                        "type": "Pydantic",
+                        "value": {
+                            "test_size": 0.3,
+                            "random_state": 42
+                        }
+                    }
+                }
+            },
+            "gui_edit_hyperparams": {
+                "hyper_params": {
+                    "name": "hyper_params",
+                    "data": {
+                        "type": "Pydantic",
+                        "value": {
+                            "num_epochs": 100,
+                            "hidden_size": 10,
+                            "learning_rate": 0.01,
+                            "update_plots_every": 10
+                        }
+                    }
+                }
+            },
+            "gui_perform_training": {},
+            "plot_decision_boundary": {},
+            "gui_save_model": {},
+            "gui_load_model": {},
+            "gui": {}
+        }
+    },
+    "gui_options": {
+        "gui_edit_split_params": {
+            "function_node_with_gui": {
+                "_inputs_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_outputs_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_doc_expanded": {
+                    "inside_node": false,
+                    "focused": true
+                },
+                "fiat_tuning_expanded": {
+                    "inside_node": false,
+                    "focused": true
+                },
+                "_internal_state_gui_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_function_node": {
+                    "inputs": {
+                        "split_params": {
+                            "cb_options": {
+                                "test_size": {
+                                    "cb_options": {},
+                                    "expanded": true
+                                },
+                                "random_state": {
+                                    "cb_options": {},
+                                    "expanded": true
+                                }
+                            },
+                            "expanded": true
+                        }
+                    },
+                    "outputs": {}
+                },
+                "_backup_expanded_states": {
+                    "inside_node": null,
+                    "focused": null
+                },
+                "_focused_window_was_visible_at_exit": false
+            },
+            "function_node": {
+                "inputs": {
+                    "split_params": {
+                        "cb_options": {
+                            "test_size": {
+                                "cb_options": {},
+                                "expanded": true
+                            },
+                            "random_state": {
+                                "cb_options": {},
+                                "expanded": true
+                            }
+                        },
+                        "expanded": true
+                    }
+                },
+                "outputs": {}
+            }
+        },
+        "gui_edit_hyperparams": {
+            "function_node_with_gui": {
+                "_inputs_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_outputs_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_doc_expanded": {
+                    "inside_node": false,
+                    "focused": true
+                },
+                "fiat_tuning_expanded": {
+                    "inside_node": false,
+                    "focused": true
+                },
+                "_internal_state_gui_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_function_node": {
+                    "inputs": {
+                        "hyper_params": {
+                            "cb_options": {
+                                "num_epochs": {
+                                    "cb_options": {},
+                                    "expanded": true
+                                },
+                                "hidden_size": {
+                                    "cb_options": {},
+                                    "expanded": true
+                                },
+                                "learning_rate": {
+                                    "cb_options": {},
+                                    "expanded": true
+                                },
+                                "update_plots_every": {
+                                    "cb_options": {},
+                                    "expanded": true
+                                }
+                            },
+                            "expanded": true
+                        }
+                    },
+                    "outputs": {}
+                },
+                "_backup_expanded_states": {
+                    "inside_node": null,
+                    "focused": null
+                },
+                "_focused_window_was_visible_at_exit": false
+            },
+            "function_node": {
+                "inputs": {
+                    "hyper_params": {
+                        "cb_options": {
+                            "num_epochs": {
+                                "cb_options": {},
+                                "expanded": true
+                            },
+                            "hidden_size": {
+                                "cb_options": {},
+                                "expanded": true
+                            },
+                            "learning_rate": {
+                                "cb_options": {},
+                                "expanded": true
+                            },
+                            "update_plots_every": {
+                                "cb_options": {},
+                                "expanded": true
+                            }
+                        },
+                        "expanded": true
+                    }
+                },
+                "outputs": {}
+            }
+        },
+        "gui_perform_training": {
+            "function_node_with_gui": {
+                "_inputs_expanded": {
+                    "inside_node": false,
+                    "focused": true
+                },
+                "_outputs_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_doc_expanded": {
+                    "inside_node": false,
+                    "focused": true
+                },
+                "fiat_tuning_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_internal_state_gui_expanded": {
+                    "inside_node": false,
+                    "focused": true
+                },
+                "_function_node": {
+                    "inputs": {},
+                    "outputs": {}
+                },
+                "_backup_expanded_states": {
+                    "inside_node": {
+                        "inputs": true,
+                        "outputs": true,
+                        "doc": false,
+                        "fiat_tuning": true,
+                        "internal_state_gui": true
+                    },
+                    "focused": {
+                        "inputs": true,
+                        "outputs": true,
+                        "doc": false,
+                        "fiat_tuning": true,
+                        "internal_state_gui": true
+                    }
+                },
+                "_focused_window_was_visible_at_exit": false
+            },
+            "function_node": {
+                "inputs": {},
+                "outputs": {}
+            }
+        },
+        "plot_decision_boundary": {
+            "function_node_with_gui": {
+                "_inputs_expanded": {
+                    "inside_node": false,
+                    "focused": true
+                },
+                "_outputs_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_doc_expanded": {
+                    "inside_node": false,
+                    "focused": true
+                },
+                "fiat_tuning_expanded": {
+                    "inside_node": false,
+                    "focused": true
+                },
+                "_internal_state_gui_expanded": {
+                    "inside_node": false,
+                    "focused": true
+                },
+                "_function_node": {
+                    "inputs": {},
+                    "outputs": {
+                        "0": {
+                            "cb_options": {
+                                "figure_size": {
+                                    "x": 700.0,
+                                    "y": 300.0
+                                }
+                            },
+                            "expanded": true
+                        }
+                    }
+                },
+                "_backup_expanded_states": {
+                    "inside_node": {
+                        "inputs": true,
+                        "outputs": true,
+                        "doc": true,
+                        "fiat_tuning": false,
+                        "internal_state_gui": true
+                    },
+                    "focused": {
+                        "inputs": true,
+                        "outputs": true,
+                        "doc": true,
+                        "fiat_tuning": false,
+                        "internal_state_gui": true
+                    }
+                },
+                "_focused_window_was_visible_at_exit": true
+            },
+            "function_node": {
+                "inputs": {},
+                "outputs": {
+                    "0": {
+                        "cb_options": {
+                            "figure_size": {
+                                "x": 700.0,
+                                "y": 300.0
+                            }
+                        },
+                        "expanded": true
+                    }
+                }
+            }
+        },
+        "gui_save_model": {
+            "function_node_with_gui": {
+                "_inputs_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_outputs_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_doc_expanded": {
+                    "inside_node": false,
+                    "focused": true
+                },
+                "fiat_tuning_expanded": {
+                    "inside_node": false,
+                    "focused": true
+                },
+                "_internal_state_gui_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_function_node": {
+                    "inputs": {},
+                    "outputs": {}
+                },
+                "_backup_expanded_states": {
+                    "inside_node": null,
+                    "focused": null
+                },
+                "_focused_window_was_visible_at_exit": false
+            },
+            "function_node": {
+                "inputs": {},
+                "outputs": {}
+            }
+        },
+        "gui_load_model": {
+            "function_node_with_gui": {
+                "_inputs_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_outputs_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_doc_expanded": {
+                    "inside_node": false,
+                    "focused": true
+                },
+                "fiat_tuning_expanded": {
+                    "inside_node": false,
+                    "focused": true
+                },
+                "_internal_state_gui_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_function_node": {
+                    "inputs": {},
+                    "outputs": {}
+                },
+                "_backup_expanded_states": {
+                    "inside_node": null,
+                    "focused": null
+                },
+                "_focused_window_was_visible_at_exit": false
+            },
+            "function_node": {
+                "inputs": {},
+                "outputs": {}
+            }
+        },
+        "gui": {
+            "function_node_with_gui": {
+                "_inputs_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_outputs_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_doc_expanded": {
+                    "inside_node": false,
+                    "focused": true
+                },
+                "fiat_tuning_expanded": {
+                    "inside_node": false,
+                    "focused": true
+                },
+                "_internal_state_gui_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_function_node": {
+                    "inputs": {},
+                    "outputs": {}
+                },
+                "_backup_expanded_states": {
+                    "inside_node": null,
+                    "focused": null
+                },
+                "_focused_window_was_visible_at_exit": false
+            },
+            "function_node": {
+                "inputs": {},
+                "outputs": {}
+            }
+        }
+    }
+}

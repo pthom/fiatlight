@@ -371,6 +371,8 @@ class FunctionWithGui:
             self.invoke_async = fn_fiat_attributes["invoke_async"]
         if "invoke_async_stoppable" in fn_fiat_attributes:
             self.invoke_async_stoppable = fn_fiat_attributes["invoke_async_stoppable"]
+            if self.invoke_async_stoppable:
+                self.invoke_async = True
         if "invoke_manually" in fn_fiat_attributes:
             self.invoke_manually = fn_fiat_attributes["invoke_manually"]
         if "invoke_always_dirty" in fn_fiat_attributes:
