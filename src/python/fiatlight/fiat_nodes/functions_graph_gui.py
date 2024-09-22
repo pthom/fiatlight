@@ -1,4 +1,7 @@
 from __future__ import annotations
+
+import logging
+
 from fiatlight.fiat_types import JsonDict
 from fiatlight.fiat_core import FunctionsGraph, FunctionWithGui
 from fiatlight.fiat_core.function_with_gui import FunctionWithGuiFactoryFromName
@@ -17,24 +20,23 @@ class FunctionsGraphGui:
     shall_layout_graph: bool = False
     can_edit_graph: bool = False
 
-    _idx_frame: int = 0
-    _function_no_node_editor_rect: imgui.internal.ImRect | None = None
-    _use_node_editor_if_one_function: bool = False
+    _idx_render_graph: int = 0
+    _idx_last_frame_render: int = 0
 
     # ======================================================================================================================
     # Constructor
     # ======================================================================================================================
-    def __init__(self, functions_graph: FunctionsGraph, use_node_editor_if_one_function: bool) -> None:
-        self._use_node_editor_if_one_function = use_node_editor_if_one_function
+    def __init__(self, functions_graph: FunctionsGraph) -> None:
         self.functions_graph = functions_graph
         self._create_function_nodes_and_links_gui()
 
     def _create_function_nodes_and_links_gui(self) -> None:
         self.function_nodes_gui = []
+        dockable_visible_at_first_use_ever = len(self.functions_graph.functions_nodes) == 1
         for f in self.functions_graph.functions_nodes:
             fn_node_gui = FunctionNodeGui(f)
             self.function_nodes_gui.append(fn_node_gui)
-            fn_node_gui.focused_window_create_dockable()
+            fn_node_gui.focused_window_create_dockable(visible_at_first_use_ever=dockable_visible_at_first_use_ever)
 
         self.functions_links_gui = []
         for link in self.functions_graph.functions_nodes_links:
@@ -47,31 +49,9 @@ class FunctionsGraphGui:
     class _Drawing_Section:  # Dummy class to create a section in the IDE # noqa
         pass
 
-    def shall_use_node_editor(self) -> bool:
-        if len(self.function_nodes_gui) > 1:
-            return True
-        return self._use_node_editor_if_one_function
-
-    @staticmethod
-    def _handle_global_zoom_if_no_node_editor() -> None:
-        # imgui.text("(?)")
-        # fiat_osd.set_widget_tooltip("Ctrl+Alt+Wheel to zoom")
-        ctrl_down = imgui.is_key_down(imgui.Key.left_ctrl) or imgui.is_key_down(imgui.Key.right_ctrl)
-        alt_down = imgui.is_key_down(imgui.Key.left_alt) or imgui.is_key_down(imgui.Key.right_alt)
-        mod_ok = ctrl_down and alt_down
-        if not mod_ok:
-            return
-
-        wheel_amount = imgui.get_io().mouse_wheel
-        if wheel_amount == 0:
-            return
-        k = 1.0 + wheel_amount / 20
-        imgui.get_io().font_global_scale *= k
-
     def draw(self) -> bool:
+        self._idx_last_frame_render = imgui.get_frame_count()
         from fiatlight.fiat_utils import fiat_node_semaphore
-
-        shall_use_node_editor = self.shall_use_node_editor()
 
         def draw_nodes() -> bool:
             changed = False
@@ -86,32 +66,20 @@ class FunctionsGraphGui:
             for link in self.functions_links_gui:
                 link.draw()
 
-        if not shall_use_node_editor:
-            self._handle_global_zoom_if_no_node_editor()
-
         self._layout_graph_if_required()
         nodes_changed = False
         with imgui_ctx.push_obj_id(self):
-            if shall_use_node_editor:
-                ed.begin("FunctionsGraphGui")
-                fiat_node_semaphore._IS_RENDERING_IN_NODE = True
-            else:
-                imgui.begin_group()
+            fiat_node_semaphore._IS_RENDERING_IN_NODE = True
+            ed.begin("FunctionsGraphGui")
             if draw_nodes():
                 nodes_changed = True
             draw_links()
             if self.can_edit_graph:
                 self._handle_graph_edition()
-            if shall_use_node_editor:
-                ed.end()
-                fiat_node_semaphore._IS_RENDERING_IN_NODE = False
-            else:
-                imgui.end_group()
-                self._function_no_node_editor_rect = imgui.internal.ImRect(
-                    imgui.get_item_rect_min(), imgui.get_item_rect_max()
-                )
+            ed.end()
+            fiat_node_semaphore._IS_RENDERING_IN_NODE = False
         self._restore_focused_windows_visibility_at_startup()
-        self._idx_frame += 1
+        self._idx_render_graph += 1
         return nodes_changed
 
     def _restore_focused_windows_visibility_at_startup(self) -> None:
@@ -191,7 +159,7 @@ class FunctionsGraphGui:
         function_node = self.functions_graph.add_function(function)
         function_node_gui = FunctionNodeGui(function_node)
         self.function_nodes_gui.append(function_node_gui)
-        function_node_gui.focused_window_create_dockable()
+        function_node_gui.focused_window_create_dockable(visible_at_first_use_ever=False)
 
     def _can_add_link(self, input_pin_id: ed.PinId, output_pin_id: ed.PinId) -> Tuple[bool, str]:
         # 1. Look for the function node GUIs that correspond to the input and output pins
@@ -281,7 +249,7 @@ class FunctionsGraphGui:
         def are_all_nodes_on_zero() -> bool:
             # the node sizes are not set yet in the first frame
             # we need to wait until we know them
-            if self._idx_frame == 0:
+            if self._idx_render_graph == 0:
                 return False
 
             for node in self.function_nodes_gui:
@@ -308,17 +276,32 @@ class FunctionsGraphGui:
                     current_position.y += current_row_height + height_between_nodes
                     current_row_height = 0
 
+    def _get_last_focused_function_boundings(self) -> imgui.internal.ImRect:
+        # shot_rect could be a rectangle from the focused function
+        from fiatlight.fiat_nodes.function_node_gui import _LAST_FOCUSED_FUNCTION_SCREENSHOT_RECT
+
+        shot_rect = _LAST_FOCUSED_FUNCTION_SCREENSHOT_RECT.get()
+        if shot_rect is None:
+            logging.warning("No focused function found, taking a screenshot of the whole window")
+            shot_rect = imgui.internal.ImRect(
+                imgui.get_main_viewport().pos,
+                imgui.get_main_viewport().pos + imgui.get_main_viewport().size,  # type: ignore  # noqa
+            )
+
+        r = shot_rect
+        fbs = imgui.get_io().display_framebuffer_scale
+        main_viewport_pos = imgui.get_main_viewport().pos
+        r.min -= main_viewport_pos  # type: ignore # noqa
+        r.max -= main_viewport_pos  # type: ignore
+        r.min = r.min * fbs  # type: ignore
+        r.max = r.max * fbs  # type: ignore
+        return r
+
     def _get_node_screenshot_boundings(self) -> imgui.internal.ImRect:
-        if not self.shall_use_node_editor():
-            assert self._function_no_node_editor_rect is not None
-            r = self._function_no_node_editor_rect
-            main_viewport_pos = imgui.get_main_viewport().pos
-            fbs = imgui.get_io().display_framebuffer_scale
-            r.min -= main_viewport_pos  # type: ignore # noqa
-            r.max -= main_viewport_pos  # type: ignore
-            r.min = r.min * fbs  # type: ignore
-            r.max = r.max * fbs  # type: ignore
-            return r
+        if self._idx_last_frame_render != imgui.get_frame_count():
+            # This might happen if the graph was not rendered in the current frame
+            # (i.e. we switched to another tab)
+            return self._get_last_focused_function_boundings()
 
         all_nodes_boundings = []
         for fn in self.function_nodes_gui:

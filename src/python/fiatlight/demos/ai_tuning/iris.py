@@ -227,4 +227,4 @@ def perform_training(
 
 
 perform_training.__doc__ = __doc__
-fl.run(perform_training, use_node_editor_if_one_function=False)
+fl.run(perform_training)

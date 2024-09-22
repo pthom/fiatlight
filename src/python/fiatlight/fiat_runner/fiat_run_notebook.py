@@ -22,7 +22,6 @@ def _fiat_run_graph_nb(
     notebook_runner_params: NotebookRunnerParams | None,
     theme: hello_imgui.ImGuiTheme_ | None,
     remember_theme: bool,
-    use_node_editor_if_one_function: bool,
 ) -> None:
     "fiatlight runner for jupyter notebook"
     import cv2
@@ -44,7 +43,6 @@ def _fiat_run_graph_nb(
             app_name=app_name,
             theme=theme,
             remember_theme=remember_theme,
-            use_node_editor_if_one_function=use_node_editor_if_one_function,
         )
         fiat_gui.run()
 

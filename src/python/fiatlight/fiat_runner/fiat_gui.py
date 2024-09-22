@@ -250,7 +250,6 @@ class FiatGui:
         app_name: str | None = None,
         theme: ImGuiTheme_ | None = None,
         remember_theme: bool = False,
-        use_node_editor_if_one_function: bool = False,
     ) -> None:
         self.apply_fiat_style_graph()
 
@@ -276,7 +275,7 @@ class FiatGui:
             )
 
         self.params = params
-        self._functions_graph_gui = FunctionsGraphGui(functions_graph, use_node_editor_if_one_function)
+        self._functions_graph_gui = FunctionsGraphGui(functions_graph)
 
         if self.params.customizable_graph:
             self._functions_graph_gui.can_edit_graph = True
@@ -327,12 +326,14 @@ class FiatGui:
         _ENQUEUED_CALLBACKS.run_pre_frame_callbacks()
         get_fiat_config().style.update_colors_from_imgui_colors()
 
-    def _before_imgui_render(self) -> None:
+    def _post_gui(self) -> None:
         # We focus the functions graph window after a few frames,
         # because the functions' dockable focused windows are created in the first few frames and may
         # have taken the focus
         if imgui.get_frame_count() == 7:
             hello_imgui.get_runner_params().docking_params.focus_dockable_window("Functions Graph")
+            if len(self._functions_graph_gui.function_nodes_gui) > 1:
+                hello_imgui.get_runner_params().docking_params.focus_dockable_window("Functions Graph")
 
     def _after_swap(self) -> None:
         _ENQUEUED_CALLBACKS.run_post_frame_callbacks()
@@ -359,7 +360,7 @@ class FiatGui:
 
         self.params.runner_params.callbacks.pre_new_frame = self._pre_new_frame
         self.params.runner_params.callbacks.after_swap = self._after_swap
-        self.params.runner_params.callbacks.before_imgui_render = self._before_imgui_render
+        self.params.runner_params.callbacks.before_imgui_render = self._post_gui
 
         from fiatlight.fiat_widgets.fontawesome6_ctx_utils import _load_font_awesome_6  # noqa
 
@@ -681,7 +682,6 @@ def _fiat_run_graph(
     app_name: str | None,
     theme: ImGuiTheme_ | None,
     remember_theme: bool,
-    use_node_editor_if_one_function: bool,
 ) -> None:
     if is_running_in_notebook():
         from fiatlight.fiat_runner.fiat_run_notebook import _fiat_run_graph_nb, NotebookRunnerParams
@@ -700,7 +700,6 @@ def _fiat_run_graph(
             notebook_runner_params=notebook_runner_params,
             theme=theme,
             remember_theme=remember_theme,
-            use_node_editor_if_one_function=use_node_editor_if_one_function,
         )
     else:
         fiat_gui = FiatGui(
@@ -709,7 +708,6 @@ def _fiat_run_graph(
             app_name=app_name,
             theme=theme,
             remember_theme=remember_theme,
-            use_node_editor_if_one_function=use_node_editor_if_one_function,
         )
         fiat_gui.run()
 
@@ -720,7 +718,6 @@ def _fiat_run(
     app_name: str | None,
     theme: ImGuiTheme_ | None,
     remember_theme: bool,
-    use_node_editor_if_one_function: bool,
 ) -> None:
     functions_graph = FunctionsGraph.from_function(fn)
     _fiat_run_graph(
@@ -729,7 +726,6 @@ def _fiat_run(
         app_name=app_name,
         theme=theme,
         remember_theme=remember_theme,
-        use_node_editor_if_one_function=use_node_editor_if_one_function,
     )
 
 
@@ -739,7 +735,6 @@ def _fiat_run_composition(
     app_name: str | None,
     theme: ImGuiTheme_ | None,
     remember_theme: bool,
-    use_node_editor_if_one_function: bool,
 ) -> None:
     functions_graph = FunctionsGraph.from_function_composition(composition)
     _fiat_run_graph(
@@ -748,7 +743,6 @@ def _fiat_run_composition(
         app_name=app_name,
         theme=theme,
         remember_theme=remember_theme,
-        use_node_editor_if_one_function=use_node_editor_if_one_function,
     )
 
 
@@ -758,7 +752,6 @@ def run(
     app_name: str | None = None,
     theme: ImGuiTheme_ | None = None,
     remember_theme: bool = False,
-    use_node_editor_if_one_function: bool = False,
 ) -> None:
     """Runs a function, a composition of functions, or a functions graph in the Fiat GUI.
 
@@ -776,7 +769,6 @@ def run(
             app_name=app_name,
             theme=theme,
             remember_theme=remember_theme,
-            use_node_editor_if_one_function=use_node_editor_if_one_function,
         )
     elif isinstance(fn, list):
         _fiat_run_composition(
@@ -785,7 +777,6 @@ def run(
             app_name=app_name,
             theme=theme,
             remember_theme=remember_theme,
-            use_node_editor_if_one_function=use_node_editor_if_one_function,
         )
     else:
         _fiat_run(
@@ -794,5 +785,4 @@ def run(
             app_name=app_name,
             theme=theme,
             remember_theme=remember_theme,
-            use_node_editor_if_one_function=use_node_editor_if_one_function,
         )

@@ -55,9 +55,12 @@ from fiatlight.fiat_widgets import icons_fontawesome_6, fontawesome_6_ctx, fiat_
 from fiatlight import fiat_widgets, fiat_togui, fiat_utils
 from typing import Dict, List, Any
 from dataclasses import dataclass
+from fiatlight.fiat_widgets.value_per_imgui_frame import ValuePerImGuiFrame
 
 
 _CURRENT_FUNCTION_NODE_ID: ed.NodeId | None = None
+
+_LAST_FOCUSED_FUNCTION_SCREENSHOT_RECT = ValuePerImGuiFrame[imgui.internal.ImRect]()
 
 
 def get_current_function_node_id() -> ed.NodeId | None:
@@ -226,6 +229,8 @@ class FunctionNodeGui:
                 imgui.push_id(id_node_or_focused)
                 if fiat_utils.is_rendering_in_node():
                     ed.begin_node(self._node_id)
+                else:
+                    imgui.begin_group()
                 _CURRENT_FUNCTION_NODE_ID = self._node_id
                 with imgui_ctx.begin_vertical("node_content"):
                     # Title
@@ -252,6 +257,10 @@ class FunctionNodeGui:
                     self._draw_function_outputs()
                 if fiat_utils.is_rendering_in_node():
                     ed.end_node()
+                else:
+                    imgui.end_group()
+                    function_rect = imgui.internal.ImRect(imgui.get_item_rect_min(), imgui.get_item_rect_max())
+                    _LAST_FOCUSED_FUNCTION_SCREENSHOT_RECT.set(function_rect)
                 imgui.pop_id()
             except Exception as e:
                 function_with_gui = self._function_node.function_with_gui
@@ -1030,7 +1039,7 @@ class FunctionNodeGui:
         # ==================================================================================================================
         """
 
-    def focused_window_create_dockable(self) -> None:
+    def focused_window_create_dockable(self, visible_at_first_use_ever: bool) -> None:
         def _wrap_gui_store_change() -> None:
             changed = self.draw_node()
             if changed:
@@ -1040,7 +1049,7 @@ class FunctionNodeGui:
         dockable_window.dock_space_name = "MainDockSpace"
         dockable_window.gui_function = _wrap_gui_store_change
         dockable_window.label = self.focused_window_label()
-        dockable_window.is_visible = False
+        dockable_window.is_visible = visible_at_first_use_ever
         dockable_window.include_in_view_menu = True
         hello_imgui.add_dockable_window(dockable_window)
 
