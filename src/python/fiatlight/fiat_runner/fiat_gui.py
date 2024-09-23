@@ -186,17 +186,16 @@ class FiatGuiParams:
     runner_params: hello_imgui.RunnerParams
     addons: immapp.AddOnsParams
     customizable_graph: bool = False
+    delete_settings: bool = False
 
     def __init__(
         self,
         app_title: str = "",
         window_size: Tuple[int, int] | None = None,
-        initial_value: Any = None,
         runner_params: hello_imgui.RunnerParams | None = None,
         addons: immapp.AddOnsParams | None = None,
+        delete_settings: bool = False,
     ) -> None:
-        self.initial_value = initial_value
-
         if addons is None:
             addons = immapp.AddOnsParams()
         self.addons = addons
@@ -227,6 +226,7 @@ class FiatGuiParams:
             runner_params.imgui_window_params.enable_viewports = True
 
         self._runner_params = runner_params
+        self.delete_settings = delete_settings
 
 
 # ==================================================================================================================
@@ -308,6 +308,8 @@ class FiatGui:
             self.params.runner_params.callbacks.show_menus = self._show_menus
 
         setup_menus()
+        if self.params.delete_settings:
+            self._del_user_settings()
         self.was_post_init_called = False
 
     @staticmethod
@@ -590,6 +592,21 @@ class FiatGui:
     # ==================================================================================================================
     class _Serialization_Section:  # Dummy class to create a section in the IDE # noqa
         pass
+
+    def _del_user_settings(self) -> None:
+        files = [
+            self._user_settings_filename(),
+            self._graph_composition_filename(),
+            self._node_settings_filename(),
+            hello_imgui.ini_settings_location(self.params.runner_params),
+        ]
+        for file in files:
+            path = pathlib.Path(file)
+            if path.exists():
+                path.unlink()
+
+    def _node_settings_filename(self) -> str:
+        return hello_imgui.ini_settings_location(self.params.runner_params)[:-4] + ".node_editor.json"
 
     def _user_settings_filename(self) -> str:
         return hello_imgui.ini_settings_location(self.params.runner_params)[:-4] + ".fiat_user.json"
