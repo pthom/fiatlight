@@ -17,7 +17,7 @@ def add_functions_to_collection(collection: FunctionsCollection) -> None:
 
 def main() -> None:
     graph = fl.FunctionsGraph.create_empty()
-    params = fl.FiatGuiParams()
+    params = fl.FiatRunParams()
     params.customizable_graph = True
 
     gui = fl.fiat_runner.FiatGui(graph, params)

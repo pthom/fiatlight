@@ -132,7 +132,7 @@ def main() -> None:
     graph.add_function(gaussian_heatmap)
     graph.add_function(interactive_histogram)
 
-    fl.run(graph, app_name="Mix ImPlot - Matplotlib", theme=fl.ImGuiTheme_.white_is_white)
+    fl.run(graph, params=fl.FiatRunParams(app_name="Mix ImPlot - Matplotlib", theme=fl.ImGuiTheme_.white_is_white))
 
 
 if __name__ == "__main__":

@@ -158,8 +158,7 @@ def gui_latency() -> None:
 # Register the type NumbersList with its GUI NumbersListWithGui
 fl.register_type(NumbersList, NumbersListWithLatency_Gui)
 # Disable idling, to make animations smoother
-gui_params = fl.FiatGuiParams()
-gui_params.runner_params.fps_idling.enable_idling = False
+gui_params = fl.FiatRunParams(enable_idling=False)
 # Create a FunctionGraph
 graph = fl.FunctionsGraph()
 # add the random numbers generator, and make its invocation manual...

@@ -52,8 +52,7 @@ def gui_latency() -> None:
 
 
 fl.register_type(NumbersList, NumbersListWithLatency_Gui)  # register the GUI for NumbersList
-gui_params = fl.FiatGuiParams()  # Instantiate runner parameters for Fiatlight FunctionsGraph
-gui_params.runner_params.fps_idling.enable_idling = False  # Refresh the GUI as quickly as possible
+gui_params = fl.FiatRunParams(enable_idling=False)  # Refresh the GUI as quickly as possible
 graph = fl.FunctionsGraph()  # Create a graph of functions
 fl.add_fiat_attributes(make_random_number_list, label="Generate random numbers", invoke_manually=True, invoke_always_dirty=True)
 graph.add_function(make_random_number_list)  # Add the numbers generator, and make its invocation manual (see above)

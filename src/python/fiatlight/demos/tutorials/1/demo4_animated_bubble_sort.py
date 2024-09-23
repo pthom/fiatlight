@@ -93,7 +93,6 @@ def bubble_sort_wrapper(numbers: NumbersList) -> float:
 fl.register_type(NumbersList, NumbersListWithLatency_Gui)
 
 # Disable idling, to make animations smoother
-gui_params = fl.FiatGuiParams()
-gui_params.runner_params.fps_idling.enable_idling = False
+gui_params = fl.FiatRunParams(enable_idling=False)
 # run the composition of the two functions with flat light and the given parameters
 fl.run([make_random_number_list, bubble_sort_wrapper], params=gui_params)

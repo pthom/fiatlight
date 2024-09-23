@@ -96,10 +96,8 @@ def bubble_sort_wrapper(numbers: NumbersList) -> float:
 fl.register_type(NumbersList, NumbersListWithGui)
 
 # Now, run the function composition with Fiatlight
-#   First, make sure that the GUI is updated as quickly as possible:
-#     - Instantiate runner parameters for Fiatlight FunctionsGraph
-gui_params = fl.FiatGuiParams()
-#     - Disable idling, to make animations smoother, even when the user is not interacting with the GUI
-gui_params.runner_params.fps_idling.enable_idling = False
+#   First, make sure that the GUI is updated as quickly as possible,
+#   by disabling idling, to make animations smoother, even when the user is not interacting with the GUI
+gui_params = fl.FiatRunParams(enable_idling=False)
 # Then, run the composition of functions
 fl.run([make_random_number_list, bubble_sort_wrapper], params=gui_params)

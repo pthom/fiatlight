@@ -1,5 +1,5 @@
 import traceback
-
+from dataclasses import dataclass
 from fiatlight.fiat_nodes.function_node_gui import FunctionNodeGui
 from fiatlight.fiat_nodes.functions_graph_gui import FunctionsGraphGui
 from fiatlight.fiat_core import FunctionsGraph, FunctionWithGui
@@ -180,53 +180,20 @@ def _ini_filename_from_app_name(app_name: str) -> str:
 
 
 # ==================================================================================================================
-#                                  FiatGuiParams
+#                                  FiatRunParams
 # ==================================================================================================================
-class FiatGuiParams:
-    runner_params: hello_imgui.RunnerParams
-    addons: immapp.AddOnsParams
+@dataclass
+class FiatRunParams:
+    # members used to populate the runner_params
+    app_name: str | None = None
+    window_size: Tuple[int, int] | None = None
+    enable_idling: bool = True
+    theme: ImGuiTheme_ | None = None
+    remember_theme: bool | None = None
+
+    # FiatLight specific members
     customizable_graph: bool = False
     delete_settings: bool = False
-
-    def __init__(
-        self,
-        app_title: str = "",
-        window_size: Tuple[int, int] | None = None,
-        runner_params: hello_imgui.RunnerParams | None = None,
-        addons: immapp.AddOnsParams | None = None,
-        delete_settings: bool = False,
-    ) -> None:
-        if addons is None:
-            addons = immapp.AddOnsParams()
-        self.addons = addons
-        addons.with_node_editor = True
-        addons.with_node_editor_config = ed.Config()
-        addons.with_node_editor_config.force_window_content_width_to_node_width = True
-        addons.with_markdown = True
-        addons.with_implot = True
-
-        created_runner_params = runner_params is None
-        if runner_params is None:
-            runner_params = hello_imgui.RunnerParams()
-        self.runner_params = runner_params
-        assert runner_params is not None
-
-        if len(runner_params.app_window_params.window_title) == 0:
-            runner_params.app_window_params.window_title = app_title
-
-        runner_params.app_window_params.window_geometry.size = window_size or (1600, 1000)
-
-        runner_params.imgui_window_params.default_imgui_window_type = (
-            hello_imgui.DefaultImGuiWindowType.provide_full_screen_dock_space
-        )
-
-        if created_runner_params:
-            runner_params.app_window_params.restore_previous_geometry = True
-            runner_params.imgui_window_params.show_status_bar = True
-            runner_params.imgui_window_params.enable_viewports = True
-
-        self._runner_params = runner_params
-        self.delete_settings = delete_settings
 
 
 # ==================================================================================================================
@@ -241,7 +208,9 @@ class FiatGui:
     # ==================================================================================================================
     #                                  Members
     # ==================================================================================================================
-    params: FiatGuiParams
+    params: FiatRunParams
+
+    _runner_params: hello_imgui.RunnerParams
     _functions_graph_gui: FunctionsGraphGui
     _main_dock_space_id: str
     _info_dock_space_id: str = "info_dock"
@@ -262,35 +231,15 @@ class FiatGui:
     def __init__(
         self,
         functions_graph: FunctionsGraph,
-        params: FiatGuiParams | None = None,
-        app_name: str | None = None,
-        theme: ImGuiTheme_ | None = None,
-        remember_theme: bool = False,
+        params: FiatRunParams | None = None,
     ) -> None:
+        if params is None:
+            params = FiatRunParams()
+        self.params = params
+        self._prepare_runner_params()
+
         self.apply_fiat_style_graph()
 
-        if theme is None:
-            theme = hello_imgui.ImGuiTheme_.darcula_darker
-        if params is None:
-            params = FiatGuiParams()
-
-        if app_name is not None:
-            params.runner_params.app_window_params.window_title = app_name
-        elif params.runner_params.app_window_params.window_title == "":
-            # Set window_title from the name of the calling module
-            params.runner_params.app_window_params.window_title = _main_python_module_name()
-
-        if theme is not None:
-            params.runner_params.imgui_window_params.tweaked_theme.theme = theme
-            params.runner_params.imgui_window_params.remember_theme = False
-        params.runner_params.imgui_window_params.remember_theme = remember_theme
-
-        if len(params.runner_params.ini_filename) == 0:
-            params.runner_params.ini_filename = _ini_filename_from_app_name(
-                params.runner_params.app_window_params.window_title
-            )
-
-        self.params = params
         self._functions_graph_gui = FunctionsGraphGui(functions_graph)
 
         if self.params.customizable_graph:
@@ -300,17 +249,48 @@ class FiatGui:
 
         self._functions_collection_gui.on_add_function = lambda fn: self._functions_graph_gui.add_function_with_gui(fn)
 
-        def setup_menus() -> None:
-            # We redefine the menus completely inside _show_menus
-            self.params.runner_params.imgui_window_params.show_menu_bar = True
-            self.params.runner_params.imgui_window_params.show_menu_view = False
-            self.params.runner_params.imgui_window_params.show_menu_app = False
-            self.params.runner_params.callbacks.show_menus = self._show_menus
-
-        setup_menus()
         if self.params.delete_settings:
             self._del_user_settings()
         self.was_post_init_called = False
+
+    def _prepare_runner_params(self) -> None:
+        params = self.params
+        runner_params = hello_imgui.RunnerParams()
+
+        runner_params.app_window_params.window_geometry.size = params.window_size or (1600, 1000)
+        runner_params.imgui_window_params.default_imgui_window_type = (
+            hello_imgui.DefaultImGuiWindowType.provide_full_screen_dock_space
+        )
+        runner_params.app_window_params.restore_previous_geometry = True
+        runner_params.imgui_window_params.show_status_bar = True
+        runner_params.imgui_window_params.enable_viewports = True
+        runner_params.fps_idling.enable_idling = params.enable_idling
+
+        # Setup theme
+        if params.theme is not None:
+            runner_params.imgui_window_params.tweaked_theme.theme = params.theme
+            runner_params.imgui_window_params.remember_theme = False
+        else:
+            runner_params.imgui_window_params.tweaked_theme.theme = hello_imgui.ImGuiTheme_.darcula_darker
+        if params.remember_theme is not None:
+            runner_params.imgui_window_params.remember_theme = params.remember_theme
+
+        # Setup menus: we redefine the menus completely inside _show_menus
+        runner_params.imgui_window_params.show_menu_bar = True
+        runner_params.imgui_window_params.show_menu_view = False
+        runner_params.imgui_window_params.show_menu_app = False
+        runner_params.callbacks.show_menus = self._show_menus
+
+        # window title from app_title or the name of the calling module
+        if params.app_name is not None:
+            runner_params.app_window_params.window_title = params.app_name
+        else:
+            runner_params.app_window_params.window_title = _main_python_module_name()
+
+        if len(runner_params.ini_filename) == 0:
+            runner_params.ini_filename = _ini_filename_from_app_name(runner_params.app_window_params.window_title)
+
+        self._runner_params = runner_params
 
     @staticmethod
     def apply_fiat_style_graph() -> None:
@@ -345,12 +325,12 @@ class FiatGui:
         get_fiat_config().style.update_colors_from_imgui_colors()
 
     def run(self) -> None:
-        self.params.runner_params.docking_params.docking_splits += self._docking_splits()
-        self.params.runner_params.docking_params.dockable_windows += self._dockable_windows()
+        self._runner_params.docking_params.docking_splits += self._docking_splits()
+        self._runner_params.docking_params.dockable_windows += self._dockable_windows()
 
-        self.params.runner_params.callbacks.before_exit = functional_utils.sequence_void_functions(
+        self._runner_params.callbacks.before_exit = functional_utils.sequence_void_functions(
             self._before_exit,
-            self.params.runner_params.callbacks.before_exit,
+            self._runner_params.callbacks.before_exit,
         )
 
         # We do not call self.post_init here, because it is preferable to call it once an imgui window
@@ -362,13 +342,13 @@ class FiatGui:
         #     self._post_init, self.params.runner_params.callbacks.post_init
         # )
 
-        self.params.runner_params.callbacks.pre_new_frame = self._pre_new_frame
-        self.params.runner_params.callbacks.after_swap = self._post_gui_after_swap
-        self.params.runner_params.callbacks.before_imgui_render = self._post_gui
+        self._runner_params.callbacks.pre_new_frame = self._pre_new_frame
+        self._runner_params.callbacks.after_swap = self._post_gui_after_swap
+        self._runner_params.callbacks.before_imgui_render = self._post_gui
 
         from fiatlight.fiat_widgets.fontawesome6_ctx_utils import _load_font_awesome_6  # noqa
 
-        self.params.runner_params.callbacks.load_additional_fonts = functional_utils.sequence_void_functions(
+        self._runner_params.callbacks.load_additional_fonts = functional_utils.sequence_void_functions(
             hello_imgui.imgui_default_settings.load_default_font_with_font_awesome_icons, _load_font_awesome_6
         )
 
@@ -379,9 +359,16 @@ class FiatGui:
         #     options=top_toolbar_options,
         # )
 
-        self.params.runner_params.callbacks.post_render_dockable_windows = self._heartbeat_post_render_dockable_windows
+        self._runner_params.callbacks.post_render_dockable_windows = self._heartbeat_post_render_dockable_windows
 
-        immapp.run(self.params.runner_params, self.params.addons)
+        addons = immapp.AddOnsParams()
+        addons.with_node_editor = True
+        addons.with_node_editor_config = ed.Config()
+        addons.with_node_editor_config.force_window_content_width_to_node_width = True
+        addons.with_markdown = True
+        addons.with_implot = True
+
+        immapp.run(self._runner_params, addons)
 
     def _store_final_app_window_screenshot(self) -> None:
         global _LAST_SCREENSHOT
@@ -406,7 +393,7 @@ class FiatGui:
                 has_live_function = True
                 break
         if has_live_function:
-            self.params.runner_params.fps_idling.enable_idling = False
+            self._runner_params.fps_idling.enable_idling = False
 
     # ==================================================================================================================
     #                                  GUI
@@ -451,7 +438,7 @@ class FiatGui:
                 self._functions_graph_gui.shall_layout_graph = True
             imgui.end_menu()
 
-        hello_imgui.show_view_menu(self.params.runner_params)
+        hello_imgui.show_view_menu(self._runner_params)
 
     def _show_help_and_logo_tooltip_window(self) -> None:
         def _read_logo_texture() -> None:
@@ -598,7 +585,7 @@ class FiatGui:
             self._user_settings_filename(),
             self._graph_composition_filename(),
             self._node_settings_filename(),
-            hello_imgui.ini_settings_location(self.params.runner_params),
+            hello_imgui.ini_settings_location(self._runner_params),
         ]
         for file in files:
             path = pathlib.Path(file)
@@ -606,13 +593,13 @@ class FiatGui:
                 path.unlink()
 
     def _node_settings_filename(self) -> str:
-        return hello_imgui.ini_settings_location(self.params.runner_params)[:-4] + ".node_editor.json"
+        return hello_imgui.ini_settings_location(self._runner_params)[:-4] + ".node_editor.json"
 
     def _user_settings_filename(self) -> str:
-        return hello_imgui.ini_settings_location(self.params.runner_params)[:-4] + ".fiat_user.json"
+        return hello_imgui.ini_settings_location(self._runner_params)[:-4] + ".fiat_user.json"
 
     def _graph_composition_filename(self) -> str:
-        return hello_imgui.ini_settings_location(self.params.runner_params)[:-4] + ".fiat_graph.json"
+        return hello_imgui.ini_settings_location(self._runner_params)[:-4] + ".fiat_graph.json"
 
     def _save_data(self, filename: str, save_type: _SaveType) -> None:
         has_extension = "." in filename
@@ -711,15 +698,12 @@ class FiatGui:
 
 def _fiat_run_graph(
     functions_graph: FunctionsGraph,
-    params: FiatGuiParams | None,
-    app_name: str | None,
-    theme: ImGuiTheme_ | None,
-    remember_theme: bool,
+    params: FiatRunParams,
 ) -> None:
     if is_running_in_notebook():
         from fiatlight.fiat_runner.fiat_run_notebook import _fiat_run_graph_nb, NotebookRunnerParams
 
-        if app_name is None:
+        if params.app_name is None:
             raise ValueError(
                 "app_name must be specified when running in a notebook, so that the settings can be saved."
             )
@@ -729,62 +713,42 @@ def _fiat_run_graph(
         _fiat_run_graph_nb(
             functions_graph,
             params=params,
-            app_name=app_name,
             notebook_runner_params=notebook_runner_params,
-            theme=theme,
-            remember_theme=remember_theme,
         )
     else:
         fiat_gui = FiatGui(
             functions_graph,
             params=params,
-            app_name=app_name,
-            theme=theme,
-            remember_theme=remember_theme,
         )
         fiat_gui.run()
 
 
 def _fiat_run(
     fn: Function | FunctionWithGui,
-    params: FiatGuiParams | None,
-    app_name: str | None,
-    theme: ImGuiTheme_ | None,
-    remember_theme: bool,
+    params: FiatRunParams,
 ) -> None:
     functions_graph = FunctionsGraph.from_function(fn)
     _fiat_run_graph(
         functions_graph,
         params=params,
-        app_name=app_name,
-        theme=theme,
-        remember_theme=remember_theme,
     )
 
 
 def _fiat_run_composition(
     composition: List[Function | FunctionWithGui],
-    params: FiatGuiParams | None,
-    app_name: str | None,
-    theme: ImGuiTheme_ | None,
-    remember_theme: bool,
+    params: FiatRunParams,
 ) -> None:
     functions_graph = FunctionsGraph.from_function_composition(composition)
     _fiat_run_graph(
         functions_graph,
         params=params,
-        app_name=app_name,
-        theme=theme,
-        remember_theme=remember_theme,
     )
 
 
 def run(
     fn: Function | FunctionWithGui | List[Function | FunctionWithGui] | FunctionsGraph,
-    params: FiatGuiParams | None = None,
+    params: FiatRunParams | None = None,
     app_name: str | None = None,
-    theme: ImGuiTheme_ | None = None,
-    remember_theme: bool = False,
 ) -> None:
     """Runs a function, a composition of functions, or a functions graph in the Fiat GUI.
 
@@ -795,27 +759,23 @@ def run(
     - remember_theme: if True, the user selected theme will be saved in the settings file, and restored at the next run.
                       (this will bypass the theme parameter)
     """
+    if params is None:
+        params = FiatRunParams()
+    if app_name is not None:
+        params.app_name = app_name
+
     if isinstance(fn, FunctionsGraph):
         _fiat_run_graph(
             fn,
             params=params,
-            app_name=app_name,
-            theme=theme,
-            remember_theme=remember_theme,
         )
     elif isinstance(fn, list):
         _fiat_run_composition(
             fn,
             params=params,
-            app_name=app_name,
-            theme=theme,
-            remember_theme=remember_theme,
         )
     else:
         _fiat_run(
             fn,
             params=params,
-            app_name=app_name,
-            theme=theme,
-            remember_theme=remember_theme,
         )

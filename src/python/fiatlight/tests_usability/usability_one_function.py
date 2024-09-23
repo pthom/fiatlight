@@ -10,4 +10,4 @@ def toon_2(image_file: fl.fiat_types.ImagePath, params: ToonEdgesParams) -> fiat
     return r
 
 
-fl.run(toon_2, app_name="toon_2", params=fl.FiatGuiParams(delete_settings=True))
+fl.run(toon_2, app_name="toon_2", params=fl.FiatRunParams(delete_settings=True))

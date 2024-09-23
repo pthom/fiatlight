@@ -1,5 +1,5 @@
 from fiatlight.fiat_core import FunctionsGraph
-from fiatlight.fiat_runner.fiat_gui import FiatGuiParams, FiatGui
+from fiatlight.fiat_runner.fiat_gui import FiatRunParams, FiatGui
 from fiatlight.fiat_runner.fiat_gui import get_last_screenshot
 from fiatlight.fiat_kits.fiat_image import ImageU8_3
 from imgui_bundle import hello_imgui
@@ -17,11 +17,8 @@ class NotebookRunnerParams:
 
 def _fiat_run_graph_nb(
     functions_graph: FunctionsGraph,
-    params: FiatGuiParams | None,
-    app_name: str | None,
+    params: FiatRunParams,
     notebook_runner_params: NotebookRunnerParams | None,
-    theme: hello_imgui.ImGuiTheme_ | None,
-    remember_theme: bool,
 ) -> None:
     "fiatlight runner for jupyter notebook"
     import cv2
@@ -29,8 +26,8 @@ def _fiat_run_graph_nb(
     from IPython.display import display
     from IPython.core.display import HTML
 
-    if theme is None:
-        theme = hello_imgui.ImGuiTheme_.white_is_white
+    if params.theme is None:
+        params.theme = hello_imgui.ImGuiTheme_.white_is_white
 
     if notebook_runner_params is None:
         notebook_runner_params = NotebookRunnerParams()
@@ -40,9 +37,6 @@ def _fiat_run_graph_nb(
         fiat_gui = FiatGui(
             functions_graph,
             params=params,
-            app_name=app_name,
-            theme=theme,
-            remember_theme=remember_theme,
         )
         fiat_gui.run()
 

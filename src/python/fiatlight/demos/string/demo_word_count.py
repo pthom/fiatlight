@@ -81,8 +81,7 @@ def main() -> None:
             run_length_encode,
             sort_word_with_counts,
         ],
-        app_name="demo_word_count",
-        theme=fl.ImGuiTheme_.white_is_white,
+        params=fl.FiatRunParams(app_name="demo_word_count", theme=fl.ImGuiTheme_.white_is_white),
     )
 
 

@@ -318,8 +318,6 @@ class FunctionNodeGui:
                 if any saved state => restore saved state | destroy saved state
                 else => expand all
         """
-        if self._function_node.function_with_gui.function_name == "run_length_encode":
-            print("a")
         has_inputs = self._function_node.function_with_gui.nb_inputs() > 0
         has_outputs = self._function_node.function_with_gui.nb_outputs() > 0
         has_doc = self._function_node.function_with_gui.get_function_doc().user_doc is not None
