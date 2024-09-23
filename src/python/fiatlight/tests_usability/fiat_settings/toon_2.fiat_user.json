@@ -1,0 +1,311 @@
+{
+    "user_inputs": {
+        "functions_nodes": {
+            "toon_2": {
+                "image_file": {
+                    "name": "image_file",
+                    "data": {
+                        "type": "Unspecified"
+                    }
+                },
+                "params": {
+                    "name": "params",
+                    "data": {
+                        "type": "Unspecified"
+                    }
+                }
+            }
+        }
+    },
+    "gui_options": {
+        "toon_2": {
+            "function_node_with_gui": {
+                "_inputs_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_outputs_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_doc_expanded": {
+                    "inside_node": false,
+                    "focused": true
+                },
+                "fiat_tuning_expanded": {
+                    "inside_node": false,
+                    "focused": true
+                },
+                "_internal_state_gui_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_function_node": {
+                    "inputs": {
+                        "image_file": {
+                            "cb_options": {},
+                            "expanded": true
+                        },
+                        "params": {
+                            "cb_options": {
+                                "canny": {
+                                    "cb_options": {
+                                        "t_lower": {
+                                            "cb_options": {},
+                                            "expanded": true
+                                        },
+                                        "t_upper": {
+                                            "cb_options": {},
+                                            "expanded": true
+                                        },
+                                        "l2_gradient": {
+                                            "cb_options": {},
+                                            "expanded": true
+                                        },
+                                        "blur_sigma": {
+                                            "cb_options": {},
+                                            "expanded": true
+                                        },
+                                        "aperture_size": {
+                                            "cb_options": {},
+                                            "expanded": true
+                                        }
+                                    },
+                                    "expanded": true
+                                },
+                                "dilate": {
+                                    "cb_options": {
+                                        "kernel_size": {
+                                            "cb_options": {},
+                                            "expanded": true
+                                        },
+                                        "morph_shape": {
+                                            "cb_options": {},
+                                            "expanded": true
+                                        },
+                                        "iterations": {
+                                            "cb_options": {},
+                                            "expanded": true
+                                        }
+                                    },
+                                    "expanded": true
+                                },
+                                "appearance": {
+                                    "cb_options": {
+                                        "blur_sigma": {
+                                            "cb_options": {},
+                                            "expanded": true
+                                        },
+                                        "intensity": {
+                                            "cb_options": {},
+                                            "expanded": true
+                                        },
+                                        "color": {
+                                            "cb_options": {},
+                                            "expanded": true
+                                        }
+                                    },
+                                    "expanded": true
+                                }
+                            },
+                            "expanded": true
+                        }
+                    },
+                    "outputs": {
+                        "0": {
+                            "cb_options": {
+                                "image_params": {
+                                    "AddWatchedPixelOnDoubleClick": true,
+                                    "ColormapKey": "",
+                                    "ColormapSettings": {
+                                        "Colormap": "None",
+                                        "ColormapScaleFromStats": {
+                                            "ColorMapStatsType": 0,
+                                            "NbSigmas": 1.5,
+                                            "UseStatsMax": false,
+                                            "UseStatsMin": false
+                                        },
+                                        "ColormapScaleMax": 1.0,
+                                        "ColormapScaleMin": 0.0,
+                                        "internal_ColormapHovered": ""
+                                    },
+                                    "DrawValuesOnZoomedPixels": true,
+                                    "HighlightWatchedPixels": true,
+                                    "ImageDisplaySize": {
+                                        "height": 0,
+                                        "width": 200
+                                    },
+                                    "IsColorOrderBGR": true,
+                                    "PanWithMouse": true,
+                                    "RefreshImage": false,
+                                    "SelectedChannel": -1,
+                                    "ShowAlphaChannelCheckerboard": true,
+                                    "ShowGrid": true,
+                                    "ShowImageInfo": true,
+                                    "ShowOptionsButton": true,
+                                    "ShowOptionsInTooltip": false,
+                                    "ShowOptionsPanel": false,
+                                    "ShowPixelInfo": true,
+                                    "ShowSchoolPaperBackground": true,
+                                    "ShowZoomButtons": true,
+                                    "WatchedPixels": [],
+                                    "ZoomKey": "z",
+                                    "ZoomPanMatrix": {
+                                        "00": 1.0,
+                                        "01": 0.0,
+                                        "02": 0.0,
+                                        "10": 0.0,
+                                        "11": 1.0,
+                                        "12": 0.0,
+                                        "20": 0.0,
+                                        "21": 0.0,
+                                        "22": 1.0
+                                    },
+                                    "ZoomWithMouseWheel": true
+                                },
+                                "show_channels": false,
+                                "channel_layout_vertically": false
+                            },
+                            "expanded": true
+                        }
+                    }
+                },
+                "_backup_expanded_states": {
+                    "inside_node": null,
+                    "focused": null
+                },
+                "_focused_function_visible": true
+            },
+            "function_node": {
+                "inputs": {
+                    "image_file": {
+                        "cb_options": {},
+                        "expanded": true
+                    },
+                    "params": {
+                        "cb_options": {
+                            "canny": {
+                                "cb_options": {
+                                    "t_lower": {
+                                        "cb_options": {},
+                                        "expanded": true
+                                    },
+                                    "t_upper": {
+                                        "cb_options": {},
+                                        "expanded": true
+                                    },
+                                    "l2_gradient": {
+                                        "cb_options": {},
+                                        "expanded": true
+                                    },
+                                    "blur_sigma": {
+                                        "cb_options": {},
+                                        "expanded": true
+                                    },
+                                    "aperture_size": {
+                                        "cb_options": {},
+                                        "expanded": true
+                                    }
+                                },
+                                "expanded": true
+                            },
+                            "dilate": {
+                                "cb_options": {
+                                    "kernel_size": {
+                                        "cb_options": {},
+                                        "expanded": true
+                                    },
+                                    "morph_shape": {
+                                        "cb_options": {},
+                                        "expanded": true
+                                    },
+                                    "iterations": {
+                                        "cb_options": {},
+                                        "expanded": true
+                                    }
+                                },
+                                "expanded": true
+                            },
+                            "appearance": {
+                                "cb_options": {
+                                    "blur_sigma": {
+                                        "cb_options": {},
+                                        "expanded": true
+                                    },
+                                    "intensity": {
+                                        "cb_options": {},
+                                        "expanded": true
+                                    },
+                                    "color": {
+                                        "cb_options": {},
+                                        "expanded": true
+                                    }
+                                },
+                                "expanded": true
+                            }
+                        },
+                        "expanded": true
+                    }
+                },
+                "outputs": {
+                    "0": {
+                        "cb_options": {
+                            "image_params": {
+                                "AddWatchedPixelOnDoubleClick": true,
+                                "ColormapKey": "",
+                                "ColormapSettings": {
+                                    "Colormap": "None",
+                                    "ColormapScaleFromStats": {
+                                        "ColorMapStatsType": 0,
+                                        "NbSigmas": 1.5,
+                                        "UseStatsMax": false,
+                                        "UseStatsMin": false
+                                    },
+                                    "ColormapScaleMax": 1.0,
+                                    "ColormapScaleMin": 0.0,
+                                    "internal_ColormapHovered": ""
+                                },
+                                "DrawValuesOnZoomedPixels": true,
+                                "HighlightWatchedPixels": true,
+                                "ImageDisplaySize": {
+                                    "height": 0,
+                                    "width": 200
+                                },
+                                "IsColorOrderBGR": true,
+                                "PanWithMouse": true,
+                                "RefreshImage": false,
+                                "SelectedChannel": -1,
+                                "ShowAlphaChannelCheckerboard": true,
+                                "ShowGrid": true,
+                                "ShowImageInfo": true,
+                                "ShowOptionsButton": true,
+                                "ShowOptionsInTooltip": false,
+                                "ShowOptionsPanel": false,
+                                "ShowPixelInfo": true,
+                                "ShowSchoolPaperBackground": true,
+                                "ShowZoomButtons": true,
+                                "WatchedPixels": [],
+                                "ZoomKey": "z",
+                                "ZoomPanMatrix": {
+                                    "00": 1.0,
+                                    "01": 0.0,
+                                    "02": 0.0,
+                                    "10": 0.0,
+                                    "11": 1.0,
+                                    "12": 0.0,
+                                    "20": 0.0,
+                                    "21": 0.0,
+                                    "22": 1.0
+                                },
+                                "ZoomWithMouseWheel": true
+                            },
+                            "show_channels": false,
+                            "channel_layout_vertically": false
+                        },
+                        "expanded": true
+                    }
+                }
+            }
+        }
+    }
+}
