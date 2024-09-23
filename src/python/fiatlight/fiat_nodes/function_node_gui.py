@@ -1037,13 +1037,25 @@ class FunctionNodeGui:
         """
 
     _focused_function_visible: bool = False
-    focused_function_focus_on_next_frame: bool = False
+    _focused_function_focus_on_next_frame: bool = False
+    _focused_function_flag_separate_window: bool = False
 
     def _focused_function_draw_button(self) -> None:
+        if not fiat_utils.is_rendering_in_node():
+            return
         with fontawesome_6_ctx():
             clicked = imgui.button(icons_fontawesome_6.ICON_FA_UP_RIGHT_FROM_SQUARE, ImVec2(0, 0))
-            fiat_osd.set_widget_tooltip("Focus on function in new window")
+            if not self._focused_function_visible:
+                tooltip = (
+                    "Focus on function in new tab\n\n"
+                    + 'To open in separate window, click which pressing "Alt" (or "Option" on Mac)'
+                )
+            else:
+                tooltip = "Show focused function"
+            fiat_osd.set_widget_tooltip(tooltip)
             if clicked:
+                if imgui.is_key_down(imgui.Key.left_alt) or imgui.is_key_down(imgui.Key.right_alt):
+                    self._focused_function_flag_separate_window = True
                 self._focused_function_show()
 
     def _focused_function_show(self) -> None:
@@ -1060,7 +1072,7 @@ class FunctionNodeGui:
             self._focused_function_visible = True
         else:
             imgui_ex_make_imgui_window_tab_visible(self._focused_function_label())
-            self.focused_function_focus_on_next_frame = True
+            self._focused_function_focus_on_next_frame = True
 
     def _focused_function_label(self) -> str:
         function_name = self.get_function_node().function_with_gui.function_name
@@ -1075,14 +1087,18 @@ class FunctionNodeGui:
             return
         # Dock
         # dock_id = hello_imgui.get_runner_params().docking_params.dock_space_id_from_name("focused_function_dock")
-        dock_id = hello_imgui.get_runner_params().docking_params.dock_space_id_from_name("MainDockSpace")
-        assert dock_id is not None
-        imgui.set_next_window_dock_id(dock_id, imgui.Cond_.first_use_ever.value)
+        if not self._focused_function_flag_separate_window:
+            dock_id = hello_imgui.get_runner_params().docking_params.dock_space_id_from_name("MainDockSpace")
+            assert dock_id is not None
+            imgui.set_next_window_dock_id(dock_id, imgui.Cond_.first_use_ever.value)
+        else:
+            imgui.set_next_window_dock_id(0, imgui.Cond_.always.value)
+            self._focused_function_flag_separate_window = False
 
         # Focus on the next frame
-        if self.focused_function_focus_on_next_frame:
+        if self._focused_function_focus_on_next_frame:
             imgui.set_next_window_focus()
-            self.focused_function_focus_on_next_frame = False
+            self._focused_function_focus_on_next_frame = False
 
         window_flags = 0 | imgui.WindowFlags_.always_auto_resize.value
 
