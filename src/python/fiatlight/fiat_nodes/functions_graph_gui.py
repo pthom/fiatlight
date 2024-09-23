@@ -32,11 +32,9 @@ class FunctionsGraphGui:
 
     def _create_function_nodes_and_links_gui(self) -> None:
         self.function_nodes_gui = []
-        dockable_visible_at_first_use_ever = len(self.functions_graph.functions_nodes) == 1
         for f in self.functions_graph.functions_nodes:
             fn_node_gui = FunctionNodeGui(f)
             self.function_nodes_gui.append(fn_node_gui)
-            fn_node_gui.focused_window_create_dockable(visible_at_first_use_ever=dockable_visible_at_first_use_ever)
 
         self.functions_links_gui = []
         for link in self.functions_graph.functions_nodes_links:
@@ -78,13 +76,8 @@ class FunctionsGraphGui:
                 self._handle_graph_edition()
             ed.end()
             fiat_node_semaphore._IS_RENDERING_IN_NODE = False
-        self._restore_focused_windows_visibility_at_startup()
         self._idx_render_graph += 1
         return nodes_changed
-
-    def _restore_focused_windows_visibility_at_startup(self) -> None:
-        for fn in self.function_nodes_gui:
-            fn.focused_windows_restore_visibility_at_startup()
 
     def _handle_graph_edition(self) -> None:
         #
@@ -159,7 +152,6 @@ class FunctionsGraphGui:
         function_node = self.functions_graph.add_function(function)
         function_node_gui = FunctionNodeGui(function_node)
         self.function_nodes_gui.append(function_node_gui)
-        function_node_gui.focused_window_create_dockable(visible_at_first_use_ever=False)
 
     def _can_add_link(self, input_pin_id: ed.PinId, output_pin_id: ed.PinId) -> Tuple[bool, str]:
         # 1. Look for the function node GUIs that correspond to the input and output pins
@@ -238,9 +230,6 @@ class FunctionsGraphGui:
                 links_to_remove.append(link_gui)
         for link_gui in links_to_remove:
             self.functions_links_gui.remove(link_gui)
-
-        # 4. Remove the dockable window if it exists
-        fn_gui.focused_window_remove_dockable()
 
     # ======================================================================================================================
     # Graph layout

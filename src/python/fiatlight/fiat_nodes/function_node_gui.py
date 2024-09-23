@@ -30,7 +30,6 @@ Notes:
 
 from __future__ import annotations
 from enum import Enum
-import logging
 
 import fiatlight
 from fiatlight.fiat_types import Error, Unspecified, UnspecifiedValue, JsonDict
@@ -306,7 +305,7 @@ class FunctionNodeGui:
         self._draw_async_status_on_title_line()
         imgui.spring()
         self._draw_minimize_btn()
-        self.focused_window_draw_button()
+        self._focused_function_draw_button()
 
     def _draw_minimize_btn(self) -> None:
         """
@@ -1029,66 +1028,41 @@ class FunctionNodeGui:
             fiat_osd.show_void_detached_window_button(detached_window_params)
             render_user_doc()
 
-    class _FocusedWindow_Section:  # Dummy class to create a section in the IDE # noqa
+    class _FocusedFunction:  # Dummy class to create a section in the IDE # noqa
         """
         # ==================================================================================================================
-        # Focused window Section: function nodes can also be displayed in a separate window
-        # known as focused window.
+        # Focused Function Section: function nodes can also be displayed in a separate window
+        # known as focused function.
         # ==================================================================================================================
         """
 
-    def focused_window_create_dockable(self, visible_at_first_use_ever: bool) -> None:
-        def _wrap_gui_store_change() -> None:
-            changed = self.draw_node()
-            if changed:
-                self._focused_window_change_frame_id = imgui.get_frame_count()
+    _focused_function_visible: bool = False
+    focused_function_focus_on_next_frame: bool = False
 
-        dockable_window = hello_imgui.DockableWindow()
-        dockable_window.dock_space_name = "MainDockSpace"
-        dockable_window.gui_function = _wrap_gui_store_change
-        dockable_window.label = self.focused_window_label()
-        dockable_window.is_visible = visible_at_first_use_ever
-        dockable_window.include_in_view_menu = True
-        hello_imgui.add_dockable_window(dockable_window)
+    def _focused_function_draw_button(self) -> None:
+        with fontawesome_6_ctx():
+            clicked = imgui.button(icons_fontawesome_6.ICON_FA_UP_RIGHT_FROM_SQUARE, ImVec2(0, 0))
+            fiat_osd.set_widget_tooltip("Focus on function in new window")
+            if clicked:
+                self._focused_function_show()
 
-    def focused_window_remove_dockable(self) -> None:
-        hello_imgui.remove_dockable_window(self.focused_window_label())
+    def _focused_function_show(self) -> None:
+        """Will either show or focus on the focused function"""
 
-    def focused_window_get_dockable(self) -> hello_imgui.DockableWindow | None:
-        # May return None (the dockable window is created only after a few frames)
-        window_label = self.focused_window_label()
-        dockable_window = hello_imgui.get_runner_params().docking_params.dockable_window_of_name(window_label)
-        return dockable_window
+        def imgui_ex_make_imgui_window_tab_visible(window_name: str) -> bool:
+            window = imgui.internal.find_window_by_name(window_name)
+            if window is None or window.dock_node is None or window.dock_node.tab_bar is None:
+                return False
+            window.dock_node.tab_bar.next_selected_tab_id = window.id_
+            return True
 
-    def focused_window_is_visible(self) -> bool:
-        dockable_window = self.focused_window_get_dockable()
-        if dockable_window is None:
-            logging.warning(f"Dockable window not found for {self._function_node.function_with_gui.function_name}")
-            return False
-        return dockable_window.is_visible
+        if not self._focused_function_visible:
+            self._focused_function_visible = True
+        else:
+            imgui_ex_make_imgui_window_tab_visible(self._focused_function_label())
+            self.focused_function_focus_on_next_frame = True
 
-    def focused_window_set_visible(self, visible: bool) -> None:
-        dockable_window = self.focused_window_get_dockable()
-        if dockable_window is None:
-            logging.warning(f"Dockable window not found for {self._function_node.function_with_gui.function_name}")
-            return
-        dockable_window.is_visible = visible
-
-    def focused_windows_restore_visibility_at_startup(self) -> None:
-        """Restore the visibility of the focused window at startup
-        Once done, the _focused_window_was_visible_at_exit is set to None
-        Since the dockable windows are not created at startup, this will happen after a few frames
-        """
-        if self._focused_window_was_visible_at_exit is None:
-            return
-        window_label = self.focused_window_label()
-        dockable_window = hello_imgui.get_runner_params().docking_params.dockable_window_of_name(window_label)
-        if dockable_window is None:
-            return
-        dockable_window.is_visible = self._focused_window_was_visible_at_exit
-        self._focused_window_was_visible_at_exit = None
-
-    def focused_window_label(self) -> str:
+    def _focused_function_label(self) -> str:
         function_name = self.get_function_node().function_with_gui.function_name
         function_label = self.get_function_node().function_with_gui.label
         label = function_label
@@ -1096,16 +1070,33 @@ class FunctionNodeGui:
             label += " (" + function_name + ")"
         return label + "##FocusedFunctionsInTabs"
 
-    def focused_window_highlight(self) -> None:
-        self.focused_window_set_visible(True)
-        hello_imgui.get_runner_params().docking_params.focus_dockable_window(self.focused_window_label())
+    def focused_function_draw_window(self) -> None:
+        if not self._focused_function_visible:
+            return
+        # Dock
+        # dock_id = hello_imgui.get_runner_params().docking_params.dock_space_id_from_name("focused_function_dock")
+        dock_id = hello_imgui.get_runner_params().docking_params.dock_space_id_from_name("MainDockSpace")
+        assert dock_id is not None
+        imgui.set_next_window_dock_id(dock_id, imgui.Cond_.first_use_ever.value)
 
-    def focused_window_draw_button(self) -> None:
-        with fontawesome_6_ctx():
-            clicked = imgui.button(icons_fontawesome_6.ICON_FA_UP_RIGHT_FROM_SQUARE, ImVec2(0, 0))
-            fiat_osd.set_widget_tooltip("Focus on function in new tab")
-            if clicked:
-                self.focused_window_highlight()
+        # Focus on the next frame
+        if self.focused_function_focus_on_next_frame:
+            imgui.set_next_window_focus()
+            self.focused_function_focus_on_next_frame = False
+
+        window_flags = 0 | imgui.WindowFlags_.always_auto_resize.value
+
+        shall_draw, still_visible = imgui.begin(
+            self._focused_function_label(), self._focused_function_visible, window_flags
+        )
+        if shall_draw:
+            changed = self.draw_node()
+            if changed:
+                self._focused_window_change_frame_id = imgui.get_frame_count()
+
+        imgui.end()
+        assert still_visible is not None
+        self._focused_function_visible = still_visible
 
     class _Serialization_Section:  # Dummy class to create a section in the IDE # noqa
         """
@@ -1126,7 +1117,6 @@ class FunctionNodeGui:
         #     fiat_tuning_options = {}
         #     for name, data_with_gui in self._fiat_tuning_with_gui.items():
         #         fiat_tuning_options[name] = data_with_gui.save_gui_options_to_json()
-        self._focused_window_was_visible_at_exit = self.focused_window_is_visible()
         r = {
             "_inputs_expanded": self._inputs_expanded.save_to_dict(),
             "_outputs_expanded": self._outputs_expanded.save_to_dict(),
@@ -1135,7 +1125,7 @@ class FunctionNodeGui:
             "_internal_state_gui_expanded": self._internal_state_gui_expanded.save_to_dict(),
             "_function_node": self._function_node.save_gui_options_to_json(),
             "_backup_expanded_states": self._backup_expanded_states.save_to_dict(),
-            "_focused_window_was_visible_at_exit": self._focused_window_was_visible_at_exit,
+            "_focused_function_visible": self._focused_function_visible,
             # "_fiat_tuning_with_gui": fiat_tuning_options,
         }
         return r
@@ -1151,8 +1141,8 @@ class FunctionNodeGui:
         if "_backup_expanded_states" in json_data:
             self._backup_expanded_states = FlagsDictInNodeVsFocused.load_from_dict(json_data["_backup_expanded_states"])
 
-        if "_focused_window_was_visible_at_exit" in json_data:
-            self._focused_window_was_visible_at_exit = json_data["_focused_window_was_visible_at_exit"]
+        if "_focused_function_visible" in json_data:
+            self._focused_function_visible = json_data["_focused_function_visible"]
 
         self._function_node.load_gui_options_from_json(json_data["_function_node"])
         # fiat_tuning_options = json_data.get("_fiat_tuning_with_gui", {})

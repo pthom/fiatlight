@@ -501,6 +501,9 @@ class FiatGui:
                 hello_imgui.get_runner_params().docking_params.focus_dockable_window("Functions Graph")
         handle_global_zoom_if_no_node_editor()
 
+        for fn in self._functions_graph_gui.function_nodes_gui:
+            fn.focused_function_draw_window()
+
     def _post_gui_after_swap(self) -> None:
         _ENQUEUED_CALLBACKS.run_post_frame_callbacks()
         if self._functions_graph_gui.did_any_focused_window_change_something():
