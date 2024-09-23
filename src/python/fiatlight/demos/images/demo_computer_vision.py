@@ -56,7 +56,7 @@ def main() -> None:
     graph.add_function(lut_channels_in_colorspace)
     graph.add_link(image_source, lut_channels_in_colorspace)
 
-    fl.run(graph, app_name="demo_computer_vision", params=fl.FiatRunParams(delete_settings=True))
+    fl.run(graph, app_name="demo_computer_vision", params=fl.FiatRunParams(delete_settings=False))
 
 
 if __name__ == "__main__":
