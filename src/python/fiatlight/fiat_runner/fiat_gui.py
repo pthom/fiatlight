@@ -212,8 +212,6 @@ class FiatGui:
 
     _runner_params: hello_imgui.RunnerParams
     _functions_graph_gui: FunctionsGraphGui
-    _main_dock_space_id: str
-    _info_dock_space_id: str = "info_dock"
     _show_inspector: bool = False
 
     save_dialog: pfd.save_file | None = None
@@ -535,36 +533,35 @@ class FiatGui:
                     self.load_dialog_callback(selected_filenames[0])
             self.load_dialog = None
 
+    def _docking_splits(self) -> List[hello_imgui.DockingSplit]:
+        split_main_info = hello_imgui.DockingSplit(
+            initial_dock_="MainDockSpace",
+            new_dock_="log_dock",
+            direction_=imgui.Dir.down,
+            ratio_=0.1,
+        )
+        return [split_main_info]
+
     def _dockable_windows(self) -> List[hello_imgui.DockableWindow]:
         main_window = hello_imgui.DockableWindow(
             label_="Functions Graph",
-            dock_space_name_=self._main_dock_space_id,
+            dock_space_name_="MainDockSpace",
             gui_function_=lambda: self._draw_functions_graph(),
         )
         image_inspector = hello_imgui.DockableWindow(
             label_="Image Inspector",
-            dock_space_name_=self._main_dock_space_id,
+            dock_space_name_="MainDockSpace",
             gui_function_=lambda: immvision.inspector_show(),
             is_visible_=False,
         )
         logger_window = hello_imgui.DockableWindow(
             label_="Log",
-            dock_space_name_=self._info_dock_space_id,
+            dock_space_name_="log_dock",
             gui_function_=lambda: hello_imgui.log_gui(),
             is_visible_=False,
         )
         r = [main_window, image_inspector, logger_window]
         return r
-
-    def _docking_splits(self, initial_dock: str = "MainDockSpace") -> List[hello_imgui.DockingSplit]:
-        self._main_dock_space_id = initial_dock
-        split_main_info = hello_imgui.DockingSplit(
-            initial_dock_=self._main_dock_space_id,
-            new_dock_=self._info_dock_space_id,
-            direction_=imgui.Dir.down,
-            ratio_=0.1,
-        )
-        return [split_main_info]
 
     # ==================================================================================================================
     #                                  Utilities
