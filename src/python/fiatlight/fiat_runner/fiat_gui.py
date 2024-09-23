@@ -374,6 +374,17 @@ class FiatGui:
         global _LAST_SCREENSHOT
         last_hello_imgui_image = hello_imgui.final_app_window_screenshot()
         nodes_boundings = self._functions_graph_gui._get_node_screenshot_boundings()  # noqa
+
+        # Fix the boundings to be inside the image
+        if nodes_boundings.min.x < 0:
+            nodes_boundings.min.x = 0
+        if nodes_boundings.min.y < 0:
+            nodes_boundings.min.y = 0
+        if nodes_boundings.max.x > last_hello_imgui_image.shape[1]:
+            nodes_boundings.max.x = last_hello_imgui_image.shape[1]
+        if nodes_boundings.max.y > last_hello_imgui_image.shape[0]:
+            nodes_boundings.max.y = last_hello_imgui_image.shape[0]
+
         last_nodes_image = last_hello_imgui_image[
             int(nodes_boundings.min.y) : int(nodes_boundings.max.y),
             int(nodes_boundings.min.x) : int(nodes_boundings.max.x),
