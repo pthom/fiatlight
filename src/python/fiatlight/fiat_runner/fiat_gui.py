@@ -342,20 +342,6 @@ class FiatGui:
         _ENQUEUED_CALLBACKS.run_pre_frame_callbacks()
         get_fiat_config().style.update_colors_from_imgui_colors()
 
-    def _post_gui(self) -> None:
-        # We focus the functions graph window after a few frames,
-        # because the functions' dockable focused windows are created in the first few frames and may
-        # have taken the focus
-        if imgui.get_frame_count() == 7:
-            if len(self._functions_graph_gui.function_nodes_gui) > 1:
-                hello_imgui.get_runner_params().docking_params.focus_dockable_window("Functions Graph")
-        handle_global_zoom_if_no_node_editor()
-
-    def _after_swap(self) -> None:
-        _ENQUEUED_CALLBACKS.run_post_frame_callbacks()
-        if self._functions_graph_gui.did_any_focused_window_change_something():
-            self._notify_if_dirty_functions()
-
     def run(self) -> None:
         self.params.runner_params.docking_params.docking_splits += self._docking_splits()
         self.params.runner_params.docking_params.dockable_windows += self._dockable_windows()
@@ -375,7 +361,7 @@ class FiatGui:
         # )
 
         self.params.runner_params.callbacks.pre_new_frame = self._pre_new_frame
-        self.params.runner_params.callbacks.after_swap = self._after_swap
+        self.params.runner_params.callbacks.after_swap = self._post_gui_after_swap
         self.params.runner_params.callbacks.before_imgui_render = self._post_gui
 
         from fiatlight.fiat_widgets.fontawesome6_ctx_utils import _load_font_awesome_6  # noqa
@@ -516,6 +502,20 @@ class FiatGui:
                 self._notify_if_dirty_functions()
 
         self._show_help_and_logo_tooltip_window()
+
+    def _post_gui(self) -> None:
+        # We focus the functions graph window after a few frames,
+        # because the functions' dockable focused windows are created in the first few frames and may
+        # have taken the focus
+        if imgui.get_frame_count() == 7:
+            if len(self._functions_graph_gui.function_nodes_gui) > 1:
+                hello_imgui.get_runner_params().docking_params.focus_dockable_window("Functions Graph")
+        handle_global_zoom_if_no_node_editor()
+
+    def _post_gui_after_swap(self) -> None:
+        _ENQUEUED_CALLBACKS.run_post_frame_callbacks()
+        if self._functions_graph_gui.did_any_focused_window_change_something():
+            self._notify_if_dirty_functions()
 
     def _handle_file_dialogs(self) -> None:
         if self.save_dialog is not None and self.save_dialog.ready():
