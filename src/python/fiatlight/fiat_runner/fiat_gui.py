@@ -107,20 +107,22 @@ class HelloImGuiLogHandler(logging.Handler):
         hello_imgui.log(level, msg)
 
 
-# Create a logger
-root_logger = logging.getLogger()
-root_logger.setLevel(logging.INFO)  # Or whatever level you want
+def _init_logger():
+    # Create a logger
+    root_logger = logging.getLogger()
+    root_logger.setLevel(logging.INFO)  # Or whatever level you want
 
-# Create the HelloImGuiLogHandler
-hello_imgui_log_handler = HelloImGuiLogHandler()
-hello_imgui_log_handler.setFormatter(logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s"))
-root_logger.addHandler(hello_imgui_log_handler)
+    # Create the HelloImGuiLogHandler
+    hello_imgui_log_handler = HelloImGuiLogHandler()
+    hello_imgui_log_handler.setFormatter(logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s"))
+    root_logger.addHandler(hello_imgui_log_handler)
 
-# Create a console handler
-if not _is_running_in_documentation():  # do not add logs to doc notebooks
-    console_handler = logging.StreamHandler()
-    console_handler.setFormatter(logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s"))
-    root_logger.addHandler(console_handler)
+    # Create a console handler
+    if not _is_running_in_documentation():  # do not add logs to doc notebooks
+        console_handler = logging.StreamHandler()
+        console_handler.setFormatter(logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s"))
+        root_logger.addHandler(console_handler)
+
 
 # Last image
 _LAST_SCREENSHOT: ImageU8_3 | None = None
@@ -312,6 +314,7 @@ class FiatGui:
         self._functions_graph_gui.invoke_all_functions(also_invoke_manual_function=False)
         self._notify_if_dirty_functions()
         self._disable_idling_if_any_live_function()
+        _init_logger()
 
     def _before_exit(self) -> None:
         self._store_final_app_window_screenshot()
