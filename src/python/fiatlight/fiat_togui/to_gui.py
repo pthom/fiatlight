@@ -1,5 +1,4 @@
-from sphinx.util.inspect import isclass
-
+from inspect import isclass
 from fiatlight.fiat_types import DataType, FiatAttributes
 from fiatlight.fiat_types import typename_utils
 from fiatlight.fiat_core.any_data_with_gui import AnyDataWithGui, AnyDataWithGui_UnregisteredType
