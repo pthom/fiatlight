@@ -37,11 +37,26 @@
     "gui_options": {
         "text_from_file": {
             "function_node_with_gui": {
-                "_inputs_expanded": true,
-                "_outputs_expanded": true,
-                "_doc_expanded": false,
-                "fiat_tuning_expanded": true,
-                "_internal_state_gui_expanded": true,
+                "_inputs_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_outputs_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_doc_expanded": {
+                    "inside_node": false,
+                    "focused": true
+                },
+                "fiat_tuning_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_internal_state_gui_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
                 "_function_node": {
                     "inputs": {
                         "text_file": {
@@ -63,7 +78,12 @@
                             "expanded": true
                         }
                     }
-                }
+                },
+                "_backup_expanded_states": {
+                    "inside_node": null,
+                    "focused": null
+                },
+                "_focused_function_visible": false
             },
             "function_node": {
                 "inputs": {
@@ -90,11 +110,26 @@
         },
         "str_lower": {
             "function_node_with_gui": {
-                "_inputs_expanded": true,
-                "_outputs_expanded": true,
-                "_doc_expanded": false,
-                "fiat_tuning_expanded": true,
-                "_internal_state_gui_expanded": true,
+                "_inputs_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_outputs_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_doc_expanded": {
+                    "inside_node": false,
+                    "focused": true
+                },
+                "fiat_tuning_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_internal_state_gui_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
                 "_function_node": {
                     "inputs": {
                         "s": {
@@ -124,7 +159,12 @@
                             "expanded": true
                         }
                     }
-                }
+                },
+                "_backup_expanded_states": {
+                    "inside_node": null,
+                    "focused": null
+                },
+                "_focused_function_visible": false
             },
             "function_node": {
                 "inputs": {
@@ -159,11 +199,26 @@
         },
         "remove_non_letters": {
             "function_node_with_gui": {
-                "_inputs_expanded": true,
-                "_outputs_expanded": true,
-                "_doc_expanded": false,
-                "fiat_tuning_expanded": true,
-                "_internal_state_gui_expanded": true,
+                "_inputs_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_outputs_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_doc_expanded": {
+                    "inside_node": false,
+                    "focused": true
+                },
+                "fiat_tuning_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_internal_state_gui_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
                 "_function_node": {
                     "inputs": {
                         "s": {
@@ -193,7 +248,12 @@
                             "expanded": true
                         }
                     }
-                }
+                },
+                "_backup_expanded_states": {
+                    "inside_node": null,
+                    "focused": null
+                },
+                "_focused_function_visible": false
             },
             "function_node": {
                 "inputs": {
@@ -228,11 +288,26 @@
         },
         "split_words": {
             "function_node_with_gui": {
-                "_inputs_expanded": true,
-                "_outputs_expanded": true,
-                "_doc_expanded": false,
-                "fiat_tuning_expanded": true,
-                "_internal_state_gui_expanded": true,
+                "_inputs_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_outputs_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_doc_expanded": {
+                    "inside_node": false,
+                    "focused": true
+                },
+                "fiat_tuning_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_internal_state_gui_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
                 "_function_node": {
                     "inputs": {
                         "s": {
@@ -254,7 +329,12 @@
                             "expanded": true
                         }
                     }
-                }
+                },
+                "_backup_expanded_states": {
+                    "inside_node": null,
+                    "focused": null
+                },
+                "_focused_function_visible": false
             },
             "function_node": {
                 "inputs": {
@@ -281,11 +361,26 @@
         },
         "filter_out_short_words": {
             "function_node_with_gui": {
-                "_inputs_expanded": true,
-                "_outputs_expanded": true,
-                "_doc_expanded": false,
-                "fiat_tuning_expanded": true,
-                "_internal_state_gui_expanded": true,
+                "_inputs_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_outputs_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_doc_expanded": {
+                    "inside_node": false,
+                    "focused": true
+                },
+                "fiat_tuning_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_internal_state_gui_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
                 "_function_node": {
                     "inputs": {
                         "words": {
@@ -303,7 +398,12 @@
                             "expanded": true
                         }
                     }
-                }
+                },
+                "_backup_expanded_states": {
+                    "inside_node": null,
+                    "focused": null
+                },
+                "_focused_function_visible": false
             },
             "function_node": {
                 "inputs": {
@@ -326,11 +426,26 @@
         },
         "sort_words": {
             "function_node_with_gui": {
-                "_inputs_expanded": true,
-                "_outputs_expanded": true,
-                "_doc_expanded": false,
-                "fiat_tuning_expanded": true,
-                "_internal_state_gui_expanded": true,
+                "_inputs_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_outputs_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_doc_expanded": {
+                    "inside_node": false,
+                    "focused": true
+                },
+                "fiat_tuning_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_internal_state_gui_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
                 "_function_node": {
                     "inputs": {
                         "words": {
@@ -348,7 +463,12 @@
                             "expanded": true
                         }
                     }
-                }
+                },
+                "_backup_expanded_states": {
+                    "inside_node": null,
+                    "focused": null
+                },
+                "_focused_function_visible": false
             },
             "function_node": {
                 "inputs": {
@@ -371,11 +491,26 @@
         },
         "run_length_encode": {
             "function_node_with_gui": {
-                "_inputs_expanded": true,
-                "_outputs_expanded": true,
-                "_doc_expanded": false,
-                "fiat_tuning_expanded": true,
-                "_internal_state_gui_expanded": true,
+                "_inputs_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_outputs_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_doc_expanded": {
+                    "inside_node": false,
+                    "focused": true
+                },
+                "fiat_tuning_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_internal_state_gui_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
                 "_function_node": {
                     "inputs": {
                         "input_list": {
@@ -389,7 +524,12 @@
                             "expanded": true
                         }
                     }
-                }
+                },
+                "_backup_expanded_states": {
+                    "inside_node": null,
+                    "focused": null
+                },
+                "_focused_function_visible": false
             },
             "function_node": {
                 "inputs": {
@@ -408,11 +548,26 @@
         },
         "sort_word_with_counts": {
             "function_node_with_gui": {
-                "_inputs_expanded": true,
-                "_outputs_expanded": true,
-                "_doc_expanded": false,
-                "fiat_tuning_expanded": true,
-                "_internal_state_gui_expanded": true,
+                "_inputs_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_outputs_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_doc_expanded": {
+                    "inside_node": false,
+                    "focused": true
+                },
+                "fiat_tuning_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_internal_state_gui_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
                 "_function_node": {
                     "inputs": {
                         "words": {
@@ -426,7 +581,12 @@
                             "expanded": true
                         }
                     }
-                }
+                },
+                "_backup_expanded_states": {
+                    "inside_node": null,
+                    "focused": null
+                },
+                "_focused_function_visible": false
             },
             "function_node": {
                 "inputs": {
