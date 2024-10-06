@@ -949,6 +949,8 @@ class AnyDataWithGui(Generic[DataType]):
             return True
         except TypeError:
             return False
+        except ValueError:
+            return False
 
     def construct_default_value(self) -> DataType:
         if self._type is None and self.callbacks.default_value_provider is None:
