@@ -168,7 +168,6 @@
                                         "height": 177,
                                         "width": 339
                                     },
-                                    "IsColorOrderBGR": true,
                                     "PanWithMouse": true,
                                     "RefreshImage": false,
                                     "SelectedChannel": -1,
@@ -244,7 +243,6 @@
                                     "height": 177,
                                     "width": 339
                                 },
-                                "IsColorOrderBGR": true,
                                 "PanWithMouse": true,
                                 "RefreshImage": false,
                                 "SelectedChannel": -1,
@@ -327,7 +325,6 @@
                                         "height": 0,
                                         "width": 200
                                     },
-                                    "IsColorOrderBGR": true,
                                     "PanWithMouse": true,
                                     "RefreshImage": false,
                                     "SelectedChannel": -1,
@@ -405,7 +402,6 @@
                                         "height": 247,
                                         "width": 473
                                     },
-                                    "IsColorOrderBGR": true,
                                     "PanWithMouse": true,
                                     "RefreshImage": false,
                                     "SelectedChannel": -1,
@@ -471,7 +467,6 @@
                                     "height": 0,
                                     "width": 200
                                 },
-                                "IsColorOrderBGR": true,
                                 "PanWithMouse": true,
                                 "RefreshImage": false,
                                 "SelectedChannel": -1,
@@ -549,7 +544,6 @@
                                     "height": 247,
                                     "width": 473
                                 },
-                                "IsColorOrderBGR": true,
                                 "PanWithMouse": true,
                                 "RefreshImage": false,
                                 "SelectedChannel": -1,
@@ -632,7 +626,6 @@
                                         "height": 0,
                                         "width": 200
                                     },
-                                    "IsColorOrderBGR": true,
                                     "PanWithMouse": true,
                                     "RefreshImage": false,
                                     "SelectedChannel": -1,
@@ -684,8 +677,8 @@
                                             "UseStatsMax": false,
                                             "UseStatsMin": false
                                         },
-                                        "ColormapScaleMax": 0.10739194904551888,
-                                        "ColormapScaleMin": -0.1085877434085848,
+                                        "ColormapScaleMax": 0.1062140999640091,
+                                        "ColormapScaleMin": -0.10781748659678121,
                                         "internal_ColormapHovered": ""
                                     },
                                     "DrawValuesOnZoomedPixels": true,
@@ -694,7 +687,6 @@
                                         "height": 240,
                                         "width": 459
                                     },
-                                    "IsColorOrderBGR": true,
                                     "PanWithMouse": true,
                                     "RefreshImage": false,
                                     "SelectedChannel": -1,
@@ -760,7 +752,6 @@
                                     "height": 0,
                                     "width": 200
                                 },
-                                "IsColorOrderBGR": true,
                                 "PanWithMouse": true,
                                 "RefreshImage": false,
                                 "SelectedChannel": -1,
@@ -812,8 +803,8 @@
                                         "UseStatsMax": false,
                                         "UseStatsMin": false
                                     },
-                                    "ColormapScaleMax": 0.10739194904551888,
-                                    "ColormapScaleMin": -0.1085877434085848,
+                                    "ColormapScaleMax": 0.1062140999640091,
+                                    "ColormapScaleMin": -0.10781748659678121,
                                     "internal_ColormapHovered": ""
                                 },
                                 "DrawValuesOnZoomedPixels": true,
@@ -822,7 +813,6 @@
                                     "height": 240,
                                     "width": 459
                                 },
-                                "IsColorOrderBGR": true,
                                 "PanWithMouse": true,
                                 "RefreshImage": false,
                                 "SelectedChannel": -1,
@@ -905,7 +895,6 @@
                                         "height": 0,
                                         "width": 200
                                     },
-                                    "IsColorOrderBGR": true,
                                     "PanWithMouse": true,
                                     "RefreshImage": false,
                                     "SelectedChannel": -1,
@@ -987,7 +976,6 @@
                                         "height": 195,
                                         "width": 372
                                     },
-                                    "IsColorOrderBGR": true,
                                     "PanWithMouse": true,
                                     "RefreshImage": false,
                                     "SelectedChannel": -1,
@@ -1053,7 +1041,6 @@
                                     "height": 0,
                                     "width": 200
                                 },
-                                "IsColorOrderBGR": true,
                                 "PanWithMouse": true,
                                 "RefreshImage": false,
                                 "SelectedChannel": -1,
@@ -1135,7 +1122,6 @@
                                     "height": 195,
                                     "width": 372
                                 },
-                                "IsColorOrderBGR": true,
                                 "PanWithMouse": true,
                                 "RefreshImage": false,
                                 "SelectedChannel": -1,
