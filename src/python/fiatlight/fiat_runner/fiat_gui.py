@@ -458,7 +458,7 @@ class FiatGui:
 
                 logo_path = fiat_assets_dir() + "/logo/LogoBeam2.jpg"
                 logo_image = imread_rgb(logo_path)
-                self._logo_texture = immvision.GlTexture(logo_image)  # type: ignore
+                self._logo_texture = immvision.GlTexture(logo_image)
 
         _read_logo_texture()
         from fiatlight.fiat_widgets.permanent_tooltip_window import compute_corner_position_from_window, CornerPosition
