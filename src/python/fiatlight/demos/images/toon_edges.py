@@ -2,7 +2,7 @@ import time
 
 import fiatlight as fl
 from fiatlight.fiat_types import PositiveFloat, ColorRgb
-from fiatlight.fiat_kits.fiat_image import ImageU8_GRAY, ImageU8_3, image_source
+from fiatlight.fiat_kits.fiat_image import ImageU8_GRAY, ImageU8_RGB, image_source
 from fiatlight.demos.images.opencv_wrappers import canny, dilate, MorphShape, CannyApertureSize
 from fiatlight.fiat_kits.fiat_image import overlay_alpha_image
 from pydantic import BaseModel
@@ -12,12 +12,12 @@ import cv2
 
 @fl.with_fiat_attributes(edges_intensity__range=(0.0, 1.0))
 def merge_toon_edges(
-    image: ImageU8_3,
+    image: ImageU8_RGB,
     edges_images: ImageU8_GRAY,
     edges_intensity: float = 0.7,
     edges_color: ColorRgb = ColorRgb((0, 0, 0)),
     is_image_bgr: bool = True,
-) -> ImageU8_3:
+) -> ImageU8_RGB:
     """Add toon edges to the image.
     :param image: Image: Input image
     :param edges_images: binary image with edges detected using Canny filter
@@ -87,7 +87,7 @@ class ToonEdgesParams(BaseModel):
     params__label="Edges Params",
     label="Add Toon Edges",
 )
-def add_toon_edges(image: ImageU8_3, params: ToonEdgesParams) -> ImageU8_3:
+def add_toon_edges(image: ImageU8_RGB, params: ToonEdgesParams) -> ImageU8_RGB:
     """Add toon edges to an image.
     Edges are detected using the Canny filter, then dilated and blurred.
     The edges are then overlaid on the original image, with a given intensity and color.

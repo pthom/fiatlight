@@ -25,7 +25,7 @@ class ImageProcessor(BaseModel, ABC):
     """Base class for image processors."""
 
     @abstractmethod
-    def process(self, image: fi.ImageU8_3) -> fi.ImageU8_3:
+    def process(self, image: fi.ImageU8_RGB) -> fi.ImageU8_RGB:
         pass
 
 
@@ -42,7 +42,7 @@ class GeometricTransformation(ImageProcessor):
     flip_h: bool = False
     flip_v: bool = False
 
-    def process(self, image: fi.ImageU8_3) -> fi.ImageU8_3:
+    def process(self, image: fi.ImageU8_RGB) -> fi.ImageU8_RGB:
         if self.rot_degree != 0:
             height, width = image.shape[:2]
             center = (width / 2, height / 2)
@@ -66,7 +66,7 @@ class ColorProcessing(ImageProcessor):
     src_color: fi.ColorType = fi.ColorType.BGR
     lut_color: fi.ColorType = fi.ColorType.HSV
 
-    def process(self, image: fi.ImageU8_3) -> fi.ImageU8_3:
+    def process(self, image: fi.ImageU8_RGB) -> fi.ImageU8_RGB:
         image_color_conversion_1 = fi.ColorConversion(src_color=self.src_color, dst_color=self.lut_color)
         image_color_conversion_2 = fi.ColorConversion(src_color=self.lut_color, dst_color=self.src_color)
         image_color = image_color_conversion_1.convert_image(image)
@@ -83,7 +83,7 @@ class ImageFilters(BaseModel):
     blur_radius: float = 0.0
     sharpen: bool = False
 
-    def process(self, image: fi.ImageU8_3) -> fi.ImageU8_3:
+    def process(self, image: fi.ImageU8_RGB) -> fi.ImageU8_RGB:
         if self.blur_radius:
             image = cv2.GaussianBlur(image, (0, 0), self.blur_radius)  # type: ignore
         if self.sharpen:
@@ -96,7 +96,7 @@ class ImageFilters(BaseModel):
 class AddTitleOnImage(ImageProcessor):
     params: MemeTextParams
 
-    def process(self, image: fi.ImageU8_3) -> fi.ImageU8_3:
+    def process(self, image: fi.ImageU8_RGB) -> fi.ImageU8_RGB:
         return add_meme_text(image, self.params)  # type: ignore
 
 
@@ -107,7 +107,7 @@ class ImageEffect(BaseModel):
     image_filters: Optional[ImageFilters] = None
     title_text: Optional[AddTitleOnImage] = None
 
-    def process(self, image: fi.ImageU8_3) -> fi.ImageU8_3:
+    def process(self, image: fi.ImageU8_RGB) -> fi.ImageU8_RGB:
         if self.geo_transf:
             image = self.geo_transf.process(image)
         if self.color_filter:
@@ -119,5 +119,5 @@ class ImageEffect(BaseModel):
         return image
 
 
-def apply_image_effect(image: fi.ImageU8_3, effect: ImageEffect) -> fi.ImageU8_3:
+def apply_image_effect(image: fi.ImageU8_RGB, effect: ImageEffect) -> fi.ImageU8_RGB:
     return effect.process(image)

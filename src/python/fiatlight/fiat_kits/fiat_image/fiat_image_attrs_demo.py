@@ -9,15 +9,15 @@ Notes:
 """
 
 import fiatlight as fl
-from fiatlight.fiat_kits.fiat_image import ImageU8_3
+from fiatlight.fiat_kits.fiat_image import ImageU8_RGB
 
 
 # Our demo image
-demo_image: ImageU8_3 = fl.imread_rgb(fl.fiat_assets_dir() + "/images/house.jpg")  # type: ignore
+demo_image: ImageU8_RGB = fl.imread_rgb(fl.fiat_assets_dir() + "/images/house.jpg")  # type: ignore
 
 
 # A simple function that will use the Image Widget with its default settings.
-def show_image(image: ImageU8_3 = demo_image) -> ImageU8_3:
+def show_image(image: ImageU8_RGB = demo_image) -> ImageU8_RGB:
     return image
 
 
@@ -26,14 +26,14 @@ def show_image(image: ImageU8_3 = demo_image) -> ImageU8_3:
 # it will be zoomed and panned together with the image
 # shown by "show_image"
 @fl.with_fiat_attributes(return__show_channels=True)
-def show_image_channels(image: ImageU8_3 = demo_image) -> ImageU8_3:
+def show_image_channels(image: ImageU8_RGB = demo_image) -> ImageU8_RGB:
     return image
 
 
 # A function whose output will have a different zoom key:
 # it can be panned and zoomed, independently of the other images
 @fl.with_fiat_attributes(return__zoom_key="other")
-def show_image_different_zoom_key(image: ImageU8_3 = demo_image) -> ImageU8_3:
+def show_image_different_zoom_key(image: ImageU8_RGB = demo_image) -> ImageU8_RGB:
     return image
 
 
@@ -48,7 +48,7 @@ def show_image_different_zoom_key(image: ImageU8_3 = demo_image) -> ImageU8_3:
     return__image_display_size=(0, 300),
     return__can_resize=False,
 )
-def show_image_only_display(image: ImageU8_3 = demo_image) -> ImageU8_3:
+def show_image_only_display(image: ImageU8_RGB = demo_image) -> ImageU8_RGB:
     return image
 
 

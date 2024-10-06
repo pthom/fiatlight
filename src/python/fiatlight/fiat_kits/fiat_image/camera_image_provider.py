@@ -6,7 +6,7 @@ from pydantic import BaseModel
 
 from fiatlight.fiat_togui.gui_registry import base_model_with_gui_registration
 from fiatlight.fiat_types import JsonDict
-from fiatlight.fiat_kits.fiat_image import ImageU8_3
+from fiatlight.fiat_kits.fiat_image import ImageU8_RGB
 from fiatlight.fiat_core.function_with_gui import FunctionWithGui
 from fiatlight.fiat_core.any_data_with_gui import AnyDataWithGui
 from fiatlight.fiat_utils import add_fiat_attributes
@@ -16,10 +16,10 @@ from imgui_bundle import imgui, imgui_ctx, hello_imgui
 from typing import Optional
 
 # hack, used when building documentation: we replace the camera image with a static image or video
-_HACK_IMAGE: ImageU8_3 | None = None
+_HACK_IMAGE: ImageU8_RGB | None = None
 _HACK_MOVIE: str | None = None
 
-# _HACK_IMAGE: ImageU8_3 = fl.imread_rgb(os.path.dirname(__file__) + "/paris.jpg")  # type: ignore
+# _HACK_IMAGE: ImageU8_RGB = fl.imread_rgb(os.path.dirname(__file__) + "/paris.jpg")  # type: ignore
 # _HACK_MOVIE = "/Users/pascal/dvp/OpenSource/ImGuiWork/_Bundle/fiatlight/priv_assets/videos_demos/Sintel.2010.720p.mkv"  # noqa
 
 
@@ -87,7 +87,7 @@ class CameraImageProvider:
             params = CameraParams()
         self.camera_params = params
 
-    def get_image(self) -> ImageU8_3 | None:
+    def get_image(self) -> ImageU8_RGB | None:
         if _HACK_IMAGE is not None:
             return _HACK_IMAGE
         if self.cv_cap is None:
@@ -97,7 +97,8 @@ class CameraImageProvider:
             return None
         if frame.shape[0] == 0 or frame.shape[1] == 0:
             return None
-        return frame  # type: ignore
+        frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        return frame_rgb  # type: ignore
 
     def apply_params(self, params: CameraParams) -> None:
         if self.previous_camera_params is not None and params == self.previous_camera_params:
@@ -159,7 +160,7 @@ class CameraImageProviderGui(FunctionWithGui):
         # A flag for fiatlight to set this as a live function
         self.invoke_always_dirty = True
 
-    def f(self) -> ImageU8_3 | None:
+    def f(self) -> ImageU8_RGB | None:
         return self._camera_provider.get_image()
 
     def _save_internal_gui_options_to_json(self) -> JsonDict:

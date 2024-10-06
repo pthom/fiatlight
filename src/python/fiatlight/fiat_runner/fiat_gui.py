@@ -8,7 +8,7 @@ from fiatlight.fiat_types.function_types import Function
 from fiatlight.fiat_widgets import fiat_osd
 from fiatlight.fiat_utils import functional_utils
 from fiatlight.fiat_runner.functions_collection import FunctionCollectionGui
-from fiatlight.fiat_kits.fiat_image.image_types import ImageU8_3
+from fiatlight.fiat_kits.fiat_image.image_types import ImageU8_RGB
 from fiatlight.fiat_config import get_fiat_config
 from imgui_bundle import immapp, imgui, portable_file_dialogs as pfd, imgui_node_editor as ed
 from typing import Any, Callable
@@ -141,10 +141,10 @@ def _init_logger() -> None:
 
 
 # Last image
-_LAST_SCREENSHOT: ImageU8_3 | None = None
+_LAST_SCREENSHOT: ImageU8_RGB | None = None
 
 
-def get_last_screenshot() -> ImageU8_3 | None:
+def get_last_screenshot() -> ImageU8_RGB | None:
     """Returns a screenshot of the nodes of the last frame, just before exiting the app."""
     return _LAST_SCREENSHOT
 
