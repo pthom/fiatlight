@@ -24,6 +24,7 @@ from .lut_gui import LutParamsWithGui
 from .overlay_alpha_image import overlay_alpha_image
 from .image_to_from_file_gui import image_from_file, ImageToFileGui
 from .camera_image_provider import CameraImageProvider, CameraImageProviderGui
+from .imread_rgb import imread_rgb
 
 
 def _register_factories() -> None:
@@ -35,6 +36,12 @@ def _register_factories() -> None:
 
 
 _register_factories()
+
+_was_color_order_registered = False
+if not _was_color_order_registered:
+    from imgui_bundle import immvision
+
+    immvision.use_rgb_color_order()
 
 
 __all__ = [
@@ -76,4 +83,6 @@ __all__ = [
     # from camera_image_provider
     "CameraImageProvider",
     "CameraImageProviderGui",
+    # from imread_rgb
+    "imread_rgb",
 ]

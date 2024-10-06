@@ -4,7 +4,6 @@ from fiatlight.fiat_kits.fiat_image import ImageU8
 from fiatlight.fiat_utils import with_fiat_attributes
 from fiatlight.fiat_kits.fiat_ai.prompt import Prompt
 import numpy as np
-import cv2
 import sys
 
 #
@@ -27,8 +26,9 @@ ENABLE_CPU_OFFLOAD_CUDA = False
 from typing import TYPE_CHECKING  # noqa
 
 
-from diffusers import DiffusionPipeline
-import torch
+from diffusers import DiffusionPipeline  # noqa
+import torch  # noqa
+
 pipe = DiffusionPipeline.from_pretrained(  # type: ignore
     "stabilityai/stable-diffusion-xl-base-1.0", torch_dtype=torch.float16, use_safetensors=True, variant="fp16"
 )
@@ -65,7 +65,6 @@ class _SdxlWrapper:
             raise ValueError("Prompt must not be empty")
         image = r.images[0]
         as_array = np.array(image)
-        as_array = cv2.cvtColor(as_array, cv2.COLOR_RGB2BGR)
         return as_array  # type: ignore
 
 

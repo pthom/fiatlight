@@ -169,8 +169,6 @@ class ImagePresenter:
             self.image_params.zoom_key = fiat_attrs["zoom_key"]
         if "can_resize" in fiat_attrs:
             self.image_params.can_resize = fiat_attrs["can_resize"]
-        if "is_color_order_bgr" in fiat_attrs:
-            self.image_params.is_color_order_bgr = fiat_attrs["is_color_order_bgr"]
         if "pan_with_mouse" in fiat_attrs:
             self.image_params.pan_with_mouse = fiat_attrs["pan_with_mouse"]
         if "zoom_with_mouse_wheel" in fiat_attrs:
@@ -220,7 +218,6 @@ class ImagePresenter:
                     refresh_image=need_refresh,
                     resizable=self.image_params.can_resize,
                     size=self.size_when_only_display,
-                    is_bgr_or_bgra=self.image_params.is_color_order_bgr,
                     show_options_button=False,
                 )
             else:
@@ -249,7 +246,6 @@ class ImagePresenter:
                 refresh_image=need_refresh,
                 resizable=self.image_params.can_resize,
                 size=self.size_when_only_display,
-                is_bgr_or_bgra=self.image_params.is_color_order_bgr,
                 show_options_button=False,
             )
         else:
@@ -326,6 +322,8 @@ class ImageWithGui(AnyDataWithGui[Image]):
         self.image_presenter.handle_fiat_attrs(fiat_attrs)
 
     def edit(self, value: Image) -> tuple[bool, Image]:
+        from fiatlight.fiat_kits.fiat_image.imread_rgb import imread_rgb
+
         changed = False
         if imgui.button("Select image file"):
             # self.open_file_dialog = pfd.open_file(
@@ -335,9 +333,9 @@ class ImageWithGui(AnyDataWithGui[Image]):
         if self.open_file_dialog is not None and self.open_file_dialog.ready():
             if len(self.open_file_dialog.result()) == 1:
                 image_file = self.open_file_dialog.result()[0]
-                new_image = cv2.imread(image_file)
+                new_image = imread_rgb(image_file)
                 if new_image is not None:
-                    value = new_image  # type: ignore
+                    value = new_image
                     changed = True
             self.open_file_dialog = None
         return changed, value
@@ -375,11 +373,13 @@ def image_source(image_file: ImagePath, max_image_size: int | None = None) -> Im
     Since image_file is of type ImagePath, it will be displayed as a file picker in the GUI
     (if not linked to another function).
     """
-    image = cv2.imread(image_file)
+    from fiatlight.fiat_kits.fiat_image.imread_rgb import imread_rgb
+
+    image = imread_rgb(image_file)
 
     if max_image_size is not None:
         if image.shape[0] > max_image_size or image.shape[1] > max_image_size:
             k = max_image_size / max(image.shape[0], image.shape[1])
             assert k > 0.0
-            image = cv2.resize(image, None, fx=k, fy=k)
-    return image  # type: ignore
+            image = cv2.resize(image, None, fx=k, fy=k)  # type: ignore
+    return image

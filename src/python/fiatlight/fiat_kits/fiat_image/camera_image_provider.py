@@ -19,7 +19,7 @@ from typing import Optional
 _HACK_IMAGE: ImageU8_3 | None = None
 _HACK_MOVIE: str | None = None
 
-# _HACK_IMAGE: ImageU8_3 = cv2.imread(os.path.dirname(__file__) + "/paris.jpg")  # type: ignore
+# _HACK_IMAGE: ImageU8_3 = fl.imread_rgb(os.path.dirname(__file__) + "/paris.jpg")  # type: ignore
 # _HACK_MOVIE = "/Users/pascal/dvp/OpenSource/ImGuiWork/_Bundle/fiatlight/priv_assets/videos_demos/Sintel.2010.720p.mkv"  # noqa
 
 

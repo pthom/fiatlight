@@ -31,6 +31,7 @@ from fiatlight.fiat_utils import (
     is_rendering_in_node,
 )
 from fiatlight.fiat_config import get_fiat_config
+from fiatlight.fiat_kits.fiat_image import imread_rgb
 from fiatlight.fiat_types import Error, Unspecified, Invalid, ErrorValue, UnspecifiedValue
 from imgui_bundle import hello_imgui
 
@@ -106,4 +107,6 @@ __all__ = [
     "UnspecifiedValue",
     # from imgui_bundle
     "ImGuiTheme_",
+    # from fiat_image
+    "imread_rgb",
 ]

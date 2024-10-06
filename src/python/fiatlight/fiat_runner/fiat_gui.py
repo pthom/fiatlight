@@ -123,7 +123,7 @@ class HelloImGuiLogHandler(logging.Handler):
         hello_imgui.log(level, msg)
 
 
-def _init_logger():
+def _init_logger() -> None:
     # Create a logger
     root_logger = logging.getLogger()
     root_logger.setLevel(logging.INFO)  # Or whatever level you want
@@ -452,12 +452,13 @@ class FiatGui:
     def _show_help_and_logo_tooltip_window(self) -> None:
         def _read_logo_texture() -> None:
             if not hasattr(self, "_logo_texture"):
-                import cv2
+                from fiatlight.fiat_kits.fiat_image.imread_rgb import imread_rgb
+
                 from fiatlight import fiat_assets_dir
 
                 logo_path = fiat_assets_dir() + "/logo/LogoBeam2.jpg"
-                logo_image = cv2.imread(logo_path)
-                self._logo_texture = immvision.GlTexture(logo_image, True)
+                logo_image = imread_rgb(logo_path)
+                self._logo_texture = immvision.GlTexture(logo_image)  # type: ignore
 
         _read_logo_texture()
         from fiatlight.fiat_widgets.permanent_tooltip_window import compute_corner_position_from_window, CornerPosition

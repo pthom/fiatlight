@@ -10,11 +10,10 @@ Notes:
 
 import fiatlight as fl
 from fiatlight.fiat_kits.fiat_image import ImageU8_3
-import cv2
 
 
 # Our demo image
-demo_image: ImageU8_3 = cv2.imread(fl.fiat_assets_dir() + "/images/house.jpg")  # type: ignore
+demo_image: ImageU8_3 = fl.imread_rgb(fl.fiat_assets_dir() + "/images/house.jpg")  # type: ignore
 
 
 # A simple function that will use the Image Widget with its default settings.

@@ -7,7 +7,6 @@ from fiatlight.fiat_utils import LazyModule
 from fiatlight.fiat_utils import with_fiat_attributes
 from .prompt import Prompt
 import numpy as np
-import cv2
 import sys
 
 #
@@ -76,7 +75,6 @@ class _SdxlTurboWrapper:
             raise ValueError("Prompt must not be empty")
         image = r.images[0]
         as_array = np.array(image)
-        as_array = cv2.cvtColor(as_array, cv2.COLOR_RGB2BGR)
         return as_array  # type: ignore
 
 
