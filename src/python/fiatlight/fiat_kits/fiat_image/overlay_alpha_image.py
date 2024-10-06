@@ -1,4 +1,4 @@
-from fiatlight.fiat_kits.fiat_image.image_types import ImageU8_RGB, ImageU8_RGBA
+from fiatlight.fiat_kits.fiat_image.image_types import ImageRgb, ImageRgba
 from fiatlight.fiat_utils import with_fiat_attributes
 
 import numpy as np
@@ -6,11 +6,11 @@ import numpy as np
 
 @with_fiat_attributes(alpha__range=(0.0, 1.0), gamma_factor__range=(0.0, 3.0))
 def overlay_alpha_image(
-    background_rgb: ImageU8_RGB,
-    overlay_rgba: ImageU8_RGBA,
+    background_rgb: ImageRgb,
+    overlay_rgba: ImageRgba,
     alpha: float = 1.0,
     gamma_factor: float = 2.2,
-) -> ImageU8_RGB:
+) -> ImageRgb:
     """
     cf minute physics brilliant clip "Computer color is broken" : https://www.youtube.com/watch?v=LKnqECcg6Gw
     the RGB values are gamma-corrected by the sensor (in order to keep accuracy for lower luminance),

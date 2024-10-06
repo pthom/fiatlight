@@ -1,5 +1,6 @@
 """This module defines several types you can use to annotate your functions.
 The image types are defined as NewType instances, which are just aliases for numpy arrays.
+("NewType" types are not enforced at runtime, but they are used for type checking.)
 
 All those types will be displayed in the GUI as images, using the ImmVision image viewer
 (https://github.com/pthom/immvision)
@@ -35,12 +36,12 @@ ImageU8_4 = NewType("ImageU8_4", np.ndarray[ShapeHeightWidthChannels, UInt8])
 ImageU8_WithNbChannels = Union[ImageU8_1, ImageU8_2, ImageU8_3, ImageU8_4]
 
 # Type definitions based on the roles of the channels
-ImageU8_RGB = NewType("ImageU8_RGB", ImageU8_3)
-ImageU8_RGBA = NewType("ImageU8_RGBA", ImageU8_4)
-ImageU8_BGRA = NewType("ImageU8_BGRA", ImageU8_4)
-ImageU8_BGR = NewType("ImageU8_BGR", ImageU8_3)
+ImageRgb = NewType("ImageRgb", ImageU8_3)
+ImageRgba = NewType("ImageRgba", ImageU8_4)
+ImageBgra = NewType("ImageBgra", ImageU8_4)
+ImageBgr = NewType("ImageBgr", ImageU8_3)
 ImageU8_GRAY = NewType("ImageU8_GRAY", ImageU8_1)
-ImageU8_WithChannelsRoles = Union[ImageU8_RGB, ImageU8_RGBA, ImageU8_BGRA, ImageU8_BGR, ImageU8_GRAY]
+ImageU8_WithChannelsRoles = Union[ImageRgb, ImageRgba, ImageBgra, ImageBgr, ImageU8_GRAY]
 
 # Generic type for any 8-bit image
 ImageU8 = Union[ImageU8_WithNbChannels, ImageU8_WithChannelsRoles]

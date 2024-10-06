@@ -1,7 +1,7 @@
 from fiatlight.fiat_core import FunctionsGraph
 from fiatlight.fiat_runner.fiat_gui import FiatRunParams, FiatGui
 from fiatlight.fiat_runner.fiat_gui import get_last_screenshot
-from fiatlight.fiat_kits.fiat_image import ImageU8_RGB
+from fiatlight.fiat_kits.fiat_image import ImageRgb
 from imgui_bundle import hello_imgui
 import imgui_bundle
 from typing import Tuple, Optional
@@ -40,7 +40,7 @@ def _fiat_run_graph_nb(
         )
         fiat_gui.run()
 
-    def make_thumbnail(image: ImageU8_RGB) -> ImageU8_RGB:
+    def make_thumbnail(image: ImageRgb) -> ImageRgb:
         resize_ratio = 1.0
         if notebook_runner_params.thumbnail_ratio != 0.0:
             resize_ratio = notebook_runner_params.thumbnail_ratio
@@ -63,7 +63,7 @@ def _fiat_run_graph_nb(
             thumbnail_image = image
         return thumbnail_image  # type: ignore
 
-    def display_image(image: ImageU8_RGB) -> None:
+    def display_image(image: ImageRgb) -> None:
         pil_image = PIL.Image.fromarray(image)
         display(pil_image)  # type: ignore
 

@@ -6,7 +6,7 @@ from pydantic import BaseModel
 
 from fiatlight.fiat_togui.gui_registry import base_model_with_gui_registration
 from fiatlight.fiat_types import JsonDict
-from fiatlight.fiat_kits.fiat_image import ImageU8_RGB
+from fiatlight.fiat_kits.fiat_image import ImageRgb
 from fiatlight.fiat_core.function_with_gui import FunctionWithGui
 from fiatlight.fiat_core.any_data_with_gui import AnyDataWithGui
 from fiatlight.fiat_utils import add_fiat_attributes
@@ -16,10 +16,10 @@ from imgui_bundle import imgui, imgui_ctx, hello_imgui
 from typing import Optional
 
 # hack, used when building documentation: we replace the camera image with a static image or video
-_HACK_IMAGE: ImageU8_RGB | None = None
+_HACK_IMAGE: ImageRgb | None = None
 _HACK_MOVIE: str | None = None
 
-# _HACK_IMAGE: ImageU8_RGB = fl.imread_rgb(os.path.dirname(__file__) + "/paris.jpg")  # type: ignore
+# _HACK_IMAGE: ImageRgb = fl.imread_rgb(os.path.dirname(__file__) + "/paris.jpg")  # type: ignore
 # _HACK_MOVIE = "/Users/pascal/dvp/OpenSource/ImGuiWork/_Bundle/fiatlight/priv_assets/videos_demos/Sintel.2010.720p.mkv"  # noqa
 
 
@@ -87,7 +87,7 @@ class CameraImageProvider:
             params = CameraParams()
         self.camera_params = params
 
-    def get_image(self) -> ImageU8_RGB | None:
+    def get_image(self) -> ImageRgb | None:
         if _HACK_IMAGE is not None:
             return _HACK_IMAGE
         if self.cv_cap is None:
@@ -160,7 +160,7 @@ class CameraImageProviderGui(FunctionWithGui):
         # A flag for fiatlight to set this as a live function
         self.invoke_always_dirty = True
 
-    def f(self) -> ImageU8_RGB | None:
+    def f(self) -> ImageRgb | None:
         return self._camera_provider.get_image()
 
     def _save_internal_gui_options_to_json(self) -> JsonDict:

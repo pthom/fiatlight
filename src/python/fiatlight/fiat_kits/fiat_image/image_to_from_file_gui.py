@@ -1,13 +1,13 @@
 from fiatlight.fiat_types.file_types import ImagePath, ImagePath_Save
 from fiatlight.fiat_core.function_with_gui import FunctionWithGui
 from imgui_bundle import imgui, portable_file_dialogs as pfd
-from .image_types import ImageU8_RGB
+from .image_types import ImageRgb
 
 
 _ACCEPT_ANY_FILE = "*.*"
 
 
-def image_from_file(path: ImagePath) -> ImageU8_RGB | None:
+def image_from_file(path: ImagePath) -> ImageRgb | None:
     """Read an image from a file.
     Note: This function uses OpenCV to read the image, but it makes sure to return the image in RGB order.
     """
@@ -22,14 +22,14 @@ def image_from_file(path: ImagePath) -> ImageU8_RGB | None:
 
 class ImageToFileGui(FunctionWithGui):
     _save_dialog: pfd.save_file | None = None
-    _image: ImageU8_RGB | None = None
+    _image: ImageRgb | None = None
     _exception_message: str | None = None
 
     def __init__(self) -> None:
         super().__init__(self.f, "ImageToFile")
         self.internal_state_gui = self._internal_state_gui
 
-    def f(self, image: ImageU8_RGB) -> None:
+    def f(self, image: ImageRgb) -> None:
         self._image = image
 
     def do_write(self, path: ImagePath_Save) -> None:
