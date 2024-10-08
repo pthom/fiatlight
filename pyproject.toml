@@ -21,21 +21,15 @@ keywords = ["python"]
 
 dependencies = [
 #    "imgui-bundle",
-#    "opencv-contrib-python",
     "opencv-python",
     "pydantic",
     "Pillow",
     "types-Pillow",
-    "numpy<2.0.0",  # numpy 2.0.0 breaks compatibility with librosa and OpenCV. Let's wait a bit...
+    "numpy<2.0.0",  # numpy 2.0.0 breaks compatibility with librosa. Let's wait a bit...
     "matplotlib",
-    "scipy",
-    "scikit-learn",
-    "pyglfw",
-    "IPython",
-    "fire",
+#    "fire",  # unavailable on pyodide => install message in fiatlight_cli.py
     "tabulate",
     "pandas",
-    "pandas-stubs"
 ]
 
 [tool.hatch.build.targets.wheel]

@@ -5,3 +5,4 @@ pytest
 jupyter
 nbformat
 types-tabulate
+pandas-stubs

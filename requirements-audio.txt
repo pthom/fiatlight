@@ -2,3 +2,4 @@ librosa
 soundfile
 sounddevice
 pedalboard
+scipy

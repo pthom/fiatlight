@@ -2,6 +2,19 @@
 
 # Note: may study prompt_toolkit instead of fire
 
+# if fire not installed, inform user to install it
+try:
+    import fire
+except ImportError:
+    raise ModuleNotFoundError(
+        """
+    The 'fire' module is required for fiatlight command line interface.
+    Please install it with:
+
+        pip install fire
+
+    """
+    )
 import fire  # type: ignore
 from fiatlight.fiat_togui.gui_registry import _GUI_FACTORIES
 
