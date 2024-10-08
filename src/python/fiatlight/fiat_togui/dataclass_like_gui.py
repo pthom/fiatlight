@@ -55,11 +55,6 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
         # The data cannot be presented in a node if any of its params is incompatible
         self.callbacks.present_node_compatible = True
         self.callbacks.edit_node_compatible = True
-        for param_gui in self._parameters_with_gui:
-            if not param_gui.data_with_gui.callbacks.present_node_compatible:
-                self.callbacks.present_node_compatible = False
-            if not param_gui.data_with_gui.callbacks.edit_node_compatible:
-                self.callbacks.edit_node_compatible = False
 
         self.callbacks.on_change = self.on_change
         self.callbacks.on_exit = self.on_exit
