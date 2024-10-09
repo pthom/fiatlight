@@ -4,7 +4,7 @@
 
 # if fire not installed, inform user to install it
 try:
-    import fire
+    import fire  # type: ignore
 except ImportError:
     raise ModuleNotFoundError(
         """
@@ -15,7 +15,6 @@ except ImportError:
 
     """
     )
-import fire  # type: ignore
 from fiatlight.fiat_togui.gui_registry import _GUI_FACTORIES
 
 
