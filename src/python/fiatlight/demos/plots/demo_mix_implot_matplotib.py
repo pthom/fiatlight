@@ -1,5 +1,7 @@
 """Demonstrates plots generated using ImPlot and Matplotlib in the same application.
 """
+import matplotlib
+matplotlib.use("Agg")
 
 from fiatlight import fiat_implot
 import fiatlight as fl
@@ -8,6 +10,7 @@ import math
 import time
 from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
+
 from enum import Enum
 
 

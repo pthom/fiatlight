@@ -2,6 +2,8 @@
 
 This example demonstrates several types of matplotlib figures rendered within Fiatlight with interactive GUI elements, including a sine wave plot, a Gaussian heatmap, data smoothing, and a histogram.
 """
+import matplotlib
+matplotlib.use("Agg")
 
 import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
