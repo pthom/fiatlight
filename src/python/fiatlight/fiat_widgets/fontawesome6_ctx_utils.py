@@ -5,6 +5,11 @@ from imgui_bundle import icons_fontawesome_6
 _FONT_AWESOME_6: imgui.ImFont | None = None
 
 
+def _unload_font_awesome_6() -> None:
+    global _FONT_AWESOME_6
+    _FONT_AWESOME_6 = None
+
+
 def _load_font_awesome_6() -> None:
     global _FONT_AWESOME_6
     font_size = 15
@@ -13,6 +18,7 @@ def _load_font_awesome_6() -> None:
     font_params.use_full_glyph_range = True
     font_params.merge_to_last_font = True
     _FONT_AWESOME_6 = hello_imgui.load_font("fonts/Font_Awesome_6_Free-Solid-900.otf", font_size, font_params)
+    hello_imgui.get_runner_params().callbacks.enqueue_before_exit(_unload_font_awesome_6)
 
 
 class PushFontAwesome6:
