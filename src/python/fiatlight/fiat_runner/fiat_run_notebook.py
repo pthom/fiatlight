@@ -10,8 +10,8 @@ ScreenSize = Tuple[int, int]
 
 
 class NotebookRunnerParams:
-    thumbnail_height: int = 0
-    thumbnail_ratio: float = 0.5
+    thumbnail_height: int | None = None
+    thumbnail_ratio: float | None = None
     run_id: Optional[str] = None
 
 
@@ -42,9 +42,9 @@ def _fiat_run_graph_nb(
 
     def make_thumbnail(image: ImageRgb) -> ImageRgb:
         resize_ratio = 1.0
-        if notebook_runner_params.thumbnail_ratio != 0.0:
+        if notebook_runner_params.thumbnail_ratio is not None:
             resize_ratio = notebook_runner_params.thumbnail_ratio
-        elif notebook_runner_params.thumbnail_height > 0:
+        elif notebook_runner_params.thumbnail_height is not None:
             resize_ratio = notebook_runner_params.thumbnail_height / image.shape[0]
 
         if resize_ratio != 1:
@@ -70,6 +70,9 @@ def _fiat_run_graph_nb(
     def run_app_and_display_thumb() -> None:
         run_app()
         app_image = get_last_screenshot()
+        scale = hello_imgui.final_app_window_screenshot_framebuffer_scale()
+        if notebook_runner_params.thumbnail_ratio is None:
+            notebook_runner_params.thumbnail_ratio = 1.0 / scale
         if app_image is None:
             return
         thumbnail = make_thumbnail(app_image)
