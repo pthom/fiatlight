@@ -46,6 +46,7 @@ def load_user_default_fiat_run_config() -> FiatRunConfig | None:
 
 
 _FIAT_CONFIG = FiatConfig()
+_FIAT_CONFIG_LAST_FRAME_IDX = 0
 
 
 def get_fiat_config() -> FiatConfig:
@@ -60,5 +61,13 @@ def get_fiat_config() -> FiatConfig:
         if run_config is not None:
             _FIAT_CONFIG.run_config = run_config
         static.WAS_LOAD_USER_DEFAULT_FIAT_RUN_CONFIG_CALLED = True  # type: ignore
+
+    # Heartbeat per frame (update style / dark or light, etc)
+    global _FIAT_CONFIG_LAST_FRAME_IDX
+    from imgui_bundle import imgui
+
+    current_frame_idx = imgui.get_frame_count()
+    if current_frame_idx != _FIAT_CONFIG_LAST_FRAME_IDX:
+        _FIAT_CONFIG._heartbeat()
 
     return _FIAT_CONFIG

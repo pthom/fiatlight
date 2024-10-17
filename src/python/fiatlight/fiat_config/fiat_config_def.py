@@ -38,3 +38,6 @@ class FiatConfig(BaseModel):
     def __init__(self, **data: Any) -> None:
         super().__init__(**data)
         self.style = FiatStyle()
+
+    def _heartbeat(self) -> None:
+        self.style._heartbeat()

@@ -93,7 +93,7 @@ _STANDARD_COLORS: dict[_ColorTypes, _ColorWithDarkLightVariations] = {
     ),
     _ColorTypes.transparent_grey: _ColorWithDarkLightVariations(ColorRgbaFloat((0.8, 0.8, 0.8, 0.4))),
     _ColorTypes.yellow: _ColorWithDarkLightVariations(
-        ColorRgbaFloat((1.0, 1.0, 0.0, 1.0)), ColorRgbaFloat((0.7, 0.7, 0.0, 1.0))
+        ColorRgbaFloat((1.0, 1.0, 0.0, 1.0)), ColorRgbaFloat((0.6, 0.6, 0.0, 1.0))
     ),
     _ColorTypes.light_grey: _ColorWithDarkLightVariations(ColorRgbaFloat((0.9, 0.9, 0.9, 1.0))),
     _ColorTypes.contrasting_black_or_white: _ColorWithDarkLightVariations(
@@ -194,9 +194,12 @@ class FiatStyle(BaseModel):
 
     def __init__(self, **data: Any):
         super().__init__(**data)
-        self.fill_with_default_colors_depending_on_theme()
+        self.update_colors_from_imgui_colors()
 
-    def is_dark_theme(self) -> bool:
+    def _heartbeat(self) -> None:
+        self.update_colors_from_imgui_colors()
+
+    def _is_dark_theme(self) -> bool:
         if ed.get_current_editor() is None:
             return True
 
@@ -206,10 +209,7 @@ class FiatStyle(BaseModel):
         return is_dark
 
     def update_colors_from_imgui_colors(self) -> None:
-        self.fill_with_default_colors_depending_on_theme()
-
-    def fill_with_default_colors_depending_on_theme(self) -> None:
-        is_dark_theme = self.is_dark_theme()
+        is_dark_theme = self._is_dark_theme()
         colors = _STANDARD_COLORS_DARK_THEME if is_dark_theme else _STANDARD_COLORS_LIGHT_THEME
         default_colors = {
             # Input Pins
