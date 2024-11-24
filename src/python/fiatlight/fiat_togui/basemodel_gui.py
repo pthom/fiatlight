@@ -74,9 +74,9 @@ class BaseModelGui(DataclassLikeGui[DataclassLikeType]):
 
         except ValidationError as e:
             # Here we catch the Pydantic validation errors.
-            logging.warning(
+            logging.info(
                 f"""
-                factor_dataclass_instance_with_edited_values() In BaseModelGui({self.datatype_qualified_name()})
+                Pydantic validation error for {self.datatype_qualified_name()} (in BaseModelGui.factor_dataclass_instance_with_edited_values())
                 ValidationError:
                 {e}"""
             )
