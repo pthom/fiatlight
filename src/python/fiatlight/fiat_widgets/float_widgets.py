@@ -16,7 +16,7 @@ def _str_until_double_hash(s: str) -> str:
 
 def _get_next_item_width() -> float:
     g = imgui.get_current_context()
-    if not g.next_item_data.flags & imgui.internal.NextItemDataFlags_.has_width.value:
+    if not g.next_item_data.has_flags & imgui.internal.NextItemDataFlags_.has_width.value:
         return -1.0
     return g.next_item_data.width
 
