@@ -66,8 +66,11 @@ def get_fiat_config() -> FiatConfig:
     global _FIAT_CONFIG_LAST_FRAME_IDX
     from imgui_bundle import imgui
 
-    current_frame_idx = imgui.get_frame_count()
-    if current_frame_idx != _FIAT_CONFIG_LAST_FRAME_IDX:
-        _FIAT_CONFIG._heartbeat()
+    from imgui_bundle import hello_imgui
+
+    if hello_imgui.is_using_hello_imgui():
+        current_frame_idx = imgui.get_frame_count()
+        if current_frame_idx != _FIAT_CONFIG_LAST_FRAME_IDX:
+            _FIAT_CONFIG._heartbeat()
 
     return _FIAT_CONFIG
