@@ -32,6 +32,11 @@ dependencies = [
     "pandas",
 ]
 
+[tool.hatch.build.targets.sdist]
+exclude = [
+  "src/python/fiatlight/doc",
+]
+
 [tool.hatch.build.targets.wheel]
 packages = ["src/python/fiatlight"]
 
