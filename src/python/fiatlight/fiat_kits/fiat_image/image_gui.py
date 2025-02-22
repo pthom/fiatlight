@@ -2,7 +2,7 @@ from fiatlight.fiat_utils.fiat_attributes_decorator import with_fiat_attributes
 from fiatlight.fiat_types import JsonDict, ImagePath, FiatAttributes, Unspecified, UnspecifiedValue
 from fiatlight.fiat_core import AnyDataWithGui, PossibleFiatAttributes
 from fiatlight.fiat_kits.fiat_image.image_types import Image, ImageU8
-from fiatlight.fiat_widgets.cache_per_imgui_view import CachePerImGuiView
+from fiatlight.fiat_utils.cache_per_imgui_view import CachePerImGuiView
 from imgui_bundle import immvision, imgui, ImVec2
 from imgui_bundle import portable_file_dialogs as pfd, hello_imgui
 

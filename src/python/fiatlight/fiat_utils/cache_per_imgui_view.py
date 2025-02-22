@@ -1,7 +1,8 @@
-from fiatlight.fiat_types.base_types import DataType
 from imgui_bundle import imgui
 from typing import Generic
+from typing import TypeVar
 
+DataType = TypeVar("DataType")
 HashId = int
 
 

@@ -54,7 +54,7 @@ from fiatlight.fiat_widgets import icons_fontawesome_6, fontawesome_6_ctx, fiat_
 from fiatlight import fiat_widgets, fiat_togui, fiat_utils
 from typing import Dict, List, Any
 from dataclasses import dataclass
-from fiatlight.fiat_widgets.value_per_imgui_frame import ValuePerImGuiFrame
+from fiatlight.fiat_utils.value_per_imgui_frame import ValuePerImGuiFrame
 
 
 _CURRENT_FUNCTION_NODE_ID: ed.NodeId | None = None

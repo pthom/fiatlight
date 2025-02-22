@@ -3,7 +3,7 @@ import math
 from fiatlight.fiat_core import AnyDataWithGui
 from fiatlight.fiat_kits.fiat_image import ImageU8
 from fiatlight.fiat_kits.fiat_image.lut_types import LutParams, LutTable
-from fiatlight.fiat_widgets.cache_per_imgui_view import CachePerImGuiView
+from fiatlight.fiat_utils.cache_per_imgui_view import CachePerImGuiView
 from imgui_bundle import immapp, imgui, immvision
 
 
