@@ -471,13 +471,13 @@ class FiatGui:
             padding_em=ImVec2(0.7, 2.1),
             position=CornerPosition.TOP_RIGHT,
         )
-        logo_rect = imgui.internal.ImRect(logo_pos, logo_pos + logo_size)  # type: ignore
+        logo_rect = imgui.internal.ImRect(logo_pos, logo_pos + logo_size)
         alpha = 0.5
         is_hovering = imgui.is_mouse_hovering_rect(logo_rect.min, logo_rect.max)
         if is_hovering:
             alpha = 1.0
         col = imgui.IM_COL32(255, 255, 255, int(255 * alpha))
-        imgui.get_window_draw_list().add_image(self._logo_texture.texture_id, logo_pos, logo_pos + logo_size, col=col)  # type: ignore
+        imgui.get_window_draw_list().add_image(self._logo_texture.texture_id, logo_pos, logo_pos + logo_size, col=col)
         if is_hovering:
             if imgui.begin_tooltip():
                 logo_height_em_big = 16.0

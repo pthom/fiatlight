@@ -277,16 +277,16 @@ class FunctionsGraphGui:
             logging.warning("No focused function found, taking a screenshot of the whole window")
             shot_rect = imgui.internal.ImRect(
                 imgui.get_main_viewport().pos,
-                imgui.get_main_viewport().pos + imgui.get_main_viewport().size,  # type: ignore  # noqa
+                imgui.get_main_viewport().pos + imgui.get_main_viewport().size,  # noqa
             )
 
         r = shot_rect
         fbs = imgui.get_io().display_framebuffer_scale
         main_viewport_pos = imgui.get_main_viewport().pos
-        r.min -= main_viewport_pos  # type: ignore # noqa
-        r.max -= main_viewport_pos  # type: ignore
-        r.min = r.min * fbs  # type: ignore
-        r.max = r.max * fbs  # type: ignore
+        r.min -= main_viewport_pos  # noqa
+        r.max -= main_viewport_pos
+        r.min = r.min * fbs
+        r.max = r.max * fbs
         return r
 
     def _get_node_screenshot_boundings(self) -> imgui.internal.ImRect:
@@ -300,21 +300,21 @@ class FunctionsGraphGui:
             node_id = fn.node_id()
             # position and size are in canvas coordinates
             node_tl = ed.get_node_position(node_id)
-            node_br = node_tl + ed.get_node_size(node_id)  # type: ignore
+            node_br = node_tl + ed.get_node_size(node_id)
             # convert to screen coordinates (i.e coordinates on the computer screen)
             node_tl = ed.canvas_to_screen(node_tl)
             node_br = ed.canvas_to_screen(node_br)
             # convert to viewport coordinates (i.e. from the top left corner of the app window)
             main_viewport_pos = imgui.get_main_viewport().pos
-            node_tl -= main_viewport_pos  # type: ignore # noqa
+            node_tl -= main_viewport_pos
             node_br -= main_viewport_pos
             # take into account the display frame buffer scale
             fbs = imgui.get_io().display_framebuffer_scale
-            node_tl = node_tl * fbs  # type: ignore
+            node_tl = node_tl * fbs
             node_br = node_br * fbs
             # Add some margin
             margin = 3
-            node_tl -= ImVec2(margin, margin)  # type: ignore
+            node_tl -= ImVec2(margin, margin)
             node_br += ImVec2(margin, margin)
             # phew, done...
 

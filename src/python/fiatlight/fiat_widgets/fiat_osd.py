@@ -114,7 +114,7 @@ class _OsdDetachedWindows:
                 with fontawesome_6_ctx():
                     with imgui_ctx.push_style_var(imgui.StyleVar_.frame_rounding.value, 50.0):
                         cur_pos = imgui.get_cursor_screen_pos()
-                        window_tl = cur_pos - imgui.get_style().window_padding  # type: ignore
+                        window_tl = cur_pos - imgui.get_style().window_padding
                         imgui.set_cursor_screen_pos(window_tl)
                         shall_close = imgui.button(icons_fontawesome_6.ICON_FA_CIRCLE_XMARK)
                         set_widget_tooltip("Close ")
