@@ -2,8 +2,6 @@ from fiatlight.fiat_types.base_types import DataType
 from imgui_bundle import imgui
 from typing import Generic
 
-HashId = int
-
 
 class ValuePerImGuiFrame(Generic[DataType]):
     """A value that is stored per ImGui frame, i.e. it is reset at the beginning of each frame."""

@@ -125,7 +125,7 @@ class AnyDataWithGui(Generic[DataType]):
 
     # The value of the data - can be a DataType, Unspecified, or Error
     # It is accessed through the value property, which triggers the on_change callback (if set)
-    _value: DataType | Unspecified | Error = UnspecifiedValue
+    _value: DataType | Unspecified | Error | Invalid[DataType] = UnspecifiedValue
 
     # Callbacks for the GUI
     # This is the heart of FiatLight: the GUI is defined by the callbacks.
@@ -227,7 +227,8 @@ class AnyDataWithGui(Generic[DataType]):
     @property
     def value(self) -> DataType | Unspecified | Error | Invalid[DataType]:
         """The value of the data, accessed through the value property.
-        Warning: it might be an instance of `Unspecified` (user did not enter any value) or `Error` (an error was triggered)
+        Warning: it might be an instance of `Unspecified` (user did not enter any value)
+                 or `Error` (an error was triggered) or `Invalid` (the value is invalid).
         """
         return self._value
 
@@ -281,6 +282,10 @@ class AnyDataWithGui(Generic[DataType]):
         # Call on_change callback if everything is fine
         if not isinstance(self.value, Invalid) and self.callbacks.on_change is not None:
             self.callbacks.on_change(new_value)
+
+    def has_valid_value(self) -> bool:
+        """Return True if the value is valid, i.e. it is not Unspecified, Error, or Invalid"""
+        return not isinstance(self.value, (Unspecified, Error, Invalid))
 
     def get_actual_value(self) -> DataType:
         """Returns the actual value of the data, or raises an exception if the value is Unspecified or Error or Invalid
