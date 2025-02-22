@@ -22,6 +22,8 @@ from fiatlight.fiat_togui import (
     base_model_with_gui_registration,
     any_type_to_gui,
     to_data_with_gui,
+    immediate_edit,
+    immedit,
 )
 from fiatlight.fiat_utils import (
     with_fiat_attributes,
@@ -80,6 +82,8 @@ __all__ = [
     "dataclass_with_gui_registration",
     "register_base_model",
     "base_model_with_gui_registration",
+    "immediate_edit",
+    "immedit",
     # from fiat_runner
     "run",
     "FiatRunParams",

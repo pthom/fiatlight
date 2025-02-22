@@ -25,6 +25,7 @@ from .to_gui import (
 from .explained_value_gui import edit_explained_value, make_explained_value_edit_callback
 from .file_types_gui import text_from_file, TextToFileGui
 from .file_types_gui import _register_file_paths_types
+from .immediate_edit import immediate_edit, immedit
 from . import dataclass_examples  # noqa (this will register an example dataclass and BaseModel)
 
 _register_file_paths_types()
@@ -47,4 +48,7 @@ __all__ = [
     # from file_types_gui
     "text_from_file",
     "TextToFileGui",
+    # from immediate_edit
+    "immediate_edit",
+    "immedit",
 ]
