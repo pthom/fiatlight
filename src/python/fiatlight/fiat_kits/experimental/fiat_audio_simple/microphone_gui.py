@@ -90,6 +90,11 @@ class MicrophoneGui(FunctionWithGui):
         block = self._displayed_sound_block
         if block is None:
             return
+
+        # if the sound has several channels, we only display the first one
+        if len(block.shape) > 1:
+            block = block[:, 0]
+
         with imgui_ctx.begin_vertical("LiveSoundBlock"):
             max_intensity = block.max()
             avg_intensity = block.mean()

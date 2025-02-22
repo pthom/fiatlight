@@ -9,6 +9,13 @@
 
 # pip install librosa matplotlib numpy scipy pedalboard
 
+# Important:
+# in order to display matplotlib figures in our GUI, we need to change matplotlib renderer to Agg,
+# before importing pyplot.
+import matplotlib
+
+matplotlib.use("Agg")
+
 from fiatlight.fiat_kits.experimental import fiat_audio_simple
 import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
