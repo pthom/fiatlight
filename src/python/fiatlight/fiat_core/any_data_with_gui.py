@@ -52,6 +52,18 @@ class AnyDataWithGuiGenericPossibleFiatAttributes(PossibleFiatAttributes):
             explanation="The color of the label (will use the default text color if not provided)",
             default_value=ImVec4(0, 0, 0, 1),
         )
+        self.add_explained_attribute(
+            name="edit_collapsible",
+            type_=bool,
+            explanation="If True, the edit GUI may be collapsible",
+            default_value=True,
+        )
+        self.add_explained_attribute(
+            name="present_collapsible",
+            type_=bool,
+            explanation="If True, the present GUI may be collapsible",
+            default_value=True,
+        )
 
 
 _ANYDATAWITHGUI_GENERIC_POSSIBLE_FIAT_ATTRIBUTES = AnyDataWithGuiGenericPossibleFiatAttributes()
@@ -371,6 +383,10 @@ class AnyDataWithGui(Generic[DataType]):
             if not callable(validator):
                 raise ValueError("validator is not a callable for parameter output")
             self.callbacks.validators.append(validator)
+        if "edit_collapsible" in self.fiat_attributes:
+            self.callbacks.edit_collapsible = self.fiat_attributes["edit_collapsible"]
+        if "present_collapsible" in self.fiat_attributes:
+            self.callbacks.present_collapsible = self.fiat_attributes["present_collapsible"]
 
     @staticmethod
     def propagate_label_and_tooltip(a: "AnyDataWithGui[Any]", b: "AnyDataWithGui[Any]") -> None:

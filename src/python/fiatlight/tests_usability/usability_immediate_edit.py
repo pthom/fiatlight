@@ -3,7 +3,11 @@ from pydantic import BaseModel, field_validator
 import fiatlight as fl
 
 
-@fl.base_model_with_gui_registration()
+@fl.base_model_with_gui_registration(
+    label="Address entry",
+    tooltip="Please input at least the city",
+    edit_collapsible=False,
+)
 class Address(BaseModel):
     city: str = "Your city?"
     street: str = ""
@@ -42,7 +46,7 @@ def gui():
     if imgui.button("Set age to 42"):
         USER.age = 42
         force_refresh = True
-    user_changed, USER = fl.immediate_edit("User##1", USER, force_refresh=force_refresh)
+    user_changed, USER = fl.immediate_edit("User##1", USER, edit_collapsible=False, force_refresh=force_refresh)
     if user_changed:
         print("User changed")
 

@@ -275,6 +275,8 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
             if len(this_param_attrs) > 0:
                 param_gui.data_with_gui.merge_fiat_attributes(this_param_attrs)
 
+        self._handle_generic_attrs()
+
     def on_heartbeat(self) -> bool:
         changed = False
 
