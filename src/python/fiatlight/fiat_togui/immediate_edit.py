@@ -14,8 +14,8 @@ def immediate_edit(
     **fiat_attributes: Any,
 ) -> tuple[bool, SomeDataType]:
     """
-    A generic immediate mode editing function that caches GUI wrappers using the provided label as key.
-    It can edit any data type that has a GUI representation.
+    A generic immediate mode editing function: it can edit any
+    data type that has a GUI representation in FiatLight.
 
     Args:
         label_id (str):
@@ -37,6 +37,9 @@ def immediate_edit(
        - new_value: The updated value,
             or the original value if no changes were made
             or if the edited value is invalid.
+
+    Alias:
+        immedit is a shorter alias for immediate_edit
     """
     static = immediate_edit
 
@@ -94,10 +97,4 @@ def immediate_edit(
         return False, data
 
 
-immedit = immediate_edit  # alias
-immediate_edit.__doc__ = (
-    immediate_edit.__doc__
-    + """
-    immedit (alias): immediate_edit
-"""
-)
+immedit = immediate_edit
