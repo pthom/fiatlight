@@ -37,6 +37,8 @@ def make_sort_function_visualizer(sort_fn: Callable[[NumbersList], NumbersList])
         _sorted_numbers = sort_fn(numbers_being_sorted)  # launch the sorting algorithm
         return time.time() - start_time  # return the elapsed time in seconds
     sort_wrapper.__doc__ = sort_fn.__doc__  # copy the docstring of the sorting function
+    sort_wrapper.__doc__ = sort_function.__doc__
+    sort_wrapper.__name__ = sort_function.__name__ + " visualization"
     return sort_wrapper
 
 
