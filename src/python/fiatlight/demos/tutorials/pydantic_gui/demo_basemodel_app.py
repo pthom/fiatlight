@@ -1,9 +1,11 @@
 """A basic example showing how you can use the advanced GUI creation capabilities of Fiatlight,
 inside a standalone application.
 
-Here, we demonstrate how to create a GUI for a nested Pydantic model, with custom validation and labels.
+Here, we demonstrate how to create a GUI for a nested Pydantic model, with custom validation and labels:
 
-"""
+we simply call `fl.immediate_edit`, and the GUI will be generated automatically, taking into account the
+Pydantic model structure and the customizations and validations we have set.
+`"""
 
 import fiatlight as fl
 from enum import Enum
@@ -65,11 +67,12 @@ class TrainingImage(BaseModel):
 
 def main() -> None:
     """Main function, which will be run when the script is executed."""
-    training_gui = fl.to_data_with_gui(TrainingImage())
+    training_image = TrainingImage()
 
     def gui() -> None:
         # Display the GUI: we simply call the GUI object's gui_edit method
-        _changed = training_gui.gui_edit()
+        nonlocal training_image
+        _changed, training_image = fl.immediate_edit("Training Image", training_image)
 
     immapp.run(gui)
 
