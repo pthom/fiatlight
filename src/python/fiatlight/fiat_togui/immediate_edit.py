@@ -39,10 +39,15 @@ def immediate_edit(
             or if the edited value is invalid.
     """
     static = immediate_edit
+
     # Create a global cache if not already defined.
     if not hasattr(static, "GUI_CACHE"):
         static.GUI_CACHE: dict[int, AnyDataWithGui[SomeDataType]] = {}
         static.USED_IDS_THIS_FRAME: ValuePerImGuiFrame[set[str]] = ValuePerImGuiFrame()
+
+    # # if edit_collapsible is not set in fiat_attributes, set it to False?
+    # if "edit_collapsible" not in fiat_attributes:
+    #     fiat_attributes["edit_collapsible"] = False
 
     # Look up the GUI wrapper using the label.
     imgui.push_id(label_id)
@@ -63,7 +68,7 @@ def immediate_edit(
         )
     used_ids.add(label_id)
 
-    # Check if the GUI wrapper is already cached.
+    # Reuse GUI wrapper is already cached, otherwise create a new one.
     if cache_key in static.GUI_CACHE:
         gui_wrapper = static.GUI_CACHE[cache_key]
     else:
