@@ -180,9 +180,9 @@ class ThreadedSortFunctionVisualizer:
 class AppGui:
     """AppGui is the main class of the application."""
 
-    # numbers_generation_options_gui:
-    # A GUI for the NumbersGenerationOptions class (it contains an instance of NumbersGenerationOptions)
-    numbers_generation_options_gui: fl.AnyDataWithGui[NumbersGenerationOptions]
+    # numbers_generation_options: options for the generation of the numbers
+    numbers_generation_options: NumbersGenerationOptions
+
     # threaded_visualizers:
     #   Our sort functions will be run in a thread: here, we store for each sort function
     #   the thread, its thread proc (sort_visualizer) and the duration of the thread
@@ -194,7 +194,7 @@ class AppGui:
     show_theme_window: bool = False
 
     def __init__(self) -> None:
-        self.numbers_generation_options_gui = fl.to_data_with_gui(NumbersGenerationOptions())
+        self.numbers_generation_options = NumbersGenerationOptions()
         self.threaded_visualizers = []
 
         # add all the sorting algorithms, and link them to the random numbers generator
@@ -222,7 +222,7 @@ class AppGui:
         return r
 
     def _launch_sort_threads(self) -> None:
-        self.current_numbers_list = make_random_number_list(self.numbers_generation_options_gui.get_actual_value())
+        self.current_numbers_list = make_random_number_list(self.numbers_generation_options)
 
         def launch_thread(tv: ThreadedSortFunctionVisualizer) -> None:
             def thread_proc() -> None:
@@ -237,7 +237,9 @@ class AppGui:
             launch_thread(tv_)
 
     def gui_numbers_generation(self) -> None:
-        _changed = self.numbers_generation_options_gui.gui_edit()
+        _changed, self.numbers_generation_options = fl.immediate_edit(
+            "Gen. options", self.numbers_generation_options, edit_collapsible=False
+        )
         is_running = self._is_any_sort_thread_running()
         if is_running:
             imgui.begin_disabled(True)
