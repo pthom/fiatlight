@@ -16,7 +16,7 @@ def merge_toon_edges(
     edges_images: ImageU8_GRAY,
     edges_intensity: float = 0.7,
     edges_color: ColorRgb = ColorRgb((0, 0, 0)),
-    is_image_bgr: bool = True,
+    is_image_bgr: bool = False,
 ) -> ImageRgb:
     """Add toon edges to the image.
     :param image: Image: Input image
