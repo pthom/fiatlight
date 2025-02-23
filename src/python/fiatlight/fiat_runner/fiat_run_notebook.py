@@ -2,8 +2,7 @@ from fiatlight.fiat_core import FunctionsGraph
 from fiatlight.fiat_runner.fiat_gui import FiatRunParams, FiatGui
 from fiatlight.fiat_runner.fiat_gui import get_last_screenshot
 from fiatlight.fiat_kits.fiat_image import ImageRgb
-from imgui_bundle import hello_imgui
-import imgui_bundle
+from imgui_bundle import hello_imgui, immapp
 from typing import Tuple, Optional
 
 ScreenSize = Tuple[int, int]
@@ -24,7 +23,13 @@ def _fiat_run_graph_nb(
     import cv2
     import PIL.Image  # pip install pillow
     from IPython.display import display
-    from IPython.core.display import HTML
+
+    # Restore the original C++ run method if it was replaced by
+    # imgui_bundle's notebook_do_patch_runners_if_needed (which adds a screenshot feature)
+    # we are providing here our own implementation of the screenshot.
+    if hasattr(immapp, "run_original"):
+        immapp.run = immapp.run_original
+        del immapp.run_original
 
     if params.theme is None:
         params.theme = hello_imgui.ImGuiTheme_.white_is_white
@@ -78,37 +83,6 @@ def _fiat_run_graph_nb(
         thumbnail = make_thumbnail(app_image)
         display_image(thumbnail)
 
-    def display_run_button() -> None:
-        html_code = f"""
-        <script>
-        function btnClick_{notebook_runner_params.run_id}(btn) {{
-            // alert("btnClick_{notebook_runner_params.run_id}");
-            cell_element = btn.parentElement.parentElement.parentElement.parentElement.parentElement;
-            cell_idx = Jupyter.notebook.get_cell_elements().index(cell_element)
-            IPython.notebook.kernel.execute("imgui_bundle.JAVASCRIPT_RUN_ID='{notebook_runner_params.run_id}'")
-            Jupyter.notebook.execute_cells([cell_idx])
-        }}
-        </script>
-        <button onClick="btnClick_{notebook_runner_params.run_id}(this)">Run</button>
-        """
-        display(HTML(html_code))  # type: ignore
-
-    def display_app_with_run_button(run_id: str) -> None:
-        """Experiment displaying a "run" button in the notebook below the screenshot. Disabled as of now
-        If using this, it would be possible to run the app only if the user clicks on the Run button
-        (and not during normal cell execution).
-        """
-        if run_id is None:
-            run_app_and_display_thumb()
-        else:
-            if hasattr(imgui_bundle, "JAVASCRIPT_RUN_ID"):
-                print("imgui_bundle.JAVASCRIPT_RUN_ID=" + imgui_bundle.JAVASCRIPT_RUN_ID + "{run_id=}")
-                if imgui_bundle.JAVASCRIPT_RUN_ID == run_id:
-                    run_app_and_display_thumb()
-            else:
-                print("imgui_bundle: no JAVASCRIPT_RUN_ID")
-
-    # display_app_with_run_button(run_id)
     run_app_and_display_thumb()
 
 
