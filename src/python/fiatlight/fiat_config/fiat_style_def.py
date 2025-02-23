@@ -6,7 +6,7 @@ from pydantic import BaseModel, Field
 
 from fiatlight.fiat_types.color_types import ColorRgbaFloat
 from fiatlight.fiat_widgets.text_truncated import TruncationParams
-from imgui_bundle import ImVec4, imgui_node_editor as ed
+from imgui_bundle import ImVec4, imgui_node_editor as ed, imgui
 
 
 class FiatColorType(Enum):
@@ -200,11 +200,16 @@ class FiatStyle(BaseModel):
         self.update_colors_from_imgui_colors()
 
     def _is_dark_theme(self) -> bool:
-        if ed.get_current_editor() is None:
-            return True
+        bg_color = None
 
-        node_bg_color = ed.get_style().color_(ed.StyleColor.node_bg)
-        luminance = 0.2126 * node_bg_color.x + 0.7152 * node_bg_color.y + 0.0722 * node_bg_color.z
+        if ed.get_current_editor() is not None:
+            bg_color = ed.get_style().color_(ed.StyleColor.node_bg)
+        else:
+            if imgui.get_current_context() is None:
+                return True
+            bg_color = imgui.get_style().color_(imgui.Col_.window_bg.value)
+
+        luminance = 0.2126 * bg_color.x + 0.7152 * bg_color.y + 0.0722 * bg_color.z
         is_dark = luminance < 0.5
         return is_dark
 

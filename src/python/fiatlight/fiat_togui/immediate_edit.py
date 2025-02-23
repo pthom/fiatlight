@@ -1,6 +1,7 @@
 from imgui_bundle import imgui
 from fiatlight.fiat_core.any_data_with_gui import AnyDataWithGui
 from fiatlight.fiat_utils.value_per_imgui_frame import ValuePerImGuiFrame
+from fiatlight.fiat_config import get_fiat_config
 from .to_gui import to_data_with_gui
 from typing import Any, TypeVar
 
@@ -51,6 +52,8 @@ def immediate_edit(
     # # if edit_collapsible is not set in fiat_attributes, set it to False?
     # if "edit_collapsible" not in fiat_attributes:
     #     fiat_attributes["edit_collapsible"] = False
+
+    get_fiat_config().style.update_colors_from_imgui_colors()
 
     # Look up the GUI wrapper using the label.
     imgui.push_id(label_id)
