@@ -6,28 +6,28 @@
                     "name": "freq1",
                     "data": {
                         "type": "Primitive",
-                        "value": 4.748000144958496
+                        "value": 5.251999855041504
                     }
                 },
                 "freq2": {
                     "name": "freq2",
                     "data": {
                         "type": "Primitive",
-                        "value": 3.9159998893737793
+                        "value": 3.5799999237060547
                     }
                 },
                 "delta": {
                     "name": "delta",
                     "data": {
                         "type": "Primitive",
-                        "value": 1.0959999561309814
+                        "value": 1.0299999713897705
                     }
                 },
                 "nb_periods": {
                     "name": "nb_periods",
                     "data": {
                         "type": "Primitive",
-                        "value": 4.920000076293945
+                        "value": 3.25600004196167
                     }
                 }
             }
@@ -36,11 +36,26 @@
     "gui_options": {
         "lissajous_curve": {
             "function_node_with_gui": {
-                "_inputs_expanded": true,
-                "_outputs_expanded": true,
-                "_doc_expanded": false,
-                "fiat_tuning_expanded": true,
-                "_internal_state_gui_expanded": true,
+                "_inputs_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_outputs_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_doc_expanded": {
+                    "inside_node": false,
+                    "focused": true
+                },
+                "fiat_tuning_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_internal_state_gui_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
                 "_function_node": {
                     "inputs": {
                         "freq1": {
@@ -71,7 +86,12 @@
                             "expanded": true
                         }
                     }
-                }
+                },
+                "_backup_expanded_states": {
+                    "inside_node": null,
+                    "focused": null
+                },
+                "_focused_function_visible": true
             },
             "function_node": {
                 "inputs": {

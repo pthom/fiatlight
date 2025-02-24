@@ -1,5 +1,3 @@
-# Part 1: Standard Python code (no user interface)
-# ------------------------------------------------
 import numpy as np
 import matplotlib
 
@@ -19,18 +17,17 @@ def lissajous_curve(
     return fig
 
 
-# Part 2: Add a GUI to the code in a few seconds
-# -----------------------------------------------
+# Add a GUI to the code in a few seconds, using fiatlight
 import fiatlight as fl
 
-# Options for widgets
+# Optional: set the range of the parameters
 fl.add_fiat_attributes(
     lissajous_curve,
     freq1__range=(0, 10),
     freq2__range=(0, 10),
     delta__range=(-np.pi, np.pi),
     nb_periods__range=(0.1, 10),
-    nb_periods__edit_type="knob",
 )
+
 # Run the function interactively
 fl.run(lissajous_curve, app_name="Interactive Lissajou Curve")
