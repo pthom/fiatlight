@@ -131,7 +131,9 @@ pip install -e .
 📖 Documentation & Tutorials
 ----------------------------
 
-Coming soon. We are actively working on improving documentation, tutorials, and an interactive web demo.
+See [documentation site](https://pthom.github.io/fiatlight_doc)
+
+We are actively working on improving documentation, tutorials, and an interactive web demo.
 
 
 Status & What’s Next?
