@@ -456,7 +456,7 @@ class FiatGui:
 
                 from fiatlight import fiat_assets_dir
 
-                logo_path = fiat_assets_dir() + "/logo/LogoBeam2.jpg"
+                logo_path = fiat_assets_dir() + "/logo/logo_fiatlight.jpg"
                 logo_image = imread_rgb(logo_path)
                 self._logo_texture = immvision.GlTexture(logo_image)
 
