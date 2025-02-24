@@ -131,7 +131,8 @@ pip install -e .
 📖 Documentation & Tutorials
 ----------------------------
 
-Coming soon.
+Coming soon. We are actively working on improving documentation, tutorials, and an interactive web demo.
+
 
 Status & What’s Next?
 ---------------------
