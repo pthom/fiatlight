@@ -14,12 +14,12 @@ and interactive workflows—without sacrificing flexibility.
 Key Features
 ------------
 
--[x] Instant UI for Any Function – Wrap a function, get a GUI—no extra code.
--[x] Automatic UI for Structured Data – Works with Pydantic, dataclasses, and more.
--[x] Interactive Function Pipelines – Chain multiple functions into a visual workflow.
--[x] Built-in Validation & Debugging – Constraints, state persistence, and error replay.
--[x] Domain-Specific Kits – AI, image analysis, data visualization, and more.
--[x] High Performance – Runs on Dear ImGui, with GPU-accelerated rendering.
+* [x] Instant UI for Any Function – Wrap a function, get a GUI—no extra code.
+* [x] Automatic UI for Structured Data – Works with Pydantic, dataclasses, and more.
+* [x] Interactive Function Pipelines – Chain multiple functions into a visual workflow.
+* [x] Built-in Validation & Debugging – Constraints, state persistence, and error replay.
+* [x] Domain-Specific Kits – AI, image analysis, data visualization, and more.
+* [x] High Performance – Runs on Dear ImGui, with GPU-accelerated rendering.
 
 
 Quick Examples
