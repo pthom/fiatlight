@@ -46,8 +46,8 @@ def immediate_edit(
 
     # Create a global cache if not already defined.
     if not hasattr(static, "GUI_CACHE"):
-        static.GUI_CACHE: dict[int, AnyDataWithGui[SomeDataType]] = {}
-        static.USED_IDS_THIS_FRAME: ValuePerImGuiFrame[set[str]] = ValuePerImGuiFrame()
+        static.GUI_CACHE: dict[int, AnyDataWithGui[SomeDataType]] = {}  # type: ignore # noqa
+        static.USED_IDS_THIS_FRAME: ValuePerImGuiFrame[set[str]] = ValuePerImGuiFrame()  # type: ignore # noqa
 
     # # if edit_collapsible is not set in fiat_attributes, set it to False?
     # if "edit_collapsible" not in fiat_attributes:
@@ -60,9 +60,9 @@ def immediate_edit(
     cache_key = imgui.get_id(label_id)
 
     # Shout if we are reusing an id a second time in the same ImGui frame
-    if static.USED_IDS_THIS_FRAME.get() is None:
-        static.USED_IDS_THIS_FRAME.set(set())
-    used_ids = static.USED_IDS_THIS_FRAME.get()
+    if static.USED_IDS_THIS_FRAME.get() is None:  # type: ignore
+        static.USED_IDS_THIS_FRAME.set(set())  # type: ignore
+    used_ids = static.USED_IDS_THIS_FRAME.get()  # type: ignore
     assert used_ids is not None
     if label_id in used_ids:
         raise ValueError(
@@ -75,12 +75,12 @@ def immediate_edit(
     used_ids.add(label_id)
 
     # Reuse GUI wrapper is already cached, otherwise create a new one.
-    if cache_key in static.GUI_CACHE:
-        gui_wrapper = static.GUI_CACHE[cache_key]
+    if cache_key in static.GUI_CACHE:  # type: ignore
+        gui_wrapper = static.GUI_CACHE[cache_key]  # type: ignore
     else:
         # Create a new GUI wrapper and cache it.
         gui_wrapper = to_data_with_gui(data, label=label_id, **fiat_attributes)
-        static.GUI_CACHE[cache_key] = gui_wrapper
+        static.GUI_CACHE[cache_key] = gui_wrapper  # type: ignore
 
     if force_refresh:
         gui_wrapper.value = data
