@@ -41,9 +41,9 @@ exclude = [
 packages = ["src/python/fiatlight"]
 
 [project.urls]
-# homepage = "https://pthom.github.io/fiatlight/"
+homepage = "https://pthom.github.io/fiatlight/"
 repository = "https://github.com/pthom/fiatlight/"
-#documentation = "https://pthom.github.io/fiatlight/"
+documentation = "https://pthom.github.io/fiatlight/"
 
 [tool.ruff]
 line-length = 120
