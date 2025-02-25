@@ -1,4 +1,8 @@
 # type: ignore
+# Train a simple MLP model to classify the Iris dataset by running a simple Function via Fiatlight
+# This function returns nothing, but the intermediate results and final result (loss, accuracy)
+# are displayed in the GUI, via fiat_tuning
+
 """Irises classification with a simple MLP model
 ================================================
 We train a simple MLP model to classify the Iris dataset. The model has one hidden layer with ReLU activation.
@@ -19,6 +23,7 @@ from sklearn.preprocessing import StandardScaler
 import numpy as np
 import fiatlight as fl
 import logging
+import matplotlib; matplotlib.use("Agg")  # this is needed to render the plots in the GUI # noqa
 import matplotlib.pyplot as plt
 
 
@@ -226,5 +231,4 @@ def perform_training(
         logging.warning(f"Test Accuracy: {test_accuracy:.4f}")
 
 
-perform_training.__doc__ = __doc__
 fl.run(perform_training)

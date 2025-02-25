@@ -1,3 +1,10 @@
+# A complete application which provides a function graph with several nodes where the user can:
+# - train a model on the Iris dataset
+# - save and reload the trained model (we use `add_gui_node` to add "GUI only" nodes for these actions)
+# - edit the parameters for splitting the dataset, and edit the hyperparameters for training the model
+#   (those parameters are saved and reloaded upon restarting the application)
+# - plot the decision boundary of the trained model
+
 # type: ignore
 """Irises classification with a simple MLP model
 ================================================
@@ -30,6 +37,7 @@ import numpy as np
 from pydantic import BaseModel
 import fiatlight as fl
 import logging
+import matplotlib; matplotlib.use("Agg")  # this is needed to render the plots in the GUI # noqa
 import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
 from imgui_bundle import imgui
@@ -133,7 +141,11 @@ def gui_edit_split_params(
     split_params: SplitParams = SplitParams(),
 ) -> None:
     """Edit the split parameters"""
-    # gui_edit_split_params will be presented in the GUI
+    # This function is presented in the function graph, so that the user can edit the split parameters
+    # It does nothing apart from setting the split_params in the global state:
+    # here we take advantage of the fact that Fiatlight will
+    #   - automatically generate a GUI for the SplitParams model
+    #   - automatically save and reload the parameters upon restarting the application
     GLOBALS.split_params = split_params
     GLOBALS.iris_dataset = IrisDataset(split_params)
 
@@ -142,7 +154,7 @@ def gui_edit_hyperparams(
     hyper_params: HyperParams = HyperParams(),
 ) -> None:
     """Edit the hyperparameters"""
-    # gui_edit_hyperparams will be presented in the GUI
+    # Same as above, but for the hyperparameters
     GLOBALS.hyper_params = hyper_params
 
 

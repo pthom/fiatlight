@@ -64,7 +64,8 @@
                 "_backup_expanded_states": {
                     "inside_node": null,
                     "focused": null
-                }
+                },
+                "_focused_function_visible": true
             },
             "function_node": {
                 "inputs": {
