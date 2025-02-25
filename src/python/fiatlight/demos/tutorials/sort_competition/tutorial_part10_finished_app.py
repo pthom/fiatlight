@@ -1,3 +1,5 @@
+# In  this version, we reuse Fiatlight's GUI in a standalone application.
+
 """Sorting Algorithm Competition
 ================================
 This program shows a competition between different sorts algorithms.
