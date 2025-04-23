@@ -4,10 +4,9 @@ This version might be refactored in the future since it mixes the sound source a
 """
 
 import logging
-from dataclasses import dataclass
 
 from imgui_bundle import hello_imgui
-from imgui_bundle import implot, imgui, imgui_ctx, ImVec2, immapp
+from imgui_bundle import implot, imgui, imgui_ctx, immapp, ImVec2_Pydantic
 
 from fiatlight.fiat_core.any_data_with_gui import AnyDataWithGui
 from fiatlight.fiat_widgets import (
@@ -17,6 +16,7 @@ from fiatlight.fiat_widgets import (
     button_with_disable_flag,
 )
 from fiatlight.fiat_types import TimeSeconds, JsonDict
+from pydantic import BaseModel, Field
 from numpy.typing import NDArray
 import numpy as np
 
@@ -24,50 +24,40 @@ from .audio_types import SoundWave
 from .sound_wave_player import SoundWavePlayer
 
 
-def _downsample_wave_minmax(wave: np.ndarray, max_samples: int) -> np.ndarray:
-    """Downsample using min/max strategy for plotting.
-    Alternates between min and max per chunk, to simulate waveform spikes.
-    Only supports 1D arrays (flattened audio channel)."""
-    assert wave.ndim == 1
-    if len(wave) <= max_samples:
-        return wave
+class TimeMarker(BaseModel):
+    """A time marker with a label and a time (ratio to total duration)"""
 
-    chunk_size = int(np.ceil(len(wave) / max_samples))
-    downsampled = []
-    use_min = True
-
-    for i in range(0, len(wave), chunk_size):
-        chunk = wave[i : i + chunk_size]
-        val = chunk.min() if use_min else chunk.max()
-        downsampled.append(val)
-        use_min = not use_min
-
-    return np.array(downsampled)
+    time_ratio: float = Field(ge=0.0, le=1.0)
+    label: str = ""
 
 
-@dataclass
-class SoundWaveGuiParams:
-    plot_size_em: ImVec2 | None = None
+class SoundWaveGuiParams(BaseModel):
+    plot_size_em: ImVec2_Pydantic = ImVec2_Pydantic(20, 10)
     show_time_as_seconds: bool = False
+    show_markers: bool = False
     volume: float = 1.0
-
-    def __post_init__(self) -> None:
-        if self.plot_size_em is None:
-            self.plot_size_em = ImVec2(20, 10)
+    time_markers: list[TimeMarker] = []  # Pydantic v2 handle mutable defaults
 
     def to_dict(self) -> JsonDict:
-        assert self.plot_size_em is not None
-        return {
-            "show_time_as_seconds": self.show_time_as_seconds,
-            "volume": self.volume,
-            "plot_size_em": [self.plot_size_em.x, self.plot_size_em.y],
-        }
+        r = self.model_dump(mode="json")
+        return r
 
-    def fill_from_dict(self, data: JsonDict) -> None:
-        self.show_time_as_seconds = data.get("show_time_as_seconds", True)
-        self.volume = data.get("volume", 1.0)
-        plot_size_array = data.get("plot_size_em", [20, 10])
-        self.plot_size_em = ImVec2(plot_size_array[0], plot_size_array[1])
+    @staticmethod
+    def from_dict(data: JsonDict) -> "SoundWaveGuiParams":
+        r = SoundWaveGuiParams.model_validate(data)
+        return r
+
+    def add_time_marker(self, time_ratio: float):
+        """Add a time marker at the given ratio of the total duration."""
+        if not (0 <= time_ratio <= 1):
+            raise ValueError("time_ratio must be between 0 and 1")
+        self.time_markers.append(TimeMarker(time_ratio=time_ratio))
+        self.time_markers.sort(key=lambda marker: marker.time_ratio)  # Sort markers by time ratio
+
+    def remove_time_marker(self, marker: TimeMarker):
+        """Remove a time marker."""
+        self.time_markers.remove(marker)
+        self.time_markers.sort(key=lambda m: m.time_ratio)
 
 
 class SoundWavePlayerGui(AnyDataWithGui[SoundWave]):
@@ -92,7 +82,7 @@ class SoundWavePlayerGui(AnyDataWithGui[SoundWave]):
         return self.params.to_dict()
 
     def load_gui_options_from_json(self, data: JsonDict) -> None:
-        self.params.fill_from_dict(data)
+        self.params = SoundWaveGuiParams.from_dict(data)
 
     def _on_change(self, sound_wave: SoundWave) -> None:
         if self._sound_wave_player is not None:
@@ -117,13 +107,14 @@ class SoundWavePlayerGui(AnyDataWithGui[SoundWave]):
         from .audio_types import extract_flattened_channel
 
         for channel in range(sound_wave.nb_channels()):
+            from .audio_utils import downsample_wave_minmax
+
             channel_wave = extract_flattened_channel(sound_wave.wave, channel)
-            downsampled_wave = _downsample_wave_minmax(channel_wave, max_samples_on_plot)
+            downsampled_wave = downsample_wave_minmax(channel_wave, max_samples_on_plot)
             self._plotted_values.append(downsampled_wave)
         start = 0
         stop = sound_wave.duration()
-        step = (stop - start) / max_samples_on_plot
-        self._plotted_times = np.arange(start=start, stop=stop, step=step, dtype=np.float32)
+        self._plotted_times = np.linspace(start=start, stop=stop, num=max_samples_on_plot, dtype=np.float32)
 
     def _on_exit(self) -> None:
         if self._sound_wave_player is not None:
@@ -197,16 +188,13 @@ class SoundWavePlayerGui(AnyDataWithGui[SoundWave]):
         assert self._sound_wave_player is not None
         sound_wave = self.get_actual_value()
         with imgui_ctx.begin_horizontal("Position"):
-            # Use springs to center the text
-            imgui.spring()
             position = self._sound_wave_player.position_seconds()
             duration = sound_wave.duration()
             imgui.text(f"{self._format_time(position)} / {self._format_time(duration)}")
-            imgui.spring()
             _, self.params.show_time_as_seconds = imgui.checkbox("seconds", self.params.show_time_as_seconds)
 
     def _plot_waveform(self) -> None:
-        if self._plotted_values is None:
+        if self._plotted_values is None or self._plotted_times is None:
             return
 
         x_axis_flags = implot.AxisFlags_.auto_fit.value
@@ -231,13 +219,61 @@ class SoundWavePlayerGui(AnyDataWithGui[SoundWave]):
             implot.plot_line(f"Channel {channel}", self._plotted_times, self._plotted_values[channel])
             implot.pop_style_color()
 
-        # Add line / position
+        # Show markers
+        if self._sound_wave_player is not None:
+            for marker_idx, marker in enumerate(self.params.time_markers):
+                marker_time = TimeSeconds(marker.time_ratio * self._sound_wave_player.sound_wave.duration())
+                line_color = imgui.ImVec4(1.0, 1.0, 1.0, 1.0)
+                implot.drag_line_x(marker_idx, marker_time, line_color)
+                implot.tag_x(marker_time, line_color, marker.label)
+
+        # Add line / current player position
         if self._sound_wave_player is not None:
             x = self._sound_wave_player.position_seconds()
             line_color = imgui.ImVec4(1.0, 0.0, 0.0, 1.0)
-            changed, new_x, clicked, hovered, held = implot.drag_line_x(0, x, line_color)
+            drag_id = -1
+            changed, new_x, clicked, hovered, held = implot.drag_line_x(drag_id, x, line_color)
             if changed:
                 self._sound_wave_player.seek(TimeSeconds(new_x))
+
+    def _edit_markers(self):
+        if not self.params.show_markers or self._sound_wave_player is None:
+            return
+        imgui.separator_text("Markers")
+        has_position = self._sound_wave_player is not None
+        if has_position:
+            if imgui.button("Add marker"):
+                time_ratio = self._sound_wave_player.position_seconds() / self._sound_wave_player.sound_wave.duration()
+                self.params.add_time_marker(time_ratio)
+            imgui.set_item_tooltip("Add a marker at the current position")
+        imgui.begin_vertical("Markers")
+        marker_to_remove = None
+        for marker in self.params.time_markers:
+            with imgui_ctx.push_obj_id(marker):
+                imgui.begin_horizontal("Marker" + str(id(marker)))
+                marker_time = TimeSeconds(marker.time_ratio * self._sound_wave_player.sound_wave.duration())
+                label = f"{self._format_time(marker_time)}"
+                if imgui.button(label):
+                    self._sound_wave_player.seek(marker_time)
+                if imgui.is_item_hovered():
+                    imgui.set_tooltip("Click to seek to this marker")
+                imgui.set_next_item_width(hello_imgui.em_size(3))
+                _, marker.label = imgui.input_text("##marker_label", marker.label)
+
+                if imgui.button(icons_fontawesome_6.ICON_FA_TRASH):
+                    if imgui.is_key_down(imgui.Key.mod_shift):
+                        marker_to_remove = marker
+                imgui.set_item_tooltip("Shift+Click this button to remove marker")
+
+                if imgui.button(icons_fontawesome_6.ICON_FA_ARROWS_TO_DOT):
+                    self._sound_wave_player.seek(marker_time)
+                imgui.set_item_tooltip("Click to seek to this marker")
+
+            imgui.end_horizontal()
+        imgui.end_vertical()
+
+        if marker_to_remove is not None:
+            self.params.remove_time_marker(marker_to_remove)
 
     def present(self, sound_wave: SoundWave) -> None:
         imgui.text(
@@ -248,14 +284,23 @@ class SoundWavePlayerGui(AnyDataWithGui[SoundWave]):
 
         # _, self.params.can_select = imgui.checkbox("Select", self.params.can_select)
         assert self.params.plot_size_em is not None
-        plot_size_pixels = immapp.em_to_vec2(self.params.plot_size_em)
-        new_plot_size_pixels = immapp.show_resizable_plot_in_node_editor(
-            "Audio Waveform", plot_size_pixels, self._plot_waveform
+        self.params.plot_size_em = immapp.show_resizable_plot_in_node_editor_em(
+            "Audio Waveform", self.params.plot_size_em, self._plot_waveform
         )
-        self.params.plot_size_em = immapp.pixels_to_em(new_plot_size_pixels)
 
         if self._sound_wave_player is not None:
             self._sound_wave_player.volume = self.params.volume
-            with imgui_ctx.begin_vertical("ControlsAndPosition"):
-                self._show_controls()
-                self._show_position()
+            self._show_controls()
+            imgui.same_line()
+            self._show_position()
+            imgui.same_line()
+            _, self.params.show_markers = imgui.checkbox("Show markers", self.params.show_markers)
+
+        self._edit_markers()
+
+        if imgui.is_key_pressed(imgui.Key.space):
+            if self._sound_wave_player is not None:
+                if self._sound_wave_player.is_playing():
+                    self._sound_wave_player.pause()
+                else:
+                    self._sound_wave_player.play()

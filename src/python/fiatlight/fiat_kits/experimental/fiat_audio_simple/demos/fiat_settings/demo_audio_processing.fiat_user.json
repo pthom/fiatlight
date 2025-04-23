@@ -18,11 +18,26 @@
     "gui_options": {
         "set_pre_emphasis_factor": {
             "function_node_with_gui": {
-                "_inputs_expanded": true,
-                "_outputs_expanded": true,
-                "_doc_expanded": false,
-                "fiat_tuning_expanded": false,
-                "_internal_state_gui_expanded": true,
+                "_inputs_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_outputs_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_doc_expanded": {
+                    "inside_node": false,
+                    "focused": true
+                },
+                "fiat_tuning_expanded": {
+                    "inside_node": false,
+                    "focused": true
+                },
+                "_internal_state_gui_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
                 "_function_node": {
                     "inputs": {
                         "factor": {
@@ -31,7 +46,12 @@
                         }
                     },
                     "outputs": {}
-                }
+                },
+                "_backup_expanded_states": {
+                    "inside_node": null,
+                    "focused": null
+                },
+                "_focused_function_visible": false
             },
             "function_node": {
                 "inputs": {
@@ -45,11 +65,26 @@
         },
         "MicrophoneGui": {
             "function_node_with_gui": {
-                "_inputs_expanded": true,
-                "_outputs_expanded": true,
-                "_doc_expanded": true,
-                "fiat_tuning_expanded": false,
-                "_internal_state_gui_expanded": true,
+                "_inputs_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_outputs_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_doc_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "fiat_tuning_expanded": {
+                    "inside_node": false,
+                    "focused": true
+                },
+                "_internal_state_gui_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
                 "_function_node": {
                     "inputs": {},
                     "outputs": {
@@ -58,7 +93,12 @@
                             "expanded": false
                         }
                     }
-                }
+                },
+                "_backup_expanded_states": {
+                    "inside_node": null,
+                    "focused": null
+                },
+                "_focused_function_visible": false
             },
             "function_node": {
                 "inputs": {},
@@ -72,11 +112,26 @@
         },
         "evaluate_note": {
             "function_node_with_gui": {
-                "_inputs_expanded": true,
-                "_outputs_expanded": true,
-                "_doc_expanded": false,
-                "fiat_tuning_expanded": false,
-                "_internal_state_gui_expanded": true,
+                "_inputs_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_outputs_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_doc_expanded": {
+                    "inside_node": false,
+                    "focused": true
+                },
+                "fiat_tuning_expanded": {
+                    "inside_node": false,
+                    "focused": true
+                },
+                "_internal_state_gui_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
                 "_function_node": {
                     "inputs": {
                         "wave": {
@@ -89,8 +144,8 @@
                                     10.0
                                 ],
                                 "selection": {
-                                    "start": 0.5166439909297053,
-                                    "end": 1.5499319727891159
+                                    "start": 0.2438095238095238,
+                                    "end": 0.7314285714285714
                                 }
                             },
                             "expanded": false
@@ -110,7 +165,12 @@
                             "expanded": true
                         }
                     }
-                }
+                },
+                "_backup_expanded_states": {
+                    "inside_node": null,
+                    "focused": null
+                },
+                "_focused_function_visible": false
             },
             "function_node": {
                 "inputs": {
@@ -124,8 +184,8 @@
                                 10.0
                             ],
                             "selection": {
-                                "start": 0.5166439909297053,
-                                "end": 1.5499319727891159
+                                "start": 0.2438095238095238,
+                                "end": 0.7314285714285714
                             }
                         },
                         "expanded": false
@@ -149,11 +209,26 @@
         },
         "show_fundamental_freq_graph": {
             "function_node_with_gui": {
-                "_inputs_expanded": true,
-                "_outputs_expanded": true,
-                "_doc_expanded": true,
-                "fiat_tuning_expanded": false,
-                "_internal_state_gui_expanded": true,
+                "_inputs_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_outputs_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_doc_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "fiat_tuning_expanded": {
+                    "inside_node": false,
+                    "focused": true
+                },
+                "_internal_state_gui_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
                 "_function_node": {
                     "inputs": {
                         "wave": {
@@ -166,8 +241,8 @@
                                     10.0
                                 ],
                                 "selection": {
-                                    "start": 0.5166439909297053,
-                                    "end": 1.5499319727891159
+                                    "start": 0.2438095238095238,
+                                    "end": 0.7314285714285714
                                 }
                             },
                             "expanded": false
@@ -184,7 +259,12 @@
                             "expanded": true
                         }
                     }
-                }
+                },
+                "_backup_expanded_states": {
+                    "inside_node": null,
+                    "focused": null
+                },
+                "_focused_function_visible": false
             },
             "function_node": {
                 "inputs": {
@@ -198,8 +278,8 @@
                                 10.0
                             ],
                             "selection": {
-                                "start": 0.5166439909297053,
-                                "end": 1.5499319727891159
+                                "start": 0.2438095238095238,
+                                "end": 0.7314285714285714
                             }
                         },
                         "expanded": false
@@ -220,11 +300,26 @@
         },
         "show_harmonic_percussive_graph": {
             "function_node_with_gui": {
-                "_inputs_expanded": true,
-                "_outputs_expanded": true,
-                "_doc_expanded": true,
-                "fiat_tuning_expanded": false,
-                "_internal_state_gui_expanded": true,
+                "_inputs_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_outputs_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_doc_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "fiat_tuning_expanded": {
+                    "inside_node": false,
+                    "focused": true
+                },
+                "_internal_state_gui_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
                 "_function_node": {
                     "inputs": {
                         "wave": {
@@ -237,8 +332,8 @@
                                     10.0
                                 ],
                                 "selection": {
-                                    "start": 0.5166439909297053,
-                                    "end": 1.5499319727891159
+                                    "start": 0.2438095238095238,
+                                    "end": 0.7314285714285714
                                 }
                             },
                             "expanded": false
@@ -255,7 +350,12 @@
                             "expanded": true
                         }
                     }
-                }
+                },
+                "_backup_expanded_states": {
+                    "inside_node": null,
+                    "focused": null
+                },
+                "_focused_function_visible": false
             },
             "function_node": {
                 "inputs": {
@@ -269,8 +369,8 @@
                                 10.0
                             ],
                             "selection": {
-                                "start": 0.5166439909297053,
-                                "end": 1.5499319727891159
+                                "start": 0.2438095238095238,
+                                "end": 0.7314285714285714
                             }
                         },
                         "expanded": false

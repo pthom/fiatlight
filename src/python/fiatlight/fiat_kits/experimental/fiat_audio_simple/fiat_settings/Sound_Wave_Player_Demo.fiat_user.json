@@ -6,7 +6,7 @@
                     "name": "file_path",
                     "data": {
                         "type": "Primitive",
-                        "value": "/Users/pascal/dvp/OpenSource/ImGuiWork/_Bundle/fiatlight/priv_assets/audio/6 - Libera me.mp3"
+                        "value": "/Users/pascal/dvp/OpenSource/ImGuiWork/_Bundle/fiatlight/priv_assets/audio/magnificat-morales-tenor.mp3"
                     }
                 }
             }
@@ -15,11 +15,26 @@
     "gui_options": {
         "sound_wave_from_file": {
             "function_node_with_gui": {
-                "_inputs_expanded": true,
-                "_outputs_expanded": true,
-                "_doc_expanded": false,
-                "fiat_tuning_expanded": true,
-                "_internal_state_gui_expanded": true,
+                "_inputs_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_outputs_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_doc_expanded": {
+                    "inside_node": false,
+                    "focused": false
+                },
+                "fiat_tuning_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_internal_state_gui_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
                 "_function_node": {
                     "inputs": {
                         "file_path": {
@@ -30,22 +45,29 @@
                     "outputs": {
                         "0": {
                             "cb_options": {
-                                "show_time_as_seconds": false,
-                                "can_select": false,
-                                "volume": 1.0,
                                 "plot_size_em": [
-                                    43.95772171020508,
-                                    27.20906639099121
+                                    68.35771179199219,
+                                    20.875732421875
                                 ],
-                                "selection": {
-                                    "start": 81.70448979591836,
-                                    "end": 245.1134693877551
-                                }
+                                "show_time_as_seconds": false,
+                                "show_markers": true,
+                                "volume": 2.0,
+                                "time_markers": [
+                                    {
+                                        "time_ratio": 0.31006876828568475,
+                                        "label": "aria"
+                                    }
+                                ]
                             },
                             "expanded": true
                         }
                     }
-                }
+                },
+                "_backup_expanded_states": {
+                    "inside_node": null,
+                    "focused": null
+                },
+                "_focused_function_visible": true
             },
             "function_node": {
                 "inputs": {
@@ -57,17 +79,19 @@
                 "outputs": {
                     "0": {
                         "cb_options": {
-                            "show_time_as_seconds": false,
-                            "can_select": false,
-                            "volume": 1.0,
                             "plot_size_em": [
-                                43.95772171020508,
-                                27.20906639099121
+                                68.35771179199219,
+                                20.875732421875
                             ],
-                            "selection": {
-                                "start": 81.70448979591836,
-                                "end": 245.1134693877551
-                            }
+                            "show_time_as_seconds": false,
+                            "show_markers": true,
+                            "volume": 2.0,
+                            "time_markers": [
+                                {
+                                    "time_ratio": 0.31006876828568475,
+                                    "label": "aria"
+                                }
+                            ]
                         },
                         "expanded": true
                     }
