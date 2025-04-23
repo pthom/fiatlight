@@ -5,13 +5,13 @@ from fiatlight.fiat_core import FunctionWithGui
 from fiatlight.fiat_widgets import fontawesome_6_ctx, icons_fontawesome_6, fiat_osd, misc_widgets
 
 from .microphone_io import AudioProviderMic
-from .audio_types import SoundBlock, SoundWave, SoundStreamParams
+from .audio_types import SoundBlock, SoundWave, SoundRecordParams
 from fiatlight.fiat_togui.basemodel_gui import BaseModelGui
 
 
 class MicrophoneGui(FunctionWithGui):
     # Serialized options
-    _sound_stream_params_gui: BaseModelGui[SoundStreamParams]
+    _sound_stream_params_gui: BaseModelGui[SoundRecordParams]
     _live_plot_size_em: ImVec2
 
     # IO
@@ -34,8 +34,8 @@ class MicrophoneGui(FunctionWithGui):
         self.internal_state_gui = self._internal_gui
         self.on_heartbeat = self._on_heartbeat
 
-        self._sound_stream_params_gui = BaseModelGui(SoundStreamParams)
-        self._sound_stream_params_gui.value = SoundStreamParams()
+        self._sound_stream_params_gui = BaseModelGui(SoundRecordParams)
+        self._sound_stream_params_gui.value = SoundRecordParams()
 
         self._microphone_io = AudioProviderMic()
 
@@ -43,7 +43,7 @@ class MicrophoneGui(FunctionWithGui):
         self._sound_wave_being_recorded = None
         self._live_plot_size_em = ImVec2(20, 10)
 
-    def _sound_stream_params(self) -> SoundStreamParams:
+    def _sound_stream_params(self) -> SoundRecordParams:
         return self._sound_stream_params_gui.get_actual_value()
 
     def get_current_sound_wave(self) -> SoundWave | None:

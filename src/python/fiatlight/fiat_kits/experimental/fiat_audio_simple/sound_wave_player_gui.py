@@ -99,6 +99,7 @@ class SoundWavePlayerGui(AnyDataWithGui[SoundWave]):
         self.params.fill_from_dict(data)
 
     def _on_change(self, sound_wave: SoundWave) -> None:
+        sound_wave.wave = sound_wave.wave.flatten()
         if self._sound_wave_player is not None:
             is_same_wave = self._sound_wave_player.sound_wave is sound_wave
             if is_same_wave:

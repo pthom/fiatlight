@@ -62,7 +62,7 @@ class BlockSizesCommon(Enum):
 add_fiat_attributes(BlockSizesCommon, use_value_as_label=True)
 
 
-class SoundStreamParams(BaseModel):
+class SoundRecordParams(BaseModel):
     """A *small* subset of parameters for a sound stream
     (available in the sounddevice library)
     This simple audio library only supports mono sound.

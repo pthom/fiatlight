@@ -2,7 +2,7 @@ import sounddevice as sd  # type: ignore
 from typing import Any, Optional
 import logging
 from queue import Queue, Empty
-from .audio_types import SoundBlock, SoundStreamParams, SoundBlocksList, SampleRate
+from .audio_types import SoundBlock, SoundRecordParams, SoundBlocksList, SampleRate
 
 
 class MicrophoneBuffer:
@@ -56,7 +56,7 @@ class AudioProviderMic:
         self._audio_buffer = MicrophoneBuffer()
         self._sd_stream = None
 
-    def start(self, stream_params: SoundStreamParams) -> None:
+    def start(self, stream_params: SoundRecordParams) -> None:
         """Manually start the microphone input, when not using the context manager."""
         self._start_io(stream_params)
 
@@ -64,7 +64,7 @@ class AudioProviderMic:
         """Manually stop the microphone input, when not using the context manager."""
         self._stop_io()
 
-    def toggle(self, stream_params: SoundStreamParams) -> None:
+    def toggle(self, stream_params: SoundRecordParams) -> None:
         """Toggle the microphone input on/off."""
         if self.started():
             self.stop()
@@ -78,7 +78,7 @@ class AudioProviderMic:
     def get_buffer(self) -> MicrophoneBuffer:
         return self._audio_buffer
 
-    def _start_io(self, stream_params: SoundStreamParams) -> None:
+    def _start_io(self, stream_params: SoundRecordParams) -> None:
         try:
             self._sd_stream = sd.InputStream(
                 samplerate=int(stream_params.sample_rate.value),
