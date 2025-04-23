@@ -17,40 +17,16 @@ from fiatlight.fiat_widgets import (
     button_with_disable_flag,
 )
 from fiatlight.fiat_types import TimeSeconds, JsonDict
-from fiatlight.fiat_utils import fiat_math
 
 from .audio_types import SoundWave
 from .sound_wave_player import SoundWavePlayer
-
-
-@dataclass(frozen=True)
-class SoundWaveSelection:
-    start: TimeSeconds = TimeSeconds(-1)
-    end: TimeSeconds = TimeSeconds(-1)
-
-    def is_empty(self) -> bool:
-        return self.start == -1 or self.end == -1  # type: ignore
-
-    def to_dict(self) -> JsonDict:
-        return {
-            "start": self.start,
-            "end": self.end,
-        }
-
-    @staticmethod
-    def from_dict(data: JsonDict) -> "SoundWaveSelection":
-        start = data["start"]
-        end = data["end"]
-        return SoundWaveSelection(start, end)
 
 
 @dataclass
 class SoundWaveGuiParams:
     plot_size_em: ImVec2 | None = None
     show_time_as_seconds: bool = False
-    can_select: bool = False
     volume: float = 1.0
-    selection: SoundWaveSelection = SoundWaveSelection()
 
     def __post_init__(self) -> None:
         if self.plot_size_em is None:
@@ -60,19 +36,15 @@ class SoundWaveGuiParams:
         assert self.plot_size_em is not None
         return {
             "show_time_as_seconds": self.show_time_as_seconds,
-            "can_select": self.can_select,
             "volume": self.volume,
             "plot_size_em": [self.plot_size_em.x, self.plot_size_em.y],
-            "selection": self.selection.to_dict() if self.selection is not None else None,
         }
 
     def fill_from_dict(self, data: JsonDict) -> None:
         self.show_time_as_seconds = data.get("show_time_as_seconds", True)
-        self.can_select = data.get("can_select", False)
         self.volume = data.get("volume", 1.0)
         plot_size_array = data.get("plot_size_em", [20, 10])
         self.plot_size_em = ImVec2(plot_size_array[0], plot_size_array[1])
-        self.selection = SoundWaveSelection.from_dict(data["selection"])
 
 
 class SoundWavePlayerGui(AnyDataWithGui[SoundWave]):
@@ -109,11 +81,9 @@ class SoundWavePlayerGui(AnyDataWithGui[SoundWave]):
             self._sound_wave_player = None
         if sound_wave.is_empty():
             return
-        self._sound_wave_gui_resampled = sound_wave._rough_resample_to_max_samples(max_samples=4000)
+        max_samples_on_plot = 40000
+        self._sound_wave_gui_resampled = sound_wave._rough_resample_to_max_samples(max_samples_on_plot)
         self._sound_wave_player = SoundWavePlayer(sound_wave)
-        selection_start = TimeSeconds(sound_wave.duration() * 0.25)
-        selection_end = TimeSeconds(sound_wave.duration() * 0.75)
-        self.params.selection = SoundWaveSelection(selection_start, selection_end)
 
     def _on_exit(self) -> None:
         if self._sound_wave_player is not None:
@@ -195,48 +165,6 @@ class SoundWavePlayerGui(AnyDataWithGui[SoundWave]):
             imgui.spring()
             _, self.params.show_time_as_seconds = imgui.checkbox("seconds", self.params.show_time_as_seconds)
 
-    def _plot_selection(self) -> None:
-        """Unused"""
-        sound_wave = self._sound_wave_gui_resampled
-        if sound_wave is None:
-            return
-        selection_line_color = imgui.ImVec4(0.0, 1.0, 0.0, 1.0)
-
-        def draw_selection_bg() -> None:
-            if self.params.selection is None:
-                return
-            selection_bg_color = imgui.ImVec4(0.0, 1.0, 0.0, 0.2)
-            selection_bg_color2 = imgui.color_convert_float4_to_u32(selection_bg_color)
-            pos = implot.get_plot_pos()
-            size = implot.get_plot_size()
-            y1 = pos.y
-            y2 = pos.y + size.y
-            k1 = fiat_math.unlerp(0, sound_wave.duration(), self.params.selection.start)
-            k2 = fiat_math.unlerp(0, sound_wave.duration(), self.params.selection.end)
-            x1 = fiat_math.lerp(pos.x, pos.x + size.x, k1)
-            x2 = fiat_math.lerp(pos.x, pos.x + size.x, k2)
-            tl = ImVec2(x1, y1)
-            br = ImVec2(x2, y2)
-            implot.get_plot_draw_list().add_rect_filled(tl, br, selection_bg_color2)
-
-        draw_selection_bg()
-
-        if self.params.selection is None:
-            return
-
-        sel_start = self.params.selection.start
-        changed_1, new_sel_start, clicked, hovered, held = implot.drag_line_x(1, sel_start, selection_line_color)
-
-        sel_end = self.params.selection.end
-        changed_2, new_sel_end, clicked, hovered, held = implot.drag_line_x(2, sel_end, selection_line_color)
-
-        if changed_1 or changed_2:
-            if new_sel_end < new_sel_start:
-                new_sel_end, new_sel_start = new_sel_start, new_sel_end
-            new_sel_start = fiat_math.clamp(new_sel_start, 0, sound_wave.duration())
-            new_sel_end = fiat_math.clamp(new_sel_end, 0, sound_wave.duration())
-            self.params.selection = SoundWaveSelection(new_sel_start, new_sel_end)  # type: ignore
-
     def _plot_waveform(self) -> None:
         sound_wave = self._sound_wave_gui_resampled
         if sound_wave is None:
@@ -258,10 +186,6 @@ class SoundWavePlayerGui(AnyDataWithGui[SoundWave]):
             changed, new_x, clicked, hovered, held = implot.drag_line_x(0, x, line_color)
             if changed:
                 self._sound_wave_player.seek(TimeSeconds(new_x))
-
-        # Add rect / selection
-        if self._sound_wave_player is not None and self.params.can_select:
-            self._plot_selection()
 
         # nice channel colors:
         channel_colors = [
