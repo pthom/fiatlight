@@ -17,7 +17,7 @@ import time
 import logging
 import sounddevice as sd  # type: ignore
 from typing import Optional
-from fiatlight.fiat_kits.fiat_implot import FloatMatrix_Dim1
+from .audio_types import SoundData
 from fiatlight.fiat_types import TimeSeconds
 import threading
 
@@ -104,13 +104,16 @@ class SoundWavePlayer:
             if self._stream is not None:
                 self._stream.close()
             self._stream = sd.OutputStream(
-                samplerate=self.sound_wave.sample_rate, channels=1, callback=self._callback, blocksize=1024
+                samplerate=self.sound_wave.sample_rate,
+                channels=self.sound_wave.nb_channels(),
+                callback=self._callback,
+                blocksize=1024,
             )
         except Exception as e:
             logging.error(f"Error initializing the stream: {str(e)}")
             raise RuntimeError("Stream initialization failed") from e
 
-    def _callback(self, outdata: FloatMatrix_Dim1, nb_asked_frames: int, _time: Any, _status: sd.CallbackFlags) -> None:
+    def _callback(self, outdata: SoundData, nb_asked_frames: int, _time: Any, _status: sd.CallbackFlags) -> None:
         with self._lock:
             if self._stop_flag:
                 raise sd.CallbackStop

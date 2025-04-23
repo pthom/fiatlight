@@ -99,7 +99,6 @@ class SoundWavePlayerGui(AnyDataWithGui[SoundWave]):
         self.params.fill_from_dict(data)
 
     def _on_change(self, sound_wave: SoundWave) -> None:
-        sound_wave.wave = sound_wave.wave.flatten()
         if self._sound_wave_player is not None:
             is_same_wave = self._sound_wave_player.sound_wave is sound_wave
             if is_same_wave:
@@ -264,10 +263,23 @@ class SoundWavePlayerGui(AnyDataWithGui[SoundWave]):
         if self._sound_wave_player is not None and self.params.can_select:
             self._plot_selection()
 
-        implot.plot_line("##Waveform", sound_wave.time_array(), sound_wave.wave)
+        # nice channel colors:
+        channel_colors = [
+            imgui.ImVec4(0.20, 0.60, 1.00, 1.0),  # Soft Blue
+            imgui.ImVec4(0.10, 0.90, 0.50, 1.0),  # Mint Green
+            imgui.ImVec4(0.90, 0.40, 0.70, 1.0),  # Rose
+            imgui.ImVec4(1.00, 0.80, 0.30, 1.0),  # Warm Yellow
+            imgui.ImVec4(1.00, 0.45, 0.45, 1.0),  # Soft Coral
+        ]
+        for channel in range(sound_wave.nb_channels()):
+            implot.push_style_color(implot.Col_.line.value, channel_colors[channel % len(channel_colors)])
+            implot.plot_line(f"Channel {channel}", sound_wave.time_array(), sound_wave.wave_for_channel(channel))
+            implot.pop_style_color()
 
     def present(self, sound_wave: SoundWave) -> None:
-        imgui.text(f"Duration: {sound_wave.duration():.2f} s, Sample Rate: {sound_wave.sample_rate} Hz")
+        imgui.text(
+            f"Duration: {sound_wave.duration():.2f} s, Sample Rate: {sound_wave.sample_rate} Hz, Channels: {sound_wave.nb_channels()}"
+        )
         imgui.set_next_item_width(hello_imgui.em_size(10))
         _, self.params.volume = imgui.slider_float("Volume", self.params.volume, 0.0, SoundWavePlayer.VOLUME_MAX)
 

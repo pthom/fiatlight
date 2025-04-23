@@ -94,18 +94,22 @@ class SoundWave:
     sample_rate: SampleRate
     _time_array: FloatMatrix_Dim1 | None = None  # cache for time array
     _max_intensity, _min_intensity = 1.0, -1.0
+    _waves_per_channel: list[SoundData] | None = None  # cache for waves per channel (flattened)
 
     def __post_init__(self) -> None:
         if self.is_empty():
             return
 
-        # SoundWave only supports mono
-        if self.wave.ndim == 2 and self.wave.shape[1] > 1:
-            self.wave = self.wave.mean(axis=1)
-            # remove the second dimension
-            self.wave = self.wave.squeeze()
-
         self._time_array = np.arange(0, self.duration(), 1 / self.sample_rate, self.wave.dtype)  # type: ignore
+
+        # Cache the waves per channel (flattened)
+        self._waves_per_channel = []
+        if len(self.wave.shape) > 1:
+            for i in range(self.wave.shape[1]):
+                self._waves_per_channel.append(self.wave[:, i].flatten())
+        else:
+            self._waves_per_channel.append(self.wave)
+
         self._min_intensity = self.wave.min()
         self._max_intensity = self.wave.max()
 
@@ -119,6 +123,15 @@ class SoundWave:
 
     def nb_samples(self) -> int:
         return len(self.wave)
+
+    def nb_channels(self) -> int:
+        if len(self.wave.shape) == 1:
+            return 1
+        return self.wave.shape[1]
+
+    def wave_for_channel(self, channel: int) -> SoundData:
+        assert 0 <= channel < self.nb_channels()
+        return self._waves_per_channel[channel]
 
     def is_empty(self) -> bool:
         return self.wave.size == 0
@@ -140,13 +153,10 @@ class SoundWave:
         return self._time_array  # noqa
 
     def __str__(self) -> str:
-        return f"{self.duration():.2f}s at {self.sample_rate / 1000:.1f} kHz"
+        return f"{self.duration():.2f}s, {self.nb_channels()} chan,  {self.sample_rate / 1000:.1f} kHz"
 
 
 def sound_wave_from_file(file_path: AudioPath) -> SoundWave:
     """Load a sound wave from a file."""
     wave, sample_rate = soundfile.read(file_path)
-    # Convert to mono if necessary
-    if wave.ndim == 2:
-        wave = wave.mean(axis=1)
     return SoundWave(wave, sample_rate)

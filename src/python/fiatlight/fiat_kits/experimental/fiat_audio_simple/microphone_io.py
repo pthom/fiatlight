@@ -82,7 +82,7 @@ class AudioProviderMic:
         try:
             self._sd_stream = sd.InputStream(
                 samplerate=int(stream_params.sample_rate.value),
-                channels=1,  # we only support mono!
+                channels=1,  # we only support mono recording
                 callback=self._audio_callback,
                 blocksize=stream_params.block_size.value,
             )
