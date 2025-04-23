@@ -17,9 +17,32 @@ from fiatlight.fiat_widgets import (
     button_with_disable_flag,
 )
 from fiatlight.fiat_types import TimeSeconds, JsonDict
+from numpy.typing import NDArray
+import numpy as np
 
 from .audio_types import SoundWave
 from .sound_wave_player import SoundWavePlayer
+
+
+def _downsample_wave_minmax(wave: np.ndarray, max_samples: int) -> np.ndarray:
+    """Downsample using min/max strategy for plotting.
+    Alternates between min and max per chunk, to simulate waveform spikes.
+    Only supports 1D arrays (flattened audio channel)."""
+    assert wave.ndim == 1
+    if len(wave) <= max_samples:
+        return wave
+
+    chunk_size = int(np.ceil(len(wave) / max_samples))
+    downsampled = []
+    use_min = True
+
+    for i in range(0, len(wave), chunk_size):
+        chunk = wave[i : i + chunk_size]
+        val = chunk.min() if use_min else chunk.max()
+        downsampled.append(val)
+        use_min = not use_min
+
+    return np.array(downsampled)
 
 
 @dataclass
@@ -52,8 +75,9 @@ class SoundWavePlayerGui(AnyDataWithGui[SoundWave]):
 
     params: SoundWaveGuiParams
     _sound_wave_player: SoundWavePlayer | None = None
-    # A sound wave with fewer samples, for faster plotting
-    _sound_wave_gui_resampled: SoundWave | None = None
+    # Sound wave per channel, with fewer samples, for faster plotting
+    _plotted_values: list[NDArray[np.float32]] | None = None
+    _plotted_times: NDArray[np.float32] | None = None
 
     def __init__(self) -> None:
         super().__init__(SoundWave)
@@ -81,9 +105,25 @@ class SoundWavePlayerGui(AnyDataWithGui[SoundWave]):
             self._sound_wave_player = None
         if sound_wave.is_empty():
             return
-        max_samples_on_plot = 40000
-        self._sound_wave_gui_resampled = sound_wave._rough_resample_to_max_samples(max_samples_on_plot)
+
+        self._cache_plotted_wave(sound_wave)
+
         self._sound_wave_player = SoundWavePlayer(sound_wave)
+
+    def _cache_plotted_wave(self, sound_wave: SoundWave):
+        width_pixels = self.params.plot_size_em.x * hello_imgui.em_size()
+        max_samples_on_plot = int(width_pixels * 4)
+        self._plotted_values = []
+        from .audio_types import extract_flattened_channel
+
+        for channel in range(sound_wave.nb_channels()):
+            channel_wave = extract_flattened_channel(sound_wave.wave, channel)
+            downsampled_wave = _downsample_wave_minmax(channel_wave, max_samples_on_plot)
+            self._plotted_values.append(downsampled_wave)
+        start = 0
+        stop = sound_wave.duration()
+        step = (stop - start) / max_samples_on_plot
+        self._plotted_times = np.arange(start=start, stop=stop, step=step, dtype=np.float32)
 
     def _on_exit(self) -> None:
         if self._sound_wave_player is not None:
@@ -166,8 +206,7 @@ class SoundWavePlayerGui(AnyDataWithGui[SoundWave]):
             _, self.params.show_time_as_seconds = imgui.checkbox("seconds", self.params.show_time_as_seconds)
 
     def _plot_waveform(self) -> None:
-        sound_wave = self._sound_wave_gui_resampled
-        if sound_wave is None:
+        if self._plotted_values is None:
             return
 
         x_axis_flags = implot.AxisFlags_.auto_fit.value
@@ -179,6 +218,19 @@ class SoundWavePlayerGui(AnyDataWithGui[SoundWave]):
             implot.get_style().use24_hour_clock = True
             implot.setup_axis_scale(implot.ImAxis_.x1.value, implot.Scale_.time.value)
 
+        # nice channel colors:
+        channel_colors = [
+            imgui.ImVec4(0.20, 0.60, 1.00, 0.8),  # Soft Blue
+            imgui.ImVec4(0.10, 0.90, 0.50, 0.8),  # Mint Green
+            imgui.ImVec4(0.90, 0.40, 0.70, 1.0),  # Rose
+            imgui.ImVec4(1.00, 0.80, 0.30, 1.0),  # Warm Yellow
+            imgui.ImVec4(1.00, 0.45, 0.45, 1.0),  # Soft Coral
+        ]
+        for channel in range(len(self._plotted_values)):
+            implot.push_style_color(implot.Col_.line.value, channel_colors[channel % len(channel_colors)])
+            implot.plot_line(f"Channel {channel}", self._plotted_times, self._plotted_values[channel])
+            implot.pop_style_color()
+
         # Add line / position
         if self._sound_wave_player is not None:
             x = self._sound_wave_player.position_seconds()
@@ -186,19 +238,6 @@ class SoundWavePlayerGui(AnyDataWithGui[SoundWave]):
             changed, new_x, clicked, hovered, held = implot.drag_line_x(0, x, line_color)
             if changed:
                 self._sound_wave_player.seek(TimeSeconds(new_x))
-
-        # nice channel colors:
-        channel_colors = [
-            imgui.ImVec4(0.20, 0.60, 1.00, 1.0),  # Soft Blue
-            imgui.ImVec4(0.10, 0.90, 0.50, 1.0),  # Mint Green
-            imgui.ImVec4(0.90, 0.40, 0.70, 1.0),  # Rose
-            imgui.ImVec4(1.00, 0.80, 0.30, 1.0),  # Warm Yellow
-            imgui.ImVec4(1.00, 0.45, 0.45, 1.0),  # Soft Coral
-        ]
-        for channel in range(sound_wave.nb_channels()):
-            implot.push_style_color(implot.Col_.line.value, channel_colors[channel % len(channel_colors)])
-            implot.plot_line(f"Channel {channel}", sound_wave.time_array(), sound_wave.wave_for_channel(channel))
-            implot.pop_style_color()
 
     def present(self, sound_wave: SoundWave) -> None:
         imgui.text(
