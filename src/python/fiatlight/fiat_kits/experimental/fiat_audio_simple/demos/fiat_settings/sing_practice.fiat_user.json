@@ -1,0 +1,304 @@
+{
+    "user_inputs": {
+        "functions_nodes": {
+            "sound_wave_from_file": {
+                "file_path": {
+                    "name": "file_path",
+                    "data": {
+                        "type": "Primitive",
+                        "value": "/Users/pascal/dvp/OpenSource/ImGuiWork/_Bundle/fiatlight/priv_assets/audio/magnificat-morales-tenor.mp3"
+                    }
+                }
+            },
+            "apply_sound_transform": {
+                "sound_transform": {
+                    "name": "sound_transform",
+                    "data": {
+                        "type": "Optional",
+                        "value": {
+                            "type": "Pydantic",
+                            "value": {
+                                "pitch_semitones": 0.0,
+                                "tempo_ratio": 1.0
+                            }
+                        }
+                    }
+                }
+            },
+            "gui": {}
+        }
+    },
+    "gui_options": {
+        "sound_wave_from_file": {
+            "function_node_with_gui": {
+                "_inputs_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_outputs_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_doc_expanded": {
+                    "inside_node": false,
+                    "focused": true
+                },
+                "fiat_tuning_expanded": {
+                    "inside_node": false,
+                    "focused": true
+                },
+                "_internal_state_gui_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_function_node": {
+                    "inputs": {
+                        "file_path": {
+                            "cb_options": {},
+                            "expanded": true
+                        }
+                    },
+                    "outputs": {
+                        "0": {
+                            "cb_options": {
+                                "plot_size_em": [
+                                    20.0,
+                                    10.0
+                                ],
+                                "show_time_as_seconds": false,
+                                "show_markers": false,
+                                "volume": 1.0,
+                                "time_markers": []
+                            },
+                            "expanded": false
+                        }
+                    }
+                },
+                "_backup_expanded_states": {
+                    "inside_node": null,
+                    "focused": null
+                },
+                "_focused_function_visible": false
+            },
+            "function_node": {
+                "inputs": {
+                    "file_path": {
+                        "cb_options": {},
+                        "expanded": true
+                    }
+                },
+                "outputs": {
+                    "0": {
+                        "cb_options": {
+                            "plot_size_em": [
+                                20.0,
+                                10.0
+                            ],
+                            "show_time_as_seconds": false,
+                            "show_markers": false,
+                            "volume": 1.0,
+                            "time_markers": []
+                        },
+                        "expanded": false
+                    }
+                }
+            }
+        },
+        "apply_sound_transform": {
+            "function_node_with_gui": {
+                "_inputs_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_outputs_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_doc_expanded": {
+                    "inside_node": false,
+                    "focused": true
+                },
+                "fiat_tuning_expanded": {
+                    "inside_node": false,
+                    "focused": true
+                },
+                "_internal_state_gui_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_function_node": {
+                    "inputs": {
+                        "wave": {
+                            "cb_options": {
+                                "plot_size_em": [
+                                    20.0,
+                                    10.0
+                                ],
+                                "show_time_as_seconds": false,
+                                "show_markers": false,
+                                "volume": 1.0,
+                                "time_markers": []
+                            },
+                            "expanded": false
+                        },
+                        "sound_transform": {
+                            "cb_options": {},
+                            "expanded": false
+                        }
+                    },
+                    "outputs": {
+                        "0": {
+                            "cb_options": {
+                                "plot_size_em": [
+                                    77.22264862060547,
+                                    16.723291397094727
+                                ],
+                                "show_time_as_seconds": false,
+                                "show_markers": true,
+                                "volume": 1.0,
+                                "time_markers": [
+                                    {
+                                        "time_ratio": 0.0,
+                                        "label": "S"
+                                    },
+                                    {
+                                        "time_ratio": 0.027733092503222045,
+                                        "label": "A 40"
+                                    },
+                                    {
+                                        "time_ratio": 0.0878549245524417,
+                                        "label": "B"
+                                    },
+                                    {
+                                        "time_ratio": 0.1392948413790346,
+                                        "label": "C"
+                                    },
+                                    {
+                                        "time_ratio": 0.18576752691699827,
+                                        "label": "D"
+                                    },
+                                    {
+                                        "time_ratio": 0.24751787263991196,
+                                        "label": "E"
+                                    },
+                                    {
+                                        "time_ratio": 0.33801731289805176,
+                                        "label": "F"
+                                    }
+                                ]
+                            },
+                            "expanded": true
+                        }
+                    }
+                },
+                "_backup_expanded_states": {
+                    "inside_node": null,
+                    "focused": null
+                },
+                "_focused_function_visible": false
+            },
+            "function_node": {
+                "inputs": {
+                    "wave": {
+                        "cb_options": {
+                            "plot_size_em": [
+                                20.0,
+                                10.0
+                            ],
+                            "show_time_as_seconds": false,
+                            "show_markers": false,
+                            "volume": 1.0,
+                            "time_markers": []
+                        },
+                        "expanded": false
+                    },
+                    "sound_transform": {
+                        "cb_options": {},
+                        "expanded": false
+                    }
+                },
+                "outputs": {
+                    "0": {
+                        "cb_options": {
+                            "plot_size_em": [
+                                77.22264862060547,
+                                16.723291397094727
+                            ],
+                            "show_time_as_seconds": false,
+                            "show_markers": true,
+                            "volume": 1.0,
+                            "time_markers": [
+                                {
+                                    "time_ratio": 0.0,
+                                    "label": "S"
+                                },
+                                {
+                                    "time_ratio": 0.027733092503222045,
+                                    "label": "A 40"
+                                },
+                                {
+                                    "time_ratio": 0.0878549245524417,
+                                    "label": "B"
+                                },
+                                {
+                                    "time_ratio": 0.1392948413790346,
+                                    "label": "C"
+                                },
+                                {
+                                    "time_ratio": 0.18576752691699827,
+                                    "label": "D"
+                                },
+                                {
+                                    "time_ratio": 0.24751787263991196,
+                                    "label": "E"
+                                },
+                                {
+                                    "time_ratio": 0.33801731289805176,
+                                    "label": "F"
+                                }
+                            ]
+                        },
+                        "expanded": true
+                    }
+                }
+            }
+        },
+        "gui": {
+            "function_node_with_gui": {
+                "_inputs_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_outputs_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_doc_expanded": {
+                    "inside_node": false,
+                    "focused": true
+                },
+                "fiat_tuning_expanded": {
+                    "inside_node": false,
+                    "focused": true
+                },
+                "_internal_state_gui_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_function_node": {
+                    "inputs": {},
+                    "outputs": {}
+                },
+                "_backup_expanded_states": {
+                    "inside_node": null,
+                    "focused": null
+                },
+                "_focused_function_visible": false
+            },
+            "function_node": {
+                "inputs": {},
+                "outputs": {}
+            }
+        }
+    }
+}
