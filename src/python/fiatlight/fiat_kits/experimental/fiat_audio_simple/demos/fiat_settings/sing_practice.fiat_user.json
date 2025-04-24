@@ -66,7 +66,6 @@
                                     10.0
                                 ],
                                 "show_time_as_seconds": false,
-                                "show_markers": false,
                                 "volume": 1.0,
                                 "time_markers": []
                             },
@@ -95,7 +94,6 @@
                                 10.0
                             ],
                             "show_time_as_seconds": false,
-                            "show_markers": false,
                             "volume": 1.0,
                             "time_markers": []
                         },
@@ -135,7 +133,6 @@
                                     10.0
                                 ],
                                 "show_time_as_seconds": false,
-                                "show_markers": false,
                                 "volume": 1.0,
                                 "time_markers": []
                             },
@@ -143,23 +140,26 @@
                         },
                         "sound_transform": {
                             "cb_options": {},
-                            "expanded": false
+                            "expanded": true
                         }
                     },
                     "outputs": {
                         "0": {
                             "cb_options": {
                                 "plot_size_em": [
-                                    77.22264862060547,
-                                    16.723291397094727
+                                    60.86249923706055,
+                                    17.39562225341797
                                 ],
                                 "show_time_as_seconds": false,
-                                "show_markers": true,
                                 "volume": 1.0,
                                 "time_markers": [
                                     {
                                         "time_ratio": 0.0,
                                         "label": "S"
+                                    },
+                                    {
+                                        "time_ratio": 0.0,
+                                        "label": ""
                                     },
                                     {
                                         "time_ratio": 0.027733092503222045,
@@ -172,6 +172,10 @@
                                     {
                                         "time_ratio": 0.1392948413790346,
                                         "label": "C"
+                                    },
+                                    {
+                                        "time_ratio": 0.13933247108392366,
+                                        "label": ""
                                     },
                                     {
                                         "time_ratio": 0.18576752691699827,
@@ -206,7 +210,6 @@
                                 10.0
                             ],
                             "show_time_as_seconds": false,
-                            "show_markers": false,
                             "volume": 1.0,
                             "time_markers": []
                         },
@@ -214,23 +217,26 @@
                     },
                     "sound_transform": {
                         "cb_options": {},
-                        "expanded": false
+                        "expanded": true
                     }
                 },
                 "outputs": {
                     "0": {
                         "cb_options": {
                             "plot_size_em": [
-                                77.22264862060547,
-                                16.723291397094727
+                                60.86249923706055,
+                                17.39562225341797
                             ],
                             "show_time_as_seconds": false,
-                            "show_markers": true,
                             "volume": 1.0,
                             "time_markers": [
                                 {
                                     "time_ratio": 0.0,
                                     "label": "S"
+                                },
+                                {
+                                    "time_ratio": 0.0,
+                                    "label": ""
                                 },
                                 {
                                     "time_ratio": 0.027733092503222045,
@@ -243,6 +249,10 @@
                                 {
                                     "time_ratio": 0.1392948413790346,
                                     "label": "C"
+                                },
+                                {
+                                    "time_ratio": 0.13933247108392366,
+                                    "label": ""
                                 },
                                 {
                                     "time_ratio": 0.18576752691699827,

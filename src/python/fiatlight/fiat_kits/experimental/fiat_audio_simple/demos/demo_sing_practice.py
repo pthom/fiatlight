@@ -22,10 +22,34 @@ class SoundTransformParams(BaseModel):
         return math.fabs(self.pitch_semitones) < 0.01 and math.fabs(self.tempo_ratio - 1.0) < 0.01
 
 
-def apply_sound_transform(wave: SoundWave, sound_transform: SoundTransformParams | None = None) -> SoundWave:
-    """Apply pitch and tempo transformations to a sound wave.
-    This is slow, so you have to invoke it manually.
-    """
+def apply_sound_transform_pedalboard(
+    wave: SoundWave,
+    sound_transform: SoundTransformParams | None = None,
+) -> SoundWave:
+    from pedalboard import time_stretch
+    import numpy as np
+
+    if (
+        sound_transform is None
+        or wave.is_empty()
+        or (sound_transform.tempo_ratio == 1.0 and sound_transform.pitch_semitones == 0.0)
+    ):
+        return wave
+
+    audio = wave.wave.astype(np.float32)
+
+    processed = time_stretch(
+        audio,
+        samplerate=float(wave.sample_rate),
+        stretch_factor=sound_transform.tempo_ratio,
+        pitch_shift_in_semitones=sound_transform.pitch_semitones,
+        high_quality=True,
+    )
+
+    return SoundWave(processed.astype(np.float32), wave.sample_rate)
+
+
+def apply_sound_transform_librosa(wave: SoundWave, sound_transform: SoundTransformParams | None = None) -> SoundWave:
     import librosa
 
     if sound_transform is None or wave.is_empty() or sound_transform.is_default():
@@ -45,6 +69,15 @@ def apply_sound_transform(wave: SoundWave, sound_transform: SoundTransformParams
     transformed_wave = np.stack(processed_channels, axis=0).T.astype(np.float32)
 
     return SoundWave(transformed_wave, wave.sample_rate)
+
+
+def apply_sound_transform(wave: SoundWave, sound_transform: SoundTransformParams | None = None) -> SoundWave:
+    """Apply pitch and tempo transformations to a sound wave.
+    This is slow, so you have to invoke it manually.
+    """
+    # pedalboard is twice slower than librosa in this case!
+    return apply_sound_transform_librosa(wave, sound_transform)
+    # return apply_sound_transform_pedalboard(wave, sound_transform)
 
 
 class SoundTransformParamsGui(BaseModelGui[SoundTransformParams]):
@@ -84,5 +117,3 @@ You can also set markers to indicate the start of a section you want to practice
 """
 )
 fl.run(graph, app_name="sing_practice")
-
-# fl.run([sound_wave_from_file, apply_sound_transform], app_name="sing_practice")
