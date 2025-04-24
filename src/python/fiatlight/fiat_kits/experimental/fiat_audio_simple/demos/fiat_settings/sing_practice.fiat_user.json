@@ -19,7 +19,7 @@
                             "type": "Pydantic",
                             "value": {
                                 "pitch_semitones": 0.0,
-                                "tempo_ratio": 1.0
+                                "tempo_ratio": 1.8299992084503174
                             }
                         }
                     }
@@ -66,6 +66,7 @@
                                     10.0
                                 ],
                                 "show_time_as_seconds": false,
+                                "show_markers": false,
                                 "volume": 1.0,
                                 "time_markers": []
                             },
@@ -94,6 +95,7 @@
                                 10.0
                             ],
                             "show_time_as_seconds": false,
+                            "show_markers": false,
                             "volume": 1.0,
                             "time_markers": []
                         },
@@ -133,6 +135,7 @@
                                     10.0
                                 ],
                                 "show_time_as_seconds": false,
+                                "show_markers": false,
                                 "volume": 1.0,
                                 "time_markers": []
                             },
@@ -151,15 +154,12 @@
                                     17.39562225341797
                                 ],
                                 "show_time_as_seconds": false,
+                                "show_markers": true,
                                 "volume": 1.0,
                                 "time_markers": [
                                     {
                                         "time_ratio": 0.0,
                                         "label": "S"
-                                    },
-                                    {
-                                        "time_ratio": 0.0,
-                                        "label": ""
                                     },
                                     {
                                         "time_ratio": 0.027733092503222045,
@@ -210,6 +210,7 @@
                                 10.0
                             ],
                             "show_time_as_seconds": false,
+                            "show_markers": false,
                             "volume": 1.0,
                             "time_markers": []
                         },
@@ -228,15 +229,12 @@
                                 17.39562225341797
                             ],
                             "show_time_as_seconds": false,
+                            "show_markers": true,
                             "volume": 1.0,
                             "time_markers": [
                                 {
                                     "time_ratio": 0.0,
                                     "label": "S"
-                                },
-                                {
-                                    "time_ratio": 0.0,
-                                    "label": ""
                                 },
                                 {
                                     "time_ratio": 0.027733092503222045,
