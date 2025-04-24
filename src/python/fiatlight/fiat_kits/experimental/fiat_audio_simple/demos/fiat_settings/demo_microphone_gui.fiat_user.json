@@ -20,7 +20,7 @@
                     "focused": true
                 },
                 "fiat_tuning_expanded": {
-                    "inside_node": true,
+                    "inside_node": false,
                     "focused": true
                 },
                 "_internal_state_gui_expanded": {

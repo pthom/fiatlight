@@ -1,0 +1,150 @@
+{
+    "user_inputs": {
+        "functions_nodes": {
+            "MicrophoneGui": {},
+            "add_chorus_effect": {}
+        }
+    },
+    "gui_options": {
+        "MicrophoneGui": {
+            "function_node_with_gui": {
+                "_inputs_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_outputs_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_doc_expanded": {
+                    "inside_node": false,
+                    "focused": true
+                },
+                "fiat_tuning_expanded": {
+                    "inside_node": false,
+                    "focused": true
+                },
+                "_internal_state_gui_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_function_node": {
+                    "inputs": {},
+                    "outputs": {
+                        "0": {
+                            "cb_options": {},
+                            "expanded": true
+                        }
+                    }
+                },
+                "_backup_expanded_states": {
+                    "inside_node": null,
+                    "focused": null
+                },
+                "_focused_function_visible": false
+            },
+            "function_node": {
+                "inputs": {},
+                "outputs": {
+                    "0": {
+                        "cb_options": {},
+                        "expanded": true
+                    }
+                }
+            }
+        },
+        "add_chorus_effect": {
+            "function_node_with_gui": {
+                "_inputs_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_outputs_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_doc_expanded": {
+                    "inside_node": false,
+                    "focused": true
+                },
+                "fiat_tuning_expanded": {
+                    "inside_node": false,
+                    "focused": true
+                },
+                "_internal_state_gui_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_function_node": {
+                    "inputs": {
+                        "wave": {
+                            "cb_options": {
+                                "plot_size_em": [
+                                    20.0,
+                                    10.0
+                                ],
+                                "show_time_as_seconds": false,
+                                "show_markers": false,
+                                "volume": 1.0,
+                                "time_markers": []
+                            },
+                            "expanded": false
+                        }
+                    },
+                    "outputs": {
+                        "0": {
+                            "cb_options": {
+                                "plot_size_em": [
+                                    20.0,
+                                    10.0
+                                ],
+                                "show_time_as_seconds": false,
+                                "show_markers": false,
+                                "volume": 1.0,
+                                "time_markers": []
+                            },
+                            "expanded": true
+                        }
+                    }
+                },
+                "_backup_expanded_states": {
+                    "inside_node": null,
+                    "focused": null
+                },
+                "_focused_function_visible": false
+            },
+            "function_node": {
+                "inputs": {
+                    "wave": {
+                        "cb_options": {
+                            "plot_size_em": [
+                                20.0,
+                                10.0
+                            ],
+                            "show_time_as_seconds": false,
+                            "show_markers": false,
+                            "volume": 1.0,
+                            "time_markers": []
+                        },
+                        "expanded": false
+                    }
+                },
+                "outputs": {
+                    "0": {
+                        "cb_options": {
+                            "plot_size_em": [
+                                20.0,
+                                10.0
+                            ],
+                            "show_time_as_seconds": false,
+                            "show_markers": false,
+                            "volume": 1.0,
+                            "time_markers": []
+                        },
+                        "expanded": true
+                    }
+                }
+            }
+        }
+    }
+}
