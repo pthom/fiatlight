@@ -34,7 +34,7 @@ dependencies = [
 
 [tool.hatch.build.targets.sdist]
 exclude = [
-  "src/python/fiatlight/doc",
+  "src/python/fiatlight/doc", "devel_doc"
 ]
 
 [tool.hatch.build.targets.wheel]
