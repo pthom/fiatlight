@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "fiatlight"
-version = "0.1.0"
+version = "0.2.0"
 authors = [{ name = "Pascal Thomet", email = "pthomet@gmail.com" }]
 description = "fiatlight: shine light inside your algorithm pipelines"
 readme = "Readme.md"
@@ -20,7 +20,7 @@ classifiers = [
 keywords = ["python"]
 
 dependencies = [
-#    "imgui-bundle",
+    "imgui-bundle>=1.92.3",
     "opencv-python",
     "pydantic",
     "Pillow",
