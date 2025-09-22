@@ -477,7 +477,9 @@ class FiatGui:
         if is_hovering:
             alpha = 1.0
         col = imgui.IM_COL32(255, 255, 255, int(255 * alpha))
-        imgui.get_window_draw_list().add_image(self._logo_texture.texture_id, logo_pos, logo_pos + logo_size, col=col)
+        imgui.get_window_draw_list().add_image(
+            imgui.ImTextureRef(self._logo_texture.texture_id), logo_pos, logo_pos + logo_size, col=col
+        )
         if is_hovering:
             if imgui.begin_tooltip():
                 logo_height_em_big = 16.0

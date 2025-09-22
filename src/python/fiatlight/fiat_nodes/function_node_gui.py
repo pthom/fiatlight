@@ -295,7 +295,7 @@ class FunctionNodeGui:
         fn_label = fn_label.split("##")[0]
 
         bold_font = imgui_md.get_font(imgui_md.MarkdownFontSpec(bold_=True))
-        with imgui_ctx.push_font(bold_font):
+        with imgui_ctx.push_font(bold_font.font):
             imgui.text("      " + fn_label)
         function_name = self._function_node.function_with_gui.function_name
         if function_name != fn_label:

@@ -15,7 +15,6 @@ def _load_font_awesome_6() -> None:
     font_size = 15
     _FONT_AWESOME_6 = hello_imgui.load_font("fonts/DroidSans.ttf", font_size)
     font_params = hello_imgui.FontLoadingParams()
-    font_params.use_full_glyph_range = True
     font_params.merge_to_last_font = True
     _FONT_AWESOME_6 = hello_imgui.load_font("fonts/Font_Awesome_6_Free-Solid-900.otf", font_size, font_params)
     hello_imgui.get_runner_params().callbacks.enqueue_before_exit(_unload_font_awesome_6)
@@ -32,7 +31,7 @@ class PushFontAwesome6:
 
     def __enter__(self) -> None:
         if _FONT_AWESOME_6 is not None:
-            imgui.push_font(_FONT_AWESOME_6)
+            imgui.push_font(_FONT_AWESOME_6, 0.0)
 
     def __exit__(self, exc_type, exc_val, exc_tb) -> None:  # type: ignore
         if _FONT_AWESOME_6 is not None:
