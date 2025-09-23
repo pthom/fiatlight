@@ -84,22 +84,6 @@ def _is_running_in_documentation() -> bool:
     return r
 
 
-def handle_global_zoom_if_no_node_editor() -> None:
-    # imgui.text("(?)")
-    # fiat_osd.set_widget_tooltip("Ctrl+Alt+Wheel to zoom")
-    ctrl_down = imgui.is_key_down(imgui.Key.left_ctrl) or imgui.is_key_down(imgui.Key.right_ctrl)
-    alt_down = imgui.is_key_down(imgui.Key.left_alt) or imgui.is_key_down(imgui.Key.right_alt)
-    mod_ok = ctrl_down and alt_down
-    if not mod_ok:
-        return
-
-    wheel_amount = imgui.get_io().mouse_wheel
-    if wheel_amount == 0:
-        return
-    k = 1.0 + wheel_amount / 20
-    imgui.get_io().font_global_scale *= k
-
-
 # ==================================================================================================================
 #                                  Logging
 # ==================================================================================================================
@@ -511,7 +495,6 @@ class FiatGui:
         if imgui.get_frame_count() == 7:
             if len(self._functions_graph_gui.function_nodes_gui) > 1:
                 hello_imgui.get_runner_params().docking_params.focus_dockable_window("Functions Graph")
-        handle_global_zoom_if_no_node_editor()
 
         for fn in self._functions_graph_gui.function_nodes_gui:
             fn.focused_function_draw_window()
