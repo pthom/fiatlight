@@ -25,6 +25,7 @@ class PromptWithGui(AnyDataWithGui[Prompt]):
         self.callbacks.on_change = self.on_change
         self.callbacks.edit = self.edit
         self.callbacks.edit_node_compatible = False
+        self.callbacks.edit_collapsible = False
         self.callbacks.present = self.present
         self.callbacks.default_value_provider = lambda: Prompt("")
         self.callbacks.save_gui_options_to_json = self.save_gui_options_to_json

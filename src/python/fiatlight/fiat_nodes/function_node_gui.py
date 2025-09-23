@@ -192,7 +192,7 @@ class FunctionNodeGui:
     def get_function_node(self) -> FunctionNode:
         return self._function_node
 
-    def nb_outputs_with_custom_present(self) -> int:
+    def _nb_outputs_with_custom_present(self) -> int:
         r = 0
         nb_outputs = self._function_node.function_with_gui.nb_outputs()
         for i in range(nb_outputs):
@@ -612,7 +612,9 @@ class FunctionNodeGui:
         node_separator_params.show_collapse_button = nb_inputs >= 1
         # Separator collapse all button
         node_separator_params.show_toggle_collapse_all_button = (
-            nb_unlinked_inputs > 1 and self._inputs_expanded.current_value()
+            nb_unlinked_inputs > 1
+            and self._inputs_expanded.current_value()
+            and self._function_node.function_with_gui._nb_collapsible_inputs() > 0
         )
 
         # Draw the separator
@@ -700,7 +702,9 @@ class FunctionNodeGui:
         node_separator_params.show_collapse_button = nb_outputs > 0
         # show collapse all button
         node_separator_params.show_toggle_collapse_all_button = (
-            self._outputs_expanded.current_value() and self.nb_outputs_with_custom_present() > 0
+            self._outputs_expanded.current_value()
+            and self._nb_outputs_with_custom_present() > 0
+            and self._function_node.function_with_gui._nb_collapsible_outputs() > 0
         )
 
         # Draw the separator

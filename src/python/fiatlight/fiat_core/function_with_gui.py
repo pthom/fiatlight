@@ -559,6 +559,14 @@ class FunctionWithGui:
     def toggle_expand_outputs(self) -> None:
         toggle_expanded_state_on_guis(self.outputs_guis())
 
+    def _nb_collapsible_inputs(self) -> int:
+        """Return the number of collapsible inputs of the function"""
+        n = 0
+        for param in self._inputs_with_gui:
+            if param.data_with_gui.callbacks.edit_collapsible:
+                n += 1
+        return n
+
     class _Outputs_Section:  # Dummy class to create a section in the IDE # noqa
         """
         # --------------------------------------------------------------------------------------------
@@ -603,6 +611,14 @@ class FunctionWithGui:
         for i in self._outputs_with_gui:
             r.append(i.data_with_gui)
         return r
+
+    def _nb_collapsible_outputs(self) -> int:
+        """Return the number of collapsible outputs of the function"""
+        n = 0
+        for output in self._outputs_with_gui:
+            if output.data_with_gui.callbacks.edit_collapsible:
+                n += 1
+        return n
 
     class _Invoke_Section:  # Dummy class to create a section in the IDE # noqa
         """
