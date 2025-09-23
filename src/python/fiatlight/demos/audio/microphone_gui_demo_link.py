@@ -1,3 +1,3 @@
-from fiatlight.fiat_kits.experimental.fiat_audio_simple import microphone_gui_demo
+from fiatlight.fiat_kits.experimental.fiat_audio_simple.demos import demo_microphone_gui
 
-microphone_gui_demo.main()
+demo_microphone_gui.main()
