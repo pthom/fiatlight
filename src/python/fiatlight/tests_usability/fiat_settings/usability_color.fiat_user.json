@@ -18,10 +18,10 @@
                     "data": {
                         "type": "Tuple",
                         "value": [
-                            0.09803921729326248,
-                            0.572549045085907,
-                            0.3294117748737335,
-                            0.5882353186607361
+                            0.2916438579559326,
+                            0.6725664138793945,
+                            0.3823397159576416,
+                            0.5803921818733215
                         ]
                     }
                 },
@@ -30,9 +30,9 @@
                     "data": {
                         "type": "Tuple",
                         "value": [
-                            184,
-                            98,
-                            98
+                            29,
+                            178,
+                            0
                         ]
                     }
                 },
@@ -41,10 +41,10 @@
                     "data": {
                         "type": "Tuple",
                         "value": [
-                            0,
-                            0,
-                            0,
-                            255
+                            49,
+                            12,
+                            12,
+                            174
                         ]
                     }
                 }
@@ -54,10 +54,26 @@
     "gui_options": {
         "f": {
             "function_node_with_gui": {
-                "_inputs_expanded": true,
-                "_outputs_expanded": true,
-                "fiat_tuning_expanded": false,
-                "_internal_state_gui_expanded": true,
+                "_inputs_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_outputs_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_doc_expanded": {
+                    "inside_node": false,
+                    "focused": true
+                },
+                "fiat_tuning_expanded": {
+                    "inside_node": false,
+                    "focused": true
+                },
+                "_internal_state_gui_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
                 "_function_node": {
                     "inputs": {
                         "c3f": {
@@ -70,7 +86,7 @@
                         },
                         "c3": {
                             "cb_options": {},
-                            "expanded": false
+                            "expanded": true
                         },
                         "c4": {
                             "cb_options": {},
@@ -80,23 +96,27 @@
                     "outputs": {
                         "0": {
                             "cb_options": {},
-                            "expanded": true
+                            "expanded": false
                         },
                         "1": {
                             "cb_options": {},
-                            "expanded": true
+                            "expanded": false
                         },
                         "2": {
                             "cb_options": {},
-                            "expanded": true
+                            "expanded": false
                         },
                         "3": {
                             "cb_options": {},
-                            "expanded": true
+                            "expanded": false
                         }
-                    },
-                    "internal_gui_options": {}
-                }
+                    }
+                },
+                "_backup_expanded_states": {
+                    "inside_node": null,
+                    "focused": null
+                },
+                "_focused_function_visible": false
             },
             "function_node": {
                 "inputs": {
@@ -110,7 +130,7 @@
                     },
                     "c3": {
                         "cb_options": {},
-                        "expanded": false
+                        "expanded": true
                     },
                     "c4": {
                         "cb_options": {},
@@ -120,22 +140,21 @@
                 "outputs": {
                     "0": {
                         "cb_options": {},
-                        "expanded": true
+                        "expanded": false
                     },
                     "1": {
                         "cb_options": {},
-                        "expanded": true
+                        "expanded": false
                     },
                     "2": {
                         "cb_options": {},
-                        "expanded": true
+                        "expanded": false
                     },
                     "3": {
                         "cb_options": {},
-                        "expanded": true
+                        "expanded": false
                     }
-                },
-                "internal_gui_options": {}
+                }
             }
         }
     }

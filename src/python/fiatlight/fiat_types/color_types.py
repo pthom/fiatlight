@@ -1,4 +1,6 @@
 from typing import NewType
+from imgui_bundle import ImVec4
+
 
 ColorRgb = NewType("ColorRgb", tuple[int, int, int])
 ColorRgb.__doc__ = "synonym for tuple[int, int, int] describing an RGB color, with values in [0, 255] (NewType)"
@@ -47,3 +49,19 @@ def color_rgb_to_color_rgba(color_rgb: ColorRgb) -> ColorRgba:
 
 def color_rgb_float_to_color_rgba_float(color_rgb_float: ColorRgbFloat) -> ColorRgbaFloat:
     return ColorRgbaFloat(color_rgb_float + (1.0,))
+
+
+def color_rgb_to_imvec4(v: ColorRgb) -> ImVec4:
+    return ImVec4(v[0] / 255.0, v[1] / 255.0, v[2] / 255.0, 1.0)
+
+
+def color_rgba_to_imvec4(v: ColorRgba) -> ImVec4:
+    return ImVec4(v[0] / 255.0, v[1] / 255.0, v[2] / 255.0, v[3] / 255.0)
+
+
+def color_rgb_float_to_imvec4(v: ColorRgbFloat) -> ImVec4:
+    return ImVec4(v[0], v[1], v[2], 1.0)
+
+
+def color_rgba_float_to_imvec4(v: ColorRgbaFloat) -> ImVec4:
+    return ImVec4(v[0], v[1], v[2], v[3])
