@@ -737,7 +737,7 @@ def _fiat_run_graph(
         fiat_gui.run()
 
 
-def _fiat_run(
+def _fiat_run_function(
     fn: Function | FunctionWithGui,
     params: FiatRunParams,
 ) -> None:
@@ -789,7 +789,7 @@ def run(
             params=params,
         )
     else:
-        _fiat_run(
+        _fiat_run_function(
             fn,
             params=params,
         )
