@@ -484,7 +484,7 @@ class FiatGui:
             if imgui.begin_tooltip():
                 logo_height_em_big = 16.0
                 logo_size_big = hello_imgui.em_to_vec2(logo_height_em_big * logo_ratio, logo_height_em_big)
-                imgui.image(self._logo_texture.texture_id, logo_size_big)
+                imgui.image(imgui.ImTextureRef(self._logo_texture.texture_id), logo_size_big)
                 imgui_md.render_unindented(
                     """
                     * Use the mouse wheel to zoom in and out in the graph
