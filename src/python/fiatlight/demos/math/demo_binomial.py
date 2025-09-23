@@ -39,8 +39,8 @@ def main() -> None:
     random_binomial_gui = fl.FunctionWithGui(random_binomial)
     random_binomial_gui.output().set_present_callback(present_histogram)
 
-    random_binomial_gui.input("p").set_edit_callback(edit_probability)
-    random_binomial_gui.input("n").set_edit_callback(edit_n)
+    random_binomial_gui.input("p").set_edit_callback(edit_probability, edit_collapsible=True)
+    random_binomial_gui.input("n").set_edit_callback(edit_n, edit_collapsible=True)
 
     fl.run(random_binomial_gui)
 

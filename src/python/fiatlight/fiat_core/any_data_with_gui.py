@@ -854,17 +854,33 @@ class AnyDataWithGui(Generic[DataType]):
         # ------------------------------------------------------------------------------------------------------------------
         """
 
-    def set_edit_callback(self, edit_callback: DataEditFunction[DataType]) -> None:
+    def set_edit_callback(
+        self,
+        edit_callback: DataEditFunction[DataType],
+        *,
+        edit_collapsible: bool | None = None,
+        edit_node_compatible: bool | None = None,
+    ) -> None:
         """Helper function to set the edit callback from a free function"""
         self.callbacks.edit = edit_callback
+        if edit_node_compatible is not None:
+            self.callbacks.edit_node_compatible = edit_node_compatible
+        if edit_collapsible is not None:
+            self.callbacks.edit_collapsible = edit_collapsible
 
     def set_present_callback(
-        self, present_callback: DataPresentFunction[DataType], present_node_compatible: bool | None = None
+        self,
+        present_callback: DataPresentFunction[DataType],
+        *,
+        present_collapsible: bool | None = None,
+        present_node_compatible: bool | None = None,
     ) -> None:
         """Helper function to set the present custom callback from a free function"""
         self.callbacks.present = present_callback
         if present_node_compatible is not None:
             self.callbacks.present_node_compatible = present_node_compatible
+        if present_collapsible is not None:
+            self.callbacks.present_collapsible = present_collapsible
 
     def add_validator_callback(self, cb: Callable[[DataType], DataType]) -> None:
         self.callbacks.validators.append(cb)
