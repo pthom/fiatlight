@@ -330,13 +330,11 @@ class FunctionNodeGui:
             or (self.fiat_tuning_expanded.current_value() and has_fiat_tuning)
             or (self._internal_state_gui_expanded.current_value() and has_internal_state_gui)
         )
-        has_backup = self._backup_expanded_states.current_value() is not None
 
         class PossibleAction(Enum):
             None_ = 0
             CollapseAll = 1
-            Restore = 2
-            ExpandAll = 3
+            Expand = 2
 
         def display_btn() -> PossibleAction:
             result = PossibleAction.None_
@@ -347,16 +345,10 @@ class FunctionNodeGui:
                     if clicked_minimize:
                         result = PossibleAction.CollapseAll
                 else:
-                    if has_backup:
-                        clicked_restore = imgui.button(icons_fontawesome_6.ICON_FA_WINDOW_RESTORE)
-                        fiat_osd.set_widget_tooltip("Restore previous view")
-                        if clicked_restore:
-                            result = PossibleAction.Restore
-
-                    clicked_maximize = imgui.button(icons_fontawesome_6.ICON_FA_WINDOW_MAXIMIZE)
-                    fiat_osd.set_widget_tooltip("Expand all")
-                    if clicked_maximize:
-                        result = PossibleAction.ExpandAll
+                    clicked_restore = imgui.button(icons_fontawesome_6.ICON_FA_WINDOW_MAXIMIZE)
+                    fiat_osd.set_widget_tooltip("Expand")
+                    if clicked_restore:
+                        result = PossibleAction.Expand
                 return result
 
         def handle_action(action: PossibleAction) -> None:
@@ -377,26 +369,26 @@ class FunctionNodeGui:
                 self._doc_expanded.set_current_value(False)
                 self.fiat_tuning_expanded.set_current_value(False)
                 self._internal_state_gui_expanded.set_current_value(False)
-            elif action == PossibleAction.Restore:
+            elif action == PossibleAction.Expand:
                 backup = self._backup_expanded_states.current_value()
-                assert backup is not None
-                self._inputs_expanded.set_current_value(backup["inputs"])
-                self._outputs_expanded.set_current_value(backup["outputs"])
-                self._doc_expanded.set_current_value(backup["doc"])
-                self.fiat_tuning_expanded.set_current_value(backup["fiat_tuning"])
-                self._internal_state_gui_expanded.set_current_value(backup["internal_state_gui"])
-                self._backup_expanded_states.set_current_value(None)
-            elif action == PossibleAction.ExpandAll:
-                if has_inputs:
-                    self._inputs_expanded.set_current_value(True)
-                if has_outputs:
-                    self._outputs_expanded.set_current_value(True)
-                if has_doc:
-                    self._doc_expanded.set_current_value(True)
-                if has_fiat_tuning:
-                    self.fiat_tuning_expanded.set_current_value(True)
-                if has_internal_state_gui:
-                    self._internal_state_gui_expanded.set_current_value(True)
+                if backup is not None:
+                    self._inputs_expanded.set_current_value(backup["inputs"])
+                    self._outputs_expanded.set_current_value(backup["outputs"])
+                    self._doc_expanded.set_current_value(backup["doc"])
+                    self.fiat_tuning_expanded.set_current_value(backup["fiat_tuning"])
+                    self._internal_state_gui_expanded.set_current_value(backup["internal_state_gui"])
+                    self._backup_expanded_states.set_current_value(None)
+                else:
+                    if has_inputs:
+                        self._inputs_expanded.set_current_value(True)
+                    if has_outputs:
+                        self._outputs_expanded.set_current_value(True)
+                    if has_doc:
+                        self._doc_expanded.set_current_value(True)
+                    if has_fiat_tuning:
+                        self.fiat_tuning_expanded.set_current_value(True)
+                    if has_internal_state_gui:
+                        self._internal_state_gui_expanded.set_current_value(True)
 
         action_ = display_btn()
         handle_action(action_)
