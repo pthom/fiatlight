@@ -113,6 +113,7 @@ class FunctionCollectionGui:
                                 self.on_add_function(new_fn)
 
     def gui(self) -> None:
+        imgui.set_next_window_size(hello_imgui.em_to_vec2(20, -1.0), imgui.Cond_.appearing)
         with imgui_ctx.begin("Functions collection"):
             with imgui_ctx.begin_vertical("V"):
                 self._gui_tags()
