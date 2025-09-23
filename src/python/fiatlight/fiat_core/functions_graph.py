@@ -154,18 +154,14 @@ class FunctionsGraph:
                     return True
             return False
 
-        if has_already_function_with_same_name():
-            raise ValueError(
-                """Cannot add two functions with the same name to the graph.
-            If you want to add the same function twice, you can give it a different name, for example:
-                graph = fl.FunctionsGraph()
-                graph.add_function(my_function)
-                graph.add_function(fl.FunctionWithGui(my_function, function_name="my_function##2"))
+        def f_gui_with_distinct_name() -> FunctionWithGui:
+            f_gui_2 = copy.copy(f_gui)
+            f_gui_2.function_name = f"{f_gui.function_name}_2"
+            return f_gui_2
 
-            Note: if you add "##" before the suffix, the suffix will be hidden in the GUI.
-                ...
-            """
-            )
+        if has_already_function_with_same_name():
+            r = self._add_function_with_gui(f_gui_with_distinct_name())
+            return r
 
         f_node = FunctionNode(f_gui)
         self.functions_nodes.append(f_node)
