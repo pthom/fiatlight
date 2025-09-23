@@ -23,7 +23,7 @@ def create_demo_sound_wave() -> fiat_audio_simple.SoundWave:
             wave = np.column_stack((wave_left, wave_right))
             full_wave = wave if full_wave is None else np.concatenate([full_wave, wave])
 
-    return fiat_audio_simple.SoundWave(full_wave, sample_rate)
+    return fiat_audio_simple.SoundWave(full_wave, sample_rate)  # type: ignore
 
 
 def sandbox() -> None:

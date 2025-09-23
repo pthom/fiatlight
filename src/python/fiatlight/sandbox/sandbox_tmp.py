@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 
 def lissajous_curve(
     freq1: float = 5.0, freq2: float = 4.0, delta: float = np.pi / 2, nb_periods: float = 1
-) -> plt.Figure:
+) -> plt.Figure:  # type: ignore
     """Creates a Lissajous curve, and returns a Matplotlib figure."""
     t = np.linspace(0, 2 * np.pi * nb_periods, 10_000)
     x = np.sin(freq1 * t + delta)

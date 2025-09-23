@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def downsample_wave_minmax(wave: np.ndarray, max_samples: int) -> np.ndarray:
+def downsample_wave_minmax(wave: np.ndarray, max_samples: int) -> np.ndarray:  # type: ignore
     """Downsample using min/max strategy for plotting.
     Alternates between min and max per chunk, to simulate waveform spikes.
     Only supports 1D arrays (flattened audio channel)."""

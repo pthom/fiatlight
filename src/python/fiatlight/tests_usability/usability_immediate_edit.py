@@ -113,7 +113,7 @@ MY_VALUE = 42
 MY_VALUE2 = 12
 
 
-def gui():
+def gui() -> None:
     global USER
 
     # Edit a pydantic model

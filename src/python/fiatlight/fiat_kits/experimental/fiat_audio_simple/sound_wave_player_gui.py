@@ -47,14 +47,14 @@ class SoundWaveGuiParams(BaseModel):
         r = SoundWaveGuiParams.model_validate(data)
         return r
 
-    def add_time_marker(self, time_ratio: float):
+    def add_time_marker(self, time_ratio: float) -> None:
         """Add a time marker at the given ratio of the total duration."""
         if not (0 <= time_ratio <= 1):
             raise ValueError("time_ratio must be between 0 and 1")
         self.time_markers.append(TimeMarker(time_ratio=time_ratio))
         self.time_markers.sort(key=lambda marker: marker.time_ratio)  # Sort markers by time ratio
 
-    def remove_time_marker(self, marker: TimeMarker):
+    def remove_time_marker(self, marker: TimeMarker) -> None:
         """Remove a time marker."""
         self.time_markers.remove(marker)
         self.time_markers.sort(key=lambda m: m.time_ratio)
@@ -100,7 +100,7 @@ class SoundWavePlayerGui(AnyDataWithGui[SoundWave]):
 
         self._sound_wave_player = SoundWavePlayer(sound_wave)
 
-    def _cache_plotted_wave(self, sound_wave: SoundWave):
+    def _cache_plotted_wave(self, sound_wave: SoundWave) -> None:
         width_pixels = self.params.plot_size_em.x * hello_imgui.em_size()
         max_samples_on_plot = int(width_pixels * 4)
         self._plotted_values = []
@@ -236,13 +236,13 @@ class SoundWavePlayerGui(AnyDataWithGui[SoundWave]):
             if changed:
                 self._sound_wave_player.seek(TimeSeconds(new_x))
 
-    def _edit_markers(self):
+    def _edit_markers(self) -> None:
         if self._sound_wave_player is None:
             return
         if not self.params.show_markers:
             return
 
-        _, self.params.show_markers = imgui.begin("Edit Markers", self.params.show_markers)
+        _, self.params.show_markers = imgui.begin("Edit Markers", self.params.show_markers)  # type: ignore
         if self.params.show_markers:
             imgui.text("Markers")
 

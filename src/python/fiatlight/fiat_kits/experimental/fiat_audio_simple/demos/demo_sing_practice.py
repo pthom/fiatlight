@@ -26,7 +26,7 @@ def apply_sound_transform_pedalboard(
     wave: SoundWave,
     sound_transform: SoundTransformParams | None = None,
 ) -> SoundWave:
-    from pedalboard import time_stretch
+    from pedalboard import time_stretch  # type: ignore
     import numpy as np
 
     if (
