@@ -41,9 +41,6 @@ class FunctionsGraphGui:
             link_gui = FunctionNodeLinkGui(link, self.function_nodes_gui)
             self.functions_links_gui.append(link_gui)
 
-        if len(self.function_nodes_gui) == 1:
-            self.function_nodes_gui[0]._focused_function_visible = True
-
     # ======================================================================================================================
     # Drawing
     # ======================================================================================================================
