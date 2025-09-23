@@ -17,6 +17,11 @@ class GenerationType(str, Enum):
 
 # Register our BaseModel, i.e. associate it with a GUI provided by Fiatlight
 # We also add fiat_attributes, which are options for the GUI, and enable to set the range of the sliders, the labels, etc.
+#
+# Note: if we do not want to "pollute" the data definition code with Fiatlight-specific code,
+#       we could have used the function fl.register_base_model instead of the decorator
+#       somewhere else in the code, e.g. in the main function, like this:
+#            fl.register_base_model(NumbersGenerationOptions, nb_values__range=(1, 100_000), ...)
 @fl.base_model_with_gui_registration(
     # Options for the nb_values member
     nb_values__range=(1, 100_000),  # range of the number of values. When the range is provided, a slider is displayed
