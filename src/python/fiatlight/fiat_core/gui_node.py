@@ -45,6 +45,7 @@ class GuiNode(FunctionWithGui):
         self._accept_none_as_output = True
         super().__init__(gui_function)
         self.invoke_is_gui_only = True
+        self._outputs_with_gui = []
 
         self.internal_state_gui = self._impl_internal_state_gui
         self.internal_state_gui_node_compatible = gui_node_compatible

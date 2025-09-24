@@ -753,6 +753,8 @@ class FunctionWithGui:
         - or the output can be None (i.e. the signature looks like `def f() -> int | None:`)
         if the function has multiple outputs, we consider that it can not emit None
         """
+        if self.invoke_is_gui_only:
+            return True
         if len(self._outputs_with_gui) > 1:
             return False
         if len(self._outputs_with_gui) == 0:
