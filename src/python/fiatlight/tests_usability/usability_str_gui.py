@@ -1,4 +1,4 @@
-import fiatlight
+import fiatlight as fl
 
 
 def sandbox_multiline_strings() -> None:
@@ -23,12 +23,13 @@ Un bouquet de houx vert et de bruyère en fleur.
 Victor Hugo, extrait du recueil «Les Contemplations» (1856)
         """
 
-    def f(text: str = poem) -> str:
-        return text.upper()
+    @fl.with_fiat_attributes(
+        multiline_text__allow_multiline_edit=True,
+    )
+    def f(short_input: str, multiline_text: str = poem) -> str:
+        return short_input, multiline_text
 
-    f_gui = fiatlight.FunctionWithGui(f)
-
-    fiatlight.run(f_gui)
+    fl.run(f)
 
 
 if __name__ == "__main__":
