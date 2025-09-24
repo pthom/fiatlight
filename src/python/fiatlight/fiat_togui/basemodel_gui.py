@@ -129,8 +129,8 @@ class BaseModelGui(DataclassLikeGui[DataclassLikeType]):
         for field_name, model_field in basemodel_type.model_fields.items():
             param = self.param_of_name(field_name)
             if model_field.default_factory:
-                param.default_value = model_field.default_factory()
-                param.data_with_gui.callbacks.default_value_provider = model_field.default_factory
+                param.default_value = model_field.default_factory()  # type: ignore
+                param.data_with_gui.callbacks.default_value_provider = lambda: model_field.default_factory()  # type: ignore
 
     @staticmethod
     def _save_to_dict(value: DataclassLikeType) -> JsonDict:
