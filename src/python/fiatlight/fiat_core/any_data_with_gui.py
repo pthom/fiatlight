@@ -18,7 +18,6 @@ from imgui_bundle import imgui, imgui_ctx, ImVec4, hello_imgui, ImVec2
 from fiatlight.fiat_config import get_fiat_config, FiatColorType
 from fiatlight.fiat_widgets.fontawesome6_ctx_utils import icons_fontawesome_6, fontawesome_6_ctx
 from fiatlight.fiat_widgets import fiat_osd
-from fiatlight import fiat_utils
 from fiatlight.fiat_widgets.text_truncated import text_maybe_truncated
 from typing import Generic, Any, Type, final, Callable
 import logging
@@ -435,14 +434,10 @@ class AnyDataWithGui(Generic[DataType]):
     def can_show_present_popup(self) -> bool:
         if self.callbacks.present_collapsible:
             return True
-        if fiat_utils.is_rendering_in_node() and not self.callbacks.present_node_compatible:
-            return True
         return False
 
     def can_show_edit_popup(self) -> bool:
         if self.callbacks.edit_collapsible:
-            return True
-        if fiat_utils.is_rendering_in_node() and not self.callbacks.edit_node_compatible:
             return True
         return False
 
@@ -473,27 +468,23 @@ class AnyDataWithGui(Generic[DataType]):
             return False
         if isinstance(self.value, (Unspecified, Error)):
             return False
-        disabled_in_node = fiat_utils.is_rendering_in_node() and not self.callbacks.present_node_compatible
-        return self.callbacks.present_collapsible and not disabled_in_node
+        return self.callbacks.present_collapsible
 
     def can_collapse_edit(self, is_expand_disabled: bool) -> bool:
         if is_expand_disabled:
             return False
         if isinstance(self.value, (Unspecified, Error)):
             return False
-        disabled_in_node = fiat_utils.is_rendering_in_node() and not self.callbacks.edit_node_compatible
-        return self.callbacks.edit_collapsible and not disabled_in_node
+        return self.callbacks.edit_collapsible
 
     def can_edit_on_header_line(self) -> bool:
         has_small_edit = self.callbacks.edit is not None and not self.callbacks.edit_collapsible
-        disabled_in_node = fiat_utils.is_rendering_in_node() and not self.callbacks.edit_node_compatible
-        return has_small_edit and not disabled_in_node
+        return has_small_edit
 
     def can_present_on_header_line(self) -> bool:
         # we do not test self.callbacks.present is None because if not provided, it will be presented with str()
         has_small_present = not self.callbacks.present_collapsible
-        disabled_in_node = fiat_utils.is_rendering_in_node() and not self.callbacks.present_node_compatible
-        return has_small_present and not disabled_in_node
+        return has_small_present
 
     def _can_edit_on_next_lines_if_expanded(self, is_expand_disabled: bool) -> bool:
         if is_expand_disabled:
@@ -501,8 +492,7 @@ class AnyDataWithGui(Generic[DataType]):
         is_datatype_or_invalid = not isinstance(self.value, (Unspecified, Error))
         has_callback = self.callbacks.edit is not None
         # collapsible = self.callbacks.edit_collapsible
-        disabled_in_node = fiat_utils.is_rendering_in_node() and not self.callbacks.edit_node_compatible
-        return has_callback and is_datatype_or_invalid and not disabled_in_node
+        return has_callback and is_datatype_or_invalid
 
     def _can_present_on_next_lines_if_expanded(self, is_expand_disabled: bool) -> bool:
         if is_expand_disabled:
@@ -510,8 +500,7 @@ class AnyDataWithGui(Generic[DataType]):
         # we do not test self.callbacks.present is None because if not provided, it will be presented with str()
         is_datatype_or_invalid = not isinstance(self.value, (Unspecified, Error))
         # collapsible = self.callbacks.present_collapsible
-        disabled_in_node = fiat_utils.is_rendering_in_node() and not self.callbacks.present_node_compatible
-        return is_datatype_or_invalid and not disabled_in_node
+        return is_datatype_or_invalid
 
     def _is_editing_on_next_lines(self, is_expand_disabled: bool) -> bool:
         if is_expand_disabled:
@@ -859,12 +848,9 @@ class AnyDataWithGui(Generic[DataType]):
         edit_callback: DataEditFunction[DataType],
         *,
         edit_collapsible: bool | None = None,
-        edit_node_compatible: bool | None = None,
     ) -> None:
         """Helper function to set the edit callback from a free function"""
         self.callbacks.edit = edit_callback
-        if edit_node_compatible is not None:
-            self.callbacks.edit_node_compatible = edit_node_compatible
         if edit_collapsible is not None:
             self.callbacks.edit_collapsible = edit_collapsible
 
@@ -873,12 +859,9 @@ class AnyDataWithGui(Generic[DataType]):
         present_callback: DataPresentFunction[DataType],
         *,
         present_collapsible: bool | None = None,
-        present_node_compatible: bool | None = None,
     ) -> None:
         """Helper function to set the present custom callback from a free function"""
         self.callbacks.present = present_callback
-        if present_node_compatible is not None:
-            self.callbacks.present_node_compatible = present_node_compatible
         if present_collapsible is not None:
             self.callbacks.present_collapsible = present_collapsible
 

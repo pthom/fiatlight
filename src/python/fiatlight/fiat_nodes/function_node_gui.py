@@ -788,9 +788,8 @@ class FunctionNodeGui:
         if internal_state_fn is None:
             return False
 
-        is_node_compatible = fn_with_gui.internal_state_gui_node_compatible
-        can_collapse = is_node_compatible
-        expanded = self._internal_state_gui_expanded.current_value() or not is_node_compatible
+        can_collapse = True
+        expanded = self._internal_state_gui_expanded.current_value()
 
         #
         # Draw the separator
@@ -830,7 +829,7 @@ class FunctionNodeGui:
         if fiat_osd.get_detached_window_bool_return(detached_window_params):
             changed = True
 
-        if self._internal_state_gui_expanded.current_value() and is_node_compatible:
+        if self._internal_state_gui_expanded.current_value():
             changed = internal_state_fn()
 
         return changed

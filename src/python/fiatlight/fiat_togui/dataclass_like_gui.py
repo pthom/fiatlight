@@ -52,10 +52,6 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
         self.callbacks.edit_collapsible = True
         self.callbacks.present_collapsible = True
 
-        # The data cannot be presented in a node if any of its params is incompatible
-        self.callbacks.present_node_compatible = True
-        self.callbacks.edit_node_compatible = True
-
         self.callbacks.on_change = self.on_change
         self.callbacks.on_exit = self.on_exit
         self.callbacks.on_heartbeat = self.on_heartbeat

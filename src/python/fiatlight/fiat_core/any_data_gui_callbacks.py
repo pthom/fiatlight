@@ -18,7 +18,8 @@ class AnyDataGuiCallbacks(Generic[DataType]):
     # Note about Node Editor compatibility
     # ------------------------------------
     #   - Child windows, and widgets that open a child window are *incompatible*
-    #     with being rendered in a node.
+    #     with being rendered in a node. If you need to use them, open a popup and
+    #     render them there.
     #   - `imgui.input_text_multiline` was made compatible by adding a "..." button
     #     to open the multiline editor in a popup
     #   - You can query `fiatlight.is_rendering_in_node()` to know if you are rendering in a node.
@@ -52,14 +53,6 @@ class AnyDataGuiCallbacks(Generic[DataType]):
     #     - show the custom presentation + a collapse button
     present_collapsible: bool = True
 
-    # present_node_compatible: (Optional: set to False if using input_text_multiline, combo, begin_child, etc.)
-    # If True, the present function is incompatible with being presented in a node (this is due to a limitation
-    # of the node editor, which cannot render child windows)
-    # Note: instead of setting edit_node_compatible to False, you may query
-    #       `fiatlight.is_rendering_in_node()` to know if you are rendering in a node
-    #       and choose alternative widgets in this case.
-    present_node_compatible: bool = True
-
     # ---------------------------------------------------------------------------------------------
 
     #                        Edition
@@ -77,14 +70,6 @@ class AnyDataGuiCallbacks(Generic[DataType]):
     #     - show present_str + an expand button
     #     - show the custom edition + a collapse button
     edit_collapsible: bool = True
-
-    # edit_node_compatible: (Optional: set to False if using input_text_multiline, combo, begin_child, etc.)
-    # If True, the edit function is incompatible with being presented in a node (this is due to a limitation
-    # of the node editor, which cannot render child windows)
-    # Note: instead of setting edit_node_compatible to False, you may query
-    #       `fiatlight.is_rendering_in_node()` to know if you are rendering in a node
-    #       and choose alternative widgets in this case.
-    edit_node_compatible: bool = True
 
     # ---------------------------------------------------------------------------------------------
 

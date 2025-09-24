@@ -65,9 +65,7 @@ class StrWithGui(AnyDataWithGui[str]):
         self.params = StrWithGuiParams()
         self.callbacks.on_change = self.on_change
         self.callbacks.edit = self.edit
-        self.callbacks.edit_node_compatible = True
         self.callbacks.present = self.present
-        self.callbacks.present_node_compatible = True
         self.callbacks.default_value_provider = lambda: ""
         self.callbacks.on_fiat_attributes_changed = self.on_fiat_attributes_changes
 

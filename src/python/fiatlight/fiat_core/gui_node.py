@@ -48,7 +48,6 @@ class GuiNode(FunctionWithGui):
         self._outputs_with_gui = []
 
         self.internal_state_gui = self._impl_internal_state_gui
-        self.internal_state_gui_node_compatible = gui_node_compatible
 
         self.function_name = gui_function.__name__
         self.label = label if label is not None else self.function_name

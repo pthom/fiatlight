@@ -48,13 +48,6 @@ class TupleWithGui(AnyDataWithGui[tuple[Any, ...]]):
         self.callbacks.edit_collapsible = True
         self.callbacks.present_collapsible = True
 
-        self.callbacks.present_node_compatible = all(
-            inner_gui.callbacks.present_node_compatible for inner_gui in self._inner_guis
-        )
-        self.callbacks.edit_node_compatible = all(
-            inner_gui.callbacks.edit_node_compatible for inner_gui in self._inner_guis
-        )
-
         self.callbacks.on_change = self.on_change
         self.callbacks.on_exit = self.on_exit
         self.callbacks.on_heartbeat = self._on_heartbeat

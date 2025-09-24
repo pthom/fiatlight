@@ -21,8 +21,6 @@ class OptionalWithGui(AnyDataWithGui[DataType | None]):
         self.callbacks.default_value_provider = self.default_provider
         self.callbacks.clipboard_copy_possible = inner_gui.callbacks.clipboard_copy_possible
 
-        self.callbacks.present_node_compatible = inner_gui.callbacks.present_node_compatible
-        self.callbacks.edit_node_compatible = inner_gui.callbacks.edit_node_compatible
         self.callbacks.on_fiat_attributes_changed = inner_gui.callbacks.on_fiat_attributes_changed
 
         if self.inner_gui.callbacks.present is not None:

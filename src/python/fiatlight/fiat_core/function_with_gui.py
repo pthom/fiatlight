@@ -123,14 +123,6 @@ class FunctionWithGui:
     #  and return True if the state has changed, and the function needs to be called)
     internal_state_gui: BoolFunction | None = None
 
-    # internal_state_gui_node_compatible:
-    # If True, the internal_state_gui function is incompatible with being presented in a node
-    # (this is due to a limitation of the node editor, which cannot render scrollable widgets)
-    # Note: instead of setting edit_node_compatible to False, you may query
-    #       `fiatlight.is_rendering_in_node()` to know if you are rendering in a node
-    #       and choose alternative widgets in this case.
-    internal_state_gui_node_compatible: bool = True
-
     #
     # Heartbeat
     # ---------
@@ -214,14 +206,6 @@ class FunctionWithGui:
     # (this function may display a GUI to show the internal state of the function,
     #  and return True if the state has changed, and the function needs to be called)
     internal_state_gui: BoolFunction | None = None
-
-    # internal_state_gui_node_compatible:
-    # If True, the internal_state_gui function is incompatible with being presented in a node
-    # (this is due to a limitation of the node editor, which cannot render scrollable widgets)
-    # Note: instead of setting edit_node_compatible to False, you may query
-    #       `fiatlight.is_rendering_in_node()` to know if you are rendering in a node
-    #       and choose alternative widgets in this case.
-    internal_state_gui_node_compatible: bool = True
 
     # Serialization
     # save/load_internal_gui_options_from_json (Optional)
