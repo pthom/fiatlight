@@ -91,6 +91,7 @@ def validate_prompt(prompt: Prompt) -> Prompt:
     seed__range=(0, 1000),
     label="Generate Image",
     prompt__validator=validate_prompt,
+    prompt__width_em=25.0,
 )
 def invoke_sdxl_turbo(
     prompt: Prompt,

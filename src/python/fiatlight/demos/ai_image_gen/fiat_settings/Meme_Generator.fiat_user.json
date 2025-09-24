@@ -48,26 +48,30 @@
     "gui_options": {
         "invoke_sdxl_turbo": {
             "function_node_with_gui": {
-                "_inputs_expanded": true,
-                "_outputs_expanded": true,
-                "_doc_expanded": false,
-                "fiat_tuning_expanded": false,
-                "_internal_state_gui_expanded": true,
+                "_inputs_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_outputs_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_doc_expanded": {
+                    "inside_node": false,
+                    "focused": true
+                },
+                "fiat_tuning_expanded": {
+                    "inside_node": false,
+                    "focused": true
+                },
+                "_internal_state_gui_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
                 "_function_node": {
                     "inputs": {
                         "prompt": {
-                            "cb_options": {
-                                "_str_with_resizable_gui": {
-                                    "width_em": 15.0,
-                                    "size_multiline_em": [
-                                        28.0,
-                                        15.0
-                                    ],
-                                    "wrap_multiline": false,
-                                    "wrap_multiline_width": 80
-                                },
-                                "submit_continuously": false
-                            },
+                            "cb_options": {},
                             "expanded": false
                         },
                         "seed": {
@@ -99,7 +103,6 @@
                                         "height": 420,
                                         "width": 447
                                     },
-                                    "IsColorOrderBGR": true,
                                     "PanWithMouse": true,
                                     "RefreshImage": false,
                                     "SelectedChannel": -1,
@@ -133,23 +136,17 @@
                             "expanded": true
                         }
                     }
-                }
+                },
+                "_backup_expanded_states": {
+                    "inside_node": null,
+                    "focused": null
+                },
+                "_focused_function_visible": false
             },
             "function_node": {
                 "inputs": {
                     "prompt": {
-                        "cb_options": {
-                            "_str_with_resizable_gui": {
-                                "width_em": 15.0,
-                                "size_multiline_em": [
-                                    28.0,
-                                    15.0
-                                ],
-                                "wrap_multiline": false,
-                                "wrap_multiline_width": 80
-                            },
-                            "submit_continuously": false
-                        },
+                        "cb_options": {},
                         "expanded": false
                     },
                     "seed": {
@@ -181,7 +178,6 @@
                                     "height": 420,
                                     "width": 447
                                 },
-                                "IsColorOrderBGR": true,
                                 "PanWithMouse": true,
                                 "RefreshImage": false,
                                 "SelectedChannel": -1,
@@ -219,11 +215,26 @@
         },
         "add_meme_text": {
             "function_node_with_gui": {
-                "_inputs_expanded": true,
-                "_outputs_expanded": true,
-                "_doc_expanded": false,
-                "fiat_tuning_expanded": false,
-                "_internal_state_gui_expanded": true,
+                "_inputs_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_outputs_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_doc_expanded": {
+                    "inside_node": false,
+                    "focused": true
+                },
+                "fiat_tuning_expanded": {
+                    "inside_node": false,
+                    "focused": true
+                },
+                "_internal_state_gui_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
                 "_function_node": {
                     "inputs": {
                         "image": {
@@ -249,7 +260,6 @@
                                         "height": 0,
                                         "width": 200
                                     },
-                                    "IsColorOrderBGR": true,
                                     "PanWithMouse": true,
                                     "RefreshImage": true,
                                     "SelectedChannel": -1,
@@ -285,15 +295,7 @@
                         "params": {
                             "cb_options": {
                                 "text": {
-                                    "cb_options": {
-                                        "width_em": 15.0,
-                                        "size_multiline_em": [
-                                            60.0,
-                                            15.0
-                                        ],
-                                        "wrap_multiline": false,
-                                        "wrap_multiline_width": 80
-                                    },
+                                    "cb_options": {},
                                     "expanded": false
                                 },
                                 "font_size": {
@@ -352,7 +354,6 @@
                                         "height": 358,
                                         "width": 448
                                     },
-                                    "IsColorOrderBGR": true,
                                     "PanWithMouse": true,
                                     "RefreshImage": false,
                                     "SelectedChannel": -1,
@@ -386,7 +387,12 @@
                             "expanded": true
                         }
                     }
-                }
+                },
+                "_backup_expanded_states": {
+                    "inside_node": null,
+                    "focused": null
+                },
+                "_focused_function_visible": false
             },
             "function_node": {
                 "inputs": {
@@ -413,7 +419,6 @@
                                     "height": 0,
                                     "width": 200
                                 },
-                                "IsColorOrderBGR": true,
                                 "PanWithMouse": true,
                                 "RefreshImage": true,
                                 "SelectedChannel": -1,
@@ -449,15 +454,7 @@
                     "params": {
                         "cb_options": {
                             "text": {
-                                "cb_options": {
-                                    "width_em": 15.0,
-                                    "size_multiline_em": [
-                                        60.0,
-                                        15.0
-                                    ],
-                                    "wrap_multiline": false,
-                                    "wrap_multiline_width": 80
-                                },
+                                "cb_options": {},
                                 "expanded": false
                             },
                             "font_size": {
@@ -516,7 +513,6 @@
                                     "height": 358,
                                     "width": 448
                                 },
-                                "IsColorOrderBGR": true,
                                 "PanWithMouse": true,
                                 "RefreshImage": false,
                                 "SelectedChannel": -1,

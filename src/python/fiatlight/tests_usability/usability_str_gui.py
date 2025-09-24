@@ -26,7 +26,7 @@ Victor Hugo, extrait du recueil «Les Contemplations» (1856)
     @fl.with_fiat_attributes(
         multiline_text__allow_multiline_edit=True,
     )
-    def f(short_input: str, multiline_text: str = poem) -> str:
+    def f(short_input: str, multiline_text: str = poem) -> tuple[str, str]:
         return short_input, multiline_text
 
     fl.run(f)
