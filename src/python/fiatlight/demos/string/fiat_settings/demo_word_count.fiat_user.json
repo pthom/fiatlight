@@ -66,15 +66,7 @@
                     },
                     "outputs": {
                         "0": {
-                            "cb_options": {
-                                "width_em": 15.0,
-                                "size_multiline_em": [
-                                    60.0,
-                                    15.0
-                                ],
-                                "wrap_multiline": false,
-                                "wrap_multiline_width": 80
-                            },
+                            "cb_options": {},
                             "expanded": true
                         }
                     }
@@ -94,15 +86,7 @@
                 },
                 "outputs": {
                     "0": {
-                        "cb_options": {
-                            "width_em": 15.0,
-                            "size_multiline_em": [
-                                60.0,
-                                15.0
-                            ],
-                            "wrap_multiline": false,
-                            "wrap_multiline_width": 80
-                        },
+                        "cb_options": {},
                         "expanded": true
                     }
                 }
@@ -133,29 +117,13 @@
                 "_function_node": {
                     "inputs": {
                         "s": {
-                            "cb_options": {
-                                "width_em": 15.0,
-                                "size_multiline_em": [
-                                    60.0,
-                                    15.0
-                                ],
-                                "wrap_multiline": false,
-                                "wrap_multiline_width": 80
-                            },
+                            "cb_options": {},
                             "expanded": false
                         }
                     },
                     "outputs": {
                         "0": {
-                            "cb_options": {
-                                "width_em": 15.0,
-                                "size_multiline_em": [
-                                    60.0,
-                                    15.0
-                                ],
-                                "wrap_multiline": false,
-                                "wrap_multiline_width": 80
-                            },
+                            "cb_options": {},
                             "expanded": true
                         }
                     }
@@ -169,29 +137,13 @@
             "function_node": {
                 "inputs": {
                     "s": {
-                        "cb_options": {
-                            "width_em": 15.0,
-                            "size_multiline_em": [
-                                60.0,
-                                15.0
-                            ],
-                            "wrap_multiline": false,
-                            "wrap_multiline_width": 80
-                        },
+                        "cb_options": {},
                         "expanded": false
                     }
                 },
                 "outputs": {
                     "0": {
-                        "cb_options": {
-                            "width_em": 15.0,
-                            "size_multiline_em": [
-                                60.0,
-                                15.0
-                            ],
-                            "wrap_multiline": false,
-                            "wrap_multiline_width": 80
-                        },
+                        "cb_options": {},
                         "expanded": true
                     }
                 }
@@ -222,29 +174,13 @@
                 "_function_node": {
                     "inputs": {
                         "s": {
-                            "cb_options": {
-                                "width_em": 15.0,
-                                "size_multiline_em": [
-                                    60.0,
-                                    15.0
-                                ],
-                                "wrap_multiline": false,
-                                "wrap_multiline_width": 80
-                            },
+                            "cb_options": {},
                             "expanded": false
                         }
                     },
                     "outputs": {
                         "0": {
-                            "cb_options": {
-                                "width_em": 15.0,
-                                "size_multiline_em": [
-                                    60.0,
-                                    15.0
-                                ],
-                                "wrap_multiline": false,
-                                "wrap_multiline_width": 80
-                            },
+                            "cb_options": {},
                             "expanded": true
                         }
                     }
@@ -258,29 +194,13 @@
             "function_node": {
                 "inputs": {
                     "s": {
-                        "cb_options": {
-                            "width_em": 15.0,
-                            "size_multiline_em": [
-                                60.0,
-                                15.0
-                            ],
-                            "wrap_multiline": false,
-                            "wrap_multiline_width": 80
-                        },
+                        "cb_options": {},
                         "expanded": false
                     }
                 },
                 "outputs": {
                     "0": {
-                        "cb_options": {
-                            "width_em": 15.0,
-                            "size_multiline_em": [
-                                60.0,
-                                15.0
-                            ],
-                            "wrap_multiline": false,
-                            "wrap_multiline_width": 80
-                        },
+                        "cb_options": {},
                         "expanded": true
                     }
                 }
@@ -311,15 +231,7 @@
                 "_function_node": {
                     "inputs": {
                         "s": {
-                            "cb_options": {
-                                "width_em": 15.0,
-                                "size_multiline_em": [
-                                    60.0,
-                                    15.0
-                                ],
-                                "wrap_multiline": false,
-                                "wrap_multiline_width": 80
-                            },
+                            "cb_options": {},
                             "expanded": false
                         }
                     },
@@ -339,15 +251,7 @@
             "function_node": {
                 "inputs": {
                     "s": {
-                        "cb_options": {
-                            "width_em": 15.0,
-                            "size_multiline_em": [
-                                60.0,
-                                15.0
-                            ],
-                            "wrap_multiline": false,
-                            "wrap_multiline_width": 80
-                        },
+                        "cb_options": {},
                         "expanded": false
                     }
                 },

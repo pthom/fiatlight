@@ -1,7 +1,6 @@
 from fiatlight.fiat_config import get_fiat_config
 from fiatlight.fiat_types import DataType, Unspecified, Error, JsonDict
 from fiatlight.fiat_core import AnyDataWithGui
-from fiatlight.fiat_widgets import fiat_osd
 from imgui_bundle import hello_imgui, imgui
 from typing import List
 
@@ -70,20 +69,17 @@ class ListWithGui(AnyDataWithGui[List[DataType]]):
 
     def present(self, value: List[DataType]) -> None:
         max_elements = get_fiat_config().style.list_maximum_elements_in_node
-
-        def popup_details_value() -> None:
-            self.popup_details(value)
-
-        detached_window_params = fiat_osd.DetachedWindowParams(
-            unique_id="ListWithGuiPopup" + str(id(self)),
-            window_name=f"{self.label}  - list of {len(value)} elements",
-            button_label="List content",
-            gui_function=popup_details_value,
-        )
-        fiat_osd.show_void_detached_window_button(detached_window_params)
-
         txt = self._elements_str(value, max_elements)
         imgui.text(txt)
+
+        if imgui.button("Details"):
+            imgui.open_popup("DetailsPopup")
+        popup_visible, _ = imgui.begin_popup_modal("DetailsPopup")
+        if popup_visible:
+            self.popup_details(value)
+            if imgui.button("Close"):
+                imgui.close_current_popup()
+            imgui.end_popup()
 
     def _save_to_dict(self, value: List[DataType]) -> JsonDict:
         r = {"type": "List", "value": [self.inner_gui.call_save_to_dict(v) for v in value]}
