@@ -13,8 +13,17 @@ class AnyDataGuiCallbacks(Generic[DataType]):
     presented, edited, and managed within the Fiatlight GUI framework.
 
     These callbacks are used by [AnyDataWithGui](any_data_with_gui).
-
     """
+
+    # Note about Node Editor compatibility
+    # ------------------------------------
+    #   - Child windows, and widgets that open a child window are *incompatible*
+    #     with being rendered in a node.
+    #   - `imgui.input_text_multiline` was made compatible by adding a "..." button
+    #     to open the multiline editor in a popup
+    #   - You can query `fiatlight.is_rendering_in_node()` to know if you are rendering in a node.
+    #   - When inside a Node, you may want to render a smaller version, to save space
+    #   - Widgets that open a popup are compatible with being rendered in a node
 
     #                        Presentation
     # ---------------------------------------------------------------------------------------------
@@ -33,11 +42,6 @@ class AnyDataGuiCallbacks(Generic[DataType]):
     # a function that provides a more complex, custom GUI representation of the data. Used for detailed views.
     # It will be presented when a function param is in "expanded" mode, and can use imgui widgets on several lines.
     # If not provided, the data will be presented using present_str
-    #
-    # Note: Some widgets cannot be presented in a Node (e.g., a multiline text input, a child window, etc.)!
-    #       You can query `fiatlight.is_rendering_in_node()` to know if you are rendering in a node.
-    #       Also, when inside a Node, you may want to render a smaller version, to save space
-    #       (as opposed to rendering a larger version in a detached window).
     present: Callable[[DataType], None] | None = None
 
     # present_collapsible:
@@ -50,7 +54,7 @@ class AnyDataGuiCallbacks(Generic[DataType]):
 
     # present_node_compatible: (Optional: set to False if using input_text_multiline, combo, begin_child, etc.)
     # If True, the present function is incompatible with being presented in a node (this is due to a limitation
-    # of the node editor, which cannot render scrollable widgets)
+    # of the node editor, which cannot render child windows)
     # Note: instead of setting edit_node_compatible to False, you may query
     #       `fiatlight.is_rendering_in_node()` to know if you are rendering in a node
     #       and choose alternative widgets in this case.
@@ -65,8 +69,6 @@ class AnyDataGuiCallbacks(Generic[DataType]):
     #     (True, new_value) if changed
     #     (False, old_value) if not changed
     # If not provided, the data will be presented as read-only
-    # Note: Some widgets cannot be presented in a Node (e.g., a multiline text input, a child window, etc.)!
-    #       You can query `fiatlight.is_rendering_in_node()` to know if you are rendering in a node.
     edit: Callable[[DataType], tuple[bool, DataType]] | None = None
 
     # edit_collapsible:
@@ -78,7 +80,7 @@ class AnyDataGuiCallbacks(Generic[DataType]):
 
     # edit_node_compatible: (Optional: set to False if using input_text_multiline, combo, begin_child, etc.)
     # If True, the edit function is incompatible with being presented in a node (this is due to a limitation
-    # of the node editor, which cannot render scrollable widgets)
+    # of the node editor, which cannot render child windows)
     # Note: instead of setting edit_node_compatible to False, you may query
     #       `fiatlight.is_rendering_in_node()` to know if you are rendering in a node
     #       and choose alternative widgets in this case.
