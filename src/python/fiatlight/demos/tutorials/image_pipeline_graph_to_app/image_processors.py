@@ -100,7 +100,9 @@ class AddTitleOnImage(ImageProcessor):
         return add_meme_text(image, self.params)  # type: ignore
 
 
-@fl.base_model_with_gui_registration()
+@fl.base_model_with_gui_registration(
+    edit_detachable=True,
+)
 class ImageEffect(BaseModel):
     geo_transf: Optional[GeometricTransformation] = None
     color_filter: Optional[ColorProcessing] = None

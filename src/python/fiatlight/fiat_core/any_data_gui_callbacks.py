@@ -53,6 +53,12 @@ class AnyDataGuiCallbacks(Generic[DataType]):
     #     - show the custom presentation + a collapse button
     present_collapsible: bool = True
 
+    # present_detachable
+    # Set this to True if your custom presentation is complex
+    # and would benefit from being shown in a separate window
+    # (in this case, a button will be added for that)
+    present_detachable: bool = False
+
     # ---------------------------------------------------------------------------------------------
 
     #                        Edition
@@ -70,6 +76,12 @@ class AnyDataGuiCallbacks(Generic[DataType]):
     #     - show present_str + an expand button
     #     - show the custom edition + a collapse button
     edit_collapsible: bool = True
+
+    # edit_detachable
+    # Set this to True if your custom edition is complex
+    # and would benefit from being shown in a separate window
+    # (in this case, a button will be added for that)
+    edit_detachable: bool = False
 
     # ---------------------------------------------------------------------------------------------
 

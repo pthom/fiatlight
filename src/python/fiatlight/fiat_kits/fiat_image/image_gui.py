@@ -313,6 +313,8 @@ class ImageWithGui(AnyDataWithGui[Image]):
         self.callbacks.load_gui_options_from_json = self.load_gui_options_from_json
         self.callbacks.present_collapsible = True
         self.callbacks.on_fiat_attributes_changed = self.on_fiat_attributes_changes
+        self.callbacks.present_detachable = True
+        self.callbacks.edit_detachable = True
 
     @staticmethod
     def possible_fiat_attributes() -> PossibleFiatAttributes | None:

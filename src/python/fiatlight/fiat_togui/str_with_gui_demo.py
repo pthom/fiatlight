@@ -17,6 +17,7 @@ def only_lowercase(s: str) -> str:
     name__resizable=True,
 )
 def greet(name: str = "") -> str:
+    """Greet a person by name."""
     return f"Hello, {name}!"
 
 

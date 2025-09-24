@@ -818,15 +818,15 @@ class FunctionNodeGui:
         #
         changed = False
 
-        detached_window_params = fiat_osd.DetachedWindowParams(
+        detached_internal_state_fn = fiat_osd.DetachedWindowParams(
             unique_id="internal_state" + str(id(internal_state_fn)),
             window_name=f"{self._function_node.function_with_gui.label} Internal GUI",
             gui_function=internal_state_fn,
         )
-        fiat_osd.show_bool_detached_window_button(detached_window_params)
+        fiat_osd.show_bool_detached_window_button(detached_internal_state_fn)
 
         # If the user edits the internal gui in a detached window
-        if fiat_osd.get_detached_window_bool_return(detached_window_params):
+        if fiat_osd.get_detached_window_bool_return(detached_internal_state_fn):
             changed = True
 
         if self._internal_state_gui_expanded.current_value():

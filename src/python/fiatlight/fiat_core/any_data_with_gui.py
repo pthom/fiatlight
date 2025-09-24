@@ -63,6 +63,18 @@ class AnyDataWithGuiGenericPossibleFiatAttributes(PossibleFiatAttributes):
             explanation="If True, the present GUI may be collapsible",
             default_value=True,
         )
+        self.add_explained_attribute(
+            name="present_detachable",
+            type_=bool,
+            explanation="If True, the present GUI may be shown in a separate window",
+            default_value=False,
+        )
+        self.add_explained_attribute(
+            name="edit_detachable",
+            type_=bool,
+            explanation="If True, the edit GUI may be shown in a separate window",
+            default_value=False,
+        )
 
 
 _ANYDATAWITHGUI_GENERIC_POSSIBLE_FIAT_ATTRIBUTES = AnyDataWithGuiGenericPossibleFiatAttributes()
@@ -386,6 +398,10 @@ class AnyDataWithGui(Generic[DataType]):
             self.callbacks.edit_collapsible = self.fiat_attributes["edit_collapsible"]
         if "present_collapsible" in self.fiat_attributes:
             self.callbacks.present_collapsible = self.fiat_attributes["present_collapsible"]
+        if "present_detachable" in self.fiat_attributes:
+            self.callbacks.present_detachable = self.fiat_attributes["present_detachable"]
+        if "edit_detachable" in self.fiat_attributes:
+            self.callbacks.edit_detachable = self.fiat_attributes["edit_detachable"]
 
     @staticmethod
     def propagate_label_and_tooltip(a: "AnyDataWithGui[Any]", b: "AnyDataWithGui[Any]") -> None:
@@ -430,16 +446,6 @@ class AnyDataWithGui(Generic[DataType]):
         if imgui.button(icon):
             self.sub_items_collapse_or_expand(new_expanded_state)
         fiat_osd.set_widget_tooltip(tooltip)
-
-    def can_show_present_popup(self) -> bool:
-        if self.callbacks.present_collapsible:
-            return True
-        return False
-
-    def can_show_edit_popup(self) -> bool:
-        if self.callbacks.edit_collapsible:
-            return True
-        return False
 
     def _show_collapse_button(self) -> None:
         if not get_fiat_config().any_gui_with_data_settings().show_collapse_button:
@@ -494,6 +500,24 @@ class AnyDataWithGui(Generic[DataType]):
         # collapsible = self.callbacks.edit_collapsible
         return has_callback and is_datatype_or_invalid
 
+    def _can_present_detachable(self) -> bool:
+        if not self.callbacks.present_detachable:
+            return False
+        if isinstance(self.value, (Unspecified, Error, Invalid)):
+            return False
+        if self.callbacks.present is None:
+            return False
+        return True
+
+    def _can_edit_detachable(self) -> bool:
+        if not self.callbacks.edit_detachable:
+            return False
+        if isinstance(self.value, (Unspecified, Error, Invalid)):
+            return False
+        if self.callbacks.edit is None:
+            return False
+        return True
+
     def _can_present_on_next_lines_if_expanded(self, is_expand_disabled: bool) -> bool:
         if is_expand_disabled:
             return False
@@ -529,7 +553,6 @@ class AnyDataWithGui(Generic[DataType]):
 
     def _gui_present_header_line(self, params: GuiHeaderLineParams[DataType]) -> None:
         """Present the value as a string in one line, or as a widget if it fits on one line"""
-        can_present_in_popup = self.can_show_present_popup()
 
         with imgui_ctx.begin_horizontal("present_header_line"):
             #
@@ -544,7 +567,7 @@ class AnyDataWithGui(Generic[DataType]):
             # Label
             if self.label is not None:
                 label_color = (
-                    imgui.get_style().color_(imgui.Col_.text.value) if self.label_color is None else self.label_color
+                    imgui.get_style().color_(imgui.Col_.text) if self.label_color is None else self.label_color
                 )
                 _draw_label_with_max_width(self.label, label_color, self.tooltip, self.status_tooltip)
             # Expand button
@@ -592,16 +615,15 @@ class AnyDataWithGui(Generic[DataType]):
             #   * clipboard button
             #   * suffix_gui (might contain a node output pin when used in a function node)
             imgui.spring()  # Align the rest to the right
-            # popup button
-            if can_present_in_popup:
+            if self._can_present_detachable():
 
-                def gui_present_in_popup() -> None:
+                def gui_present_detached() -> None:
                     self._gui_present_next_lines(in_popup=True, is_expand_disabled=params.is_expand_disabled)
 
                 detached_window_params = fiat_osd.DetachedWindowParams(
                     unique_id="##present_in_popup" + str(id(self)),
                     window_name=self._popup_window_name(params, self.PresentOrEdit.present),
-                    gui_function=gui_present_in_popup,
+                    gui_function=gui_present_detached,
                 )
                 fiat_osd.show_void_detached_window_button(detached_window_params)
             # clipboard button
@@ -620,9 +642,6 @@ class AnyDataWithGui(Generic[DataType]):
             )
 
     def _gui_edit_header_line(self, params: GuiHeaderLineParams[DataType]) -> bool:
-        # can_edit_in_node = not self.callbacks.edit_popup_required
-        can_edit_in_popup = self.can_show_edit_popup()
-
         changed = False
 
         with imgui_ctx.begin_horizontal("edit_header_line"):
@@ -638,7 +657,7 @@ class AnyDataWithGui(Generic[DataType]):
             # Label
             if self.label is not None:
                 label_color = (
-                    imgui.get_style().color_(imgui.Col_.text.value) if self.label_color is None else self.label_color
+                    imgui.get_style().color_(imgui.Col_.text) if self.label_color is None else self.label_color
                 )
                 _draw_label_with_max_width(self.label, label_color, self.tooltip, self.status_tooltip)
             # Expand button
@@ -686,9 +705,9 @@ class AnyDataWithGui(Generic[DataType]):
             #   * Reset to unspecified or to default value
             imgui.spring()  # Align the rest to the right
             # popup button
-            if can_edit_in_popup:
+            if self._can_edit_detachable():
 
-                def gui_edit_in_popup() -> bool:
+                def gui_edit_detached() -> bool:
                     if isinstance(self.value, Unspecified):
                         # If unspecified, set to default value before editing in popup
                         if self.can_construct_default_value():
@@ -699,15 +718,15 @@ class AnyDataWithGui(Generic[DataType]):
 
                     return changed
 
-                detached_window_params = fiat_osd.DetachedWindowParams(
+                detached_gui_edit = fiat_osd.DetachedWindowParams(
                     unique_id="##edit_in_popup" + str(id(self)),
                     window_name=self._popup_window_name(params, self.PresentOrEdit.edit),
-                    gui_function=gui_edit_in_popup,
+                    gui_function=gui_edit_detached,
                 )
-                fiat_osd.show_bool_detached_window_button(detached_window_params)
+                fiat_osd.show_bool_detached_window_button(detached_gui_edit)
 
                 # If the user edits the input value in a detached window
-                if fiat_osd.get_detached_window_bool_return(detached_window_params):
+                if fiat_osd.get_detached_window_bool_return(detached_gui_edit):
                     changed = True
 
             # clipboard button
