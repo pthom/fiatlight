@@ -100,8 +100,6 @@ x_times_2_gui = fl.FunctionWithGui(x_times_2)
 x_times_2_gui.output().callbacks.present = lambda value: imgui.text_wrapped(
     f"This is a customized present callback\n{value=}"
 )
-graph.add_function(x_times_2_gui)
-graph.add_link(input_x, x_times_2_gui)
 
 # Run the graph
 fl.run(graph)
