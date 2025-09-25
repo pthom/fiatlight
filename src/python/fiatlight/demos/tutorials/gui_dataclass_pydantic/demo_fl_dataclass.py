@@ -88,6 +88,8 @@ class PersonDataclass:
 
 
 # Option 2: call fl.register_dataclass with the dataclass as argument
+#           (this is often preferable, because it is less intrusive
+#           as it does not modify the class definition)
 # --------------------------------------------------------------------
 # fl.register_dataclass(
 #     PersonDataclass,

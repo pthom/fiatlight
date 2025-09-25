@@ -86,7 +86,9 @@ class PersonPydantic(BaseModel):
         return validate_name(value)
 
 
-# Option 2: call fl.register_base_model with the model as argument
+# # Option 2: call fl.register_base_model with the model as argument
+#           (this is often preferable, because it is less intrusive
+#           as it does not modify the class definition)
 # ----------------------------------------------------------------
 # fl.register_base_model(
 #     PersonPydantic,
@@ -100,6 +102,7 @@ class PersonPydantic(BaseModel):
 #     # name__validator=validate_name,  # We may choose to use the pydantic field_validator decorator instead
 #     preferred_number__validator=validate_preferred_number,  # or we use a fiatlight validator (which will run in the GUI only)
 # )
+#
 
 
 # Display a function that uses the model as an input and output:

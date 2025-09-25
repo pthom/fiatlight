@@ -14,25 +14,32 @@
     "gui_options": {
         "f_dataclass": {
             "function_node_with_gui": {
-                "_inputs_expanded": true,
-                "_outputs_expanded": true,
-                "_doc_expanded": false,
-                "fiat_tuning_expanded": true,
-                "_internal_state_gui_expanded": true,
+                "_inputs_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_outputs_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_doc_expanded": {
+                    "inside_node": false,
+                    "focused": true
+                },
+                "fiat_tuning_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_internal_state_gui_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
                 "_function_node": {
                     "inputs": {
                         "person": {
                             "cb_options": {
                                 "name": {
-                                    "cb_options": {
-                                        "width_em": 15.0,
-                                        "size_multiline_em": [
-                                            60.0,
-                                            15.0
-                                        ],
-                                        "wrap_multiline": false,
-                                        "wrap_multiline_width": 80
-                                    },
+                                    "cb_options": {},
                                     "expanded": true
                                 },
                                 "age": {
@@ -51,15 +58,7 @@
                         "0": {
                             "cb_options": {
                                 "name": {
-                                    "cb_options": {
-                                        "width_em": 15.0,
-                                        "size_multiline_em": [
-                                            60.0,
-                                            15.0
-                                        ],
-                                        "wrap_multiline": false,
-                                        "wrap_multiline_width": 80
-                                    },
+                                    "cb_options": {},
                                     "expanded": true
                                 },
                                 "age": {
@@ -74,22 +73,19 @@
                             "expanded": true
                         }
                     }
-                }
+                },
+                "_backup_expanded_states": {
+                    "inside_node": null,
+                    "focused": null
+                },
+                "_focused_function_visible": false
             },
             "function_node": {
                 "inputs": {
                     "person": {
                         "cb_options": {
                             "name": {
-                                "cb_options": {
-                                    "width_em": 15.0,
-                                    "size_multiline_em": [
-                                        60.0,
-                                        15.0
-                                    ],
-                                    "wrap_multiline": false,
-                                    "wrap_multiline_width": 80
-                                },
+                                "cb_options": {},
                                 "expanded": true
                             },
                             "age": {
@@ -108,15 +104,7 @@
                     "0": {
                         "cb_options": {
                             "name": {
-                                "cb_options": {
-                                    "width_em": 15.0,
-                                    "size_multiline_em": [
-                                        60.0,
-                                        15.0
-                                    ],
-                                    "wrap_multiline": false,
-                                    "wrap_multiline_width": 80
-                                },
+                                "cb_options": {},
                                 "expanded": true
                             },
                             "age": {
