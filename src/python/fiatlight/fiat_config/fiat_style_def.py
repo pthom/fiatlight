@@ -93,7 +93,7 @@ _STANDARD_COLORS: dict[_ColorTypes, _ColorWithDarkLightVariations] = {
     ),
     _ColorTypes.transparent_grey: _ColorWithDarkLightVariations(ColorRgbaFloat((0.8, 0.8, 0.8, 0.4))),
     _ColorTypes.yellow: _ColorWithDarkLightVariations(
-        ColorRgbaFloat((1.0, 1.0, 0.0, 1.0)), ColorRgbaFloat((0.6, 0.6, 0.0, 1.0))
+        ColorRgbaFloat((1.0, 1.0, 0.0, 1.0)), ColorRgbaFloat((0.55, 0.45, 0.0, 1.0))
     ),
     _ColorTypes.light_grey: _ColorWithDarkLightVariations(ColorRgbaFloat((0.9, 0.9, 0.9, 1.0))),
     _ColorTypes.contrasting_black_or_white: _ColorWithDarkLightVariations(
