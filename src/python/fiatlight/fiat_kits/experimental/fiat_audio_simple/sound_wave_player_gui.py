@@ -34,7 +34,6 @@ class TimeMarker(BaseModel):
 class SoundWaveGuiParams(BaseModel):
     plot_size_em: ImVec2_Pydantic = ImVec2_Pydantic(20, 10)
     show_time_as_seconds: bool = False
-    show_markers: bool = False
     volume: float = 1.0
     time_markers: list[TimeMarker] = []  # Pydantic v2 handle mutable defaults
 
@@ -236,55 +235,46 @@ class SoundWavePlayerGui(AnyDataWithGui[SoundWave]):
             if changed:
                 self._sound_wave_player.seek(TimeSeconds(new_x))
 
-    def _edit_markers(self) -> None:
+    def _do_edit_markers(self) -> None:
+        imgui.text("Markers")
         if self._sound_wave_player is None:
             return
-        if not self.params.show_markers:
-            return
 
-        _, self.params.show_markers = imgui.begin("Edit Markers", self.params.show_markers)  # type: ignore
-        if self.params.show_markers:
-            imgui.text("Markers")
+        has_position = self._sound_wave_player is not None
+        if has_position:
+            if imgui.button("Add marker"):
+                time_ratio = self._sound_wave_player.position_seconds() / self._sound_wave_player.sound_wave.duration()
+                self.params.add_time_marker(time_ratio)
+            imgui.set_item_tooltip("Add a marker at the current position")
+        imgui.begin_vertical("Markers")
+        marker_to_remove = None
 
-            has_position = self._sound_wave_player is not None
-            if has_position:
-                if imgui.button("Add marker"):
-                    time_ratio = (
-                        self._sound_wave_player.position_seconds() / self._sound_wave_player.sound_wave.duration()
-                    )
-                    self.params.add_time_marker(time_ratio)
-                imgui.set_item_tooltip("Add a marker at the current position")
-            imgui.begin_vertical("Markers")
-            marker_to_remove = None
+        for marker in self.params.time_markers:
+            with imgui_ctx.push_obj_id(marker):
+                imgui.begin_horizontal("Marker" + str(id(marker)))
+                marker_time = TimeSeconds(marker.time_ratio * self._sound_wave_player.sound_wave.duration())
+                label = f"{self._format_time(marker_time)}"
+                if imgui.button(label):
+                    self._sound_wave_player.seek(marker_time)
+                if imgui.is_item_hovered():
+                    imgui.set_tooltip("Click to seek to this marker")
+                imgui.set_next_item_width(hello_imgui.em_size(3))
+                _, marker.label = imgui.input_text("##marker_label", marker.label)
 
-            for marker in self.params.time_markers:
-                with imgui_ctx.push_obj_id(marker):
-                    imgui.begin_horizontal("Marker" + str(id(marker)))
-                    marker_time = TimeSeconds(marker.time_ratio * self._sound_wave_player.sound_wave.duration())
-                    label = f"{self._format_time(marker_time)}"
-                    if imgui.button(label):
-                        self._sound_wave_player.seek(marker_time)
-                    if imgui.is_item_hovered():
-                        imgui.set_tooltip("Click to seek to this marker")
-                    imgui.set_next_item_width(hello_imgui.em_size(3))
-                    _, marker.label = imgui.input_text("##marker_label", marker.label)
+                if imgui.button(icons_fontawesome_6.ICON_FA_TRASH):
+                    if imgui.is_key_down(imgui.Key.mod_shift):
+                        marker_to_remove = marker
+                imgui.set_item_tooltip("Shift+Click this button to remove marker")
 
-                    if imgui.button(icons_fontawesome_6.ICON_FA_TRASH):
-                        if imgui.is_key_down(imgui.Key.mod_shift):
-                            marker_to_remove = marker
-                    imgui.set_item_tooltip("Shift+Click this button to remove marker")
+                if imgui.button(icons_fontawesome_6.ICON_FA_ARROWS_TO_DOT):
+                    self._sound_wave_player.seek(marker_time)
+                imgui.set_item_tooltip("Click to seek to this marker")
 
-                    if imgui.button(icons_fontawesome_6.ICON_FA_ARROWS_TO_DOT):
-                        self._sound_wave_player.seek(marker_time)
-                    imgui.set_item_tooltip("Click to seek to this marker")
+            imgui.end_horizontal()
+        imgui.end_vertical()
 
-                imgui.end_horizontal()
-            imgui.end_vertical()
-
-            if marker_to_remove is not None:
-                self.params.remove_time_marker(marker_to_remove)
-
-        imgui.end()
+        if marker_to_remove is not None:
+            self.params.remove_time_marker(marker_to_remove)
 
     def present(self, sound_wave: SoundWave) -> None:
         imgui.text(
@@ -304,11 +294,17 @@ class SoundWavePlayerGui(AnyDataWithGui[SoundWave]):
             self._show_controls()
             imgui.same_line()
             self._show_position()
-            imgui.same_line()
-            if imgui.button("Edit Markers"):
-                self.params.show_markers = True
 
-        self._edit_markers()
+        # Detached window to edit markers
+        marker_window_params = fiat_osd.DetachedWindowParams(
+            unique_id="Edit Markers##" + str(id(self)),
+            gui_function=lambda: self._do_edit_markers(),
+            window_name="Edit Markers",
+            button_label="Edit Markers",
+            window_flags=None,
+            window_size=hello_imgui.em_to_vec2(15, 25),
+        )
+        fiat_osd.show_void_detached_window_button(marker_window_params)
 
         if imgui.is_key_pressed(imgui.Key.space):
             if self._sound_wave_player is not None:
