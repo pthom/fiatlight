@@ -112,12 +112,14 @@ class FunctionsGraph:
         composition = FunctionsGraph._create_from_function_composition(functions)
         self.merge_graph(composition)
 
-    def add_function(self, f: Function | FunctionWithGui) -> FunctionNode:
+    def add_function(self, f: Function | FunctionWithGui, label: str | None = None) -> FunctionNode:
         """Add a function to the graph. It will not be linked to any other function. Returns the FunctionNode added."""
         if isinstance(f, FunctionWithGui):
+            if label is not None:
+                f.label = label
             return self._add_function_with_gui(f)
         else:
-            return self._add_function(f)
+            return self._add_function(f, label=label)
 
     def add_gui_node(
         self,
@@ -170,8 +172,11 @@ class FunctionsGraph:
     def _add_function(
         self,
         f: Function,
+        label: str | None = None,
     ) -> FunctionNode:
         f_gui = FunctionWithGui(f)
+        if label is not None:
+            f_gui.label = label
         return self._add_function_with_gui(f_gui)
 
     @staticmethod

@@ -33,7 +33,7 @@ class MarkdownNode(GuiNode):
     ) -> None:
         self.md_params = _MarkdownParams(unindented=unindented, md_string=md_string, text_width_em=text_width_em)
 
-        super().__init__(self.gui, label=label, gui_node_compatible=True)
+        super().__init__(self.gui, label=label)
 
     def gui(self) -> None:
         width_pixels = hello_imgui.em_size(self.md_params.text_width_em)

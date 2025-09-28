@@ -164,10 +164,8 @@ gui_params = fl.FiatRunParams(enable_idling=False)
 # Create a FunctionGraph
 graph = fl.FunctionsGraph()
 # add the random numbers generator, and make its invocation manual...
-fl.add_fiat_attributes(
-    make_random_number_list, label="Generate random numbers", invoke_manually=True, invoke_always_dirty=True
-)
-graph.add_function(make_random_number_list)
+fl.add_fiat_attributes(make_random_number_list, invoke_manually=True, invoke_always_dirty=True)
+graph.add_function(make_random_number_list, label="Generate random numbers")
 # Then add all the sorting algorithms, and link them to the random numbers generator
 sort_functions = [bubble_sort, selection_sort, insertion_sort, merge_sort, quick_sort, quick_sort_median_of_three]
 for sort_function in sort_functions:
@@ -175,7 +173,7 @@ for sort_function in sort_functions:
     graph.add_function(sort_view)
     graph.add_link(make_random_number_list, sort_view)
 # Add a GUI only node to set the latency
-graph.add_gui_node(gui_latency)
+graph.add_gui_node(gui_latency, label="Set Latency")
 # # Add a documentation node (which will display the docstring of this script)
 graph.add_markdown_node(__doc__, label="Sort Competition", text_width_em=15)
 # Finally run the graph with the given parameters

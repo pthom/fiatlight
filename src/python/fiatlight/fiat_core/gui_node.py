@@ -39,7 +39,6 @@ class GuiNode(FunctionWithGui):
         self,
         gui_function: GuiFunctionWithInputs,
         label: str | None = None,
-        gui_node_compatible: bool = True,
         gui_serializable_data: BaseModel | None = None,
     ) -> None:
         self._accept_none_as_output = True

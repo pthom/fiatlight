@@ -791,43 +791,47 @@ class FunctionNodeGui:
         can_collapse = True
         expanded = self._internal_state_gui_expanded.current_value()
 
-        #
-        # Draw the separator
-        #
-        node_separator_params = fiat_widgets.NodeSeparatorParams()
-        node_separator_params.parent_node = self._node_id
-        # expanded state
-        node_separator_params.expanded = expanded
-        # Separator text
-        if isinstance(fn_with_gui, GuiNode):
-            node_separator_params.text = " "
-        else:
-            node_separator_params.text = "Function internal state"
-        # Separator collapse button
-        node_separator_params.show_collapse_button = can_collapse
-        # Separator collapse all button
-        node_separator_params.show_toggle_collapse_all_button = False
+        is_gui_only_node = self._function_node.function_with_gui.invoke_is_gui_only
 
+        #
         # Draw the separator
-        node_separator_output = fiat_widgets.node_separator(node_separator_params)
-        # Update the expanded state
-        self._internal_state_gui_expanded.set_current_value(node_separator_output.expanded)
+        #
+        if not is_gui_only_node:
+            node_separator_params = fiat_widgets.NodeSeparatorParams()
+            node_separator_params.parent_node = self._node_id
+            # expanded state
+            node_separator_params.expanded = expanded
+            # Separator text
+            if isinstance(fn_with_gui, GuiNode):
+                node_separator_params.text = " "
+            else:
+                node_separator_params.text = "Function internal state"
+            # Separator collapse button
+            node_separator_params.show_collapse_button = can_collapse
+            # Separator collapse all button
+            node_separator_params.show_toggle_collapse_all_button = False
+
+            # Draw the separator
+            node_separator_output = fiat_widgets.node_separator(node_separator_params)
+            # Update the expanded state
+            self._internal_state_gui_expanded.set_current_value(node_separator_output.expanded)
 
         #
         # Invoke the internal state gui
         #
         changed = False
 
-        detached_internal_state_fn = fiat_osd.DetachedWindowParams(
-            unique_id="internal_state" + str(id(internal_state_fn)),
-            window_name=f"{self._function_node.function_with_gui.label} Internal GUI",
-            gui_function=internal_state_fn,
-        )
-        fiat_osd.show_bool_detached_window_button(detached_internal_state_fn)
+        if not is_gui_only_node:
+            detached_internal_state_fn = fiat_osd.DetachedWindowParams(
+                unique_id="internal_state" + str(id(internal_state_fn)),
+                window_name=f"{self._function_node.function_with_gui.label} Internal GUI",
+                gui_function=internal_state_fn,
+            )
+            fiat_osd.show_bool_detached_window_button(detached_internal_state_fn)
 
-        # If the user edits the internal gui in a detached window
-        if fiat_osd.get_detached_window_bool_return(detached_internal_state_fn):
-            changed = True
+            # If the user edits the internal gui in a detached window
+            if fiat_osd.get_detached_window_bool_return(detached_internal_state_fn):
+                changed = True
 
         if self._internal_state_gui_expanded.current_value():
             changed = internal_state_fn()
@@ -998,30 +1002,7 @@ class FunctionNodeGui:
             else:
                 imgui.text_wrapped(doc.user_doc)
 
-        def render_source_code() -> None:
-            assert doc.source_code is not None
-            md = "### Source code\n\n"
-            md += f"```python\n{doc.source_code}\n```"
-            imgui_md.render(md)
-
-        def render_doc_in_popup() -> None:
-            with imgui_ctx.begin_vertical("function_doc"):
-                if doc.user_doc is not None:
-                    imgui.separator_text("Function documentation")
-                    render_user_doc()
-                if doc.source_code is not None:
-                    imgui.separator_text("Source code")
-                    render_source_code()
-
-        with fontawesome_6_ctx():
-            detached_window_params = fiat_osd.DetachedWindowParams(
-                unique_id="function_doc" + str(id(self)),
-                window_name=f"Function documentation for {fn_with_gui.label}",
-                button_label=icons_fontawesome_6.ICON_FA_BOOK,
-                gui_function=render_doc_in_popup,
-            )
-            fiat_osd.show_void_detached_window_button(detached_window_params)
-            render_user_doc()
+        render_user_doc()
 
     class _FocusedFunction:  # Dummy class to create a section in the IDE # noqa
         """

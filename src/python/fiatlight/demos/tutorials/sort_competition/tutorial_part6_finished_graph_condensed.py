@@ -56,13 +56,13 @@ def gui_latency() -> None:
 fl.register_type(NumbersList, NumbersListWithLatency_Gui)  # register the GUI for NumbersList
 gui_params = fl.FiatRunParams(enable_idling=False)  # Refresh the GUI as quickly as possible
 graph = fl.FunctionsGraph()  # Create a graph of functions
-fl.add_fiat_attributes(make_random_number_list, label="Generate random numbers", invoke_manually=True, invoke_always_dirty=True)
-graph.add_function(make_random_number_list)  # Add the numbers generator, and make its invocation manual (see above)
+fl.add_fiat_attributes(make_random_number_list, invoke_manually=True, invoke_always_dirty=True)
+graph.add_function(make_random_number_list, label="Generate random numbers")  # Add the numbers generator, and make its invocation manual (see above)
 sort_functions = [bubble_sort, selection_sort, insertion_sort, merge_sort, quick_sort, quick_sort_median_of_three]
 for sort_function in sort_functions:  # For each sorting function, create a wrapper function which will sort, display...
     sort_view = make_sort_function_visualizer(sort_function)  # ... real-time visualization, and return elapsed time.
     graph.add_function(sort_view)  # Add the wrapper function to the graph
     graph.add_link(make_random_number_list, sort_view)  # Link the random numbers generator to the sorting function
-graph.add_gui_node(gui_latency)  # Add a GUI node to set the latency
+graph.add_gui_node(gui_latency,  label="Set Latency")  # Add a GUI node to set the latency
 graph.add_markdown_node(__doc__, label="Sort Competition", text_width_em=15)  # Add a node with the documentation
 fl.run(graph, params=gui_params)  # And run the graph
