@@ -88,8 +88,8 @@ def age_histogram_plot(df: pd.DataFrame) -> None:
         implot.setup_axes(
             x_label="Age",
             y_label="Count",
-            x_flags=implot.AxisFlags_.auto_fit.value,
-            y_flags=implot.AxisFlags_.auto_fit.value,
+            x_flags=implot.AxisFlags_.auto_fit,
+            y_flags=implot.AxisFlags_.auto_fit,
         )
         implot.plot_histogram("Age", df["Age"].dropna().values, bins=30)  # type: ignore
         implot.end_plot()
