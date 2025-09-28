@@ -15,13 +15,7 @@
                     "name": "sound_transform",
                     "data": {
                         "type": "Optional",
-                        "value": {
-                            "type": "Pydantic",
-                            "value": {
-                                "pitch_semitones": 0.0,
-                                "tempo_ratio": 1.8299992084503174
-                            }
-                        }
+                        "value": null
                     }
                 }
             },
@@ -66,7 +60,6 @@
                                     10.0
                                 ],
                                 "show_time_as_seconds": false,
-                                "show_markers": false,
                                 "volume": 1.0,
                                 "time_markers": []
                             },
@@ -95,7 +88,6 @@
                                 10.0
                             ],
                             "show_time_as_seconds": false,
-                            "show_markers": false,
                             "volume": 1.0,
                             "time_markers": []
                         },
@@ -135,7 +127,6 @@
                                     10.0
                                 ],
                                 "show_time_as_seconds": false,
-                                "show_markers": false,
                                 "volume": 1.0,
                                 "time_markers": []
                             },
@@ -154,7 +145,6 @@
                                     17.39562225341797
                                 ],
                                 "show_time_as_seconds": false,
-                                "show_markers": true,
                                 "volume": 1.0,
                                 "time_markers": [
                                     {
@@ -210,7 +200,6 @@
                                 10.0
                             ],
                             "show_time_as_seconds": false,
-                            "show_markers": false,
                             "volume": 1.0,
                             "time_markers": []
                         },
@@ -229,7 +218,6 @@
                                 17.39562225341797
                             ],
                             "show_time_as_seconds": false,
-                            "show_markers": true,
                             "volume": 1.0,
                             "time_markers": [
                                 {
