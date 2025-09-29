@@ -1,4 +1,4 @@
-#git+https://github.com/pthom/imgui_bundle@main
+imgui-bundle
 # opencv-contrib-python
 opencv-python
 numpy
