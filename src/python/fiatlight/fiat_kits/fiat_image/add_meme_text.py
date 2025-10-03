@@ -16,11 +16,6 @@ class MemeFont(Enum):
     SaoTorpes = "fonts/sao_torpes/SaoTorpes.otf"
 
 
-@fl.base_model_with_gui_registration(
-    x__range=(0, 1),
-    y__range=(0, 1),
-    font_size__range=(5, 100),
-)
 class MemeTextParams(BaseModel):
     text: str = "Hello!"
     font_size: int = 20
@@ -30,6 +25,9 @@ class MemeTextParams(BaseModel):
     text_color: ColorRgb = ColorRgb((255, 255, 255))  # ------>
     outline_color: ColorRgb = ColorRgb((0, 0, 0))
     is_image_bgr: bool = True
+
+
+fl.register_base_model(MemeTextParams, x__range=(0, 1), y__range=(0, 1), font_size__range=(5, 100))
 
 
 @fl.with_fiat_attributes(label="Add Meme Text")
