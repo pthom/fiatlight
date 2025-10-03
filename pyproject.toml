@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "fiatlight"
-version = "0.2.0"
+version = "0.5.0"
 authors = [{ name = "Pascal Thomet", email = "pthomet@gmail.com" }]
 description = "fiatlight: shine light inside your algorithm pipelines"
 readme = "Readme.md"
@@ -20,12 +20,13 @@ classifiers = [
 keywords = ["python"]
 
 dependencies = [
-    "imgui-bundle>=1.92.3",
+    "imgui-bundle>=1.92.4",
     "opencv-python",
     "pydantic",
     "Pillow",
     "types-Pillow",
-    "numpy<2.0.0",  # numpy 2.0.0 breaks compatibility with librosa. Let's wait a bit...
+#    "numpy<2.0.0",  # numpy 2.0.0 breaks compatibility with librosa. Let's wait a bit...
+    "numpy",
     "matplotlib",
 #    "fire",  # unavailable on pyodide => install message in fiatlight_cli.py
     "tabulate",
