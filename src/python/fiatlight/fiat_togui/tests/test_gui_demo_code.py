@@ -28,7 +28,11 @@ import fiatlight
     int_param__validator = None,
     int_param__label = "",
     int_param__tooltip = "",
-    int_param__label_color = ImVec4(0.000000, 0.000000, 0.000000, 1.000000))
+    int_param__label_color = ImVec4(0.000000, 0.000000, 0.000000, 1.000000),
+    int_param__edit_collapsible = True,
+    int_param__present_collapsible = True,
+    int_param__present_detachable = False,
+    int_param__edit_detachable = False)
 def f(int_param: int) -> int:
     return int_param
 

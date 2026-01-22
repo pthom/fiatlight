@@ -27,7 +27,9 @@ def test_hello_imgui_image_proportional_size_signature() -> None:
         # no signature found for builtin <built-in method image_proportional_size of PyCapsule object at 0x102a45f80>
         print(e)
         got_exception = True
-    assert got_exception
+
+    f_sig_str = str(f_sig)
+    assert got_exception or f_sig_str == "(*args, **kwargs)"
 
     # However, the signature is available in the stubs and looks like this:
     f_sig_str = "image_proportional_size(asked_size: ImVec2, image_size: ImVec2) -> ImVec2"
