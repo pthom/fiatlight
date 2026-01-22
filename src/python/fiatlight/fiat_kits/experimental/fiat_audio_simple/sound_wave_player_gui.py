@@ -50,7 +50,9 @@ class SoundWaveGuiParams(BaseModel):
         """Add a time marker at the given ratio of the total duration."""
         if not (0 <= time_ratio <= 1):
             raise ValueError("time_ratio must be between 0 and 1")
-        self.time_markers.append(TimeMarker(time_ratio=time_ratio))
+        nb_markers = len(self.time_markers)
+        marker_label = chr(ord("a") + nb_markers)
+        self.time_markers.append(TimeMarker(time_ratio=time_ratio, label=marker_label))
         self.time_markers.sort(key=lambda marker: marker.time_ratio)  # Sort markers by time ratio
 
     def remove_time_marker(self, marker: TimeMarker) -> None:
