@@ -174,6 +174,7 @@ class FiatRunParams:
     enable_idling: bool = True
     theme: ImGuiTheme_ | None = None
     remember_theme: bool | None = None
+    top_most: bool = False
 
     # FiatLight specific members
     customizable_graph: bool = False
@@ -247,6 +248,7 @@ class FiatGui:
         runner_params.imgui_window_params.show_status_bar = True
         runner_params.imgui_window_params.enable_viewports = True
         runner_params.fps_idling.enable_idling = params.enable_idling
+        runner_params.app_window_params.top_most = params.top_most
 
         # Setup theme
         if params.theme is not None:
@@ -756,12 +758,14 @@ def run(
     fn: Function | FunctionWithGui | List[Function | FunctionWithGui] | FunctionsGraph,
     params: FiatRunParams | None = None,
     app_name: str | None = None,
+    top_most: bool = False,
 ) -> None:
     """Runs a function, a composition of functions, or a functions graph in the Fiat GUI.
 
     - app_name: will be displayed in the window title, and used to save/load the user inputs and graph composition.
                 if it is None, then the name of the calling module will be used.
                 Note: inside a notebook, specifying app_name is mandatory, since the module name is not available.
+    - top_most: if True, the window will stay on top of other windows (useful in notebooks). Default: False.
     - theme: the theme to use. If None, the default theme will be used.
     - remember_theme: if True, the user selected theme will be saved in the settings file, and restored at the next run.
                       (this will bypass the theme parameter)
@@ -770,6 +774,8 @@ def run(
         params = FiatRunParams()
     if app_name is not None:
         params.app_name = app_name
+    if top_most:
+        params.top_most = top_most
 
     if isinstance(fn, FunctionsGraph):
         _fiat_run_graph(
@@ -828,6 +834,7 @@ async def run_async(
     fn: Function | FunctionWithGui | List[Function | FunctionWithGui] | FunctionsGraph,
     params: FiatRunParams | None = None,
     app_name: str | None = None,
+    top_most: bool = False,
 ) -> None:
     """Runs a function, a composition of functions, or a functions graph in the Fiat GUI asynchronously.
 
@@ -836,6 +843,7 @@ async def run_async(
     - app_name: will be displayed in the window title, and used to save/load the user inputs and graph composition.
                 if it is None, then the name of the calling module will be used.
                 Note: inside a notebook, specifying app_name is mandatory, since the module name is not available.
+    - top_most: if True, the window will stay on top of other windows (useful in notebooks). Default: False.
     - theme: the theme to use. If None, the default theme will be used.
     - remember_theme: if True, the user selected theme will be saved in the settings file, and restored at the next run.
                       (this will bypass the theme parameter)
@@ -844,6 +852,8 @@ async def run_async(
         params = FiatRunParams()
     if app_name is not None:
         params.app_name = app_name
+    if top_most:
+        params.top_most = top_most
 
     if isinstance(fn, FunctionsGraph):
         await _fiat_run_graph_async(

@@ -36,6 +36,7 @@ def start(
     fn: Function | FunctionWithGui | List[Function | FunctionWithGui] | FunctionsGraph,
     params: FiatRunParams | None = None,
     app_name: str | None = None,
+    top_most: bool = False,
 ) -> None:
     """Start a fiatlight application asynchronously in a notebook.
 
@@ -47,6 +48,7 @@ def start(
         params: Optional FiatRunParams to configure the runner.
         app_name: The application name (required for notebooks to save settings).
                   Will be displayed in the window title.
+        top_most: if True, the window will stay on top of other windows (recommended inside Jupyter notebooks).
 
     Raises:
         RuntimeError: If a fiatlight application is already running.
@@ -67,6 +69,9 @@ def start(
     # Apply light theme by default for notebooks (better visibility)
     if params.theme is None:
         params.theme = hello_imgui.ImGuiTheme_.white_is_white
+
+    # Apply top_most setting (default True for notebooks)
+    params.top_most = top_most
 
     async def _run_wrapper() -> None:
         await run_async(fn, params=params)
