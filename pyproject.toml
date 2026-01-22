@@ -51,3 +51,8 @@ line-length = 120
 
 [project.scripts]
 fiatlight = "fiatlight.fiat_cli.fiatlight_cli:main"
+
+[tool.uv.sources]
+# enable editable install of imgui-bundle for development
+imgui-bundle = { path = "../imgui_bundle", editable = true }
+
