@@ -6,3 +6,4 @@ jupyter
 nbformat
 types-tabulate
 pandas-stubs
+jupyter-book<2.0.0
