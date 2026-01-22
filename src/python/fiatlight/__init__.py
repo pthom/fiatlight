@@ -9,9 +9,11 @@ from fiatlight.fiat_core import (
 )
 from fiatlight.fiat_runner import (
     run,
+    run_async,
     FiatRunParams,
     fire_once_at_frame_end,
     fire_once_at_frame_start,
+    nb,
 )
 from fiatlight.fiat_kits import fiat_image, fiat_implot
 from fiatlight.fiat_togui import (
@@ -86,9 +88,11 @@ __all__ = [
     "immedit",
     # from fiat_runner
     "run",
+    "run_async",
     "FiatRunParams",
     "fire_once_at_frame_end",
     "fire_once_at_frame_start",
+    "nb",
     # from here
     "fiat_assets_dir",
     "fiatlight_dir",

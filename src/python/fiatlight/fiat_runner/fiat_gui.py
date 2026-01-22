@@ -306,7 +306,8 @@ class FiatGui:
         _ENQUEUED_CALLBACKS.run_pre_frame_callbacks()
         get_fiat_config().style.update_colors_from_imgui_colors()
 
-    def run(self) -> None:
+    def _setup_runner(self) -> Tuple[hello_imgui.RunnerParams, immapp.AddOnsParams]:
+        """Setup the runner params and addons. Returns (runner_params, addons) for use with immapp.run or run_async."""
         self._runner_params.docking_params.docking_splits += self._docking_splits()
         self._runner_params.docking_params.dockable_windows += self._dockable_windows()
 
@@ -350,7 +351,16 @@ class FiatGui:
         addons.with_markdown = True
         addons.with_implot = True
 
-        immapp.run(self._runner_params, addons)
+        return self._runner_params, addons
+
+    def run(self) -> None:
+        runner_params, addons = self._setup_runner()
+        immapp.run(runner_params, addons)
+
+    async def run_async(self) -> None:
+        """Run the FiatGui asynchronously. Use this for async workflows or notebook integration."""
+        runner_params, addons = self._setup_runner()
+        await immapp.run_async(runner_params, addons)
 
     def _store_final_app_window_screenshot(self) -> None:
         global _LAST_SCREENSHOT
@@ -773,6 +783,80 @@ def run(
         )
     else:
         _fiat_run_function(
+            fn,
+            params=params,
+        )
+
+
+# ==================================================================================================================
+#                                  Async run functions
+# ==================================================================================================================
+async def _fiat_run_graph_async(
+    functions_graph: FunctionsGraph,
+    params: FiatRunParams,
+) -> None:
+    fiat_gui = FiatGui(
+        functions_graph,
+        params=params,
+    )
+    await fiat_gui.run_async()
+
+
+async def _fiat_run_function_async(
+    fn: Function | FunctionWithGui,
+    params: FiatRunParams,
+) -> None:
+    functions_graph = FunctionsGraph.from_function(fn)
+    await _fiat_run_graph_async(
+        functions_graph,
+        params=params,
+    )
+
+
+async def _fiat_run_composition_async(
+    composition: List[Function | FunctionWithGui],
+    params: FiatRunParams,
+) -> None:
+    functions_graph = FunctionsGraph.from_function_composition(composition)
+    await _fiat_run_graph_async(
+        functions_graph,
+        params=params,
+    )
+
+
+async def run_async(
+    fn: Function | FunctionWithGui | List[Function | FunctionWithGui] | FunctionsGraph,
+    params: FiatRunParams | None = None,
+    app_name: str | None = None,
+) -> None:
+    """Runs a function, a composition of functions, or a functions graph in the Fiat GUI asynchronously.
+
+    This is the async version of `run()`. Use this for async workflows or notebook integration.
+
+    - app_name: will be displayed in the window title, and used to save/load the user inputs and graph composition.
+                if it is None, then the name of the calling module will be used.
+                Note: inside a notebook, specifying app_name is mandatory, since the module name is not available.
+    - theme: the theme to use. If None, the default theme will be used.
+    - remember_theme: if True, the user selected theme will be saved in the settings file, and restored at the next run.
+                      (this will bypass the theme parameter)
+    """
+    if params is None:
+        params = FiatRunParams()
+    if app_name is not None:
+        params.app_name = app_name
+
+    if isinstance(fn, FunctionsGraph):
+        await _fiat_run_graph_async(
+            fn,
+            params=params,
+        )
+    elif isinstance(fn, list):
+        await _fiat_run_composition_async(
+            fn,
+            params=params,
+        )
+    else:
+        await _fiat_run_function_async(
             fn,
             params=params,
         )
