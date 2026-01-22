@@ -698,7 +698,7 @@ def _fiat_run_graph(
     params: FiatRunParams,
 ) -> None:
     if is_running_in_notebook():
-        from fiatlight.fiat_runner.fiat_run_notebook import _fiat_run_graph_nb, NotebookRunnerParams
+        from fiatlight.fiat_runner.fiat_run_notebook import _fiat_nb_run_graph_and_save_screenshot, NotebookRunnerParams
 
         if params.app_name is None:
             raise ValueError(
@@ -707,7 +707,7 @@ def _fiat_run_graph(
 
         notebook_runner_params = NotebookRunnerParams()
 
-        _fiat_run_graph_nb(
+        _fiat_nb_run_graph_and_save_screenshot(
             functions_graph,
             params=params,
             notebook_runner_params=notebook_runner_params,

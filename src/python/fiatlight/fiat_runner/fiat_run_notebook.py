@@ -14,7 +14,7 @@ class NotebookRunnerParams:
     run_id: Optional[str] = None
 
 
-def _fiat_run_graph_nb(
+def _fiat_nb_run_graph_and_save_screenshot(
     functions_graph: FunctionsGraph,
     params: FiatRunParams,
     notebook_runner_params: NotebookRunnerParams | None,
