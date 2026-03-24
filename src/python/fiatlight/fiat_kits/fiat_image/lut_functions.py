@@ -68,23 +68,34 @@ def lut(image: ImageU8, lut_table: LutTable) -> ImageU8:
     return image_with_lut_uint8  # type: ignore
 
 
+def _draw_line(
+    image: ImageU8, p0: Tuple[float, float], p1: Tuple[float, float], color: Tuple[float, float, float, float]
+) -> None:
+    """Draws an anti-aliased line on the image, with subpixel precision."""
+    shift = 4
+    two_pow_shift = 1 << shift
+
+    def _to_cv_point_with_shift(p: Tuple[float, float]) -> Tuple[int, int]:
+        return int(p[0] * two_pow_shift), int(p[1] * two_pow_shift)
+
+    cv2.line(image, _to_cv_point_with_shift(p0), _to_cv_point_with_shift(p1), color, lineType=cv2.LINE_AA, shift=shift)  # type: ignore
+
+
 def lut_table_graph(lut_table: LutTable, size: int) -> ImageU8:
     """A small image representing the LUT table."""
-    from imgui_bundle import immvision
-
     image = np.zeros((size, size, 4), dtype=np.uint8)
     assert len(lut_table) == 256
 
-    def to_point(x: float, y: float) -> Tuple[float, float]:
-        return 1.0 + x * (size - 3), 1.0 + (1.0 - y) * (size - 3)
-
     y_table = lut_table.astype(np.float64) / 255.0
     x_table = np.arange(0.0, 1.0, 1.0 / 256.0)
+
+    def to_point(x: float, y: float) -> Tuple[float, float]:
+        return 1.0 + x * (size - 3), 1.0 + (1.0 - y) * (size - 3)
 
     image[:, :, :] = (0, 0, 0, 200)
     color = (255, 255, 0, 255)
     for i in range(255):
         x0, y0 = float(x_table[i]), float(y_table[i])
         x1, y1 = float(x_table[i + 1]), float(y_table[i + 1])
-        immvision.cv_drawing_utils.line(image, to_point(x0, y0), to_point(x1, y1), color)
+        _draw_line(image, to_point(x0, y0), to_point(x1, y1), color)
     return image  # type: ignore
