@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.7.1 (2026-03-31)
+
+- Logo loading no longer requires OpenCV — uses `hello_imgui.im_texture_id_from_asset` (stb_image) instead
+
 ## v0.7.0 (2026-03-31)
 
 ### New features

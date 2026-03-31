@@ -206,7 +206,7 @@ class FiatGui:
 
     _functions_collection_gui: FunctionCollectionGui
 
-    _logo_texture: immvision.GlTexture
+    _logo_texture: imgui.ImTextureRef
 
     # ==================================================================================================================
     #                                  Constructor
@@ -448,13 +448,11 @@ class FiatGui:
     def _show_help_and_logo_tooltip_window(self) -> None:
         def _read_logo_texture() -> None:
             if not hasattr(self, "_logo_texture"):
-                from fiatlight.fiat_kits.fiat_image.imread_rgb import imread_rgb
-
+                from imgui_bundle import hello_imgui
                 from fiatlight import fiat_assets_dir
 
                 logo_path = fiat_assets_dir() + "/logo/logo_fiatlight.jpg"
-                logo_image = imread_rgb(logo_path)
-                self._logo_texture = immvision.GlTexture(logo_image)
+                self._logo_texture = imgui.ImTextureRef(hello_imgui.im_texture_id_from_asset(logo_path))
 
         _read_logo_texture()
         from fiatlight.fiat_widgets.permanent_tooltip_window import compute_corner_position_from_window, CornerPosition
@@ -473,14 +471,12 @@ class FiatGui:
         if is_hovering:
             alpha = 1.0
         col = imgui.IM_COL32(255, 255, 255, int(255 * alpha))
-        imgui.get_window_draw_list().add_image(
-            imgui.ImTextureRef(self._logo_texture.texture_id), logo_pos, logo_pos + logo_size, col=col
-        )
+        imgui.get_window_draw_list().add_image(self._logo_texture, logo_pos, logo_pos + logo_size, col=col)
         if is_hovering:
             if imgui.begin_tooltip():
                 logo_height_em_big = 16.0
                 logo_size_big = hello_imgui.em_to_vec2(logo_height_em_big * logo_ratio, logo_height_em_big)
-                imgui.image(imgui.ImTextureRef(self._logo_texture.texture_id), logo_size_big)
+                imgui.image(self._logo_texture, logo_size_big)
                 imgui_md.render_unindented(
                     """
                     * Use the mouse wheel to zoom in and out in the graph
