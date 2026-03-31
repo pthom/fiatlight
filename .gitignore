@@ -18,3 +18,4 @@ src/python/fiatlight/fiat_togui/tests/truc.py
 *.webp
 bindings_imgui_bundle
 _drafts/
+uv.lock
