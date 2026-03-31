@@ -45,7 +45,7 @@ full = [
 
 [tool.hatch.build.targets.sdist]
 exclude = [
-  "src/python/fiatlight/doc", "devel_doc"
+  "src/python/fiatlight/doc", "devel_doc", "v3*", ".venv", "venv*"
 ]
 
 [tool.hatch.build.targets.wheel]

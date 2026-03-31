@@ -8,7 +8,8 @@ external/
 TODO.txt
 /dist/
 priv_assets/
-# v3* (virtualenvs)
+# virtualenvs
+/.venv
 /v3*
 .DS_Store
 .ipynb_checkpoints
