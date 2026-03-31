@@ -1,7 +1,6 @@
 import time
-
 import fiatlight as fl
-from fiatlight.fiat_types import PositiveFloat, ColorRgb
+from fiatlight.fiat_types import ColorRgb
 from fiatlight.fiat_kits.fiat_image import ImageU8_GRAY, ImageRgb, image_source
 from fiatlight.demos.images.opencv_wrappers import canny, dilate, MorphShape, CannyApertureSize
 from fiatlight.fiat_kits.fiat_image import overlay_alpha_image
@@ -10,7 +9,6 @@ import numpy as np
 import cv2
 
 
-@fl.with_fiat_attributes(edges_intensity__range=(0.0, 1.0))
 def merge_toon_edges(
     image: ImageRgb,
     edges_images: ImageU8_GRAY,
@@ -40,53 +38,32 @@ def merge_toon_edges(
     return r
 
 
-@fl.base_model_with_gui_registration(
-    blur_sigma__range=(0.0, 10.0),
-)
 class ToonCannyParams(BaseModel):
-    t_lower: PositiveFloat = PositiveFloat(1000.0)
-    t_upper: PositiveFloat = PositiveFloat(5000.0)
+    t_lower: float = 1000.0
+    t_upper: float = 5000.0
     l2_gradient: bool = True
     blur_sigma: float = 0.0
     aperture_size: CannyApertureSize = CannyApertureSize.APERTURE_5
 
 
-@fl.base_model_with_gui_registration(
-    kernel_size__range=(0, 10),
-    iterations__range=(0, 10),
-)
 class ToonDilateParams(BaseModel):
     kernel_size: int = 2
     morph_shape: MorphShape = MorphShape.MORPH_ELLIPSE
     iterations: int = 2
 
 
-@fl.base_model_with_gui_registration(
-    blur_sigma__range=(0.0, 10.0),
-    intensity__range=(0.0, 1.0),
-)
 class ToonEdgesAppearance(BaseModel):
     blur_sigma: float = 0.0
     intensity: float = 0.8
     color: ColorRgb = ColorRgb((0, 0, 0))
 
 
-@fl.base_model_with_gui_registration(
-    canny__tooltip="Params for the edge detection",
-    dilate__tooltip="Params for the edge dilation (make it thicker)",
-    appearance__tooltip="Params for the appearance of the edges",
-)
 class ToonEdgesParams(BaseModel):
     canny: ToonCannyParams = ToonCannyParams()
     dilate: ToonDilateParams = ToonDilateParams()
     appearance: ToonEdgesAppearance = ToonEdgesAppearance()
 
 
-@fl.with_fiat_attributes(
-    params__tooltip="Parameters for the Toon Edges function",
-    params__label="Edges Params",
-    label="Add Toon Edges",
-)
 def add_toon_edges(image: ImageRgb, params: ToonEdgesParams) -> ImageRgb:
     """Add toon edges to an image.
     Edges are detected using the Canny filter, then dilated and blurred.
@@ -153,6 +130,41 @@ def add_toon_edges(image: ImageRgb, params: ToonEdgesParams) -> ImageRgb:
 
 
 def main() -> None:
+    fl.register_base_model(
+        ToonCannyParams,
+        blur_sigma__range=(0.0, 10.0),
+        t_lower__range=(100.0, 10000.0),
+        t_lower__slider_logarithmic=True,
+        t_upper__range=(100.0, 10000.0),
+        t_upper__slider_logarithmic=True,
+    )
+
+    fl.register_base_model(
+        ToonDilateParams,
+        kernel_size__range=(0, 10),
+        iterations__range=(0, 10),
+    )
+
+    fl.register_base_model(
+        ToonEdgesAppearance,
+        blur_sigma__range=(0.0, 10.0),
+        intensity__range=(0.0, 1.0),
+    )
+
+    fl.register_base_model(
+        ToonEdgesParams,
+        canny__tooltip="Params for the edge detection",
+        dilate__tooltip="Params for the edge dilation (make it thicker)",
+        appearance__tooltip="Params for the appearance of the edges",
+    )
+
+    fl.add_fiat_attributes(
+        add_toon_edges,
+        params__tooltip="Parameters for the Toon Edges function",
+        params__label="Edges Params",
+        label="Add Toon Edges",
+    )
+
     fl.run([image_source, add_toon_edges], fl.FiatRunParams(app_name="Toon Edges", theme=fl.ImGuiTheme_.material_flat))
 
 
