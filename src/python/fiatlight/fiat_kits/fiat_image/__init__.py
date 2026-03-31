@@ -13,18 +13,25 @@ from .image_types import (
     ImageU8_4,
 )
 from .image_gui import ImageWithGui, ImagePresenterParams, image_source
-from .cv_color_type import ColorType, ColorConversion
-from .lut_functions import (
-    lut_with_params,
-    lut_channels_with_params,
-    lut_channels_in_colorspace,
-)
-from .lut_types import LutParams, LutTable
-from .lut_gui import LutParamsWithGui
 from .overlay_alpha_image import overlay_alpha_image
 from .image_to_from_file_gui import image_from_file, ImageToFileGui
-from .camera_image_provider import CameraImageProvider, CameraImageProviderGui
-from .imread_rgb import imread_rgb
+
+# Most of the features of fiatlight.fiat_image require OpenCV
+try:
+    HAS_OPENCV = True
+    from .cv_color_type import ColorType, ColorConversion
+    from .lut_functions import (
+        lut_with_params,
+        lut_channels_with_params,
+        lut_channels_in_colorspace,
+    )
+    from .lut_types import LutParams, LutTable
+    from .lut_gui import LutParamsWithGui
+    from .camera_image_provider import CameraImageProvider, CameraImageProviderGui
+    from .imread_rgb import imread_rgb
+except ImportError:
+    HAS_OPENCV = False
+    pass
 
 
 def _register_factories() -> None:
@@ -32,7 +39,8 @@ def _register_factories() -> None:
     from fiatlight.fiat_togui.gui_registry import register_type
 
     _register_image_type_factories()
-    register_type(LutParams, LutParamsWithGui)
+    if HAS_OPENCV:
+        register_type(LutParams, LutParamsWithGui)
 
 
 _register_factories()

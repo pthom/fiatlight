@@ -21,8 +21,17 @@ keywords = ["python"]
 
 dependencies = [
     "imgui-bundle>=1.92.6",
-    "opencv-python",
     "pydantic",
+]
+
+[tool.uv.sources]
+# enable editable install of imgui-bundle for development
+#imgui-bundle = { path = "../imgui_bundle", editable = true }
+
+
+[project.optional-dependencies]
+full = [
+    "opencv-python",
     "Pillow",
     "types-Pillow",
 #    "numpy<2.0.0",  # numpy 2.0.0 breaks compatibility with librosa. Let's wait a bit...
@@ -32,6 +41,7 @@ dependencies = [
     "tabulate",
     "pandas",
 ]
+
 
 [tool.hatch.build.targets.sdist]
 exclude = [
@@ -52,7 +62,4 @@ line-length = 120
 [project.scripts]
 fiatlight = "fiatlight.fiat_cli.fiatlight_cli:main"
 
-[tool.uv.sources]
-# enable editable install of imgui-bundle for development
-imgui-bundle = { path = "../imgui_bundle", editable = true }
 

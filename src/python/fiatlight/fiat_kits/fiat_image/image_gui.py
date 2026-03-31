@@ -8,7 +8,6 @@ from imgui_bundle import portable_file_dialogs as pfd, hello_imgui
 
 from typing import Optional, Sequence, TypeAlias, Any
 import numpy as np
-import cv2
 import json
 
 
@@ -198,7 +197,7 @@ class ImagePresenter:
         self.image = image
         self.need_refresh_cache_per_view.set_for_all_views(True)
         if len(image.shape) == 3 or len(image.shape) == 4:
-            self.image_channels = cv2.split(image)  # type: ignore
+            self.image_channels = [image[:, :, i] for i in range(image.shape[2])]
 
     def _show_image_inspector_on_first_call(self) -> None:
         if not self.was_inspect_window_opened_on_first_log:
@@ -380,6 +379,10 @@ def image_source(image_file: ImagePath, max_image_size: int | None = None) -> Im
     image = imread_rgb(image_file)
 
     if max_image_size is not None:
+        try:
+            import cv2  # type: ignore
+        except ImportError:
+            raise ImportError("cv2 is required to resize the image, please install it with 'pip install opencv-python'")
         if image.shape[0] > max_image_size or image.shape[1] > max_image_size:
             k = max_image_size / max(image.shape[0], image.shape[1])
             assert k > 0.0

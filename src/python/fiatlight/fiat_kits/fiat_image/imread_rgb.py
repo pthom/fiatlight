@@ -1,12 +1,13 @@
 """reads an image file and returns a numpy array with the image data in RGB order, using OpenCV"""
 
-import cv2
 from .image_types import ImageU8
 import numpy as np
 
 
 def imread_rgb(image_file: str) -> ImageU8:
     """reads an image file and returns a numpy array with the image data in RGB order, using OpenCV"""
+    import cv2
+
     img = cv2.imread(image_file)
     if len(img.shape) == 3:
         nb_channels = img.shape[2]
