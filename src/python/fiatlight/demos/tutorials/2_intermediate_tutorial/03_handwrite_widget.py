@@ -38,8 +38,9 @@ from imgui_bundle import imgui
 @fl.with_fiat_attributes(label="Read Image from File")
 def read_image(image_path: ImagePath) -> ImageRgb:
     img = cv2.imread(image_path)
+    assert img is not None
     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-    return img
+    return img  # type: ignore
 
 
 def detect_edges(
@@ -51,7 +52,7 @@ def detect_edges(
     """Detects edges in an image and returns a new image with the edges
     Following OpenCV documentation, the only valid values for aperture_size are 3, 5, and 7.
     """
-    return cv2.Canny(image, low_threshold, high_threshold, apertureSize=aperture_size)
+    return cv2.Canny(image, low_threshold, high_threshold, apertureSize=aperture_size)  # type: ignore
 
 
 def edit_aperture_size(aperture_size: int) -> tuple[bool, int]:

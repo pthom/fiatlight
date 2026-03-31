@@ -216,7 +216,7 @@ class SoundWavePlayerGui(AnyDataWithGui[SoundWave]):
             imgui.ImVec4(1.00, 0.45, 0.45, 1.0),  # Soft Coral
         ]
         for channel in range(len(self._plotted_values)):
-            implot.push_style_color(implot.Col_.line.value, channel_colors[channel % len(channel_colors)])
+            implot.push_style_color(implot.Col_.line.value, channel_colors[channel % len(channel_colors)])  # type: ignore
             implot.plot_line(f"Channel {channel}", self._plotted_times, self._plotted_values[channel])
             implot.pop_style_color()
 

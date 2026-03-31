@@ -29,7 +29,7 @@ from fiatlight.fiat_types.function_types import Function
 from fiatlight.fiat_runner.fiat_gui import FiatRunParams, run_async
 
 # Global state for tracking the running task
-_running_task: asyncio.Task | None = None
+_running_task: asyncio.Task[None] | None = None
 
 
 def start(

@@ -197,7 +197,7 @@ class ImagePresenter:
         self.image = image
         self.need_refresh_cache_per_view.set_for_all_views(True)
         if len(image.shape) == 3 or len(image.shape) == 4:
-            self.image_channels = [image[:, :, i] for i in range(image.shape[2])]
+            self.image_channels = [image[:, :, i] for i in range(image.shape[2])]  # type: ignore
 
     def _show_image_inspector_on_first_call(self) -> None:
         if not self.was_inspect_window_opened_on_first_log:
@@ -213,7 +213,7 @@ class ImagePresenter:
             if self.only_display:
                 immvision.image_display_resizable(
                     label_id=label,
-                    mat=image_channel,
+                    image=image_channel,
                     refresh_image=need_refresh,
                     resizable=self.image_params.can_resize,
                     size=self.size_when_only_display,
@@ -380,7 +380,7 @@ def image_source(image_file: ImagePath, max_image_size: int | None = None) -> Im
 
     if max_image_size is not None:
         try:
-            import cv2  # type: ignore
+            import cv2
         except ImportError:
             raise ImportError("cv2 is required to resize the image, please install it with 'pip install opencv-python'")
         if image.shape[0] > max_image_size or image.shape[1] > max_image_size:

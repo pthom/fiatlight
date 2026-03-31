@@ -64,7 +64,7 @@ class SoundWavePlayer:
         self._seek_impl(position)
 
     def is_playing(self) -> bool:
-        return self._stream.active if self._stream else False  # type: ignore
+        return self._stream.active if self._stream else False
 
     def position_seconds(self) -> TimeSeconds:
         return TimeSeconds(self.position / self.sound_wave.sample_rate)

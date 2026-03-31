@@ -105,7 +105,7 @@ class SoundWave:
     def nb_channels(self) -> int:
         if len(self.wave.shape) == 1:
             return 1
-        return self.wave.shape[1]
+        return int(self.wave.shape[1])
 
     def is_empty(self) -> bool:
         return self.wave.size == 0

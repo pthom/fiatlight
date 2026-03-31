@@ -39,13 +39,14 @@ from fiatlight.fiat_kits.fiat_image import ImageRgb
 def read_image(image_path: ImagePath) -> ImageRgb:
     """Reads an image from a file and returns it as an ImageRgb (i.e. a numpy array in RGB order)"""
     img = cv2.imread(image_path)
+    assert img is not None
     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)  # OpenCV uses BGR by default
-    return img
+    return img  # type: ignore
 
 
 def detect_edges(image: ImageRgb, low_threshold: float = 100.0, high_threshold: float = 200.0) -> ImageRgb:
     """Detects edges in an image and returns a new image with the edges"""
-    return cv2.Canny(image, low_threshold, high_threshold)
+    return cv2.Canny(image, low_threshold, high_threshold)  # type: ignore
 
 
 # Customize the GUI for the detect_edges function, by adding fiat attributes

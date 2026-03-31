@@ -9,6 +9,7 @@ def imread_rgb(image_file: str) -> ImageU8:
     import cv2
 
     img = cv2.imread(image_file)
+    assert img is not None
     if len(img.shape) == 3:
         nb_channels = img.shape[2]
         if nb_channels == 4:

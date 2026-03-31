@@ -1,6 +1,7 @@
 """Demonstrates plots generated using ImPlot and Matplotlib in the same application.
 """
 import matplotlib
+
 matplotlib.use("Agg")
 
 from fiatlight import fiat_implot
@@ -115,7 +116,7 @@ def interactive_histogram(
     data = np.random.normal(mu, sigma, int(nb_data)) + average
     bins = np.linspace(np.min(data), np.max(data), n_bars)
     fig, ax = plt.subplots()
-    ax.hist(data, bins=bins, color="blue", alpha=0.7)
+    ax.hist(data, bins=bins.tolist(), color="blue", alpha=0.7)
     return fig
 
 

@@ -211,7 +211,8 @@ def remove_hello_imgui_settings(runner_params: hello_imgui.RunnerParams) -> None
     """If desired, remove the settings file of Hello ImGui, to start with a fresh state"""
     import os
 
-    settings_file: str = hello_imgui.ini_settings_location(runner_params)
+    settings_file = hello_imgui.ini_settings_location(runner_params)
+    assert settings_file is not None
     if os.path.exists(settings_file):
         os.remove(settings_file)
 

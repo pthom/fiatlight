@@ -78,7 +78,7 @@ def _draw_line(
     def _to_cv_point_with_shift(p: Tuple[float, float]) -> Tuple[int, int]:
         return int(p[0] * two_pow_shift), int(p[1] * two_pow_shift)
 
-    cv2.line(image, _to_cv_point_with_shift(p0), _to_cv_point_with_shift(p1), color, lineType=cv2.LINE_AA, shift=shift)  # type: ignore
+    cv2.line(image, _to_cv_point_with_shift(p0), _to_cv_point_with_shift(p1), color, lineType=cv2.LINE_AA, shift=shift)
 
 
 def lut_table_graph(lut_table: LutTable, size: int) -> ImageU8:
@@ -97,5 +97,5 @@ def lut_table_graph(lut_table: LutTable, size: int) -> ImageU8:
     for i in range(255):
         x0, y0 = float(x_table[i]), float(y_table[i])
         x1, y1 = float(x_table[i + 1]), float(y_table[i + 1])
-        _draw_line(image, to_point(x0, y0), to_point(x1, y1), color)
+        _draw_line(image, to_point(x0, y0), to_point(x1, y1), color)  # type: ignore
     return image  # type: ignore

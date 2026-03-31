@@ -54,7 +54,7 @@ class BaseModelGui(DataclassLikeGui[DataclassLikeType]):
     def __init__(self, basemodel_type: Type[DataclassLikeType], fiat_attributes: FiatAttributes | None = None) -> None:
         if not issubclass(basemodel_type, BaseModel):
             raise FiatToGuiException(f"{basemodel_type} is not a pydantic model")
-        super().__init__(basemodel_type, fiat_attributes)  # type: ignore
+        super().__init__(basemodel_type, fiat_attributes)
         self.callbacks.load_from_dict = self._load_from_dict
         self.callbacks.save_to_dict = self._save_to_dict
         self.callbacks.clipboard_copy_possible = True
@@ -147,7 +147,7 @@ class BaseModelGui(DataclassLikeGui[DataclassLikeType]):
         assert not isinstance(self._type, Error)
         r = self._type.model_validate(json_data["value"])
         assert isinstance(r, self._type)
-        return r  # type: ignore
+        return r
 
     def clipboard_copy_str(self, value: DataclassLikeType) -> str:
         assert isinstance(value, BaseModel)

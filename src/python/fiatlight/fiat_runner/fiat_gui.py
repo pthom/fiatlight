@@ -590,11 +590,13 @@ class FiatGui:
         pass
 
     def _del_user_settings(self) -> None:
+        loc = hello_imgui.ini_settings_location(self._runner_params)
+        assert loc is not None
         files = [
             self._user_settings_filename(),
             self._graph_composition_filename(),
             self._node_settings_filename(),
-            hello_imgui.ini_settings_location(self._runner_params),
+            loc,
         ]
         for file in files:
             path = pathlib.Path(file)
@@ -602,13 +604,19 @@ class FiatGui:
                 path.unlink()
 
     def _node_settings_filename(self) -> str:
-        return hello_imgui.ini_settings_location(self._runner_params)[:-4] + ".node_editor.json"
+        loc = hello_imgui.ini_settings_location(self._runner_params)
+        assert loc is not None
+        return loc[:-4] + ".node_editor.json"
 
     def _user_settings_filename(self) -> str:
-        return hello_imgui.ini_settings_location(self._runner_params)[:-4] + ".fiat_user.json"
+        loc = hello_imgui.ini_settings_location(self._runner_params)
+        assert loc is not None
+        return loc[:-4] + ".fiat_user.json"
 
     def _graph_composition_filename(self) -> str:
-        return hello_imgui.ini_settings_location(self._runner_params)[:-4] + ".fiat_graph.json"
+        loc = hello_imgui.ini_settings_location(self._runner_params)
+        assert loc is not None
+        return loc[:-4] + ".fiat_graph.json"
 
     def _save_data(self, filename: str, save_type: _SaveType) -> None:
         has_extension = "." in filename

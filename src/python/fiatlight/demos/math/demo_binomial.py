@@ -14,7 +14,7 @@ def random_binomial(n: int = 50, p: float = 0.1) -> NDArray[np.int32]:
     :return: The binomial distribution.
     """
     r = np.random.binomial(n, p, size=10000)
-    return r
+    return r  # type: ignore
 
 
 def present_histogram(values: NDArray[np.int32]) -> None:

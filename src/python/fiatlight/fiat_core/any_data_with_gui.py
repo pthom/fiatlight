@@ -956,7 +956,7 @@ class AnyDataWithGui(Generic[DataType]):
             assert issubclass(self._type, pydantic.BaseModel)
             r = self._type.model_validate(json_data["value"])
             assert isinstance(r, self._type)
-            return r  # type: ignore
+            return r
         else:
             raise ValueError(f"Cannot deserialize {json_data}")
 
