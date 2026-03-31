@@ -5,6 +5,8 @@ __all__ = ["fiat_image", "fiat_implot", "fiat_ai"]
 import importlib.util
 
 if importlib.util.find_spec("pandas") is not None:
+    from . import fiat_dataframe  # noqa: F401 - triggers DataFrame GUI registration
+
     __all__.append("fiat_dataframe")
 
 if importlib.util.find_spec("matplotlib") is not None:
