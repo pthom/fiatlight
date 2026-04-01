@@ -40,8 +40,7 @@ jobs:
           cd doc
           BASE_URL="/fiatlight" jupyter-book build --html
           jupyter-book build --pdf
-          mkdir -p _build/html/assets
-          cp _build/exports/flgt.pdf _build/html/assets/flgt.pdf
+          cp _build/exports/flgt.pdf _build/html/flgt.pdf
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v4
