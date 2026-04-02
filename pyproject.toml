@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "fiatlight"
-version = "0.7.1"
+version = "0.7.2"
 authors = [{ name = "Pascal Thomet", email = "pthomet@gmail.com" }]
 description = "fiatlight: shine light inside your algorithm pipelines"
 readme = "Readme.md"
@@ -45,7 +45,7 @@ full = [
 
 [tool.hatch.build.targets.sdist]
 exclude = [
-  "src/python/fiatlight/doc", "devel_doc", "v3*", ".venv", "venv*"
+  "doc", "src/python/fiatlight/doc", "devel_doc", "v3*", ".venv", "venv*"
 ]
 
 [tool.hatch.build.targets.wheel]

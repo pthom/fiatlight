@@ -1,5 +1,8 @@
 # Changelog
 
+## v0.7.2 (2026-04-02)
+- Fix dataframe registration
+
 ## v0.7.1 (2026-03-31)
 
 - Logo loading no longer requires OpenCV — uses `hello_imgui.im_texture_id_from_asset` (stb_image) instead
