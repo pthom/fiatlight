@@ -14,6 +14,7 @@ from examples.img_proc_playground.fiat_cv_enums import CannyApertureSize
     t_lower__slider_logarithmic=True,
     t_upper__range=(100.0, 10000.0),
     t_upper__slider_logarithmic=True,
+    fiat_tags=["edges", "cv2.imgproc"],
 )
 def canny(
     image: ImageU8,

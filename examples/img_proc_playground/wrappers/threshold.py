@@ -26,6 +26,7 @@ def _block_size_validator(block_size: int) -> int:
 @fl.with_fiat_attributes(
     thresh__range=(0.0, 255.0),
     maxval__range=(0.0, 255.0),
+    fiat_tags=["threshold", "cv2.imgproc"],
 )
 def threshold(
     image: ImageU8_GRAY,
@@ -63,6 +64,7 @@ def threshold(
     block_size__range=(3, 51),
     block_size__validator=_block_size_validator,
     c__range=(-50.0, 50.0),
+    fiat_tags=["threshold", "cv2.imgproc"],
 )
 def adaptive_threshold(
     image: ImageU8_GRAY,

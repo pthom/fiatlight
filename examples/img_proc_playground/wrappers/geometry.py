@@ -10,6 +10,7 @@ from examples.img_proc_playground.fiat_cv_enums import InterpolationFlag
 @fl.with_fiat_attributes(
     fx__range=(0.05, 4.0),
     fy__range=(0.0, 4.0),
+    fiat_tags=["geometry", "cv2.imgproc"],
 )
 def resize(
     image: ImageU8,

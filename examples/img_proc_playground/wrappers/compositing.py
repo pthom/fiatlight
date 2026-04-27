@@ -1,9 +1,11 @@
 """Compositing wrappers for the image-processing playground."""
+import fiatlight as fl
 from fiatlight.fiat_kits.fiat_image import ImageU8
 
 import cv2
 
 
+@fl.with_fiat_attributes(fiat_tags=["compositing", "cv2.core"])
 def bitwise_and(image_a: ImageU8, image_b: ImageU8) -> ImageU8:
     """Per-pixel bitwise AND of two images.
 
@@ -21,6 +23,7 @@ def bitwise_and(image_a: ImageU8, image_b: ImageU8) -> ImageU8:
     return r  # type: ignore
 
 
+@fl.with_fiat_attributes(fiat_tags=["compositing", "cv2.core"])
 def bitwise_or(image_a: ImageU8, image_b: ImageU8) -> ImageU8:
     """Per-pixel bitwise OR of two images.
 

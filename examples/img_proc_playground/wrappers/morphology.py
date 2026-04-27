@@ -7,7 +7,11 @@ import cv2
 from examples.img_proc_playground.fiat_cv_enums import MorphShape
 
 
-@fl.with_fiat_attributes(kernel_size__range=(1, 10), iterations__range=(1, 10))
+@fl.with_fiat_attributes(
+    kernel_size__range=(1, 10),
+    iterations__range=(1, 10),
+    fiat_tags=["morphology", "cv2.imgproc"],
+)
 def dilate(
     image: ImageU8_GRAY,
     kernel_size: int = 2,
@@ -33,7 +37,11 @@ def dilate(
     return r  # type: ignore
 
 
-@fl.with_fiat_attributes(kernel_size__range=(1, 10), iterations__range=(1, 10))
+@fl.with_fiat_attributes(
+    kernel_size__range=(1, 10),
+    iterations__range=(1, 10),
+    fiat_tags=["morphology", "cv2.imgproc"],
+)
 def erode(
     image: ImageU8_GRAY,
     kernel_size: int = 2,

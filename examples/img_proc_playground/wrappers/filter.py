@@ -18,6 +18,7 @@ def _bilateral_d_validator(d: int) -> int:
 @fl.with_fiat_attributes(
     sigma_x__range=(0.0, 25.0),
     sigma_y__range=(0.0, 25.0),
+    fiat_tags=["filter", "cv2.imgproc"],
 )
 def gaussian_blur(
     image: ImageU8,
@@ -53,6 +54,7 @@ def gaussian_blur(
     d__validator=_bilateral_d_validator,
     sigma_color__range=(1.0, 200.0),
     sigma_space__range=(1.0, 200.0),
+    fiat_tags=["filter", "cv2.imgproc"],
 )
 def bilateral_filter(
     image: ImageU8,
