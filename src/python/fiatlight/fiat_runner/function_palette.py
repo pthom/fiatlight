@@ -111,6 +111,17 @@ class FunctionPalette:
         for function_info in self._functions:
             if function_info.name == name:
                 return function_info.function_factory()
+        # Saved graphs may carry duplicate-disambiguation suffixes like
+        # `foo_2` when the same function appears twice. The palette only
+        # knows the base name; strip a trailing `_<digits>` and retry. The
+        # graph's own dedup logic will re-apply the suffix on insertion.
+        import re
+
+        base = re.sub(r"(_\d+)+$", "", name)
+        if base != name:
+            for function_info in self._functions:
+                if function_info.name == base:
+                    return function_info.function_factory()
         raise ValueError(f"Function with name {name} not found in collection")
 
 
