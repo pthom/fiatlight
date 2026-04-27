@@ -49,7 +49,6 @@ def gaussian_blur(
 
 @fl.with_fiat_attributes(
     invoke_async=True,
-    invoke_manually=True,
     d__range=(1, 15),
     d__validator=_bilateral_d_validator,
     sigma_color__range=(1.0, 200.0),
@@ -66,8 +65,8 @@ def bilateral_filter(
 
     **When to use:** When you want to remove texture/noise but keep edges
     sharp — e.g. before edge detection on a noisy photo, or as the smoothing
-    step of a cartoonize pipeline. Slow on large images: this wrapper is
-    marked `invoke_async + invoke_manually`, click the run button to apply.
+    step of a cartoonize pipeline.
+    Slow on large images: this wrapper is marked `invoke_async`, to preserve UI responsiveness.
 
     **Parameters:**
     - `d`: diameter of the pixel neighbourhood. ≥ 1; values above 9 are slow.
