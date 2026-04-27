@@ -166,7 +166,6 @@ class FunctionPaletteGui:
         imgui.set_next_item_width(hello_imgui.em_size(10))
         _, self._search_text = imgui.input_text("Search", self._search_text)
 
-        imgui.same_line()
         imgui.text(" Match:")
         imgui.same_line()
         if imgui.radio_button("AND", self._match_mode is TagMatchMode.AND):
@@ -245,9 +244,9 @@ class FunctionPaletteGui:
                     self._gui_function_row(fi)
 
     def gui(self) -> None:
-        imgui.set_next_window_size(hello_imgui.em_to_vec2(25, -1.0), imgui.Cond_.appearing)
-        with imgui_ctx.begin("Function palette"):
-            with imgui_ctx.begin_vertical("V"):
-                self._gui_search_and_match_mode()
-                self._gui_tags()
-                self._gui_functions()
+        """Render palette contents into the surrounding window. The caller
+        owns the `imgui.begin/end` (typical when docked via HelloImGui)."""
+        with imgui_ctx.begin_vertical("V"):
+            self._gui_search_and_match_mode()
+            self._gui_tags()
+            self._gui_functions()

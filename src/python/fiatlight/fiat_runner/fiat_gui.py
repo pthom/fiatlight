@@ -388,8 +388,6 @@ class FiatGui:
     def _heartbeat_post_render_dockable_windows(self) -> None:
         fiat_osd.render_all_osd()  # noqa
         self._handle_file_dialogs()
-        if self.params.customizable_graph:
-            self._function_palette_gui.gui()
 
     def _disable_idling_if_any_live_function(self) -> None:
         has_live_function = False
@@ -528,13 +526,25 @@ class FiatGui:
             self.load_dialog = None
 
     def _docking_splits(self) -> List[hello_imgui.DockingSplit]:
-        split_main_info = hello_imgui.DockingSplit(
-            initial_dock_="MainDockSpace",
-            new_dock_="log_dock",
-            direction_=imgui.Dir.down,
-            ratio_=0.1,
+        splits: List[hello_imgui.DockingSplit] = []
+        if self.params.customizable_graph:
+            splits.append(
+                hello_imgui.DockingSplit(
+                    initial_dock_="MainDockSpace",
+                    new_dock_="palette_dock",
+                    direction_=imgui.Dir.left,
+                    ratio_=0.22,
+                )
+            )
+        splits.append(
+            hello_imgui.DockingSplit(
+                initial_dock_="MainDockSpace",
+                new_dock_="log_dock",
+                direction_=imgui.Dir.down,
+                ratio_=0.1,
+            )
         )
-        return [split_main_info]
+        return splits
 
     def _dockable_windows(self) -> List[hello_imgui.DockableWindow]:
         main_window = hello_imgui.DockableWindow(
@@ -555,6 +565,13 @@ class FiatGui:
             is_visible_=False,
         )
         r = [main_window, image_inspector, logger_window]
+        if self.params.customizable_graph:
+            palette_window = hello_imgui.DockableWindow(
+                label_="Function palette",
+                dock_space_name_="palette_dock",
+                gui_function_=lambda: self._function_palette_gui.gui(),
+            )
+            r.append(palette_window)
         return r
 
     # ==================================================================================================================
