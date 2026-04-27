@@ -7,7 +7,7 @@ from fiatlight.fiat_types.function_types import VoidFunction
 from fiatlight.fiat_types.function_types import Function
 from fiatlight.fiat_widgets import fiat_osd
 from fiatlight.fiat_utils import functional_utils
-from fiatlight.fiat_runner.functions_collection import FunctionCollectionGui
+from fiatlight.fiat_runner.function_palette import FunctionPaletteGui
 from fiatlight.fiat_kits.fiat_image.image_types import ImageRgb
 from fiatlight.fiat_config import get_fiat_config
 from imgui_bundle import immapp, imgui, portable_file_dialogs as pfd, imgui_node_editor as ed
@@ -204,7 +204,7 @@ class FiatGui:
     load_dialog: pfd.open_file | None = None
     load_dialog_callback: Callable[[str], None] | None = None
 
-    _functions_collection_gui: FunctionCollectionGui
+    _function_palette_gui: FunctionPaletteGui
 
     _logo_texture: imgui.ImTextureRef
 
@@ -228,9 +228,9 @@ class FiatGui:
         if self.params.customizable_graph:
             self._functions_graph_gui.can_edit_graph = True
 
-        self._functions_collection_gui = FunctionCollectionGui()
+        self._function_palette_gui = FunctionPaletteGui()
 
-        self._functions_collection_gui.on_add_function = lambda fn: self._functions_graph_gui.add_function_with_gui(fn)
+        self._function_palette_gui.on_add_function = lambda fn: self._functions_graph_gui.add_function_with_gui(fn)
 
         if self.params.delete_settings:
             self._del_user_settings()
@@ -389,7 +389,7 @@ class FiatGui:
         fiat_osd.render_all_osd()  # noqa
         self._handle_file_dialogs()
         if self.params.customizable_graph:
-            self._functions_collection_gui.gui()
+            self._function_palette_gui.gui()
 
     def _disable_idling_if_any_live_function(self) -> None:
         has_live_function = False
@@ -662,7 +662,7 @@ class FiatGui:
             elif save_type == _SaveType.GraphComposition:
 
                 def factor_function_from_name(name: str) -> Any:
-                    return self._functions_collection_gui.functions_collection.factor_function_from_name(name)
+                    return self._function_palette_gui.palette.factor_function_from_name(name)
 
                 self._functions_graph_gui.load_graph_composition_from_json(json_data, factor_function_from_name)
         except Exception as e:
@@ -756,6 +756,38 @@ def _fiat_run_composition(
         functions_graph,
         params=params,
     )
+
+
+def run_graph_composer(
+    functions: List[Function],
+    initial_graph: FunctionsGraph | None = None,
+    params: FiatRunParams | None = None,
+    app_name: str | None = None,
+    top_most: bool = False,
+) -> None:
+    """Run the Fiat GUI as a graph composer: a function palette (built from
+    `functions`) that the user can drag into a live, editable function graph.
+
+    - functions: list of functions exposed in the palette. Each must carry
+                 `fiat_tags` (set via `@fl.with_fiat_attributes(...)` or
+                 `fl.add_fiat_attributes(...)`).
+    - initial_graph: optional starter wiring. If None, the composer starts
+                     with an empty graph.
+    - params, app_name, top_most: same meaning as in `run()`.
+    """
+    if params is None:
+        params = FiatRunParams()
+    if app_name is not None:
+        params.app_name = app_name
+    if top_most:
+        params.top_most = top_most
+    params.customizable_graph = True
+
+    graph = initial_graph if initial_graph is not None else FunctionsGraph.create_empty()
+    fiat_gui = FiatGui(graph, params=params)
+    for fn in functions:
+        fiat_gui._function_palette_gui.palette.add_function(fn)
+    fiat_gui.run()
 
 
 def run(

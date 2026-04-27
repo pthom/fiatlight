@@ -53,7 +53,7 @@ def _read_fiat_tags(fn: Function) -> list[str]:
     return list(tags)
 
 
-class FunctionsCollection:
+class FunctionPalette:
     _functions: list[FunctionInfo]
 
     def __init__(self) -> None:
@@ -114,8 +114,8 @@ class FunctionsCollection:
         raise ValueError(f"Function with name {name} not found in collection")
 
 
-class FunctionCollectionGui:
-    functions_collection: FunctionsCollection
+class FunctionPaletteGui:
+    palette: FunctionPalette
     on_add_function: Callable[[FunctionWithGui], None] | None = None
 
     _selected_tags: list[str]
@@ -123,7 +123,7 @@ class FunctionCollectionGui:
     _match_mode: TagMatchMode
 
     def __init__(self) -> None:
-        self.functions_collection = FunctionsCollection()
+        self.palette = FunctionPalette()
         self._selected_tags = []
         self._search_text = ""
         self._match_mode = TagMatchMode.AND
@@ -143,7 +143,7 @@ class FunctionCollectionGui:
 
     def _filter_fn_infos(self) -> list[FunctionInfo]:
         """Apply tag filter and search-text filter, both under the current AND/OR mode."""
-        infos = self.functions_collection.get_function_factories(self._selected_tags, mode=self._match_mode)
+        infos = self.palette.get_function_factories(self._selected_tags, mode=self._match_mode)
         terms = self._search_terms()
         if not terms:
             return infos
@@ -176,7 +176,7 @@ class FunctionCollectionGui:
             self._match_mode = TagMatchMode.OR
 
     def _gui_tags(self) -> None:
-        all_tags = self.functions_collection.tags_set()
+        all_tags = self.palette.tags_set()
         if not all_tags:
             return
         style = imgui.get_style()
@@ -246,7 +246,7 @@ class FunctionCollectionGui:
 
     def gui(self) -> None:
         imgui.set_next_window_size(hello_imgui.em_to_vec2(25, -1.0), imgui.Cond_.appearing)
-        with imgui_ctx.begin("Functions collection"):
+        with imgui_ctx.begin("Function palette"):
             with imgui_ctx.begin_vertical("V"):
                 self._gui_search_and_match_mode()
                 self._gui_tags()

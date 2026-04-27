@@ -43,19 +43,8 @@ ALL_WRAPPERS = [
 ]
 
 
-SANE_COMPOSITION = [
-    image_source,
-    # resize,
-    color_convert,
-    # gaussian_blur,
-    # canny,
-    threshold,
-    # dilate,
-    # erode
-]
-
 def main() -> None:
-    fl.run(SANE_COMPOSITION, app_name="img_proc_playground")
+    fl.run_graph_composer(functions=ALL_WRAPPERS)
 
 
 if __name__ == "__main__":

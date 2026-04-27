@@ -10,6 +10,7 @@ from fiatlight.fiat_core import (
 from fiatlight.fiat_runner import (
     run,
     run_async,
+    run_graph_composer,
     FiatRunParams,
     fire_once_at_frame_end,
     fire_once_at_frame_start,
@@ -89,6 +90,7 @@ __all__ = [
     # from fiat_runner
     "run",
     "run_async",
+    "run_graph_composer",
     "FiatRunParams",
     "fire_once_at_frame_end",
     "fire_once_at_frame_start",
