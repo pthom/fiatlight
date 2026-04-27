@@ -1,10 +1,26 @@
 """Filter wrappers for the image-processing playground."""
 import fiatlight as fl
-from fiatlight.fiat_kits.fiat_image import ImageU8
+from fiatlight.fiat_kits.fiat_image import ImageU8, ImageU8_GRAY
 
 import cv2
 
-from examples.img_proc_playground.fiat_cv_enums import BorderType, GaussianKsize
+from examples.img_proc_playground.fiat_cv_enums import BorderType, GaussianKsize, SobelKsize
+
+
+def _odd_int_validator(value: int) -> int:
+    """Auto-correct to the nearest odd integer >= 1."""
+    if value < 1:
+        value = 1
+    if value % 2 == 0:
+        value += 1
+    return value
+
+
+def _sobel_dx_dy_validator(value: int) -> int:
+    """`dx` / `dy` must be a non-negative integer (0, 1, or 2 in practice)."""
+    if value < 0:
+        raise ValueError("dx and dy must be >= 0")
+    return value
 
 
 def _bilateral_d_validator(d: int) -> int:
@@ -80,4 +96,161 @@ def bilateral_filter(
     **OpenCV docs:** [cv2.bilateralFilter](https://docs.opencv.org/4.13.0/d4/d86/group__imgproc__filter.html#ga9d7064d478c95d60003cf839430737ed)
     """
     r = cv2.bilateralFilter(image, d, sigma_color, sigma_space)
+    return r  # type: ignore
+
+
+@fl.with_fiat_attributes(
+    ksize__range=(1, 31),
+    ksize__validator=_odd_int_validator,
+    fiat_tags=["filter", "cv2.imgproc"],
+)
+def median_blur(image: ImageU8, ksize: int = 5) -> ImageU8:
+    """Replace each pixel by the median of its `ksize`×`ksize` neighbourhood.
+
+    **When to use:** Removing salt-and-pepper noise while keeping edges sharp.
+    Median filtering is non-linear, so unlike `gaussian_blur` it does not
+    smear sharp transitions.
+
+    **Parameters:**
+    - `ksize`: aperture size. Must be odd and >= 1; auto-corrected if even.
+
+    **See also:** `gaussian_blur`, `bilateral_filter`.
+
+    **OpenCV docs:** [cv2.medianBlur](https://docs.opencv.org/4.13.0/d4/d86/group__imgproc__filter.html#ga564869aa33e58769b4469101aac458f9)
+    """
+    r = cv2.medianBlur(image, ksize)
+    return r  # type: ignore
+
+
+@fl.with_fiat_attributes(
+    ksize__range=(1, 31),
+    ksize__validator=_odd_int_validator,
+    fiat_tags=["filter", "cv2.imgproc"],
+)
+def box_filter(
+    image: ImageU8,
+    ksize: int = 5,
+    normalize: bool = True,
+    border_type: BorderType = BorderType.BORDER_DEFAULT,
+) -> ImageU8:
+    """Average each pixel over a `ksize`×`ksize` neighbourhood.
+
+    **When to use:** Cheapest possible blur. For most image-quality use cases
+    `gaussian_blur` is preferable; box filtering is useful when speed matters
+    or when a perfectly flat kernel is desired.
+
+    **Parameters:**
+    - `ksize`: aperture size. Must be odd and >= 1; auto-corrected.
+    - `normalize`: if False, returns the *sum* over the neighbourhood (can
+      saturate quickly on bright images).
+    - `border_type`: how pixels outside the image are sampled.
+
+    **OpenCV docs:** [cv2.boxFilter](https://docs.opencv.org/4.13.0/d4/d86/group__imgproc__filter.html#gad533230ebf2d42509547d514f7d3fbc3)
+    """
+    r = cv2.boxFilter(image, ddepth=-1, ksize=(ksize, ksize), normalize=normalize, borderType=border_type.value)
+    return r  # type: ignore
+
+
+@fl.with_fiat_attributes(
+    dx__range=(0, 2),
+    dx__validator=_sobel_dx_dy_validator,
+    dy__range=(0, 2),
+    dy__validator=_sobel_dx_dy_validator,
+    scale__range=(0.0, 10.0),
+    delta__range=(-128.0, 128.0),
+    fiat_tags=["filter", "edges", "cv2.imgproc"],
+)
+def sobel(
+    image: ImageU8_GRAY,
+    dx: int = 1,
+    dy: int = 0,
+    ksize: SobelKsize = SobelKsize.K_3,
+    scale: float = 1.0,
+    delta: float = 0.0,
+) -> ImageU8_GRAY:
+    """Compute an image derivative with the Sobel operator.
+
+    **When to use:** Build a directional edge map. Set `dx=1, dy=0` for
+    vertical edges, `dx=0, dy=1` for horizontal. Output is the **absolute
+    value** of the (signed) derivative, scaled to U8 — sufficient for
+    visualization. For numerical work, call `cv2.Sobel` directly with a
+    floating-point `ddepth`.
+
+    **Parameters:**
+    - `dx`, `dy`: derivative orders. At least one must be > 0.
+    - `ksize`: kernel size (1 = special 1×3 / 3×1 Scharr-like).
+    - `scale`: optional gradient scale factor.
+    - `delta`: bias added before conversion to U8.
+
+    **See also:** `scharr`, `laplacian`, `canny`.
+
+    **OpenCV docs:** [cv2.Sobel](https://docs.opencv.org/4.13.0/d4/d86/group__imgproc__filter.html#gacea54f142e81b6758cb6f375ce782c8d)
+    """
+    if dx == 0 and dy == 0:
+        raise ValueError("Sobel: at least one of dx, dy must be > 0")
+    g = cv2.Sobel(image, cv2.CV_64F, dx, dy, ksize=ksize.value, scale=scale, delta=delta)
+    r = cv2.convertScaleAbs(g)
+    return r  # type: ignore
+
+
+@fl.with_fiat_attributes(
+    scale__range=(0.0, 10.0),
+    delta__range=(-128.0, 128.0),
+    fiat_tags=["filter", "edges", "cv2.imgproc"],
+)
+def scharr(
+    image: ImageU8_GRAY,
+    dx: int = 1,
+    dy: int = 0,
+    scale: float = 1.0,
+    delta: float = 0.0,
+) -> ImageU8_GRAY:
+    """3×3 Scharr derivative — a more accurate Sobel alternative.
+
+    **When to use:** When you need a directional gradient and the small
+    Sobel-3 kernel is not accurate enough. Scharr has better rotational
+    symmetry than `sobel(ksize=3)` at the same cost.
+
+    **Parameters:**
+    - `dx`, `dy`: derivative orders. **Exactly one** must be 1, the other 0.
+    - `scale`, `delta`: scaling and bias before U8 conversion.
+
+    **See also:** `sobel`, `laplacian`.
+
+    **OpenCV docs:** [cv2.Scharr](https://docs.opencv.org/4.13.0/d4/d86/group__imgproc__filter.html#gaa13106761eedf14798f37aa2d60404c9)
+    """
+    if (dx, dy) not in ((1, 0), (0, 1)):
+        raise ValueError("Scharr requires exactly one of dx, dy to be 1 (the other 0)")
+    g = cv2.Scharr(image, cv2.CV_64F, dx, dy, scale=scale, delta=delta)
+    r = cv2.convertScaleAbs(g)
+    return r  # type: ignore
+
+
+@fl.with_fiat_attributes(
+    scale__range=(0.0, 10.0),
+    delta__range=(-128.0, 128.0),
+    fiat_tags=["filter", "edges", "cv2.imgproc"],
+)
+def laplacian(
+    image: ImageU8_GRAY,
+    ksize: SobelKsize = SobelKsize.K_3,
+    scale: float = 1.0,
+    delta: float = 0.0,
+) -> ImageU8_GRAY:
+    """Second-derivative edge response via `cv2.Laplacian`.
+
+    **When to use:** Highlight zero-crossings (rapid intensity changes) in
+    all directions at once. Often pre-blurred (LoG = Laplacian-of-Gaussian)
+    to reduce noise sensitivity.
+
+    **Parameters:**
+    - `ksize`: aperture size (1 / 3 / 5 / 7).
+    - `scale`, `delta`: scaling and bias before U8 conversion.
+
+    **See also:** `sobel`, `gaussian_blur` (apply before for LoG), `canny`.
+
+    **OpenCV docs:** [cv2.Laplacian](https://docs.opencv.org/4.13.0/d4/d86/group__imgproc__filter.html#gad78703e4c8fe703d479c1860d76429e6)
+    """
+    g = cv2.Laplacian(image, cv2.CV_64F, ksize=ksize.value, scale=scale, delta=delta)
+    r = cv2.convertScaleAbs(g)
     return r  # type: ignore

@@ -1,45 +1,90 @@
-"""Image-processing playground — entry point.
-
-Phase 1: full v0 atomic-wrapper palette (no per-node tags yet, no palette UX
-upgrade yet — those land in Phases 2 and 4 respectively).
-"""
+"""Image-processing playground — entry point."""
 import fiatlight as fl
 
 from examples.img_proc_playground.wrappers.source import image_source, imread_rgb
 from examples.img_proc_playground.wrappers.color import color_convert
 from examples.img_proc_playground.wrappers.lut import lut_with_params, lut_channels_in_colorspace
-from examples.img_proc_playground.wrappers.filter import gaussian_blur, bilateral_filter
+from examples.img_proc_playground.wrappers.tone import (
+    apply_color_map,
+    clahe,
+    convert_scale_abs,
+    equalize_hist,
+)
+from examples.img_proc_playground.wrappers.filter import (
+    bilateral_filter,
+    box_filter,
+    gaussian_blur,
+    laplacian,
+    median_blur,
+    scharr,
+    sobel,
+)
+from examples.img_proc_playground.wrappers.photo import (
+    edge_preserving_filter,
+    fast_nl_means_denoising,
+    fast_nl_means_denoising_colored,
+    stylization,
+)
 from examples.img_proc_playground.wrappers.edges import canny
-from examples.img_proc_playground.wrappers.morphology import dilate, erode
+from examples.img_proc_playground.wrappers.morphology import dilate, erode, morphology_ex
 from examples.img_proc_playground.wrappers.threshold import threshold, adaptive_threshold
-from examples.img_proc_playground.wrappers.compositing import bitwise_and, bitwise_or
-from examples.img_proc_playground.wrappers.geometry import resize
+from examples.img_proc_playground.wrappers.compositing import (
+    absdiff,
+    add_weighted,
+    bitwise_and,
+    bitwise_not,
+    bitwise_or,
+    bitwise_xor,
+)
+from examples.img_proc_playground.wrappers.geometry import copy_make_border, flip, resize, rotate
 
 
 ALL_WRAPPERS = [
     # source
     image_source,
     imread_rgb,
-    # color
+    # color / tone
     color_convert,
     lut_with_params,
     lut_channels_in_colorspace,
+    equalize_hist,
+    clahe,
+    apply_color_map,
+    convert_scale_abs,
     # filter
     gaussian_blur,
     bilateral_filter,
+    median_blur,
+    box_filter,
+    sobel,
+    scharr,
+    laplacian,
+    # photo
+    fast_nl_means_denoising,
+    fast_nl_means_denoising_colored,
+    stylization,
+    edge_preserving_filter,
     # edges
     canny,
     # morphology
     dilate,
     erode,
+    morphology_ex,
     # threshold
     threshold,
     adaptive_threshold,
     # compositing
     bitwise_and,
     bitwise_or,
+    bitwise_xor,
+    bitwise_not,
+    add_weighted,
+    absdiff,
     # geometry
     resize,
+    flip,
+    rotate,
+    copy_make_border,
 ]
 
 

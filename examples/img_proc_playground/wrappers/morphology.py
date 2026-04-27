@@ -1,10 +1,10 @@
 """Morphology wrappers for the image-processing playground."""
 import fiatlight as fl
-from fiatlight.fiat_kits.fiat_image import ImageU8_GRAY
+from fiatlight.fiat_kits.fiat_image import ImageU8, ImageU8_GRAY
 
 import cv2
 
-from examples.img_proc_playground.fiat_cv_enums import MorphShape
+from examples.img_proc_playground.fiat_cv_enums import MorphOp, MorphShape
 
 
 @fl.with_fiat_attributes(
@@ -64,4 +64,40 @@ def erode(
     """
     kernel = cv2.getStructuringElement(morph_shape.value, (kernel_size, kernel_size))
     r = cv2.erode(image, kernel, iterations=iterations)
+    return r  # type: ignore
+
+
+@fl.with_fiat_attributes(
+    kernel_size__range=(1, 15),
+    iterations__range=(1, 10),
+    fiat_tags=["morphology", "cv2.imgproc"],
+)
+def morphology_ex(
+    image: ImageU8,
+    op: MorphOp = MorphOp.MORPH_OPEN,
+    kernel_size: int = 3,
+    morph_shape: MorphShape = MorphShape.MORPH_ELLIPSE,
+    iterations: int = 1,
+) -> ImageU8:
+    """Composite morphological operation: open, close, gradient, top-hat or black-hat.
+
+    **When to use:**
+    - **OPEN** (`erode → dilate`): remove small bright spots / thin protrusions.
+    - **CLOSE** (`dilate → erode`): close small dark holes.
+    - **GRADIENT**: outline of objects (`dilate − erode`).
+    - **TOPHAT**: bright details smaller than the kernel (`src − open`).
+    - **BLACKHAT**: dark details smaller than the kernel (`close − src`).
+
+    **Parameters:**
+    - `op`: which composite operation to run.
+    - `kernel_size`: side of the square structuring element.
+    - `morph_shape`: shape of the structuring element.
+    - `iterations`: number of times the operation is applied.
+
+    **See also:** `dilate`, `erode`.
+
+    **OpenCV docs:** [cv2.morphologyEx](https://docs.opencv.org/4.13.0/d4/d86/group__imgproc__filter.html#ga67493776e3ad1a3df63883829375201f)
+    """
+    kernel = cv2.getStructuringElement(morph_shape.value, (kernel_size, kernel_size))
+    r = cv2.morphologyEx(image, op.value, kernel, iterations=iterations)
     return r  # type: ignore

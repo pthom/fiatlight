@@ -1,0 +1,55 @@
+{
+    "functions_names": [
+        "image_source",
+        "edge_preserving_filter",
+        "scharr",
+        "threshold",
+        "dilate",
+        "bitwise_not",
+        "bitwise_and"
+    ],
+    "functions_nodes_links": [
+        {
+            "src_function_name": "image_source",
+            "dst_function_name": "edge_preserving_filter",
+            "dst_input_name": "image",
+            "src_output_idx": 0
+        },
+        {
+            "src_function_name": "image_source",
+            "dst_function_name": "scharr",
+            "dst_input_name": "image",
+            "src_output_idx": 0
+        },
+        {
+            "src_function_name": "scharr",
+            "dst_function_name": "threshold",
+            "dst_input_name": "image",
+            "src_output_idx": 0
+        },
+        {
+            "src_function_name": "threshold",
+            "dst_function_name": "dilate",
+            "dst_input_name": "image",
+            "src_output_idx": 0
+        },
+        {
+            "src_function_name": "dilate",
+            "dst_function_name": "bitwise_not",
+            "dst_input_name": "image",
+            "src_output_idx": 0
+        },
+        {
+            "src_function_name": "edge_preserving_filter",
+            "dst_function_name": "bitwise_and",
+            "dst_input_name": "image_a",
+            "src_output_idx": 0
+        },
+        {
+            "src_function_name": "bitwise_not",
+            "dst_function_name": "bitwise_and",
+            "dst_input_name": "image_b",
+            "src_output_idx": 0
+        }
+    ]
+}
