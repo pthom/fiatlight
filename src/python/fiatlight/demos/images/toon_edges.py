@@ -78,8 +78,8 @@ def add_toon_edges(image: ImageRgb, params: ToonEdgesParams) -> ImageRgb:
     start_time = time.time()
     edges = canny(
         image,
-        params.canny.t_lower,
-        params.canny.t_upper,
+        params.canny.t_lower,  # type: ignore
+        params.canny.t_upper,  # type: ignore
         params.canny.aperture_size,
         params.canny.l2_gradient,
         params.canny.blur_sigma,

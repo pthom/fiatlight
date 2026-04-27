@@ -131,7 +131,7 @@ def test_any_function_to_function_with_gui_one_output() -> None:
     # Test after invoke
     add_gui._inputs_with_gui[0].data_with_gui.value = 1
     add_gui.invoke()
-    assert add_gui._outputs_with_gui[0].data_with_gui.value == 3
+    assert add_gui._outputs_with_gui[0].data_with_gui.value == 3  # type: ignore
     assert add_gui._last_exception_message is None
 
     # Test after invoke with different default value
@@ -139,14 +139,14 @@ def test_any_function_to_function_with_gui_one_output() -> None:
     add_gui._inputs_with_gui[1].data_with_gui.value = 3
     add_gui._dirty = True
     add_gui.invoke()
-    assert add_gui._outputs_with_gui[0].data_with_gui.value == 4
+    assert add_gui._outputs_with_gui[0].data_with_gui.value == 4  # type: ignore
     assert add_gui._last_exception_message is None
 
     # Test after invoke with exception
     add_gui._inputs_with_gui[0].data_with_gui.value = "a"
     add_gui._dirty = True
     add_gui.invoke()
-    assert add_gui._outputs_with_gui[0].data_with_gui.value is ErrorValue
+    assert add_gui._outputs_with_gui[0].data_with_gui.value is ErrorValue  # type: ignore
     assert add_gui._last_exception_message is not None
 
 
@@ -171,8 +171,8 @@ def test_any_function_to_function_with_gui_two_outputs() -> None:
     # Test after invoke
     add_mult_gui._inputs_with_gui[0].data_with_gui.value = 1
     add_mult_gui.invoke()
-    assert add_mult_gui._outputs_with_gui[0].data_with_gui.value == 3
-    assert add_mult_gui._outputs_with_gui[1].data_with_gui.value == 2
+    assert add_mult_gui._outputs_with_gui[0].data_with_gui.value == 3  # type: ignore
+    assert add_mult_gui._outputs_with_gui[1].data_with_gui.value == 2  # type: ignore
     assert add_mult_gui._last_exception_message is None
 
     # Test after invoke with different default value
@@ -180,16 +180,16 @@ def test_any_function_to_function_with_gui_two_outputs() -> None:
     add_mult_gui._inputs_with_gui[1].data_with_gui.value = 3
     add_mult_gui._dirty = True
     add_mult_gui.invoke()
-    assert add_mult_gui._outputs_with_gui[0].data_with_gui.value == 4
-    assert add_mult_gui._outputs_with_gui[1].data_with_gui.value == 3
+    assert add_mult_gui._outputs_with_gui[0].data_with_gui.value == 4  # type: ignore
+    assert add_mult_gui._outputs_with_gui[1].data_with_gui.value == 3  # type: ignore
     assert add_mult_gui._last_exception_message is None
 
     # Test after invoke with exception
     add_mult_gui._inputs_with_gui[0].data_with_gui.value = "a"
     add_mult_gui._dirty = True
     add_mult_gui.invoke()
-    assert add_mult_gui._outputs_with_gui[0].data_with_gui.value is ErrorValue
-    assert add_mult_gui._outputs_with_gui[1].data_with_gui.value is ErrorValue
+    assert add_mult_gui._outputs_with_gui[0].data_with_gui.value is ErrorValue  # type: ignore
+    assert add_mult_gui._outputs_with_gui[1].data_with_gui.value is ErrorValue  # type: ignore
     assert add_mult_gui._last_exception_message is not None
 
 

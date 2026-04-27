@@ -7,7 +7,7 @@ from fiatlight.fiat_doc import code_utils
 class MethodBodyRemover(ast.NodeTransformer):
     def visit_FunctionDef(self, node: ast.FunctionDef) -> ast.FunctionDef:
         # Remove the method body while keeping the docstring
-        if node.body and isinstance(node.body[0], ast.Expr) and isinstance(node.body[0].value, ast.Str):
+        if node.body and isinstance(node.body[0], ast.Expr) and isinstance(node.body[0].value, ast.Str):  # type: ignore
             # The first statement is a docstring
             docstring_node = node.body[0]
             node.body = [docstring_node, ast.Pass()]

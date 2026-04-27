@@ -49,17 +49,17 @@ def _plantuml(uml_content: str, use_local: bool) -> SVG:
     return svg_object
 
 
-@register_cell_magic  # type: ignore
+@register_cell_magic
 def plantuml_web(_magic_args: str, cell: str) -> SVG:
     return _plantuml(cell, use_local=False)
 
 
-@register_cell_magic  # type: ignore
+@register_cell_magic
 def plantuml_local(_magic_args: str, cell: str) -> SVG:
     return _plantuml(cell, use_local=True)
 
 
-@register_line_magic  # type: ignore
+@register_line_magic
 def plantuml_include(_magic_args: str) -> SVG:
     uml_code = f"""
 @startuml
