@@ -78,7 +78,7 @@ def test_sorted_signature() -> None:
     # This is meant to differentiate TypeVar instances from regular types or classes in the signature
     f2_sig = inspect.signature(f2)
     expected_sig = (
-        "(iterable: Iterable[~T], /, *, key: Optional[Callable[[~T], Any]] = None, reverse: bool = False) -> List[~T]"
+        "(iterable: Iterable[~T], /, *, key: Callable[[~T], Any] | None = None, reverse: bool = False) -> List[~T]"
     )
     assert str(f2_sig) == expected_sig
 
@@ -107,7 +107,7 @@ def test_get_function_signature() -> None:
     # from regular types or classes)
     assert (
         str(sig)
-        == "(iterable: Iterable[~T], /, *, key: Optional[Callable[[~T], Any]] = None, reverse: bool = False) -> List[~T]"
+        == "(iterable: Iterable[~T], /, *, key: Callable[[~T], Any] | None = None, reverse: bool = False) -> List[~T]"
     )
 
 

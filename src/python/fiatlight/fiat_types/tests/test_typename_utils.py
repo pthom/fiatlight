@@ -33,8 +33,8 @@ def test_generic_typename() -> None:
     assert tu.fully_qualified_generic_typename(dict[str, int]) == "builtins.dict[builtins.str, builtins.int]"
     assert tu.base_generic_typename(dict[str, int]) == "dict[str, int]"
 
-    assert tu.fully_qualified_generic_typename(int | None) == "types.UnionType[builtins.int, builtins.NoneType]"
-    assert tu.base_generic_typename(int | None) == "UnionType[int, NoneType]"
+    assert tu.fully_qualified_generic_typename(int | None) == "typing.Union[builtins.int, builtins.NoneType]"
+    assert tu.base_generic_typename(int | None) == "Union[int, NoneType]"
 
 
 MyNewType = NewType("MyNewType", int)
@@ -52,8 +52,8 @@ def test_typename() -> None:
     assert tu.fully_qualified_typename(list[int]) == "builtins.list[builtins.int]"
     assert tu.base_typename(list[int]) == "list[int]"
 
-    assert tu.fully_qualified_typename(int | None) == "types.UnionType[builtins.int, builtins.NoneType]"
-    assert tu.base_typename(int | None) == "UnionType[int, NoneType]"
+    assert tu.fully_qualified_typename(int | None) == "typing.Union[builtins.int, builtins.NoneType]"
+    assert tu.base_typename(int | None) == "Union[int, NoneType]"
 
     from fiatlight.fiat_togui.tests.sample_enum import SampleEnum
 
