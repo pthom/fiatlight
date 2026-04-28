@@ -475,10 +475,38 @@ class FiatGui:
                 logo_height_em_big = 16.0
                 logo_size_big = hello_imgui.em_to_vec2(logo_height_em_big * logo_ratio, logo_height_em_big)
                 imgui.image(self._logo_texture, logo_size_big)
+                imgui.dummy(hello_imgui.em_to_vec2(40, 0))
                 imgui_md.render_unindented(
                     """
-                    * Use the mouse wheel to zoom in and out in the graph
-                    * Use the right mouse button to move the graph
+* Use the mouse wheel to zoom in and out in the graph
+* Drag with the right mouse button to move the graph
+
+### Mouse
+
+| Input                                | Action |
+|--------------------------------------|--------|
+| Left click on background             | Clear selection |
+| Left click on node or link           | Select that object (replaces selection) |
+| `Ctrl` + left click                  | Toggle the clicked object in or out of the selection |
+| Left drag on background              | Rubber-band select nodes |
+| `Shift` + left drag on background    | Rubber-band select Group nodes |
+| `Alt` + left drag on background      | Rubber-band select links |
+| `Ctrl` + left drag (rubber band)     | Keep the previous selection while lassoing |
+| Left drag on a node                  | Move the node (and members of any selected Group) |
+| `Shift` + left drag on a node        | Move only the directly-selected nodes |
+| Right drag                           | Pan the canvas |
+| Right click                          | Open the context menu |
+| Mouse wheel                          | Zoom in or out (smooth zoom controlled by `Config::EnableSmoothZoom`) |
+
+### Keyboard
+
+| Input                  | Action |
+|------------------------|--------|
+| `F` over a node, pin or Group | Center that object  |
+| `F` with a non-empty selection| Center the selection bounds  |
+| `F` over the empty background | Center all content |
+| `Shift` + `F`                 | Same as `F`, but with zoom |
+
                 """
                 )
                 imgui.end_tooltip()
