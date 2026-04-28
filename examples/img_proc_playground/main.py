@@ -89,7 +89,9 @@ ALL_WRAPPERS = [
 
 
 def main() -> None:
-    fl.run_graph_composer(functions=ALL_WRAPPERS)
+    params = fl.FiatRunParams()
+    # params.theme = fl.ImGuiTheme_.white_is_white
+    fl.run_graph_composer(functions=ALL_WRAPPERS, params=params)
 
 
 if __name__ == "__main__":
