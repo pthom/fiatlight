@@ -54,6 +54,9 @@ class FunctionsGraphGui:
     _idx_render_graph: int = 0
     _idx_last_frame_render: int = 0
     _pending_drag_spawn: _PendingDragSpawn | None = None
+    # True only on the frame that should call ed.open_popup; subsequent frames
+    # rely on imgui to keep the popup open until the user dismisses it.
+    _drag_spawn_popup_just_requested: bool = False
     # When a node is spawned via drag-from-pin, we need to set its position
     # inside an ed.begin/end block — defer to the next frame.
     _pending_node_position: Tuple[ed.NodeId, ImVec2] | None = None
@@ -427,6 +430,7 @@ class FunctionsGraphGui:
             if pin_type is None:
                 return
             self._pending_drag_spawn = _PendingDragSpawn(pin_id, "input", pin_type, imgui.get_mouse_pos())
+            self._drag_spawn_popup_just_requested = True
             return
         fn_output, output_idx = self._function_node_gui_from_output_pin_id(pin_id)
         if fn_output is not None:
@@ -434,6 +438,7 @@ class FunctionsGraphGui:
             if pin_type is None:
                 return
             self._pending_drag_spawn = _PendingDragSpawn(pin_id, "output", pin_type, imgui.get_mouse_pos())
+            self._drag_spawn_popup_just_requested = True
 
     def _draw_drag_spawn_popup(self) -> bool:
         """Render the 'pick a compatible function' popup. Returns True if a
@@ -443,11 +448,16 @@ class FunctionsGraphGui:
             return False
         if self.on_request_compatible_functions is None:
             self._pending_drag_spawn = None
+            self._drag_spawn_popup_just_requested = False
             return False
 
         popup_id = "##drag_spawn_popup"
-        if not imgui.is_popup_open(popup_id):
+        # Only open on the frame the wire was dropped — never re-open. If the
+        # user clicks outside, imgui closes the popup and begin_popup returns
+        # False on the next frame, which clears our pending state.
+        if self._drag_spawn_popup_just_requested:
             imgui.open_popup(popup_id)
+            self._drag_spawn_popup_just_requested = False
 
         spawned = False
         if imgui.begin_popup(popup_id):
@@ -465,7 +475,7 @@ class FunctionsGraphGui:
                         break
             imgui.end_popup()
         else:
-            # popup was dismissed (clicked outside) — clear state
+            # Popup was dismissed (clicked outside, Escape, or item picked).
             self._pending_drag_spawn = None
         return spawned
 
