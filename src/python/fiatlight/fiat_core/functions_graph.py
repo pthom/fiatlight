@@ -275,6 +275,17 @@ class FunctionsGraph:
         if self._would_add_cycle(new_link):
             return False, "Link would create a cycle"
 
+        # 7. Check that output and input types are compatible
+        from fiatlight.fiat_types.type_compat import is_link_compatible, explain_incompatibility
+
+        src_output_gui = src_function_node.function_with_gui.output(src_output_idx)
+        dst_input_gui = dst_function_node.function_with_gui.input(dst_input_name)
+        src_type = src_output_gui._type
+        dst_type = dst_input_gui._type
+        if src_type is not None and dst_type is not None:
+            if not is_link_compatible(src_type, dst_type):
+                return False, explain_incompatibility(src_type, dst_type)
+
         return True, ""
 
     def _add_link_from_function_nodes(
