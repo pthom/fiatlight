@@ -7,7 +7,13 @@ from fiatlight.fiat_types.function_types import VoidFunction
 from fiatlight.fiat_types.function_types import Function
 from fiatlight.fiat_widgets import fiat_osd
 from fiatlight.fiat_utils import functional_utils
-from fiatlight.fiat_runner.function_palette import FunctionPaletteGui
+from fiatlight.fiat_runner.function_palette import (
+    FunctionInfo,
+    FunctionPaletteGui,
+    PaletteFilter,
+    palette_gui_body,
+)
+from fiatlight.fiat_nodes.functions_graph_gui import PaletteCompat
 from fiatlight.fiat_kits.fiat_image.image_types import ImageRgb
 from fiatlight.fiat_config import get_fiat_config
 from imgui_bundle import immapp, imgui, portable_file_dialogs as pfd, imgui_node_editor as ed
@@ -232,13 +238,35 @@ class FiatGui:
 
         self._function_palette_gui.on_add_function = lambda fn: self._functions_graph_gui.add_function_with_gui(fn)
 
-        # Drag-from-pin → filtered palette: when the user drops a wire on
-        # empty canvas, ask the palette for compatible candidates.
-        def _candidates_from_palette(pin_type, pin_kind):  # type: ignore[no-untyped-def]
-            infos = self._function_palette_gui.palette.get_compatible_function_infos(pin_type, pin_kind)
-            return [(fi.name, fi.function_factory) for fi in infos]
+        # Shared popup palette (right-click on canvas, drag-from-pin):
+        # FunctionsGraphGui owns the lifecycle, FiatGui owns the filter state
+        # and the rendering.
+        self._popup_filter: PaletteFilter = PaletteFilter()
+        self._popup_focus_search_pending: bool = False
 
-        self._functions_graph_gui.on_request_compatible_functions = _candidates_from_palette
+        def _open_palette_popup(compat: PaletteCompat | None) -> None:
+            self._popup_filter = PaletteFilter()
+            if compat is not None:
+                self._popup_filter.compatibility = compat
+            self._popup_focus_search_pending = True
+
+        def _render_palette_popup_body(on_pick_fn: Callable[[FunctionWithGui], None]) -> None:
+            focus = self._popup_focus_search_pending
+            self._popup_focus_search_pending = False
+
+            def on_pick_info(fi: FunctionInfo) -> None:
+                on_pick_fn(fi.function_factory())
+
+            palette_gui_body(
+                self._function_palette_gui.palette,
+                self._popup_filter,
+                on_pick_info,
+                row_click_picks=True,
+                focus_search=focus,
+            )
+
+        self._functions_graph_gui.on_open_palette_popup = _open_palette_popup
+        self._functions_graph_gui.on_render_palette_popup_body = _render_palette_popup_body
 
         if self.params.delete_settings:
             self._del_user_settings()

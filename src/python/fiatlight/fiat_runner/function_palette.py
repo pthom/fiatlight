@@ -27,6 +27,23 @@ class TagMatchMode(Enum):
 
 
 @dataclass
+class PaletteFilter:
+    """Owned by the caller, mutated by the palette widgets each frame.
+
+    Three filters are composed (AND/OR depending on `match_mode`):
+    - `selected_tags`: which tag chips are checked.
+    - `search_text`: substring tokens matched against name / tags / doc.
+    - `compatibility`: when set, restrict to functions that have at least one
+      pin compatible with this dragged pin (set by the drag-from-pin popup).
+    """
+
+    selected_tags: list[str] = field(default_factory=list)
+    search_text: str = ""
+    match_mode: TagMatchMode = TagMatchMode.AND
+    compatibility: tuple[TypeLike, PinKind] | None = None
+
+
+@dataclass
 class FunctionInfo:
     name: str
     function_factory: FunctionWithGuiFactory
@@ -175,139 +192,193 @@ class FunctionPalette:
         raise ValueError(f"Function with name {name} not found in collection")
 
 
-class FunctionPaletteGui:
-    palette: FunctionPalette
-    on_add_function: Callable[[FunctionWithGui], None] | None = None
+def _search_terms(search_text: str) -> list[str]:
+    import shlex
 
-    _selected_tags: list[str]
-    _search_text: str
-    _match_mode: TagMatchMode
+    try:
+        tokens = shlex.split(search_text)
+    except ValueError:
+        tokens = search_text.split()
+    return [t.lower() for t in tokens if t]
 
-    def __init__(self) -> None:
-        self.palette = FunctionPalette()
-        self._selected_tags = []
-        self._search_text = ""
-        self._match_mode = TagMatchMode.AND
 
-    # ------------------------------------------------------------------
-    # Filtering
-    # ------------------------------------------------------------------
+def _filter_fn_infos(palette: FunctionPalette, filt: PaletteFilter) -> list[FunctionInfo]:
+    """Apply tag, compatibility, and search-text filters."""
+    infos = palette.get_function_factories(filt.selected_tags, mode=filt.match_mode)
 
-    def _search_terms(self) -> list[str]:
-        import shlex
+    if filt.compatibility is not None:
+        pin_type, pin_kind = filt.compatibility
+        if pin_kind == "output":
+            infos = [fi for fi in infos if fi.first_compatible_input(pin_type) is not None]
+        else:
+            infos = [fi for fi in infos if fi.first_compatible_output(pin_type) is not None]
 
-        try:
-            tokens = shlex.split(self._search_text)
-        except ValueError:
-            tokens = self._search_text.split()
-        return [t.lower() for t in tokens if t]
+    terms = _search_terms(filt.search_text)
+    if not terms:
+        return infos
 
-    def _filter_fn_infos(self) -> list[FunctionInfo]:
-        """Apply tag filter and search-text filter, both under the current AND/OR mode."""
-        infos = self.palette.get_function_factories(self._selected_tags, mode=self._match_mode)
-        terms = self._search_terms()
-        if not terms:
-            return infos
+    def haystack(fi: FunctionInfo) -> str:
+        parts = [fi.name, *fi.tags]
+        if fi.doc is not None:
+            parts.append(fi.doc)
+        return "\n".join(parts).lower()
 
-        def haystack(fi: FunctionInfo) -> str:
-            parts = [fi.name, *fi.tags]
-            if fi.doc is not None:
-                parts.append(fi.doc)
-            return "\n".join(parts).lower()
+    if filt.match_mode is TagMatchMode.AND:
+        return [fi for fi in infos if all(t in haystack(fi) for t in terms)]
+    return [fi for fi in infos if any(t in haystack(fi) for t in terms)]
 
-        if self._match_mode is TagMatchMode.AND:
-            return [fi for fi in infos if all(t in haystack(fi) for t in terms)]
-        return [fi for fi in infos if any(t in haystack(fi) for t in terms)]
 
-    # ------------------------------------------------------------------
-    # Drawing
-    # ------------------------------------------------------------------
+def _gui_search_and_match_mode(filt: PaletteFilter, *, focus_search: bool) -> None:
+    imgui.set_next_item_width(hello_imgui.em_size(10))
+    if focus_search:
+        imgui.set_keyboard_focus_here()
+    _, filt.search_text = imgui.input_text("Search", filt.search_text)
 
-    def _gui_search_and_match_mode(self) -> None:
-        imgui.set_next_item_width(hello_imgui.em_size(10))
-        _, self._search_text = imgui.input_text("Search", self._search_text)
+    imgui.text(" Match:")
+    imgui.same_line()
+    if imgui.radio_button("AND", filt.match_mode is TagMatchMode.AND):
+        filt.match_mode = TagMatchMode.AND
+    imgui.same_line()
+    if imgui.radio_button("OR", filt.match_mode is TagMatchMode.OR):
+        filt.match_mode = TagMatchMode.OR
 
-        imgui.text(" Match:")
-        imgui.same_line()
-        if imgui.radio_button("AND", self._match_mode is TagMatchMode.AND):
-            self._match_mode = TagMatchMode.AND
-        imgui.same_line()
-        if imgui.radio_button("OR", self._match_mode is TagMatchMode.OR):
-            self._match_mode = TagMatchMode.OR
 
-    def _gui_tags(self) -> None:
-        all_tags = self.palette.tags_set()
-        if not all_tags:
-            return
-        style = imgui.get_style()
-        checkbox_extra = imgui.get_frame_height() + style.item_inner_spacing.x
-        col_width = max(imgui.calc_text_size(t).x for t in all_tags) + checkbox_extra + style.item_spacing.x
-        avail = imgui.get_content_region_avail().x
-        n_cols = max(1, int(avail // col_width))
+def _gui_tags(palette: FunctionPalette, filt: PaletteFilter) -> None:
+    all_tags = palette.tags_set()
+    if not all_tags:
+        return
+    style = imgui.get_style()
+    checkbox_extra = imgui.get_frame_height() + style.item_inner_spacing.x
+    col_width = max(imgui.calc_text_size(t).x for t in all_tags) + checkbox_extra + style.item_spacing.x
+    avail = imgui.get_content_region_avail().x
+    n_cols = max(1, int(avail // col_width))
 
-        for i, tag in enumerate(all_tags):
-            was_selected = tag in self._selected_tags
-            _, is_selected = imgui.checkbox(tag, was_selected)
-            if is_selected and not was_selected:
-                self._selected_tags.append(tag)
-            elif was_selected and not is_selected:
-                self._selected_tags = [t for t in self._selected_tags if t != tag]
+    for i, tag in enumerate(all_tags):
+        was_selected = tag in filt.selected_tags
+        _, is_selected = imgui.checkbox(tag, was_selected)
+        if is_selected and not was_selected:
+            filt.selected_tags.append(tag)
+        elif was_selected and not is_selected:
+            filt.selected_tags[:] = [t for t in filt.selected_tags if t != tag]
 
-            col = i % n_cols
-            if col + 1 < n_cols and i + 1 < len(all_tags):
-                imgui.same_line(col_width * (col + 1))
+        col = i % n_cols
+        if col + 1 < n_cols and i + 1 < len(all_tags):
+            imgui.same_line(col_width * (col + 1))
 
-    def _gui_function_row(self, fn_info: FunctionInfo) -> None:
-        with imgui_ctx.push_obj_id(fn_info):
+
+def _gui_function_row(
+    fn_info: FunctionInfo,
+    on_pick: Callable[[FunctionInfo], None],
+    *,
+    row_click_picks: bool,
+) -> None:
+    with imgui_ctx.push_obj_id(fn_info):
+        if row_click_picks:
+            # Whole-row clickable (popup mode).
+            if imgui.selectable(fn_info.name, False)[0]:
+                on_pick(fn_info)
+            _draw_function_row_tooltip(fn_info)
+        else:
+            # Name + spring + "+" button (dock mode).
             with imgui_ctx.begin_horizontal("H"):
                 with fontawesome_6_ctx():
                     imgui.text(fn_info.name)
-                    if imgui.is_item_hovered():
-                        if imgui.begin_item_tooltip():
-                            imgui.dummy(hello_imgui.em_to_vec2(40, 0))
-                            md_str = f"""
-                            ## {fn_info.name}
-
-                            Tags: {', '.join(fn_info.tags) if fn_info.tags else 'none'}
-
-                            ---
-                            """
-                            imgui_md.render_unindented(md_str)
-
-                            if fn_info.doc is not None:
-                                if fn_info.doc_is_markdown:
-                                    imgui_md.render_unindented(fn_info.doc)
-                                else:
-                                    imgui.text_wrapped(fn_info.doc)
-
-                            imgui.end_tooltip()
+                    _draw_function_row_tooltip(fn_info)
                     imgui.spring()
                     if imgui.button(icons_fontawesome_6.ICON_FA_SQUARE_PLUS):
-                        if self.on_add_function is not None:
-                            new_fn = fn_info.function_factory()
-                            self.on_add_function(new_fn)
+                        on_pick(fn_info)
 
-    def _gui_functions(self) -> None:
-        """Render functions grouped by their primary (first) tag."""
-        infos = self._filter_fn_infos()
 
-        # Preserve registration order for groups.
-        groups: dict[str, list[FunctionInfo]] = {}
-        for fi in infos:
-            primary = fi.tags[0] if fi.tags else "other"
-            groups.setdefault(primary, []).append(fi)
+def _draw_function_row_tooltip(fn_info: FunctionInfo) -> None:
+    if not imgui.is_item_hovered():
+        return
+    if not imgui.begin_item_tooltip():
+        return
+    imgui.dummy(hello_imgui.em_to_vec2(40, 0))
+    md_str = f"""
+    ## {fn_info.name}
 
-        flag_default_open = int(imgui.TreeNodeFlags_.default_open)
-        for primary, group in groups.items():
-            header = f"{primary} ({len(group)})"
-            if imgui.collapsing_header(header, flag_default_open):
-                for fi in group:
-                    self._gui_function_row(fi)
+    Tags: {', '.join(fn_info.tags) if fn_info.tags else 'none'}
+
+    ---
+    """
+    imgui_md.render_unindented(md_str)
+    if fn_info.doc is not None:
+        if fn_info.doc_is_markdown:
+            imgui_md.render_unindented(fn_info.doc)
+        else:
+            imgui.text_wrapped(fn_info.doc)
+    imgui.end_tooltip()
+
+
+def _gui_functions(
+    palette: FunctionPalette,
+    filt: PaletteFilter,
+    on_pick: Callable[[FunctionInfo], None],
+    *,
+    row_click_picks: bool,
+) -> None:
+    """Render functions grouped by their primary (first) tag."""
+    infos = _filter_fn_infos(palette, filt)
+    if not infos:
+        imgui.text_disabled("No matching functions")
+        return
+
+    groups: dict[str, list[FunctionInfo]] = {}
+    for fi in infos:
+        primary = fi.tags[0] if fi.tags else "other"
+        groups.setdefault(primary, []).append(fi)
+
+    flag_default_open = int(imgui.TreeNodeFlags_.default_open)
+    for primary, group in groups.items():
+        header = f"{primary} ({len(group)})"
+        if imgui.collapsing_header(header, flag_default_open):
+            for fi in group:
+                _gui_function_row(fi, on_pick, row_click_picks=row_click_picks)
+
+
+def palette_gui_body(
+    palette: FunctionPalette,
+    filt: PaletteFilter,
+    on_pick: Callable[[FunctionInfo], None],
+    *,
+    row_click_picks: bool = False,
+    focus_search: bool = False,
+) -> None:
+    """Render the full palette body (search bar, tag chips, function list)
+    into the current imgui window or popup. The caller owns `filt` so its
+    state persists across frames; `on_pick` receives the picked FunctionInfo.
+
+    `row_click_picks=True` makes the whole row clickable (good for popups);
+    `False` shows the "+" button next to each name (dock layout).
+
+    `focus_search=True` (set on the first frame a popup opens) sends keyboard
+    focus to the search input so the user can start typing immediately.
+    """
+    with imgui_ctx.begin_vertical("V"):
+        _gui_search_and_match_mode(filt, focus_search=focus_search)
+        _gui_tags(palette, filt)
+        _gui_functions(palette, filt, on_pick, row_click_picks=row_click_picks)
+
+
+class FunctionPaletteGui:
+    """Persistent dock-side palette. Owns its own filter state so search/tag
+    selections are remembered across frames."""
+
+    palette: FunctionPalette
+    on_add_function: Callable[[FunctionWithGui], None] | None = None
+    _filter: PaletteFilter
+
+    def __init__(self) -> None:
+        self.palette = FunctionPalette()
+        self._filter = PaletteFilter()
 
     def gui(self) -> None:
         """Render palette contents into the surrounding window. The caller
         owns the `imgui.begin/end` (typical when docked via HelloImGui)."""
-        with imgui_ctx.begin_vertical("V"):
-            self._gui_search_and_match_mode()
-            self._gui_tags()
-            self._gui_functions()
+
+        def on_pick(fi: FunctionInfo) -> None:
+            if self.on_add_function is not None:
+                self.on_add_function(fi.function_factory())
+
+        palette_gui_body(self.palette, self._filter, on_pick)

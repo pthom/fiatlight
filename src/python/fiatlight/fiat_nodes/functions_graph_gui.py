@@ -1,42 +1,52 @@
 from __future__ import annotations
 
 import logging
+from dataclasses import dataclass
 
 from fiatlight.fiat_types import JsonDict
+from fiatlight.fiat_types.type_compat import is_link_compatible
 from fiatlight.fiat_types.typename_utils import TypeLike
 from fiatlight.fiat_core import FunctionsGraph, FunctionWithGui
+from fiatlight.fiat_core.function_node import FunctionNode
 from fiatlight.fiat_core.function_with_gui import FunctionWithGuiFactoryFromName
 from fiatlight.fiat_nodes.function_node_gui import FunctionNodeGui, FunctionNodeLinkGui
 from fiatlight.fiat_widgets import fiat_osd
 from imgui_bundle import imgui, imgui_node_editor as ed, hello_imgui, ImVec2, imgui_ctx
-from typing import Callable, List, Dict, Literal, Tuple
+from typing import Callable, List, Dict, Literal, Optional, Tuple
 
 
 PinKind = Literal["input", "output"]
-# A candidate offered to the user when they drop a wire on empty space:
-# (display label, factory that returns a new FunctionWithGui)
-CompatibleCandidate = Tuple[str, Callable[[], FunctionWithGui]]
-RequestCompatibleFunctions = Callable[[TypeLike, PinKind], List[CompatibleCandidate]]
+# Callback contract for the shared palette popup (right-click on canvas, or
+# drag-from-pin). Two callbacks together so fiat_nodes does not need to know
+# the FunctionPalette / PaletteFilter types.
+#
+# - `on_open_palette_popup(compat)` is called once on the frame the popup
+#   opens; the implementation resets its filter state (and sets compatibility
+#   if `compat` is not None).
+# - `on_render_palette_popup_body(on_pick)` is called every frame the popup
+#   is open; the implementation draws the palette body (search/tags/list) and
+#   calls `on_pick(new_function_with_gui)` when the user picks an entry.
+PaletteCompat = Tuple[TypeLike, PinKind]
+OpenPalettePopupFn = Callable[[Optional[PaletteCompat]], None]
+RenderPalettePopupBodyFn = Callable[[Callable[[FunctionWithGui], None]], None]
 
 
+@dataclass(frozen=True)
 class _PendingDragSpawn:
-    """Captures the state of a wire drop on empty canvas, while the
-    'pick a compatible function' popup is being shown to the user."""
+    """Captures a wire drop on empty canvas while the palette popup is open."""
 
-    def __init__(
-        self,
-        pin_id: ed.PinId,
-        pin_kind: PinKind,
-        pin_type: TypeLike,
-        screen_pos: ImVec2,
-    ) -> None:
-        self.pin_id = pin_id
-        self.pin_kind = pin_kind
-        self.pin_type = pin_type
-        self.screen_pos = screen_pos
+    pin_id: ed.PinId
+    pin_kind: PinKind
+    pin_type: TypeLike
+    screen_pos: ImVec2
 
 
 class FunctionsGraphGui:
+    # Palette popup geometry (em units, scaled by hello_imgui.em_size).
+    _PALETTE_POPUP_WIDTH_EM = 40
+    _PALETTE_POPUP_MAX_HEIGHT_EM = 35
+    _PALETTE_POPUP_ID = "##palette_popup"
+
     functions_graph: FunctionsGraph
 
     function_nodes_gui: List[FunctionNodeGui]
@@ -45,20 +55,20 @@ class FunctionsGraphGui:
     shall_layout_graph: bool = False
     can_edit_graph: bool = False
 
-    # Optional callback used by drag-from-pin-to-empty: given a pin type and
-    # whether the user dragged from an output ("output") or input ("input"),
-    # return the list of compatible candidate functions to offer in the popup.
-    # Wired by FiatGui to the FunctionPalette.
-    on_request_compatible_functions: RequestCompatibleFunctions | None = None
+    # Wired by FiatGui to the FunctionPalette. Both must be set for the
+    # right-click and drag-from-pin popups to appear; if either is None, the
+    # graph editor falls back to its old (popup-less) behavior.
+    on_open_palette_popup: OpenPalettePopupFn | None = None
+    on_render_palette_popup_body: RenderPalettePopupBodyFn | None = None
 
     _idx_render_graph: int = 0
     _idx_last_frame_render: int = 0
+    # State for the shared palette popup (right-click on canvas OR drag-from-pin).
     _pending_drag_spawn: _PendingDragSpawn | None = None
-    # True only on the frame that should call ed.open_popup; subsequent frames
-    # rely on imgui to keep the popup open until the user dismisses it.
-    _drag_spawn_popup_just_requested: bool = False
-    # When a node is spawned via drag-from-pin, we need to set its position
-    # inside an ed.begin/end block — defer to the next frame.
+    _bg_popup_screen_pos: ImVec2 | None = None  # set when right-click opens the popup
+    _palette_popup_just_requested: bool = False  # True only on the frame open_popup is needed
+    # When a node is spawned from a popup, we need to set its position inside
+    # an ed.begin/end block — defer to the next frame.
     _pending_node_position: Tuple[ed.NodeId, ImVec2] | None = None
 
     # ======================================================================================================================
@@ -116,7 +126,7 @@ class FunctionsGraphGui:
             ed.end()
             fiat_node_semaphore._IS_RENDERING_IN_NODE = False
             if self.can_edit_graph:
-                if self._draw_drag_spawn_popup():
+                if self._draw_palette_popup():
                     nodes_changed = True
         self._idx_render_graph += 1
         return nodes_changed
@@ -145,10 +155,15 @@ class FunctionsGraphGui:
             # functions on the next frame.
             new_node_pin_id = ed.PinId()
             if ed.query_new_node(new_node_pin_id):
-                if new_node_pin_id and self.on_request_compatible_functions is not None:
+                if new_node_pin_id and self._palette_popup_available():
                     if ed.accept_new_item():
                         self._begin_drag_spawn(new_node_pin_id)
             ed.end_create()
+
+        # Right-click on empty canvas → palette popup (no compatibility filter).
+        if self._palette_popup_available():
+            if ed.show_background_context_menu():
+                self._begin_background_palette_popup()
 
         # Handle deletion action
         if ed.begin_delete():
@@ -420,17 +435,21 @@ class FunctionsGraphGui:
         return matching_nodes[0]
 
     # ------------------------------------------------------------------
-    # Drag-from-pin → spawn compatible node
+    # Shared palette popup (right-click on canvas, or drag-from-pin)
     # ------------------------------------------------------------------
+    def _palette_popup_available(self) -> bool:
+        return self.on_open_palette_popup is not None and self.on_render_palette_popup_body is not None
+
     def _begin_drag_spawn(self, pin_id: ed.PinId) -> None:
-        """Capture the dropped wire so the popup can offer compatible nodes."""
+        """Capture the dropped wire and open the palette popup with a
+        compatibility filter pre-set."""
         fn_input, param_name = self._function_node_gui_from_input_pin_id(pin_id)
         if fn_input is not None:
             pin_type = fn_input.get_function_node().function_with_gui.input(param_name)._type
             if pin_type is None:
                 return
             self._pending_drag_spawn = _PendingDragSpawn(pin_id, "input", pin_type, imgui.get_mouse_pos())
-            self._drag_spawn_popup_just_requested = True
+            self._palette_popup_just_requested = True
             return
         fn_output, output_idx = self._function_node_gui_from_output_pin_id(pin_id)
         if fn_output is not None:
@@ -438,108 +457,120 @@ class FunctionsGraphGui:
             if pin_type is None:
                 return
             self._pending_drag_spawn = _PendingDragSpawn(pin_id, "output", pin_type, imgui.get_mouse_pos())
-            self._drag_spawn_popup_just_requested = True
+            self._palette_popup_just_requested = True
 
-    def _draw_drag_spawn_popup(self) -> bool:
-        """Render the 'pick a compatible function' popup. Returns True if a
-        node was actually spawned this frame.
-        """
-        if self._pending_drag_spawn is None:
+    def _begin_background_palette_popup(self) -> None:
+        """Open the palette popup at the cursor (no compatibility filter)."""
+        self._bg_popup_screen_pos = imgui.get_mouse_pos()
+        self._palette_popup_just_requested = True
+
+    def _draw_palette_popup(self) -> bool:
+        """Render the shared palette popup. Returns True if a node was spawned."""
+        if self._pending_drag_spawn is None and self._bg_popup_screen_pos is None:
             return False
-        if self.on_request_compatible_functions is None:
-            self._pending_drag_spawn = None
-            self._drag_spawn_popup_just_requested = False
+        on_open = self.on_open_palette_popup
+        on_render = self.on_render_palette_popup_body
+        if on_open is None or on_render is None:
+            self._reset_palette_popup_state()
             return False
 
-        popup_id = "##drag_spawn_popup"
-        # Only open on the frame the wire was dropped — never re-open. If the
-        # user clicks outside, imgui closes the popup and begin_popup returns
-        # False on the next frame, which clears our pending state.
-        if self._drag_spawn_popup_just_requested:
-            imgui.open_popup(popup_id)
-            self._drag_spawn_popup_just_requested = False
+        if self._palette_popup_just_requested:
+            compat: Optional[PaletteCompat] = None
+            if self._pending_drag_spawn is not None:
+                compat = (self._pending_drag_spawn.pin_type, self._pending_drag_spawn.pin_kind)
+            on_open(compat)
+            imgui.open_popup(self._PALETTE_POPUP_ID)
+            self._palette_popup_just_requested = False
+
+        # Force the popup width on appearance so the tag-checkbox grid wraps
+        # to a readable column count instead of stretching across the screen.
+        # (set_next_window_size_constraints alone is not enough — _gui_tags
+        # reads content_region_avail to pick its column count before the
+        # constraint can clamp the auto-grown popup.)
+        popup_w = hello_imgui.em_size(self._PALETTE_POPUP_WIDTH_EM)
+        max_h = hello_imgui.em_size(self._PALETTE_POPUP_MAX_HEIGHT_EM)
+        imgui.set_next_window_size(ImVec2(popup_w, 0), imgui.Cond_.appearing)
+        imgui.set_next_window_size_constraints(ImVec2(popup_w, 0), ImVec2(popup_w, max_h))
 
         spawned = False
-        if imgui.begin_popup(popup_id):
-            candidates = self.on_request_compatible_functions(
-                self._pending_drag_spawn.pin_type, self._pending_drag_spawn.pin_kind
-            )
-            if not candidates:
-                imgui.text_disabled("No compatible functions")
-            else:
-                for label, factory in candidates:
-                    if imgui.menu_item_simple(label):
-                        self._spawn_dragged(factory)
-                        spawned = True
-                        imgui.close_current_popup()
-                        break
+        if imgui.begin_popup(self._PALETTE_POPUP_ID):
+            picked: List[FunctionWithGui] = []
+            on_render(picked.append)
+            if picked:
+                self._spawn_from_palette(picked[0])
+                spawned = True
+                imgui.close_current_popup()
             imgui.end_popup()
         else:
-            # Popup was dismissed (clicked outside, Escape, or item picked).
-            self._pending_drag_spawn = None
+            self._reset_palette_popup_state()
         return spawned
 
-    def _spawn_dragged(self, factory: Callable[[], FunctionWithGui]) -> None:
-        assert self._pending_drag_spawn is not None
-        pending = self._pending_drag_spawn
+    def _reset_palette_popup_state(self) -> None:
         self._pending_drag_spawn = None
+        self._bg_popup_screen_pos = None
+        self._palette_popup_just_requested = False
 
-        new_fn = factory()
+    def _spawn_from_palette(self, new_fn: FunctionWithGui) -> None:
+        """Place the picked function on the canvas, and (if the popup was
+        opened by a wire drop) wire it to the dragged pin."""
+        pending = self._pending_drag_spawn
+        screen_pos = pending.screen_pos if pending is not None else self._bg_popup_screen_pos
+        self._reset_palette_popup_state()
+
         self.add_function_with_gui(new_fn)
         new_node_gui = self.function_nodes_gui[-1]
-        canvas_pos = ed.screen_to_canvas(pending.screen_pos)
-        self._pending_node_position = (new_node_gui.node_id(), canvas_pos)
+        if screen_pos is not None:
+            self._pending_node_position = (new_node_gui.node_id(), ed.screen_to_canvas(screen_pos))
 
-        # Try to create the link to/from the dragged pin.
+        if pending is not None:
+            self._link_dragged_pin_to_new_node(pending, new_node_gui)
+
+    def _link_dragged_pin_to_new_node(self, pending: _PendingDragSpawn, new_node_gui: FunctionNodeGui) -> None:
         new_fn_with_gui = new_node_gui.get_function_node().function_with_gui
         if pending.pin_kind == "output":
-            # dragged from output pin → link output → first compatible input of new node
-            from fiatlight.fiat_types.type_compat import is_link_compatible
-
             for i in range(new_fn_with_gui.nb_inputs()):
                 p = new_fn_with_gui.input_of_idx(i)
                 t = p.data_with_gui._type
-                if t is not None and is_link_compatible(pending.pin_type, t):
-                    fn_output, src_output_idx = self._function_node_gui_from_output_pin_id(pending.pin_id)
-                    if fn_output is not None:
-                        try:
-                            self.functions_graph._add_link_from_function_nodes(
-                                fn_output.get_function_node(),
-                                new_node_gui.get_function_node(),
-                                dst_input_name=p.name,
-                                src_output_idx=src_output_idx,
-                            )
-                            self.functions_links_gui.append(
-                                FunctionNodeLinkGui(
-                                    self.functions_graph.functions_nodes_links[-1], self.function_nodes_gui
-                                )
-                            )
-                        except ValueError as e:
-                            logging.warning(f"Drag-spawn link rejected: {e}")
-                    break
+                if t is None or not is_link_compatible(pending.pin_type, t):
+                    continue
+                fn_output, src_output_idx = self._function_node_gui_from_output_pin_id(pending.pin_id)
+                if fn_output is None:
+                    return
+                self._try_add_link_from_to(
+                    fn_output.get_function_node(),
+                    new_node_gui.get_function_node(),
+                    dst_input_name=p.name,
+                    src_output_idx=src_output_idx,
+                )
+                return
         else:
-            from fiatlight.fiat_types.type_compat import is_link_compatible
-
             for i in range(new_fn_with_gui.nb_outputs()):
                 t = new_fn_with_gui.output(i)._type
-                if t is not None and is_link_compatible(t, pending.pin_type):
-                    fn_input, dst_param_name = self._function_node_gui_from_input_pin_id(pending.pin_id)
-                    if fn_input is not None:
-                        try:
-                            self.functions_graph._add_link_from_function_nodes(
-                                new_node_gui.get_function_node(),
-                                fn_input.get_function_node(),
-                                dst_input_name=dst_param_name,
-                                src_output_idx=i,
-                            )
-                            self.functions_links_gui.append(
-                                FunctionNodeLinkGui(
-                                    self.functions_graph.functions_nodes_links[-1], self.function_nodes_gui
-                                )
-                            )
-                        except ValueError as e:
-                            logging.warning(f"Drag-spawn link rejected: {e}")
-                    break
+                if t is None or not is_link_compatible(t, pending.pin_type):
+                    continue
+                fn_input, dst_param_name = self._function_node_gui_from_input_pin_id(pending.pin_id)
+                if fn_input is None:
+                    return
+                self._try_add_link_from_to(
+                    new_node_gui.get_function_node(),
+                    fn_input.get_function_node(),
+                    dst_input_name=dst_param_name,
+                    src_output_idx=i,
+                )
+                return
+
+    def _try_add_link_from_to(
+        self, src_fn: FunctionNode, dst_fn: FunctionNode, *, dst_input_name: str, src_output_idx: int
+    ) -> None:
+        try:
+            self.functions_graph._add_link_from_function_nodes(
+                src_fn, dst_fn, dst_input_name=dst_input_name, src_output_idx=src_output_idx
+            )
+            self.functions_links_gui.append(
+                FunctionNodeLinkGui(self.functions_graph.functions_nodes_links[-1], self.function_nodes_gui)
+            )
+        except ValueError as e:
+            logging.warning(f"Palette-spawn link rejected: {e}")
 
     def _apply_pending_node_position(self) -> None:
         if self._pending_node_position is None:
