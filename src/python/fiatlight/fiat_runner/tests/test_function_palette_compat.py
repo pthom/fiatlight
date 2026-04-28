@@ -4,6 +4,7 @@ from typing import NewType
 
 import fiatlight as fl
 from fiatlight.fiat_runner.function_palette import FunctionPalette
+from fiatlight.fiat_types import Function
 
 
 MyInt = NewType("MyInt", int)
@@ -37,7 +38,8 @@ def consume_str(s: str) -> str:
 
 def _palette() -> FunctionPalette:
     p = FunctionPalette()
-    for fn in [produce_int, produce_str, consume_int, consume_my_int, consume_str]:
+    fns: list[Function] = [produce_int, produce_str, consume_int, consume_my_int, consume_str]
+    for fn in fns:
         p.add_function(fn)
     return p
 

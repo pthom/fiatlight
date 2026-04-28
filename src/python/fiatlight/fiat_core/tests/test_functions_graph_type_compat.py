@@ -34,7 +34,7 @@ def test_incompatible_link_rejected_int_to_str() -> None:
     def consume_str(s: str) -> str:
         return s
 
-    g = FunctionsGraph()  # type: ignore[call-arg]
+    g = FunctionsGraph()
     g.add_function(produce_int)
     g.add_function(consume_str)
     src = g.functions_nodes[0]
@@ -51,7 +51,7 @@ def test_newtype_to_supertype_accepted_in_graph() -> None:
     def consume_int(x: int) -> int:
         return x
 
-    g = FunctionsGraph()  # type: ignore[call-arg]
+    g = FunctionsGraph()
     g.add_function(produce_my_int)
     g.add_function(consume_int)
     src = g.functions_nodes[0]
@@ -67,7 +67,7 @@ def test_supertype_to_newtype_rejected_in_graph() -> None:
     def consume_my_int(x: MyInt) -> MyInt:
         return x
 
-    g = FunctionsGraph()  # type: ignore[call-arg]
+    g = FunctionsGraph()
     g.add_function(produce_int)
     g.add_function(consume_my_int)
     src = g.functions_nodes[0]

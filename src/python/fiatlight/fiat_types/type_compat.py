@@ -44,7 +44,7 @@ __all__ = [
 #  Internal helpers
 # ---------------------------------------------------------------------------
 def _is_any(t: TypeLike) -> bool:
-    return t is Any or t is typing.Any  # type: ignore[comparison-overlap]
+    return t is Any or t is typing.Any
 
 
 def _is_union(t: TypeLike) -> bool:
@@ -53,7 +53,7 @@ def _is_union(t: TypeLike) -> bool:
 
 
 def _union_members(t: TypeLike) -> tuple[TypeLike, ...]:
-    return typing.get_args(t)  # type: ignore[no-any-return]
+    return typing.get_args(t)
 
 
 def _is_newtype(t: TypeLike) -> bool:
@@ -74,7 +74,7 @@ def _supertype_chain(t: TypeLike) -> Iterable[TypeLike]:
         yield cur
         if not _is_newtype(cur):
             return
-        cur = cur.__supertype__  # type: ignore[union-attr]
+        cur = cur.__supertype__
 
 
 def _typename_eq(a: TypeLike, b: TypeLike) -> bool:
