@@ -34,12 +34,6 @@
             "src_output_idx": 0
         },
         {
-            "src_function_name": "dilate",
-            "dst_function_name": "bitwise_not",
-            "dst_input_name": "image",
-            "src_output_idx": 0
-        },
-        {
             "src_function_name": "edge_preserving_filter",
             "dst_function_name": "bitwise_and",
             "dst_input_name": "image_a",
@@ -49,6 +43,12 @@
             "src_function_name": "bitwise_not",
             "dst_function_name": "bitwise_and",
             "dst_input_name": "image_b",
+            "src_output_idx": 0
+        },
+        {
+            "src_function_name": "dilate",
+            "dst_function_name": "bitwise_not",
+            "dst_input_name": "image",
             "src_output_idx": 0
         }
     ]

@@ -415,6 +415,8 @@ class FloatWithGui(AnyDataWithGui[float]):
         auto_handle_format_and_logarithmic()
 
     def present_str(self, value: float) -> str:
+        if not isinstance(value, float) and not isinstance(value, int):
+            return "Not a number!"
         if self.params.nb_significant_digits >= 0:
             return f"{value:.{self.params.nb_significant_digits}g}"
         else:
