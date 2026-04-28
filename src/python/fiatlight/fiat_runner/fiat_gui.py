@@ -232,6 +232,14 @@ class FiatGui:
 
         self._function_palette_gui.on_add_function = lambda fn: self._functions_graph_gui.add_function_with_gui(fn)
 
+        # Drag-from-pin → filtered palette: when the user drops a wire on
+        # empty canvas, ask the palette for compatible candidates.
+        def _candidates_from_palette(pin_type, pin_kind):  # type: ignore[no-untyped-def]
+            infos = self._function_palette_gui.palette.get_compatible_function_infos(pin_type, pin_kind)
+            return [(fi.name, fi.function_factory) for fi in infos]
+
+        self._functions_graph_gui.on_request_compatible_functions = _candidates_from_palette
+
         if self.params.delete_settings:
             self._del_user_settings()
         self.was_post_init_called = False

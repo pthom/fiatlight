@@ -3,12 +3,37 @@ from __future__ import annotations
 import logging
 
 from fiatlight.fiat_types import JsonDict
+from fiatlight.fiat_types.typename_utils import TypeLike
 from fiatlight.fiat_core import FunctionsGraph, FunctionWithGui
 from fiatlight.fiat_core.function_with_gui import FunctionWithGuiFactoryFromName
 from fiatlight.fiat_nodes.function_node_gui import FunctionNodeGui, FunctionNodeLinkGui
 from fiatlight.fiat_widgets import fiat_osd
 from imgui_bundle import imgui, imgui_node_editor as ed, hello_imgui, ImVec2, imgui_ctx
-from typing import List, Dict, Tuple
+from typing import Callable, List, Dict, Literal, Tuple
+
+
+PinKind = Literal["input", "output"]
+# A candidate offered to the user when they drop a wire on empty space:
+# (display label, factory that returns a new FunctionWithGui)
+CompatibleCandidate = Tuple[str, Callable[[], FunctionWithGui]]
+RequestCompatibleFunctions = Callable[[TypeLike, PinKind], List[CompatibleCandidate]]
+
+
+class _PendingDragSpawn:
+    """Captures the state of a wire drop on empty canvas, while the
+    'pick a compatible function' popup is being shown to the user."""
+
+    def __init__(
+        self,
+        pin_id: ed.PinId,
+        pin_kind: PinKind,
+        pin_type: TypeLike,
+        screen_pos: ImVec2,
+    ) -> None:
+        self.pin_id = pin_id
+        self.pin_kind = pin_kind
+        self.pin_type = pin_type
+        self.screen_pos = screen_pos
 
 
 class FunctionsGraphGui:
@@ -20,8 +45,18 @@ class FunctionsGraphGui:
     shall_layout_graph: bool = False
     can_edit_graph: bool = False
 
+    # Optional callback used by drag-from-pin-to-empty: given a pin type and
+    # whether the user dragged from an output ("output") or input ("input"),
+    # return the list of compatible candidate functions to offer in the popup.
+    # Wired by FiatGui to the FunctionPalette.
+    on_request_compatible_functions: RequestCompatibleFunctions | None = None
+
     _idx_render_graph: int = 0
     _idx_last_frame_render: int = 0
+    _pending_drag_spawn: _PendingDragSpawn | None = None
+    # When a node is spawned via drag-from-pin, we need to set its position
+    # inside an ed.begin/end block — defer to the next frame.
+    _pending_node_position: Tuple[ed.NodeId, ImVec2] | None = None
 
     # ======================================================================================================================
     # Constructor
@@ -69,6 +104,7 @@ class FunctionsGraphGui:
         with imgui_ctx.push_obj_id(self):
             fiat_node_semaphore._IS_RENDERING_IN_NODE = True
             ed.begin("FunctionsGraphGui")
+            self._apply_pending_node_position()
             if draw_nodes():
                 nodes_changed = True
             draw_links()
@@ -76,6 +112,9 @@ class FunctionsGraphGui:
                 self._handle_graph_edition()
             ed.end()
             fiat_node_semaphore._IS_RENDERING_IN_NODE = False
+            if self.can_edit_graph:
+                if self._draw_drag_spawn_popup():
+                    nodes_changed = True
         self._idx_render_graph += 1
         return nodes_changed
 
@@ -97,6 +136,15 @@ class FunctionsGraphGui:
                     else:
                         if ed.accept_new_item():
                             self._try_add_link(input_pin_id, output_pin_id)
+
+            # QueryNewNode returns true if the user dropped a wire on empty
+            # canvas. We capture the pin and open a popup of compatible
+            # functions on the next frame.
+            new_node_pin_id = ed.PinId()
+            if ed.query_new_node(new_node_pin_id):
+                if new_node_pin_id and self.on_request_compatible_functions is not None:
+                    if ed.accept_new_item():
+                        self._begin_drag_spawn(new_node_pin_id)
             ed.end_create()
 
         # Handle deletion action
@@ -367,6 +415,128 @@ class FunctionsGraphGui:
             return None, -1
         assert len(matching_nodes) == 1
         return matching_nodes[0]
+
+    # ------------------------------------------------------------------
+    # Drag-from-pin → spawn compatible node
+    # ------------------------------------------------------------------
+    def _begin_drag_spawn(self, pin_id: ed.PinId) -> None:
+        """Capture the dropped wire so the popup can offer compatible nodes."""
+        fn_input, param_name = self._function_node_gui_from_input_pin_id(pin_id)
+        if fn_input is not None:
+            pin_type = fn_input.get_function_node().function_with_gui.input(param_name)._type
+            if pin_type is None:
+                return
+            self._pending_drag_spawn = _PendingDragSpawn(pin_id, "input", pin_type, imgui.get_mouse_pos())
+            return
+        fn_output, output_idx = self._function_node_gui_from_output_pin_id(pin_id)
+        if fn_output is not None:
+            pin_type = fn_output.get_function_node().function_with_gui.output(output_idx)._type
+            if pin_type is None:
+                return
+            self._pending_drag_spawn = _PendingDragSpawn(pin_id, "output", pin_type, imgui.get_mouse_pos())
+
+    def _draw_drag_spawn_popup(self) -> bool:
+        """Render the 'pick a compatible function' popup. Returns True if a
+        node was actually spawned this frame.
+        """
+        if self._pending_drag_spawn is None:
+            return False
+        if self.on_request_compatible_functions is None:
+            self._pending_drag_spawn = None
+            return False
+
+        popup_id = "##drag_spawn_popup"
+        if not imgui.is_popup_open(popup_id):
+            imgui.open_popup(popup_id)
+
+        spawned = False
+        if imgui.begin_popup(popup_id):
+            candidates = self.on_request_compatible_functions(
+                self._pending_drag_spawn.pin_type, self._pending_drag_spawn.pin_kind
+            )
+            if not candidates:
+                imgui.text_disabled("No compatible functions")
+            else:
+                for label, factory in candidates:
+                    if imgui.menu_item_simple(label):
+                        self._spawn_dragged(factory)
+                        spawned = True
+                        imgui.close_current_popup()
+                        break
+            imgui.end_popup()
+        else:
+            # popup was dismissed (clicked outside) — clear state
+            self._pending_drag_spawn = None
+        return spawned
+
+    def _spawn_dragged(self, factory: Callable[[], FunctionWithGui]) -> None:
+        assert self._pending_drag_spawn is not None
+        pending = self._pending_drag_spawn
+        self._pending_drag_spawn = None
+
+        new_fn = factory()
+        self.add_function_with_gui(new_fn)
+        new_node_gui = self.function_nodes_gui[-1]
+        canvas_pos = ed.screen_to_canvas(pending.screen_pos)
+        self._pending_node_position = (new_node_gui.node_id(), canvas_pos)
+
+        # Try to create the link to/from the dragged pin.
+        new_fn_with_gui = new_node_gui.get_function_node().function_with_gui
+        if pending.pin_kind == "output":
+            # dragged from output pin → link output → first compatible input of new node
+            from fiatlight.fiat_types.type_compat import is_link_compatible
+
+            for i in range(new_fn_with_gui.nb_inputs()):
+                p = new_fn_with_gui.input_of_idx(i)
+                t = p.data_with_gui._type
+                if t is not None and is_link_compatible(pending.pin_type, t):
+                    fn_output, src_output_idx = self._function_node_gui_from_output_pin_id(pending.pin_id)
+                    if fn_output is not None:
+                        try:
+                            self.functions_graph._add_link_from_function_nodes(
+                                fn_output.get_function_node(),
+                                new_node_gui.get_function_node(),
+                                dst_input_name=p.name,
+                                src_output_idx=src_output_idx,
+                            )
+                            self.functions_links_gui.append(
+                                FunctionNodeLinkGui(
+                                    self.functions_graph.functions_nodes_links[-1], self.function_nodes_gui
+                                )
+                            )
+                        except ValueError as e:
+                            logging.warning(f"Drag-spawn link rejected: {e}")
+                    break
+        else:
+            from fiatlight.fiat_types.type_compat import is_link_compatible
+
+            for i in range(new_fn_with_gui.nb_outputs()):
+                t = new_fn_with_gui.output(i)._type
+                if t is not None and is_link_compatible(t, pending.pin_type):
+                    fn_input, dst_param_name = self._function_node_gui_from_input_pin_id(pending.pin_id)
+                    if fn_input is not None:
+                        try:
+                            self.functions_graph._add_link_from_function_nodes(
+                                new_node_gui.get_function_node(),
+                                fn_input.get_function_node(),
+                                dst_input_name=dst_param_name,
+                                src_output_idx=i,
+                            )
+                            self.functions_links_gui.append(
+                                FunctionNodeLinkGui(
+                                    self.functions_graph.functions_nodes_links[-1], self.function_nodes_gui
+                                )
+                            )
+                        except ValueError as e:
+                            logging.warning(f"Drag-spawn link rejected: {e}")
+                    break
+
+    def _apply_pending_node_position(self) -> None:
+        if self._pending_node_position is None:
+            return
+        node_id, pos = self._pending_node_position
+        ed.set_node_position(node_id, pos)
+        self._pending_node_position = None
 
     def _function_node_gui_from_id(self, node_id: ed.NodeId) -> FunctionNodeGui:
         matching_nodes = [fn for fn in self.function_nodes_gui if fn.node_id() == node_id]

@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import Enum
 
 from imgui_bundle import hello_imgui, imgui, imgui_ctx, imgui_md
@@ -6,10 +6,13 @@ from imgui_bundle import hello_imgui, imgui, imgui_ctx, imgui_md
 from fiatlight.fiat_core import FunctionWithGui
 from fiatlight.fiat_widgets import fontawesome_6_ctx, icons_fontawesome_6
 from fiatlight.fiat_types import Function
+from fiatlight.fiat_types.type_compat import is_link_compatible
+from fiatlight.fiat_types.typename_utils import TypeLike
 
-from typing import Callable
+from typing import Any, Callable, Literal
 
 FunctionWithGuiFactory = Callable[[], FunctionWithGui]
+PinKind = Literal["input", "output"]
 
 
 class TagMatchMode(Enum):
@@ -30,6 +33,25 @@ class FunctionInfo:
     tags: list[str]
     doc: str | None
     doc_is_markdown: bool
+    # Cached pin types so the compatibility filter does not have to re-factor
+    # every function on every popup frame. Each entry is the parameter / output
+    # name and its Python type (which may be None for unannotated outputs).
+    input_types: list[tuple[str, Any]] = field(default_factory=list)
+    output_types: list[Any] = field(default_factory=list)
+
+    def first_compatible_input(self, dragged_output_type: TypeLike) -> str | None:
+        """Return the name of the first input whose type accepts `dragged_output_type`."""
+        for name, t in self.input_types:
+            if t is not None and is_link_compatible(dragged_output_type, t):
+                return name
+        return None
+
+    def first_compatible_output(self, dragged_input_type: TypeLike) -> int | None:
+        """Return the index of the first output whose type fits into `dragged_input_type`."""
+        for idx, t in enumerate(self.output_types):
+            if t is not None and is_link_compatible(t, dragged_input_type):
+                return idx
+        return None
 
 
 def _read_fiat_tags(fn: Function) -> list[str]:
@@ -78,8 +100,36 @@ class FunctionPalette:
         gui = function_factory()
         name = gui.function_name
         doc = gui.get_function_doc()
-        function_info = FunctionInfo(name, function_factory, tags, doc.user_doc, doc.is_user_doc_markdown)
+        input_types = [
+            (gui.input_of_idx(i).name, gui.input_of_idx(i).data_with_gui._type) for i in range(gui.nb_inputs())
+        ]
+        output_types = [gui.output(i)._type for i in range(gui.nb_outputs())]
+        function_info = FunctionInfo(
+            name,
+            function_factory,
+            tags,
+            doc.user_doc,
+            doc.is_user_doc_markdown,
+            input_types=input_types,
+            output_types=output_types,
+        )
         self._functions.append(function_info)
+
+    def get_compatible_function_infos(self, pin_type: TypeLike, pin_kind: PinKind) -> list[FunctionInfo]:
+        """Return functions that have at least one pin compatible with the dragged pin.
+
+        If the user dragged an *output* pin, we look for functions with at least one
+        input that accepts `pin_type`. Symmetrically for inputs.
+        """
+        result: list[FunctionInfo] = []
+        for fi in self._functions:
+            if pin_kind == "output":
+                if fi.first_compatible_input(pin_type) is not None:
+                    result.append(fi)
+            else:
+                if fi.first_compatible_output(pin_type) is not None:
+                    result.append(fi)
+        return result
 
     def tags_set(self) -> list[str]:
         tags: set[str] = set()
