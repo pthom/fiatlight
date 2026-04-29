@@ -7,13 +7,7 @@ from fiatlight.fiat_types.function_types import VoidFunction
 from fiatlight.fiat_types.function_types import Function
 from fiatlight.fiat_widgets import fiat_osd
 from fiatlight.fiat_utils import functional_utils
-from fiatlight.fiat_runner.function_palette import (
-    FunctionInfo,
-    FunctionPaletteGui,
-    PaletteFilter,
-    palette_gui_body,
-)
-from fiatlight.fiat_nodes.functions_graph_gui import PaletteCompat
+from fiatlight.fiat_palette import FunctionPalette
 from fiatlight.fiat_kits.fiat_image.image_types import ImageRgb
 from fiatlight.fiat_config import get_fiat_config
 from imgui_bundle import immapp, imgui, portable_file_dialogs as pfd, imgui_node_editor as ed
@@ -210,7 +204,7 @@ class FiatGui:
     load_dialog: pfd.open_file | None = None
     load_dialog_callback: Callable[[str], None] | None = None
 
-    _function_palette_gui: FunctionPaletteGui
+    _function_palette: FunctionPalette
 
     _logo_texture: imgui.ImTextureRef
 
@@ -229,45 +223,11 @@ class FiatGui:
 
         self.apply_fiat_style_graph()
 
-        self._functions_graph_gui = FunctionsGraphGui(functions_graph)
+        self._function_palette = FunctionPalette()
+        self._functions_graph_gui = FunctionsGraphGui(functions_graph, function_palette=self._function_palette)
 
         if self.params.customizable_graph:
             self._functions_graph_gui.can_edit_graph = True
-
-        self._function_palette_gui = FunctionPaletteGui()
-
-        self._function_palette_gui.on_add_function = lambda fn: self._functions_graph_gui.add_function_with_gui(fn)
-
-        # Shared popup palette (right-click on canvas, drag-from-pin):
-        # FunctionsGraphGui owns the lifecycle, FiatGui owns the filter state
-        # and the rendering.
-        self._popup_filter: PaletteFilter = PaletteFilter()
-        self._popup_focus_search_pending: bool = False
-
-        def _open_palette_popup(compat: PaletteCompat | None) -> None:
-            self._popup_filter = PaletteFilter()
-            if compat is not None:
-                self._popup_filter.compatibility = compat
-            self._popup_focus_search_pending = True
-
-        def _render_palette_popup_body(on_pick_fn: Callable[[FunctionWithGui], None]) -> None:
-            focus = self._popup_focus_search_pending
-            self._popup_focus_search_pending = False
-
-            def on_pick_info(fi: FunctionInfo) -> None:
-                on_pick_fn(fi.function_factory())
-
-            palette_gui_body(
-                self._function_palette_gui.palette,
-                self._popup_filter,
-                on_pick_info,
-                row_click_picks=True,
-                focus_search=focus,
-                show_doc_panel=True,
-            )
-
-        self._functions_graph_gui.on_open_palette_popup = _open_palette_popup
-        self._functions_graph_gui.on_render_palette_popup_body = _render_palette_popup_body
 
         if self.params.delete_settings:
             self._del_user_settings()
@@ -592,15 +552,6 @@ class FiatGui:
 
     def _docking_splits(self) -> List[hello_imgui.DockingSplit]:
         splits: List[hello_imgui.DockingSplit] = []
-        if self.params.customizable_graph:
-            splits.append(
-                hello_imgui.DockingSplit(
-                    initial_dock_="MainDockSpace",
-                    new_dock_="palette_dock",
-                    direction_=imgui.Dir.left,
-                    ratio_=0.22,
-                )
-            )
         splits.append(
             hello_imgui.DockingSplit(
                 initial_dock_="MainDockSpace",
@@ -629,15 +580,7 @@ class FiatGui:
             gui_function_=lambda: hello_imgui.log_gui(),
             is_visible_=False,
         )
-        r = [main_window, image_inspector, logger_window]
-        if self.params.customizable_graph:
-            palette_window = hello_imgui.DockableWindow(
-                label_="Function palette",
-                dock_space_name_="palette_dock",
-                gui_function_=lambda: self._function_palette_gui.gui(),
-            )
-            r.append(palette_window)
-        return r
+        return [main_window, image_inspector, logger_window]
 
     # ==================================================================================================================
     #                                  Utilities
@@ -744,7 +687,7 @@ class FiatGui:
             elif save_type == _SaveType.GraphComposition:
 
                 def factor_function_from_name(name: str) -> Any:
-                    return self._function_palette_gui.palette.factor_function_from_name(name)
+                    return self._function_palette.factor_function_from_name(name)
 
                 self._functions_graph_gui.load_graph_composition_from_json(json_data, factor_function_from_name)
         except Exception as e:
@@ -868,7 +811,7 @@ def run_graph_composer(
     graph = initial_graph if initial_graph is not None else FunctionsGraph.create_empty()
     fiat_gui = FiatGui(graph, params=params)
     for fn in functions:
-        fiat_gui._function_palette_gui.palette.add_function(fn)
+        fiat_gui._function_palette.add_function(fn)
     fiat_gui.run()
 
 

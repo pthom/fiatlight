@@ -2,13 +2,11 @@
     "functions_names": [
         "image_source",
         "edge_preserving_filter",
-        "imread_rgb",
         "lut_channels_in_colorspace",
-        "color_convert",
-        "imread_rgb_2",
-        "image_source_2",
-        "imread_rgb_2_2",
-        "imread_rgb_2_2_2"
+        "convert_scale_abs",
+        "lut_with_params",
+        "lut_channels_in_colorspace_2",
+        "imread_rgb"
     ],
     "functions_nodes_links": [
         {
@@ -18,14 +16,26 @@
             "src_output_idx": 0
         },
         {
-            "src_function_name": "image_source",
+            "src_function_name": "edge_preserving_filter",
             "dst_function_name": "lut_channels_in_colorspace",
             "dst_input_name": "image",
             "src_output_idx": 0
         },
         {
-            "src_function_name": "edge_preserving_filter",
-            "dst_function_name": "color_convert",
+            "src_function_name": "image_source",
+            "dst_function_name": "convert_scale_abs",
+            "dst_input_name": "image",
+            "src_output_idx": 0
+        },
+        {
+            "src_function_name": "image_source",
+            "dst_function_name": "lut_with_params",
+            "dst_input_name": "image",
+            "src_output_idx": 0
+        },
+        {
+            "src_function_name": "image_source",
+            "dst_function_name": "lut_channels_in_colorspace_2",
             "dst_input_name": "image",
             "src_output_idx": 0
         }
