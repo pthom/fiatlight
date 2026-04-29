@@ -2,11 +2,13 @@
     "functions_names": [
         "image_source",
         "edge_preserving_filter",
-        "scharr",
-        "threshold",
-        "dilate",
-        "bitwise_not",
-        "bitwise_and"
+        "imread_rgb",
+        "lut_channels_in_colorspace",
+        "color_convert",
+        "imread_rgb_2",
+        "image_source_2",
+        "imread_rgb_2_2",
+        "imread_rgb_2_2_2"
     ],
     "functions_nodes_links": [
         {
@@ -17,37 +19,13 @@
         },
         {
             "src_function_name": "image_source",
-            "dst_function_name": "scharr",
-            "dst_input_name": "image",
-            "src_output_idx": 0
-        },
-        {
-            "src_function_name": "scharr",
-            "dst_function_name": "threshold",
-            "dst_input_name": "image",
-            "src_output_idx": 0
-        },
-        {
-            "src_function_name": "threshold",
-            "dst_function_name": "dilate",
+            "dst_function_name": "lut_channels_in_colorspace",
             "dst_input_name": "image",
             "src_output_idx": 0
         },
         {
             "src_function_name": "edge_preserving_filter",
-            "dst_function_name": "bitwise_and",
-            "dst_input_name": "image_a",
-            "src_output_idx": 0
-        },
-        {
-            "src_function_name": "bitwise_not",
-            "dst_function_name": "bitwise_and",
-            "dst_input_name": "image_b",
-            "src_output_idx": 0
-        },
-        {
-            "src_function_name": "dilate",
-            "dst_function_name": "bitwise_not",
+            "dst_function_name": "color_convert",
             "dst_input_name": "image",
             "src_output_idx": 0
         }
