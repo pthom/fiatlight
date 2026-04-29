@@ -36,9 +36,14 @@ class _DraggedFnParamPin:
 class _OpenPalettePopup:
     """All state of the function-palette popup while it is open. Lives on
     `FunctionsGraphGui` for as long as the popup is showing; cleared on
-    dismiss or pick."""
+    dismiss or pick.
 
-    screen_pos: ImVec2
+    `canvas_pos` is where the new node should land. Pre-converted via
+    `ed.screen_to_canvas` at the moment the popup is opened, *while inside*
+    `ed.begin/end` — converting later, after `ed.end()`, gives stale or
+    wrong canvas coords."""
+
+    canvas_pos: ImVec2
     filter: PaletteFilter
     focus_search: bool = True
     pin: _DraggedFnParamPin | None = None  # set when entry was drag-from-pin
@@ -137,6 +142,12 @@ class FunctionsGraphGui:
         return nodes_changed
 
     def _handle_graph_edition(self) -> None:
+        # Inside ed.begin/end (and outside ed.begin_create), imgui-node-editor
+        # reroutes imgui.get_mouse_pos() through its canvas transform: the
+        # value below is already in canvas coordinates, NOT screen coordinates.
+        # Inside ed.begin_create the transform is suspended and get_mouse_pos
+        # returns true screen coords — see _open_popup_from_dragged_pin.
+        mouse_canvas_pos = imgui.get_mouse_pos()
         #
         # Handle creation action, returns true if editor want to create new object (node or link)
         #
@@ -167,7 +178,7 @@ class FunctionsGraphGui:
 
         # Right-click on empty canvas → palette popup (no type filter).
         if self.function_palette is not None and ed.show_background_context_menu():
-            self._open_popup_at(imgui.get_mouse_pos())
+            self._open_popup_at(mouse_canvas_pos)
 
         # Handle deletion action
         if ed.begin_delete():
@@ -441,16 +452,19 @@ class FunctionsGraphGui:
     # ------------------------------------------------------------------
     # Shared palette popup (right-click on canvas, or drag-from-pin)
     # ------------------------------------------------------------------
-    def _open_popup_at(self, screen_pos: ImVec2, dragged_pin: _DraggedFnParamPin | None = None) -> None:
-        """Single entry point for both right-click and drag-from-pin: build
-        the popup state, type-filtering the candidate list when a pin was dragged."""
+    def _open_popup_at(self, canvas_pos: ImVec2, dragged_pin: _DraggedFnParamPin | None = None) -> None:
+        """Single entry point for both right-click and drag-from-pin.
+        `canvas_pos` must already be in canvas coordinates."""
         filt = PaletteFilter()
         if dragged_pin is not None:
             if dragged_pin.pin_kind is PinKind.OUTPUT:
                 filt.input_type_filter = dragged_pin.pin_type
             else:
                 filt.output_type_filter = dragged_pin.pin_type
-        self._open_popup = _OpenPalettePopup(screen_pos=screen_pos, filter=filt, pin=dragged_pin)
+        # Defensive copy: ImVec2 is mutable and imgui.get_mouse_pos() may hand
+        # back a reference that imgui mutates frame-to-frame.
+        canvas_pos_copy = ImVec2(canvas_pos.x, canvas_pos.y)
+        self._open_popup = _OpenPalettePopup(canvas_pos=canvas_pos_copy, filter=filt, pin=dragged_pin)
 
     def _open_popup_from_dragged_pin(self, pin_id: ed.PinId) -> None:
         """Resolve the pin id into kind + type, then open the popup."""
@@ -468,7 +482,9 @@ class FunctionsGraphGui:
             if pin_type is None:
                 return
             pin = _DraggedFnParamPin(pin_id, PinKind.OUTPUT, pin_type)
-        self._open_popup_at(imgui.get_mouse_pos(), dragged_pin=pin)
+        # Inside ed.begin_create the editor suspends its canvas transform on
+        # io.MousePos, so imgui.get_mouse_pos() returns true screen coords here.
+        self._open_popup_at(ed.screen_to_canvas(imgui.get_mouse_pos()), dragged_pin=pin)
 
     def _draw_palette_popup(self) -> bool:
         """Render the popup and handle its lifecycle. Returns True if a node was spawned."""
@@ -512,7 +528,7 @@ class FunctionsGraphGui:
         self._open_popup = None
         self.add_function_with_gui(new_fn)
         new_node_gui = self.function_nodes_gui[-1]
-        self._pending_node_position = (new_node_gui.node_id(), ed.screen_to_canvas(popup.screen_pos))
+        self._pending_node_position = (new_node_gui.node_id(), popup.canvas_pos)
         if popup.pin is not None:
             self._link_dragged_pin_to_new_node(popup.pin, new_node_gui)
 
