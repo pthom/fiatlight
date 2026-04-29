@@ -363,6 +363,9 @@ class FiatGui:
 
     def _store_final_app_window_screenshot(self) -> None:
         global _LAST_SCREENSHOT
+        if len(self._functions_graph_gui.function_nodes_gui) == 0:
+            _LAST_SCREENSHOT = None
+            return
         last_hello_imgui_image = hello_imgui.final_app_window_screenshot()
         nodes_boundings = self._functions_graph_gui._get_node_screenshot_boundings()  # noqa
 
