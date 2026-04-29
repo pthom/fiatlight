@@ -17,7 +17,14 @@ Before implementing:
 
 **If you encounter an API in the codebase which is awkward to use**
 - Do not circumvent it with a hack. Instead, surface the issue and ask for clarification or improvement.
-- The same goes for code smells or patterns that seem out of place. Don't just "make it work" - stop implementing, then communicate the underlying problem so it can be addressed properly in collaboration with the user.
+- The same goes for code smells or patterns that seem out of place. Don't just "make it work" - stop implementing,
+  then communicate the underlying problem so it can be addressed properly in collaboration with the user.
+- This is **important**: we follow a trajectory where the codebase needs to become better and better.
+  So, when we encounter something that is awkward (a code, an architecture smell) and which makes our job difficult, it is a good time to surface it.
+  Then discuss with the user on how it could be improved to make the task at hand better, as well as all future developments a maintenance.
+  The user might discuss with you on how to improve the architecture (do provide some well thought advices), or he might decide to say that a workaround
+  is the way to follow. But this needs to be discussed.
+
 
 **Before implementing a solution, wait for the user to finish evaluating alternatives.**
 
@@ -78,6 +85,29 @@ For multi-step tasks, state a brief plan:
 ```
 
 Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
+
+## 5. Debug from data, not from theory
+
+**A single well-placed log is worth ten speculative fixes.**
+
+- Before changing code to fix a bug, observe the actual values at the suspected fault site. Don't assume what a function returns — log it.
+- If your fix doesn't work on the first try, stop coding and add observation. A second failed attempt without new data means you don't yet understand the bug.
+- Choose log sites that will distinguish between the leading hypotheses. If you have two competing theories, log the values that would differ between them.
+
+## 5a. Stop after two
+
+After **two failed attempts** to fix a bug, stop coding and write down — for the user, or for yourself — what you've tried, why each failed, and what data would distinguish the remaining hypotheses. Resist the third speculative patch. The third patch usually leaks into the fourth, and by then the original problem is buried under fix-of-fix code.
+
+
+## 6. Comments document the code, not the journey
+
+Code comments explain what a future reader needs to know to safely modify the code. They do **not** narrate development history.
+
+- ✅ "Function X reroutes Y through a transform — value here is in canvas coords, not screen."
+- ❌ "We had a bug where this returned the wrong value, then we tried Z, then we discovered…"
+
+War stories belong in commit messages and PR descriptions; the code stays clean.
+
 
 # Fiatlight-specific notes
 
@@ -143,7 +173,7 @@ palette popup via `FunctionInfo.first_compatible_input/output` (UX filter).
 
 ## The canvas rule
 
-**Never display GUI widgets while inside `ed.begin / ed.end`** (the
+**Never display bare (i.e outside of  node) GUI widgets while inside `ed.begin / ed.end`** (the
 `imgui_node_editor` canvas). The canvas's zoom transform is incompatible
 with ImGui windows / child windows / popups. Two correct paths:
 
@@ -155,9 +185,12 @@ with ImGui windows / child windows / popups. Two correct paths:
    for the palette popup. `imgui.open_popup` / `begin_popup` calls live
    *outside* the `ed.begin/end` pair, so no `suspend()` / `resume()` needed.
 
-When in doubt, don't reimplement what imgui does (tooltip positioning,
-auto-resize, viewport clip). If a lever you need isn't exposed, that's
-usually imgui telling you the seam is wrong.
+When you are inside ed.begin() / ed.end(), the canvas hacks all the coordinates (widgets windows, including the mouse coordinates),
+so that they are in canvas coordinates. It is possible suspend/resume that with the suspend()/resume() functions.
+Suspend and resume are not 100% safe based on Pascal's experiments, so we may also avoid the problem by using the fiat_osd when possible
+(i.e. deferred gui lambdas that will run after ed.end()).
+
+
 
 ## Cross-package patterns
 
