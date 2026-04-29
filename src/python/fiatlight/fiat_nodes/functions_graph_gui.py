@@ -43,8 +43,8 @@ class _PendingDragSpawn:
 
 class FunctionsGraphGui:
     # Palette popup geometry (em units, scaled by hello_imgui.em_size).
-    _PALETTE_POPUP_WIDTH_EM = 40
-    _PALETTE_POPUP_MAX_HEIGHT_EM = 35
+    _PALETTE_POPUP_WIDTH_EM = 50
+    _PALETTE_POPUP_HEIGHT_EM = 40
     _PALETTE_POPUP_ID = "##palette_popup"
 
     functions_graph: FunctionsGraph
@@ -482,15 +482,16 @@ class FunctionsGraphGui:
             imgui.open_popup(self._PALETTE_POPUP_ID)
             self._palette_popup_just_requested = False
 
-        # Force the popup width on appearance so the tag-checkbox grid wraps
-        # to a readable column count instead of stretching across the screen.
-        # (set_next_window_size_constraints alone is not enough — _gui_tags
-        # reads content_region_avail to pick its column count before the
-        # constraint can clamp the auto-grown popup.)
+        # Force both width AND height on appearance: the side-by-side body
+        # uses `imgui.get_content_region_avail()` to size the list/doc
+        # children, which only works when the popup itself has a known size.
+        # If we only forced width, the popup would auto-fit height to its
+        # content — but the content asks for "available height" → 0 → the
+        # children collapse and the popup shrinks to just the search strip.
         popup_w = hello_imgui.em_size(self._PALETTE_POPUP_WIDTH_EM)
-        max_h = hello_imgui.em_size(self._PALETTE_POPUP_MAX_HEIGHT_EM)
-        imgui.set_next_window_size(ImVec2(popup_w, 0), imgui.Cond_.appearing)
-        imgui.set_next_window_size_constraints(ImVec2(popup_w, 0), ImVec2(popup_w, max_h))
+        popup_h = hello_imgui.em_size(self._PALETTE_POPUP_HEIGHT_EM)
+        imgui.set_next_window_size(ImVec2(popup_w, popup_h), imgui.Cond_.appearing)
+        # imgui.set_next_window_size_constraints(ImVec2(popup_w, popup_h), ImVec2(popup_w, popup_h))
 
         spawned = False
         if imgui.begin_popup(self._PALETTE_POPUP_ID):

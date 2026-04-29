@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from enum import Enum
 
-from imgui_bundle import hello_imgui, imgui, imgui_ctx, imgui_md
+from imgui_bundle import hello_imgui, imgui, imgui_ctx, imgui_md, ImVec2
 
 from fiatlight.fiat_core import FunctionWithGui
 from fiatlight.fiat_widgets import fontawesome_6_ctx, icons_fontawesome_6
@@ -35,12 +35,18 @@ class PaletteFilter:
     - `search_text`: substring tokens matched against name / tags / doc.
     - `compatibility`: when set, restrict to functions that have at least one
       pin compatible with this dragged pin (set by the drag-from-pin popup).
+
+    `latched_fn` is the row whose docs the side panel currently shows.
+    Updated each frame a row is hovered; persists across frames so the user
+    can move the mouse into the doc panel and read/scroll without losing
+    the active function.
     """
 
     selected_tags: list[str] = field(default_factory=list)
     search_text: str = ""
     match_mode: TagMatchMode = TagMatchMode.AND
     compatibility: tuple[TypeLike, PinKind] | None = None
+    latched_fn: "FunctionInfo | None" = None
 
 
 @dataclass
@@ -271,15 +277,26 @@ def _gui_function_row(
     on_pick: Callable[[FunctionInfo], None],
     *,
     row_click_picks: bool,
-) -> None:
+    is_latched: bool = False,
+) -> bool:
+    """Render one row.
+
+    Returns True iff the row is hovered this frame — used by the popup body
+    to drive the doc panel. (In dock mode hover state is unused; the inline
+    tooltip below provides on-demand docs.)
+
+    `is_latched` (popup mode only): render the row as `selected` so the user
+    can see which row's docs are showing in the side panel.
+    """
+    hovered = False
     with imgui_ctx.push_obj_id(fn_info):
         if row_click_picks:
-            # Whole-row clickable (popup mode).
-            if imgui.selectable(fn_info.name, False)[0]:
+            # Whole-row clickable (popup mode); doc panel renders the doc.
+            if imgui.selectable(fn_info.name, is_latched)[0]:
                 on_pick(fn_info)
-            _draw_function_row_tooltip(fn_info)
+            hovered = imgui.is_item_hovered()
         else:
-            # Name + spring + "+" button (dock mode).
+            # Name + spring + "+" button (dock mode); inline tooltip on hover.
             with imgui_ctx.begin_horizontal("H"):
                 with fontawesome_6_ctx():
                     imgui.text(fn_info.name)
@@ -287,14 +304,23 @@ def _gui_function_row(
                     imgui.spring()
                     if imgui.button(icons_fontawesome_6.ICON_FA_SQUARE_PLUS):
                         on_pick(fn_info)
+    return hovered
 
 
 def _draw_function_row_tooltip(fn_info: FunctionInfo) -> None:
-    if not imgui.is_item_hovered():
-        return
+    """Inline imgui-managed tooltip used by the dock-side palette."""
     if not imgui.begin_item_tooltip():
         return
     imgui.dummy(hello_imgui.em_to_vec2(40, 0))
+    _render_function_doc_markdown(fn_info)
+    imgui.end_tooltip()
+
+
+def _render_function_doc_markdown(fn_info: FunctionInfo) -> None:
+    """Render the function's documentation block (header + body) as markdown.
+
+    Shared between the dock-side hover tooltip and the popup doc panel.
+    """
     md_str = f"""
     ## {fn_info.name}
 
@@ -308,7 +334,6 @@ def _draw_function_row_tooltip(fn_info: FunctionInfo) -> None:
             imgui_md.render_unindented(fn_info.doc)
         else:
             imgui.text_wrapped(fn_info.doc)
-    imgui.end_tooltip()
 
 
 def _gui_functions(
@@ -318,7 +343,13 @@ def _gui_functions(
     *,
     row_click_picks: bool,
 ) -> None:
-    """Render functions grouped by their primary (first) tag."""
+    """Render functions grouped by their primary (first) tag.
+
+    In popup mode (`row_click_picks=True`), updates `filt.latched_fn` to
+    the row currently being hovered. The latch persists across frames —
+    when the user moves the mouse into the side doc panel, the previously-
+    hovered function's docs stay visible, and the row stays highlighted.
+    """
     infos = _filter_fn_infos(palette, filt)
     if not infos:
         imgui.text_disabled("No matching functions")
@@ -334,7 +365,11 @@ def _gui_functions(
         header = f"{primary} ({len(group)})"
         if imgui.collapsing_header(header, flag_default_open):
             for fi in group:
-                _gui_function_row(fi, on_pick, row_click_picks=row_click_picks)
+                hovered = _gui_function_row(
+                    fi, on_pick, row_click_picks=row_click_picks, is_latched=(filt.latched_fn is fi)
+                )
+                if hovered:
+                    filt.latched_fn = fi
 
 
 def palette_gui_body(
@@ -344,6 +379,8 @@ def palette_gui_body(
     *,
     row_click_picks: bool = False,
     focus_search: bool = False,
+    show_doc_panel: bool = False,
+    list_width_ratio: float = 0.4,
 ) -> None:
     """Render the full palette body (search bar, tag chips, function list)
     into the current imgui window or popup. The caller owns `filt` so its
@@ -354,11 +391,53 @@ def palette_gui_body(
 
     `focus_search=True` (set on the first frame a popup opens) sends keyboard
     focus to the search input so the user can start typing immediately.
+
+    `show_doc_panel=True` lays out a documentation panel to the right of
+    the function list, showing the docs of the latched (last-hovered) row.
+    The side layout — rather than below the list — means the user can move
+    the mouse rightward into the doc panel without crossing other rows
+    (which would otherwise switch the latch). Same pattern as Dear ImGui
+    Explorer (code on the right, list on the left).
+
+    `list_width_ratio` is the fraction of the popup's content width given
+    to the function list; the doc panel takes the rest.
     """
-    with imgui_ctx.begin_vertical("V"):
-        _gui_search_and_match_mode(filt, focus_search=focus_search)
-        _gui_tags(palette, filt)
+    _gui_search_and_match_mode(filt, focus_search=focus_search)
+    _gui_tags(palette, filt)
+
+    if not show_doc_panel:
         _gui_functions(palette, filt, on_pick, row_click_picks=row_click_picks)
+        return
+
+    # Side-by-side: function list on the left, doc panel on the right.
+    avail = imgui.get_content_region_avail()
+    list_w = max(hello_imgui.em_size(15), avail.x * list_width_ratio)
+    if imgui.begin_child("##palette_fn_list", ImVec2(list_w, avail.y)):
+        _gui_functions(palette, filt, on_pick, row_click_picks=row_click_picks)
+    imgui.end_child()
+    imgui.same_line()
+    _gui_doc_panel(filt.latched_fn, ImVec2(0, avail.y))
+
+
+def _gui_doc_panel(fn_info: FunctionInfo | None, size: ImVec2) -> None:
+    """Side documentation panel. Visually distinct from the function list
+    (title strip + tinted background) so the user reads it as a separate
+    section."""
+    # Slightly darker bg so the panel reads as "another surface".
+    style = imgui.get_style()
+    base = style.color_(imgui.Col_.child_bg.value)
+    tinted = (base.x * 0.6, base.y * 0.6, base.z * 0.6, max(base.w, 0.6))
+    imgui.push_style_color(imgui.Col_.child_bg.value, tinted)
+    flags = imgui.ChildFlags_.borders.value
+    if imgui.begin_child("##palette_doc", size, child_flags=flags):
+        imgui.text_disabled("Documentation")
+        imgui.separator()
+        if fn_info is not None:
+            _render_function_doc_markdown(fn_info)
+        else:
+            imgui.text_disabled("Hover a function to see its documentation")
+    imgui.end_child()
+    imgui.pop_style_color()
 
 
 class FunctionPaletteGui:

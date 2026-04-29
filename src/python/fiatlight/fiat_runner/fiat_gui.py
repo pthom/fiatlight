@@ -263,6 +263,7 @@ class FiatGui:
                 on_pick_info,
                 row_click_picks=True,
                 focus_search=focus,
+                show_doc_panel=True,
             )
 
         self._functions_graph_gui.on_open_palette_popup = _open_palette_popup
