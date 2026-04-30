@@ -79,6 +79,11 @@ from examples.img_proc_playground.wrappers.transforms import (
     warpPerspective,
 )
 from examples.img_proc_playground.wrappers.effects import floodFill, pencilSketch
+from examples.img_proc_playground.wrappers.histogram import (
+    calcBackProject,
+    calcHist1D,
+    calcHist2D,
+)
 
 
 ALL_WRAPPERS = [
@@ -165,6 +170,10 @@ ALL_WRAPPERS = [
     # effects / segmentation
     pencilSketch,
     floodFill,
+    # histogram
+    calcHist1D,
+    calcHist2D,
+    calcBackProject,
 ]
 
 
