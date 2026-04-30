@@ -50,6 +50,11 @@ from examples.img_proc_playground.wrappers.geometry import (
     rotate,
 )
 from examples.img_proc_playground.wrappers.contours import drawContours, findContours
+from examples.img_proc_playground.wrappers.features import (
+    cornerHarris,
+    drawPoints,
+    goodFeaturesToTrack,
+)
 
 
 ALL_WRAPPERS = [
@@ -105,6 +110,10 @@ ALL_WRAPPERS = [
     # contours
     findContours,
     drawContours,
+    # features
+    goodFeaturesToTrack,
+    cornerHarris,
+    drawPoints,
 ]
 
 
