@@ -57,12 +57,19 @@ from examples.img_proc_playground.wrappers.features import (
     boundingRects,
     convexHulls,
     cornerHarris,
+    cornerSubPix,
     drawCircles,
+    drawEllipses,
     drawLines,
     drawPoints,
     drawRects,
+    drawRotatedRects,
+    fitEllipses,
     goodFeaturesToTrack,
+    matchTemplate,
+    minAreaRects,
     minEnclosingCircles,
+    minMaxLoc,
 )
 from examples.img_proc_playground.wrappers.transforms import (
     getAffineTransform,
@@ -71,6 +78,7 @@ from examples.img_proc_playground.wrappers.transforms import (
     warpAffine,
     warpPerspective,
 )
+from examples.img_proc_playground.wrappers.effects import floodFill, pencilSketch
 
 
 ALL_WRAPPERS = [
@@ -140,12 +148,23 @@ ALL_WRAPPERS = [
     minEnclosingCircles,
     convexHulls,
     approxPolyDPs,
+    minAreaRects,
+    fitEllipses,
+    drawRotatedRects,
+    drawEllipses,
+    cornerSubPix,
+    # template matching
+    matchTemplate,
+    minMaxLoc,
     # transforms
     getRotationMatrix2D,
     getAffineTransform,
     getPerspectiveTransform,
     warpAffine,
     warpPerspective,
+    # effects / segmentation
+    pencilSketch,
+    floodFill,
 ]
 
 

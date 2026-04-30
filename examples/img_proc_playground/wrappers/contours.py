@@ -6,6 +6,7 @@ import numpy as np
 
 import fiatlight as fl
 from fiatlight.fiat_kits.fiat_image import Contours, ContoursHierarchy, ImageU8
+from fiatlight.fiat_types import ColorRgb
 
 from examples.img_proc_playground.fiat_cv_enums import (
     ContourApproximation,
@@ -57,9 +58,6 @@ def findContours(
 
 
 @fl.with_fiat_attributes(
-    color_r__range=(0, 255),
-    color_g__range=(0, 255),
-    color_b__range=(0, 255),
     thickness__range=(-1, 10),
     contourIdx__range=(-1, 100),
     maxLevel__range=(0, 10),
@@ -69,9 +67,7 @@ def drawContours(
     image: ImageU8,
     contours: Contours,
     hierarchy: ContoursHierarchy | None = None,
-    color_r: int = 0,
-    color_g: int = 255,
-    color_b: int = 0,
+    color: ColorRgb = ColorRgb((0, 255, 0)),
     thickness: int = 2,
     contourIdx: int = -1,
     maxLevel: int = 0,
@@ -84,7 +80,7 @@ def drawContours(
     holes, …). Ignored when `contourIdx >= 0`.
 
     **Parameters:**
-    - `color_r`, `color_g`, `color_b`: stroke color (RGB, 0-255 each).
+    - `color`: stroke color (RGB).
     - `thickness`: stroke width in pixels. `-1` fills each contour.
     - `contourIdx`: index of a single contour to draw, or `-1` for all.
     - `maxLevel`: tree-depth cutoff (only used when drawing all contours).
@@ -98,7 +94,7 @@ def drawContours(
         out,
         contours,
         contourIdx,
-        (color_r, color_g, color_b),
+        tuple(color),
         thickness,
         cv2.LINE_8,
         hierarchy,

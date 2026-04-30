@@ -3,15 +3,20 @@ import cv2
 import numpy as np
 
 import fiatlight as fl
+from typing import NamedTuple
+
 from fiatlight.fiat_kits.fiat_image import (
     Circles2D,
     Contours,
     ImageU8,
     ImageU8_GRAY,
     Lines2D,
+    Point2D,
     Points2D,
     Rects2D,
+    RotatedRects2D,
 )
+from fiatlight.fiat_types import ColorRgb
 
 
 @fl.with_fiat_attributes(
@@ -101,9 +106,6 @@ def cornerHarris(
 
 
 @fl.with_fiat_attributes(
-    color_r__range=(0, 255),
-    color_g__range=(0, 255),
-    color_b__range=(0, 255),
     radius__range=(1, 20),
     thickness__range=(-1, 5),
     fiat_tags=["features", "drawing", "cv2.imgproc"],
@@ -111,9 +113,7 @@ def cornerHarris(
 def drawPoints(
     image: ImageU8,
     points: Points2D,
-    color_r: int = 0,
-    color_g: int = 255,
-    color_b: int = 0,
+    color: ColorRgb = ColorRgb((0, 255, 0)),
     radius: int = 4,
     thickness: int = 2,
 ) -> ImageU8:
@@ -123,7 +123,7 @@ def drawPoints(
     other `Points2D` source) over the source image.
 
     **Parameters:**
-    - `color_r`, `color_g`, `color_b`: marker color (RGB, 0-255 each).
+    - `color`: marker color (RGB).
     - `radius`: circle radius in pixels.
     - `thickness`: stroke width; `-1` fills the marker.
 
@@ -132,9 +132,9 @@ def drawPoints(
     **OpenCV docs:** [cv2.circle](https://docs.opencv.org/4.13.0/d6/d6e/group__imgproc__draw.html#gaf10604b069374903dbd0f0488cb43670)
     """
     out = np.ascontiguousarray(image).copy()
-    color = (color_r, color_g, color_b)
+    bgr = tuple(color)
     for x, y in points:
-        cv2.circle(out, (int(x), int(y)), radius, color, thickness)
+        cv2.circle(out, (int(x), int(y)), radius, bgr, thickness)
     return out  # type: ignore
 
 
@@ -179,18 +179,13 @@ def HoughLinesP(
 
 
 @fl.with_fiat_attributes(
-    color_r__range=(0, 255),
-    color_g__range=(0, 255),
-    color_b__range=(0, 255),
     thickness__range=(1, 10),
     fiat_tags=["features", "drawing", "cv2.imgproc"],
 )
 def drawLines(
     image: ImageU8,
     lines: Lines2D,
-    color_r: int = 0,
-    color_g: int = 255,
-    color_b: int = 0,
+    color: ColorRgb = ColorRgb((0, 255, 0)),
     thickness: int = 2,
 ) -> ImageU8:
     """Draw a line segment for each row of a `Lines2D` value.
@@ -198,18 +193,12 @@ def drawLines(
     **When to use:** Visualize the output of `HoughLinesP` (or any
     other `Lines2D` source) over the source image.
 
-    **Parameters:**
-    - `color_r`, `color_g`, `color_b`: stroke color (RGB, 0-255 each).
-    - `thickness`: stroke width in pixels.
-
-    **See also:** `HoughLinesP`, `drawContours`, `drawPoints`.
-
     **OpenCV docs:** [cv2.line](https://docs.opencv.org/4.13.0/d6/d6e/group__imgproc__draw.html#ga7078a9fae8c7e7d13d24dac2520ae4a2)
     """
     out = np.ascontiguousarray(image).copy()
-    color = (color_r, color_g, color_b)
+    bgr = tuple(color)
     for x1, y1, x2, y2 in lines:
-        cv2.line(out, (int(x1), int(y1)), (int(x2), int(y2)), color, thickness)
+        cv2.line(out, (int(x1), int(y1)), (int(x2), int(y2)), bgr, thickness)
     return out  # type: ignore
 
 
@@ -267,18 +256,13 @@ def HoughCircles(
 
 
 @fl.with_fiat_attributes(
-    color_r__range=(0, 255),
-    color_g__range=(0, 255),
-    color_b__range=(0, 255),
     thickness__range=(-1, 5),
     fiat_tags=["features", "drawing", "cv2.imgproc"],
 )
 def drawCircles(
     image: ImageU8,
     circles: Circles2D,
-    color_r: int = 0,
-    color_g: int = 255,
-    color_b: int = 0,
+    color: ColorRgb = ColorRgb((0, 255, 0)),
     thickness: int = 2,
     draw_centers: bool = True,
 ) -> ImageU8:
@@ -287,7 +271,7 @@ def drawCircles(
     **When to use:** Visualize the output of `HoughCircles`.
 
     **Parameters:**
-    - `color_r`, `color_g`, `color_b`: stroke color (RGB, 0-255 each).
+    - `color`: stroke color (RGB).
     - `thickness`: stroke width; `-1` fills.
     - `draw_centers`: also draw a small marker at each circle's center.
 
@@ -296,11 +280,11 @@ def drawCircles(
     **OpenCV docs:** [cv2.circle](https://docs.opencv.org/4.13.0/d6/d6e/group__imgproc__draw.html#gaf10604b069374903dbd0f0488cb43670)
     """
     out = np.ascontiguousarray(image).copy()
-    color = (color_r, color_g, color_b)
+    bgr = tuple(color)
     for cx, cy, r in circles:
-        cv2.circle(out, (int(cx), int(cy)), int(r), color, thickness)
+        cv2.circle(out, (int(cx), int(cy)), int(r), bgr, thickness)
         if draw_centers:
-            cv2.circle(out, (int(cx), int(cy)), 2, color, -1)
+            cv2.circle(out, (int(cx), int(cy)), 2, bgr, -1)
     return out  # type: ignore
 
 
@@ -383,18 +367,13 @@ def approxPolyDPs(
 
 
 @fl.with_fiat_attributes(
-    color_r__range=(0, 255),
-    color_g__range=(0, 255),
-    color_b__range=(0, 255),
     thickness__range=(-1, 5),
     fiat_tags=["features", "drawing", "cv2.imgproc"],
 )
 def drawRects(
     image: ImageU8,
     rects: Rects2D,
-    color_r: int = 0,
-    color_g: int = 255,
-    color_b: int = 0,
+    color: ColorRgb = ColorRgb((0, 255, 0)),
     thickness: int = 2,
 ) -> ImageU8:
     """Draw a rectangle for each row of a `Rects2D` value.
@@ -404,7 +383,202 @@ def drawRects(
     **OpenCV docs:** [cv2.rectangle](https://docs.opencv.org/4.13.0/d6/d6e/group__imgproc__draw.html#ga07d2f74cadcf8e305e810ce8eed13bc9)
     """
     out = np.ascontiguousarray(image).copy()
-    color = (color_r, color_g, color_b)
+    bgr = tuple(color)
     for x, y, w, h in rects:
-        cv2.rectangle(out, (int(x), int(y)), (int(x + w), int(y + h)), color, thickness)
+        cv2.rectangle(out, (int(x), int(y)), (int(x + w), int(y + h)), bgr, thickness)
     return out  # type: ignore
+
+
+# ---------------------------------------------------------------------------
+# Sub-pixel corner refinement
+# ---------------------------------------------------------------------------
+
+
+@fl.with_fiat_attributes(
+    win_size__range=(3, 21),
+    max_iter__range=(1, 100),
+    epsilon__range=(0.001, 1.0),
+    epsilon__slider_logarithmic=True,
+    fiat_tags=["features", "cv2.imgproc"],
+)
+def cornerSubPix(
+    image: ImageU8_GRAY,
+    points: Points2D,
+    win_size: int = 5,
+    max_iter: int = 30,
+    epsilon: float = 0.01,
+) -> Points2D:
+    """Refine integer corner locations to sub-pixel precision.
+
+    **When to use:** Improve `goodFeaturesToTrack` output before tracking
+    or geometric estimation.
+
+    **Parameters:**
+    - `win_size`: half-side of the search window (cv2 expects odd-sided
+      window of side `2*win_size + 1`).
+    - `max_iter`, `epsilon`: termination criteria.
+
+    **OpenCV docs:** [cv2.cornerSubPix](https://docs.opencv.org/4.13.0/dd/d1a/group__imgproc__feature.html#ga354e0d7c86d0d9da75de9b9701a9a87e)
+    """
+    if len(points) == 0:
+        return points
+    pts32 = points.astype(np.float32).reshape(-1, 1, 2).copy()
+    crit = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, max_iter, epsilon)
+    refined = cv2.cornerSubPix(image, pts32, (win_size, win_size), (-1, -1), crit)
+    return Points2D(refined.reshape(-1, 2).round().astype(np.int32))
+
+
+# ---------------------------------------------------------------------------
+# Per-contour rotated bounding box / ellipse fit
+# ---------------------------------------------------------------------------
+
+
+def _to_rotated_row(
+    rr: tuple[tuple[float, float], tuple[float, float], float],
+) -> tuple[float, float, float, float, float]:
+    (cx, cy), (w, h), angle = rr
+    return (float(cx), float(cy), float(w), float(h), float(angle))
+
+
+@fl.with_fiat_attributes(fiat_tags=["contours", "shape", "cv2.imgproc"])
+def minAreaRects(contours: Contours) -> RotatedRects2D:
+    """Per-contour minimum-area rotated bounding rectangle.
+
+    **When to use:** Reduce a contour to a tilted bounding box (better
+    fit than `boundingRects` for rotated objects). Output pairs with
+    `drawRotatedRects`.
+
+    **OpenCV docs:** [cv2.minAreaRect](https://docs.opencv.org/4.13.0/d3/dc0/group__imgproc__shape.html#ga3d476a3417130ae5154aea421ca7ead9)
+    """
+    if len(contours) == 0:
+        return RotatedRects2D(np.empty((0, 5), dtype=np.float32))
+    rows = [_to_rotated_row(cv2.minAreaRect(c)) for c in contours]
+    return RotatedRects2D(np.asarray(rows, dtype=np.float32))
+
+
+@fl.with_fiat_attributes(fiat_tags=["contours", "shape", "cv2.imgproc"])
+def fitEllipses(contours: Contours) -> RotatedRects2D:
+    """Per-contour best-fit ellipse (least-squares).
+
+    **When to use:** Fit an ellipse to a contour (each contour must
+    have at least 5 points; shorter contours are skipped). Output pairs
+    with `drawEllipses`.
+
+    **OpenCV docs:** [cv2.fitEllipse](https://docs.opencv.org/4.13.0/d3/dc0/group__imgproc__shape.html#gaf259efaad93098103d6c27b9e4900ffa)
+    """
+    rows = []
+    for c in contours:
+        if c.shape[0] < 5:
+            continue
+        rows.append(_to_rotated_row(cv2.fitEllipse(c)))
+    if not rows:
+        return RotatedRects2D(np.empty((0, 5), dtype=np.float32))
+    return RotatedRects2D(np.asarray(rows, dtype=np.float32))
+
+
+@fl.with_fiat_attributes(
+    thickness__range=(1, 5),
+    fiat_tags=["features", "drawing", "cv2.imgproc"],
+)
+def drawRotatedRects(
+    image: ImageU8,
+    rects: RotatedRects2D,
+    color: ColorRgb = ColorRgb((0, 255, 0)),
+    thickness: int = 2,
+) -> ImageU8:
+    """Draw each row of a `RotatedRects2D` as an oriented rectangle.
+
+    **OpenCV docs:** [cv2.boxPoints](https://docs.opencv.org/4.13.0/d3/dc0/group__imgproc__shape.html#gaf78d467e024b4d7936cf08397d17c6f5)
+    """
+    out = np.ascontiguousarray(image).copy()
+    bgr = tuple(color)
+    for cx, cy, w, h, angle in rects:
+        box = cv2.boxPoints(((float(cx), float(cy)), (float(w), float(h)), float(angle)))
+        cv2.polylines(out, [box.astype(np.int32)], True, bgr, thickness)
+    return out  # type: ignore
+
+
+@fl.with_fiat_attributes(
+    thickness__range=(-1, 5),
+    fiat_tags=["features", "drawing", "cv2.imgproc"],
+)
+def drawEllipses(
+    image: ImageU8,
+    ellipses: RotatedRects2D,
+    color: ColorRgb = ColorRgb((0, 255, 0)),
+    thickness: int = 2,
+) -> ImageU8:
+    """Draw each row of a `RotatedRects2D` as an ellipse (uses cv2.ellipse).
+
+    **OpenCV docs:** [cv2.ellipse](https://docs.opencv.org/4.13.0/d6/d6e/group__imgproc__draw.html#ga28b2267d35786f5f890ca167236cbc69)
+    """
+    out = np.ascontiguousarray(image).copy()
+    bgr = tuple(color)
+    for cx, cy, w, h, angle in ellipses:
+        cv2.ellipse(
+            out,
+            (int(round(float(cx))), int(round(float(cy)))),
+            (int(round(float(w) / 2)), int(round(float(h) / 2))),
+            float(angle),
+            0,
+            360,
+            bgr,
+            thickness,
+        )
+    return out  # type: ignore
+
+
+# ---------------------------------------------------------------------------
+# Template matching
+# ---------------------------------------------------------------------------
+
+
+class MinMaxLocResult(NamedTuple):
+    """Output of `minMaxLoc`: the global extrema of a single-channel image."""
+
+    min_val: float
+    max_val: float
+    min_loc: Point2D
+    max_loc: Point2D
+
+
+@fl.with_fiat_attributes(fiat_tags=["features", "template", "cv2.imgproc"])
+def matchTemplate(
+    image: ImageU8_GRAY,
+    template: ImageU8_GRAY,
+) -> ImageU8_GRAY:
+    """Slide `template` over `image` and produce a normalized score map.
+
+    **When to use:** Locate a known small pattern in a larger image.
+    The peak of the returned score map is the best match (use
+    `minMaxLoc` to extract it).
+
+    The cv2 output is float32; this wrapper normalizes to U8 for
+    display via `cv2.normalize`. For numerical use, call `cv2.matchTemplate`
+    directly.
+
+    Uses `cv2.TM_CCOEFF_NORMED` (a robust default).
+
+    **OpenCV docs:** [cv2.matchTemplate](https://docs.opencv.org/4.13.0/df/dfb/group__imgproc__object.html#ga586ebfb0a7fb604b35a23d85391329be)
+    """
+    score = cv2.matchTemplate(image, template, cv2.TM_CCOEFF_NORMED)
+    r = cv2.normalize(score, None, 0, 255, cv2.NORM_MINMAX).astype(np.uint8)
+    return r  # type: ignore
+
+
+@fl.with_fiat_attributes(fiat_tags=["features", "cv2.core"])
+def minMaxLoc(image: ImageU8_GRAY) -> MinMaxLocResult:
+    """Return the global min/max values and their locations in a single-channel image.
+
+    **When to use:** Locate the brightest/darkest pixel — typically the
+    peak of a score map produced by `matchTemplate`.
+
+    **OpenCV docs:** [cv2.minMaxLoc](https://docs.opencv.org/4.13.0/d2/de8/group__core__array.html#gab473bf2eb6d14ff97e89b355dac20707)
+    """
+    min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(image)
+    return MinMaxLocResult(
+        min_val=float(min_val),
+        max_val=float(max_val),
+        min_loc=Point2D(x=int(min_loc[0]), y=int(min_loc[1])),
+        max_loc=Point2D(x=int(max_loc[0]), y=int(max_loc[1])),
+    )

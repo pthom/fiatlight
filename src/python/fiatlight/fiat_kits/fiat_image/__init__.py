@@ -27,6 +27,9 @@ from .transform_matrix_types import Matrix2x3, Matrix3x3
 from .transform_matrix_gui import _register as _register_transform_matrices
 from .rects2d_types import Rects2D
 from .rects2d_gui import _register as _register_rects2d
+from .rotated_rects2d_types import RotatedRects2D
+from .rotated_rects2d_gui import _register as _register_rotated_rects2d
+from .point2d_type import Point2D  # registered via decorator at import time
 
 # Most of the features of fiatlight.fiat_image require OpenCV
 try:
@@ -57,6 +60,7 @@ def _register_factories() -> None:
     _register_circles2d()
     _register_transform_matrices()
     _register_rects2d()
+    _register_rotated_rects2d()
     if HAS_OPENCV:
         register_type(LutParams, LutParamsWithGui)
 
@@ -125,4 +129,8 @@ __all__ = [
     "Matrix3x3",
     # from rects2d_types
     "Rects2D",
+    # from rotated_rects2d_types
+    "RotatedRects2D",
+    # from point2d_type
+    "Point2D",
 ]
