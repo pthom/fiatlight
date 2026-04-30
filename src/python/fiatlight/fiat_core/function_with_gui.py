@@ -343,7 +343,7 @@ class FunctionWithGui:
                         """
                     )
             else:
-                if not self.has_param(param_name):
+                if not self.has_param(param_name) and not param_name.startswith("return_"):
                     raise FiatToGuiException(
                         f"""
                         FunctionWithGui({self.function_name}): custom attribute '{fiat_attribute}' is associated to a parameter {param_name} that does not exist!

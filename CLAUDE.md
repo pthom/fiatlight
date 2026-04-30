@@ -213,6 +213,17 @@ python -m pytest src/python/fiatlight/ \
     --ignore=src/python/fiatlight/tests_usability
 ```
 
+## Documentation
+
+User-facing docs live in `doc/`. Each tutorial/comparison page is a pair
+`<name>_source.md` (the editable markdown) + `<name>.ipynb` (the rendered
+notebook used by the book). **Never edit `.ipynb` files by hand** — they
+are regenerated from the `_source.md` files by
+`doc/scripts/generate_doc_notebooks.py`. Run that script after editing
+any `_source.md` (or after editing the in-tree API markdown like
+`fiat_core/function_with_gui.md`, which the same script also renders to
+`api_*.ipynb`). The list of files it processes lives inside the script.
+
 mypy is `strict=True` and is expected to be **0 errors**.
 Pre-commit hooks run ruff / ruff-format / utf-8-bom / no-tabs.
 Treat them as authoritative — don't bypass with `--no-verify`.

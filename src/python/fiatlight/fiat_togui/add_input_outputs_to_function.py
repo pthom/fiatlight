@@ -30,7 +30,8 @@ def _fn_outputs_with_gui(
         for idx_output, output_gui in enumerate(output_gui._inner_guis):
             output_fiat_attrs = get_output_fiat_attributes(fn_fiat_attributes, idx_output)
             output_gui.merge_fiat_attributes(output_fiat_attrs)
-            output_gui.label = f"Output {idx_output + 1}"
+            if output_gui.label is None:
+                output_gui.label = f"Output {idx_output + 1}"
             r.append(output_gui)
 
     return r
