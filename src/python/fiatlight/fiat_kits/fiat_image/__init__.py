@@ -23,6 +23,8 @@ from .lines2d_types import Lines2D
 from .lines2d_gui import _register as _register_lines2d
 from .circles2d_types import Circles2D
 from .circles2d_gui import _register as _register_circles2d
+from .transform_matrix_types import Matrix2x3, Matrix3x3
+from .transform_matrix_gui import _register as _register_transform_matrices
 
 # Most of the features of fiatlight.fiat_image require OpenCV
 try:
@@ -51,6 +53,7 @@ def _register_factories() -> None:
     _register_points2d()
     _register_lines2d()
     _register_circles2d()
+    _register_transform_matrices()
     if HAS_OPENCV:
         register_type(LutParams, LutParamsWithGui)
 
@@ -114,4 +117,7 @@ __all__ = [
     "Lines2D",
     # from circles2d_types
     "Circles2D",
+    # from transform_matrix_types
+    "Matrix2x3",
+    "Matrix3x3",
 ]

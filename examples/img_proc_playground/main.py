@@ -59,6 +59,11 @@ from examples.img_proc_playground.wrappers.features import (
     drawPoints,
     goodFeaturesToTrack,
 )
+from examples.img_proc_playground.wrappers.transforms import (
+    getRotationMatrix2D,
+    warpAffine,
+    warpPerspective,
+)
 
 
 ALL_WRAPPERS = [
@@ -122,6 +127,10 @@ ALL_WRAPPERS = [
     drawLines,
     HoughCircles,
     drawCircles,
+    # transforms
+    getRotationMatrix2D,
+    warpAffine,
+    warpPerspective,
 ]
 
 
