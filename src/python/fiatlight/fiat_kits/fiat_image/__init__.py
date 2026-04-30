@@ -30,6 +30,8 @@ from .rects2d_gui import _register as _register_rects2d
 from .rotated_rects2d_types import RotatedRects2D
 from .rotated_rects2d_gui import _register as _register_rotated_rects2d
 from .point2d_type import Point2D  # registered via decorator at import time
+from .rect2d_type import Rect2D  # registered via decorator at import time
+from .roi_picker import RoiPicker
 
 # Most of the features of fiatlight.fiat_image require OpenCV
 try:
@@ -133,4 +135,8 @@ __all__ = [
     "RotatedRects2D",
     # from point2d_type
     "Point2D",
+    # from rect2d_type
+    "Rect2D",
+    # from roi_picker
+    "RoiPicker",
 ]
