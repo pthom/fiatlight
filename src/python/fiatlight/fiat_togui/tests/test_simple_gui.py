@@ -1,5 +1,6 @@
 """Tests for `make_simple_gui` and `register_callbacks`."""
 
+import inspect
 from typing import NewType
 
 import pytest
@@ -24,11 +25,33 @@ class _Plain:
 
 
 def test_callback_field_set_matches_dataclass() -> None:
-    """Drift guard: kwargs allowlist must mirror AnyDataGuiCallbacks annotations."""
+    """Drift guard: internal field set must mirror AnyDataGuiCallbacks annotations."""
     declared = set(AnyDataGuiCallbacks.__annotations__.keys())
     assert _CALLBACK_FIELDS == declared, (
         f"missing in helper: {declared - _CALLBACK_FIELDS}, " f"extra in helper: {_CALLBACK_FIELDS - declared}"
     )
+
+
+def _signature_param_names(fn) -> set[str]:  # type: ignore[no-untyped-def]
+    return {name for name, p in inspect.signature(fn).parameters.items() if p.kind == inspect.Parameter.KEYWORD_ONLY}
+
+
+def test_make_simple_gui_signature_matches_callbacks() -> None:
+    """Drift guard: explicit kwargs must mirror AnyDataGuiCallbacks fields + helper extras."""
+    sig_params = _signature_param_names(make_simple_gui)
+    expected = _CALLBACK_FIELDS | {"default", "callbacks"}
+    assert sig_params == expected
+
+
+def test_register_callbacks_signature_matches_make_simple_gui() -> None:
+    """register_callbacks must accept the same kwargs as make_simple_gui."""
+    assert _signature_param_names(register_callbacks) == _signature_param_names(make_simple_gui)
+
+
+def test_unknown_kwarg_raises_typeerror() -> None:
+    """Python's keyword-only signature rejects unknown kwargs at runtime."""
+    with pytest.raises(TypeError, match="unexpected keyword"):
+        make_simple_gui(_Plain, totally_invented=lambda: None)  # type: ignore[call-arg]
 
 
 def test_kwargs_are_applied_to_callbacks() -> None:
@@ -36,11 +59,6 @@ def test_kwargs_are_applied_to_callbacks() -> None:
     gui = factory()
     assert gui.callbacks.present_str is not None
     assert gui.callbacks.present_str(_Plain()) == "P!"
-
-
-def test_unknown_kwarg_raises_typeerror() -> None:
-    with pytest.raises(TypeError, match="unknown callback"):
-        make_simple_gui(_Plain, totally_invented=lambda: None)
 
 
 def test_default_alias_targets_default_value_provider() -> None:

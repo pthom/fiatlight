@@ -17,7 +17,7 @@ def _edit_point(point: MyPoint3D) -> tuple[bool, MyPoint3D]:
     changed = False
     new_point = MyPoint3D(**point.model_dump())
 
-    imgui.text("Edit Point:")
+    imgui.text("My Edit Point:")
     imgui.set_next_item_width(100)
     c, new_x = imgui.input_float("X", new_point.x)
     if c:
