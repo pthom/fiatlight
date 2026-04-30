@@ -6,7 +6,7 @@ import cv2
 import numpy as np
 
 import fiatlight as fl
-from fiatlight.fiat_kits.fiat_image import ImageBgr, ImageU8, ImageU8_GRAY, Point2D
+from fiatlight.fiat_kits.fiat_image import ImageBgr, ImageU8, ImageU8_GRAY, Point2D, Rect2D
 from fiatlight.fiat_types import ColorRgb
 
 
@@ -87,4 +87,71 @@ def floodFill(
     else:
         new_val = tuple(int(c) for c in new_color)
     cv2.floodFill(out, mask, (seed.x, seed.y), new_val, (lo_diff,) * len(new_val), (up_diff,) * len(new_val))
+    return out  # type: ignore
+
+
+@fl.with_fiat_attributes(
+    iter_count__range=(1, 10),
+    invoke_async=True,
+    fiat_tags=["segmentation", "cv2.imgproc"],
+)
+def grabCut(
+    image: ImageBgr,
+    rect: Rect2D,
+    iter_count: int = 3,
+) -> ImageU8_GRAY:
+    """Foreground segmentation by GrabCut, seeded by a bounding rectangle.
+
+    **When to use:** Pull an object out of a photo when you can roughly
+    bbox it. Output is a binary mask: 255 inside foreground, 0 elsewhere.
+    Pair with `bitwise_and` against the source image to extract.
+
+    Slow on big images; this wrapper is `invoke_async`.
+
+    **Parameters:**
+    - `rect`: bounding box of the probable foreground object.
+    - `iter_count`: GrabCut iterations (more = slower + cleaner).
+
+    **OpenCV docs:** [cv2.grabCut](https://docs.opencv.org/4.13.0/d3/d47/group__imgproc__segmentation.html#ga909c1dda50efcbeaa3ce126be862b37f)
+    """
+    if rect.w < 2 or rect.h < 2:
+        return np.zeros(image.shape[:2], dtype=np.uint8)  # type: ignore
+    mask = np.zeros(image.shape[:2], dtype=np.uint8)
+    bgd_model = np.zeros((1, 65), dtype=np.float64)
+    fgd_model = np.zeros((1, 65), dtype=np.float64)
+    cv2.grabCut(
+        image,
+        mask,
+        (rect.x, rect.y, rect.w, rect.h),
+        bgd_model,
+        fgd_model,
+        iter_count,
+        cv2.GC_INIT_WITH_RECT,
+    )
+    out = np.where((mask == cv2.GC_FGD) | (mask == cv2.GC_PR_FGD), 255, 0).astype(np.uint8)
+    return out  # type: ignore
+
+
+@fl.with_fiat_attributes(fiat_tags=["segmentation", "cv2.imgproc"])
+def watershed(
+    image: ImageBgr,
+    markers: ImageU8_GRAY,
+) -> ImageU8_GRAY:
+    """Marker-based watershed segmentation.
+
+    **When to use:** Split touching objects when you can pre-mark seed
+    regions (e.g. via thresholding + connected-component labels mapped
+    to small marker regions). Output: per-pixel region label as U8
+    (clipped to 0-255; -1 boundary pixels become 255).
+
+    **Parameters:**
+    - `markers`: input marker image. Each non-zero pixel is treated as
+      a seed region label. Background should be labelled 1; unknown
+      regions 0.
+
+    **OpenCV docs:** [cv2.watershed](https://docs.opencv.org/4.13.0/d3/d47/group__imgproc__segmentation.html#ga3267243e4d3f95165d55a618c65ac6e1)
+    """
+    m32 = markers.astype(np.int32)
+    cv2.watershed(image, m32)
+    out = np.clip(m32, 0, 255).astype(np.uint8)
     return out  # type: ignore

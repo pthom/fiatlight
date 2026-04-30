@@ -78,11 +78,21 @@ from examples.img_proc_playground.wrappers.transforms import (
     warpAffine,
     warpPerspective,
 )
-from examples.img_proc_playground.wrappers.effects import floodFill, pencilSketch
+from examples.img_proc_playground.wrappers.effects import (
+    floodFill,
+    grabCut,
+    pencilSketch,
+    watershed,
+)
 from examples.img_proc_playground.wrappers.histogram import (
     calcBackProject,
     calcHist1D,
     calcHist2D,
+)
+from examples.img_proc_playground.wrappers.flow import calcOpticalFlowPyrLK
+from examples.img_proc_playground.wrappers.blobs import (
+    connectedComponents,
+    connectedComponentsWithStats,
 )
 
 
@@ -170,10 +180,17 @@ ALL_WRAPPERS = [
     # effects / segmentation
     pencilSketch,
     floodFill,
+    grabCut,
+    watershed,
     # histogram
     calcHist1D,
     calcHist2D,
     calcBackProject,
+    # tracking
+    calcOpticalFlowPyrLK,
+    # blobs / connected components
+    connectedComponents,
+    connectedComponentsWithStats,
 ]
 
 

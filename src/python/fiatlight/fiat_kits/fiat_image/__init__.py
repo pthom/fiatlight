@@ -32,6 +32,10 @@ from .rotated_rects2d_gui import _register as _register_rotated_rects2d
 from .point2d_type import Point2D  # registered via decorator at import time
 from .rect2d_type import Rect2D  # registered via decorator at import time
 from .roi_picker import RoiPicker
+from .label_image_types import LabelImage
+from .label_image_gui import _register as _register_label_image
+from .blob_stats_types import BlobStats
+from .blob_stats_gui import _register as _register_blob_stats
 
 # Most of the features of fiatlight.fiat_image require OpenCV
 try:
@@ -63,6 +67,8 @@ def _register_factories() -> None:
     _register_transform_matrices()
     _register_rects2d()
     _register_rotated_rects2d()
+    _register_label_image()
+    _register_blob_stats()
     if HAS_OPENCV:
         register_type(LutParams, LutParamsWithGui)
 
@@ -139,4 +145,8 @@ __all__ = [
     "Rect2D",
     # from roi_picker
     "RoiPicker",
+    # from label_image_types
+    "LabelImage",
+    # from blob_stats_types
+    "BlobStats",
 ]
