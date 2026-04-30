@@ -1,6 +1,12 @@
 How to create a fully customizable new widget.
 =============================================
 
+> **Before reaching for the skeleton:** if your type doesn't need
+> per-instance state (no zoom/pan cache, no save/load of GUI options),
+> use the lighter-weight `fl.register_callbacks(...)` / `fl.make_simple_gui(...)`
+> helpers — see https://pthom.github.io/fiatlight/manual-custom/. The skeleton below is for
+> types that genuinely need a class subclassing `AnyDataWithGui`.
+
 fiat_kit_skeleton
 -----------------
 

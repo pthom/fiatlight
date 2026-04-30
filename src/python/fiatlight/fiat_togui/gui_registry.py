@@ -6,7 +6,7 @@ from fiatlight.fiat_types.fiat_number_types import FloatInterval, IntInterval
 from fiatlight.fiat_core.any_data_with_gui import AnyDataWithGui
 from fiatlight.fiat_utils import docstring_first_line
 
-from typing import Any, Callable, Generic, List, Tuple, Type, TypeAlias
+from typing import Any, Callable, Generic, List, NewType, Tuple, Type, TypeAlias
 from enum import Enum
 from dataclasses import dataclass
 from types import NoneType
@@ -311,7 +311,14 @@ class GuiFactories:
         self.register_matcher_factory(matcher_function, factory, type_, new_type_doc)
 
     def register_type(self, type_: Type[Any], factory: GuiFactory[Any]) -> None:
-        """Registers a factory for a type (real type or NewType)."""
+        """Registers a factory for a type (real type or NewType).
+
+        NewType inputs auto-dispatch to `register_typing_new_type` so the
+        registry can still complain if the NewType is undocumented.
+        """
+        if isinstance(type_, NewType):
+            self.register_typing_new_type(type_, factory)
+            return
         full_typename = typename_utils.fully_qualified_typename(type_)
 
         def matcher_function(tested_typename: Typename) -> bool:

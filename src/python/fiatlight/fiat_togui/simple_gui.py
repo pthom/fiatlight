@@ -8,7 +8,7 @@ typos are caught by mypy + IDE autocomplete, not at runtime.
 See `_plans/anydatawithgui_ergonomics__spec.md` for the design rationale.
 """
 
-from typing import Any, Callable, NewType, cast
+from typing import Any, Callable, cast
 
 from fiatlight.fiat_core.any_data_with_gui import AnyDataWithGui
 from fiatlight.fiat_core.any_data_gui_callbacks import AnyDataGuiCallbacks
@@ -16,7 +16,7 @@ from fiatlight.fiat_types.base_types import FiatAttributes, JsonDict
 from fiatlight.fiat_types.function_types import BoolFunction, VoidFunction
 from fiatlight.fiat_types.typename_utils import TypeLike
 
-from .gui_registry import GuiFactory, register_type, register_typing_new_type
+from .gui_registry import GuiFactory, register_type
 
 
 # Mirror of AnyDataGuiCallbacks's attribute names. A unit test asserts
@@ -174,9 +174,8 @@ def register_callbacks(
 ) -> None:
     """Build a simple GUI for `type_` and register it in one shot.
 
-    Same kwargs as `make_simple_gui`; NewType inputs route through the
-    docstring-checking registration path so an undocumented NewType still
-    raises the same friendly error `register_typing_new_type` produces.
+    Same kwargs as `make_simple_gui`. NewType inputs auto-dispatch via
+    `register_type` to the docstring-checking path.
     """
     factory = make_simple_gui(
         type_,
@@ -202,10 +201,7 @@ def register_callbacks(
         clipboard_copy_possible=clipboard_copy_possible,
         callbacks=callbacks,
     )
-    if isinstance(type_, NewType):
-        register_typing_new_type(type_, factory)
-    else:
-        register_type(cast(type, type_), factory)
+    register_type(cast(type, type_), factory)
 
 
 __all__ = [

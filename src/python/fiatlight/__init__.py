@@ -39,7 +39,7 @@ from fiatlight.fiat_utils import (
 )
 from fiatlight.fiat_config import get_fiat_config
 from fiatlight.fiat_kits.fiat_image import imread_rgb
-from fiatlight.fiat_types import Error, Unspecified, Invalid, ErrorValue, UnspecifiedValue
+from fiatlight.fiat_types import Error, Unspecified, Invalid, ErrorValue, UnspecifiedValue, documented_newtype
 from imgui_bundle import hello_imgui
 
 
@@ -89,6 +89,7 @@ __all__ = [
     "base_model_with_gui_registration",
     "make_simple_gui",
     "register_callbacks",
+    "documented_newtype",
     "immediate_edit",
     "immedit",
     # from fiat_runner

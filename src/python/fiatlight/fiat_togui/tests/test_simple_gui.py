@@ -181,3 +181,55 @@ def test_register_callbacks_edit_able_type() -> None:
     assert isinstance(p, _MyPoint3D) and p.x == 0.0
     assert gui.callbacks.present_str is not None
     assert gui.callbacks.present_str(_MyPoint3D(1, 2, 3)) == "P(1, 2, 3)"
+
+
+# ---------------------------------------------------------------------------
+# Phase 2: register_type auto-dispatches NewType inputs
+# ---------------------------------------------------------------------------
+
+
+_AutoDispatchDocumentedNT = NewType("_AutoDispatchDocumentedNT", int)
+_AutoDispatchDocumentedNT.__doc__ = "Documented NewType for the auto-dispatch test."
+
+_AutoDispatchUndocumentedNT = NewType("_AutoDispatchUndocumentedNT", int)
+
+
+def test_register_type_auto_dispatches_documented_newtype() -> None:
+    """register_type with a NewType auto-dispatches to the NewType path."""
+    from fiatlight.fiat_togui.gui_registry import register_type as direct_register_type
+
+    factory = make_simple_gui(_AutoDispatchDocumentedNT, present_str=lambda v: "ok")
+    direct_register_type(_AutoDispatchDocumentedNT, factory)
+    typename = fully_qualified_typename(_AutoDispatchDocumentedNT)
+    assert gui_factories().can_handle_typename(typename)
+
+
+def test_register_type_auto_dispatches_undocumented_newtype_rejected() -> None:
+    """register_type with an undocumented NewType raises via the auto-dispatch."""
+    from fiatlight.fiat_togui.gui_registry import register_type as direct_register_type
+
+    factory = make_simple_gui(_AutoDispatchUndocumentedNT, present_str=lambda v: "x")
+    with pytest.raises(ValueError, match="docstring"):
+        direct_register_type(_AutoDispatchUndocumentedNT, factory)
+
+
+# ---------------------------------------------------------------------------
+# Phase 3a: documented_newtype helper
+# ---------------------------------------------------------------------------
+
+
+def test_documented_newtype_carries_docstring() -> None:
+    from fiatlight.fiat_types.typename_utils import documented_newtype
+
+    nt = documented_newtype("MyDocNT", int, "Some documented NewType.")
+    assert nt.__doc__ == "Some documented NewType."
+
+
+def test_documented_newtype_works_with_register_callbacks() -> None:
+    """A documented_newtype-built type registers without the manual __doc__ assignment."""
+    from fiatlight.fiat_types.typename_utils import documented_newtype
+
+    nt = documented_newtype("MyDocNT2", int, "Another doc.")
+    register_callbacks(nt, present_str=lambda v: f"v={v}")
+    typename = fully_qualified_typename(nt)
+    assert gui_factories().can_handle_typename(typename)

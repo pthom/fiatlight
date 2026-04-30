@@ -143,8 +143,28 @@ def base_and_qualified_typename(type_: TypeLike) -> str:
         return f"{basename} ({full_typename})"
 
 
+def documented_newtype(name: str, tp: Any, doc: str) -> Any:
+    """Create a typing.NewType with a real docstring in one expression.
+
+    `typing.NewType("X", T)` does not carry a docstring through; the
+    fiatlight registry insists every registered NewType has one. This
+    helper combines the NewType + `.__doc__ = ...` assignment so the
+    pattern is one line at the call site.
+
+    `tp` is annotated `Any` because `typing.NewType` itself accepts any
+    type expression (concrete classes, NewType, Union, generic aliases
+    like `list[np.ndarray]`).
+    """
+    # mypy insists NewType's first argument be a literal string;
+    # this helper exists precisely to wrap that call dynamically.
+    nt = NewType(name, tp)  # type: ignore[misc]
+    nt.__doc__ = doc
+    return nt
+
+
 __all__ = [
     "base_typename",
     "fully_qualified_typename",
     "base_and_qualified_typename",
+    "documented_newtype",
 ]

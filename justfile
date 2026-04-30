@@ -21,6 +21,12 @@ doc_build_pdf:
 doc_serve:
     cd doc && jupyter-book start
 
+# Serve the notebooks
+[group('docs')]
+doc_notebook_edit:
+    cd doc && jupyter notebook
+
+
 # Serve the built static HTML
 [group('docs')]
 doc_serve_static:
