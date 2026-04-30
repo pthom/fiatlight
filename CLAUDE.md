@@ -145,6 +145,14 @@ Source: `src/python/fiatlight/`. Layered, depending downward:
 Tests live next to code at `<package>/tests/test_*.py`.
 Examples / demos / sandbox / `tests_usability` are interactive.
 
+`src/python/fiatlight/tests_usability/usability_*.py` is where the user
+keeps small, hand-run scripts that exercise a feature end-to-end in the
+GUI (one script per feature, e.g. `usability_output_tuple.py`). When a
+new feature warrants a visual smoke check, add a `usability_<topic>.py`
+script there rather than wiring it into `sandbox_tmp.py` (which is
+scratch). These scripts are excluded from `pytest` (`--ignore=...
+tests_usability`) — they exist to be launched manually.
+
 `examples/*/fiat_settings/*.json` are **runtime state** (saved graph,
 window positions). Never include them in feature commits.
 

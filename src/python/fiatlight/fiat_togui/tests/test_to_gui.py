@@ -5,7 +5,7 @@ from fiatlight.fiat_types import UnspecifiedValue, ErrorValue
 from fiatlight import FunctionWithGui
 from fiatlight.fiat_types import FiatAttributes
 
-from typing import Tuple, Optional, NewType
+from typing import Tuple, Optional, NewType, NamedTuple
 import typing
 
 
@@ -199,6 +199,48 @@ def test_any_function_to_function_with_gui_two_outputs_old_style() -> None:
 
     add_mult_gui = FunctionWithGui(add_mult)
     assert len(add_mult_gui._outputs_with_gui) == 2
+
+
+class _NTIntAndStr(NamedTuple):
+    quantity: int
+    name: str
+
+
+class _NTCalcResult(NamedTuple):
+    sum: int
+    product: int
+
+
+def test_named_tuple_type() -> None:
+    from fiatlight.fiat_togui.tuple_with_gui import TupleWithGui
+    from fiatlight.fiat_togui.primitives_gui import IntWithGui
+    from fiatlight.fiat_togui.str_with_gui import StrWithGui
+
+    gui = to_gui._any_type_to_gui_impl(_NTIntAndStr, NO_FIAT_ATTRIBUTES)
+    assert isinstance(gui, TupleWithGui)
+    assert len(gui._inner_guis) == 2
+    assert isinstance(gui._inner_guis[0], IntWithGui)
+    assert isinstance(gui._inner_guis[1], StrWithGui)
+    # Field names propagate as labels
+    assert gui._inner_guis[0].label == "quantity"
+    assert gui._inner_guis[1].label == "name"
+
+
+def test_named_tuple_function_outputs() -> None:
+    def calc(a: int, b: int = 2) -> _NTCalcResult:
+        return _NTCalcResult(sum=a + b, product=a * b)
+
+    calc_gui = FunctionWithGui(calc)
+    # Splits into two output pins, each labelled with the field name
+    assert len(calc_gui._outputs_with_gui) == 2
+    assert calc_gui._outputs_with_gui[0].data_with_gui.label == "sum"
+    assert calc_gui._outputs_with_gui[1].data_with_gui.label == "product"
+
+    # Values flow through correctly (NamedTuple is a tuple subclass)
+    calc_gui._inputs_with_gui[0].data_with_gui.value = 3
+    calc_gui.invoke()
+    assert calc_gui._outputs_with_gui[0].data_with_gui.value == 5
+    assert calc_gui._outputs_with_gui[1].data_with_gui.value == 6
 
 
 def test_function_with_optional_param() -> None:

@@ -107,15 +107,27 @@ def _any_list_type_to_gui_impl(type_: Type[List[Any]], fiat_attributes: FiatAttr
 
 
 def _any_tuple_type_to_gui_impl(
-    element_types: tuple[type, ...], fiat_attributes: FiatAttributes
+    element_types: tuple[type, ...],
+    fiat_attributes: FiatAttributes,
+    field_names: tuple[str, ...] | None = None,
 ) -> AnyDataWithGui[Any]:
     """Handle tuple types."""
     from fiatlight.fiat_togui.tuple_with_gui import TupleWithGui
 
     empty_fiat_attrs = FiatAttributes({})
     element_guis_tuple = tuple(_any_type_to_gui_impl(element_type, empty_fiat_attrs) for element_type in element_types)
-    tuple_gui = TupleWithGui(element_guis_tuple, fiat_attributes)
+    tuple_gui = TupleWithGui(element_guis_tuple, fiat_attributes, field_names=field_names)
     return tuple_gui
+
+
+def _is_typed_named_tuple(type_: Any) -> bool:
+    """True for `typing.NamedTuple` subclasses (typed). Excludes legacy `collections.namedtuple` (untyped)."""
+    return (
+        isclass(type_)
+        and issubclass(type_, tuple)
+        and hasattr(type_, "_fields")
+        and bool(getattr(type_, "__annotations__", None))
+    )
 
 
 def _any_type_to_gui_impl(
@@ -144,6 +156,12 @@ def _any_type_to_gui_impl(
     elif typing.get_origin(type_) is tuple:
         element_types = typing.get_args(type_)
         return _any_tuple_type_to_gui_impl(element_types, fiat_attributes)
+
+    elif _is_typed_named_tuple(type_):
+        field_names = type_._fields
+        annotations = type_.__annotations__
+        field_types = tuple(annotations[name] for name in field_names)
+        return _any_tuple_type_to_gui_impl(field_types, fiat_attributes, field_names=field_names)
 
     elif hasattr(type_, "__supertype__"):  # Check if it's a NewType
         return _any_new_type_to_gui_impl(type_, fiat_attributes)

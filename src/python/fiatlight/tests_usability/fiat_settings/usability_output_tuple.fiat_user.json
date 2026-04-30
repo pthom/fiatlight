@@ -1,0 +1,186 @@
+{
+    "user_inputs": {
+        "functions_nodes": {
+            "calc_tuple": {
+                "a": {
+                    "name": "a",
+                    "data": {
+                        "type": "Primitive",
+                        "value": 1
+                    }
+                },
+                "b": {
+                    "name": "b",
+                    "data": {
+                        "type": "Primitive",
+                        "value": 4
+                    }
+                }
+            },
+            "calc_named_tuple": {
+                "a": {
+                    "name": "a",
+                    "data": {
+                        "type": "Primitive",
+                        "value": 0
+                    }
+                },
+                "b": {
+                    "name": "b",
+                    "data": {
+                        "type": "Primitive",
+                        "value": 4
+                    }
+                }
+            }
+        }
+    },
+    "gui_options": {
+        "calc_tuple": {
+            "function_node_with_gui": {
+                "_inputs_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_outputs_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_doc_expanded": {
+                    "inside_node": false,
+                    "focused": true
+                },
+                "fiat_tuning_expanded": {
+                    "inside_node": false,
+                    "focused": true
+                },
+                "_internal_state_gui_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_function_node": {
+                    "inputs": {
+                        "a": {
+                            "cb_options": {},
+                            "expanded": true
+                        },
+                        "b": {
+                            "cb_options": {},
+                            "expanded": true
+                        }
+                    },
+                    "outputs": {
+                        "0": {
+                            "cb_options": {},
+                            "expanded": true
+                        },
+                        "1": {
+                            "cb_options": {},
+                            "expanded": true
+                        }
+                    }
+                },
+                "_backup_expanded_states": {
+                    "inside_node": null,
+                    "focused": null
+                },
+                "_focused_function_visible": false
+            },
+            "function_node": {
+                "inputs": {
+                    "a": {
+                        "cb_options": {},
+                        "expanded": true
+                    },
+                    "b": {
+                        "cb_options": {},
+                        "expanded": true
+                    }
+                },
+                "outputs": {
+                    "0": {
+                        "cb_options": {},
+                        "expanded": true
+                    },
+                    "1": {
+                        "cb_options": {},
+                        "expanded": true
+                    }
+                }
+            }
+        },
+        "calc_named_tuple": {
+            "function_node_with_gui": {
+                "_inputs_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_outputs_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_doc_expanded": {
+                    "inside_node": false,
+                    "focused": true
+                },
+                "fiat_tuning_expanded": {
+                    "inside_node": false,
+                    "focused": true
+                },
+                "_internal_state_gui_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_function_node": {
+                    "inputs": {
+                        "a": {
+                            "cb_options": {},
+                            "expanded": true
+                        },
+                        "b": {
+                            "cb_options": {},
+                            "expanded": true
+                        }
+                    },
+                    "outputs": {
+                        "0": {
+                            "cb_options": {},
+                            "expanded": true
+                        },
+                        "1": {
+                            "cb_options": {},
+                            "expanded": true
+                        }
+                    }
+                },
+                "_backup_expanded_states": {
+                    "inside_node": null,
+                    "focused": null
+                },
+                "_focused_function_visible": false
+            },
+            "function_node": {
+                "inputs": {
+                    "a": {
+                        "cb_options": {},
+                        "expanded": true
+                    },
+                    "b": {
+                        "cb_options": {},
+                        "expanded": true
+                    }
+                },
+                "outputs": {
+                    "0": {
+                        "cb_options": {},
+                        "expanded": true
+                    },
+                    "1": {
+                        "cb_options": {},
+                        "expanded": true
+                    }
+                }
+            }
+        }
+    }
+}

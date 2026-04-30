@@ -22,7 +22,12 @@ class TupleWithGui(AnyDataWithGui[tuple[Any, ...]]):
         # ------------------------------------------------------------------------------------------------------------------
         """
 
-    def __init__(self, inner_guis: tuple[AnyDataWithGui[Any], ...], fiat_attributes: FiatAttributes) -> None:
+    def __init__(
+        self,
+        inner_guis: tuple[AnyDataWithGui[Any], ...],
+        fiat_attributes: FiatAttributes,
+        field_names: tuple[str, ...] | None = None,
+    ) -> None:
         # Constructing a tuple type for all _inner_guis
         types = tuple(inner_gui._type for inner_gui in inner_guis)
         tuple_type = cast(Tuple[tuple(types)], tuple)  # type: ignore
@@ -31,7 +36,10 @@ class TupleWithGui(AnyDataWithGui[tuple[Any, ...]]):
 
         # We set the _can_set_unspecified_or_default to False for all parameters
         for i, inner_gui in enumerate(inner_guis):
-            inner_gui.label = f"{i} ({inner_gui.datatype_basename()})"
+            if field_names is not None:
+                inner_gui.label = field_names[i]
+            else:
+                inner_gui.label = f"{i} ({inner_gui.datatype_basename()})"
             inner_gui._can_set_unspecified_or_default = False
             inner_gui.label_color = self._member_label_color()
 
