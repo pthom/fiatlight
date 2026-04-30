@@ -53,13 +53,20 @@ from examples.img_proc_playground.wrappers.contours import drawContours, findCon
 from examples.img_proc_playground.wrappers.features import (
     HoughCircles,
     HoughLinesP,
+    approxPolyDPs,
+    boundingRects,
+    convexHulls,
     cornerHarris,
     drawCircles,
     drawLines,
     drawPoints,
+    drawRects,
     goodFeaturesToTrack,
+    minEnclosingCircles,
 )
 from examples.img_proc_playground.wrappers.transforms import (
+    getAffineTransform,
+    getPerspectiveTransform,
     getRotationMatrix2D,
     warpAffine,
     warpPerspective,
@@ -127,8 +134,16 @@ ALL_WRAPPERS = [
     drawLines,
     HoughCircles,
     drawCircles,
+    # contour-derived primitives
+    boundingRects,
+    drawRects,
+    minEnclosingCircles,
+    convexHulls,
+    approxPolyDPs,
     # transforms
     getRotationMatrix2D,
+    getAffineTransform,
+    getPerspectiveTransform,
     warpAffine,
     warpPerspective,
 ]

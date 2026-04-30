@@ -3,7 +3,15 @@ import cv2
 import numpy as np
 
 import fiatlight as fl
-from fiatlight.fiat_kits.fiat_image import Circles2D, ImageU8, ImageU8_GRAY, Lines2D, Points2D
+from fiatlight.fiat_kits.fiat_image import (
+    Circles2D,
+    Contours,
+    ImageU8,
+    ImageU8_GRAY,
+    Lines2D,
+    Points2D,
+    Rects2D,
+)
 
 
 @fl.with_fiat_attributes(
@@ -293,4 +301,110 @@ def drawCircles(
         cv2.circle(out, (int(cx), int(cy)), int(r), color, thickness)
         if draw_centers:
             cv2.circle(out, (int(cx), int(cy)), 2, color, -1)
+    return out  # type: ignore
+
+
+# ---------------------------------------------------------------------------
+# Per-contour primitive shapes
+# ---------------------------------------------------------------------------
+
+
+@fl.with_fiat_attributes(fiat_tags=["contours", "shape", "cv2.imgproc"])
+def boundingRects(contours: Contours) -> Rects2D:
+    """Per-contour axis-aligned bounding rectangle.
+
+    **When to use:** Reduce a contour list to one bbox per contour for
+    quick visualization or filtering by size. Output pairs with `drawRects`.
+
+    **OpenCV docs:** [cv2.boundingRect](https://docs.opencv.org/4.13.0/d3/dc0/group__imgproc__shape.html#ga103fcbda2f540f3ef1c042d6a9b35ac7)
+    """
+    if len(contours) == 0:
+        return Rects2D(np.empty((0, 4), dtype=np.int32))
+    rows = [cv2.boundingRect(c) for c in contours]
+    return Rects2D(np.asarray(rows, dtype=np.int32))
+
+
+@fl.with_fiat_attributes(fiat_tags=["contours", "shape", "cv2.imgproc"])
+def minEnclosingCircles(contours: Contours) -> Circles2D:
+    """Per-contour minimum enclosing circle.
+
+    **When to use:** Reduce a contour list to one circle per contour
+    (smallest circle that fully contains the contour). Output pairs with
+    `drawCircles`.
+
+    **OpenCV docs:** [cv2.minEnclosingCircle](https://docs.opencv.org/4.13.0/d3/dc0/group__imgproc__shape.html#ga8ce13c24081bbc7151e9326f412190f1)
+    """
+    if len(contours) == 0:
+        return Circles2D(np.empty((0, 3), dtype=np.int32))
+    rows = []
+    for c in contours:
+        (cx, cy), r = cv2.minEnclosingCircle(c)
+        rows.append((int(round(cx)), int(round(cy)), int(round(r))))
+    return Circles2D(np.asarray(rows, dtype=np.int32))
+
+
+@fl.with_fiat_attributes(fiat_tags=["contours", "shape", "cv2.imgproc"])
+def convexHulls(contours: Contours) -> Contours:
+    """Per-contour convex hull.
+
+    **When to use:** Smooth-out concavities; useful before shape analysis
+    where only the outer envelope matters.
+
+    **OpenCV docs:** [cv2.convexHull](https://docs.opencv.org/4.13.0/d3/dc0/group__imgproc__shape.html#ga014b28e56cb8854c0de4a211cb2be656)
+    """
+    return Contours([cv2.convexHull(c) for c in contours])
+
+
+@fl.with_fiat_attributes(
+    epsilon__range=(0.1, 50.0),
+    epsilon__slider_logarithmic=True,
+    fiat_tags=["contours", "shape", "cv2.imgproc"],
+)
+def approxPolyDPs(
+    contours: Contours,
+    epsilon: float = 3.0,
+    closed: bool = True,
+) -> Contours:
+    """Per-contour Douglas-Peucker polygon simplification.
+
+    **When to use:** Reduce contour vertex count while staying within
+    `epsilon` pixels of the original curve. Higher `epsilon` = coarser
+    polygon (e.g. detect rectangles, triangles).
+
+    **Parameters:**
+    - `epsilon`: max distance (in pixels) between original curve and
+      approximation.
+    - `closed`: treat each contour as a closed polygon (typical for
+      contours from `findContours`).
+
+    **OpenCV docs:** [cv2.approxPolyDP](https://docs.opencv.org/4.13.0/d3/dc0/group__imgproc__shape.html#ga0012a5fdaea70b8a9970165d98722b4c)
+    """
+    return Contours([cv2.approxPolyDP(c, epsilon, closed) for c in contours])
+
+
+@fl.with_fiat_attributes(
+    color_r__range=(0, 255),
+    color_g__range=(0, 255),
+    color_b__range=(0, 255),
+    thickness__range=(-1, 5),
+    fiat_tags=["features", "drawing", "cv2.imgproc"],
+)
+def drawRects(
+    image: ImageU8,
+    rects: Rects2D,
+    color_r: int = 0,
+    color_g: int = 255,
+    color_b: int = 0,
+    thickness: int = 2,
+) -> ImageU8:
+    """Draw a rectangle for each row of a `Rects2D` value.
+
+    **When to use:** Visualize the output of `boundingRects`.
+
+    **OpenCV docs:** [cv2.rectangle](https://docs.opencv.org/4.13.0/d6/d6e/group__imgproc__draw.html#ga07d2f74cadcf8e305e810ce8eed13bc9)
+    """
+    out = np.ascontiguousarray(image).copy()
+    color = (color_r, color_g, color_b)
+    for x, y, w, h in rects:
+        cv2.rectangle(out, (int(x), int(y)), (int(x + w), int(y + h)), color, thickness)
     return out  # type: ignore
