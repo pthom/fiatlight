@@ -37,6 +37,37 @@ def resize(
     return r  # type: ignore
 
 
+@fl.with_fiat_attributes(fiat_tags=["geometry", "cv2.imgproc"])
+def pyrDown(image: ImageU8, borderType: BorderType = BorderType.BORDER_DEFAULT) -> ImageU8:
+    """Halve image size with a 5×5 Gaussian + 2× downsample.
+
+    **When to use:** Build a Gaussian pyramid, or quickly downscale by exactly
+    half with sensible smoothing. Faster than `resize(fx=0.5)` with
+    `INTER_AREA` and produces fewer aliasing artefacts.
+
+    **See also:** `pyrUp` (inverse), `resize`.
+
+    **OpenCV docs:** [cv2.pyrDown](https://docs.opencv.org/4.13.0/d4/d86/group__imgproc__filter.html#gaf9bba239dfca11654cb7f50f889fc2ff)
+    """
+    r = cv2.pyrDown(image, borderType=borderType.value)
+    return r  # type: ignore
+
+
+@fl.with_fiat_attributes(fiat_tags=["geometry", "cv2.imgproc"])
+def pyrUp(image: ImageU8, borderType: BorderType = BorderType.BORDER_DEFAULT) -> ImageU8:
+    """Double image size with a 2× upsample + 5×5 Gaussian smoothing.
+
+    **When to use:** Build a Laplacian pyramid, or upscale by exactly 2.
+    Smoother than `resize(fx=2)` with `INTER_NEAREST`/`INTER_LINEAR`.
+
+    **See also:** `pyrDown` (inverse), `resize`.
+
+    **OpenCV docs:** [cv2.pyrUp](https://docs.opencv.org/4.13.0/d4/d86/group__imgproc__filter.html#gada75b59bdaaca411ed6fee10085eb784)
+    """
+    r = cv2.pyrUp(image, borderType=borderType.value)
+    return r  # type: ignore
+
+
 @fl.with_fiat_attributes(fiat_tags=["geometry", "cv2.core"])
 def flip(image: ImageU8, flipCode: FlipCode = FlipCode.HORIZONTAL) -> ImageU8:
     """Mirror an image around an axis.

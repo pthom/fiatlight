@@ -27,7 +27,12 @@ from examples.img_proc_playground.wrappers.photo import (
 )
 from examples.img_proc_playground.wrappers.edges import Canny
 from examples.img_proc_playground.wrappers.morphology import dilate, erode, morphologyEx
-from examples.img_proc_playground.wrappers.threshold import threshold, adaptiveThreshold
+from examples.img_proc_playground.wrappers.threshold import (
+    adaptiveThreshold,
+    distanceTransform,
+    inRange,
+    threshold,
+)
 from examples.img_proc_playground.wrappers.compositing import (
     absdiff,
     addWeighted,
@@ -36,7 +41,14 @@ from examples.img_proc_playground.wrappers.compositing import (
     bitwise_or,
     bitwise_xor,
 )
-from examples.img_proc_playground.wrappers.geometry import copyMakeBorder, flip, resize, rotate
+from examples.img_proc_playground.wrappers.geometry import (
+    copyMakeBorder,
+    flip,
+    pyrDown,
+    pyrUp,
+    resize,
+    rotate,
+)
 from examples.img_proc_playground.wrappers.contours import drawContours, findContours
 
 
@@ -74,6 +86,8 @@ ALL_WRAPPERS = [
     # threshold
     threshold,
     adaptiveThreshold,
+    inRange,
+    distanceTransform,
     # compositing
     bitwise_and,
     bitwise_or,
@@ -83,6 +97,8 @@ ALL_WRAPPERS = [
     absdiff,
     # geometry
     resize,
+    pyrDown,
+    pyrUp,
     flip,
     rotate,
     copyMakeBorder,

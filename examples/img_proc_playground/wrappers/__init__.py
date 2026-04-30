@@ -31,7 +31,12 @@ from examples.img_proc_playground.wrappers.photo import (
 )
 from examples.img_proc_playground.wrappers.edges import Canny
 from examples.img_proc_playground.wrappers.morphology import dilate, erode, morphologyEx
-from examples.img_proc_playground.wrappers.threshold import threshold, adaptiveThreshold
+from examples.img_proc_playground.wrappers.threshold import (
+    adaptiveThreshold,
+    distanceTransform,
+    inRange,
+    threshold,
+)
 from examples.img_proc_playground.wrappers.compositing import (
     absdiff,
     addWeighted,
@@ -40,7 +45,14 @@ from examples.img_proc_playground.wrappers.compositing import (
     bitwise_or,
     bitwise_xor,
 )
-from examples.img_proc_playground.wrappers.geometry import copyMakeBorder, flip, resize, rotate
+from examples.img_proc_playground.wrappers.geometry import (
+    copyMakeBorder,
+    flip,
+    pyrDown,
+    pyrUp,
+    resize,
+    rotate,
+)
 
 
 def all_atomic_wrappers() -> List[Callable]:
@@ -77,6 +89,8 @@ def all_atomic_wrappers() -> List[Callable]:
         # threshold
         threshold,
         adaptiveThreshold,
+        inRange,
+        distanceTransform,
         # compositing
         bitwise_and,
         bitwise_or,
@@ -86,6 +100,8 @@ def all_atomic_wrappers() -> List[Callable]:
         absdiff,
         # geometry
         resize,
+        pyrDown,
+        pyrUp,
         flip,
         rotate,
         copyMakeBorder,
@@ -118,6 +134,8 @@ __all__ = [
     "morphologyEx",
     "threshold",
     "adaptiveThreshold",
+    "inRange",
+    "distanceTransform",
     "bitwise_and",
     "bitwise_or",
     "bitwise_xor",
@@ -125,6 +143,8 @@ __all__ = [
     "addWeighted",
     "absdiff",
     "resize",
+    "pyrDown",
+    "pyrUp",
     "flip",
     "rotate",
     "copyMakeBorder",

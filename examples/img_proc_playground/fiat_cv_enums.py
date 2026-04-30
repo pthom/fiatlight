@@ -188,6 +188,22 @@ class InterpolationFlag(Enum):
     INTER_LANCZOS4 = cv2.INTER_LANCZOS4
 
 
+class DistanceType(Enum):
+    """Distance metric used by `cv2.distanceTransform`."""
+
+    DIST_L1 = cv2.DIST_L1
+    DIST_L2 = cv2.DIST_L2
+    DIST_C = cv2.DIST_C
+
+
+class DistanceMaskSize(Enum):
+    """Mask size for `cv2.distanceTransform` (3 / 5 / DIST_MASK_PRECISE)."""
+
+    MASK_3 = cv2.DIST_MASK_3
+    MASK_5 = cv2.DIST_MASK_5
+    MASK_PRECISE = cv2.DIST_MASK_PRECISE
+
+
 class RetrievalMode(Enum):
     """Contour retrieval mode for `cv2.findContours`.
 
