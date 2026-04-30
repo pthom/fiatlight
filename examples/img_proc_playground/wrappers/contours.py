@@ -42,7 +42,7 @@ def findContours(
     - `mode`: which contours to keep (outermost only, flat list, or hierarchical).
     - `method`: how aggressively to compress straight segments.
 
-    **See also:** `drawContours`, `threshold`, `adaptive_threshold`.
+    **See also:** `drawContours`, `threshold`, `adaptiveThreshold`.
 
     **OpenCV docs:** [cv2.findContours](https://docs.opencv.org/4.13.0/d3/dc0/group__imgproc__shape.html#gadf1ad6a0b82947fa1fe3c3d497f260e0)
     """

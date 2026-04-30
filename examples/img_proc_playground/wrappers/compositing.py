@@ -72,7 +72,7 @@ def bitwise_not(image: ImageU8) -> ImageU8:
     gamma__range=(-128.0, 128.0),
     fiat_tags=["compositing", "cv2.core"],
 )
-def add_weighted(
+def addWeighted(
     image_a: ImageU8,
     image_b: ImageU8,
     alpha: float = 0.5,

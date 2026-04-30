@@ -28,7 +28,7 @@ def dilate(
     - `morph_shape`: shape of the structuring element.
     - `iterations`: number of times the dilation is applied.
 
-    **See also:** `erode` (opposite operation), `canny`.
+    **See also:** `erode` (opposite operation), `Canny`.
 
     **OpenCV docs:** [cv2.dilate](https://docs.opencv.org/4.13.0/d4/d86/group__imgproc__filter.html#ga4ff0f3318642c4f469d0e11f242f3b6c)
     """
@@ -72,7 +72,7 @@ def erode(
     iterations__range=(1, 10),
     fiat_tags=["morphology", "cv2.imgproc"],
 )
-def morphology_ex(
+def morphologyEx(
     image: ImageU8,
     op: MorphOp = MorphOp.MORPH_OPEN,
     kernel_size: int = 3,

@@ -12,7 +12,7 @@ from examples.img_proc_playground.fiat_cv_enums import ColorMap
 
 
 @fl.with_fiat_attributes(fiat_tags=["tone", "cv2.imgproc"])
-def equalize_hist(image: ImageU8_GRAY) -> ImageU8_GRAY:
+def equalizeHist(image: ImageU8_GRAY) -> ImageU8_GRAY:
     """Global histogram equalization on a grayscale image.
 
     **When to use:** Stretch contrast on a low-contrast image whose
@@ -28,36 +28,36 @@ def equalize_hist(image: ImageU8_GRAY) -> ImageU8_GRAY:
 
 
 @fl.with_fiat_attributes(
-    clip_limit__range=(0.5, 40.0),
-    tile_grid_size__range=(1, 32),
+    clipLimit__range=(0.5, 40.0),
+    tileGridSize__range=(1, 32),
     fiat_tags=["tone", "cv2.imgproc"],
 )
 def clahe(
     image: ImageU8_GRAY,
-    clip_limit: float = 2.0,
-    tile_grid_size: int = 8,
+    clipLimit: float = 2.0,
+    tileGridSize: int = 8,
 ) -> ImageU8_GRAY:
     """Contrast-Limited Adaptive Histogram Equalization on a grayscale image.
 
     **When to use:** Boost local contrast where lighting varies across the
-    image. Less prone to over-amplifying noise than plain `equalize_hist`.
+    image. Less prone to over-amplifying noise than plain `equalizeHist`.
 
     **Parameters:**
-    - `clip_limit`: clipping threshold for histogram bins. Higher = more
+    - `clipLimit`: clipping threshold for histogram bins. Higher = more
       aggressive contrast boost.
-    - `tile_grid_size`: side of the local tile grid (e.g. 8 → 8×8 tiles).
+    - `tileGridSize`: side of the local tile grid (e.g. 8 → 8×8 tiles).
 
-    **See also:** `equalize_hist`.
+    **See also:** `equalizeHist`.
 
     **OpenCV docs:** [cv2.createCLAHE](https://docs.opencv.org/4.13.0/d6/db6/classcv_1_1CLAHE.html)
     """
-    op = cv2.createCLAHE(clipLimit=clip_limit, tileGridSize=(tile_grid_size, tile_grid_size))
+    op = cv2.createCLAHE(clipLimit=clipLimit, tileGridSize=(tileGridSize, tileGridSize))
     r = op.apply(image)
     return r  # type: ignore
 
 
 @fl.with_fiat_attributes(fiat_tags=["color", "tone", "cv2.imgproc"])
-def apply_color_map(image: ImageU8_GRAY, colormap: ColorMap = ColorMap.VIRIDIS) -> ImageBgr:
+def applyColorMap(image: ImageU8_GRAY, colormap: ColorMap = ColorMap.VIRIDIS) -> ImageBgr:
     """Map a single-channel image to color via a built-in cv2 color map.
 
     **When to use:** Visualize a grayscale image (depth, heat, gradient
@@ -77,7 +77,7 @@ def apply_color_map(image: ImageU8_GRAY, colormap: ColorMap = ColorMap.VIRIDIS) 
     beta__range=(-128.0, 128.0),
     fiat_tags=["tone", "cv2.core"],
 )
-def convert_scale_abs(image: ImageU8, alpha: float = 1.0, beta: float = 0.0) -> ImageU8:
+def convertScaleAbs(image: ImageU8, alpha: float = 1.0, beta: float = 0.0) -> ImageU8:
     """Linear contrast / brightness adjustment: `|alpha*src + beta|` clipped to U8.
 
     **When to use:** Quick brightness / contrast tweak. `alpha > 1` boosts

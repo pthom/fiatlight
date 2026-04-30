@@ -20,7 +20,7 @@ def resize(
 ) -> ImageU8:
     """Resize an image by a per-axis scale factor.
 
-    **When to use:** Downscale before slow ops (bilateral filter on 4K) to
+    **When to use:** Downscale before slow ops (bilateralFilter on 4K) to
     keep the live-tuning loop responsive. Upscale for display.
 
     **Parameters:**
@@ -38,23 +38,23 @@ def resize(
 
 
 @fl.with_fiat_attributes(fiat_tags=["geometry", "cv2.core"])
-def flip(image: ImageU8, flip_code: FlipCode = FlipCode.HORIZONTAL) -> ImageU8:
+def flip(image: ImageU8, flipCode: FlipCode = FlipCode.HORIZONTAL) -> ImageU8:
     """Mirror an image around an axis.
 
     **Parameters:**
-    - `flip_code`: `HORIZONTAL` mirrors left-right, `VERTICAL` mirrors
+    - `flipCode`: `HORIZONTAL` mirrors left-right, `VERTICAL` mirrors
       top-bottom, `BOTH` is a 180° rotation.
 
     **See also:** `rotate`.
 
     **OpenCV docs:** [cv2.flip](https://docs.opencv.org/4.13.0/d2/de8/group__core__array.html#gaca7be533e3dac7feb70fc60635adf441)
     """
-    r = cv2.flip(image, flip_code.value)
+    r = cv2.flip(image, flipCode.value)
     return r  # type: ignore
 
 
 @fl.with_fiat_attributes(fiat_tags=["geometry", "cv2.core"])
-def rotate(image: ImageU8, rotate_code: RotateCode = RotateCode.ROTATE_90_CW) -> ImageU8:
+def rotate(image: ImageU8, rotateCode: RotateCode = RotateCode.ROTATE_90_CW) -> ImageU8:
     """Rotate an image by a multiple of 90°.
 
     **When to use:** Cheap, lossless quarter-turn rotation. For arbitrary
@@ -62,7 +62,7 @@ def rotate(image: ImageU8, rotate_code: RotateCode = RotateCode.ROTATE_90_CW) ->
 
     **OpenCV docs:** [cv2.rotate](https://docs.opencv.org/4.13.0/d2/de8/group__core__array.html#ga4ad01c0978b65c64cb8d8d04c4a2b6e9)
     """
-    r = cv2.rotate(image, rotate_code.value)
+    r = cv2.rotate(image, rotateCode.value)
     return r  # type: ignore
 
 
@@ -74,13 +74,13 @@ def rotate(image: ImageU8, rotate_code: RotateCode = RotateCode.ROTATE_90_CW) ->
     constant_value__range=(0, 255),
     fiat_tags=["geometry", "cv2.core"],
 )
-def copy_make_border(
+def copyMakeBorder(
     image: ImageU8,
     top: int = 10,
     bottom: int = 10,
     left: int = 10,
     right: int = 10,
-    border_type: BorderType = BorderType.BORDER_REFLECT_101,
+    borderType: BorderType = BorderType.BORDER_REFLECT_101,
     constant_value: int = 0,
 ) -> ImageU8:
     """Add a border around the image.
@@ -91,12 +91,12 @@ def copy_make_border(
 
     **Parameters:**
     - `top` / `bottom` / `left` / `right`: border size in pixels.
-    - `border_type`: how the new pixels are filled.
+    - `borderType`: how the new pixels are filled.
     - `constant_value`: only used with `BORDER_CONSTANT`.
 
     **OpenCV docs:** [cv2.copyMakeBorder](https://docs.opencv.org/4.13.0/d2/de8/group__core__array.html#ga2ac1049c2c3dd25c2b41bffe17658a36)
     """
     r = cv2.copyMakeBorder(
-        image, top, bottom, left, right, border_type.value, value=(constant_value, constant_value, constant_value)
+        image, top, bottom, left, right, borderType.value, value=(constant_value, constant_value, constant_value)
     )
     return r  # type: ignore

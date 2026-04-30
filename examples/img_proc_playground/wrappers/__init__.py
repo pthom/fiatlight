@@ -9,38 +9,38 @@ from typing import Callable, List
 from examples.img_proc_playground.wrappers.source import image_source, imread_rgb
 from examples.img_proc_playground.wrappers.color import color_convert
 from examples.img_proc_playground.wrappers.tone import (
-    apply_color_map,
+    applyColorMap,
     clahe,
-    convert_scale_abs,
-    equalize_hist,
+    convertScaleAbs,
+    equalizeHist,
 )
 from examples.img_proc_playground.wrappers.filter import (
-    bilateral_filter,
-    box_filter,
-    gaussian_blur,
-    laplacian,
-    median_blur,
-    scharr,
-    sobel,
+    GaussianBlur,
+    Laplacian,
+    Scharr,
+    Sobel,
+    bilateralFilter,
+    boxFilter,
+    medianBlur,
 )
 from examples.img_proc_playground.wrappers.photo import (
-    edge_preserving_filter,
-    fast_nl_means_denoising,
-    fast_nl_means_denoising_colored,
+    edgePreservingFilter,
+    fastNlMeansDenoising,
+    fastNlMeansDenoisingColored,
     stylization,
 )
-from examples.img_proc_playground.wrappers.edges import canny
-from examples.img_proc_playground.wrappers.morphology import dilate, erode, morphology_ex
-from examples.img_proc_playground.wrappers.threshold import threshold, adaptive_threshold
+from examples.img_proc_playground.wrappers.edges import Canny
+from examples.img_proc_playground.wrappers.morphology import dilate, erode, morphologyEx
+from examples.img_proc_playground.wrappers.threshold import threshold, adaptiveThreshold
 from examples.img_proc_playground.wrappers.compositing import (
     absdiff,
-    add_weighted,
+    addWeighted,
     bitwise_and,
     bitwise_not,
     bitwise_or,
     bitwise_xor,
 )
-from examples.img_proc_playground.wrappers.geometry import copy_make_border, flip, resize, rotate
+from examples.img_proc_playground.wrappers.geometry import copyMakeBorder, flip, resize, rotate
 
 
 def all_atomic_wrappers() -> List[Callable]:
@@ -51,44 +51,44 @@ def all_atomic_wrappers() -> List[Callable]:
         imread_rgb,
         # color / tone
         color_convert,
-        equalize_hist,
+        equalizeHist,
         clahe,
-        apply_color_map,
-        convert_scale_abs,
+        applyColorMap,
+        convertScaleAbs,
         # filter
-        gaussian_blur,
-        bilateral_filter,
-        median_blur,
-        box_filter,
-        sobel,
-        scharr,
-        laplacian,
+        GaussianBlur,
+        bilateralFilter,
+        medianBlur,
+        boxFilter,
+        Sobel,
+        Scharr,
+        Laplacian,
         # photo
-        fast_nl_means_denoising,
-        fast_nl_means_denoising_colored,
+        fastNlMeansDenoising,
+        fastNlMeansDenoisingColored,
         stylization,
-        edge_preserving_filter,
+        edgePreservingFilter,
         # edges
-        canny,
+        Canny,
         # morphology
         dilate,
         erode,
-        morphology_ex,
+        morphologyEx,
         # threshold
         threshold,
-        adaptive_threshold,
+        adaptiveThreshold,
         # compositing
         bitwise_and,
         bitwise_or,
         bitwise_xor,
         bitwise_not,
-        add_weighted,
+        addWeighted,
         absdiff,
         # geometry
         resize,
         flip,
         rotate,
-        copy_make_border,
+        copyMakeBorder,
     ]
 
 
@@ -97,35 +97,35 @@ __all__ = [
     "image_source",
     "imread_rgb",
     "color_convert",
-    "equalize_hist",
+    "equalizeHist",
     "clahe",
-    "apply_color_map",
-    "convert_scale_abs",
-    "gaussian_blur",
-    "bilateral_filter",
-    "median_blur",
-    "box_filter",
-    "sobel",
-    "scharr",
-    "laplacian",
-    "fast_nl_means_denoising",
-    "fast_nl_means_denoising_colored",
+    "applyColorMap",
+    "convertScaleAbs",
+    "GaussianBlur",
+    "bilateralFilter",
+    "medianBlur",
+    "boxFilter",
+    "Sobel",
+    "Scharr",
+    "Laplacian",
+    "fastNlMeansDenoising",
+    "fastNlMeansDenoisingColored",
     "stylization",
-    "edge_preserving_filter",
-    "canny",
+    "edgePreservingFilter",
+    "Canny",
     "dilate",
     "erode",
-    "morphology_ex",
+    "morphologyEx",
     "threshold",
-    "adaptive_threshold",
+    "adaptiveThreshold",
     "bitwise_and",
     "bitwise_or",
     "bitwise_xor",
     "bitwise_not",
-    "add_weighted",
+    "addWeighted",
     "absdiff",
     "resize",
     "flip",
     "rotate",
-    "copy_make_border",
+    "copyMakeBorder",
 ]

@@ -26,15 +26,15 @@ class ThresholdResult(NamedTuple):
     dst: ImageU8_GRAY
 
 
-def _block_size_validator(block_size: int) -> int:
-    """Adaptive threshold requires an odd `block_size` >= 3. Auto-correct
+def _block_size_validator(blockSize: int) -> int:
+    """Adaptive threshold requires an odd `blockSize` >= 3. Auto-correct
     to the nearest odd integer >= 3 — this is "obviously what the user meant"
     when they drag a slider through even values."""
-    if block_size < 3:
-        block_size = 3
-    if block_size % 2 == 0:
-        block_size += 1
-    return block_size
+    if blockSize < 3:
+        blockSize = 3
+    if blockSize % 2 == 0:
+        blockSize += 1
+    return blockSize
 
 
 @fl.with_fiat_attributes(
@@ -52,7 +52,7 @@ def threshold(
     """Apply a fixed-level threshold to a grayscale image.
 
     **When to use:** Quick binary segmentation when the foreground / background
-    split is roughly uniform across the image. Use `adaptive_threshold` instead
+    split is roughly uniform across the image. Use `adaptiveThreshold` instead
     when lighting varies across the frame.
 
     **Parameters:**
@@ -67,7 +67,7 @@ def threshold(
       OTSU / TRIANGLE picked one for you).
     - `dst`: the thresholded image.
 
-    **See also:** `adaptive_threshold` (per-pixel threshold), `canny`.
+    **See also:** `adaptiveThreshold` (per-pixel threshold), `Canny`.
 
     **OpenCV docs:** [cv2.threshold](https://docs.opencv.org/4.13.0/d7/d1b/group__imgproc__misc.html#gae8a4a146d1ca78c626a53577199e9c57)
     """
@@ -79,19 +79,19 @@ def threshold(
 
 
 @fl.with_fiat_attributes(
-    max_value__range=(0.0, 255.0),
-    block_size__range=(3, 51),
-    block_size__validator=_block_size_validator,
-    c__range=(-50.0, 50.0),
+    maxValue__range=(0.0, 255.0),
+    blockSize__range=(3, 51),
+    blockSize__validator=_block_size_validator,
+    C__range=(-50.0, 50.0),
     fiat_tags=["threshold", "cv2.imgproc"],
 )
-def adaptive_threshold(
+def adaptiveThreshold(
     image: ImageU8_GRAY,
-    max_value: float = 255.0,
-    method: AdaptiveMethod = AdaptiveMethod.ADAPTIVE_THRESH_GAUSSIAN_C,
-    type: AdaptiveThresholdType = AdaptiveThresholdType.THRESH_BINARY,
-    block_size: int = 11,
-    c: float = 2.0,
+    maxValue: float = 255.0,
+    adaptiveMethod: AdaptiveMethod = AdaptiveMethod.ADAPTIVE_THRESH_GAUSSIAN_C,
+    thresholdType: AdaptiveThresholdType = AdaptiveThresholdType.THRESH_BINARY,
+    blockSize: int = 11,
+    C: float = 2.0,
 ) -> ImageU8_GRAY:
     """Per-pixel threshold whose level depends on a local neighbourhood.
 
@@ -99,15 +99,15 @@ def adaptive_threshold(
     Robust where a single global threshold fails.
 
     **Parameters:**
-    - `max_value`: value assigned to pixels above the local threshold.
-    - `method`: how the local threshold is computed (mean or Gaussian-weighted).
-    - `type`: BINARY or BINARY_INV; other modes are not supported by cv2.
-    - `block_size`: side of the local neighbourhood. Must be odd, >= 3.
-    - `c`: constant subtracted from the local mean. Higher = stricter.
+    - `maxValue`: value assigned to pixels above the local threshold.
+    - `adaptiveMethod`: how the local threshold is computed (mean or Gaussian-weighted).
+    - `thresholdType`: BINARY or BINARY_INV; other modes are not supported by cv2.
+    - `blockSize`: side of the local neighbourhood. Must be odd, >= 3.
+    - `C`: constant subtracted from the local mean. Higher = stricter.
 
-    **See also:** `threshold` (global threshold), `gaussian_blur`.
+    **See also:** `threshold` (global threshold), `GaussianBlur`.
 
     **OpenCV docs:** [cv2.adaptiveThreshold](https://docs.opencv.org/4.13.0/d7/d1b/group__imgproc__misc.html#ga72b913f352e4a1b1b397736707afcde3)
     """
-    r = cv2.adaptiveThreshold(image, max_value, method.value, type.value, block_size, c)
+    r = cv2.adaptiveThreshold(image, maxValue, adaptiveMethod.value, thresholdType.value, blockSize, C)
     return r  # type: ignore
