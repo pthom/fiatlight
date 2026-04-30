@@ -1,4 +1,6 @@
 """Thresholding wrappers for the image-processing playground."""
+from typing import NamedTuple
+
 import fiatlight as fl
 from fiatlight.fiat_kits.fiat_image import ImageU8_GRAY
 
@@ -10,6 +12,18 @@ from examples.img_proc_playground.fiat_cv_enums import (
     AutoThresholdMethod,
     ThresholdMode,
 )
+
+
+class ThresholdResult(NamedTuple):
+    """Two-pin output of `threshold`: the resolved threshold value and the
+    thresholded image.
+
+    `used_thresh` equals the input `thresh` when `auto` is `NONE`, and the
+    automatically-computed level when `auto` is `OTSU` or `TRIANGLE`.
+    """
+
+    used_thresh: float
+    dst: ImageU8_GRAY
 
 
 def _block_size_validator(block_size: int) -> int:
@@ -34,7 +48,7 @@ def threshold(
     maxval: float = 255.0,
     mode: ThresholdMode = ThresholdMode.THRESH_BINARY,
     auto: AutoThresholdMethod = AutoThresholdMethod.NONE,
-) -> ImageU8_GRAY:
+) -> ThresholdResult:
     """Apply a fixed-level threshold to a grayscale image.
 
     **When to use:** Quick binary segmentation when the foreground / background
@@ -48,6 +62,11 @@ def threshold(
     - `auto`: optional automatic threshold-value computation (NONE / OTSU /
       TRIANGLE). Both auto methods require a single-channel 8-bit image.
 
+    **Outputs:**
+    - `used_thresh`: the threshold value cv2 actually applied (= `thresh` unless
+      OTSU / TRIANGLE picked one for you).
+    - `dst`: the thresholded image.
+
     **See also:** `adaptive_threshold` (per-pixel threshold), `canny`.
 
     **OpenCV docs:** [cv2.threshold](https://docs.opencv.org/4.13.0/d7/d1b/group__imgproc__misc.html#gae8a4a146d1ca78c626a53577199e9c57)
@@ -55,8 +74,8 @@ def threshold(
     flag = mode.value
     if auto is not AutoThresholdMethod.NONE:
         flag |= auto.value
-    _, r = cv2.threshold(image, thresh, maxval, flag)
-    return r  # type: ignore
+    used_thresh, r = cv2.threshold(image, thresh, maxval, flag)
+    return ThresholdResult(float(used_thresh), r)
 
 
 @fl.with_fiat_attributes(

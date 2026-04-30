@@ -37,7 +37,7 @@ from examples.img_proc_playground.wrappers.compositing import (
     bitwise_xor,
 )
 from examples.img_proc_playground.wrappers.geometry import copy_make_border, flip, resize, rotate
-from examples.img_proc_playground.wrappers.contours import draw_contours, find_contours
+from examples.img_proc_playground.wrappers.contours import drawContours, findContours
 
 
 ALL_WRAPPERS = [
@@ -87,8 +87,8 @@ ALL_WRAPPERS = [
     rotate,
     copy_make_border,
     # contours
-    find_contours,
-    draw_contours,
+    findContours,
+    drawContours,
 ]
 
 
