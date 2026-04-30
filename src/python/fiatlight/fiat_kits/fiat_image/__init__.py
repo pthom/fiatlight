@@ -15,6 +15,8 @@ from .image_types import (
 from .image_gui import ImageWithGui, ImagePresenterParams, image_source
 from .overlay_alpha_image import overlay_alpha_image
 from .image_to_from_file_gui import image_from_file, ImageToFileGui
+from .contours_types import Contours
+from .contours_gui import ContoursWithGui
 
 # Most of the features of fiatlight.fiat_image require OpenCV
 try:
@@ -36,9 +38,10 @@ except ImportError:
 
 def _register_factories() -> None:
     from .image_types import _register_image_type_factories
-    from fiatlight.fiat_togui.gui_registry import register_type
+    from fiatlight.fiat_togui.gui_registry import register_type, register_typing_new_type
 
     _register_image_type_factories()
+    register_typing_new_type(Contours, ContoursWithGui)
     if HAS_OPENCV:
         register_type(LutParams, LutParamsWithGui)
 
@@ -93,4 +96,7 @@ __all__ = [
     "CameraImageProviderGui",
     # from imread_rgb
     "imread_rgb",
+    # from contours_types / contours_gui
+    "Contours",
+    "ContoursWithGui",
 ]

@@ -186,3 +186,33 @@ class InterpolationFlag(Enum):
     INTER_CUBIC = cv2.INTER_CUBIC
     INTER_AREA = cv2.INTER_AREA
     INTER_LANCZOS4 = cv2.INTER_LANCZOS4
+
+
+class RetrievalMode(Enum):
+    """Contour retrieval mode for `cv2.findContours`.
+
+    Controls which contours are returned and how they relate to one another:
+    - **EXTERNAL**: only the outermost contours.
+    - **LIST**: all contours, no parent/child relationship.
+    - **CCOMP**: two-level hierarchy (outer + holes).
+    - **TREE**: full nested hierarchy.
+    """
+
+    RETR_EXTERNAL = cv2.RETR_EXTERNAL
+    RETR_LIST = cv2.RETR_LIST
+    RETR_CCOMP = cv2.RETR_CCOMP
+    RETR_TREE = cv2.RETR_TREE
+
+
+class ContourApproximation(Enum):
+    """Contour point compression for `cv2.findContours`.
+
+    - **NONE**: keep every boundary pixel.
+    - **SIMPLE**: collapse straight horizontal/vertical/diagonal segments to endpoints.
+    - **TC89_L1** / **TC89_KCOS**: Teh-Chin approximation variants.
+    """
+
+    CHAIN_APPROX_NONE = cv2.CHAIN_APPROX_NONE
+    CHAIN_APPROX_SIMPLE = cv2.CHAIN_APPROX_SIMPLE
+    CHAIN_APPROX_TC89_L1 = cv2.CHAIN_APPROX_TC89_L1
+    CHAIN_APPROX_TC89_KCOS = cv2.CHAIN_APPROX_TC89_KCOS
