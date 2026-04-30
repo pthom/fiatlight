@@ -51,7 +51,9 @@ from examples.img_proc_playground.wrappers.geometry import (
 )
 from examples.img_proc_playground.wrappers.contours import drawContours, findContours
 from examples.img_proc_playground.wrappers.features import (
+    HoughLinesP,
     cornerHarris,
+    drawLines,
     drawPoints,
     goodFeaturesToTrack,
 )
@@ -114,6 +116,8 @@ ALL_WRAPPERS = [
     goodFeaturesToTrack,
     cornerHarris,
     drawPoints,
+    HoughLinesP,
+    drawLines,
 ]
 
 

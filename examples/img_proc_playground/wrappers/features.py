@@ -3,7 +3,7 @@ import cv2
 import numpy as np
 
 import fiatlight as fl
-from fiatlight.fiat_kits.fiat_image import ImageU8, ImageU8_GRAY, Points2D
+from fiatlight.fiat_kits.fiat_image import ImageU8, ImageU8_GRAY, Lines2D, Points2D
 
 
 @fl.with_fiat_attributes(
@@ -127,4 +127,79 @@ def drawPoints(
     color = (color_r, color_g, color_b)
     for x, y in points:
         cv2.circle(out, (int(x), int(y)), radius, color, thickness)
+    return out  # type: ignore
+
+
+@fl.with_fiat_attributes(
+    rho__range=(1.0, 10.0),
+    theta__range=(0.001, 0.1),
+    threshold__range=(1, 500),
+    minLineLength__range=(0, 500),
+    maxLineGap__range=(0, 100),
+    fiat_tags=["features", "edges", "cv2.imgproc"],
+)
+def HoughLinesP(
+    image: ImageU8_GRAY,
+    rho: float = 1.0,
+    theta: float = np.pi / 180.0,
+    threshold: int = 80,
+    minLineLength: int = 30,
+    maxLineGap: int = 10,
+) -> Lines2D:
+    """Probabilistic Hough line-segment detector.
+
+    **When to use:** Find straight line segments in a binary edge map.
+    Pair with `Canny` or `threshold` to produce the input mask. Output
+    is a `Lines2D` value pairing naturally with `drawLines`.
+
+    **Parameters:**
+    - `rho`: distance resolution of the accumulator in pixels.
+    - `theta`: angular resolution in radians (default ≈ 1°).
+    - `threshold`: minimum number of votes to accept a line.
+    - `minLineLength`: shorter segments are rejected.
+    - `maxLineGap`: maximum allowed gap between collinear segments to
+      merge them.
+
+    **See also:** `Canny`, `drawLines`.
+
+    **OpenCV docs:** [cv2.HoughLinesP](https://docs.opencv.org/4.13.0/dd/d1a/group__imgproc__feature.html#ga8618180a5948286384e3b7ca02f6feeb)
+    """
+    raw = cv2.HoughLinesP(image, rho, theta, threshold, None, minLineLength, maxLineGap)
+    if raw is None:
+        return Lines2D(np.empty((0, 4), dtype=np.int32))
+    return Lines2D(raw.reshape(-1, 4).astype(np.int32))
+
+
+@fl.with_fiat_attributes(
+    color_r__range=(0, 255),
+    color_g__range=(0, 255),
+    color_b__range=(0, 255),
+    thickness__range=(1, 10),
+    fiat_tags=["features", "drawing", "cv2.imgproc"],
+)
+def drawLines(
+    image: ImageU8,
+    lines: Lines2D,
+    color_r: int = 0,
+    color_g: int = 255,
+    color_b: int = 0,
+    thickness: int = 2,
+) -> ImageU8:
+    """Draw a line segment for each row of a `Lines2D` value.
+
+    **When to use:** Visualize the output of `HoughLinesP` (or any
+    other `Lines2D` source) over the source image.
+
+    **Parameters:**
+    - `color_r`, `color_g`, `color_b`: stroke color (RGB, 0-255 each).
+    - `thickness`: stroke width in pixels.
+
+    **See also:** `HoughLinesP`, `drawContours`, `drawPoints`.
+
+    **OpenCV docs:** [cv2.line](https://docs.opencv.org/4.13.0/d6/d6e/group__imgproc__draw.html#ga7078a9fae8c7e7d13d24dac2520ae4a2)
+    """
+    out = np.ascontiguousarray(image).copy()
+    color = (color_r, color_g, color_b)
+    for x1, y1, x2, y2 in lines:
+        cv2.line(out, (int(x1), int(y1)), (int(x2), int(y2)), color, thickness)
     return out  # type: ignore
