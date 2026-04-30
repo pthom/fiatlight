@@ -10,6 +10,7 @@ from .gui_registry import (
     register_base_model,
     base_model_with_gui_registration,  # (decorator)
 )
+from .simple_gui import make_simple_gui, register_callbacks
 from .to_gui import (
     # ===============================
     # Convert a type or data to a GUI
@@ -38,6 +39,8 @@ __all__ = [
     "dataclass_with_gui_registration",
     "register_base_model",
     "base_model_with_gui_registration",
+    "make_simple_gui",
+    "register_callbacks",
     "any_type_to_gui",
     "to_data_with_gui",
     "_to_data_with_gui_impl",

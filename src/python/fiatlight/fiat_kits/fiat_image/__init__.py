@@ -16,9 +16,9 @@ from .image_gui import ImageWithGui, ImagePresenterParams, image_source
 from .overlay_alpha_image import overlay_alpha_image
 from .image_to_from_file_gui import image_from_file, ImageToFileGui
 from .contours_types import Contours, ContoursHierarchy
-from .contours_gui import ContoursWithGui, ContoursHierarchyWithGui
+from .contours_gui import _register as _register_contours
 from .points2d_types import Points2D
-from .points2d_gui import Points2DWithGui
+from .points2d_gui import _register as _register_points2d
 
 # Most of the features of fiatlight.fiat_image require OpenCV
 try:
@@ -40,12 +40,11 @@ except ImportError:
 
 def _register_factories() -> None:
     from .image_types import _register_image_type_factories
-    from fiatlight.fiat_togui.gui_registry import register_type, register_typing_new_type
+    from fiatlight.fiat_togui.gui_registry import register_type
 
     _register_image_type_factories()
-    register_typing_new_type(Contours, ContoursWithGui)
-    register_typing_new_type(ContoursHierarchy, ContoursHierarchyWithGui)
-    register_typing_new_type(Points2D, Points2DWithGui)
+    _register_contours()
+    _register_points2d()
     if HAS_OPENCV:
         register_type(LutParams, LutParamsWithGui)
 
@@ -100,12 +99,9 @@ __all__ = [
     "CameraImageProviderGui",
     # from imread_rgb
     "imread_rgb",
-    # from contours_types / contours_gui
+    # from contours_types
     "Contours",
     "ContoursHierarchy",
-    "ContoursWithGui",
-    "ContoursHierarchyWithGui",
-    # from points2d_types / points2d_gui
+    # from points2d_types
     "Points2D",
-    "Points2DWithGui",
 ]

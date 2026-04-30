@@ -23,6 +23,8 @@ from fiatlight.fiat_togui import (
     dataclass_with_gui_registration,
     register_base_model,
     base_model_with_gui_registration,
+    make_simple_gui,
+    register_callbacks,
     any_type_to_gui,
     to_data_with_gui,
     immediate_edit,
@@ -85,6 +87,8 @@ __all__ = [
     "dataclass_with_gui_registration",
     "register_base_model",
     "base_model_with_gui_registration",
+    "make_simple_gui",
+    "register_callbacks",
     "immediate_edit",
     "immedit",
     # from fiat_runner
