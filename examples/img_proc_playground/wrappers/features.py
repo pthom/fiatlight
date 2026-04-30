@@ -3,7 +3,7 @@ import cv2
 import numpy as np
 
 import fiatlight as fl
-from fiatlight.fiat_kits.fiat_image import ImageU8, ImageU8_GRAY, Lines2D, Points2D
+from fiatlight.fiat_kits.fiat_image import Circles2D, ImageU8, ImageU8_GRAY, Lines2D, Points2D
 
 
 @fl.with_fiat_attributes(
@@ -202,4 +202,95 @@ def drawLines(
     color = (color_r, color_g, color_b)
     for x1, y1, x2, y2 in lines:
         cv2.line(out, (int(x1), int(y1)), (int(x2), int(y2)), color, thickness)
+    return out  # type: ignore
+
+
+@fl.with_fiat_attributes(
+    dp__range=(1.0, 4.0),
+    minDist__range=(1.0, 500.0),
+    param1__range=(10.0, 500.0),
+    param2__range=(1.0, 200.0),
+    minRadius__range=(0, 500),
+    maxRadius__range=(0, 500),
+    fiat_tags=["features", "cv2.imgproc"],
+)
+def HoughCircles(
+    image: ImageU8_GRAY,
+    dp: float = 1.0,
+    minDist: float = 20.0,
+    param1: float = 100.0,
+    param2: float = 30.0,
+    minRadius: int = 0,
+    maxRadius: int = 0,
+) -> Circles2D:
+    """Hough circle detector (gradient method).
+
+    **When to use:** Find circular shapes in a grayscale image. Unlike
+    `HoughLinesP`, this works directly on the grayscale image — no
+    explicit edge map needed (it computes Canny internally using
+    `param1` as the high threshold).
+
+    **Parameters:**
+    - `dp`: inverse ratio of accumulator resolution to image resolution
+      (1 = same size, 2 = half).
+    - `minDist`: minimum center-to-center distance between detections.
+    - `param1`: high threshold passed to the internal Canny.
+    - `param2`: accumulator threshold for circle centers; lower = more
+      false positives.
+    - `minRadius`, `maxRadius`: radius bounds (0 disables).
+
+    **See also:** `drawCircles`, `HoughLinesP`.
+
+    **OpenCV docs:** [cv2.HoughCircles](https://docs.opencv.org/4.13.0/dd/d1a/group__imgproc__feature.html#ga47849c3be0d0406ad3ca45db65a25d2d)
+    """
+    raw = cv2.HoughCircles(
+        image,
+        cv2.HOUGH_GRADIENT,
+        dp,
+        minDist,
+        param1=param1,
+        param2=param2,
+        minRadius=minRadius,
+        maxRadius=maxRadius,
+    )
+    if raw is None:
+        return Circles2D(np.empty((0, 3), dtype=np.int32))
+    return Circles2D(raw.reshape(-1, 3).round().astype(np.int32))
+
+
+@fl.with_fiat_attributes(
+    color_r__range=(0, 255),
+    color_g__range=(0, 255),
+    color_b__range=(0, 255),
+    thickness__range=(-1, 5),
+    fiat_tags=["features", "drawing", "cv2.imgproc"],
+)
+def drawCircles(
+    image: ImageU8,
+    circles: Circles2D,
+    color_r: int = 0,
+    color_g: int = 255,
+    color_b: int = 0,
+    thickness: int = 2,
+    draw_centers: bool = True,
+) -> ImageU8:
+    """Draw a circle for each row of a `Circles2D` value.
+
+    **When to use:** Visualize the output of `HoughCircles`.
+
+    **Parameters:**
+    - `color_r`, `color_g`, `color_b`: stroke color (RGB, 0-255 each).
+    - `thickness`: stroke width; `-1` fills.
+    - `draw_centers`: also draw a small marker at each circle's center.
+
+    **See also:** `HoughCircles`, `drawPoints`.
+
+    **OpenCV docs:** [cv2.circle](https://docs.opencv.org/4.13.0/d6/d6e/group__imgproc__draw.html#gaf10604b069374903dbd0f0488cb43670)
+    """
+    out = np.ascontiguousarray(image).copy()
+    color = (color_r, color_g, color_b)
+    for cx, cy, r in circles:
+        cv2.circle(out, (int(cx), int(cy)), int(r), color, thickness)
+        if draw_centers:
+            cv2.circle(out, (int(cx), int(cy)), 2, color, -1)
     return out  # type: ignore
