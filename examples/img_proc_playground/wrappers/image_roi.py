@@ -10,17 +10,13 @@ from fiatlight.fiat_kits.fiat_image import Rect2D, Image
 def image_roi(img: Image, rect: Rect2D) -> Image:
     """Crop a rectangular region of interest from an image.
 
-    **When to use:** Extract a rectangular patch from an image, e.g. for
-    cropping or zooming into a specific area.
+    **When to use:** Extract a rectangular patch from an image, e.g. for cropping or zooming into a specific area.
 
     **Parameters:**
     - `img`: input image.
     - `rect`: rectangle specifying the ROI as (x, y, w, h).
 
-    **See also:** `resize` for scaling an image, `warpAffine` for more
-    general affine warps.
-
-    **OpenCV docs:** [cv2.getRotationMatrix2D](https://docs.opencv.org/4.13.0/da/d54/group__imgproc__transform.html#gafbbc470ce83812914a70abfb604f4326)
+    **Note:** This wrapper returns a copy of the ROI region (using numpy.copy).
     """
     shape = img.shape
     img_width, img_height = shape[0], shape[1]
