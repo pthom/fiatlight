@@ -927,18 +927,10 @@ class FunctionNodeGui:
         last_exception_message = self._function_node.function_with_gui.get_last_exception_message()
         if last_exception_message is None:
             return
-
-        min_exception_width = hello_imgui.em_size(30)
-        exception_width = min_exception_width
-        if self._node_size is not None:
-            exception_width = self._node_size.x - hello_imgui.em_size(2)
-            if exception_width < min_exception_width:
-                exception_width = min_exception_width
-        fiat_widgets.text_maybe_truncated(
-            "Exception:\n" + last_exception_message,
-            get_fiat_config().style.str_truncation.exceptions,
-            color=get_fiat_config().style.color_as_vec4(FiatColorType.ExceptionError),
-        )
+        with imgui_ctx.push_style_color(
+            imgui.Col_.text, get_fiat_config().style.color_as_vec4(FiatColorType.ExceptionError)
+        ):
+            imgui.text_wrapped("Exception:\n" + last_exception_message)
 
         # Raise the exception so that the user can debug it
         with fontawesome_6_ctx():
