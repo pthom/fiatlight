@@ -125,7 +125,7 @@ _IMAGE_POSSIBLE_ATTRIBUTES = _ImagePossibleAttributes()
 class ImagePresenter:
     # Cached image and channels
     image: Image
-    image_channels: Sequence[Image]
+    image_channels: Sequence[Image]  # filled on demand (when displaying channels)
     # Cache
     need_refresh_cache_per_view: CachePerImGuiView[bool]
     # User preferences below
@@ -194,11 +194,16 @@ class ImagePresenter:
         if "show_inspect_button" in fiat_attrs:
             self.show_inspect_button = fiat_attrs["show_inspect_button"]
 
+    def _fill_channels_if_needed(self) -> None:
+        if len(self.image_channels) > 0:
+            return
+        if len(self.image.shape) == 3 or len(self.image.shape) == 4:
+            self.image_channels = [np.ascontiguousarray(self.image[:, :, i]) for i in range(self.image.shape[2])]
+
     def set_image(self, image: Image) -> None:
         self.image = image
         self.need_refresh_cache_per_view.set_for_all_views(True)
-        if len(image.shape) == 3 or len(image.shape) == 4:
-            self.image_channels = [image[:, :, i] for i in range(image.shape[2])]  # type: ignore
+        self.image_channels = []  # will be filled on demand
 
     def _show_image_inspector_on_first_call(self) -> None:
         if not self.was_inspect_window_opened_on_first_log:
@@ -207,6 +212,7 @@ class ImagePresenter:
 
     def _gui_channels(self) -> None:
         need_refresh = self.need_refresh_cache_per_view.get_for_current_view()
+        self._fill_channels_if_needed()
         for i, image_channel in enumerate(self.image_channels):
             imgui.push_id(str(i))
             label = f"channel {i}"
