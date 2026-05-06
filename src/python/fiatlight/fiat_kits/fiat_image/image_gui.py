@@ -3,6 +3,7 @@ from fiatlight.fiat_types import JsonDict, ImagePath, FiatAttributes, Unspecifie
 from fiatlight.fiat_core import AnyDataWithGui, PossibleFiatAttributes
 from fiatlight.fiat_kits.fiat_image.image_types import Image, ImageU8
 from fiatlight.fiat_utils.cache_per_imgui_view import CachePerImGuiView
+from fiatlight.fiat_widgets import fiat_osd
 from imgui_bundle import immvision, imgui, ImVec2
 from imgui_bundle import portable_file_dialogs as pfd, hello_imgui
 
@@ -260,17 +261,45 @@ class ImagePresenter:
                 self._show_image_inspector_on_first_call()
                 _INSPECT_ID += 1
 
+    def _gui_zoom_group_button(self) -> None:
+        zoom_key = self.image_params.zoom_key
+        label = "Zoom group" if zoom_key == "z" else f"Zoom group: {zoom_key}"
+        if imgui.small_button(label):
+
+            def popup() -> None:
+                imgui.text("Images sharing a zoom group pan/zoom together.")
+                imgui.text('Default zoom group is "z".')
+                imgui.set_next_item_width(hello_imgui.em_size(8))
+                _, self.image_params.zoom_key = imgui.input_text("##zoom_key", self.image_params.zoom_key)
+                if imgui.button("Reset to default"):
+                    self.image_params.zoom_key = "z"
+
+            fiat_osd.set_popup_gui(popup)
+
     def gui(self) -> None:
         assert self.image is not None
         assert len(self.image.shape) > 0
         if len(self.image.shape) == 1:
             imgui.text("Image is 1D, cannot display")
             return
+
+        # first line: "Show channels" checkbox, and "Zoom group" button
         nb_channels = 1 if len(self.image.shape) == 2 else self.image.shape[2]
-        if nb_channels > 1:
-            _, self.show_channels = imgui.checkbox("Show channels", self.show_channels)
-            if self.show_channels:
-                _, self.channel_layout_vertically = imgui.checkbox("Vertical layout", self.channel_layout_vertically)
+        has_first_line = nb_channels > 1 or not self.only_display
+        if has_first_line:
+            imgui.begin_horizontal("##image_controls")
+            if nb_channels > 1:
+                _, self.show_channels = imgui.checkbox("Show channels", self.show_channels)
+                if self.show_channels:
+                    _, self.channel_layout_vertically = imgui.checkbox(
+                        "Vertical layout", self.channel_layout_vertically
+                    )
+            imgui.spring()
+            if not self.only_display:
+                self._gui_zoom_group_button()
+            imgui.end_horizontal()
+
+        # Image widget
         if self.show_channels and nb_channels > 1:
             self._gui_channels()
         else:
