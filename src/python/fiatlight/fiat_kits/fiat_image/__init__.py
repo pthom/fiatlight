@@ -31,7 +31,6 @@ from .rotated_rects2d_types import RotatedRects2D
 from .rotated_rects2d_gui import _register as _register_rotated_rects2d
 from .point2d_type import Point2D  # registered via decorator at import time
 from .rect2d_type import Rect2D  # registered via decorator at import time
-from .roi_picker import RoiPicker
 from .label_image_types import LabelImage
 from .label_image_gui import _register as _register_label_image
 from .blob_stats_types import BlobStats
@@ -143,8 +142,6 @@ __all__ = [
     "Point2D",
     # from rect2d_type
     "Rect2D",
-    # from roi_picker
-    "RoiPicker",
     # from label_image_types
     "LabelImage",
     # from blob_stats_types
