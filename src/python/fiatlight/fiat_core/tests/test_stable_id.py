@@ -46,12 +46,12 @@ def test_function_ref_refuses_functools_partial() -> None:
 
 
 def test_add_link_raises_on_ambiguous_name() -> None:
+    """Two nodes wrapping the same function share a function_name. String
+    addressing must raise rather than silently bind to one of them — the
+    error guides the caller to capture the FunctionNode handle returned by
+    add_function and pass that instead."""
     g = FunctionsGraph()
     g.add_function(_color_convert)
     g.add_function(_color_convert)
-    # The suffix scheme keeps the names distinct today (so no ambiguity),
-    # but if the suffix scheme is ever bypassed the resolver must surface
-    # the ambiguity with a clear message rather than silently picking one.
-    g.functions_nodes[1].function_with_gui.function_name = "_color_convert"
-    with pytest.raises(ValueError, match="resolves to 2 nodes"):
+    with pytest.raises(ValueError, match="2 nodes match"):
         g._function_node_with_name("_color_convert")

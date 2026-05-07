@@ -645,7 +645,12 @@ class FunctionsGraphGui:
     class _Serialization_Section:  # Dummy class to create a section in the IDE # noqa
         """
         # ======================================================================================================================
-        # Serialization — id-keyed workspace + session format (spec §6, §9).
+        # Two JSON files live side by side:
+        #   * the workspace — everything needed to reconstruct the graph the
+        #     user sees (nodes, links, values, per-pin GUI option blobs, node
+        #     positions, expand flags). Shareable between machines.
+        #   * the session — local view state (focused-mode visibility, and
+        #     eventually canvas viewport). Per installation, never shared.
         # ======================================================================================================================
         """
 
@@ -653,10 +658,13 @@ class FunctionsGraphGui:
 
     _WORKSPACE_VERSION = 1
     _SESSION_VERSION = 1
-    # Subset of FunctionNodeGui state that affects node geometry. Sliced
-    # here on save and re-applied on load; the `_function_node` block (per-pin
-    # GUI options) is carried separately in input_gui_options/output_gui_options
-    # and `_focused_function_visible` lives in the session file.
+    # Per-node FunctionNodeGui flags that affect how big the node draws.
+    # Saved alongside positions because they change layout, so a workspace
+    # opened on a second machine looks the same. `_focused_function_visible`
+    # is excluded — it's a transient view state that lives in the session
+    # file, not the shareable workspace. The `_function_node` block (per-pin
+    # GUI options) is excluded too: the same data is already saved at the
+    # workspace's `input_gui_options` / `output_gui_options` level.
     _WORKSPACE_EXPAND_FIELDS = (
         "_inputs_expanded",
         "_outputs_expanded",
@@ -667,9 +675,10 @@ class FunctionsGraphGui:
     )
 
     def save_workspace_to_json(self) -> JsonDict:
-        """Full workspace JSON: core data (topology, links, values, per-pin
-        GUI option blobs) + GUI-layer fields (position, expand_flags). See
-        spec §6 for the schema. Includes `version`."""
+        """Build the full workspace dict: the core data from FunctionsGraph
+        plus the GUI-layer fields each node carries (canvas position and
+        expand flags). The result is what gets written to
+        `<app>.fiat_workspace.json`."""
         core = self.functions_graph.save_workspace_core_to_json()
         nodes = core["nodes"]
         for fn_node_gui in self.function_nodes_gui:

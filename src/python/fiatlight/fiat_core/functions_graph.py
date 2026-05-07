@@ -161,14 +161,15 @@ class FunctionsGraph:
         pass
 
     def _add_function_with_gui(self, f_gui: FunctionWithGui, stable_id: str | None = None) -> FunctionNode:
-        # Identity is now stable_id-based (D5-A); duplicate function_names are
-        # allowed. Two `blur` nodes share their display name but have distinct
-        # stable_ids, so save/load keys never collide.
+        # Two nodes wrapping the same function are allowed and share their
+        # display name. They are distinguished by their stable_id, which is
+        # the key used everywhere persistent state lives.
         if stable_id is None:
             stable_id = self._next_stable_id()
         elif stable_id.startswith("n"):
-            # Keep the counter ahead of any explicitly-supplied id so future
-            # mints don't collide. Non-`n<int>` ids leave the counter alone.
+            # Keep the counter ahead of any explicitly-supplied id so a
+            # subsequent _next_stable_id() can't collide with what the loader
+            # just inserted. Non-`n<int>` ids (custom schemes) leave it alone.
             try:
                 n = int(stable_id[1:])
                 if n > self._stable_id_counter:
@@ -361,10 +362,38 @@ class FunctionsGraph:
         dst_input_name: str | None = None,
         src_output_idx: int = 0,
     ) -> None:
-        """Add a link between two nodes. Endpoints may be passed as a name
-        string (must resolve uniquely; D5-A raises on duplicate function
-        names), a FunctionNode handle (returned by `add_function`), a
-        FunctionWithGui, or the raw callable."""
+        """Connect a source function's output to a destination function's input.
+
+        Each endpoint can be addressed in any of these ways:
+
+        - **As a string**: matches the node's `label` (the display name) or,
+          failing that, the function's name. So if you wrote
+          `graph.add_function(cos, label="cos1")`, you can use `"cos1"`.
+          When the same function is added several times with the same label
+          (or no label), the string is ambiguous and `add_link` raises —
+          use a node handle instead (see below).
+        - **As a node handle**: the `FunctionNode` returned by
+          `add_function` / `add_gui_node` / etc. Always unambiguous, so this
+          is what to use when the same function appears twice in the graph.
+        - **As the original Python callable** or a `FunctionWithGui`
+          instance: matched by identity.
+
+        Examples:
+
+            n_a = graph.add_function(load_image)
+            n_b = graph.add_function(blur)
+            graph.add_link(n_a, n_b)
+            graph.add_link("load_image", "blur")     # equivalent
+
+            # Same function used twice — pass handles to disambiguate.
+            cos1 = graph.add_function(cos, label="cos1")
+            cos2 = graph.add_function(cos, label="cos2")
+            graph.add_link(cos1, cos2)
+            graph.add_link("cos1", "cos2")           # also works (label match)
+
+        `dst_input_name` defaults to the destination's first input name;
+        `src_output_idx` defaults to 0.
+        """
         src_function_node = self._function_node_with_name_or_is_function(src_function)
         dst_function_node = self._function_node_with_name_or_is_function(dst_function)
         self._add_link_from_function_nodes(
@@ -446,9 +475,11 @@ class FunctionsGraph:
     def _function_node_with_name_or_is_function(
         self, name_or_function: str | Function | FunctionWithGui | FunctionNode
     ) -> FunctionNode:
-        """Resolve a string, FunctionNode handle, FunctionWithGui, or raw
-        callable to the FunctionNode in this graph. The FunctionNode handle
-        is the D5-A escape hatch for the duplicate-function case."""
+        """Resolve any of the four endpoint forms accepted by `add_link`
+        (string, node handle, FunctionWithGui, raw callable) to a
+        FunctionNode in this graph. See `add_link` for the user-facing
+        contract; this method centralises the matching logic so all the
+        addressing forms behave consistently."""
         if isinstance(name_or_function, FunctionNode):
             if name_or_function in self.functions_nodes:
                 return name_or_function
@@ -485,19 +516,31 @@ class FunctionsGraph:
             else:
                 return candidate_nodes[0]
 
-    def _function_node_with_name(self, function_name: str) -> FunctionNode:
-        """Get the function with the unique name. Raises if no match or if multiple
-        nodes share that name (D5: `add_link` callers must disambiguate by passing a
-        node handle directly when the same function appears more than once)."""
-        matches = [fn for fn in self.functions_nodes if fn.function_with_gui.function_name == function_name]
-        if len(matches) == 0:
-            raise ValueError(f"No function with the name {function_name}")
-        if len(matches) > 1:
+    def _function_node_with_name(self, name_or_label: str) -> FunctionNode:
+        """Look up a node by string. Matches against the node's label
+        (typically the user-set display name) or, failing that, the
+        wrapped function's name.
+
+        A single node may match through both fields (default case: label
+        defaults to function_name) — that's still one match, not two. The
+        ambiguous case is when *different* nodes match the same string;
+        callers must pass a `FunctionNode` handle in that case (see the
+        `add_link` docstring for examples).
+        """
+        matches: List[FunctionNode] = []
+        for fn in self.functions_nodes:
+            if fn.function_with_gui.label == name_or_label or fn.function_with_gui.function_name == name_or_label:
+                matches.append(fn)
+        # A node can satisfy both predicates (label == function_name); dedup.
+        unique = list({id(fn): fn for fn in matches}.values())
+        if len(unique) == 0:
+            raise ValueError(f"No function node matches {name_or_label!r} (tried label and function_name).")
+        if len(unique) > 1:
             raise ValueError(
-                f"Name {function_name!r} resolves to {len(matches)} nodes; "
-                "pass a node handle (the FunctionNode returned by add_function) instead."
+                f"{len(unique)} nodes match {name_or_label!r}. Capture the FunctionNode "
+                "returned by add_function and pass that handle to add_link instead."
             )
-        return matches[0]
+        return unique[0]
 
     def shall_display_refresh_needed_label(self) -> bool:
         """Returns True if any function node shall display a "Refresh needed" label"""
@@ -517,12 +560,14 @@ class FunctionsGraph:
         pass
 
     def save_workspace_core_to_json(self) -> JsonDict:
-        """Core workspace data — id-keyed nodes + id-referenced links + per-pin
-        GUI option blobs + input values. No GUI-layer state (positions and
-        expand flags belong to FunctionsGraphGui.save_workspace_to_json).
+        """Serialize the parts of the workspace that don't depend on the GUI
+        layer: an id-keyed `nodes` dict carrying each function's identity,
+        input values, and per-pin GUI option blobs, plus a `links` list that
+        references nodes by stable id.
 
-        Caller is responsible for adding the top-level `version` and any
-        GUI-layer fields. See spec §6 for the full schema.
+        Positions and expand flags live in `FunctionsGraphGui` and are added
+        on top of this dict by `FunctionsGraphGui.save_workspace_to_json`.
+        The top-level `version` is also added by the caller.
         """
         nodes: JsonDict = {}
         for fn in self.functions_nodes:
@@ -559,14 +604,21 @@ class FunctionsGraph:
         *,
         rebuild_topology: bool = True,
     ) -> None:
-        """Rebuild from core workspace data. When ``rebuild_topology`` is
-        False (programmatic-mode loader path), nodes and links from
-        ``json_data`` are ignored — code is the source of truth — and only
-        per-node values + GUI option blobs are restored against the existing
-        nodes (matched by stable_id).
+        """Restore a graph from the core JSON written by
+        `save_workspace_core_to_json`.
 
-        Missing function refs and incompatible links are logged and skipped
-        per spec §11.
+        With ``rebuild_topology=True`` (the default, for graphs the user
+        edits in the GUI) the existing nodes/links are wiped and the saved
+        ones are recreated, looking each function up via
+        ``function_factory_from_ref``.
+
+        With ``rebuild_topology=False`` (programmatic graphs whose shape
+        comes from Python code), the existing nodes are kept; only their
+        values and GUI option blobs are restored, matched by stable_id.
+
+        Saved nodes whose function_ref is no longer registered are skipped
+        with a warning, and any link that touches a missing endpoint is
+        dropped — load is best-effort, never raises on a single bad node.
         """
         import logging
 
@@ -584,8 +636,6 @@ class FunctionsGraph:
                 except ValueError as e:
                     logging.warning(f"Workspace: skipping node {stable_id!r}: {e}")
                     continue
-                # Restore the saved function_name in case it carried a
-                # disambiguating suffix from the legacy scheme.
                 saved_name = node_data.get("function_name")
                 if saved_name:
                     f_gui.function_name = saved_name

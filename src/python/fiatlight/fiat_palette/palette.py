@@ -211,10 +211,11 @@ class FunctionPalette:
         return [fi for fi in infos if any(t in haystack(fi) for t in terms)]
 
     def factor_function_from_ref(self, function_ref: str) -> FunctionWithGui:
-        """Resolve a saved function_ref (`module.qualname`) to a fresh
-        FunctionWithGui. Strict — used by the workspace loader. The caller
-        is expected to handle ValueError by skipping the orphaned node and
-        dropping any links touching it (spec §11)."""
+        """Look up a `function_ref` (the `module.qualname` string carried in
+        saved workspaces) and call the registered factory to produce a fresh
+        FunctionWithGui. Raises ValueError if no registered function has
+        that ref — the workspace loader catches this to drop orphaned nodes
+        gracefully."""
         for function_info in self._functions:
             if function_info.function_ref and function_info.function_ref == function_ref:
                 return function_info.function_factory()

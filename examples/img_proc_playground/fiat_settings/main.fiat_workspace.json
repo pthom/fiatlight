@@ -70,10 +70,10 @@
                             "ZoomPanMatrix": {
                                 "00": 0.09471516815374052,
                                 "01": 0.0,
-                                "02": 8.526512829121202e-14,
+                                "02": 8.000285593766206e-14,
                                 "10": 0.0,
                                 "11": 0.09471516815374052,
-                                "12": 8.526512829121202e-14,
+                                "12": 8.000285593766206e-14,
                                 "20": 0.0,
                                 "21": 0.0,
                                 "22": 1.0
@@ -127,7 +127,7 @@
                         "type": "Pydantic",
                         "value": {
                             "src_color": 3,
-                            "dst_color": 10
+                            "dst_color": 5
                         }
                     }
                 }
@@ -216,8 +216,8 @@
                                     "UseStatsMax": false,
                                     "UseStatsMin": false
                                 },
-                                "ColormapScaleMax": 168.18708488600578,
-                                "ColormapScaleMin": -10.119396604832698,
+                                "ColormapScaleMax": 212.70204328215826,
+                                "ColormapScaleMin": -4.387314585015879,
                                 "internal_ColormapHovered": ""
                             },
                             "DrawValuesOnZoomedPixels": true,
@@ -253,15 +253,15 @@
                             },
                             "ZoomWithMouseWheel": true
                         },
-                        "show_channels": false,
+                        "show_channels": true,
                         "channel_layout_vertically": false
                     },
                     "expanded": true
                 }
             },
             "position": [
-                632.0,
-                239.0
+                664.0,
+                111.0
             ],
             "expand_flags": {
                 "_inputs_expanded": {
