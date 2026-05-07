@@ -52,6 +52,8 @@ class _BaseFilePathWithGui(AnyDataWithGui[FilePath]):
             self._open_file_dialog = None
         if len(value) > 0:
             basename = os.path.basename(value)
+            if len(basename) > 20:
+                basename = "..." + basename[-17:]
             imgui.same_line()
             imgui.text(basename)
             fiat_osd.set_widget_tooltip(value)
