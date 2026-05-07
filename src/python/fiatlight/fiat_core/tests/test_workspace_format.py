@@ -1,8 +1,7 @@
 """Round-trip tests for the workspace JSON format introduced in
 PR 3 of the graph-persistence rework. Covers `FunctionsGraph`-level
-core data only. GUI-layer round-trip (positions, expand flags,
-session) requires an imgui-node-editor context and is exercised by
-manual smoke testing."""
+core data only. GUI-layer round-trip (positions, expand flags) requires
+an imgui-node-editor context and is exercised by manual smoke testing."""
 
 from __future__ import annotations
 
@@ -156,34 +155,44 @@ def test_workspace_refuses_future_version() -> None:
         gui.load_workspace_from_json({"version": 999, "nodes": {}, "links": []}, _factory_from_ref)
 
 
-def test_session_focused_visible_roundtrip() -> None:
+def test_workspace_load_propagates_focused_function_visible() -> None:
+    """`focused_function_visible` rides inside each node entry of the
+    workspace JSON (the per-app session file is gone). The loader should
+    pull the bool back out and apply it to FunctionNodeGui."""
     from fiatlight.fiat_nodes.functions_graph_gui import FunctionsGraphGui
 
     g = FunctionsGraph.from_function_composition([_f_a, _f_b])
     gui = FunctionsGraphGui(g)
+    sid_a = gui.function_nodes_gui[0].get_function_node().stable_id
+    sid_b = gui.function_nodes_gui[1].get_function_node().stable_id
 
-    # Default is False everywhere.
-    saved = gui.save_session_to_json()
-    sids = [n.stable_id for n in g.functions_nodes]
-    assert all(saved["focused_function_visible"][s] is False for s in sids)
+    # Build a minimal workspace JSON by hand so the test runs headless
+    # (save_workspace_to_json reaches into ed.get_node_position, which
+    # needs an imgui-node-editor context).
+    core = g.save_workspace_core_to_json()
+    saved = {"version": 1, **core}
+    saved["nodes"][sid_a]["focused_function_visible"] = True
+    saved["nodes"][sid_b]["focused_function_visible"] = False
 
-    # Toggle and round-trip.
-    gui.function_nodes_gui[0]._focused_function_visible = True
-    saved = gui.save_session_to_json()
-    gui.function_nodes_gui[0]._focused_function_visible = False
-    gui.load_session_from_json(saved)
-    assert gui.function_nodes_gui[0]._focused_function_visible is True
+    gui.load_workspace_from_json(saved, _factory_from_ref)
+    fn_by_sid = {fn.get_function_node().stable_id: fn for fn in gui.function_nodes_gui}
+    assert fn_by_sid[sid_a]._focused_function_visible is True
+    assert fn_by_sid[sid_b]._focused_function_visible is False
 
 
-def test_session_load_tolerates_unknown_node_ids() -> None:
+def test_workspace_load_tolerates_missing_focused_visible() -> None:
+    """Older workspace files written before the session merge don't carry
+    `focused_function_visible`. The loader should leave the default in
+    place rather than raising."""
     from fiatlight.fiat_nodes.functions_graph_gui import FunctionsGraphGui
 
     g = FunctionsGraph.from_function_composition([_f_a])
     gui = FunctionsGraphGui(g)
-    # Saved session references a stable_id that no longer exists; loader
-    # should ignore it without raising.
-    gui.load_session_from_json({"version": 1, "focused_function_visible": {"n_gone": True}})
-    # Existing node's flag is at its default.
+    core = g.save_workspace_core_to_json()
+    saved = {"version": 1, **core}
+    # No `focused_function_visible` key at all.
+
+    gui.load_workspace_from_json(saved, _factory_from_ref)
     assert gui.function_nodes_gui[0]._focused_function_visible is False
 
 
@@ -220,11 +229,3 @@ def test_round_trip_save_clear_load_restores_state() -> None:
     g.load_workspace_core_from_json(saved, _factory_from_ref)
     assert [n.stable_id for n in g.functions_nodes] == saved_ids
     assert len(g.functions_nodes_links) == 1
-
-
-def test_session_path_for_strips_workspace_suffix() -> None:
-    from fiatlight.fiat_runner.fiat_gui import FiatGui
-
-    assert FiatGui._session_path_for("/tmp/foo.fiat_workspace.json") == "/tmp/foo.fiat_session.json"
-    # No canonical suffix: append, don't try to be clever.
-    assert FiatGui._session_path_for("/tmp/foo.json") == "/tmp/foo.json.fiat_session.json"

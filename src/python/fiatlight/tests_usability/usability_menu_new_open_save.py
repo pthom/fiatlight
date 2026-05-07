@@ -4,15 +4,15 @@ Launched with `run_graph_composer`, so the graph starts empty and all
 four menu entries are visible. Suggested checks:
 
 1. Drag a couple of nodes from the palette, wire them up.
-2. File > Save As… → pick `~/foo.fiat_workspace.json`. Confirm the
-   companion `foo.fiat_session.json` appears next to it.
+2. File > Save As… → pick `~/foo.fiat_workspace.json`. A single file is
+   written; focused-mode visibility rides along inside the workspace.
 3. Quit. Relaunch the script: the workspace is restored from
    `~/foo.fiat_workspace.json` (the cursor was persisted via
    hello_imgui's user-pref storage, inside the per-app .ini).
 4. File > New Workspace → canvas clears, and the cursor resets to the
    default per-app autosave path. Quit + relaunch resumes empty.
 5. File > Open Workspace… → pick `foo.fiat_workspace.json` again.
-   Positions and labels round-trip; sibling session is reloaded too.
+   Positions, labels, and focused-mode flags round-trip.
 
 In programmatic mode (a script that calls `fl.run(graph, ...)` with a
 pre-built graph), the File menu hides New (the topology comes from

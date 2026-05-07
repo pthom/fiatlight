@@ -683,26 +683,15 @@ class FunctionsGraphGui:
     class _Serialization_Section:  # Dummy class to create a section in the IDE # noqa
         """
         # ======================================================================================================================
-        # Two JSON files live side by side:
-        #   * the workspace: everything needed to reconstruct the graph the
-        #     user sees (nodes, links, values, per-pin GUI option blobs, node
-        #     positions, expand flags). Shareable between machines.
-        #   * the session: local view state (focused-mode visibility, and
-        #     eventually canvas viewport). Per installation, never shared.
+        # Workspace JSON: everything needed to reconstruct what the user sees
+        # (nodes, links, values, per-pin GUI option blobs, node positions,
+        # expand flags, focused-mode visibility). Shareable between machines.
         # ======================================================================================================================
         """
 
         pass
 
     _WORKSPACE_VERSION = 1
-    _SESSION_VERSION = 1
-    # Per-node FunctionNodeGui flags that affect how big the node draws.
-    # Saved alongside positions because they change layout, so a workspace
-    # opened on a second machine looks the same. `_focused_function_visible`
-    # is excluded: it's a transient view state that lives in the session
-    # file, not the shareable workspace. The `_function_node` block (per-pin
-    # GUI options) is excluded too: the same data is already saved at the
-    # workspace's `input_gui_options` / `output_gui_options` level.
     _WORKSPACE_EXPAND_FIELDS = (
         "_inputs_expanded",
         "_outputs_expanded",
@@ -714,8 +703,8 @@ class FunctionsGraphGui:
 
     def save_workspace_to_json(self) -> JsonDict:
         """Build the full workspace dict: the core data from FunctionsGraph
-        plus the GUI-layer fields each node carries (canvas position and
-        expand flags). The result is what gets written to
+        plus the GUI-layer fields each node carries (canvas position, expand
+        flags, focused-mode visibility). The result is what gets written to
         `<app>.fiat_workspace.json`."""
         core = self.functions_graph.save_workspace_core_to_json()
         nodes = core["nodes"]
@@ -727,6 +716,7 @@ class FunctionsGraphGui:
             pos = ed.get_node_position(fn_node_gui.node_id())
             entry["position"] = [pos.x, pos.y]
             entry["expand_flags"] = self._save_expand_flags(fn_node_gui)
+            entry["focused_function_visible"] = bool(fn_node_gui._focused_function_visible)
         return {"version": self._WORKSPACE_VERSION, **core}
 
     def load_workspace_from_json(
@@ -767,36 +757,13 @@ class FunctionsGraphGui:
             expand_flags = node_data.get("expand_flags")
             if isinstance(expand_flags, dict):
                 self._load_expand_flags(fn_node_gui, expand_flags)
+            focused = node_data.get("focused_function_visible")
+            if isinstance(focused, bool):
+                fn_node_gui._focused_function_visible = focused
         # Reuse PR 2's queue mechanism: applied inside ed.begin/end on the
         # next draw. Stable-id keying is wired through
         # `_apply_pending_loaded_positions_by_stable_id` below.
         self._pending_loaded_positions_by_stable_id = pending_positions or None
-
-    def save_session_to_json(self) -> JsonDict:
-        """Session JSON: per-installation, never shared. Today this is just
-        the focused-mode visibility flag per node. Canvas viewport (zoom +
-        scroll) cannot round-trip through the public ed API in this build,
-        so it's deferred."""
-        focused: Dict[str, bool] = {}
-        for fn_node_gui in self.function_nodes_gui:
-            sid = fn_node_gui.get_function_node().stable_id
-            focused[sid] = bool(fn_node_gui._focused_function_visible)
-        return {
-            "version": self._SESSION_VERSION,
-            "focused_function_visible": focused,
-        }
-
-    def load_session_from_json(self, json_data: JsonDict) -> None:
-        version = json_data.get("version", 1)
-        if isinstance(version, int) and version > self._SESSION_VERSION:
-            raise ValueError(f"Session version {version} is newer than this build supports ({self._SESSION_VERSION}).")
-        focused = json_data.get("focused_function_visible", {})
-        if not isinstance(focused, dict):
-            return
-        for fn_node_gui in self.function_nodes_gui:
-            sid = fn_node_gui.get_function_node().stable_id
-            if sid in focused:
-                fn_node_gui._focused_function_visible = bool(focused[sid])
 
     @classmethod
     def _save_expand_flags(cls, fn_node_gui: FunctionNodeGui) -> JsonDict:

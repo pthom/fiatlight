@@ -294,7 +294,6 @@ class FiatGui:
     def _post_init(self) -> None:
         self._restore_cursor_from_user_pref()
         self._load_workspace_at_startup()
-        self._load_session_at_startup()
         self._functions_graph_gui.invoke_all_functions(also_invoke_manual_function=False)
         self._notify_if_dirty_functions()
         self._disable_idling_if_any_live_function()
@@ -306,7 +305,6 @@ class FiatGui:
         # Sticky cursor: save to wherever the user last opened from (or
         # explicitly Saved As). At startup that is the default autosave path.
         self._save_workspace(self._current_workspace_path)
-        self._save_session(self._session_path_for(self._current_workspace_path))
         # Remember the cursor across runs. Stored via hello_imgui's user-pref
         # storage (lives inside the per-app .ini), so the next launch resumes
         # the exact same workspace file even after Save As to a custom path.
@@ -473,7 +471,6 @@ class FiatGui:
 
     def _menu_save_workspace(self) -> None:
         self._save_workspace(self._current_workspace_path)
-        self._save_session(self._session_path_for(self._current_workspace_path))
 
     def _menu_save_workspace_as(self) -> None:
         self.save_dialog = pfd.save_file(title="Save Workspace As")
@@ -655,10 +652,11 @@ class FiatGui:
         stem = loc[:-4]
         files = [
             self._workspace_filename(),
-            self._session_filename(),
-            # Legacy files from before the workspace + session split. Kept in
-            # the cleanup list so reset-settings scrubs any leftover from
-            # earlier fiatlight versions.
+            # Legacy files from earlier fiatlight versions. Kept in the
+            # cleanup list so reset-settings scrubs any leftover, including
+            # the short-lived per-app session split (`.fiat_session.json`)
+            # that was folded back into the workspace.
+            stem + ".fiat_session.json",
             stem + ".fiat_user.json",
             stem + ".fiat_graph.json",
             stem + ".node_editor.json",
@@ -674,21 +672,6 @@ class FiatGui:
         assert loc is not None
         return loc[:-4] + ".fiat_workspace.json"
 
-    def _session_filename(self) -> str:
-        loc = hello_imgui.ini_settings_location(self._runner_params)
-        assert loc is not None
-        return loc[:-4] + ".fiat_session.json"
-
-    @staticmethod
-    def _session_path_for(workspace_path: str) -> str:
-        """Sibling session path for a given workspace path. Strips the
-        canonical `.fiat_workspace.json` suffix when present so an opened
-        `foo.fiat_workspace.json` round-trips with `foo.fiat_session.json`."""
-        suffix = ".fiat_workspace.json"
-        if workspace_path.endswith(suffix):
-            return workspace_path[: -len(suffix)] + ".fiat_session.json"
-        return workspace_path + ".fiat_session.json"
-
     def _save_workspace(self, filename: str) -> None:
         if "." not in filename:
             filename += ".fiat_workspace.json"
@@ -702,18 +685,6 @@ class FiatGui:
                 json.dump(json_data, f, indent=4)
         except Exception as e:
             logging.error(f"FiatGui: error saving workspace to {filename}: {e}")
-
-    def _save_session(self, filename: str) -> None:
-        try:
-            json_data = self._functions_graph_gui.save_session_to_json()
-        except Exception as e:
-            logging.error(f"FiatGui: error building session JSON: {e}\n{traceback.format_exc()}")
-            return
-        try:
-            with open(filename, "w") as f:
-                json.dump(json_data, f, indent=4)
-        except Exception as e:
-            logging.error(f"FiatGui: error saving session to {filename}: {e}")
 
     def _load_workspace(self, filename: str, whine_if_not_found: bool) -> bool:
         try:
@@ -738,32 +709,11 @@ class FiatGui:
             return False
         return True
 
-    def _load_session(self, filename: str, whine_if_not_found: bool) -> bool:
-        try:
-            with open(filename, "r") as f:
-                json_data = json.load(f)
-        except FileNotFoundError:
-            if whine_if_not_found:
-                logging.warning(f"FiatGui: session file not found: {filename}")
-            return False
-        except json.JSONDecodeError as e:
-            logging.warning(f"FiatGui: session JSON decode error in {filename}: {e}")
-            return False
-        try:
-            self._functions_graph_gui.load_session_from_json(json_data)
-        except Exception as e:
-            logging.warning(f"FiatGui: error loading session from {filename}: {e}")
-            return False
-        return True
-
     def _load_workspace_at_startup(self) -> None:
         # `_current_workspace_path` was already reseated by
         # `_restore_cursor_from_user_pref` if the previous run left a valid
         # cursor; otherwise it is still the default per-app autosave path.
         self._load_workspace(self._current_workspace_path, whine_if_not_found=False)
-
-    def _load_session_at_startup(self) -> None:
-        self._load_session(self._session_path_for(self._current_workspace_path), whine_if_not_found=False)
 
     def _restore_cursor_from_user_pref(self) -> None:
         """Reseat `_current_workspace_path` from the user pref written on
@@ -790,9 +740,6 @@ class FiatGui:
         success = self._load_workspace(filename, whine_if_not_found=True)
         if not success:
             return
-        # Sibling session is best-effort: a hand-shared workspace may not
-        # ship with one, and that's fine.
-        self._load_session(self._session_path_for(filename), whine_if_not_found=False)
         self._current_workspace_path = filename
         self._functions_graph_gui.invoke_all_functions(also_invoke_manual_function=False)
         self._notify_if_dirty_functions()
@@ -801,7 +748,6 @@ class FiatGui:
         if "." not in pathlib.Path(filename).name:
             filename += ".fiat_workspace.json"
         self._save_workspace(filename)
-        self._save_session(self._session_path_for(filename))
         self._current_workspace_path = filename
 
 
