@@ -8,8 +8,10 @@ from typing import NamedTuple
 from fiatlight.fiat_kits.fiat_image import (
     Circles2D,
     Contours,
+    Image,
     ImageU8,
     ImageU8_GRAY,
+    ImageFloat_1,
     Lines2D,
     Point2D,
     Points2D,
@@ -101,8 +103,7 @@ def cornerHarris(
     **OpenCV docs:** [cv2.cornerHarris](https://docs.opencv.org/4.13.0/dd/d1a/group__imgproc__feature.html#gac1fc3598018010880e370e2f709b4345)
     """
     response = cv2.cornerHarris(image, blockSize, ksize, k)
-    r = cv2.normalize(response, None, 0, 255, cv2.NORM_MINMAX).astype(np.uint8)
-    return r  # type: ignore
+    return response  # type: ignore
 
 
 @fl.with_fiat_attributes(
@@ -544,26 +545,21 @@ class MinMaxLocResult(NamedTuple):
 
 @fl.with_fiat_attributes(fiat_tags=["features", "template", "cv2.imgproc"])
 def matchTemplate(
-    image: ImageU8_GRAY,
-    template: ImageU8_GRAY,
-) -> ImageU8_GRAY:
+    image: Image,
+    template: Image,
+) -> ImageFloat_1:
     """Slide `template` over `image` and produce a normalized score map.
 
     **When to use:** Locate a known small pattern in a larger image.
     The peak of the returned score map is the best match (use
     `minMaxLoc` to extract it).
 
-    The cv2 output is float32; this wrapper normalizes to U8 for
-    display via `cv2.normalize`. For numerical use, call `cv2.matchTemplate`
-    directly.
-
     Uses `cv2.TM_CCOEFF_NORMED` (a robust default).
 
     **OpenCV docs:** [cv2.matchTemplate](https://docs.opencv.org/4.13.0/df/dfb/group__imgproc__object.html#ga586ebfb0a7fb604b35a23d85391329be)
     """
     score = cv2.matchTemplate(image, template, cv2.TM_CCOEFF_NORMED)
-    r = cv2.normalize(score, None, 0, 255, cv2.NORM_MINMAX).astype(np.uint8)
-    return r  # type: ignore
+    return score  # type: ignore
 
 
 @fl.with_fiat_attributes(fiat_tags=["features", "cv2.core"])

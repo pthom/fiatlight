@@ -6,7 +6,7 @@ import cv2
 import numpy as np
 
 import fiatlight as fl
-from fiatlight.fiat_kits.fiat_image import ImageBgr, ImageU8, ImageU8_GRAY, Point2D, Rect2D
+from fiatlight.fiat_kits.fiat_image import ImageBgr, ImageU8, ImageU8_3, ImageU8_GRAY, Point2D, Rect2D
 from fiatlight.fiat_types import ColorRgb
 
 
@@ -26,7 +26,7 @@ class PencilSketchResult(NamedTuple):
     fiat_tags=["filter", "photo", "cv2.photo"],
 )
 def pencilSketch(
-    image: ImageBgr,
+    image: ImageU8_3,
     sigma_s: float = 60.0,
     sigma_r: float = 0.07,
     shade_factor: float = 0.05,
@@ -47,7 +47,7 @@ def pencilSketch(
     **OpenCV docs:** [cv2.pencilSketch](https://docs.opencv.org/4.13.0/df/dac/group__photo__render.html#gae5930dd822c713b36f8529b21ddebd0c)
     """
     gray, color = cv2.pencilSketch(image, sigma_s=sigma_s, sigma_r=sigma_r, shade_factor=shade_factor)
-    return PencilSketchResult(gray=gray, color=color)
+    return PencilSketchResult(gray=gray, color=color)  # type: ignore
 
 
 @fl.with_fiat_attributes(

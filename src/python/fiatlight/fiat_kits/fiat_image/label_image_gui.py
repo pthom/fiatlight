@@ -22,7 +22,7 @@ def _colorize(labels: LabelImage) -> np.ndarray:
     u8 = ((labels.astype(np.int64) * 79) % 256).astype(np.uint8)
     color = cv2.applyColorMap(u8, cv2.COLORMAP_JET)
     color[labels == 0] = (0, 0, 0)
-    return color  # type: ignore[no-any-return]
+    return color
 
 
 def _present(labels: LabelImage) -> None:

@@ -4,7 +4,7 @@
 by intent. Each function carries a `fiat_tags: List[str]` attribute used by
 the playground's function palette to filter and group nodes.
 """
-from typing import Callable, List
+from typing import Callable, List, Any
 
 from examples.img_proc_playground.wrappers.source import image_source, imread_rgb
 from examples.img_proc_playground.wrappers.color import color_convert
@@ -35,7 +35,6 @@ from examples.img_proc_playground.wrappers.morphology import dilate, erode, morp
 from examples.img_proc_playground.wrappers.threshold import (
     adaptiveThreshold,
     distanceTransform,
-    inRange,
     threshold,
 )
 from examples.img_proc_playground.wrappers.compositing import (
@@ -102,7 +101,7 @@ from examples.img_proc_playground.wrappers.blobs import (
 from examples.img_proc_playground.wrappers.image_roi import image_roi
 
 
-def all_opencv_wrappers() -> List[Callable]:
+def all_opencv_wrappers() -> List[Callable[..., Any]]:
     """Return every OpenCV wrapper, grouped by intent."""
     return [
         # source
@@ -138,7 +137,6 @@ def all_opencv_wrappers() -> List[Callable]:
         # threshold
         threshold,
         adaptiveThreshold,
-        inRange,
         distanceTransform,
         # compositing
         bitwise_and,

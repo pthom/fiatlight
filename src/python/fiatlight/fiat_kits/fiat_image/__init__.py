@@ -1,6 +1,9 @@
 from .image_types import (
     ImageU8,
     ImageFloat,
+    ImageFloat_1,
+    ImageFloat_2,
+    ImageFloat_3,
     Image,
     ImageRgb,
     ImageRgba,
@@ -85,6 +88,9 @@ __all__ = [
     # from image_types
     "ImageU8",
     "ImageFloat",
+    "ImageFloat_1",
+    "ImageFloat_2",
+    "ImageFloat_3",
     "Image",
     "ImageRgb",
     "ImageRgba",

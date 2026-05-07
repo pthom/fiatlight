@@ -1,10 +1,9 @@
 """Thresholding wrappers for the image-processing playground."""
 from typing import NamedTuple
 
-import numpy as np
 
 import fiatlight as fl
-from fiatlight.fiat_kits.fiat_image import ImageU8, ImageU8_GRAY
+from fiatlight.fiat_kits.fiat_image import ImageU8_GRAY, Image
 
 import cv2
 
@@ -27,7 +26,7 @@ class ThresholdResult(NamedTuple):
     """
 
     used_thresh: float
-    dst: ImageU8_GRAY
+    dst: Image
 
 
 def _block_size_validator(blockSize: int) -> int:
@@ -47,7 +46,7 @@ def _block_size_validator(blockSize: int) -> int:
     fiat_tags=["threshold", "cv2.imgproc"],
 )
 def threshold(
-    image: ImageU8_GRAY,
+    image: Image,
     thresh: float = 128.0,
     maxval: float = 255.0,
     mode: ThresholdMode = ThresholdMode.THRESH_BINARY,
@@ -79,7 +78,7 @@ def threshold(
     if auto is not AutoThresholdMethod.NONE:
         flag |= auto.value
     used_thresh, r = cv2.threshold(image, thresh, maxval, flag)
-    return ThresholdResult(float(used_thresh), r)
+    return ThresholdResult(float(used_thresh), r)  # type: ignore
 
 
 @fl.with_fiat_attributes(
@@ -117,49 +116,6 @@ def adaptiveThreshold(
     return r  # type: ignore
 
 
-@fl.with_fiat_attributes(
-    lowerb_0__range=(0, 255),
-    lowerb_1__range=(0, 255),
-    lowerb_2__range=(0, 255),
-    upperb_0__range=(0, 255),
-    upperb_1__range=(0, 255),
-    upperb_2__range=(0, 255),
-    fiat_tags=["threshold", "color", "cv2.core"],
-)
-def inRange(
-    image: ImageU8,
-    lowerb_0: int = 0,
-    lowerb_1: int = 0,
-    lowerb_2: int = 0,
-    upperb_0: int = 255,
-    upperb_1: int = 255,
-    upperb_2: int = 255,
-) -> ImageU8_GRAY:
-    """Per-pixel test that all channel values fall within a `[lowerb, upperb]` range.
-
-    **When to use:** Color masking — typically on an HSV image to isolate a hue
-    range. Output is a binary mask (255 inside, 0 outside).
-
-    **Parameters:**
-    - `lowerb_0/1/2`: lower bound for channel 0 / 1 / 2.
-    - `upperb_0/1/2`: upper bound for channel 0 / 1 / 2.
-
-    For grayscale input only `lowerb_0` / `upperb_0` are used.
-
-    **See also:** `threshold`, `bitwise_and` (combine masks).
-
-    **OpenCV docs:** [cv2.inRange](https://docs.opencv.org/4.13.0/d2/de8/group__core__array.html#ga48af0ab51e36436c5d04340e036ce981)
-    """
-    if image.ndim == 2:
-        lower: tuple[int, ...] = (lowerb_0,)
-        upper: tuple[int, ...] = (upperb_0,)
-    else:
-        lower = (lowerb_0, lowerb_1, lowerb_2)
-        upper = (upperb_0, upperb_1, upperb_2)
-    r = cv2.inRange(image, lower, upper)
-    return r  # type: ignore
-
-
 @fl.with_fiat_attributes(fiat_tags=["threshold", "cv2.imgproc"])
 def distanceTransform(
     image: ImageU8_GRAY,
@@ -184,5 +140,4 @@ def distanceTransform(
     **OpenCV docs:** [cv2.distanceTransform](https://docs.opencv.org/4.13.0/d7/d1b/group__imgproc__misc.html#ga8a0b7fdfcb7a13dde018988ba3a43042)
     """
     dist = cv2.distanceTransform(image, distanceType.value, maskSize.value)
-    r = cv2.normalize(dist, None, 0, 255, cv2.NORM_MINMAX).astype(np.uint8)
-    return r  # type: ignore
+    return dist  # type: ignore
