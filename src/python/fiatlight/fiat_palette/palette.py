@@ -69,6 +69,11 @@ class FunctionInfo:
     tags: list[str]
     doc: str | None
     doc_is_markdown: bool
+    # Stable cross-run identity (`module.qualname`) used as the registry key
+    # in saved workspaces. Empty when the wrapped factory builds a
+    # FunctionWithGui without a Python-defined function (e.g. some MarkdownNode
+    # constructions).
+    function_ref: str = ""
     # Cached pin types so the compatibility filter does not have to re-factor
     # every function on every popup frame. Each entry is the parameter / output
     # name and its Python type (which may be None for unannotated outputs).
@@ -145,6 +150,7 @@ class FunctionPalette:
     def _add_function_factory(self, function_factory: FunctionWithGuiFactory, tags: list[str]) -> None:
         gui = function_factory()
         name = gui.function_name
+        function_ref = gui.function_ref
         doc = gui.get_function_doc()
         input_types = [
             (gui.input_of_idx(i).name, gui.input_of_idx(i).data_with_gui._type) for i in range(gui.nb_inputs())
@@ -156,6 +162,7 @@ class FunctionPalette:
             tags,
             doc.user_doc,
             doc.is_user_doc_markdown,
+            function_ref=function_ref,
             input_types=input_types,
             output_types=output_types,
         )
@@ -202,6 +209,16 @@ class FunctionPalette:
         if filt.match_mode is TagMatchMode.AND:
             return [fi for fi in infos if all(t in haystack(fi) for t in terms)]
         return [fi for fi in infos if any(t in haystack(fi) for t in terms)]
+
+    def factor_function_from_ref(self, function_ref: str) -> FunctionWithGui:
+        """Resolve a saved function_ref (`module.qualname`) to a fresh
+        FunctionWithGui. Strict — used by the workspace loader. The caller
+        is expected to handle ValueError by skipping the orphaned node and
+        dropping any links touching it (spec §11)."""
+        for function_info in self._functions:
+            if function_info.function_ref and function_info.function_ref == function_ref:
+                return function_info.function_factory()
+        raise ValueError(f"Function with ref {function_ref!r} not found in palette")
 
     def factor_function_from_name(self, name: str) -> FunctionWithGui:
         for function_info in self._functions:

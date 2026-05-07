@@ -658,11 +658,15 @@ class FunctionsGraphGui:
         self.functions_graph.load_user_inputs_from_json(json_data)
 
     def save_gui_options_to_json(self) -> JsonDict:
+        # `FunctionNodeGui.save_gui_options_to_json()` already embeds the
+        # `_function_node` block (which is `FunctionNode.save_gui_options_to_json()`
+        # = `function_with_gui.save_gui_options_to_json()`). The legacy schema
+        # also stored a sibling `function_node` key — pure duplication, the
+        # second load just overwrote the first with identical data.
         function_gui_settings_dict = {}
         for name, fn_node_with_gui in self._dict_function_nodes().items():
             function_gui_settings_dict[name] = {
                 "function_node_with_gui": fn_node_with_gui.save_gui_options_to_json(),
-                "function_node": fn_node_with_gui.get_function_node().save_gui_options_to_json(),
             }
         return function_gui_settings_dict
 
@@ -671,7 +675,8 @@ class FunctionsGraphGui:
             if name in json_dict:
                 json_data = json_dict[name]
                 fn_node_with_gui.load_gui_options_from_json(json_data["function_node_with_gui"])
-                fn_node_with_gui.get_function_node().load_gui_options_from_json(json_data["function_node"])
+                # Legacy `function_node` sibling, if present in older save files,
+                # is the same data — ignore.
 
     def save_graph_composition_to_json(self) -> JsonDict:
         return self.functions_graph.save_graph_composition_to_json()
