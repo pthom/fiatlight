@@ -161,38 +161,20 @@ class FunctionsGraph:
         pass
 
     def _add_function_with_gui(self, f_gui: FunctionWithGui, stable_id: str | None = None) -> FunctionNode:
-        def has_already_function_with_same_name() -> bool:
-            for fn in self.functions_nodes:
-                if fn.function_with_gui.function_name == f_gui.function_name:
-                    return True
-            return False
-
-        def f_gui_with_distinct_name() -> FunctionWithGui:
-            f_gui_2 = copy.copy(f_gui)
-            f_gui_2.function_name = f"{f_gui.function_name}_2"
-            return f_gui_2
-
-        if stable_id is None and has_already_function_with_same_name():
-            # Suffix-rename to keep legacy save/load (keyed by function_name)
-            # working until the workspace format takes over. When a stable_id
-            # is explicitly given (workspace loader path), skip the rename —
-            # the workspace already disambiguates by id.
-            r = self._add_function_with_gui(f_gui_with_distinct_name())
-            return r
-
+        # Identity is now stable_id-based (D5-A); duplicate function_names are
+        # allowed. Two `blur` nodes share their display name but have distinct
+        # stable_ids, so save/load keys never collide.
         if stable_id is None:
             stable_id = self._next_stable_id()
-        else:
+        elif stable_id.startswith("n"):
             # Keep the counter ahead of any explicitly-supplied id so future
-            # mints don't collide. Tolerate non-`n<int>` ids (treat as counter
-            # bump 0).
-            if stable_id.startswith("n"):
-                try:
-                    n = int(stable_id[1:])
-                    if n > self._stable_id_counter:
-                        self._stable_id_counter = n
-                except ValueError:
-                    pass
+            # mints don't collide. Non-`n<int>` ids leave the counter alone.
+            try:
+                n = int(stable_id[1:])
+                if n > self._stable_id_counter:
+                    self._stable_id_counter = n
+            except ValueError:
+                pass
 
         f_node = FunctionNode(f_gui, stable_id=stable_id)
         self.functions_nodes.append(f_node)
@@ -374,12 +356,15 @@ class FunctionsGraph:
 
     def add_link(
         self,
-        src_function: str | Function | FunctionWithGui,
-        dst_function: str | Function | FunctionWithGui,
+        src_function: str | Function | FunctionWithGui | FunctionNode,
+        dst_function: str | Function | FunctionWithGui | FunctionNode,
         dst_input_name: str | None = None,
         src_output_idx: int = 0,
     ) -> None:
-        """Add a link between two functions, which are identified by their *unique* names"""
+        """Add a link between two nodes. Endpoints may be passed as a name
+        string (must resolve uniquely; D5-A raises on duplicate function
+        names), a FunctionNode handle (returned by `add_function`), a
+        FunctionWithGui, or the raw callable."""
         src_function_node = self._function_node_with_name_or_is_function(src_function)
         dst_function_node = self._function_node_with_name_or_is_function(dst_function)
         self._add_link_from_function_nodes(
@@ -459,9 +444,16 @@ class FunctionsGraph:
         pass
 
     def _function_node_with_name_or_is_function(
-        self, name_or_function: str | Function | FunctionWithGui
+        self, name_or_function: str | Function | FunctionWithGui | FunctionNode
     ) -> FunctionNode:
-        """Get the function node with the given name or function"""
+        """Resolve a string, FunctionNode handle, FunctionWithGui, or raw
+        callable to the FunctionNode in this graph. The FunctionNode handle
+        is the D5-A escape hatch for the duplicate-function case."""
+        if isinstance(name_or_function, FunctionNode):
+            if name_or_function in self.functions_nodes:
+                return name_or_function
+            raise ValueError(f"FunctionNode {name_or_function.stable_id!r} not in this graph")
+
         if isinstance(name_or_function, str):
             return self._function_node_with_name(name_or_function)
 
@@ -523,48 +515,6 @@ class FunctionsGraph:
         """
 
         pass
-
-    def save_user_inputs_to_json(self) -> JsonDict:
-        """Saves the user inputs, i.e. the functions params that are editable in the GUI
-        (this excludes the params that are set by the links between the functions)"""
-        fn_data = {}
-        for function_node in self.functions_nodes:
-            fn_data[function_node.function_with_gui.function_name] = function_node.save_user_inputs_to_json()
-        return {"functions_nodes": fn_data}
-
-    def load_user_inputs_from_json(self, json_data: JsonDict) -> None:
-        """Restores the user inputs from a json dict"""
-        if "functions_nodes" not in json_data:
-            return
-        fn_data = json_data["functions_nodes"]
-        for function_name, fn_json in fn_data.items():
-            fn = self._function_node_with_name(function_name)
-            fn.load_user_inputs_from_json(fn_json)
-
-    def save_graph_composition_to_json(self) -> JsonDict:
-        """Saves the graph composition to a json dict.
-        Only used when the graph composition is editable.
-        """
-
-        all_function_names: List[str]
-        all_function_names = [fn.function_with_gui.function_name for fn in self.functions_nodes]
-
-        links_data = []
-        for link in self.functions_nodes_links:
-            src_function_node = link.src_function_node
-            dst_function_node = link.dst_function_node
-            src_function_name = src_function_node.function_with_gui.function_name
-            dst_function_name = dst_function_node.function_with_gui.function_name
-            links_data.append(
-                {
-                    "src_function_name": src_function_name,
-                    "dst_function_name": dst_function_name,
-                    "dst_input_name": link.dst_input_name,
-                    "src_output_idx": link.src_output_idx,
-                }
-            )
-        r = {"functions_names": all_function_names, "functions_nodes_links": links_data}
-        return r
 
     def save_workspace_core_to_json(self) -> JsonDict:
         """Core workspace data — id-keyed nodes + id-referenced links + per-pin
@@ -698,25 +648,3 @@ class FunctionsGraph:
                 )
             except ValueError as e:
                 logging.warning(f"Workspace: link {src_id!r} -> {dst_id!r} rejected: {e}")
-
-    def load_graph_composition_from_json(
-        self, json_data: JsonDict, function_factory: FunctionWithGuiFactoryFromName
-    ) -> None:
-        """Loads the graph composition from a json dict."""
-        self.functions_nodes = []
-        self.functions_nodes_links = []
-
-        all_function_names = json_data["functions_names"]
-        for function_name in all_function_names:
-            fn = function_factory(function_name)
-            self._add_function_with_gui(fn)
-
-        links_data = json_data["functions_nodes_links"]
-        for link_data in links_data:
-            src_function_name = link_data["src_function_name"]
-            dst_function_name = link_data["dst_function_name"]
-            dst_input_name = link_data["dst_input_name"]
-            src_output_idx = link_data["src_output_idx"]
-            self.add_link(
-                src_function_name, dst_function_name, dst_input_name=dst_input_name, src_output_idx=src_output_idx
-            )

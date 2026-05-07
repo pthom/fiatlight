@@ -76,12 +76,8 @@ class FunctionsGraphGui:
     # an ed.begin/end block — defer to the next frame.
     _pending_node_position: Tuple[ed.NodeId, ImVec2] | None = None
     # Positions loaded from disk, applied lazily inside ed.begin/end on the
-    # next draw. Keyed by FunctionWithGui.function_name (matching today's
-    # other save keys); switches to stable_id when the workspace format lands.
-    _pending_loaded_positions: Dict[str, ImVec2] | None = None
-    # New id-keyed pending positions, used by load_workspace_from_json.
-    # Both pending dicts coexist during PR 3 sub-commits 2/3 — the legacy
-    # one will go away in the FiatGui switchover (sub-commit 3).
+    # next draw — `ed.set_node_position` is only valid in that scope. Keyed
+    # by stable_id (the workspace format key).
     _pending_loaded_positions_by_stable_id: Dict[str, ImVec2] | None = None
 
     # ======================================================================================================================
@@ -596,24 +592,17 @@ class FunctionsGraphGui:
         self._pending_node_position = None
 
     def _apply_pending_loaded_positions(self) -> None:
-        """Apply positions queued by `load_node_positions_from_json` (legacy,
-        function_name-keyed) or `load_workspace_from_json` (stable_id-keyed).
-        Called from `draw()` inside `ed.begin/end`, which is the only context
-        where `ed.set_node_position` is allowed."""
-        if self._pending_loaded_positions is not None:
-            for fn in self.function_nodes_gui:
-                name = self.function_name(fn)
-                saved = self._pending_loaded_positions.get(name)
-                if saved is not None:
-                    ed.set_node_position(fn.node_id(), saved)
-            self._pending_loaded_positions = None
-        if self._pending_loaded_positions_by_stable_id is not None:
-            for fn in self.function_nodes_gui:
-                sid = fn.get_function_node().stable_id
-                saved = self._pending_loaded_positions_by_stable_id.get(sid)
-                if saved is not None:
-                    ed.set_node_position(fn.node_id(), saved)
-            self._pending_loaded_positions_by_stable_id = None
+        """Apply positions queued by `load_workspace_from_json`. Called from
+        `draw()` inside `ed.begin/end`, the only context where
+        `ed.set_node_position` is allowed."""
+        if self._pending_loaded_positions_by_stable_id is None:
+            return
+        for fn in self.function_nodes_gui:
+            sid = fn.get_function_node().stable_id
+            saved = self._pending_loaded_positions_by_stable_id.get(sid)
+            if saved is not None:
+                ed.set_node_position(fn.node_id(), saved)
+        self._pending_loaded_positions_by_stable_id = None
 
     def _function_node_gui_from_id(self, node_id: ed.NodeId) -> FunctionNodeGui:
         matching_nodes = [fn for fn in self.function_nodes_gui if fn.node_id() == node_id]
@@ -656,64 +645,11 @@ class FunctionsGraphGui:
     class _Serialization_Section:  # Dummy class to create a section in the IDE # noqa
         """
         # ======================================================================================================================
-        # Serialization
+        # Serialization — id-keyed workspace + session format (spec §6, §9).
         # ======================================================================================================================
         """
 
         pass
-
-    def save_user_inputs_to_json(self) -> JsonDict:
-        return self.functions_graph.save_user_inputs_to_json()
-
-    def load_user_inputs_from_json(self, json_data: JsonDict) -> None:
-        self.functions_graph.load_user_inputs_from_json(json_data)
-
-    def save_gui_options_to_json(self) -> JsonDict:
-        function_gui_settings_dict = {}
-        for name, fn_node_with_gui in self._dict_function_nodes().items():
-            function_gui_settings_dict[name] = {
-                "function_node_with_gui": fn_node_with_gui.save_gui_options_to_json(),
-            }
-        return function_gui_settings_dict
-
-    def load_gui_options_from_json(self, json_dict: JsonDict) -> None:
-        for name, fn_node_with_gui in self._dict_function_nodes().items():
-            if name in json_dict:
-                json_data = json_dict[name]
-                fn_node_with_gui.load_gui_options_from_json(json_data["function_node_with_gui"])
-
-    def save_graph_composition_to_json(self) -> JsonDict:
-        return self.functions_graph.save_graph_composition_to_json()
-
-    def load_graph_composition_from_json(
-        self, json_data: JsonDict, function_factory: FunctionWithGuiFactoryFromName
-    ) -> None:
-        self.functions_graph.load_graph_composition_from_json(json_data, function_factory)
-        self._create_function_nodes_and_links_gui()
-
-    def save_node_positions_to_json(self) -> JsonDict:
-        """Snapshot every node's canvas position. Keyed by function_name (the
-        same key used by user_inputs / gui_options today). The new workspace
-        format will key by stable_id instead."""
-        out: JsonDict = {}
-        for fn in self.function_nodes_gui:
-            pos = ed.get_node_position(fn.node_id())
-            out[self.function_name(fn)] = [pos.x, pos.y]
-        return out
-
-    def load_node_positions_from_json(self, json_data: JsonDict) -> None:
-        """Queue positions for application on the next `draw()` — `ed.set_node_position`
-        only works inside `ed.begin/end`."""
-        pending: Dict[str, ImVec2] = {}
-        for name, xy in json_data.items():
-            if isinstance(xy, list) and len(xy) == 2:
-                pending[name] = ImVec2(float(xy[0]), float(xy[1]))
-        self._pending_loaded_positions = pending
-
-    # ------------------------------------------------------------------
-    # Workspace / session — new id-keyed format (graph persistence PR 3).
-    # Wired into FiatGui in the next sub-commit. See spec §6 / §9.
-    # ------------------------------------------------------------------
 
     _WORKSPACE_VERSION = 1
     _SESSION_VERSION = 1

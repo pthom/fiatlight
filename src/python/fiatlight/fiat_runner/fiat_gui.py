@@ -18,7 +18,6 @@ import json
 import logging
 import pathlib
 from typing import List, Tuple
-from enum import Enum, auto
 
 ImGuiTheme_ = hello_imgui.ImGuiTheme_
 
@@ -184,11 +183,6 @@ class FiatRunParams:
 # ==================================================================================================================
 #                                  FiatGui
 # ==================================================================================================================
-class _SaveType(Enum):
-    UserInputs = auto()
-    GraphComposition = auto()
-
-
 class FiatGui:
     # ==================================================================================================================
     #                                  Members
@@ -287,8 +281,8 @@ class FiatGui:
         pass
 
     def _post_init(self) -> None:
-        self._load_graph_composition_at_startup()
-        self._load_user_inputs_at_startup()
+        self._load_workspace_at_startup()
+        self._load_session_at_startup()
         self._functions_graph_gui.invoke_all_functions(also_invoke_manual_function=False)
         self._notify_if_dirty_functions()
         self._disable_idling_if_any_live_function()
@@ -297,9 +291,8 @@ class FiatGui:
     def _before_exit(self) -> None:
         self._store_final_app_window_screenshot()
         self._functions_graph_gui.on_exit()
-        if self.params.customizable_graph:
-            self._save_graph_composition(self._graph_composition_filename())
-        self._save_user_inputs(self._user_settings_filename())
+        self._save_workspace(self._workspace_filename())
+        self._save_session(self._session_filename())
 
     def _pre_new_frame(self) -> None:
         _ENQUEUED_CALLBACKS.run_pre_frame_callbacks()
@@ -415,22 +408,12 @@ class FiatGui:
             self.was_post_init_called = True
 
         if imgui.begin_menu("File"):
-            if imgui.menu_item_simple("Load user inputs"):
-                self.load_dialog = pfd.open_file(title="Load user inputs")
-                self.load_dialog_callback = self._load_user_inputs_during_execution
-            if imgui.menu_item_simple("Save user inputs"):
-                self.save_dialog = pfd.save_file(title="Save user inputs")
-                self.save_dialog_callback = self._save_user_inputs
-
-            if self.params.customizable_graph:
-                imgui.separator()
-                if imgui.menu_item_simple("Load graph definition"):
-                    self.load_dialog = pfd.open_file(title="Load graph definition")
-                    self.load_dialog_callback = self._load_graph_composition_during_execution
-
-                if imgui.menu_item_simple("Save graph definition"):
-                    self.save_dialog = pfd.save_file(title="Save graph definition")
-                    self.save_dialog_callback = self._save_graph_composition
+            if imgui.menu_item_simple("Open Workspace…"):
+                self.load_dialog = pfd.open_file(title="Open Workspace")
+                self.load_dialog_callback = self._load_workspace_during_execution
+            if imgui.menu_item_simple("Save Workspace As…"):
+                self.save_dialog = pfd.save_file(title="Save Workspace As")
+                self.save_dialog_callback = self._save_workspace
 
             imgui.separator()
             if imgui.menu_item_simple("Quit"):
@@ -618,13 +601,16 @@ class FiatGui:
     def _del_user_settings(self) -> None:
         loc = hello_imgui.ini_settings_location(self._runner_params)
         assert loc is not None
+        stem = loc[:-4]
         files = [
-            self._user_settings_filename(),
-            self._graph_composition_filename(),
-            # Legacy file from when imgui-node-editor managed its own autosave.
-            # Cleared here so reset-settings purges any stragglers from before
-            # the position-ownership switchover.
-            loc[:-4] + ".node_editor.json",
+            self._workspace_filename(),
+            self._session_filename(),
+            # Legacy files from before the workspace + session split. Kept in
+            # the cleanup list so reset-settings scrubs any leftover from
+            # earlier fiatlight versions.
+            stem + ".fiat_user.json",
+            stem + ".fiat_graph.json",
+            stem + ".node_editor.json",
             loc,
         ]
         for file in files:
@@ -632,114 +618,94 @@ class FiatGui:
             if path.exists():
                 path.unlink()
 
-    def _user_settings_filename(self) -> str:
+    def _workspace_filename(self) -> str:
         loc = hello_imgui.ini_settings_location(self._runner_params)
         assert loc is not None
-        return loc[:-4] + ".fiat_user.json"
+        return loc[:-4] + ".fiat_workspace.json"
 
-    def _graph_composition_filename(self) -> str:
+    def _session_filename(self) -> str:
         loc = hello_imgui.ini_settings_location(self._runner_params)
         assert loc is not None
-        return loc[:-4] + ".fiat_graph.json"
+        return loc[:-4] + ".fiat_session.json"
 
-    def _save_data(self, filename: str, save_type: _SaveType) -> None:
-        has_extension = "." in filename
-        if not has_extension:
-            if save_type == _SaveType.GraphComposition:
-                filename += ".fiat_graph.json"
-            elif save_type == _SaveType.UserInputs:
-                filename += ".fiat_user.json"
-
-        json_data = {}
-        if save_type == _SaveType.UserInputs:
-            json_data = {
-                "user_inputs": self._functions_graph_gui.save_user_inputs_to_json(),
-                "gui_options": self._functions_graph_gui.save_gui_options_to_json(),
-                "node_positions": self._functions_graph_gui.save_node_positions_to_json(),
-            }
-        elif save_type == _SaveType.GraphComposition:
-            json_data = self._functions_graph_gui.save_graph_composition_to_json()
+    def _save_workspace(self, filename: str) -> None:
+        if "." not in filename:
+            filename += ".fiat_workspace.json"
+        try:
+            json_data = self._functions_graph_gui.save_workspace_to_json()
+        except Exception as e:
+            logging.error(f"FiatGui: error building workspace JSON: {e}\n{traceback.format_exc()}")
+            return
         try:
             with open(filename, "w") as f:
-                json_str = json.dumps(json_data, indent=4)
-                f.write(json_str)
+                json.dump(json_data, f, indent=4)
         except Exception as e:
-            logging.error(f"FiatGui: Error saving state file {self._user_settings_filename()}: {e}")
+            logging.error(f"FiatGui: error saving workspace to {filename}: {e}")
 
-    def _load_data(self, filename: str, whine_if_not_found: bool, save_type: _SaveType) -> bool:
+    def _save_session(self, filename: str) -> None:
+        try:
+            json_data = self._functions_graph_gui.save_session_to_json()
+        except Exception as e:
+            logging.error(f"FiatGui: error building session JSON: {e}\n{traceback.format_exc()}")
+            return
+        try:
+            with open(filename, "w") as f:
+                json.dump(json_data, f, indent=4)
+        except Exception as e:
+            logging.error(f"FiatGui: error saving session to {filename}: {e}")
+
+    def _load_workspace(self, filename: str, whine_if_not_found: bool) -> bool:
         try:
             with open(filename, "r") as f:
                 json_data = json.load(f)
-        except json.JSONDecodeError as e:
-            logging.warning(
-                f"""
-                JSONDecodeError when loading state file {self._user_settings_filename()}:
-                (json.JSONDecodeError)
-                ========================================
-                {e}
-                """
-            )
-            return False
         except FileNotFoundError:
             if whine_if_not_found:
-                logging.warning(f"Could not find state file {self._user_settings_filename()}")
+                logging.warning(f"FiatGui: workspace file not found: {filename}")
             return False
+        except json.JSONDecodeError as e:
+            logging.warning(f"FiatGui: workspace JSON decode error in {filename}: {e}")
+            return False
+        rebuild_topology = self.params.customizable_graph
         try:
-            if save_type == _SaveType.UserInputs:
-                self._functions_graph_gui.load_user_inputs_from_json(json_data["user_inputs"])
-                self._functions_graph_gui.load_gui_options_from_json(json_data["gui_options"])
-                # node_positions is optional — older saves don't have it, and
-                # programmatic-mode startup may run before any prior save.
-                if "node_positions" in json_data:
-                    self._functions_graph_gui.load_node_positions_from_json(json_data["node_positions"])
-            elif save_type == _SaveType.GraphComposition:
-
-                def factor_function_from_name(name: str) -> Any:
-                    return self._function_palette.factor_function_from_name(name)
-
-                self._functions_graph_gui.load_graph_composition_from_json(json_data, factor_function_from_name)
-        except Exception as e:
-            logging.warning(
-                f"""
-                Error loading state file {self._user_settings_filename()}:
-                (while invoking load_user_inputs_from_json: the nodes may have changed)
-                ========================================
-                Exception: {e}
-                ========================================
-                Traceback
-                {traceback.format_exc()}
-                """
+            self._functions_graph_gui.load_workspace_from_json(
+                json_data,
+                self._function_palette.factor_function_from_ref,
+                rebuild_topology=rebuild_topology,
             )
-            # log traceback
-
+        except Exception as e:
+            logging.warning(f"FiatGui: error loading workspace from {filename}: {e}\n{traceback.format_exc()}")
             return False
-
         return True
 
-    def _load_user_inputs_at_startup(self) -> None:
-        self._load_data(self._user_settings_filename(), whine_if_not_found=False, save_type=_SaveType.UserInputs)
+    def _load_session(self, filename: str, whine_if_not_found: bool) -> bool:
+        try:
+            with open(filename, "r") as f:
+                json_data = json.load(f)
+        except FileNotFoundError:
+            if whine_if_not_found:
+                logging.warning(f"FiatGui: session file not found: {filename}")
+            return False
+        except json.JSONDecodeError as e:
+            logging.warning(f"FiatGui: session JSON decode error in {filename}: {e}")
+            return False
+        try:
+            self._functions_graph_gui.load_session_from_json(json_data)
+        except Exception as e:
+            logging.warning(f"FiatGui: error loading session from {filename}: {e}")
+            return False
+        return True
 
-    def _load_user_inputs_during_execution(self, filename: str) -> None:
-        success = self._load_data(filename, whine_if_not_found=True, save_type=_SaveType.UserInputs)
+    def _load_workspace_at_startup(self) -> None:
+        self._load_workspace(self._workspace_filename(), whine_if_not_found=False)
+
+    def _load_session_at_startup(self) -> None:
+        self._load_session(self._session_filename(), whine_if_not_found=False)
+
+    def _load_workspace_during_execution(self, filename: str) -> None:
+        success = self._load_workspace(filename, whine_if_not_found=True)
         if success:
             self._functions_graph_gui.invoke_all_functions(also_invoke_manual_function=False)
             self._notify_if_dirty_functions()
-
-    def _load_graph_composition_at_startup(self) -> None:
-        self._load_data(
-            self._graph_composition_filename(), whine_if_not_found=False, save_type=_SaveType.GraphComposition
-        )
-
-    def _load_graph_composition_during_execution(self, filename: str) -> None:
-        success = self._load_data(filename, whine_if_not_found=True, save_type=_SaveType.GraphComposition)
-        if success:
-            self._functions_graph_gui.invoke_all_functions(also_invoke_manual_function=False)
-
-    def _save_user_inputs(self, filename: str) -> None:
-        self._save_data(filename, _SaveType.UserInputs)
-
-    def _save_graph_composition(self, filename: str) -> None:
-        self._save_data(filename, _SaveType.GraphComposition)
 
 
 def _fiat_run_graph(
