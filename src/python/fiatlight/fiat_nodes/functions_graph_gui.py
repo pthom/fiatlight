@@ -88,6 +88,10 @@ class FunctionsGraphGui:
     #     `ed.begin/end` block (calling it from inside is a no-op in this
     #     binding); we fire it after `ed.end()` from `draw()`.
     _navigate_after_load_frame: int | None = None
+    # Screen-space top-left of the editor canvas widget, captured each frame
+    # right before `ed.begin`. Combined with `ed.get_screen_size()` it gives
+    # the canvas widget's screen rect, used by `_all_nodes_fit_in_canvas_view`.
+    _canvas_screen_top_left: ImVec2 | None = None
 
     # ======================================================================================================================
     # Constructor
@@ -149,6 +153,10 @@ class FunctionsGraphGui:
         nodes_changed = False
         with imgui_ctx.push_obj_id(self):
             fiat_node_semaphore._IS_RENDERING_IN_NODE = True
+            # Captured before ed.begin: after begin, get_cursor_screen_pos
+            # would return a canvas-space coord, not the widget's screen TL.
+            cursor = imgui.get_cursor_screen_pos()
+            self._canvas_screen_top_left = ImVec2(cursor.x, cursor.y)
             ed.begin("FunctionsGraphGui")
             self._apply_pending_loaded_positions()
             self._apply_pending_node_position()
@@ -639,8 +647,31 @@ class FunctionsGraphGui:
             return
         if imgui.get_frame_count() < self._navigate_after_load_frame:
             return
-        ed.navigate_to_content(0.05)
+        if not self._all_nodes_fit_in_canvas_view():
+            ed.navigate_to_content(0.05)
         self._navigate_after_load_frame = None
+
+    def _all_nodes_fit_in_canvas_view(self) -> bool:
+        """True if every node's screen-space rect lies fully inside the canvas widget's current screen rect."""
+        if self._canvas_screen_top_left is None or len(self.function_nodes_gui) == 0:
+            return False
+        canvas_size = ed.get_screen_size()
+        canvas_min = self._canvas_screen_top_left
+        canvas_max = ImVec2(canvas_min.x + canvas_size.x, canvas_min.y + canvas_size.y)
+        for fn in self.function_nodes_gui:
+            node_id = fn.node_id()
+            node_canvas_tl = ed.get_node_position(node_id)
+            node_canvas_br = node_canvas_tl + ed.get_node_size(node_id)
+            node_screen_tl = ed.canvas_to_screen(node_canvas_tl)
+            node_screen_br = ed.canvas_to_screen(node_canvas_br)
+            if (
+                node_screen_tl.x < canvas_min.x
+                or node_screen_tl.y < canvas_min.y
+                or node_screen_br.x > canvas_max.x
+                or node_screen_br.y > canvas_max.y
+            ):
+                return False
+        return True
 
     def _function_node_gui_from_id(self, node_id: ed.NodeId) -> FunctionNodeGui:
         matching_nodes = [fn for fn in self.function_nodes_gui if fn.node_id() == node_id]
