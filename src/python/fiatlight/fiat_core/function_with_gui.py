@@ -1,5 +1,6 @@
 """FunctionWithGui: add GUI to a function"""
 
+import functools
 from fiatlight.fiat_config import get_fiat_config
 from fiatlight.fiat_core.togui_exception import FiatToGuiException
 from fiatlight.fiat_types import UnspecifiedValue, ErrorValue, JsonDict, GuiType
@@ -14,6 +15,31 @@ from typing import Any, List, final, Callable, Optional, Type, TypeAlias
 from dataclasses import dataclass
 
 import logging
+
+
+def _derive_function_ref(fn: Callable[..., Any]) -> str:
+    """Stable cross-run identity for a Python function: 'module.qualname'.
+
+    Refuses lambdas and functools.partial — they have no useable identity
+    that survives a restart. Such inputs must be replaced by a regular
+    `def`-defined function before they can be wrapped in a FunctionWithGui.
+    """
+    if isinstance(fn, functools.partial):
+        raise FiatToGuiException(
+            "FunctionWithGui: functools.partial is not supported. "
+            "Wrap the partial in a regular function (def ...) so it has a stable identity."
+        )
+    if getattr(fn, "__name__", None) == "<lambda>":
+        raise FiatToGuiException(
+            "FunctionWithGui: lambdas are not supported. Define the function with `def` so it has a stable identity."
+        )
+    qualname: str | None = getattr(fn, "__qualname__", None)
+    if qualname is None:
+        raise FiatToGuiException(f"FunctionWithGui: cannot derive a stable identity for {fn!r} (no __qualname__).")
+    module: str = getattr(fn, "__module__", "") or ""
+    if module:
+        return f"{module}.{qualname}"
+    return qualname
 
 
 class FunctionPossibleFiatAttributes(PossibleFiatAttributes):
@@ -153,6 +179,13 @@ class FunctionWithGui:
     # the display name of the function (will use the function name if empty)
     label: str = ""
 
+    # Stable identity of the wrapped Python function, used as the registry key
+    # when saving/loading workspaces. Derived from `f"{fn.__module__}.{fn.__qualname__}"`
+    # at construction. Empty when the FunctionWithGui has no underlying Python fn
+    # (e.g. some MarkdownNode constructions). Lambdas and `functools.partial` are
+    # rejected — they have no stable, hashable identity across runs.
+    function_ref: str = ""
+
     #
     # Behavioral Flags
     # ----------------
@@ -291,6 +324,7 @@ class FunctionWithGui:
         if fn is not None:
             if self.function_name == "":
                 self.function_name = fn.__name__ if hasattr(fn, "__name__") else ""
+            self.function_ref = _derive_function_ref(fn)
             if fiat_attributes is None:
                 fiat_attributes = FiatAttributes(fn.__dict__) if hasattr(fn, "__dict__") else FiatAttributes({})
             add_input_outputs_to_function(

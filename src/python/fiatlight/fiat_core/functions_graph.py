@@ -42,6 +42,11 @@ class FunctionsGraph:
     # the list of links between the FunctionNode
     functions_nodes_links: list[FunctionNodeLink]
 
+    # Monotonic counter for minting stable node ids (`n1`, `n2`, …). Never reused,
+    # even after a node is removed, so saved data keyed by old ids cannot accidentally
+    # bind to a different node later.
+    _stable_id_counter: int = 0
+
     _secret_key: str = "FunctionsGraph"
 
     class _Construction_Section:  # Dummy class to create a section in the IDE # noqa
@@ -61,6 +66,12 @@ class FunctionsGraph:
             )
         self.functions_nodes = []
         self.functions_nodes_links = []
+        self._stable_id_counter = 0
+
+    def _next_stable_id(self) -> str:
+        """Mint a fresh stable id (`n1`, `n2`, …). Never reused, even after a node is removed."""
+        self._stable_id_counter += 1
+        return f"n{self._stable_id_counter}"
 
     @staticmethod
     def create_empty() -> "FunctionsGraph":
@@ -165,7 +176,7 @@ class FunctionsGraph:
             r = self._add_function_with_gui(f_gui_with_distinct_name())
             return r
 
-        f_node = FunctionNode(f_gui)
+        f_node = FunctionNode(f_gui, stable_id=self._next_stable_id())
         self.functions_nodes.append(f_node)
         return f_node
 
@@ -353,6 +364,10 @@ class FunctionsGraph:
 
     def merge_graph(self, other: "FunctionsGraph") -> None:
         """Merge another FunctionsGraph into this one"""
+        # Re-mint stable ids on incoming nodes; otherwise their counters
+        # collide with this graph's.
+        for fn_node in other.functions_nodes:
+            fn_node.stable_id = self._next_stable_id()
         self.functions_nodes.extend(other.functions_nodes)
         self.functions_nodes_links.extend(other.functions_nodes_links)
 
@@ -455,11 +470,18 @@ class FunctionsGraph:
                 return candidate_nodes[0]
 
     def _function_node_with_name(self, function_name: str) -> FunctionNode:
-        """Get the function with the unique name"""
-        for fn in self.functions_nodes:
-            if fn.function_with_gui.function_name == function_name:
-                return fn
-        raise ValueError(f"No function with the name {function_name}")
+        """Get the function with the unique name. Raises if no match or if multiple
+        nodes share that name (D5: `add_link` callers must disambiguate by passing a
+        node handle directly when the same function appears more than once)."""
+        matches = [fn for fn in self.functions_nodes if fn.function_with_gui.function_name == function_name]
+        if len(matches) == 0:
+            raise ValueError(f"No function with the name {function_name}")
+        if len(matches) > 1:
+            raise ValueError(
+                f"Name {function_name!r} resolves to {len(matches)} nodes; "
+                "pass a node handle (the FunctionNode returned by add_function) instead."
+            )
+        return matches[0]
 
     def shall_display_refresh_needed_label(self) -> bool:
         """Returns True if any function node shall display a "Refresh needed" label"""

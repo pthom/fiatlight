@@ -83,7 +83,7 @@ class FunctionNodeGui:
     _function_node: FunctionNode
 
     # The node Ids for imgui_node_editor
-    _node_id: ed.NodeId
+    _ed_node_id: ed.NodeId
     _pins_input: Dict[str, ed.PinId]
     _pins_output: Dict[int, ed.PinId]
 
@@ -121,7 +121,7 @@ class FunctionNodeGui:
     def __init__(self, function_node: FunctionNode) -> None:
         self._function_node = function_node
 
-        self._node_id = ed.NodeId.create()
+        self._ed_node_id = ed.NodeId.create()
 
         self._pins_input = {}
         for input_name in self._function_node.function_with_gui.all_inputs_names():
@@ -158,7 +158,7 @@ class FunctionNodeGui:
         pass
 
     def node_id(self) -> ed.NodeId:
-        return self._node_id
+        return self._ed_node_id
 
     def node_size(self) -> ImVec2:
         assert self._node_size is not None
@@ -227,10 +227,10 @@ class FunctionNodeGui:
                 id_node_or_focused = "node" if fiat_utils.is_rendering_in_node() else "focused"
                 imgui.push_id(id_node_or_focused)
                 if fiat_utils.is_rendering_in_node():
-                    ed.begin_node(self._node_id)
+                    ed.begin_node(self._ed_node_id)
                 else:
                     imgui.begin_group()
-                _CURRENT_FUNCTION_NODE_ID = self._node_id
+                _CURRENT_FUNCTION_NODE_ID = self._ed_node_id
                 with imgui_ctx.begin_vertical("node_content"):
                     # Title
                     with imgui_ctx.begin_horizontal("Title"):
@@ -277,7 +277,7 @@ class FunctionNodeGui:
                     FunctionWithGui Type={type(function_with_gui)}
             """
                 raise Exception(msg) from e
-            self._node_size = ed.get_node_size(self._node_id)
+            self._node_size = ed.get_node_size(self._ed_node_id)
         return inputs_changed
 
     class _Draw_Title_Section:  # Dummy class to create a section in the IDE # noqa
@@ -601,7 +601,7 @@ class FunctionNodeGui:
         # Instantiate the node separator parameters
         #
         node_separator_params = fiat_widgets.NodeSeparatorParams()
-        node_separator_params.parent_node = self._node_id
+        node_separator_params.parent_node = self._ed_node_id
         # expanded state
         node_separator_params.expanded = self._inputs_expanded.current_value()
         # Separator text
@@ -691,7 +691,7 @@ class FunctionNodeGui:
         # Instantiate the node separator parameters
         #
         node_separator_params = fiat_widgets.NodeSeparatorParams()
-        node_separator_params.parent_node = self._node_id
+        node_separator_params.parent_node = self._ed_node_id
         # expanded state
         node_separator_params.expanded = self._outputs_expanded.current_value()
         # Separator text
@@ -798,7 +798,7 @@ class FunctionNodeGui:
         #
         if not is_gui_only_node:
             node_separator_params = fiat_widgets.NodeSeparatorParams()
-            node_separator_params.parent_node = self._node_id
+            node_separator_params.parent_node = self._ed_node_id
             # expanded state
             node_separator_params.expanded = expanded
             # Separator text
@@ -861,7 +861,7 @@ class FunctionNodeGui:
         # Instantiate the node separator parameters
         #
         node_separator_params = fiat_widgets.NodeSeparatorParams()
-        node_separator_params.parent_node = self._node_id
+        node_separator_params.parent_node = self._ed_node_id
         node_separator_params.expanded = self.fiat_tuning_expanded.current_value()
         node_separator_params.text = "Fiat Tuning"
         node_separator_params.show_collapse_button = True

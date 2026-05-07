@@ -52,14 +52,21 @@ class FunctionNode:
     output_links: list[FunctionNodeLink]
     input_links: list[FunctionNodeLink]
 
+    # Stable identifier for this node within its FunctionsGraph. Set by the
+    # graph at construction. Survives saves/loads. Distinct from
+    # FunctionNodeGui._ed_node_id, which is the ephemeral imgui-node-editor
+    # id regenerated each session.
+    stable_id: str
+
     # Invoke related members
     _nb_inputs_changes = 0
     _input_changes_during_async = False
     _async_invoke_thread: threading.Thread | None = None
     _inputs_changed_again_during_async: bool = False
 
-    def __init__(self, function_with_gui: FunctionWithGui) -> None:
+    def __init__(self, function_with_gui: FunctionWithGui, stable_id: str) -> None:
         self.function_with_gui = function_with_gui
+        self.stable_id = stable_id
         self.output_links = []
         self.input_links = []
 
