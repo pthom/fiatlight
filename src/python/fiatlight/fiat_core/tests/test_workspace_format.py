@@ -1,6 +1,6 @@
 """Round-trip tests for the workspace JSON format introduced in
 PR 3 of the graph-persistence rework. Covers `FunctionsGraph`-level
-core data only — GUI-layer round-trip (positions, expand flags,
+core data only. GUI-layer round-trip (positions, expand flags,
 session) requires an imgui-node-editor context and is exercised by
 manual smoke testing."""
 

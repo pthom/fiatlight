@@ -76,8 +76,8 @@ class FunctionsGraphGui:
     # an ed.begin/end block — defer to the next frame.
     _pending_node_position: Tuple[ed.NodeId, ImVec2] | None = None
     # Positions loaded from disk, applied lazily inside ed.begin/end on the
-    # next draw — `ed.set_node_position` is only valid in that scope. Keyed
-    # by stable_id (the workspace format key).
+    # next draw, since `ed.set_node_position` is only valid in that scope.
+    # Keyed by stable_id (the workspace format key).
     _pending_loaded_positions_by_stable_id: Dict[str, ImVec2] | None = None
 
     # ======================================================================================================================
@@ -646,10 +646,10 @@ class FunctionsGraphGui:
         """
         # ======================================================================================================================
         # Two JSON files live side by side:
-        #   * the workspace — everything needed to reconstruct the graph the
+        #   * the workspace: everything needed to reconstruct the graph the
         #     user sees (nodes, links, values, per-pin GUI option blobs, node
         #     positions, expand flags). Shareable between machines.
-        #   * the session — local view state (focused-mode visibility, and
+        #   * the session: local view state (focused-mode visibility, and
         #     eventually canvas viewport). Per installation, never shared.
         # ======================================================================================================================
         """
@@ -661,7 +661,7 @@ class FunctionsGraphGui:
     # Per-node FunctionNodeGui flags that affect how big the node draws.
     # Saved alongside positions because they change layout, so a workspace
     # opened on a second machine looks the same. `_focused_function_visible`
-    # is excluded — it's a transient view state that lives in the session
+    # is excluded: it's a transient view state that lives in the session
     # file, not the shareable workspace. The `_function_node` block (per-pin
     # GUI options) is excluded too: the same data is already saved at the
     # workspace's `input_gui_options` / `output_gui_options` level.
@@ -729,7 +729,7 @@ class FunctionsGraphGui:
             expand_flags = node_data.get("expand_flags")
             if isinstance(expand_flags, dict):
                 self._load_expand_flags(fn_node_gui, expand_flags)
-        # Reuse PR 2's queue mechanism — applied inside ed.begin/end on the
+        # Reuse PR 2's queue mechanism: applied inside ed.begin/end on the
         # next draw. Stable-id keying is wired through
         # `_apply_pending_loaded_positions_by_stable_id` below.
         self._pending_loaded_positions_by_stable_id = pending_positions or None

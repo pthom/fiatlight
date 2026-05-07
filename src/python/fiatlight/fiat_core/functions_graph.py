@@ -370,7 +370,7 @@ class FunctionsGraph:
           failing that, the function's name. So if you wrote
           `graph.add_function(cos, label="cos1")`, you can use `"cos1"`.
           When the same function is added several times with the same label
-          (or no label), the string is ambiguous and `add_link` raises —
+          (or no label), the string is ambiguous and `add_link` raises;
           use a node handle instead (see below).
         - **As a node handle**: the `FunctionNode` returned by
           `add_function` / `add_gui_node` / etc. Always unambiguous, so this
@@ -385,7 +385,7 @@ class FunctionsGraph:
             graph.add_link(n_a, n_b)
             graph.add_link("load_image", "blur")     # equivalent
 
-            # Same function used twice — pass handles to disambiguate.
+            # Same function used twice; pass handles to disambiguate.
             cos1 = graph.add_function(cos, label="cos1")
             cos2 = graph.add_function(cos, label="cos2")
             graph.add_link(cos1, cos2)
@@ -522,7 +522,7 @@ class FunctionsGraph:
         wrapped function's name.
 
         A single node may match through both fields (default case: label
-        defaults to function_name) — that's still one match, not two. The
+        defaults to function_name); that's still one match, not two. The
         ambiguous case is when *different* nodes match the same string;
         callers must pass a `FunctionNode` handle in that case (see the
         `add_link` docstring for examples).
@@ -618,7 +618,7 @@ class FunctionsGraph:
 
         Saved nodes whose function_ref is no longer registered are skipped
         with a warning, and any link that touches a missing endpoint is
-        dropped — load is best-effort, never raises on a single bad node.
+        dropped: load is best-effort, never raises on a single bad node.
         """
         import logging
 

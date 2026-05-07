@@ -4,8 +4,6 @@
 `AnyDataGuiCallbacks` as explicit keyword-only parameters and produce a
 factory / a registered type. Explicit kwargs (no `**kwargs: Any`) so
 typos are caught by mypy + IDE autocomplete, not at runtime.
-
-See `_plans/anydatawithgui_ergonomics__spec.md` for the design rationale.
 """
 
 from typing import Any, Callable, cast

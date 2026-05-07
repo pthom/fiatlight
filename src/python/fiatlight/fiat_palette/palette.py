@@ -214,7 +214,7 @@ class FunctionPalette:
         """Look up a `function_ref` (the `module.qualname` string carried in
         saved workspaces) and call the registered factory to produce a fresh
         FunctionWithGui. Raises ValueError if no registered function has
-        that ref — the workspace loader catches this to drop orphaned nodes
+        that ref; the workspace loader catches this to drop orphaned nodes
         gracefully."""
         for function_info in self._functions:
             if function_info.function_ref and function_info.function_ref == function_ref:

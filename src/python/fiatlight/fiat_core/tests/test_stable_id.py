@@ -47,7 +47,7 @@ def test_function_ref_refuses_functools_partial() -> None:
 
 def test_add_link_raises_on_ambiguous_name() -> None:
     """Two nodes wrapping the same function share a function_name. String
-    addressing must raise rather than silently bind to one of them — the
+    addressing must raise rather than silently bind to one of them; the
     error guides the caller to capture the FunctionNode handle returned by
     add_function and pass that instead."""
     g = FunctionsGraph()

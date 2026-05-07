@@ -20,7 +20,7 @@ import logging
 def _derive_function_ref(fn: Callable[..., Any]) -> str:
     """Stable cross-run identity for a Python function: 'module.qualname'.
 
-    Refuses lambdas and functools.partial — they have no useable identity
+    Refuses lambdas and functools.partial, since they have no useable identity
     that survives a restart. Such inputs must be replaced by a regular
     `def`-defined function before they can be wrapped in a FunctionWithGui.
     """
@@ -183,7 +183,7 @@ class FunctionWithGui:
     # when saving/loading workspaces. Derived from `f"{fn.__module__}.{fn.__qualname__}"`
     # at construction. Empty when the FunctionWithGui has no underlying Python fn
     # (e.g. some MarkdownNode constructions). Lambdas and `functools.partial` are
-    # rejected — they have no stable, hashable identity across runs.
+    # rejected: they have no stable, hashable identity across runs.
     function_ref: str = ""
 
     #

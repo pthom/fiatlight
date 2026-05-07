@@ -2,7 +2,7 @@
 
 Text-only summaries; visualization on top of an image is the job of a
 `drawContours` node. We use `register_callbacks` so the per-type
-boilerplate stays minimal — see _plans/anydatawithgui_ergonomics__spec.md.
+boilerplate stays minimal.
 """
 
 from imgui_bundle import imgui

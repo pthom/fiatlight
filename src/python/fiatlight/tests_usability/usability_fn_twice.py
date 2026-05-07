@@ -2,8 +2,8 @@
 
 Demonstrates the two ways `add_link` can address such nodes:
 
-1. By string — pass the `label` you gave the node when adding it.
-2. By handle — capture the FunctionNode that `add_function` returns and
+1. By string: pass the `label` you gave the node when adding it.
+2. By handle: capture the FunctionNode that `add_function` returns and
    pass it directly. Use this when you didn't set a unique label, or
    when you want to be explicit.
 
