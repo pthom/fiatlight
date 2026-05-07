@@ -152,8 +152,13 @@ class FunctionNode:
         return user_inputs
 
     def load_user_inputs_from_json(self, json_data: JsonDict) -> None:
+        # A param can be editable at load time but absent from the saved data
+        # (e.g. it was linked at save time, so save_user_inputs_to_json skipped
+        # it). Tolerate the gap rather than KeyError'ing — loader runs nodes
+        # before links, so this is the normal path.
         for input_param in self.user_editable_params():
-            input_param.load_self_value_from_dict(json_data[input_param.name])
+            if input_param.name in json_data:
+                input_param.load_self_value_from_dict(json_data[input_param.name])
 
     def save_gui_options_to_json(self) -> JsonDict:
         return self.function_with_gui.save_gui_options_to_json()

@@ -79,6 +79,10 @@ class FunctionsGraphGui:
     # next draw. Keyed by FunctionWithGui.function_name (matching today's
     # other save keys); switches to stable_id when the workspace format lands.
     _pending_loaded_positions: Dict[str, ImVec2] | None = None
+    # New id-keyed pending positions, used by load_workspace_from_json.
+    # Both pending dicts coexist during PR 3 sub-commits 2/3 — the legacy
+    # one will go away in the FiatGui switchover (sub-commit 3).
+    _pending_loaded_positions_by_stable_id: Dict[str, ImVec2] | None = None
 
     # ======================================================================================================================
     # Constructor
@@ -592,17 +596,24 @@ class FunctionsGraphGui:
         self._pending_node_position = None
 
     def _apply_pending_loaded_positions(self) -> None:
-        """Apply positions queued by `load_node_positions_from_json`. Called
-        from `draw()` inside `ed.begin/end`, which is the only context where
-        `ed.set_node_position` is allowed."""
-        if self._pending_loaded_positions is None:
-            return
-        for fn in self.function_nodes_gui:
-            name = self.function_name(fn)
-            saved = self._pending_loaded_positions.get(name)
-            if saved is not None:
-                ed.set_node_position(fn.node_id(), saved)
-        self._pending_loaded_positions = None
+        """Apply positions queued by `load_node_positions_from_json` (legacy,
+        function_name-keyed) or `load_workspace_from_json` (stable_id-keyed).
+        Called from `draw()` inside `ed.begin/end`, which is the only context
+        where `ed.set_node_position` is allowed."""
+        if self._pending_loaded_positions is not None:
+            for fn in self.function_nodes_gui:
+                name = self.function_name(fn)
+                saved = self._pending_loaded_positions.get(name)
+                if saved is not None:
+                    ed.set_node_position(fn.node_id(), saved)
+            self._pending_loaded_positions = None
+        if self._pending_loaded_positions_by_stable_id is not None:
+            for fn in self.function_nodes_gui:
+                sid = fn.get_function_node().stable_id
+                saved = self._pending_loaded_positions_by_stable_id.get(sid)
+                if saved is not None:
+                    ed.set_node_position(fn.node_id(), saved)
+            self._pending_loaded_positions_by_stable_id = None
 
     def _function_node_gui_from_id(self, node_id: ed.NodeId) -> FunctionNodeGui:
         matching_nodes = [fn for fn in self.function_nodes_gui if fn.node_id() == node_id]
@@ -705,3 +716,131 @@ class FunctionsGraphGui:
             if isinstance(xy, list) and len(xy) == 2:
                 pending[name] = ImVec2(float(xy[0]), float(xy[1]))
         self._pending_loaded_positions = pending
+
+    # ------------------------------------------------------------------
+    # Workspace / session — new id-keyed format (graph persistence PR 3).
+    # Wired into FiatGui in the next sub-commit. See spec §6 / §9.
+    # ------------------------------------------------------------------
+
+    _WORKSPACE_VERSION = 1
+    _SESSION_VERSION = 1
+    # Subset of FunctionNodeGui state that affects node geometry. Sliced
+    # here on save and re-applied on load; the `_function_node` block (per-pin
+    # GUI options) is carried separately in input_gui_options/output_gui_options
+    # and `_focused_function_visible` lives in the session file.
+    _WORKSPACE_EXPAND_FIELDS = (
+        "_inputs_expanded",
+        "_outputs_expanded",
+        "_doc_expanded",
+        "fiat_tuning_expanded",
+        "_internal_state_gui_expanded",
+        "_backup_expanded_states",
+    )
+
+    def save_workspace_to_json(self) -> JsonDict:
+        """Full workspace JSON: core data (topology, links, values, per-pin
+        GUI option blobs) + GUI-layer fields (position, expand_flags). See
+        spec §6 for the schema. Includes `version`."""
+        core = self.functions_graph.save_workspace_core_to_json()
+        nodes = core["nodes"]
+        for fn_node_gui in self.function_nodes_gui:
+            sid = fn_node_gui.get_function_node().stable_id
+            entry = nodes.get(sid)
+            if entry is None:
+                continue
+            pos = ed.get_node_position(fn_node_gui.node_id())
+            entry["position"] = [pos.x, pos.y]
+            entry["expand_flags"] = self._save_expand_flags(fn_node_gui)
+        return {"version": self._WORKSPACE_VERSION, **core}
+
+    def load_workspace_from_json(
+        self,
+        json_data: JsonDict,
+        function_factory_from_ref: FunctionWithGuiFactoryFromName,
+        *,
+        rebuild_topology: bool = True,
+    ) -> None:
+        """Inverse of `save_workspace_to_json`. ``rebuild_topology=False`` is
+        the programmatic-mode path: the graph is already built from code, we
+        only restore per-node values + GUI options + position + expand flags.
+
+        Positions are queued for deferred application inside `ed.begin/end`.
+        """
+        version = json_data.get("version", 1)
+        if isinstance(version, int) and version > self._WORKSPACE_VERSION:
+            raise ValueError(
+                f"Workspace version {version} is newer than this build supports ({self._WORKSPACE_VERSION})."
+            )
+
+        self.functions_graph.load_workspace_core_from_json(
+            json_data, function_factory_from_ref, rebuild_topology=rebuild_topology
+        )
+        if rebuild_topology:
+            self._create_function_nodes_and_links_gui()
+
+        nodes_data = json_data.get("nodes", {})
+        pending_positions: Dict[str, ImVec2] = {}
+        for fn_node_gui in self.function_nodes_gui:
+            sid = fn_node_gui.get_function_node().stable_id
+            node_data = nodes_data.get(sid)
+            if not isinstance(node_data, dict):
+                continue
+            pos = node_data.get("position")
+            if isinstance(pos, list) and len(pos) == 2:
+                pending_positions[sid] = ImVec2(float(pos[0]), float(pos[1]))
+            expand_flags = node_data.get("expand_flags")
+            if isinstance(expand_flags, dict):
+                self._load_expand_flags(fn_node_gui, expand_flags)
+        # Reuse PR 2's queue mechanism — applied inside ed.begin/end on the
+        # next draw. Stable-id keying is wired through
+        # `_apply_pending_loaded_positions_by_stable_id` below.
+        self._pending_loaded_positions_by_stable_id = pending_positions or None
+
+    def save_session_to_json(self) -> JsonDict:
+        """Session JSON: per-installation, never shared. Today this is just
+        the focused-mode visibility flag per node. Canvas viewport (zoom +
+        scroll) cannot round-trip through the public ed API in this build,
+        so it's deferred."""
+        focused: Dict[str, bool] = {}
+        for fn_node_gui in self.function_nodes_gui:
+            sid = fn_node_gui.get_function_node().stable_id
+            focused[sid] = bool(fn_node_gui._focused_function_visible)
+        return {
+            "version": self._SESSION_VERSION,
+            "focused_function_visible": focused,
+        }
+
+    def load_session_from_json(self, json_data: JsonDict) -> None:
+        version = json_data.get("version", 1)
+        if isinstance(version, int) and version > self._SESSION_VERSION:
+            raise ValueError(f"Session version {version} is newer than this build supports ({self._SESSION_VERSION}).")
+        focused = json_data.get("focused_function_visible", {})
+        if not isinstance(focused, dict):
+            return
+        for fn_node_gui in self.function_nodes_gui:
+            sid = fn_node_gui.get_function_node().stable_id
+            if sid in focused:
+                fn_node_gui._focused_function_visible = bool(focused[sid])
+
+    @classmethod
+    def _save_expand_flags(cls, fn_node_gui: FunctionNodeGui) -> JsonDict:
+        out: JsonDict = {}
+        for field in cls._WORKSPACE_EXPAND_FIELDS:
+            value = getattr(fn_node_gui, field)
+            out[field] = value.save_to_dict()
+        return out
+
+    @classmethod
+    def _load_expand_flags(cls, fn_node_gui: FunctionNodeGui, data: JsonDict) -> None:
+        from fiatlight.fiat_nodes.value_in_node_vs_focused import (
+            ExpandedFlagInNodeVsFocused,
+            FlagsDictInNodeVsFocused,
+        )
+
+        for field in cls._WORKSPACE_EXPAND_FIELDS:
+            if field not in data:
+                continue
+            if field == "_backup_expanded_states":
+                setattr(fn_node_gui, field, FlagsDictInNodeVsFocused.load_from_dict(data[field]))
+            else:
+                setattr(fn_node_gui, field, ExpandedFlagInNodeVsFocused.load_from_dict(data[field]))

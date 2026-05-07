@@ -160,7 +160,7 @@ class FunctionsGraph:
 
         pass
 
-    def _add_function_with_gui(self, f_gui: FunctionWithGui) -> FunctionNode:
+    def _add_function_with_gui(self, f_gui: FunctionWithGui, stable_id: str | None = None) -> FunctionNode:
         def has_already_function_with_same_name() -> bool:
             for fn in self.functions_nodes:
                 if fn.function_with_gui.function_name == f_gui.function_name:
@@ -172,13 +172,37 @@ class FunctionsGraph:
             f_gui_2.function_name = f"{f_gui.function_name}_2"
             return f_gui_2
 
-        if has_already_function_with_same_name():
+        if stable_id is None and has_already_function_with_same_name():
+            # Suffix-rename to keep legacy save/load (keyed by function_name)
+            # working until the workspace format takes over. When a stable_id
+            # is explicitly given (workspace loader path), skip the rename —
+            # the workspace already disambiguates by id.
             r = self._add_function_with_gui(f_gui_with_distinct_name())
             return r
 
-        f_node = FunctionNode(f_gui, stable_id=self._next_stable_id())
+        if stable_id is None:
+            stable_id = self._next_stable_id()
+        else:
+            # Keep the counter ahead of any explicitly-supplied id so future
+            # mints don't collide. Tolerate non-`n<int>` ids (treat as counter
+            # bump 0).
+            if stable_id.startswith("n"):
+                try:
+                    n = int(stable_id[1:])
+                    if n > self._stable_id_counter:
+                        self._stable_id_counter = n
+                except ValueError:
+                    pass
+
+        f_node = FunctionNode(f_gui, stable_id=stable_id)
         self.functions_nodes.append(f_node)
         return f_node
+
+    def _function_node_by_stable_id(self, stable_id: str) -> FunctionNode:
+        for fn in self.functions_nodes:
+            if fn.stable_id == stable_id:
+                return fn
+        raise ValueError(f"No function node with stable_id {stable_id!r}")
 
     def _add_function(
         self,
@@ -541,6 +565,139 @@ class FunctionsGraph:
             )
         r = {"functions_names": all_function_names, "functions_nodes_links": links_data}
         return r
+
+    def save_workspace_core_to_json(self) -> JsonDict:
+        """Core workspace data — id-keyed nodes + id-referenced links + per-pin
+        GUI option blobs + input values. No GUI-layer state (positions and
+        expand flags belong to FunctionsGraphGui.save_workspace_to_json).
+
+        Caller is responsible for adding the top-level `version` and any
+        GUI-layer fields. See spec §6 for the full schema.
+        """
+        nodes: JsonDict = {}
+        for fn in self.functions_nodes:
+            f_gui = fn.function_with_gui
+            gui_opts = f_gui.save_gui_options_to_json()
+            entry: JsonDict = {
+                "function_ref": f_gui.function_ref,
+                "function_name": f_gui.function_name,
+                "input_values": fn.save_user_inputs_to_json(),
+                "input_gui_options": gui_opts.get("inputs", {}),
+                "output_gui_options": gui_opts.get("outputs", {}),
+            }
+            internal = gui_opts.get("internal_gui_options")
+            if internal is not None:
+                entry["internal_gui_options"] = internal
+            nodes[fn.stable_id] = entry
+
+        links: List[JsonDict] = []
+        for link in self.functions_nodes_links:
+            links.append(
+                {
+                    "src_node": link.src_function_node.stable_id,
+                    "src_output_idx": link.src_output_idx,
+                    "dst_node": link.dst_function_node.stable_id,
+                    "dst_input_name": link.dst_input_name,
+                }
+            )
+        return {"nodes": nodes, "links": links}
+
+    def load_workspace_core_from_json(
+        self,
+        json_data: JsonDict,
+        function_factory_from_ref: FunctionWithGuiFactoryFromName,
+        *,
+        rebuild_topology: bool = True,
+    ) -> None:
+        """Rebuild from core workspace data. When ``rebuild_topology`` is
+        False (programmatic-mode loader path), nodes and links from
+        ``json_data`` are ignored — code is the source of truth — and only
+        per-node values + GUI option blobs are restored against the existing
+        nodes (matched by stable_id).
+
+        Missing function refs and incompatible links are logged and skipped
+        per spec §11.
+        """
+        import logging
+
+        if rebuild_topology:
+            self.functions_nodes = []
+            self.functions_nodes_links = []
+            self._stable_id_counter = 0
+
+        nodes_data = json_data.get("nodes", {})
+        for stable_id, node_data in nodes_data.items():
+            if rebuild_topology:
+                function_ref = node_data.get("function_ref", "")
+                try:
+                    f_gui = function_factory_from_ref(function_ref)
+                except ValueError as e:
+                    logging.warning(f"Workspace: skipping node {stable_id!r}: {e}")
+                    continue
+                # Restore the saved function_name in case it carried a
+                # disambiguating suffix from the legacy scheme.
+                saved_name = node_data.get("function_name")
+                if saved_name:
+                    f_gui.function_name = saved_name
+                f_node = self._add_function_with_gui(f_gui, stable_id=stable_id)
+            else:
+                try:
+                    f_node = self._function_node_by_stable_id(stable_id)
+                except ValueError:
+                    logging.warning(
+                        f"Workspace: saved node {stable_id!r} has no match in code-defined graph; ignoring."
+                    )
+                    continue
+                f_gui = f_node.function_with_gui
+
+            self._restore_node_payload(f_node, f_gui, node_data)
+
+        if rebuild_topology:
+            self._restore_links_from_workspace(json_data.get("links", []))
+
+    @staticmethod
+    def _restore_node_payload(f_node: FunctionNode, f_gui: FunctionWithGui, node_data: JsonDict) -> None:
+        import logging
+
+        try:
+            f_node.load_user_inputs_from_json(node_data.get("input_values", {}))
+        except Exception as e:
+            logging.warning(f"Workspace: error restoring input values for {f_node.stable_id!r}: {e}")
+        gui_payload: JsonDict = {
+            "inputs": node_data.get("input_gui_options", {}),
+            "outputs": node_data.get("output_gui_options", {}),
+        }
+        if "internal_gui_options" in node_data:
+            gui_payload["internal_gui_options"] = node_data["internal_gui_options"]
+        try:
+            f_gui.load_gui_options_from_json(gui_payload)
+        except Exception as e:
+            logging.warning(f"Workspace: error restoring gui options for {f_node.stable_id!r}: {e}")
+
+    def _restore_links_from_workspace(self, links_data: List[JsonDict]) -> None:
+        import logging
+
+        for link_data in links_data:
+            src_id = link_data.get("src_node")
+            dst_id = link_data.get("dst_node")
+            try:
+                src_node = self._function_node_by_stable_id(src_id) if src_id else None
+                dst_node = self._function_node_by_stable_id(dst_id) if dst_id else None
+            except ValueError as e:
+                logging.warning(f"Workspace: link {src_id!r} -> {dst_id!r} skipped: {e}")
+                continue
+            if src_node is None or dst_node is None:
+                logging.warning(f"Workspace: link {src_id!r} -> {dst_id!r} skipped: missing endpoint id")
+                continue
+            try:
+                self._add_link_from_function_nodes(
+                    src_node,
+                    dst_node,
+                    dst_input_name=link_data.get("dst_input_name"),
+                    src_output_idx=link_data.get("src_output_idx", 0),
+                )
+            except ValueError as e:
+                logging.warning(f"Workspace: link {src_id!r} -> {dst_id!r} rejected: {e}")
 
     def load_graph_composition_from_json(
         self, json_data: JsonDict, function_factory: FunctionWithGuiFactoryFromName
