@@ -1,0 +1,125 @@
+{
+    "version": 1,
+    "nodes": {
+        "n1": {
+            "function_ref": "__main__.f",
+            "function_name": "f",
+            "input_values": {
+                "c3f": {
+                    "name": "c3f",
+                    "data": {
+                        "type": "Tuple",
+                        "value": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ]
+                    }
+                },
+                "c4f": {
+                    "name": "c4f",
+                    "data": {
+                        "type": "Tuple",
+                        "value": [
+                            0.8053097128868103,
+                            0.4525412619113922,
+                            0.4525412619113922,
+                            1.0
+                        ]
+                    }
+                },
+                "c3": {
+                    "name": "c3",
+                    "data": {
+                        "type": "Tuple",
+                        "value": [
+                            167,
+                            231,
+                            171
+                        ]
+                    }
+                },
+                "c4": {
+                    "name": "c4",
+                    "data": {
+                        "type": "Tuple",
+                        "value": [
+                            0,
+                            0,
+                            0,
+                            255
+                        ]
+                    }
+                }
+            },
+            "input_gui_options": {
+                "c3f": {
+                    "cb_options": {},
+                    "expanded": true
+                },
+                "c4f": {
+                    "cb_options": {},
+                    "expanded": true
+                },
+                "c3": {
+                    "cb_options": {},
+                    "expanded": true
+                },
+                "c4": {
+                    "cb_options": {},
+                    "expanded": true
+                }
+            },
+            "output_gui_options": {
+                "0": {
+                    "cb_options": {},
+                    "expanded": true
+                },
+                "1": {
+                    "cb_options": {},
+                    "expanded": true
+                },
+                "2": {
+                    "cb_options": {},
+                    "expanded": true
+                },
+                "3": {
+                    "cb_options": {},
+                    "expanded": true
+                }
+            },
+            "position": [
+                0.0,
+                0.0
+            ],
+            "expand_flags": {
+                "_inputs_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_outputs_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_doc_expanded": {
+                    "inside_node": false,
+                    "focused": true
+                },
+                "fiat_tuning_expanded": {
+                    "inside_node": false,
+                    "focused": true
+                },
+                "_internal_state_gui_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_backup_expanded_states": {
+                    "inside_node": null,
+                    "focused": null
+                }
+            },
+            "focused_function_visible": false
+        }
+    },
+    "links": []
+}

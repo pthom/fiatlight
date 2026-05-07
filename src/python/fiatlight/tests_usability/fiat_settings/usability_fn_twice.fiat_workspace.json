@@ -9,7 +9,7 @@
                     "name": "x",
                     "data": {
                         "type": "Primitive",
-                        "value": 1.1000001430511475
+                        "value": 0.6000000238418579
                     }
                 }
             },
@@ -54,7 +54,8 @@
                     "inside_node": null,
                     "focused": null
                 }
-            }
+            },
+            "focused_function_visible": false
         },
         "n2": {
             "function_ref": "__main__.cos",
@@ -73,8 +74,8 @@
                 }
             },
             "position": [
-                344.0,
-                120.0
+                360.0,
+                10.0
             ],
             "expand_flags": {
                 "_inputs_expanded": {
@@ -101,7 +102,8 @@
                     "inside_node": null,
                     "focused": null
                 }
-            }
+            },
+            "focused_function_visible": false
         },
         "n3": {
             "function_ref": "__main__.cos",
@@ -120,8 +122,8 @@
                 }
             },
             "position": [
-                583.0,
-                0.0
+                616.0,
+                24.0
             ],
             "expand_flags": {
                 "_inputs_expanded": {
@@ -148,7 +150,8 @@
                     "inside_node": null,
                     "focused": null
                 }
-            }
+            },
+            "focused_function_visible": false
         }
     },
     "links": [

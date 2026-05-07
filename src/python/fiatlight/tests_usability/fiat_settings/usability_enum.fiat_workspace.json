@@ -1,0 +1,63 @@
+{
+    "version": 1,
+    "nodes": {
+        "n1": {
+            "function_ref": "__main__.sandbox_enum.<locals>.foo",
+            "function_name": "foo",
+            "input_values": {
+                "x": {
+                    "name": "x",
+                    "data": {
+                        "type": "Enum",
+                        "value_name": "B",
+                        "class": "MyEnum"
+                    }
+                }
+            },
+            "input_gui_options": {
+                "x": {
+                    "cb_options": {},
+                    "expanded": true
+                }
+            },
+            "output_gui_options": {
+                "0": {
+                    "cb_options": {},
+                    "expanded": true
+                }
+            },
+            "position": [
+                0.0,
+                0.0
+            ],
+            "expand_flags": {
+                "_inputs_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_outputs_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_doc_expanded": {
+                    "inside_node": false,
+                    "focused": true
+                },
+                "fiat_tuning_expanded": {
+                    "inside_node": false,
+                    "focused": true
+                },
+                "_internal_state_gui_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_backup_expanded_states": {
+                    "inside_node": null,
+                    "focused": null
+                }
+            },
+            "focused_function_visible": false
+        }
+    },
+    "links": []
+}
