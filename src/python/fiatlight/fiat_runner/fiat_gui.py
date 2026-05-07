@@ -347,6 +347,8 @@ class FiatGui:
         addons.with_node_editor = True
         addons.with_node_editor_config = ed.Config()
         addons.with_node_editor_config.force_window_content_width_to_node_width = True
+        # Disable imgui-node-editor's own JSON autosave
+        addons.with_node_editor_config.settings_file = ""
         addons.with_markdown = True
         addons.with_implot = True
 
@@ -619,18 +621,16 @@ class FiatGui:
         files = [
             self._user_settings_filename(),
             self._graph_composition_filename(),
-            self._node_settings_filename(),
+            # Legacy file from when imgui-node-editor managed its own autosave.
+            # Cleared here so reset-settings purges any stragglers from before
+            # the position-ownership switchover.
+            loc[:-4] + ".node_editor.json",
             loc,
         ]
         for file in files:
             path = pathlib.Path(file)
             if path.exists():
                 path.unlink()
-
-    def _node_settings_filename(self) -> str:
-        loc = hello_imgui.ini_settings_location(self._runner_params)
-        assert loc is not None
-        return loc[:-4] + ".node_editor.json"
 
     def _user_settings_filename(self) -> str:
         loc = hello_imgui.ini_settings_location(self._runner_params)
@@ -655,6 +655,7 @@ class FiatGui:
             json_data = {
                 "user_inputs": self._functions_graph_gui.save_user_inputs_to_json(),
                 "gui_options": self._functions_graph_gui.save_gui_options_to_json(),
+                "node_positions": self._functions_graph_gui.save_node_positions_to_json(),
             }
         elif save_type == _SaveType.GraphComposition:
             json_data = self._functions_graph_gui.save_graph_composition_to_json()
@@ -687,6 +688,10 @@ class FiatGui:
             if save_type == _SaveType.UserInputs:
                 self._functions_graph_gui.load_user_inputs_from_json(json_data["user_inputs"])
                 self._functions_graph_gui.load_gui_options_from_json(json_data["gui_options"])
+                # node_positions is optional — older saves don't have it, and
+                # programmatic-mode startup may run before any prior save.
+                if "node_positions" in json_data:
+                    self._functions_graph_gui.load_node_positions_from_json(json_data["node_positions"])
             elif save_type == _SaveType.GraphComposition:
 
                 def factor_function_from_name(name: str) -> Any:

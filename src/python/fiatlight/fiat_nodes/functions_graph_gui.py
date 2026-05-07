@@ -75,6 +75,10 @@ class FunctionsGraphGui:
     # When a node is spawned from a popup, we need to set its position inside
     # an ed.begin/end block — defer to the next frame.
     _pending_node_position: Tuple[ed.NodeId, ImVec2] | None = None
+    # Positions loaded from disk, applied lazily inside ed.begin/end on the
+    # next draw. Keyed by FunctionWithGui.function_name (matching today's
+    # other save keys); switches to stable_id when the workspace format lands.
+    _pending_loaded_positions: Dict[str, ImVec2] | None = None
 
     # ======================================================================================================================
     # Constructor
@@ -127,6 +131,7 @@ class FunctionsGraphGui:
         with imgui_ctx.push_obj_id(self):
             fiat_node_semaphore._IS_RENDERING_IN_NODE = True
             ed.begin("FunctionsGraphGui")
+            self._apply_pending_loaded_positions()
             self._apply_pending_node_position()
             if draw_nodes():
                 nodes_changed = True
@@ -586,6 +591,19 @@ class FunctionsGraphGui:
         ed.set_node_position(node_id, pos)
         self._pending_node_position = None
 
+    def _apply_pending_loaded_positions(self) -> None:
+        """Apply positions queued by `load_node_positions_from_json`. Called
+        from `draw()` inside `ed.begin/end`, which is the only context where
+        `ed.set_node_position` is allowed."""
+        if self._pending_loaded_positions is None:
+            return
+        for fn in self.function_nodes_gui:
+            name = self.function_name(fn)
+            saved = self._pending_loaded_positions.get(name)
+            if saved is not None:
+                ed.set_node_position(fn.node_id(), saved)
+        self._pending_loaded_positions = None
+
     def _function_node_gui_from_id(self, node_id: ed.NodeId) -> FunctionNodeGui:
         matching_nodes = [fn for fn in self.function_nodes_gui if fn.node_id() == node_id]
         if len(matching_nodes) == 0:
@@ -663,3 +681,22 @@ class FunctionsGraphGui:
     ) -> None:
         self.functions_graph.load_graph_composition_from_json(json_data, function_factory)
         self._create_function_nodes_and_links_gui()
+
+    def save_node_positions_to_json(self) -> JsonDict:
+        """Snapshot every node's canvas position. Keyed by function_name (the
+        same key used by user_inputs / gui_options today). The new workspace
+        format will key by stable_id instead."""
+        out: JsonDict = {}
+        for fn in self.function_nodes_gui:
+            pos = ed.get_node_position(fn.node_id())
+            out[self.function_name(fn)] = [pos.x, pos.y]
+        return out
+
+    def load_node_positions_from_json(self, json_data: JsonDict) -> None:
+        """Queue positions for application on the next `draw()` — `ed.set_node_position`
+        only works inside `ed.begin/end`."""
+        pending: Dict[str, ImVec2] = {}
+        for name, xy in json_data.items():
+            if isinstance(xy, list) and len(xy) == 2:
+                pending[name] = ImVec2(float(xy[0]), float(xy[1]))
+        self._pending_loaded_positions = pending

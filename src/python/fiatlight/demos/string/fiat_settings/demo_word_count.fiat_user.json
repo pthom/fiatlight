@@ -6,7 +6,7 @@
                     "name": "text_file",
                     "data": {
                         "type": "Primitive",
-                        "value": "/Users/pascal/dvp/OpenSource/ImGuiWork/_Bundle/fiatlight/priv_assets/text/hamlet_Shakespeare.txt"
+                        "value": "/Users/pascal/dvp/OpenSource/ImGuiWork/_Bundle/fiatlight/priv_assets/text/hamlet_lower.txt"
                     }
                 }
             },
@@ -17,8 +17,7 @@
                 "min_length": {
                     "name": "min_length",
                     "data": {
-                        "type": "Primitive",
-                        "value": 4
+                        "type": "Unspecified"
                     }
                 }
             },
@@ -50,7 +49,7 @@
                     "focused": true
                 },
                 "fiat_tuning_expanded": {
-                    "inside_node": true,
+                    "inside_node": false,
                     "focused": true
                 },
                 "_internal_state_gui_expanded": {
@@ -107,7 +106,7 @@
                     "focused": true
                 },
                 "fiat_tuning_expanded": {
-                    "inside_node": true,
+                    "inside_node": false,
                     "focused": true
                 },
                 "_internal_state_gui_expanded": {
@@ -164,7 +163,7 @@
                     "focused": true
                 },
                 "fiat_tuning_expanded": {
-                    "inside_node": true,
+                    "inside_node": false,
                     "focused": true
                 },
                 "_internal_state_gui_expanded": {
@@ -221,7 +220,7 @@
                     "focused": true
                 },
                 "fiat_tuning_expanded": {
-                    "inside_node": true,
+                    "inside_node": false,
                     "focused": true
                 },
                 "_internal_state_gui_expanded": {
@@ -278,7 +277,7 @@
                     "focused": true
                 },
                 "fiat_tuning_expanded": {
-                    "inside_node": true,
+                    "inside_node": false,
                     "focused": true
                 },
                 "_internal_state_gui_expanded": {
@@ -343,7 +342,7 @@
                     "focused": true
                 },
                 "fiat_tuning_expanded": {
-                    "inside_node": true,
+                    "inside_node": false,
                     "focused": true
                 },
                 "_internal_state_gui_expanded": {
@@ -408,7 +407,7 @@
                     "focused": true
                 },
                 "fiat_tuning_expanded": {
-                    "inside_node": true,
+                    "inside_node": false,
                     "focused": true
                 },
                 "_internal_state_gui_expanded": {
@@ -465,7 +464,7 @@
                     "focused": true
                 },
                 "fiat_tuning_expanded": {
-                    "inside_node": true,
+                    "inside_node": false,
                     "focused": true
                 },
                 "_internal_state_gui_expanded": {
@@ -507,5 +506,39 @@
                 }
             }
         }
+    },
+    "node_positions": {
+        "text_from_file": [
+            0.0,
+            0.0
+        ],
+        "str_lower": [
+            495.0,
+            0.0
+        ],
+        "remove_non_letters": [
+            990.0,
+            0.0
+        ],
+        "split_words": [
+            -54.0,
+            282.0
+        ],
+        "filter_out_short_words": [
+            387.0,
+            395.0
+        ],
+        "sort_words": [
+            680.0,
+            293.0
+        ],
+        "run_length_encode": [
+            1006.0,
+            306.0
+        ],
+        "sort_word_with_counts": [
+            1352.0,
+            302.0
+        ]
     }
 }

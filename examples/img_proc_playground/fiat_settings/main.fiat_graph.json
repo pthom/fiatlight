@@ -1,41 +1,12 @@
 {
     "functions_names": [
         "image_source",
-        "edge_preserving_filter",
-        "lut_channels_in_colorspace",
-        "convert_scale_abs",
-        "lut_with_params",
-        "lut_channels_in_colorspace_2",
-        "imread_rgb"
+        "color_convert"
     ],
     "functions_nodes_links": [
         {
             "src_function_name": "image_source",
-            "dst_function_name": "edge_preserving_filter",
-            "dst_input_name": "image",
-            "src_output_idx": 0
-        },
-        {
-            "src_function_name": "edge_preserving_filter",
-            "dst_function_name": "lut_channels_in_colorspace",
-            "dst_input_name": "image",
-            "src_output_idx": 0
-        },
-        {
-            "src_function_name": "image_source",
-            "dst_function_name": "convert_scale_abs",
-            "dst_input_name": "image",
-            "src_output_idx": 0
-        },
-        {
-            "src_function_name": "image_source",
-            "dst_function_name": "lut_with_params",
-            "dst_input_name": "image",
-            "src_output_idx": 0
-        },
-        {
-            "src_function_name": "image_source",
-            "dst_function_name": "lut_channels_in_colorspace_2",
+            "dst_function_name": "color_convert",
             "dst_input_name": "image",
             "src_output_idx": 0
         }
