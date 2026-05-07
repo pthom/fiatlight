@@ -198,6 +198,16 @@ class FiatGui:
     load_dialog: pfd.open_file | None = None
     load_dialog_callback: Callable[[str], None] | None = None
 
+    # Sticky cursor: the workspace path Save / autosave-on-exit write to.
+    # Initialised to the per-app autosave path; Open / Save As reseat it,
+    # and the value is persisted across launches via hello_imgui user prefs.
+    _current_workspace_path: str
+
+    # Key used with hello_imgui.save_user_pref / load_user_pref. The value
+    # lives inside the per-app .ini file managed by HelloImGui, so deleting
+    # the .ini (via FiatRunParams.delete_settings) wipes the cursor too.
+    _USER_PREF_LAST_WORKSPACE = "fiat.last_workspace_path"
+
     _function_palette: FunctionPalette
 
     _logo_texture: imgui.ImTextureRef
@@ -214,6 +224,7 @@ class FiatGui:
             params = FiatRunParams()
         self.params = params
         self._prepare_runner_params()
+        self._current_workspace_path = self._workspace_filename()
 
         self.apply_fiat_style_graph()
 
@@ -281,6 +292,7 @@ class FiatGui:
         pass
 
     def _post_init(self) -> None:
+        self._restore_cursor_from_user_pref()
         self._load_workspace_at_startup()
         self._load_session_at_startup()
         self._functions_graph_gui.invoke_all_functions(also_invoke_manual_function=False)
@@ -291,8 +303,14 @@ class FiatGui:
     def _before_exit(self) -> None:
         self._store_final_app_window_screenshot()
         self._functions_graph_gui.on_exit()
-        self._save_workspace(self._workspace_filename())
-        self._save_session(self._session_filename())
+        # Sticky cursor: save to wherever the user last opened from (or
+        # explicitly Saved As). At startup that is the default autosave path.
+        self._save_workspace(self._current_workspace_path)
+        self._save_session(self._session_path_for(self._current_workspace_path))
+        # Remember the cursor across runs. Stored via hello_imgui's user-pref
+        # storage (lives inside the per-app .ini), so the next launch resumes
+        # the exact same workspace file even after Save As to a custom path.
+        hello_imgui.save_user_pref(self._USER_PREF_LAST_WORKSPACE, self._current_workspace_path)
 
     def _pre_new_frame(self) -> None:
         _ENQUEUED_CALLBACKS.run_pre_frame_callbacks()
@@ -408,16 +426,28 @@ class FiatGui:
             self.was_post_init_called = True
 
         if imgui.begin_menu("File"):
+            # New empties the in-memory topology, which only makes sense
+            # in composer mode (where topology comes from the user, not
+            # from code). Open is available in both modes: in composer
+            # mode it rebuilds topology, in programmatic mode it overlays
+            # parameter values and GUI options onto the code-defined graph
+            # (matched by stable_id; see `rebuild_topology` plumbing).
+            if self.params.customizable_graph:
+                if imgui.menu_item_simple("New Workspace"):
+                    self._menu_new_workspace()
             if imgui.menu_item_simple("Open Workspace…"):
-                self.load_dialog = pfd.open_file(title="Open Workspace")
-                self.load_dialog_callback = self._load_workspace_during_execution
+                self._menu_open_workspace()
+            if imgui.menu_item_simple("Save Workspace"):
+                self._menu_save_workspace()
             if imgui.menu_item_simple("Save Workspace As…"):
-                self.save_dialog = pfd.save_file(title="Save Workspace As")
-                self.save_dialog_callback = self._save_workspace
+                self._menu_save_workspace_as()
 
             imgui.separator()
             if imgui.menu_item_simple("Quit"):
                 hello_imgui.get_runner_params().app_shall_exit = True
+
+            if imgui.menu_item_simple("View all"):
+                ed.navigate_to_content()
 
             imgui.end_menu()
 
@@ -427,6 +457,26 @@ class FiatGui:
             imgui.end_menu()
 
         hello_imgui.show_view_menu(self._runner_params)
+
+    def _menu_new_workspace(self) -> None:
+        # Reset the sticky cursor too, so a New + Quit doesn't silently
+        # overwrite the user's previously-saved-As file with an empty graph.
+        # The next exit-save lands in the default per-app autosave path,
+        # which is the closest equivalent we have to "Untitled".
+        self._functions_graph_gui.clear()
+        self._current_workspace_path = self._workspace_filename()
+
+    def _menu_open_workspace(self) -> None:
+        self.load_dialog = pfd.open_file(title="Open Workspace")
+        self.load_dialog_callback = self._load_workspace_during_execution
+
+    def _menu_save_workspace(self) -> None:
+        self._save_workspace(self._current_workspace_path)
+        self._save_session(self._session_path_for(self._current_workspace_path))
+
+    def _menu_save_workspace_as(self) -> None:
+        self.save_dialog = pfd.save_file(title="Save Workspace As")
+        self.save_dialog_callback = self._save_workspace_as
 
     def _show_help_and_logo_tooltip_window(self) -> None:
         def _read_logo_texture() -> None:
@@ -628,6 +678,16 @@ class FiatGui:
         assert loc is not None
         return loc[:-4] + ".fiat_session.json"
 
+    @staticmethod
+    def _session_path_for(workspace_path: str) -> str:
+        """Sibling session path for a given workspace path. Strips the
+        canonical `.fiat_workspace.json` suffix when present so an opened
+        `foo.fiat_workspace.json` round-trips with `foo.fiat_session.json`."""
+        suffix = ".fiat_workspace.json"
+        if workspace_path.endswith(suffix):
+            return workspace_path[: -len(suffix)] + ".fiat_session.json"
+        return workspace_path + ".fiat_session.json"
+
     def _save_workspace(self, filename: str) -> None:
         if "." not in filename:
             filename += ".fiat_workspace.json"
@@ -696,16 +756,52 @@ class FiatGui:
         return True
 
     def _load_workspace_at_startup(self) -> None:
-        self._load_workspace(self._workspace_filename(), whine_if_not_found=False)
+        # `_current_workspace_path` was already reseated by
+        # `_restore_cursor_from_user_pref` if the previous run left a valid
+        # cursor; otherwise it is still the default per-app autosave path.
+        self._load_workspace(self._current_workspace_path, whine_if_not_found=False)
 
     def _load_session_at_startup(self) -> None:
-        self._load_session(self._session_filename(), whine_if_not_found=False)
+        self._load_session(self._session_path_for(self._current_workspace_path), whine_if_not_found=False)
+
+    def _restore_cursor_from_user_pref(self) -> None:
+        """Reseat `_current_workspace_path` from the user pref written on
+        the previous exit. Falls back to the default path (and clears the
+        pref) when the recorded file no longer exists or cannot be parsed."""
+        try:
+            stored = hello_imgui.load_user_pref(self._USER_PREF_LAST_WORKSPACE)
+            if stored.endswith("\n"):
+                stored = stored[:-1]
+        except Exception as e:
+            logging.warning(f"FiatGui: cannot read user pref {self._USER_PREF_LAST_WORKSPACE!r}: {e}")
+            return
+        if not stored:
+            return
+        if not pathlib.Path(stored).is_file():
+            logging.info(
+                f"FiatGui: stored workspace cursor {stored!r} no longer exists; " "falling back to default path."
+            )
+            hello_imgui.save_user_pref(self._USER_PREF_LAST_WORKSPACE, "")
+            return
+        self._current_workspace_path = stored
 
     def _load_workspace_during_execution(self, filename: str) -> None:
         success = self._load_workspace(filename, whine_if_not_found=True)
-        if success:
-            self._functions_graph_gui.invoke_all_functions(also_invoke_manual_function=False)
-            self._notify_if_dirty_functions()
+        if not success:
+            return
+        # Sibling session is best-effort: a hand-shared workspace may not
+        # ship with one, and that's fine.
+        self._load_session(self._session_path_for(filename), whine_if_not_found=False)
+        self._current_workspace_path = filename
+        self._functions_graph_gui.invoke_all_functions(also_invoke_manual_function=False)
+        self._notify_if_dirty_functions()
+
+    def _save_workspace_as(self, filename: str) -> None:
+        if "." not in pathlib.Path(filename).name:
+            filename += ".fiat_workspace.json"
+        self._save_workspace(filename)
+        self._save_session(self._session_path_for(filename))
+        self._current_workspace_path = filename
 
 
 def _fiat_run_graph(

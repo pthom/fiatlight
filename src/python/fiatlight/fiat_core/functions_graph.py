@@ -409,6 +409,13 @@ class FunctionsGraph:
         self.functions_nodes.extend(other.functions_nodes)
         self.functions_nodes_links.extend(other.functions_nodes_links)
 
+    def clear_all(self) -> None:
+        """Drop every node and link. The stable_id counter is intentionally
+        not reset, so any node added after this call receives an id that
+        was never used by anything saved earlier."""
+        self.functions_nodes = []
+        self.functions_nodes_links = []
+
     def _would_add_cycle(self, new_link: FunctionNodeLink) -> bool:
         """Check if adding a link would create a cycle (private)"""
         new_graph = FunctionsGraph.create_empty()

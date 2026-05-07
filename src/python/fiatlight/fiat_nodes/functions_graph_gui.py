@@ -103,6 +103,15 @@ class FunctionsGraphGui:
             link_gui = FunctionNodeLinkGui(link, self.function_nodes_gui)
             self.functions_links_gui.append(link_gui)
 
+    def clear(self) -> None:
+        """Empty the graph (data + GUI) and clear queued / transient state.
+        Used by File > New: leaves the host with a fresh, empty canvas."""
+        self.functions_graph.clear_all()
+        self._create_function_nodes_and_links_gui()
+        self._open_popup = None
+        self._pending_node_position = None
+        self._pending_loaded_positions_by_stable_id = None
+
     # ======================================================================================================================
     # Drawing
     # ======================================================================================================================

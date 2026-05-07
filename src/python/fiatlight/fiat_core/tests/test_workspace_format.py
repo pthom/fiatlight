@@ -185,3 +185,46 @@ def test_session_load_tolerates_unknown_node_ids() -> None:
     gui.load_session_from_json({"version": 1, "focused_function_visible": {"n_gone": True}})
     # Existing node's flag is at its default.
     assert gui.function_nodes_gui[0]._focused_function_visible is False
+
+
+def test_clear_all_empties_graph_and_preserves_counter() -> None:
+    """clear_all() drops nodes + links but keeps the stable_id counter
+    monotonic. Any node added after a clear receives an id that has never
+    been used by anything saved earlier in the same session."""
+    g = FunctionsGraph.from_function_composition([_f_a, _f_b])
+    last_id_before_clear = g.functions_nodes[-1].stable_id
+
+    g.clear_all()
+
+    assert g.functions_nodes == []
+    assert g.functions_nodes_links == []
+
+    fresh = g.add_function(_f_a)
+    assert fresh.stable_id != last_id_before_clear
+    # Counter advanced past the previously used id.
+    assert int(fresh.stable_id[1:]) > int(last_id_before_clear[1:])
+
+
+def test_round_trip_save_clear_load_restores_state() -> None:
+    """File menu round-trip: build → save → clear → load matches the
+    original topology. Models what File > New followed by File > Open does
+    to a composer-mode graph."""
+    g = FunctionsGraph.from_function_composition([_f_a, _f_b])
+    saved = g.save_workspace_core_to_json()
+    saved_ids = [n.stable_id for n in g.functions_nodes]
+
+    g.clear_all()
+    assert g.functions_nodes == []
+    assert g.functions_nodes_links == []
+
+    g.load_workspace_core_from_json(saved, _factory_from_ref)
+    assert [n.stable_id for n in g.functions_nodes] == saved_ids
+    assert len(g.functions_nodes_links) == 1
+
+
+def test_session_path_for_strips_workspace_suffix() -> None:
+    from fiatlight.fiat_runner.fiat_gui import FiatGui
+
+    assert FiatGui._session_path_for("/tmp/foo.fiat_workspace.json") == "/tmp/foo.fiat_session.json"
+    # No canonical suffix: append, don't try to be clever.
+    assert FiatGui._session_path_for("/tmp/foo.json") == "/tmp/foo.json.fiat_session.json"
