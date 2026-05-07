@@ -68,10 +68,8 @@ from examples.img_proc_playground.wrappers.features import (
     drawPoints,
     drawRects,
     drawRotatedRects,
-    fitEllipses,
     goodFeaturesToTrack,
     matchTemplate,
-    minAreaRects,
     minEnclosingCircles,
     minMaxLoc,
 )
@@ -93,7 +91,6 @@ from examples.img_proc_playground.wrappers.histogram import (
     calcHist1D,
     calcHist2D,
 )
-from examples.img_proc_playground.wrappers.flow import calcOpticalFlowPyrLK
 from examples.img_proc_playground.wrappers.blobs import (
     connectedComponents,
     connectedComponentsWithStats,
@@ -170,8 +167,6 @@ def all_opencv_wrappers() -> List[Callable[..., Any]]:
         minEnclosingCircles,
         convexHulls,
         approxPolyDPs,
-        minAreaRects,
-        fitEllipses,
         drawRotatedRects,
         drawEllipses,
         cornerSubPix,
@@ -193,8 +188,6 @@ def all_opencv_wrappers() -> List[Callable[..., Any]]:
         calcHist1D,
         calcHist2D,
         calcBackProject,
-        # tracking
-        calcOpticalFlowPyrLK,
         # blobs / connected components
         connectedComponents,
         connectedComponentsWithStats,

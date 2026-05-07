@@ -441,42 +441,6 @@ def _to_rotated_row(
     return (float(cx), float(cy), float(w), float(h), float(angle))
 
 
-@fl.with_fiat_attributes(fiat_tags=["contours", "shape", "cv2.imgproc"])
-def minAreaRects(contours: Contours) -> RotatedRects2D:
-    """Per-contour minimum-area rotated bounding rectangle.
-
-    **When to use:** Reduce a contour to a tilted bounding box (better
-    fit than `boundingRects` for rotated objects). Output pairs with
-    `drawRotatedRects`.
-
-    **OpenCV docs:** [cv2.minAreaRect](https://docs.opencv.org/4.13.0/d3/dc0/group__imgproc__shape.html#ga3d476a3417130ae5154aea421ca7ead9)
-    """
-    if len(contours) == 0:
-        return RotatedRects2D(np.empty((0, 5), dtype=np.float32))
-    rows = [_to_rotated_row(cv2.minAreaRect(c)) for c in contours]
-    return RotatedRects2D(np.asarray(rows, dtype=np.float32))
-
-
-@fl.with_fiat_attributes(fiat_tags=["contours", "shape", "cv2.imgproc"])
-def fitEllipses(contours: Contours) -> RotatedRects2D:
-    """Per-contour best-fit ellipse (least-squares).
-
-    **When to use:** Fit an ellipse to a contour (each contour must
-    have at least 5 points; shorter contours are skipped). Output pairs
-    with `drawEllipses`.
-
-    **OpenCV docs:** [cv2.fitEllipse](https://docs.opencv.org/4.13.0/d3/dc0/group__imgproc__shape.html#gaf259efaad93098103d6c27b9e4900ffa)
-    """
-    rows = []
-    for c in contours:
-        if c.shape[0] < 5:
-            continue
-        rows.append(_to_rotated_row(cv2.fitEllipse(c)))
-    if not rows:
-        return RotatedRects2D(np.empty((0, 5), dtype=np.float32))
-    return RotatedRects2D(np.asarray(rows, dtype=np.float32))
-
-
 @fl.with_fiat_attributes(
     thickness__range=(1, 5),
     fiat_tags=["features", "drawing", "cv2.imgproc"],
