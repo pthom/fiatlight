@@ -59,6 +59,32 @@ documentation = "https://pthom.github.io/fiatlight/"
 [tool.ruff]
 line-length = 120
 
+[tool.mypy]
+mypy_path = "src/python"
+packages = ["fiatlight", "examples.img_proc_playground"]
+explicit_package_bases = true
+strict = true
+exclude = [
+    "src/python/fiatlight/sandbox",
+    "src/python/fiatlight/doc/_build",
+    "src/python/fiatlight/doc/docs/flgt/_downloads",
+    "src/python/fiatlight/demos/fiat_manim",
+]
+
+[tool.pyright]
+# Mirror mypy.ini scope: library + examples/img_proc_playground, with the same exclusions.
+include = ["src/python/fiatlight", "examples/img_proc_playground"]
+exclude = [
+    "**/__pycache__",
+    "src/python/fiatlight/sandbox",
+    "src/python/fiatlight/doc/_build",
+    "src/python/fiatlight/doc/docs/flgt/_downloads",
+    "src/python/fiatlight/demos/fiat_manim",
+]
+extraPaths = ["src/python"]
+# imgui_bundle is a compiled module shipped with .pyi stubs but no .py sources.
+reportMissingModuleSource = "none"
+
 [project.scripts]
 fiatlight = "fiatlight.fiat_cli.fiatlight_cli:main"
 
