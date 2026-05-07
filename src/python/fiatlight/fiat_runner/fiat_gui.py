@@ -443,11 +443,12 @@ class FiatGui:
                 self._menu_save_workspace_as()
 
             imgui.separator()
+            if imgui.menu_item_simple("Fit Canvas"):
+                ed.navigate_to_content()
+
+            imgui.separator()
             if imgui.menu_item_simple("Quit"):
                 hello_imgui.get_runner_params().app_shall_exit = True
-
-            if imgui.menu_item_simple("View all"):
-                ed.navigate_to_content()
 
             imgui.end_menu()
 

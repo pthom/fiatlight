@@ -79,6 +79,15 @@ class FunctionsGraphGui:
     # next draw, since `ed.set_node_position` is only valid in that scope.
     # Keyed by stable_id (the workspace format key).
     _pending_loaded_positions_by_stable_id: Dict[str, ImVec2] | None = None
+    # ImGui frame at which a deferred `ed.navigate_to_content` should fire.
+    # Two reasons it has to be deferred AND fired outside ed.begin/end:
+    #   * `set_node_position` does not affect the bounds `navigate_to_content`
+    #     reads until the next `ed.begin/end` cycle has run, so we wait one
+    #     frame after applying positions.
+    #   * `navigate_to_content` itself is only valid *outside* the active
+    #     `ed.begin/end` block (calling it from inside is a no-op in this
+    #     binding); we fire it after `ed.end()` from `draw()`.
+    _navigate_after_load_frame: int | None = None
 
     # ======================================================================================================================
     # Constructor
@@ -111,6 +120,7 @@ class FunctionsGraphGui:
         self._open_popup = None
         self._pending_node_position = None
         self._pending_loaded_positions_by_stable_id = None
+        self._navigate_after_load_frame = None
 
     # ======================================================================================================================
     # Drawing
@@ -148,6 +158,10 @@ class FunctionsGraphGui:
             if self.can_edit_graph:
                 self._handle_graph_edition()
             ed.end()
+            # `navigate_to_content` is invalid inside ed.begin/end, so we
+            # fire it here, after ed.end() but still inside the editor's
+            # current-editor scope.
+            self._apply_pending_navigate_to_content()
             fiat_node_semaphore._IS_RENDERING_IN_NODE = False
             if self.can_edit_graph:
                 if self._draw_palette_popup():
@@ -603,7 +617,9 @@ class FunctionsGraphGui:
     def _apply_pending_loaded_positions(self) -> None:
         """Apply positions queued by `load_workspace_from_json`. Called from
         `draw()` inside `ed.begin/end`, the only context where
-        `ed.set_node_position` is allowed."""
+        `ed.set_node_position` is allowed. The matching camera-refit is
+        scheduled here but fires from `_apply_pending_navigate_to_content`
+        outside the editor block (see field comment)."""
         if self._pending_loaded_positions_by_stable_id is None:
             return
         for fn in self.function_nodes_gui:
@@ -612,6 +628,19 @@ class FunctionsGraphGui:
             if saved is not None:
                 ed.set_node_position(fn.node_id(), saved)
         self._pending_loaded_positions_by_stable_id = None
+        # Wait one frame: `navigate_to_content` reads node bounds that
+        # don't reflect the just-applied positions until ed.end() has run.
+        self._navigate_after_load_frame = imgui.get_frame_count() + 3
+
+    def _apply_pending_navigate_to_content(self) -> None:
+        """Fire the camera-refit scheduled by `_apply_pending_loaded_positions`.
+        Must be called outside `ed.begin/end`."""
+        if self._navigate_after_load_frame is None:
+            return
+        if imgui.get_frame_count() < self._navigate_after_load_frame:
+            return
+        ed.navigate_to_content(0.05)
+        self._navigate_after_load_frame = None
 
     def _function_node_gui_from_id(self, node_id: ed.NodeId) -> FunctionNodeGui:
         matching_nodes = [fn for fn in self.function_nodes_gui if fn.node_id() == node_id]
