@@ -198,7 +198,7 @@ class ImagePresenter:
         if len(self.image_channels) > 0:
             return
         if len(self.image.shape) == 3 or len(self.image.shape) == 4:
-            self.image_channels = [np.ascontiguousarray(self.image[:, :, i]) for i in range(self.image.shape[2])]
+            self.image_channels = [np.ascontiguousarray(self.image[:, :, i]) for i in range(self.image.shape[2])]  # type: ignore
 
     def set_image(self, image: Image) -> None:
         self.image = image

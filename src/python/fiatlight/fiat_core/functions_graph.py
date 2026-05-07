@@ -356,16 +356,6 @@ class FunctionsGraph:
         self.functions_nodes.extend(other.functions_nodes)
         self.functions_nodes_links.extend(other.functions_nodes_links)
 
-    def function_with_gui_of_name(self, name: str | None = None) -> FunctionWithGui:
-        """Get the function with the given unique name"""
-        if name is None:
-            assert len(self.functions_nodes) == 1
-            return self.functions_nodes[0].function_with_gui
-        for fn in self.functions_nodes:
-            if fn.function_with_gui.function_name == name:
-                return fn.function_with_gui
-        raise ValueError(f"No function with the name {name}")
-
     def _would_add_cycle(self, new_link: FunctionNodeLink) -> bool:
         """Check if adding a link would create a cycle (private)"""
         new_graph = FunctionsGraph.create_empty()
