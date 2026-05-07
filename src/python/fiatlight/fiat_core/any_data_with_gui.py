@@ -223,7 +223,7 @@ class AnyDataWithGui(Generic[DataType]):
         present = "View"
         edit = "Edit"
 
-    class _Init_Section:  # Dummy class to create a section in the IDE # noqa
+    class _Init_Section_:  # Dummy class to create a section in the IDE # noqa
         """
         # ------------------------------------------------------------------------------------------------------------------
         #            Initialization
@@ -238,7 +238,7 @@ class AnyDataWithGui(Generic[DataType]):
         self.callbacks = AnyDataGuiCallbacks()
         self._fiat_attributes = FiatAttributes({})
 
-    class _Value_Section:  # Dummy class to create a section in the IDE # noqa
+    class _Value_Section_:  # Dummy class to create a section in the IDE # noqa
         """
         # ------------------------------------------------------------------------------------------------------------------
         #            Value getter and setter + get_actual_value (which returns a DataType or raises an exception)
@@ -335,7 +335,7 @@ class AnyDataWithGui(Generic[DataType]):
         else:
             return self.value
 
-    class _FiatAttributes_Section:  # Dummy class to create a section in the IDE  # noqa
+    class _FiatAttributes_Section_:  # Dummy class to create a section in the IDE  # noqa
         """
         # ------------------------------------------------------------------------------------------------------------------
         #            Fiat Attributes
@@ -417,7 +417,7 @@ class AnyDataWithGui(Generic[DataType]):
         if b.tooltip is None:
             b.tooltip = a.tooltip
 
-    class _Gui_Section:  # Dummy class to create a section in the IDE # noqa
+    class _Gui_Section_:  # Dummy class to create a section in the IDE # noqa
         """
         # ------------------------------------------------------------------------------------------------------------------
         #            Gui sections
@@ -855,7 +855,7 @@ class AnyDataWithGui(Generic[DataType]):
         params = GuiHeaderLineParams[DataType](parent_name="")
         return self.gui_edit_customizable(params)
 
-    class _Callbacks_Section:  # Dummy class to create a section in the IDE # noqa
+    class _Callbacks_Section_:  # Dummy class to create a section in the IDE # noqa
         """
         # ------------------------------------------------------------------------------------------------------------------
         #            Callbacks sections
@@ -887,12 +887,14 @@ class AnyDataWithGui(Generic[DataType]):
     def add_validator_callback(self, cb: Callable[[DataType], DataType]) -> None:
         self.callbacks.validators.append(cb)
 
-    def _Serialization_Section(self) -> None:
+    class _Serialization_Section_:  # Dummy class to create a section in the IDE # noqa
         """
         # ------------------------------------------------------------------------------------------------------------------
         #            Serialization and deserialization
         # ------------------------------------------------------------------------------------------------------------------
         """
+
+        pass
 
     @final
     def call_save_to_dict(self, value: DataType | Unspecified | Error | Invalid[DataType]) -> JsonDict:
@@ -971,7 +973,7 @@ class AnyDataWithGui(Generic[DataType]):
             self.callbacks.load_gui_options_from_json(json_data["cb_options"])
         self._expanded = json_data.get("expanded", True)
 
-    class _Utilities_Section:  # Dummy class to create a section in the IDE # noqa
+    class _Utilities_Section_:  # Dummy class to create a section in the IDE # noqa
         """
         # ------------------------------------------------------------------------------------------------------------------
         #            Utilities
