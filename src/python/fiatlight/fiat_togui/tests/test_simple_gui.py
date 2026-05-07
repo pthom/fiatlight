@@ -211,25 +211,3 @@ def test_register_type_auto_dispatches_undocumented_newtype_rejected() -> None:
     factory = make_simple_gui(_AutoDispatchUndocumentedNT, present_str=lambda v: "x")
     with pytest.raises(ValueError, match="docstring"):
         direct_register_type(_AutoDispatchUndocumentedNT, factory)
-
-
-# ---------------------------------------------------------------------------
-# Phase 3a: documented_newtype helper
-# ---------------------------------------------------------------------------
-
-
-def test_documented_newtype_carries_docstring() -> None:
-    from fiatlight.fiat_types.typename_utils import documented_newtype
-
-    nt = documented_newtype("MyDocNT", int, "Some documented NewType.")
-    assert nt.__doc__ == "Some documented NewType."
-
-
-def test_documented_newtype_works_with_register_callbacks() -> None:
-    """A documented_newtype-built type registers without the manual __doc__ assignment."""
-    from fiatlight.fiat_types.typename_utils import documented_newtype
-
-    nt = documented_newtype("MyDocNT2", int, "Another doc.")
-    register_callbacks(nt, present_str=lambda v: f"v={v}")
-    typename = fully_qualified_typename(nt)
-    assert gui_factories().can_handle_typename(typename)

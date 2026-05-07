@@ -6,14 +6,13 @@ A `BlobStats` value is an `(N, 5)` int32 ndarray where each row is
 including row 0 = background).
 """
 
+from typing import NewType
+
 import numpy as np
 
-from fiatlight.fiat_types.typename_utils import documented_newtype
 
-
-BlobStats = documented_newtype(
-    "BlobStats",
-    np.ndarray,
+BlobStats = NewType("BlobStats", np.ndarray)
+BlobStats.__doc__ = (
     "Per-component blob statistics as an (N, 5) int32 ndarray, "
-    "rows (x, y, w, h, area). Row 0 is the background blob.",
+    "rows (x, y, w, h, area). Row 0 is the background blob."
 )

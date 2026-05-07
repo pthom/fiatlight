@@ -7,15 +7,14 @@ consumed by drawing helpers. cv2's `goodFeaturesToTrack` returns
 before producing a `Points2D` so the type is consistent for consumers.
 """
 
+from typing import NewType
+
 import numpy as np
 
-from fiatlight.fiat_types.typename_utils import documented_newtype
 
-
-Points2D = documented_newtype(
-    "Points2D",
-    np.ndarray,
+Points2D = NewType("Points2D", np.ndarray)
+Points2D.__doc__ = (
     "List of 2D pixel coordinates as an (N, 2) int32 ndarray. "
     "Returned by feature detectors (goodFeaturesToTrack, cornerHarris peaks, "
-    "Hough centers) and consumed by drawing helpers.",
+    "Hough centers) and consumed by drawing helpers."
 )

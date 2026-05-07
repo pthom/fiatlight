@@ -6,14 +6,13 @@ A `Circles2D` value is an `(N, 3)` int32 ndarray of `(cx, cy, r)` triples
 before producing a `Circles2D`.
 """
 
+from typing import NewType
+
 import numpy as np
 
-from fiatlight.fiat_types.typename_utils import documented_newtype
 
-
-Circles2D = documented_newtype(
-    "Circles2D",
-    np.ndarray,
+Circles2D = NewType("Circles2D", np.ndarray)
+Circles2D.__doc__ = (
     "List of 2D circles as an (N, 3) int32 ndarray, each row (cx, cy, r). "
-    "Returned by HoughCircles and consumed by drawing helpers.",
+    "Returned by HoughCircles and consumed by drawing helpers."
 )

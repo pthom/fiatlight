@@ -7,14 +7,13 @@ ellipse). Either rendering applies; pick the renderer that matches the
 intent (`drawRotatedRects` or `drawEllipses`).
 """
 
+from typing import NewType
+
 import numpy as np
 
-from fiatlight.fiat_types.typename_utils import documented_newtype
 
-
-RotatedRects2D = documented_newtype(
-    "RotatedRects2D",
-    np.ndarray,
+RotatedRects2D = NewType("RotatedRects2D", np.ndarray)
+RotatedRects2D.__doc__ = (
     "List of rotated rectangles / ellipses as an (N, 5) float32 ndarray, "
-    "each row (cx, cy, w, h, angle). Returned by minAreaRect / fitEllipse.",
+    "each row (cx, cy, w, h, angle). Returned by minAreaRect / fitEllipse."
 )
