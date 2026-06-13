@@ -752,6 +752,17 @@ class FunctionsGraphGui:
         "_backup_expanded_states",
     )
 
+    def nodes_layout_signature(self) -> Tuple[Tuple[str, int, int], ...]:
+        """A cheap fingerprint of node identities + canvas positions. Used to
+        detect when an edit / node-drag has settled (vs. re-serializing the whole
+        graph every frame). Rounded to ignore sub-pixel jitter."""
+        sig = []
+        for fn_node_gui in self.function_nodes_gui:
+            sid = str(fn_node_gui.get_function_node().stable_id)
+            pos = ed.get_node_position(fn_node_gui.node_id())
+            sig.append((sid, round(pos.x), round(pos.y)))
+        return tuple(sig)
+
     def save_workspace_to_json(self) -> JsonDict:
         """Build the full workspace dict: the core data from FunctionsGraph
         plus the GUI-layer fields each node carries (canvas position, expand

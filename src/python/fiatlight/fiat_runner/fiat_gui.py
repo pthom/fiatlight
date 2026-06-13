@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from fiatlight.fiat_nodes.function_node_gui import FunctionNodeGui
 from fiatlight.fiat_nodes.functions_graph_gui import FunctionsGraphGui
 from fiatlight.fiat_core import FunctionsGraph, FunctionWithGui
+from fiatlight.fiat_types.base_types import JsonDict
 from fiatlight.fiat_types.function_types import VoidFunction
 from fiatlight.fiat_types.function_types import Function
 from fiatlight.fiat_widgets import fiat_osd
@@ -208,6 +209,12 @@ class FiatGui:
     _functions_graph_gui: FunctionsGraphGui
     _show_inspector: bool = False
 
+    # Frames to wait after a (re)load before snapshotting the undo baseline, so
+    # node positions (applied deferred inside ed.begin/end) have settled.
+    _UNDO_BASELINE_DELAY_FRAMES = 8
+    # Frames the graph must stay settled before a reconcile snapshot is taken.
+    _UNDO_SETTLE_FRAMES = 4
+
     save_dialog: pfd.save_file | None = None
     save_dialog_callback: Callable[[str], None] | None = None
     load_dialog: pfd.open_file | None = None
@@ -248,6 +255,14 @@ class FiatGui:
 
         if self.params.customizable_graph:
             self._functions_graph_gui.can_edit_graph = True
+
+        # Undo/redo: full-graph snapshots, captured when an edit/drag settles.
+        from fiatlight.fiat_runner.undo_manager import UndoManager
+
+        self._undo_manager = UndoManager(self._functions_graph_gui.save_workspace_to_json, self._restore_graph_snapshot)
+        self._undo_baseline_pending = self._UNDO_BASELINE_DELAY_FRAMES
+        self._undo_settle_frames = 0
+        self._undo_prev_layout_sig: Tuple[Tuple[str, int, int], ...] = ()
 
         if self.params.delete_settings:
             self._del_user_settings()
@@ -467,6 +482,13 @@ class FiatGui:
 
             imgui.end_menu()
 
+        if imgui.begin_menu("Edit"):
+            if imgui.menu_item_simple("Undo", "Ctrl+Z", False, self._undo_manager.can_undo()):
+                self._undo_manager.undo()
+            if imgui.menu_item_simple("Redo", "Ctrl+Shift+Z", False, self._undo_manager.can_redo()):
+                self._undo_manager.redo()
+            imgui.end_menu()
+
         if imgui.begin_menu("Graph"):
             if imgui.menu_item_simple("Auto-Layout graph"):
                 self._functions_graph_gui.shall_layout_graph = True
@@ -481,6 +503,7 @@ class FiatGui:
         # which is the closest equivalent we have to "Untitled".
         self._functions_graph_gui.clear()
         self._current_workspace_path = self._workspace_filename()
+        self._request_undo_baseline()
 
     def _menu_open_workspace(self) -> None:
         self.load_dialog = pfd.open_file(title="Open Workspace")
@@ -569,8 +592,57 @@ class FiatGui:
             any_change = self._functions_graph_gui.draw()
             if any_change:
                 self._notify_if_dirty_functions()
+            # Runs in the "Functions Graph" window scope (after ed.end), so the
+            # undo shortcuts use the focused route (yield Ctrl+Z to text inputs).
+            self._handle_undo_redo()
 
         self._show_help_and_logo_tooltip_window()
+
+    def _request_undo_baseline(self) -> None:
+        """Re-snapshot the undo baseline (after New / Open), once positions settle."""
+        self._undo_baseline_pending = self._UNDO_BASELINE_DELAY_FRAMES
+
+    def _restore_graph_snapshot(self, snapshot: JsonDict) -> None:
+        rebuild_topology = self.params.customizable_graph
+        self._functions_graph_gui.load_workspace_from_json(
+            snapshot, self._function_palette.factor_function_from_ref, rebuild_topology=rebuild_topology
+        )
+        self._functions_graph_gui.invoke_all_functions(also_invoke_manual_function=False)
+
+    def _handle_undo_redo(self) -> None:
+        # Wait for positions to settle, then snapshot the baseline.
+        if self._undo_baseline_pending > 0:
+            self._undo_baseline_pending -= 1
+            if self._undo_baseline_pending == 0:
+                self._undo_manager.reset()
+                self._undo_prev_layout_sig = self._functions_graph_gui.nodes_layout_signature()
+            return
+
+        # Shortcuts: focused route, so an active text input keeps its own Ctrl+Z.
+        ctrl = imgui.Key.mod_ctrl.value
+        shift = imgui.Key.mod_shift.value
+        z = imgui.Key.z.value
+        route = imgui.InputFlags_.route_focused.value
+        if imgui.shortcut(ctrl | z, route):
+            self._undo_manager.undo()
+        if imgui.shortcut(ctrl | shift | z, route):
+            self._undo_manager.redo()
+
+        # Reconcile only when the graph has settled (no active widget, positions
+        # stable) so a continuous gesture becomes one undo step.
+        layout_sig = self._functions_graph_gui.nodes_layout_signature()
+        settled = (not imgui.is_any_item_active()) and (layout_sig == self._undo_prev_layout_sig)
+        self._undo_prev_layout_sig = layout_sig
+        if settled:
+            self._undo_settle_frames += 1
+            # `==` (not `>=`): serialize once when the graph crosses into
+            # "settled", not on every idle frame. Every real change perturbs the
+            # cheap settle signals (active-item / layout sig), so it re-settles
+            # and snapshots exactly once per change.
+            if self._undo_settle_frames == self._UNDO_SETTLE_FRAMES:
+                self._undo_manager.reconcile()
+        else:
+            self._undo_settle_frames = 0
 
     def _post_gui(self) -> None:
         # We focus the functions graph window after a few frames,
@@ -789,6 +861,7 @@ class FiatGui:
         self._current_workspace_path = filename
         self._functions_graph_gui.invoke_all_functions(also_invoke_manual_function=False)
         self._notify_if_dirty_functions()
+        self._request_undo_baseline()
 
     def _save_workspace_as(self, filename: str) -> None:
         if "." not in pathlib.Path(filename).name:
