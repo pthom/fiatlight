@@ -2,7 +2,7 @@
     "version": 1,
     "nodes": {
         "n1": {
-            "function_ref": "fiatlight.demos.string.str_functions.text_from_file",
+            "function_ref": "fiatlight.fiat_kits.fiat_text.nodes.text_from_file",
             "function_name": "text_from_file",
             "input_values": {
                 "text_file": {
@@ -54,10 +54,11 @@
                     "inside_node": null,
                     "focused": null
                 }
-            }
+            },
+            "focused_function_visible": false
         },
         "n2": {
-            "function_ref": "fiatlight.demos.string.str_functions.str_lower",
+            "function_ref": "fiatlight.fiat_kits.fiat_text.nodes.str_lower",
             "function_name": "str_lower",
             "input_values": {},
             "input_gui_options": {
@@ -101,10 +102,11 @@
                     "inside_node": null,
                     "focused": null
                 }
-            }
+            },
+            "focused_function_visible": false
         },
         "n3": {
-            "function_ref": "fiatlight.demos.string.str_functions.remove_non_letters",
+            "function_ref": "fiatlight.fiat_kits.fiat_text.nodes.remove_non_letters",
             "function_name": "remove_non_letters",
             "input_values": {},
             "input_gui_options": {
@@ -148,10 +150,11 @@
                     "inside_node": null,
                     "focused": null
                 }
-            }
+            },
+            "focused_function_visible": false
         },
         "n4": {
-            "function_ref": "fiatlight.demos.string.str_functions.split_words",
+            "function_ref": "fiatlight.fiat_kits.fiat_text.nodes.split_words",
             "function_name": "split_words",
             "input_values": {},
             "input_gui_options": {
@@ -167,8 +170,8 @@
                 }
             },
             "position": [
-                0.0,
-                306.0
+                -152.0,
+                312.0
             ],
             "expand_flags": {
                 "_inputs_expanded": {
@@ -195,7 +198,8 @@
                     "inside_node": null,
                     "focused": null
                 }
-            }
+            },
+            "focused_function_visible": false
         },
         "n5": {
             "function_ref": "__main__.filter_out_short_words",
@@ -253,10 +257,11 @@
                     "inside_node": null,
                     "focused": null
                 }
-            }
+            },
+            "focused_function_visible": false
         },
         "n6": {
-            "function_ref": "fiatlight.demos.string.str_functions.sort_words",
+            "function_ref": "fiatlight.fiat_kits.fiat_text.nodes.sort_words",
             "function_name": "sort_words",
             "input_values": {
                 "reverse": {
@@ -311,7 +316,8 @@
                     "inside_node": null,
                     "focused": null
                 }
-            }
+            },
+            "focused_function_visible": false
         },
         "n7": {
             "function_ref": "__main__.run_length_encode",
@@ -358,7 +364,8 @@
                     "inside_node": null,
                     "focused": null
                 }
-            }
+            },
+            "focused_function_visible": false
         },
         "n8": {
             "function_ref": "__main__.sort_word_with_counts",
@@ -378,7 +385,7 @@
             },
             "position": [
                 1331.0,
-                555.0
+                302.0
             ],
             "expand_flags": {
                 "_inputs_expanded": {
@@ -405,7 +412,8 @@
                     "inside_node": null,
                     "focused": null
                 }
-            }
+            },
+            "focused_function_visible": false
         }
     },
     "links": [

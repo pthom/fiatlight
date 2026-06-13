@@ -1,0 +1,136 @@
+{
+    "version": 1,
+    "nodes": {
+        "n1": {
+            "function_ref": "__main__.make_range",
+            "function_name": "make_range",
+            "input_values": {
+                "start": {
+                    "name": "start",
+                    "data": {
+                        "type": "Unspecified"
+                    }
+                },
+                "stop": {
+                    "name": "stop",
+                    "data": {
+                        "type": "Unspecified"
+                    }
+                },
+                "step": {
+                    "name": "step",
+                    "data": {
+                        "type": "Unspecified"
+                    }
+                }
+            },
+            "input_gui_options": {
+                "start": {
+                    "cb_options": {},
+                    "expanded": true
+                },
+                "stop": {
+                    "cb_options": {},
+                    "expanded": true
+                },
+                "step": {
+                    "cb_options": {},
+                    "expanded": true
+                }
+            },
+            "output_gui_options": {
+                "0": {
+                    "cb_options": {},
+                    "expanded": true
+                }
+            },
+            "position": [
+                0.0,
+                0.0
+            ],
+            "expand_flags": {
+                "_inputs_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_outputs_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_doc_expanded": {
+                    "inside_node": false,
+                    "focused": true
+                },
+                "fiat_tuning_expanded": {
+                    "inside_node": false,
+                    "focused": true
+                },
+                "_internal_state_gui_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_backup_expanded_states": {
+                    "inside_node": null,
+                    "focused": null
+                }
+            },
+            "focused_function_visible": false
+        },
+        "n2": {
+            "function_ref": "__main__.make_sin",
+            "function_name": "make_sin",
+            "input_values": {},
+            "input_gui_options": {
+                "x": {
+                    "cb_options": {},
+                    "expanded": false
+                }
+            },
+            "output_gui_options": {
+                "0": {
+                    "cb_options": {},
+                    "expanded": true
+                }
+            },
+            "position": [
+                360.0,
+                0.0
+            ],
+            "expand_flags": {
+                "_inputs_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_outputs_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_doc_expanded": {
+                    "inside_node": false,
+                    "focused": true
+                },
+                "fiat_tuning_expanded": {
+                    "inside_node": false,
+                    "focused": true
+                },
+                "_internal_state_gui_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_backup_expanded_states": {
+                    "inside_node": null,
+                    "focused": null
+                }
+            },
+            "focused_function_visible": false
+        }
+    },
+    "links": [
+        {
+            "src_node": "n1",
+            "src_output_idx": 0,
+            "dst_node": "n2",
+            "dst_input_name": "x"
+        }
+    ]
+}
