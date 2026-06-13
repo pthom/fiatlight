@@ -35,13 +35,23 @@ def _load_pack(spec: str) -> List[Function] | None:
     return list(provider())
 
 
-def default_nodes() -> List[Function]:
-    """Every built-in node pack whose dependencies are installed (image / math /
-    text), concatenated in a stable order. This is the default palette of
-    `fl.studio()`."""
+def _load_packs(specs: List[str]) -> List[Function]:
     nodes: List[Function] = []
-    for spec in _DEFAULT_PACKS.values():
+    for spec in specs:
         pack = _load_pack(spec)
         if pack is not None:
             nodes.extend(pack)
     return nodes
+
+
+def default_nodes() -> List[Function]:
+    """Every built-in node pack whose dependencies are installed (image / math /
+    text), concatenated in a stable order. This is the default palette of
+    `fl.studio()`."""
+    return _load_packs(list(_DEFAULT_PACKS.values()))
+
+
+def minimal_nodes() -> List[Function]:
+    """A lightweight subset (math + text only — no opencv import), for fast
+    startup / IDE debugging of non-image features."""
+    return _load_packs([_DEFAULT_PACKS["math"], _DEFAULT_PACKS["text"]])
