@@ -103,6 +103,9 @@ class FunctionsGraphGui:
     ) -> None:
         self.functions_graph = functions_graph
         self.function_palette = function_palette
+        # Persistent across popup reopenings: the user's search / tags / category
+        # / match mode are kept; only the per-open type filters are reset.
+        self._palette_filter = PaletteFilter()
         self._create_function_nodes_and_links_gui()
 
     def _create_function_nodes_and_links_gui(self) -> None:
@@ -492,7 +495,12 @@ class FunctionsGraphGui:
     def _open_popup_at(self, canvas_pos: ImVec2, dragged_pin: _DraggedFnParamPin | None = None) -> None:
         """Single entry point for both right-click and drag-from-pin.
         `canvas_pos` must already be in canvas coordinates."""
-        filt = PaletteFilter()
+        # Reuse the persistent filter so the user's search / tags / category /
+        # match mode survive closing and reopening the popup. Only the per-open
+        # type filters (set by drag-from-pin) are reset each time.
+        filt = self._palette_filter
+        filt.input_type_filter = None
+        filt.output_type_filter = None
         if dragged_pin is not None:
             if dragged_pin.pin_kind is PinKind.OUTPUT:
                 filt.input_type_filter = dragged_pin.pin_type
