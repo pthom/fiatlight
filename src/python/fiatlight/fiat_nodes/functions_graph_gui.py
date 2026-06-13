@@ -316,6 +316,7 @@ class FunctionsGraphGui:
         )
         function_node_link_gui = FunctionNodeLinkGui(function_node_link, self.function_nodes_gui)
         self.functions_links_gui.append(function_node_link_gui)
+        self._collapse_linked_input(fn_input.get_function_node(), dst_param_name)
 
         return True
 
@@ -612,8 +613,19 @@ class FunctionsGraphGui:
             self.functions_links_gui.append(
                 FunctionNodeLinkGui(self.functions_graph.functions_nodes_links[-1], self.function_nodes_gui)
             )
+            self._collapse_linked_input(dst_fn, dst_input_name)
         except ValueError as e:
             logging.warning(f"Palette-spawn link rejected: {e}")
+
+    @staticmethod
+    def _collapse_linked_input(dst_fn: FunctionNode, dst_input_name: str) -> None:
+        """Collapse a freshly-linked input to its one-line presentation: its
+        value is driven from upstream and already shown on the source node's
+        output, so the full (e.g. image) render would be redundant. Mirrors the
+        default applied to linked inputs when a graph is loaded
+        (FunctionNodeGui.__init__)."""
+        param = dst_fn.function_with_gui.param(dst_input_name)
+        param.data_with_gui._expanded = False
 
     def _apply_pending_node_position(self) -> None:
         if self._pending_node_position is None:
