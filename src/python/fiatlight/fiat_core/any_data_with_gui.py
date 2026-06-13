@@ -81,18 +81,14 @@ _ANYDATAWITHGUI_GENERIC_POSSIBLE_FIAT_ATTRIBUTES = AnyDataWithGuiGenericPossible
 
 
 def _draw_label_with_max_width(
-    label: str, color: ImVec4, label_tooltip: str | None, status_tooltip: str | None = None
+    label: str,
+    color: ImVec4,
+    label_tooltip: str | None,
+    status_tooltip: str | None = None,
+    id_tooltip: str | None = None,
 ) -> None:
-    tooltip: str
-
-    if label_tooltip is not None and status_tooltip is not None:
-        tooltip = label_tooltip + "\n----------------------------------\n" + status_tooltip
-    elif label_tooltip is not None:
-        tooltip = label_tooltip
-    elif status_tooltip is not None:
-        tooltip = status_tooltip
-    else:
-        tooltip = ""
+    segments = [s for s in (label_tooltip, id_tooltip, status_tooltip) if s]
+    tooltip = "\n----------------------------------\n".join(segments)
 
     cur_pos = imgui.get_cursor_screen_pos()
     if "##" in label:
@@ -130,6 +126,9 @@ class GuiHeaderLineParams(Generic[DataType]):
     is_expand_disabled: bool = (
         False  # expand will be disabled when a whole region is collapsed (e.g. inputs, outputs, fiat_tuning, etc.)
     )
+    # Optional "id: <name>" hint appended to the label tooltip. Set by the function node for input params whose label
+    # differs from the Python parameter name (otherwise lost once a label is set).
+    label_id_tooltip: str | None = None
 
 
 class AnyDataWithGui(Generic[DataType]):
@@ -569,7 +568,9 @@ class AnyDataWithGui(Generic[DataType]):
                 label_color = (
                     imgui.get_style().color_(imgui.Col_.text) if self.label_color is None else self.label_color
                 )
-                _draw_label_with_max_width(self.label, label_color, self.tooltip, self.status_tooltip)
+                _draw_label_with_max_width(
+                    self.label, label_color, self.tooltip, self.status_tooltip, params.label_id_tooltip
+                )
             # Expand button
             if self.can_collapse_present(params.is_expand_disabled) and not params.is_expand_disabled:
                 self._show_collapse_button()
@@ -659,7 +660,9 @@ class AnyDataWithGui(Generic[DataType]):
                 label_color = (
                     imgui.get_style().color_(imgui.Col_.text) if self.label_color is None else self.label_color
                 )
-                _draw_label_with_max_width(self.label, label_color, self.tooltip, self.status_tooltip)
+                _draw_label_with_max_width(
+                    self.label, label_color, self.tooltip, self.status_tooltip, params.label_id_tooltip
+                )
             # Expand button
             if self.can_collapse_edit(params.is_expand_disabled):
                 self._show_collapse_button()

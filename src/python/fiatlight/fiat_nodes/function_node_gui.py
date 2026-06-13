@@ -661,6 +661,11 @@ class FunctionNodeGui:
             if fiat_utils.is_rendering_in_node():
                 header_params.prefix_gui = lambda: self._draw_input_pin(header_elements)
             header_params.default_value_if_unspecified = input_param.default_value
+            # Surface the Python parameter name when a custom label hides it.
+            label = input_param.data_with_gui.label
+            display_label = label.split("##")[0] if label is not None else None
+            if display_label is not None and display_label != input_name:
+                header_params.label_id_tooltip = f"id: {input_name}"
 
             header_params.is_expand_disabled = not self._inputs_expanded.current_value()
 
