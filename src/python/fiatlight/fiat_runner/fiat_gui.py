@@ -761,8 +761,12 @@ class FiatGui:
         marker = " *" if (self._workspace_dirty and not is_default) else ""
         imgui.text_disabled(f"{icons_fontawesome_6.ICON_FA_FILE} {name}{marker}")
         if imgui.is_item_hovered():
-            hint = "Default workspace (auto-saved on exit):\n" if is_default else ""
-            imgui.set_tooltip(f"{hint}{self._current_workspace_path}")
+            lines = []
+            if is_default:
+                lines.append("Default workspace")
+            lines.append(self._current_workspace_path)
+            lines.append("Auto-saved on exit.")
+            imgui.set_tooltip("\n".join(lines))
 
         if self._log_handler.nb_new_alerts > 0:
             imgui.same_line()
