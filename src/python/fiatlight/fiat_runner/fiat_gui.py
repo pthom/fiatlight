@@ -494,7 +494,7 @@ class FiatGui:
             imgui.end_menu()
 
         if imgui.begin_menu("Graph"):
-            if imgui.menu_item_simple("Auto-Layout graph"):
+            if imgui.menu_item_simple("Auto-Layout graph", "Ctrl+L"):
                 self._functions_graph_gui.shall_layout_graph = True
             imgui.end_menu()
 
@@ -638,6 +638,8 @@ class FiatGui:
             self._update_workspace_dirty()
         if imgui.shortcut(ctrl | imgui.Key.s.value, route):
             self._menu_save_workspace()
+        if imgui.shortcut(ctrl | imgui.Key.l.value, route):
+            self._functions_graph_gui.shall_layout_graph = True
 
         # Reconcile only when the graph has settled (no active widget, positions
         # stable) so a continuous gesture becomes one undo step.

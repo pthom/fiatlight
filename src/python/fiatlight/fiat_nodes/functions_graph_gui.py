@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import logging
-from collections import defaultdict
 from dataclasses import dataclass
 
 from fiatlight.fiat_types import JsonDict
@@ -11,6 +10,7 @@ from fiatlight.fiat_core import FunctionsGraph, FunctionWithGui
 from fiatlight.fiat_core.function_node import FunctionNode
 from fiatlight.fiat_core.function_with_gui import FunctionWithGuiFactoryFromName
 from fiatlight.fiat_nodes.function_node_gui import FunctionNodeGui, FunctionNodeLinkGui
+from fiatlight.fiat_nodes.sugiyama_layout import compute_layered_ranks, order_layers_to_reduce_crossings
 from fiatlight.fiat_palette import (
     FunctionInfo,
     FunctionPalette,
@@ -21,34 +21,6 @@ from fiatlight.fiat_palette import (
 from fiatlight.fiat_widgets import fiat_osd
 from imgui_bundle import imgui, imgui_node_editor as ed, hello_imgui, ImVec2, imgui_ctx
 from typing import List, Dict, Tuple
-
-
-def compute_layered_ranks(order: List[str], edges: List[Tuple[str, str]]) -> Dict[str, int]:
-    """Longest-path layering of a DAG (Kahn's algorithm), the layer-assignment
-    phase of a Sugiyama layout. `order` lists node ids in stable order; `edges`
-    are (src, dst). Returns each node's layer (data-flow depth: sources at 0).
-    Edges to/from unknown ids are ignored; nodes caught in a cycle keep layer 0
-    (graceful rather than looping forever). Pure — unit-tested."""
-    node_set = set(order)
-    successors: Dict[str, List[str]] = defaultdict(list)
-    in_degree: Dict[str, int] = defaultdict(int)
-    for s, d in edges:
-        if s in node_set and d in node_set:
-            successors[s].append(d)
-            in_degree[d] += 1
-
-    layer: Dict[str, int] = {sid: 0 for sid in order}
-    remaining = {sid: in_degree[sid] for sid in order}
-    queue = [sid for sid in order if remaining[sid] == 0]
-    while queue:
-        s = queue.pop(0)
-        for d in successors[s]:
-            if layer[d] < layer[s] + 1:
-                layer[d] = layer[s] + 1
-            remaining[d] -= 1
-            if remaining[d] == 0:
-                queue.append(d)
-    return layer
 
 
 @dataclass(frozen=True)
@@ -384,6 +356,13 @@ class FunctionsGraphGui:
     # ======================================================================================================================
     # Graph layout
     # ======================================================================================================================
+    class _GraphLayout_Section:  # Dummy class to create a section in the IDE # noqa
+        """Auto-layout (Sugiyama columns), plus the pending-position / camera-refit
+        plumbing that applies node positions and fits them into view. The pure
+        layering / crossing-min algorithms live in `sugiyama_layout`."""
+
+        pass
+
     def _layout_graph_if_required(self) -> None:
         def are_all_nodes_on_zero() -> bool:
             # the node sizes are not set yet in the first frame
@@ -405,11 +384,12 @@ class FunctionsGraphGui:
             self._navigate_after_load_frame = imgui.get_frame_count() + 3
 
     def _layout_graph_layered(self) -> None:
-        """Sugiyama-style layered layout (v1): place nodes in columns by their
+        """Sugiyama-style layered layout: place nodes in columns by their
         data-flow depth (sources left, sinks right), stacked within a column and
         spaced to their actual sizes. Left-to-right, so links run forward
-        (output pin on the right -> input pin on the left). No crossing
-        minimization yet — within a column, nodes keep their creation order."""
+        (output pin on the right -> input pin on the left). Within-column order is
+        chosen to reduce link crossings (barycenter heuristic). Layering + ordering
+        come from `sugiyama_layout`; here we turn columns into pixel positions."""
         nodes_gui = self.function_nodes_gui
         if not nodes_gui:
             return
@@ -423,10 +403,7 @@ class FunctionsGraphGui:
             for link in self.functions_graph.functions_nodes_links
         ]
         layer = compute_layered_ranks(order, edges)
-
-        columns: Dict[int, List[str]] = defaultdict(list)
-        for sid in order:  # original order -> stable within-column order
-            columns[layer[sid]].append(sid)
+        columns = order_layers_to_reduce_crossings(order, edges, layer)
 
         h_gap = hello_imgui.em_size(5)
         v_gap = hello_imgui.em_size(2)
