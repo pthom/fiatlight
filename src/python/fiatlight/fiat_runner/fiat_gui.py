@@ -6,13 +6,14 @@ from fiatlight.fiat_core import FunctionsGraph, FunctionWithGui
 from fiatlight.fiat_types.function_types import VoidFunction
 from fiatlight.fiat_types.function_types import Function
 from fiatlight.fiat_widgets import fiat_osd
+from fiatlight.fiat_widgets.fontawesome6_ctx_utils import icons_fontawesome_6
 from fiatlight.fiat_utils import functional_utils
 from fiatlight.fiat_palette import FunctionPalette
 from fiatlight.fiat_kits.fiat_image.image_types import ImageRgb
 from fiatlight.fiat_config import get_fiat_config
 from imgui_bundle import immapp, imgui, portable_file_dialogs as pfd, imgui_node_editor as ed
 from typing import Any, Callable
-from imgui_bundle import hello_imgui, ImVec2, immvision, imgui_md
+from imgui_bundle import hello_imgui, ImVec2, ImVec4, immvision, imgui_md
 
 import json
 import logging
@@ -86,8 +87,18 @@ def _is_running_in_documentation() -> bool:
 # ==================================================================================================================
 #                                  Logging
 # ==================================================================================================================
+# Orange tint used for the log-alert status-bar indicator and notification.
+_LOG_ALERT_COLOR = ImVec4(1.0, 0.6, 0.0, 1.0)
+
+
 class HelloImGuiLogHandler(logging.Handler):
-    was_log_window_opened_on_first_log: bool = False
+    # Number of warning/error records logged since the user last opened the Log
+    # window (drives the status-bar indicator). Reset when the Log is opened.
+    nb_new_alerts: int = 0
+    # Short message of the latest warning/error not yet shown as a notification.
+    # Consumed (set to None) by the GUI heartbeat, which creates the toast there
+    # so that no imgui call happens inside emit() (which may run off-frame).
+    pending_alert_message: str | None = None
 
     def emit(self, record: Any) -> None:
         # Map the logging level to the LogLevel enum
@@ -100,13 +111,15 @@ class HelloImGuiLogHandler(logging.Handler):
             level = hello_imgui.LogLevel.error
         # Call the log function
         msg = self.format(record)
-        if not self.was_log_window_opened_on_first_log:
-            hello_imgui.get_runner_params().docking_params.dockable_window_of_name("Log").is_visible = True
-            self.was_log_window_opened_on_first_log = True
         hello_imgui.log(level, msg)
+        # Flag warnings/errors so the GUI can alert the user (status bar +
+        # notification) instead of force-opening the Log window.
+        if record.levelno >= logging.WARNING:
+            self.nb_new_alerts += 1
+            self.pending_alert_message = record.getMessage().strip().split("\n")[0]
 
 
-def _init_logger() -> None:
+def _init_logger() -> HelloImGuiLogHandler:
     # Create a logger
     root_logger = logging.getLogger()
     root_logger.setLevel(logging.INFO)  # Or whatever level you want
@@ -121,6 +134,8 @@ def _init_logger() -> None:
         console_handler = logging.StreamHandler()
         console_handler.setFormatter(logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s"))
         root_logger.addHandler(console_handler)
+
+    return hello_imgui_log_handler
 
 
 # Last image
@@ -266,6 +281,7 @@ class FiatGui:
         runner_params.imgui_window_params.show_menu_view = False
         runner_params.imgui_window_params.show_menu_app = False
         runner_params.callbacks.show_menus = self._show_menus
+        runner_params.callbacks.show_status = self._show_status_bar
 
         # window title from app_title or the name of the calling module
         if params.app_name is not None:
@@ -297,7 +313,7 @@ class FiatGui:
         self._functions_graph_gui.invoke_all_functions(also_invoke_manual_function=False)
         self._notify_if_dirty_functions()
         self._disable_idling_if_any_live_function()
-        _init_logger()
+        self._log_handler = _init_logger()
 
     def _before_exit(self) -> None:
         self._store_final_app_window_screenshot()
@@ -397,6 +413,7 @@ class FiatGui:
         _LAST_SCREENSHOT = last_nodes_image  # type: ignore
 
     def _heartbeat_post_render_dockable_windows(self) -> None:
+        self._notify_if_new_log_alert()
         fiat_osd.render_all_osd()  # noqa
         self._handle_file_dialogs()
 
@@ -639,6 +656,35 @@ class FiatGui:
             imgui.text("Click on the refresh button to recompute them.")
 
         fiat_osd.add_notification_gui("dirty", gui)
+
+    def _open_log_window(self) -> None:
+        self._runner_params.docking_params.dockable_window_of_name("Log").is_visible = True
+        self._log_handler.nb_new_alerts = 0
+
+    def _show_status_bar(self) -> None:
+        """Custom status-bar content: a discreet indicator that warnings/errors
+        were logged, with a button to open the Log window (which is no longer
+        opened automatically)."""
+        if self._log_handler.nb_new_alerts == 0:
+            return
+        n = self._log_handler.nb_new_alerts
+        msg = f"{icons_fontawesome_6.ICON_FA_TRIANGLE_EXCLAMATION} {n} new log message" + ("s" if n > 1 else "")
+        imgui.text_colored(_LOG_ALERT_COLOR, msg)
+        imgui.same_line()
+        if imgui.small_button("Open Log"):
+            self._open_log_window()
+
+    def _notify_if_new_log_alert(self) -> None:
+        message = self._log_handler.pending_alert_message
+        if message is None:
+            return
+        self._log_handler.pending_alert_message = None
+
+        def gui() -> None:
+            imgui.text_colored(_LOG_ALERT_COLOR, f"{icons_fontawesome_6.ICON_FA_TRIANGLE_EXCLAMATION}  Logged:")
+            imgui.text_wrapped(message)
+
+        fiat_osd.add_notification_gui("log_alert", gui)
 
     # ==================================================================================================================
     #                                  Serialization
