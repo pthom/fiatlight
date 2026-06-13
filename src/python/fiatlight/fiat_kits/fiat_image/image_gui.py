@@ -397,18 +397,14 @@ class ImageWithGui(AnyDataWithGui[Image]):
 
 
 @with_fiat_attributes(
-    image_file__label="Select Image",
+    image_file__label="File",
     max_image_size__range=(1, 3000),
     max_image_size__label="Max Image Size",
     max_image_size__tooltip="If the image with or height is larger than this size, it will be resized",
     label="Image from file",
 )
 def image_source(image_file: ImagePath, max_image_size: int | None = None) -> ImageU8:
-    """A simple function that reads an image from a file and optionally resizes it if it is too large.
-
-    Since image_file is of type ImagePath, it will be displayed as a file picker in the GUI
-    (if not linked to another function).
-    """
+    """A simple function that reads an image from a file and optionally resizes it if it is too large."""
     from fiatlight.fiat_kits.fiat_image.imread_rgb import imread_rgb
 
     image = imread_rgb(image_file)

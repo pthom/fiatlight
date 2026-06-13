@@ -6,7 +6,7 @@ the playground's function palette to filter and group nodes.
 """
 from typing import Callable, List, Any
 
-from examples.img_proc_playground.wrappers.source import image_source, imread_rgb
+from examples.img_proc_playground.wrappers.source import image_source
 from examples.img_proc_playground.wrappers.color import color_convert
 from examples.img_proc_playground.wrappers.lut import lut_with_params, lut_channels_in_colorspace
 from examples.img_proc_playground.wrappers.tone import (
@@ -103,7 +103,6 @@ def all_opencv_wrappers() -> List[Callable[..., Any]]:
     return [
         # source
         image_source,
-        imread_rgb,
         # color / tone
         color_convert,
         lut_with_params,
