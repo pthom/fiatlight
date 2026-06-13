@@ -603,8 +603,39 @@ class FiatGui:
         """Re-snapshot the undo baseline (after New / Open), once positions settle."""
         self._undo_baseline_pending = self._UNDO_BASELINE_DELAY_FRAMES
 
+    @staticmethod
+    def _topology_signature(workspace_json: JsonDict) -> Tuple[Any, ...]:
+        """Cheap fingerprint of a snapshot's graph *structure* (node ids + links),
+        ignoring values / GUI options / positions. Two snapshots with the same
+        signature differ only in restorable-in-place state, so an undo between
+        them does not need to tear down and recreate the node GUIs."""
+        nodes = tuple(sorted(workspace_json.get("nodes", {}).keys()))
+        links = tuple(
+            sorted(
+                (lk.get("src_node"), lk.get("src_output_idx"), lk.get("dst_node"), lk.get("dst_input_name"))
+                for lk in workspace_json.get("links", [])
+            )
+        )
+        return (nodes, links)
+
+    def _current_topology_signature(self) -> Tuple[Any, ...]:
+        graph = self._functions_graph_gui.functions_graph
+        nodes = tuple(sorted(fn.stable_id for fn in graph.functions_nodes))
+        links = tuple(
+            sorted(
+                (lk.src_function_node.stable_id, lk.src_output_idx, lk.dst_function_node.stable_id, lk.dst_input_name)
+                for lk in graph.functions_nodes_links
+            )
+        )
+        return (nodes, links)
+
     def _restore_graph_snapshot(self, snapshot: JsonDict) -> None:
-        rebuild_topology = self.params.customizable_graph
+        # Only rebuild the graph (recreating every node GUI) when the topology
+        # actually changed. An in-place restore keeps the same image presenters,
+        # so immvision does not re-seed their pan/zoom from its stale cache and
+        # clobber the restored view (see the long debugging trail in PR history).
+        topology_changed = self._topology_signature(snapshot) != self._current_topology_signature()
+        rebuild_topology = self.params.customizable_graph and topology_changed
         self._functions_graph_gui.load_workspace_from_json(
             snapshot, self._function_palette.factor_function_from_ref, rebuild_topology=rebuild_topology
         )
@@ -639,7 +670,9 @@ class FiatGui:
             self._functions_graph_gui.shall_layout_graph = True
 
         # Reconcile only when the graph has settled (no active widget, positions
-        # stable) so a continuous gesture becomes one undo step.
+        # stable) so a continuous gesture becomes one undo step. An image pan
+        # holds the mouse and keeps an imgui item active, so `is_any_item_active`
+        # already covers it.
         layout_sig = self._functions_graph_gui.nodes_layout_signature()
         settled = (not imgui.is_any_item_active()) and (layout_sig == self._undo_prev_layout_sig)
         self._undo_prev_layout_sig = layout_sig
@@ -752,7 +785,7 @@ class FiatGui:
         plus a discreet indicator when warnings/errors were logged."""
         # Active workspace file. Show a short name; full path on hover.
         # The default per-app path auto-saves on exit, so a "*" there would just
-        # be noise — the marker is shown only for an explicitly named file.
+        # be noise : the marker is shown only for an explicitly named file.
         is_default = self._current_workspace_path == self._workspace_filename()
         name = pathlib.Path(self._current_workspace_path).name
         if name.endswith(".fiat_workspace.json"):
@@ -996,7 +1029,7 @@ def studio(
     """Open the Fiatlight studio: an interactive node composer.
 
     Launches the graph composer with a palette of all available built-in node
-    packs (image / math / text — the image pack needs opencv; packs whose
+    packs (image / math / text : the image pack needs opencv; packs whose
     dependencies are missing are skipped). Drag nodes onto the canvas to build a
     live function graph. Pass `functions` to add your own nodes to the palette.
     """
