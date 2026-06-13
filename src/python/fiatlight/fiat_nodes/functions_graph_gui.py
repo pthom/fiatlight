@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+from collections import defaultdict
 from dataclasses import dataclass
 
 from fiatlight.fiat_types import JsonDict
@@ -20,6 +21,34 @@ from fiatlight.fiat_palette import (
 from fiatlight.fiat_widgets import fiat_osd
 from imgui_bundle import imgui, imgui_node_editor as ed, hello_imgui, ImVec2, imgui_ctx
 from typing import List, Dict, Tuple
+
+
+def compute_layered_ranks(order: List[str], edges: List[Tuple[str, str]]) -> Dict[str, int]:
+    """Longest-path layering of a DAG (Kahn's algorithm), the layer-assignment
+    phase of a Sugiyama layout. `order` lists node ids in stable order; `edges`
+    are (src, dst). Returns each node's layer (data-flow depth: sources at 0).
+    Edges to/from unknown ids are ignored; nodes caught in a cycle keep layer 0
+    (graceful rather than looping forever). Pure — unit-tested."""
+    node_set = set(order)
+    successors: Dict[str, List[str]] = defaultdict(list)
+    in_degree: Dict[str, int] = defaultdict(int)
+    for s, d in edges:
+        if s in node_set and d in node_set:
+            successors[s].append(d)
+            in_degree[d] += 1
+
+    layer: Dict[str, int] = {sid: 0 for sid in order}
+    remaining = {sid: in_degree[sid] for sid in order}
+    queue = [sid for sid in order if remaining[sid] == 0]
+    while queue:
+        s = queue.pop(0)
+        for d in successors[s]:
+            if layer[d] < layer[s] + 1:
+                layer[d] = layer[s] + 1
+            remaining[d] -= 1
+            if remaining[d] == 0:
+                queue.append(d)
+    return layer
 
 
 @dataclass(frozen=True)
@@ -370,21 +399,55 @@ class FunctionsGraphGui:
 
         if self.shall_layout_graph or are_all_nodes_on_zero():
             self.shall_layout_graph = False
-            width_between_nodes = hello_imgui.em_size(4)
-            height_between_nodes = hello_imgui.em_size(4)
-            current_row_height = 0.0
-            w = imgui.get_window_width()
-            current_position = ImVec2(0, 0)
+            self._layout_graph_layered()
+            # Fit the whole laid-out graph into view, a few frames later (once
+            # ed.end() has updated the node bounds the camera reads).
+            self._navigate_after_load_frame = imgui.get_frame_count() + 3
 
-            for i, fn in enumerate(self.function_nodes_gui):
-                ed.set_node_position(fn.node_id(), current_position)
-                node_size = ed.get_node_size(fn.node_id())
-                current_position.x += node_size.x + width_between_nodes
-                current_row_height = max(current_row_height, node_size.y)
-                if current_position.x + node_size.x > w:
-                    current_position.x = 0
-                    current_position.y += current_row_height + height_between_nodes
-                    current_row_height = 0
+    def _layout_graph_layered(self) -> None:
+        """Sugiyama-style layered layout (v1): place nodes in columns by their
+        data-flow depth (sources left, sinks right), stacked within a column and
+        spaced to their actual sizes. Left-to-right, so links run forward
+        (output pin on the right -> input pin on the left). No crossing
+        minimization yet — within a column, nodes keep their creation order."""
+        nodes_gui = self.function_nodes_gui
+        if not nodes_gui:
+            return
+
+        gui_by_sid: Dict[str, FunctionNodeGui] = {g.get_function_node().stable_id: g for g in nodes_gui}
+        order: List[str] = [g.get_function_node().stable_id for g in nodes_gui]
+        size_by_sid: Dict[str, ImVec2] = {sid: ed.get_node_size(g.node_id()) for sid, g in gui_by_sid.items()}
+
+        edges = [
+            (link.src_function_node.stable_id, link.dst_function_node.stable_id)
+            for link in self.functions_graph.functions_nodes_links
+        ]
+        layer = compute_layered_ranks(order, edges)
+
+        columns: Dict[int, List[str]] = defaultdict(list)
+        for sid in order:  # original order -> stable within-column order
+            columns[layer[sid]].append(sid)
+
+        h_gap = hello_imgui.em_size(5)
+        v_gap = hello_imgui.em_size(2)
+        max_layer = max(layer.values())
+
+        # Column widths (widest node) and heights (stacked), to space + center.
+        col_width: Dict[int, float] = {}
+        col_height: Dict[int, float] = {}
+        for c in range(max_layer + 1):
+            sids = columns[c]
+            col_width[c] = max((size_by_sid[s].x for s in sids), default=0.0)
+            col_height[c] = sum(size_by_sid[s].y for s in sids) + v_gap * max(0, len(sids) - 1)
+        total_height = max(col_height.values(), default=0.0)
+
+        x = 0.0
+        for c in range(max_layer + 1):
+            y = (total_height - col_height[c]) / 2.0  # center the column vertically
+            for sid in columns[c]:
+                ed.set_node_position(gui_by_sid[sid].node_id(), ImVec2(x, y))
+                y += size_by_sid[sid].y + v_gap
+            x += col_width[c] + h_gap
 
     def _get_last_focused_function_boundings(self) -> imgui.internal.ImRect:
         # shot_rect could be a rectangle from the focused function
