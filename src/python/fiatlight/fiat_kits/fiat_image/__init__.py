@@ -35,11 +35,16 @@ from .rotated_rects2d_gui import _register as _register_rotated_rects2d
 from .point2d_type import Point2D  # registered via decorator at import time
 from .rect2d_type import Rect2D  # registered via decorator at import time
 from .label_image_types import LabelImage
-from .label_image_gui import _register as _register_label_image
 from .blob_stats_types import BlobStats
 from .blob_stats_gui import _register as _register_blob_stats
 
-# Most of the features of fiatlight.fiat_image require OpenCV
+# imread_rgb imports cv2 lazily (inside the function), so it is always
+# importable; calling it without opencv is what raises.
+from .imread_rgb import imread_rgb
+
+# Most fiat_image features require OpenCV. The modules below import cv2 at module
+# load, so they are guarded: without opencv, fiat_image still imports (offering
+# the cv2-free features) and HAS_OPENCV is False.
 try:
     HAS_OPENCV = True
     from .cv_color_type import ColorType, ColorConversion
@@ -51,7 +56,7 @@ try:
     from .lut_types import LutParams, LutTable
     from .lut_gui import LutParamsWithGui
     from .camera_image_provider import CameraImageProvider, CameraImageProviderGui
-    from .imread_rgb import imread_rgb
+    from .label_image_gui import _register as _register_label_image
 except ImportError:
     HAS_OPENCV = False
     pass
@@ -69,9 +74,9 @@ def _register_factories() -> None:
     _register_transform_matrices()
     _register_rects2d()
     _register_rotated_rects2d()
-    _register_label_image()
     _register_blob_stats()
     if HAS_OPENCV:
+        _register_label_image()
         register_type(LutParams, LutParamsWithGui)
 
 
