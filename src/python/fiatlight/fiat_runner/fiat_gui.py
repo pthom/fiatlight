@@ -878,6 +878,32 @@ def run_graph_composer(
     fiat_gui.run()
 
 
+def studio(
+    functions: List[Function] | None = None,
+    params: FiatRunParams | None = None,
+    app_name: str | None = None,
+    top_most: bool = False,
+) -> None:
+    """Open the Fiatlight studio: an interactive node composer.
+
+    Launches the graph composer with a palette of all available built-in node
+    packs (image / math / text — the image pack needs opencv; packs whose
+    dependencies are missing are skipped). Drag nodes onto the canvas to build a
+    live function graph. Pass `functions` to add your own nodes to the palette.
+    """
+    from fiatlight.fiat_kits.node_packs import default_nodes
+
+    palette = default_nodes()
+    if functions:
+        palette = palette + list(functions)
+    run_graph_composer(
+        functions=palette,
+        params=params,
+        app_name=app_name if app_name is not None else "Fiatlight Studio",
+        top_most=top_most,
+    )
+
+
 def run(
     fn: Function | FunctionWithGui | List[Function | FunctionWithGui] | FunctionsGraph,
     params: FiatRunParams | None = None,

@@ -7,13 +7,18 @@ from fiatlight.fiat_types import Function
 _register_prompt()
 
 
-def all_functions() -> list[Function]:
+def ai_nodes() -> list[Function]:
+    """The AI node pack (currently the SDXL-turbo image generator).
+
+    Heavy (imports torch, GPU/network-bound), so it is opt-in: not part of the
+    default `fl.studio()` palette.
+    """
     return [invoke_sdxl_turbo]
 
 
 __all__ = [
     # from here
-    "all_functions",
+    "ai_nodes",
     # from .prompt
     "Prompt",
     # from .invoke_sdxl_turbo

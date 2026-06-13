@@ -42,12 +42,21 @@ def fn_attrs() -> None:
 #     _GUI_FACTORIES.run_gui_demo(gui_or_data_typename)
 
 
+def studio() -> None:
+    """Open the Fiatlight studio: an interactive node composer with a palette of
+    the built-in node packs (image / math / text) to drag onto the canvas."""
+    import fiatlight as fl
+
+    fl.studio()
+
+
 def main() -> None:
     fire.Fire(
         {
             "types": types,
             "gui": gui_info,
             "fn_attrs": fn_attrs,
+            "studio": studio,
         }
     )
 

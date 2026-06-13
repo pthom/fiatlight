@@ -61,7 +61,7 @@ line-length = 120
 
 [tool.mypy]
 mypy_path = "src/python"
-packages = ["fiatlight", "examples.img_proc_playground"]
+packages = ["fiatlight"]
 explicit_package_bases = true
 strict = true
 exclude = [
@@ -72,8 +72,8 @@ exclude = [
 ]
 
 [tool.pyright]
-# Mirror mypy.ini scope: library + examples/img_proc_playground, with the same exclusions.
-include = ["src/python/fiatlight", "examples/img_proc_playground"]
+# Mirror mypy scope: the library, with the same exclusions.
+include = ["src/python/fiatlight"]
 exclude = [
     "**/__pycache__",
     "src/python/fiatlight/sandbox",

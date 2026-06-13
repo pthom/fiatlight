@@ -5,6 +5,7 @@ from fiatlight.fiat_runner.fiat_gui import (
     run,
     run_async,
     run_graph_composer,
+    studio,
     fire_once_at_frame_end,
     fire_once_at_frame_start,
 )
@@ -20,6 +21,7 @@ __all__ = [
     "run",
     "run_async",
     "run_graph_composer",
+    "studio",
     "ImGuiTheme_",
     #
     "fire_once_at_frame_end",
