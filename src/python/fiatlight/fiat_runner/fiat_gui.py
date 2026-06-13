@@ -555,35 +555,32 @@ class FiatGui:
                 imgui.dummy(hello_imgui.em_to_vec2(40, 0))
                 imgui_md.render_unindented(
                     """
-* Use the mouse wheel to zoom in and out in the graph
-* Drag with the right mouse button to move the graph
+## Navigation
 
-### Mouse
+* **Mouse wheel** : Zoom in and out.
+* **Right-drag** : Pan the graph.
 
-| Input                                | Action |
-|--------------------------------------|--------|
-| Left click on background             | Clear selection |
-| Left click on node or link           | Select that object (replaces selection) |
-| `Ctrl` + left click                  | Toggle the clicked object in or out of the selection |
-| Left drag on background              | Rubber-band select nodes |
-| `Shift` + left drag on background    | Rubber-band select Group nodes |
-| `Alt` + left drag on background      | Rubber-band select links |
-| `Ctrl` + left drag (rubber band)     | Keep the previous selection while lassoing |
-| Left drag on a node                  | Move the node (and members of any selected Group) |
-| `Shift` + left drag on a node        | Move only the directly-selected nodes |
-| Right drag                           | Pan the canvas |
-| Right click                          | Open the context menu |
-| Mouse wheel                          | Zoom in or out (smooth zoom controlled by `Config::EnableSmoothZoom`) |
+## Centering
 
-### Keyboard
+* **`F` over a node, pin, or Group** : Center that object.
+* **`F` with a non-empty selection** : Center the selection.
+* **`F` over empty background** : Center all content.
+* **`Shift` + `F`** : Center and zoom to fit.
 
-| Input                  | Action |
-|------------------------|--------|
-| `F` over a node, pin or Group | Center that object  |
-| `F` with a non-empty selection| Center the selection bounds  |
-| `F` over the empty background | Center all content |
-| `Shift` + `F`                 | Same as `F`, but with zoom |
+## Moving nodes
 
+* **Left-drag on a node** : Move the node (and members of any selected Group).
+* **`Shift` + left-drag on a node** : Move only the directly selected nodes.
+
+## Selection
+
+* **Left-click on background** : Clear the selection.
+* **Left-click on a node or link** : Select that object (replaces the current selection).
+* **`Ctrl` + left-click** : Toggle the clicked object in the selection.
+* **Left-drag on background** : Rubber-band select nodes.
+* **`Shift` + left-drag on background** : Rubber-band select Group nodes.
+* **`Alt` + left-drag on background** : Rubber-band select links.
+* **`Ctrl` + left-drag (rubber-band)** : Keep the current selection while lassoing.
                 """
                 )
                 imgui.end_tooltip()
