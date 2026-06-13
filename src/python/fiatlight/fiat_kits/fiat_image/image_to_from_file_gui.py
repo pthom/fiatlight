@@ -54,7 +54,8 @@ def _resize_rgb(image: ImageU8, scale: float) -> ImageU8:
 
         h, w = image.shape[:2]
         new_size = (max(1, round(w * scale)), max(1, round(h * scale)))
-        return np.asarray(Image.fromarray(image).resize(new_size))  # type: ignore
+        # np.array (not np.asarray) to return a writable, contiguous array.
+        return np.array(Image.fromarray(image).resize(new_size))  # type: ignore
     return cv2.resize(image, None, fx=scale, fy=scale)  # type: ignore
 
 

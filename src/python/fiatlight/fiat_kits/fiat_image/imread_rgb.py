@@ -40,4 +40,6 @@ def _imread_rgb_pillow(image_file: str) -> ImageU8:
     pil_image = Image.open(image_file)
     # Preserve alpha when present, else RGB — matching the OpenCV path's contract.
     mode = "RGBA" if "A" in pil_image.getbands() else "RGB"
-    return np.asarray(pil_image.convert(mode))  # type: ignore
+    # np.array (not np.asarray): PIL exposes a read-only buffer, and immvision /
+    # downstream code needs a writable, contiguous array.
+    return np.array(pil_image.convert(mode))  # type: ignore

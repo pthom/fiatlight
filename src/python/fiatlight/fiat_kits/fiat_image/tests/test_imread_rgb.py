@@ -19,7 +19,11 @@ def _save(tmp_path: Path, arr: np.ndarray, mode: str | None = None) -> str:
 
 def test_pillow_reads_rgb(tmp_path: Path) -> None:
     path = _save(tmp_path, np.full((6, 8, 3), 100, np.uint8))
-    assert _imread_rgb_pillow(path).shape == (6, 8, 3)
+    img = _imread_rgb_pillow(path)
+    assert img.shape == (6, 8, 3)
+    # immvision (and downstream code) needs a writable, contiguous array; PIL's
+    # buffer is read-only, so the loader must copy.
+    assert img.flags["WRITEABLE"] and img.flags["C_CONTIGUOUS"]
 
 
 def test_pillow_preserves_alpha(tmp_path: Path) -> None:
