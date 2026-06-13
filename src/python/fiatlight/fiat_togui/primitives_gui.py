@@ -321,8 +321,13 @@ class FloatWithGui(AnyDataWithGui[float]):
     params: FloatWithGuiParams
 
     def __init__(self, params: FloatWithGuiParams | None = None) -> None:
+        from fiatlight.fiat_widgets.float_widgets import AnyRangeSliderState
+
         super().__init__(float)
         self.params = params if params is not None else FloatWithGuiParams()
+        # Transient range state for the "any range" slider (inferred from the
+        # value, not persisted — see slider_float_any_range).
+        self._any_range_state = AnyRangeSliderState()
         self.callbacks.edit = self.edit
         self.callbacks.default_value_provider = lambda: 0.0
         self.callbacks.clipboard_copy_possible = True
@@ -494,8 +499,8 @@ class FloatWithGui(AnyDataWithGui[float]):
             changed, value = slider_float_any_range(
                 self.params.label,
                 value,
+                self._any_range_state,
                 accept_negative,
-                self.params.nb_significant_digits,
             )
 
         return changed, value
