@@ -19,7 +19,7 @@ Thanks to this advanced viewer:
 
 import fiatlight as fl
 from fiatlight.fiat_kits.fiat_image import lut_channels_in_colorspace
-from fiatlight.fiat_kits.fiat_image import image_source, ImageU8_3, ImageFloat
+from fiatlight.fiat_kits.fiat_image import image_from_file_resized, ImageU8_3, ImageFloat
 from fiatlight.demos.images.opencv_wrappers import canny
 from enum import Enum
 import cv2
@@ -45,16 +45,16 @@ def compute_sobel(image: ImageU8_3, orientation: Orientation) -> ImageFloat:
 
 def main() -> None:
     graph = fl.FunctionsGraph()
-    graph.add_function(image_source)
+    graph.add_function(image_from_file_resized)
 
     graph.add_function(canny)
-    graph.add_link(image_source, canny)
+    graph.add_link(image_from_file_resized, canny)
 
     graph.add_function(compute_sobel)
-    graph.add_link(image_source, compute_sobel)
+    graph.add_link(image_from_file_resized, compute_sobel)
 
     graph.add_function(lut_channels_in_colorspace)
-    graph.add_link(image_source, lut_channels_in_colorspace)
+    graph.add_link(image_from_file_resized, lut_channels_in_colorspace)
 
     fl.run(graph, app_name="demo_computer_vision", params=fl.FiatRunParams(delete_settings=False))
 

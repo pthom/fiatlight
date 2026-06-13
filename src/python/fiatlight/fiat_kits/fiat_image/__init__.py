@@ -15,9 +15,9 @@ from .image_types import (
     ImageU8_3,
     ImageU8_4,
 )
-from .image_gui import ImageWithGui, ImagePresenterParams, image_source
+from .image_gui import ImageWithGui, ImagePresenterParams
 from .overlay_alpha_image import overlay_alpha_image
-from .image_to_from_file_gui import image_from_file, ImageToFileGui
+from .image_to_from_file_gui import image_from_file, ImageToFileGui, image_from_file_resized
 from .contours_types import Contours, ContoursHierarchy
 from .contours_gui import _register as _register_contours
 from .points2d_types import Points2D
@@ -104,7 +104,7 @@ __all__ = [
     # from image_gui
     "ImageWithGui",
     "ImagePresenterParams",
-    "image_source",
+    "image_from_file_resized",
     # from cv_color_type
     "ColorConversion",
     "ColorType",

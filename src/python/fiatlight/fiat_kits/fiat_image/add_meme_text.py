@@ -80,9 +80,9 @@ def add_meme_text(image: ImageU8, params: MemeTextParams) -> ImageU8:
 
 
 def main() -> None:
-    from fiatlight.fiat_kits.fiat_image import image_source
+    from fiatlight.fiat_kits.fiat_image import image_from_file_resized
 
-    fl.run([image_source, add_meme_text])
+    fl.run([image_from_file_resized, add_meme_text])
 
 
 if __name__ == "__main__":

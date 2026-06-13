@@ -1,5 +1,5 @@
 import fiatlight as fl
-from fiatlight.fiat_kits.fiat_image import image_source, ImageU8, ImageU8_GRAY
+from fiatlight.fiat_kits.fiat_image import image_from_file_resized, ImageU8, ImageU8_GRAY
 from enum import Enum
 import cv2
 
@@ -54,4 +54,4 @@ def dilate(
     return r  # type: ignore
 
 
-fl.run([image_source, canny, dilate], app_name="demo_canny")
+fl.run([image_from_file_resized, canny, dilate], app_name="demo_canny")

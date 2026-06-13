@@ -1,7 +1,7 @@
 import time
 import fiatlight as fl
 from fiatlight.fiat_types import ColorRgb
-from fiatlight.fiat_kits.fiat_image import ImageU8_GRAY, ImageRgb, image_source
+from fiatlight.fiat_kits.fiat_image import ImageU8_GRAY, ImageRgb, image_from_file_resized
 from fiatlight.demos.images.opencv_wrappers import canny, dilate, MorphShape, CannyApertureSize
 from fiatlight.fiat_kits.fiat_image import overlay_alpha_image
 from pydantic import BaseModel
@@ -165,7 +165,10 @@ def main() -> None:
         label="Add Toon Edges",
     )
 
-    fl.run([image_source, add_toon_edges], fl.FiatRunParams(app_name="Toon Edges", theme=fl.ImGuiTheme_.material_flat))
+    fl.run(
+        [image_from_file_resized, add_toon_edges],
+        fl.FiatRunParams(app_name="Toon Edges", theme=fl.ImGuiTheme_.material_flat),
+    )
 
 
 if __name__ == "__main__":

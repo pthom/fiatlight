@@ -1,7 +1,6 @@
-from fiatlight.fiat_utils.fiat_attributes_decorator import with_fiat_attributes
-from fiatlight.fiat_types import JsonDict, ImagePath, FiatAttributes, Unspecified, UnspecifiedValue
+from fiatlight.fiat_types import JsonDict, FiatAttributes, Unspecified, UnspecifiedValue
 from fiatlight.fiat_core import AnyDataWithGui, PossibleFiatAttributes
-from fiatlight.fiat_kits.fiat_image.image_types import Image, ImageU8
+from fiatlight.fiat_kits.fiat_image.image_types import Image
 from fiatlight.fiat_utils.cache_per_imgui_view import CachePerImGuiView
 from fiatlight.fiat_widgets import fiat_osd
 from imgui_bundle import immvision, imgui, ImVec2
@@ -394,28 +393,3 @@ class ImageWithGui(AnyDataWithGui[Image]):
 
     def load_gui_options_from_json(self, data: JsonDict) -> None:
         self.image_presenter.load_gui_options_from_json(data)
-
-
-@with_fiat_attributes(
-    image_file__label="File",
-    max_image_size__range=(1, 3000),
-    max_image_size__label="Max Image Size",
-    max_image_size__tooltip="If the image with or height is larger than this size, it will be resized",
-    label="Image from file",
-)
-def image_source(image_file: ImagePath, max_image_size: int | None = None) -> ImageU8:
-    """A simple function that reads an image from a file and optionally resizes it if it is too large."""
-    from fiatlight.fiat_kits.fiat_image.imread_rgb import imread_rgb
-
-    image = imread_rgb(image_file)
-
-    if max_image_size is not None:
-        try:
-            import cv2
-        except ImportError:
-            raise ImportError("cv2 is required to resize the image, please install it with 'pip install opencv-python'")
-        if image.shape[0] > max_image_size or image.shape[1] > max_image_size:
-            k = max_image_size / max(image.shape[0], image.shape[1])
-            assert k > 0.0
-            image = cv2.resize(image, None, fx=k, fy=k)  # type: ignore
-    return image

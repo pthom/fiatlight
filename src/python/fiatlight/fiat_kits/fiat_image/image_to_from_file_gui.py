@@ -1,35 +1,64 @@
+from fiatlight.fiat_utils.fiat_attributes_decorator import with_fiat_attributes
 from fiatlight.fiat_types.file_types import ImagePath, ImagePath_Save
 from fiatlight.fiat_core.function_with_gui import FunctionWithGui
 from imgui_bundle import imgui, portable_file_dialogs as pfd
-from .image_types import ImageRgb
+from .image_types import ImageU8
 
 
 _ACCEPT_ANY_FILE = "*.*"
 
 
-def image_from_file(path: ImagePath) -> ImageRgb | None:
+@with_fiat_attributes(
+    path__label="File",
+    label="Image from file",
+    fiat_tags=["source", "fiat_image"],
+)
+def image_from_file(path: ImagePath) -> ImageU8:
     """Read an image from a file.
     Note: This function uses OpenCV to read the image, but it makes sure to return the image in RGB order.
     """
     from fiatlight.fiat_kits.fiat_image.imread_rgb import imread_rgb
 
-    try:
-        img = imread_rgb(path)
-        return img  # type: ignore
-    except Exception:
-        return None
+    img = imread_rgb(path)
+    return img
+
+
+@with_fiat_attributes(
+    path__label="File",
+    max_image_size__range=(1, 3000),
+    max_image_size__label="Max Image Size",
+    max_image_size__tooltip="If the image with or height is larger than this size, it will be resized",
+    label="Image from file (resized)",
+    fiat_tags=["source", "fiat_image"],
+)
+def image_from_file_resized(path: ImagePath, max_image_size: int | None = None) -> ImageU8:
+    """A simple function that reads an image from a file and optionally resizes it if it is too large."""
+    from fiatlight.fiat_kits.fiat_image.imread_rgb import imread_rgb
+
+    image = imread_rgb(path)
+
+    if max_image_size is not None:
+        try:
+            import cv2
+        except ImportError:
+            raise ImportError("cv2 is required to resize the image, please install it with 'pip install opencv-python'")
+        if image.shape[0] > max_image_size or image.shape[1] > max_image_size:
+            k = max_image_size / max(image.shape[0], image.shape[1])
+            assert k > 0.0
+            image = cv2.resize(image, None, fx=k, fy=k)  # type: ignore
+    return image
 
 
 class ImageToFileGui(FunctionWithGui):
     _save_dialog: pfd.save_file | None = None
-    _image: ImageRgb | None = None
+    _image: ImageU8 | None = None
     _exception_message: str | None = None
 
     def __init__(self) -> None:
         super().__init__(self.f, "ImageToFile")
         self.internal_state_gui = self._internal_state_gui
 
-    def f(self, image: ImageRgb) -> None:
+    def f(self, image: ImageU8) -> None:
         self._image = image
 
     def do_write(self, path: ImagePath_Save) -> None:
