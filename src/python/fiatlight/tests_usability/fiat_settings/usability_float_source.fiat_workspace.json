@@ -1,0 +1,62 @@
+{
+    "version": 1,
+    "nodes": {
+        "n1": {
+            "function_ref": "fiatlight.fiat_kits.fiat_math.nodes.float_source",
+            "function_name": "float_source",
+            "input_values": {
+                "x": {
+                    "name": "x",
+                    "data": {
+                        "type": "Primitive",
+                        "value": 40160000.0
+                    }
+                }
+            },
+            "input_gui_options": {
+                "x": {
+                    "cb_options": {},
+                    "expanded": true
+                }
+            },
+            "output_gui_options": {
+                "0": {
+                    "cb_options": {},
+                    "expanded": true
+                }
+            },
+            "position": [
+                264.0,
+                26.0
+            ],
+            "expand_flags": {
+                "_inputs_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_outputs_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_doc_expanded": {
+                    "inside_node": false,
+                    "focused": true
+                },
+                "fiat_tuning_expanded": {
+                    "inside_node": false,
+                    "focused": true
+                },
+                "_internal_state_gui_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_backup_expanded_states": {
+                    "inside_node": null,
+                    "focused": null
+                }
+            },
+            "focused_function_visible": false
+        }
+    },
+    "links": []
+}

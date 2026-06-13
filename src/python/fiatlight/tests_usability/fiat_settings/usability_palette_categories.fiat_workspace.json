@@ -1,0 +1,345 @@
+{
+    "version": 1,
+    "nodes": {
+        "n1": {
+            "function_ref": "fiatlight.fiat_kits.fiat_image.cv2_nodes.edges.Canny",
+            "function_name": "Canny",
+            "input_values": {
+                "image": {
+                    "name": "image",
+                    "data": {
+                        "type": "Unspecified"
+                    }
+                },
+                "threshold1": {
+                    "name": "threshold1",
+                    "data": {
+                        "type": "Unspecified"
+                    }
+                },
+                "threshold2": {
+                    "name": "threshold2",
+                    "data": {
+                        "type": "Unspecified"
+                    }
+                },
+                "apertureSize": {
+                    "name": "apertureSize",
+                    "data": {
+                        "type": "Unspecified"
+                    }
+                },
+                "L2gradient": {
+                    "name": "L2gradient",
+                    "data": {
+                        "type": "Unspecified"
+                    }
+                },
+                "blur_sigma": {
+                    "name": "blur_sigma",
+                    "data": {
+                        "type": "Unspecified"
+                    }
+                }
+            },
+            "input_gui_options": {
+                "image": {
+                    "cb_options": {
+                        "image_params": {
+                            "AddWatchedPixelOnDoubleClick": true,
+                            "ColormapKey": "",
+                            "ColormapSettings": {
+                                "Colormap": "None",
+                                "ColormapScaleFromStats": {
+                                    "ColorMapStatsType": 0,
+                                    "NbSigmas": 1.5,
+                                    "UseStatsMax": false,
+                                    "UseStatsMin": false
+                                },
+                                "ColormapScaleMax": 1.0,
+                                "ColormapScaleMin": 0.0,
+                                "internal_ColormapHovered": ""
+                            },
+                            "DrawValuesOnZoomedPixels": true,
+                            "HighlightWatchedPixels": true,
+                            "ImageDisplaySize": {
+                                "height": 0,
+                                "width": 200
+                            },
+                            "PanWithMouse": true,
+                            "RefreshImage": false,
+                            "SelectedChannel": -1,
+                            "ShowAlphaChannelCheckerboard": true,
+                            "ShowGrid": true,
+                            "ShowImageInfo": true,
+                            "ShowOptionsButton": true,
+                            "ShowOptionsInTooltip": false,
+                            "ShowOptionsPanel": false,
+                            "ShowPixelInfo": true,
+                            "ShowSchoolPaperBackground": true,
+                            "ShowZoomButtons": true,
+                            "WatchedPixels": [],
+                            "ZoomKey": "z",
+                            "ZoomPanMatrix": {
+                                "00": 1.0,
+                                "01": 0.0,
+                                "02": 0.0,
+                                "10": 0.0,
+                                "11": 1.0,
+                                "12": 0.0,
+                                "20": 0.0,
+                                "21": 0.0,
+                                "22": 1.0
+                            },
+                            "ZoomWithMouseWheel": true
+                        },
+                        "show_channels": false,
+                        "channel_layout_vertically": false
+                    },
+                    "expanded": true
+                },
+                "threshold1": {
+                    "cb_options": {},
+                    "expanded": true
+                },
+                "threshold2": {
+                    "cb_options": {},
+                    "expanded": true
+                },
+                "apertureSize": {
+                    "cb_options": {},
+                    "expanded": true
+                },
+                "L2gradient": {
+                    "cb_options": {},
+                    "expanded": true
+                },
+                "blur_sigma": {
+                    "cb_options": {},
+                    "expanded": true
+                }
+            },
+            "output_gui_options": {
+                "0": {
+                    "cb_options": {
+                        "image_params": {
+                            "AddWatchedPixelOnDoubleClick": true,
+                            "ColormapKey": "",
+                            "ColormapSettings": {
+                                "Colormap": "None",
+                                "ColormapScaleFromStats": {
+                                    "ColorMapStatsType": 0,
+                                    "NbSigmas": 1.5,
+                                    "UseStatsMax": false,
+                                    "UseStatsMin": false
+                                },
+                                "ColormapScaleMax": 1.0,
+                                "ColormapScaleMin": 0.0,
+                                "internal_ColormapHovered": ""
+                            },
+                            "DrawValuesOnZoomedPixels": true,
+                            "HighlightWatchedPixels": true,
+                            "ImageDisplaySize": {
+                                "height": 0,
+                                "width": 200
+                            },
+                            "PanWithMouse": true,
+                            "RefreshImage": false,
+                            "SelectedChannel": -1,
+                            "ShowAlphaChannelCheckerboard": true,
+                            "ShowGrid": true,
+                            "ShowImageInfo": true,
+                            "ShowOptionsButton": true,
+                            "ShowOptionsInTooltip": false,
+                            "ShowOptionsPanel": false,
+                            "ShowPixelInfo": true,
+                            "ShowSchoolPaperBackground": true,
+                            "ShowZoomButtons": true,
+                            "WatchedPixels": [],
+                            "ZoomKey": "z",
+                            "ZoomPanMatrix": {
+                                "00": 1.0,
+                                "01": 0.0,
+                                "02": 0.0,
+                                "10": 0.0,
+                                "11": 1.0,
+                                "12": 0.0,
+                                "20": 0.0,
+                                "21": 0.0,
+                                "22": 1.0
+                            },
+                            "ZoomWithMouseWheel": true
+                        },
+                        "show_channels": false,
+                        "channel_layout_vertically": false
+                    },
+                    "expanded": true
+                }
+            },
+            "position": [
+                648.0,
+                191.0
+            ],
+            "expand_flags": {
+                "_inputs_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_outputs_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_doc_expanded": {
+                    "inside_node": false,
+                    "focused": true
+                },
+                "fiat_tuning_expanded": {
+                    "inside_node": false,
+                    "focused": true
+                },
+                "_internal_state_gui_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_backup_expanded_states": {
+                    "inside_node": null,
+                    "focused": null
+                }
+            },
+            "focused_function_visible": false
+        },
+        "n2": {
+            "function_ref": "__main__.add",
+            "function_name": "add",
+            "input_values": {
+                "a": {
+                    "name": "a",
+                    "data": {
+                        "type": "Primitive",
+                        "value": 4
+                    }
+                },
+                "b": {
+                    "name": "b",
+                    "data": {
+                        "type": "Primitive",
+                        "value": 10
+                    }
+                }
+            },
+            "input_gui_options": {
+                "a": {
+                    "cb_options": {},
+                    "expanded": true
+                },
+                "b": {
+                    "cb_options": {},
+                    "expanded": true
+                }
+            },
+            "output_gui_options": {
+                "0": {
+                    "cb_options": {},
+                    "expanded": true
+                }
+            },
+            "position": [
+                424.0,
+                530.0
+            ],
+            "expand_flags": {
+                "_inputs_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_outputs_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_doc_expanded": {
+                    "inside_node": false,
+                    "focused": true
+                },
+                "fiat_tuning_expanded": {
+                    "inside_node": false,
+                    "focused": true
+                },
+                "_internal_state_gui_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_backup_expanded_states": {
+                    "inside_node": null,
+                    "focused": null
+                }
+            },
+            "focused_function_visible": false
+        },
+        "n3": {
+            "function_ref": "__main__.multiply",
+            "function_name": "multiply",
+            "input_values": {},
+            "input_gui_options": {
+                "a": {
+                    "cb_options": {},
+                    "expanded": false
+                },
+                "b": {
+                    "cb_options": {},
+                    "expanded": false
+                }
+            },
+            "output_gui_options": {
+                "0": {
+                    "cb_options": {},
+                    "expanded": true
+                }
+            },
+            "position": [
+                1000.0,
+                513.0
+            ],
+            "expand_flags": {
+                "_inputs_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_outputs_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_doc_expanded": {
+                    "inside_node": false,
+                    "focused": true
+                },
+                "fiat_tuning_expanded": {
+                    "inside_node": false,
+                    "focused": true
+                },
+                "_internal_state_gui_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_backup_expanded_states": {
+                    "inside_node": null,
+                    "focused": null
+                }
+            },
+            "focused_function_visible": false
+        }
+    },
+    "links": [
+        {
+            "src_node": "n2",
+            "src_output_idx": 0,
+            "dst_node": "n3",
+            "dst_input_name": "a"
+        },
+        {
+            "src_node": "n2",
+            "src_output_idx": 0,
+            "dst_node": "n3",
+            "dst_input_name": "b"
+        }
+    ]
+}
