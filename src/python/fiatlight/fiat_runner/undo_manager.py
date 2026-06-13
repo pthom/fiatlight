@@ -31,19 +31,25 @@ class UndoManager:
         self._undo = [self._snapshot_fn()]
         self._redo = []
 
-    def reconcile(self) -> None:
+    def reconcile(self) -> bool:
         """Capture a snapshot iff the graph differs from the current top. Call
-        only when the graph has settled (no gesture in progress).
+        only when the graph has settled (no gesture in progress). Returns True if
+        a new snapshot was captured.
 
         After undo()/redo() the graph equals the current top, so a reconcile on
         the next frame is a no-op by dedup — no extra guard needed."""
         snap = self._snapshot_fn()
         if self._undo and self._undo[-1] == snap:
-            return
+            return False
         self._undo.append(snap)
         if len(self._undo) > self._max_depth:
             self._undo.pop(0)
         self._redo.clear()
+        return True
+
+    def current(self) -> JsonDict:
+        """The current state (top of the undo stack); {} before the baseline."""
+        return self._undo[-1] if self._undo else {}
 
     def can_undo(self) -> bool:
         return len(self._undo) > 1

@@ -16,7 +16,7 @@ def main() -> None:
     from fiatlight.fiat_kits.node_packs import minimal_nodes, node_pack
 
     if "--min" in sys.argv:
-        fl.run_graph_composer(minimal_nodes(), app_name="Fiatlight Studio (min)")
+        fl.run_graph_composer(minimal_nodes(), app_name="fiatlight studio (min)")
         return
     extra = node_pack("ai") if "--ai" in sys.argv else None
     fl.studio(functions=extra)

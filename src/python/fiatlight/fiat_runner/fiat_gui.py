@@ -263,6 +263,10 @@ class FiatGui:
         self._undo_baseline_pending = self._UNDO_BASELINE_DELAY_FRAMES
         self._undo_settle_frames = 0
         self._undo_prev_layout_sig: Tuple[Tuple[str, int, int], ...] = ()
+        # The graph snapshot as of the last save (or load); drives the status-bar
+        # "unsaved changes" marker.
+        self._saved_workspace_json: JsonDict = {}
+        self._workspace_dirty = False
 
         if self.params.delete_settings:
             self._del_user_settings()
@@ -467,7 +471,7 @@ class FiatGui:
                     self._menu_new_workspace()
             if imgui.menu_item_simple("Open Workspace…"):
                 self._menu_open_workspace()
-            if imgui.menu_item_simple("Save Workspace"):
+            if imgui.menu_item_simple("Save Workspace", "Ctrl+S"):
                 self._menu_save_workspace()
             if imgui.menu_item_simple("Save Workspace As…"):
                 self._menu_save_workspace_as()
@@ -616,6 +620,9 @@ class FiatGui:
             if self._undo_baseline_pending == 0:
                 self._undo_manager.reset()
                 self._undo_prev_layout_sig = self._functions_graph_gui.nodes_layout_signature()
+                # Baseline == the on-disk state we just loaded -> clean.
+                self._saved_workspace_json = self._undo_manager.current()
+                self._workspace_dirty = False
             return
 
         # Shortcuts: focused route, so an active text input keeps its own Ctrl+Z.
@@ -625,8 +632,12 @@ class FiatGui:
         route = imgui.InputFlags_.route_focused.value
         if imgui.shortcut(ctrl | z, route):
             self._undo_manager.undo()
+            self._update_workspace_dirty()
         if imgui.shortcut(ctrl | shift | z, route):
             self._undo_manager.redo()
+            self._update_workspace_dirty()
+        if imgui.shortcut(ctrl | imgui.Key.s.value, route):
+            self._menu_save_workspace()
 
         # Reconcile only when the graph has settled (no active widget, positions
         # stable) so a continuous gesture becomes one undo step.
@@ -640,9 +651,13 @@ class FiatGui:
             # cheap settle signals (active-item / layout sig), so it re-settles
             # and snapshots exactly once per change.
             if self._undo_settle_frames == self._UNDO_SETTLE_FRAMES:
-                self._undo_manager.reconcile()
+                if self._undo_manager.reconcile():
+                    self._update_workspace_dirty()
         else:
             self._undo_settle_frames = 0
+
+    def _update_workspace_dirty(self) -> None:
+        self._workspace_dirty = self._undo_manager.current() != self._saved_workspace_json
 
     def _post_gui(self) -> None:
         # We focus the functions graph window after a few frames,
@@ -734,17 +749,31 @@ class FiatGui:
         self._log_handler.nb_new_alerts = 0
 
     def _show_status_bar(self) -> None:
-        """Custom status-bar content: a discreet indicator that warnings/errors
-        were logged, with a button to open the Log window (which is no longer
-        opened automatically)."""
-        if self._log_handler.nb_new_alerts == 0:
-            return
-        n = self._log_handler.nb_new_alerts
-        msg = f"{icons_fontawesome_6.ICON_FA_TRIANGLE_EXCLAMATION} {n} new log message" + ("s" if n > 1 else "")
-        imgui.text_colored(_LOG_ALERT_COLOR, msg)
-        imgui.same_line()
-        if imgui.small_button("Open Log"):
-            self._open_log_window()
+        """Status-bar content: the active workspace file (the one Save writes to),
+        plus a discreet indicator when warnings/errors were logged."""
+        # Active workspace file. Show a short name; full path on hover.
+        # The default per-app path auto-saves on exit, so a "*" there would just
+        # be noise — the marker is shown only for an explicitly named file.
+        is_default = self._current_workspace_path == self._workspace_filename()
+        name = pathlib.Path(self._current_workspace_path).name
+        if name.endswith(".fiat_workspace.json"):
+            name = name[: -len(".fiat_workspace.json")]
+        marker = " *" if (self._workspace_dirty and not is_default) else ""
+        imgui.text_disabled(f"{icons_fontawesome_6.ICON_FA_FILE} {name}{marker}")
+        if imgui.is_item_hovered():
+            hint = "Default workspace (auto-saved on exit):\n" if is_default else ""
+            imgui.set_tooltip(f"{hint}{self._current_workspace_path}")
+
+        if self._log_handler.nb_new_alerts > 0:
+            imgui.same_line()
+            imgui.text_disabled(" | ")
+            imgui.same_line()
+            n = self._log_handler.nb_new_alerts
+            msg = f"{icons_fontawesome_6.ICON_FA_TRIANGLE_EXCLAMATION} {n} new log message" + ("s" if n > 1 else "")
+            imgui.text_colored(_LOG_ALERT_COLOR, msg)
+            imgui.same_line()
+            if imgui.small_button("Open Log"):
+                self._open_log_window()
 
     def _notify_if_new_log_alert(self) -> None:
         message = self._log_handler.pending_alert_message
@@ -803,6 +832,10 @@ class FiatGui:
                 json.dump(json_data, f, indent=4)
         except Exception as e:
             logging.error(f"FiatGui: error saving workspace to {filename}: {e}")
+            return
+        # What we just wrote is now the on-disk state -> clean.
+        self._saved_workspace_json = json_data
+        self._workspace_dirty = False
 
     def _load_workspace(self, filename: str, whine_if_not_found: bool) -> bool:
         try:
@@ -972,7 +1005,7 @@ def studio(
     run_graph_composer(
         functions=palette,
         params=params,
-        app_name=app_name if app_name is not None else "Fiatlight Studio",
+        app_name=app_name if app_name is not None else "fiatlight studio",
         top_most=top_most,
     )
 
