@@ -994,6 +994,10 @@ class FunctionNodeGui:
             else:
                 imgui.text_wrapped(doc.user_doc)
 
+        label = fn_with_gui.label.split("##")[0]
+        if fn_with_gui.function_name != label:
+            imgui.text_disabled(f"id: {fn_with_gui.function_name}")
+
         render_user_doc()
 
     class _FocusedFunction:  # Dummy class to create a section in the IDE # noqa

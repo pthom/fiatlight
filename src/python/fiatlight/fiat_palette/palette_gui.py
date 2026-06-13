@@ -104,10 +104,13 @@ def _gui_functions(
             for fi in group:
                 with imgui_ctx.push_obj_id(fi):
                     is_latched = filt.latched_fn is fi
-                    if imgui.selectable(fi.name, is_latched)[0]:
+                    display_label = fi.label.split("##")[0]
+                    if imgui.selectable(display_label, is_latched)[0]:
                         on_pick(fi)
                     if imgui.is_item_hovered():
                         filt.latched_fn = fi
+                        if fi.label != fi.name:
+                            imgui.set_tooltip(f"id: {fi.name}")
 
 
 def _gui_doc_panel(fn_info: FunctionInfo | None, size: ImVec2) -> None:
@@ -131,13 +134,14 @@ def _gui_doc_panel(fn_info: FunctionInfo | None, size: ImVec2) -> None:
 
 
 def _render_function_doc_markdown(fn_info: FunctionInfo) -> None:
-    md_str = f"""
-    ## {fn_info.name}
-
-    Tags: {', '.join(fn_info.tags) if fn_info.tags else 'none'}
-
-    ---
-    """
+    title = fn_info.label.split("##")[0]
+    tags_str = ", ".join(fn_info.tags) if fn_info.tags else "none"
+    lines = [f"## {title}"]
+    if fn_info.label != fn_info.name:
+        lines.append(f"*id: {fn_info.name}*")
+    lines.append(f"Tags: {tags_str}")
+    lines.append("---")
+    md_str = "\n\n".join(lines)
     imgui_md.render_unindented(md_str)
     if fn_info.doc is not None:
         if fn_info.doc_is_markdown:

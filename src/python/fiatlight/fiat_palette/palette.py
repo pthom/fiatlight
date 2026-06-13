@@ -65,6 +65,10 @@ class PaletteFilter(BaseModel):
 @dataclass
 class FunctionInfo:
     name: str
+    # Display name (from the `label` fiat attribute). Falls back to `name`.
+    # `name` stays the Python id used as the registry/identity key everywhere;
+    # `label` is presentation-only.
+    label: str
     function_factory: FunctionWithGuiFactory
     tags: list[str]
     doc: str | None
@@ -150,6 +154,7 @@ class FunctionPalette:
     def _add_function_factory(self, function_factory: FunctionWithGuiFactory, tags: list[str]) -> None:
         gui = function_factory()
         name = gui.function_name
+        label = gui.label
         function_ref = gui.function_ref
         doc = gui.get_function_doc()
         input_types = [
@@ -158,6 +163,7 @@ class FunctionPalette:
         output_types = [gui.output(i)._type for i in range(gui.nb_outputs())]
         function_info = FunctionInfo(
             name,
+            label,
             function_factory,
             tags,
             doc.user_doc,
@@ -201,7 +207,7 @@ class FunctionPalette:
             return infos
 
         def haystack(fi: FunctionInfo) -> str:
-            parts = [fi.name, *fi.tags]
+            parts = [fi.name, fi.label, *fi.tags]
             if fi.doc is not None:
                 parts.append(fi.doc)
             return "\n".join(parts).lower()
