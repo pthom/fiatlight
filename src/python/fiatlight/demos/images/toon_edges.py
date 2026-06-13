@@ -2,7 +2,8 @@ import time
 import fiatlight as fl
 from fiatlight.fiat_types import ColorRgb
 from fiatlight.fiat_kits.fiat_image import ImageU8_GRAY, ImageRgb, image_from_file_resized
-from fiatlight.demos.images.opencv_wrappers import canny, dilate, MorphShape, CannyApertureSize
+from fiatlight.fiat_kits.fiat_image.cv2_nodes import Canny, dilate
+from fiatlight.fiat_kits.fiat_image.cv2_nodes.cv_enums import MorphShape, CannyApertureSize
 from fiatlight.fiat_kits.fiat_image import overlay_alpha_image
 from pydantic import BaseModel
 import numpy as np
@@ -76,7 +77,7 @@ def add_toon_edges(image: ImageRgb, params: ToonEdgesParams) -> ImageRgb:
     :return Image: Image with edges overlaid
     """
     start_time = time.time()
-    edges = canny(
+    edges = Canny(
         image,
         params.canny.t_lower,  # type: ignore
         params.canny.t_upper,  # type: ignore

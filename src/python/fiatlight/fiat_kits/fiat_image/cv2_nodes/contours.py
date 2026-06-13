@@ -4,11 +4,11 @@ from typing import NamedTuple
 import cv2
 import numpy as np
 
-import fiatlight as fl
+from fiatlight.fiat_utils.fiat_attributes_decorator import with_fiat_attributes
 from fiatlight.fiat_kits.fiat_image import Contours, ContoursHierarchy, ImageU8
 from fiatlight.fiat_types import ColorRgb
 
-from examples.img_proc_playground.fiat_cv_enums import (
+from .cv_enums import (
     ContourApproximation,
     RetrievalMode,
 )
@@ -25,7 +25,7 @@ class FindContoursResult(NamedTuple):
     hierarchy: ContoursHierarchy
 
 
-@fl.with_fiat_attributes(
+@with_fiat_attributes(
     fiat_tags=["contours", "cv2.imgproc"],
 )
 def findContours(
@@ -57,7 +57,7 @@ def findContours(
     return FindContoursResult(Contours(list(contours)), ContoursHierarchy(hierarchy))
 
 
-@fl.with_fiat_attributes(
+@with_fiat_attributes(
     thickness__range=(-1, 10),
     contourIdx__range=(-1, 100),
     maxLevel__range=(0, 10),

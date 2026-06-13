@@ -2,9 +2,11 @@ from typing import Tuple, Optional
 import cv2
 import numpy as np
 from fiatlight.fiat_kits.fiat_image import ImageU8, ColorType, ColorConversion
+from fiatlight.fiat_utils.fiat_attributes_decorator import with_fiat_attributes
 from .lut_types import LutParams, LutTable
 
 
+@with_fiat_attributes(fiat_tags=["color", "fiat_image"])
 def lut_with_params(image: ImageU8, params: LutParams) -> ImageU8:
     r = lut(image, params.to_table())
     return r
@@ -34,6 +36,7 @@ def lut_channels_with_params(
     return result  # type: ignore
 
 
+@with_fiat_attributes(fiat_tags=["color", "fiat_image"])
 def lut_channels_in_colorspace(
     image: ImageU8,
     lut_channel_0: LutParams | None = None,

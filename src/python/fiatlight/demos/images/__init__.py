@@ -5,9 +5,12 @@ from fiatlight.fiat_types import FunctionList
 
 
 def all_functions() -> FunctionList:
-    from fiatlight.demos.images.opencv_wrappers import all_functions as all_opencv_image_functions
+    from fiatlight.fiat_kits.fiat_image.cv2_nodes import Canny, dilate, oil_paint
 
-    r = all_opencv_image_functions + [
+    r = [
+        Canny,
+        dilate,
+        oil_paint,
         image_from_file_resized,
         # Other
         add_toon_edges,
@@ -16,4 +19,4 @@ def all_functions() -> FunctionList:
     return r  # type: ignore
 
 
-__all__ = ["all_functions", "overlay_alpha_image", "add_toon_edges", "opencv_wrappers"]
+__all__ = ["all_functions", "overlay_alpha_image", "add_toon_edges"]

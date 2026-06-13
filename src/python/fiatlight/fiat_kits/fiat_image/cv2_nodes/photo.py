@@ -3,15 +3,15 @@
 These are slow on large images, so all of them set `invoke_async=True` to
 keep the UI responsive while the result is being computed.
 """
-import fiatlight as fl
-from fiatlight.fiat_kits.fiat_image import ImageBgr, ImageU8_GRAY
+from fiatlight.fiat_utils.fiat_attributes_decorator import with_fiat_attributes
+from fiatlight.fiat_kits.fiat_image import ImageBgr, ImageU8, ImageU8_GRAY
 
 import cv2
 
-from examples.img_proc_playground.fiat_cv_enums import EdgePreservingFlag
+from .cv_enums import EdgePreservingFlag
 
 
-@fl.with_fiat_attributes(
+@with_fiat_attributes(
     invoke_async=True,
     h__range=(1.0, 30.0),
     templateWindowSize__range=(3, 21),
@@ -42,7 +42,7 @@ def fastNlMeansDenoising(
     return r  # type: ignore
 
 
-@fl.with_fiat_attributes(
+@with_fiat_attributes(
     invoke_async=True,
     h__range=(1.0, 30.0),
     hColor__range=(1.0, 30.0),
@@ -74,7 +74,7 @@ def fastNlMeansDenoisingColored(
     return r  # type: ignore
 
 
-@fl.with_fiat_attributes(
+@with_fiat_attributes(
     invoke_async=True,
     sigma_s__range=(1.0, 200.0),
     sigma_r__range=(0.0, 1.0),
@@ -97,7 +97,7 @@ def stylization(image: ImageBgr, sigma_s: float = 60.0, sigma_r: float = 0.45) -
     return r  # type: ignore
 
 
-@fl.with_fiat_attributes(
+@with_fiat_attributes(
     invoke_async=True,
     sigma_s__range=(1.0, 200.0),
     sigma_r__range=(0.0, 1.0),
@@ -126,3 +126,18 @@ def edgePreservingFilter(
     """
     r = cv2.edgePreservingFilter(image, flags=flags.value, sigma_s=sigma_s, sigma_r=sigma_r)
     return r  # type: ignore
+
+
+@with_fiat_attributes(
+    size__range=(1, 10),
+    dynRatio__range=(1, 10),
+    fiat_tags=["filter", "photo", "cv2.xphoto"],
+)
+def oil_paint(image: ImageU8, size: int = 1, dynRatio: int = 3) -> ImageU8:
+    """Apply an oil-painting effect to an image.
+
+    **Note:** Uses the OpenCV `xphoto` module, which ships with
+    `opencv-contrib-python` (not the base `opencv-python`). Calling this without
+    contrib installed raises an AttributeError on `cv2.xphoto`.
+    """
+    return cv2.xphoto.oilPainting(image, size, dynRatio, cv2.COLOR_BGR2HSV)  # type: ignore

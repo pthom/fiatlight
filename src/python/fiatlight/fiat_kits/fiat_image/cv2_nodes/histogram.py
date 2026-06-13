@@ -7,12 +7,12 @@ renders as a curve / heatmap with no extra glue.
 import cv2
 import numpy as np
 
-import fiatlight as fl
+from fiatlight.fiat_utils.fiat_attributes_decorator import with_fiat_attributes
 from fiatlight.fiat_kits.fiat_image import ImageU8, ImageU8_GRAY
 from fiatlight.fiat_kits.fiat_implot import FloatMatrix_Dim1, FloatMatrix_Dim2
 
 
-@fl.with_fiat_attributes(
+@with_fiat_attributes(
     channel__range=(0, 3),
     bins__range=(8, 512),
     range_min__range=(0.0, 255.0),
@@ -46,7 +46,7 @@ def calcHist1D(
     return FloatMatrix_Dim1(arr.reshape(-1).astype(np.float32))
 
 
-@fl.with_fiat_attributes(
+@with_fiat_attributes(
     channel0__range=(0, 3),
     channel1__range=(0, 3),
     bins0__range=(8, 256),
@@ -74,7 +74,7 @@ def calcHist2D(
     return FloatMatrix_Dim2(arr.astype(np.float32))
 
 
-@fl.with_fiat_attributes(
+@with_fiat_attributes(
     channel__range=(0, 3),
     range_min__range=(0.0, 255.0),
     range_max__range=(0.0, 255.0),

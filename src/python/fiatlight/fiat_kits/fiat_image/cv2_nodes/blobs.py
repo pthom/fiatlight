@@ -4,7 +4,7 @@ from typing import NamedTuple
 import cv2
 import numpy as np
 
-import fiatlight as fl
+from fiatlight.fiat_utils.fiat_attributes_decorator import with_fiat_attributes
 from fiatlight.fiat_kits.fiat_image import (
     BlobStats,
     ImageU8_GRAY,
@@ -29,7 +29,7 @@ class ConnectedComponentsWithStatsResult(NamedTuple):
     centroids: Points2D
 
 
-@fl.with_fiat_attributes(
+@with_fiat_attributes(
     connectivity__range=(4, 8),
     fiat_tags=["blobs", "cv2.imgproc"],
 )
@@ -57,7 +57,7 @@ def connectedComponents(
     )
 
 
-@fl.with_fiat_attributes(
+@with_fiat_attributes(
     connectivity__range=(4, 8),
     fiat_tags=["blobs", "cv2.imgproc"],
 )

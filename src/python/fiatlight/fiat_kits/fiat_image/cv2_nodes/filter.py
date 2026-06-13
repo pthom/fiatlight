@@ -1,10 +1,10 @@
 """Filter wrappers for the image-processing playground."""
-import fiatlight as fl
+from fiatlight.fiat_utils.fiat_attributes_decorator import with_fiat_attributes
 from fiatlight.fiat_kits.fiat_image import ImageU8, ImageU8_GRAY
 
 import cv2
 
-from examples.img_proc_playground.fiat_cv_enums import BorderType, GaussianKsize, SobelKsize
+from .cv_enums import BorderType, GaussianKsize, SobelKsize
 
 
 def _odd_int_validator(value: int) -> int:
@@ -31,7 +31,7 @@ def _bilateral_d_validator(d: int) -> int:
     return d
 
 
-@fl.with_fiat_attributes(
+@with_fiat_attributes(
     sigmaX__range=(0.0, 25.0),
     sigmaY__range=(0.0, 25.0),
     fiat_tags=["filter", "cv2.imgproc"],
@@ -63,7 +63,7 @@ def GaussianBlur(
     return r  # type: ignore
 
 
-@fl.with_fiat_attributes(
+@with_fiat_attributes(
     invoke_async=True,
     d__range=(1, 15),
     d__validator=_bilateral_d_validator,
@@ -99,7 +99,7 @@ def bilateralFilter(
     return r  # type: ignore
 
 
-@fl.with_fiat_attributes(
+@with_fiat_attributes(
     ksize__range=(1, 31),
     ksize__validator=_odd_int_validator,
     fiat_tags=["filter", "cv2.imgproc"],
@@ -122,7 +122,7 @@ def medianBlur(image: ImageU8, ksize: int = 5) -> ImageU8:
     return r  # type: ignore
 
 
-@fl.with_fiat_attributes(
+@with_fiat_attributes(
     ksize__range=(1, 31),
     ksize__validator=_odd_int_validator,
     fiat_tags=["filter", "cv2.imgproc"],
@@ -151,7 +151,7 @@ def boxFilter(
     return r  # type: ignore
 
 
-@fl.with_fiat_attributes(
+@with_fiat_attributes(
     dx__range=(0, 2),
     dx__validator=_sobel_dx_dy_validator,
     dy__range=(0, 2),
@@ -193,7 +193,7 @@ def Sobel(
     return r  # type: ignore
 
 
-@fl.with_fiat_attributes(
+@with_fiat_attributes(
     scale__range=(0.0, 10.0),
     delta__range=(-128.0, 128.0),
     fiat_tags=["filter", "edges", "cv2.imgproc"],
@@ -226,7 +226,7 @@ def Scharr(
     return r  # type: ignore
 
 
-@fl.with_fiat_attributes(
+@with_fiat_attributes(
     scale__range=(0.0, 10.0),
     delta__range=(-128.0, 128.0),
     fiat_tags=["filter", "edges", "cv2.imgproc"],

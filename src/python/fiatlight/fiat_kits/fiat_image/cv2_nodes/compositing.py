@@ -1,11 +1,11 @@
 """Compositing wrappers for the image-processing playground."""
-import fiatlight as fl
+from fiatlight.fiat_utils.fiat_attributes_decorator import with_fiat_attributes
 from fiatlight.fiat_kits.fiat_image import ImageU8
 
 import cv2
 
 
-@fl.with_fiat_attributes(fiat_tags=["compositing", "cv2.core"])
+@with_fiat_attributes(fiat_tags=["compositing", "cv2.core"])
 def bitwise_and(image_a: ImageU8, image_b: ImageU8) -> ImageU8:
     """Per-pixel bitwise AND of two images.
 
@@ -23,7 +23,7 @@ def bitwise_and(image_a: ImageU8, image_b: ImageU8) -> ImageU8:
     return r  # type: ignore
 
 
-@fl.with_fiat_attributes(fiat_tags=["compositing", "cv2.core"])
+@with_fiat_attributes(fiat_tags=["compositing", "cv2.core"])
 def bitwise_or(image_a: ImageU8, image_b: ImageU8) -> ImageU8:
     """Per-pixel bitwise OR of two images.
 
@@ -41,7 +41,7 @@ def bitwise_or(image_a: ImageU8, image_b: ImageU8) -> ImageU8:
     return r  # type: ignore
 
 
-@fl.with_fiat_attributes(fiat_tags=["compositing", "cv2.core"])
+@with_fiat_attributes(fiat_tags=["compositing", "cv2.core"])
 def bitwise_xor(image_a: ImageU8, image_b: ImageU8) -> ImageU8:
     """Per-pixel bitwise XOR of two images.
 
@@ -54,7 +54,7 @@ def bitwise_xor(image_a: ImageU8, image_b: ImageU8) -> ImageU8:
     return r  # type: ignore
 
 
-@fl.with_fiat_attributes(fiat_tags=["compositing", "cv2.core"])
+@with_fiat_attributes(fiat_tags=["compositing", "cv2.core"])
 def bitwise_not(image: ImageU8) -> ImageU8:
     """Per-pixel bitwise NOT — invert the image.
 
@@ -66,7 +66,7 @@ def bitwise_not(image: ImageU8) -> ImageU8:
     return r  # type: ignore
 
 
-@fl.with_fiat_attributes(
+@with_fiat_attributes(
     alpha__range=(0.0, 2.0),
     beta__range=(0.0, 2.0),
     gamma__range=(-128.0, 128.0),
@@ -95,7 +95,7 @@ def addWeighted(
     return r  # type: ignore
 
 
-@fl.with_fiat_attributes(fiat_tags=["compositing", "cv2.core"])
+@with_fiat_attributes(fiat_tags=["compositing", "cv2.core"])
 def absdiff(image_a: ImageU8, image_b: ImageU8) -> ImageU8:
     """Per-pixel `|A - B|` — absolute difference of two images.
 

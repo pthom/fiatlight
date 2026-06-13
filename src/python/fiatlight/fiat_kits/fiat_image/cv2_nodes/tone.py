@@ -3,15 +3,15 @@
 These adjust the brightness, contrast or color mapping of an image without
 changing its geometry.
 """
-import fiatlight as fl
+from fiatlight.fiat_utils.fiat_attributes_decorator import with_fiat_attributes
 from fiatlight.fiat_kits.fiat_image import ImageBgr, ImageU8, ImageU8_GRAY
 
 import cv2
 
-from examples.img_proc_playground.fiat_cv_enums import ColorMap
+from .cv_enums import ColorMap
 
 
-@fl.with_fiat_attributes(fiat_tags=["tone", "cv2.imgproc"])
+@with_fiat_attributes(fiat_tags=["tone", "cv2.imgproc"])
 def equalizeHist(image: ImageU8_GRAY) -> ImageU8_GRAY:
     """Global histogram equalization on a grayscale image.
 
@@ -27,7 +27,7 @@ def equalizeHist(image: ImageU8_GRAY) -> ImageU8_GRAY:
     return r  # type: ignore
 
 
-@fl.with_fiat_attributes(
+@with_fiat_attributes(
     clipLimit__range=(0.5, 40.0),
     tileGridSize__range=(1, 32),
     fiat_tags=["tone", "cv2.imgproc"],
@@ -56,7 +56,7 @@ def clahe(
     return r  # type: ignore
 
 
-@fl.with_fiat_attributes(fiat_tags=["color", "tone", "cv2.imgproc"])
+@with_fiat_attributes(fiat_tags=["color", "tone", "cv2.imgproc"])
 def applyColorMap(image: ImageU8_GRAY, colormap: ColorMap = ColorMap.VIRIDIS) -> ImageBgr:
     """Map a single-channel image to color via a built-in cv2 color map.
 
@@ -72,7 +72,7 @@ def applyColorMap(image: ImageU8_GRAY, colormap: ColorMap = ColorMap.VIRIDIS) ->
     return r  # type: ignore
 
 
-@fl.with_fiat_attributes(
+@with_fiat_attributes(
     alpha__range=(0.0, 4.0),
     beta__range=(-128.0, 128.0),
     fiat_tags=["tone", "cv2.core"],

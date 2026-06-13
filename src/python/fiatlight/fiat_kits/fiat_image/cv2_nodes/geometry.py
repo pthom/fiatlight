@@ -1,13 +1,13 @@
 """Geometric-transform wrappers for the image-processing playground."""
-import fiatlight as fl
+from fiatlight.fiat_utils.fiat_attributes_decorator import with_fiat_attributes
 from fiatlight.fiat_kits.fiat_image import ImageU8
 
 import cv2
 
-from examples.img_proc_playground.fiat_cv_enums import BorderType, FlipCode, InterpolationFlag, RotateCode
+from .cv_enums import BorderType, FlipCode, InterpolationFlag, RotateCode
 
 
-@fl.with_fiat_attributes(
+@with_fiat_attributes(
     fx__range=(0.05, 4.0),
     fy__range=(0.0, 4.0),
     fiat_tags=["geometry", "cv2.imgproc"],
@@ -37,7 +37,7 @@ def resize(
     return r  # type: ignore
 
 
-@fl.with_fiat_attributes(fiat_tags=["geometry", "cv2.imgproc"])
+@with_fiat_attributes(fiat_tags=["geometry", "cv2.imgproc"])
 def pyrDown(image: ImageU8, borderType: BorderType = BorderType.BORDER_DEFAULT) -> ImageU8:
     """Halve image size with a 5×5 Gaussian + 2× downsample.
 
@@ -53,7 +53,7 @@ def pyrDown(image: ImageU8, borderType: BorderType = BorderType.BORDER_DEFAULT) 
     return r  # type: ignore
 
 
-@fl.with_fiat_attributes(fiat_tags=["geometry", "cv2.imgproc"])
+@with_fiat_attributes(fiat_tags=["geometry", "cv2.imgproc"])
 def pyrUp(image: ImageU8, borderType: BorderType = BorderType.BORDER_DEFAULT) -> ImageU8:
     """Double image size with a 2× upsample + 5×5 Gaussian smoothing.
 
@@ -68,7 +68,7 @@ def pyrUp(image: ImageU8, borderType: BorderType = BorderType.BORDER_DEFAULT) ->
     return r  # type: ignore
 
 
-@fl.with_fiat_attributes(fiat_tags=["geometry", "cv2.core"])
+@with_fiat_attributes(fiat_tags=["geometry", "cv2.core"])
 def flip(image: ImageU8, flipCode: FlipCode = FlipCode.HORIZONTAL) -> ImageU8:
     """Mirror an image around an axis.
 
@@ -84,7 +84,7 @@ def flip(image: ImageU8, flipCode: FlipCode = FlipCode.HORIZONTAL) -> ImageU8:
     return r  # type: ignore
 
 
-@fl.with_fiat_attributes(fiat_tags=["geometry", "cv2.core"])
+@with_fiat_attributes(fiat_tags=["geometry", "cv2.core"])
 def rotate(image: ImageU8, rotateCode: RotateCode = RotateCode.ROTATE_90_CW) -> ImageU8:
     """Rotate an image by a multiple of 90°.
 
@@ -97,7 +97,7 @@ def rotate(image: ImageU8, rotateCode: RotateCode = RotateCode.ROTATE_90_CW) -> 
     return r  # type: ignore
 
 
-@fl.with_fiat_attributes(
+@with_fiat_attributes(
     top__range=(0, 200),
     bottom__range=(0, 200),
     left__range=(0, 200),

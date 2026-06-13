@@ -20,7 +20,7 @@ Thanks to this advanced viewer:
 import fiatlight as fl
 from fiatlight.fiat_kits.fiat_image import lut_channels_in_colorspace
 from fiatlight.fiat_kits.fiat_image import image_from_file_resized, ImageU8_3, ImageFloat
-from fiatlight.demos.images.opencv_wrappers import canny
+from fiatlight.fiat_kits.fiat_image.cv2_nodes import Canny
 from enum import Enum
 import cv2
 
@@ -47,8 +47,8 @@ def main() -> None:
     graph = fl.FunctionsGraph()
     graph.add_function(image_from_file_resized)
 
-    graph.add_function(canny)
-    graph.add_link(image_from_file_resized, canny)
+    graph.add_function(Canny)
+    graph.add_link(image_from_file_resized, Canny)
 
     graph.add_function(compute_sobel)
     graph.add_link(image_from_file_resized, compute_sobel)

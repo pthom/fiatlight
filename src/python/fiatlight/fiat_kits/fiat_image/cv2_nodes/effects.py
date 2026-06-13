@@ -5,7 +5,7 @@ from typing import NamedTuple
 import cv2
 import numpy as np
 
-import fiatlight as fl
+from fiatlight.fiat_utils.fiat_attributes_decorator import with_fiat_attributes
 from fiatlight.fiat_kits.fiat_image import ImageBgr, ImageU8, ImageU8_3, ImageU8_GRAY, Point2D, Rect2D
 from fiatlight.fiat_types import ColorRgb
 
@@ -18,7 +18,7 @@ class PencilSketchResult(NamedTuple):
     color: ImageBgr
 
 
-@fl.with_fiat_attributes(
+@with_fiat_attributes(
     invoke_async=True,
     sigma_s__range=(1.0, 200.0),
     sigma_r__range=(0.0, 1.0),
@@ -50,7 +50,7 @@ def pencilSketch(
     return PencilSketchResult(gray=gray, color=color)  # type: ignore
 
 
-@fl.with_fiat_attributes(
+@with_fiat_attributes(
     lo_diff__range=(0, 100),
     up_diff__range=(0, 100),
     fiat_tags=["segmentation", "cv2.imgproc"],
@@ -90,7 +90,7 @@ def floodFill(
     return out  # type: ignore
 
 
-@fl.with_fiat_attributes(
+@with_fiat_attributes(
     iter_count__range=(1, 10),
     invoke_async=True,
     fiat_tags=["segmentation", "cv2.imgproc"],
@@ -132,7 +132,7 @@ def grabCut(
     return out  # type: ignore
 
 
-@fl.with_fiat_attributes(fiat_tags=["segmentation", "cv2.imgproc"])
+@with_fiat_attributes(fiat_tags=["segmentation", "cv2.imgproc"])
 def watershed(
     image: ImageBgr,
     markers: ImageU8_GRAY,

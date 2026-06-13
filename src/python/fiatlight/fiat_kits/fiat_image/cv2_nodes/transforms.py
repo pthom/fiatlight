@@ -2,13 +2,13 @@
 import cv2
 import numpy as np
 
-import fiatlight as fl
+from fiatlight.fiat_utils.fiat_attributes_decorator import with_fiat_attributes
 from fiatlight.fiat_kits.fiat_image import ImageU8, Matrix2x3, Matrix3x3, Points2D
 
-from examples.img_proc_playground.fiat_cv_enums import BorderType, InterpolationFlag
+from .cv_enums import BorderType, InterpolationFlag
 
 
-@fl.with_fiat_attributes(
+@with_fiat_attributes(
     center_x__range=(0.0, 2000.0),
     center_y__range=(0.0, 2000.0),
     angle__range=(-180.0, 180.0),
@@ -40,7 +40,7 @@ def getRotationMatrix2D(
     return Matrix2x3(m.astype(np.float64))
 
 
-@fl.with_fiat_attributes(
+@with_fiat_attributes(
     out_width__range=(1, 4000),
     out_height__range=(1, 4000),
     fiat_tags=["transform", "geometry", "cv2.imgproc"],
@@ -75,7 +75,7 @@ def warpAffine(
     return r  # type: ignore
 
 
-@fl.with_fiat_attributes(
+@with_fiat_attributes(
     out_width__range=(1, 4000),
     out_height__range=(1, 4000),
     fiat_tags=["transform", "geometry", "cv2.imgproc"],
@@ -111,7 +111,7 @@ def warpPerspective(
     return r  # type: ignore
 
 
-@fl.with_fiat_attributes(fiat_tags=["transform", "cv2.imgproc"])
+@with_fiat_attributes(fiat_tags=["transform", "cv2.imgproc"])
 def getAffineTransform(src: Points2D, dst: Points2D) -> Matrix2x3:
     """Solve for the 2x3 affine matrix that maps `src` → `dst`.
 
@@ -130,7 +130,7 @@ def getAffineTransform(src: Points2D, dst: Points2D) -> Matrix2x3:
     return Matrix2x3(m.astype(np.float64))
 
 
-@fl.with_fiat_attributes(fiat_tags=["transform", "cv2.imgproc"])
+@with_fiat_attributes(fiat_tags=["transform", "cv2.imgproc"])
 def getPerspectiveTransform(src: Points2D, dst: Points2D) -> Matrix3x3:
     """Solve for the 3x3 perspective matrix that maps `src` → `dst`.
 

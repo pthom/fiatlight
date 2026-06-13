@@ -1,13 +1,13 @@
 """Morphology wrappers for the image-processing playground."""
-import fiatlight as fl
+from fiatlight.fiat_utils.fiat_attributes_decorator import with_fiat_attributes
 from fiatlight.fiat_kits.fiat_image import ImageU8, ImageU8_GRAY
 
 import cv2
 
-from examples.img_proc_playground.fiat_cv_enums import MorphOp, MorphShape
+from .cv_enums import MorphOp, MorphShape
 
 
-@fl.with_fiat_attributes(
+@with_fiat_attributes(
     kernel_size__range=(1, 10),
     iterations__range=(1, 10),
     fiat_tags=["morphology", "cv2.imgproc"],
@@ -37,7 +37,7 @@ def dilate(
     return r  # type: ignore
 
 
-@fl.with_fiat_attributes(
+@with_fiat_attributes(
     kernel_size__range=(1, 10),
     iterations__range=(1, 10),
     fiat_tags=["morphology", "cv2.imgproc"],
@@ -67,7 +67,7 @@ def erode(
     return r  # type: ignore
 
 
-@fl.with_fiat_attributes(
+@with_fiat_attributes(
     kernel_size__range=(1, 15),
     iterations__range=(1, 10),
     fiat_tags=["morphology", "cv2.imgproc"],

@@ -4,6 +4,7 @@ import cv2
 from typing import TypeAlias, Any
 from numpy.typing import NDArray
 from fiatlight.fiat_kits.fiat_image.image_types import ImageU8
+from fiatlight.fiat_utils.fiat_attributes_decorator import with_fiat_attributes
 from fiatlight.fiat_togui.gui_registry import base_model_with_gui_registration
 from pydantic import BaseModel
 
@@ -111,6 +112,7 @@ class ColorConversion(BaseModel):
         return f"{self.src_color.name}=>{self.dst_color.name}"
 
 
+@with_fiat_attributes(fiat_tags=["color", "fiat_image"])
 def color_convert(image: ImageU8, color_conversion: ColorConversion) -> ImageU8:
     return color_conversion.convert_image(image)
 

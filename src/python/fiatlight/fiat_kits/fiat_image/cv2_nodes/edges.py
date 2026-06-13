@@ -1,14 +1,14 @@
 """Edge-detection wrappers for the image-processing playground."""
-import fiatlight as fl
+from fiatlight.fiat_utils.fiat_attributes_decorator import with_fiat_attributes
 from fiatlight.fiat_kits.fiat_image import ImageU8, ImageU8_GRAY
 from fiatlight.fiat_types import PositiveFloat
 
 import cv2
 
-from examples.img_proc_playground.fiat_cv_enums import CannyApertureSize
+from .cv_enums import CannyApertureSize
 
 
-@fl.with_fiat_attributes(
+@with_fiat_attributes(
     blur_sigma__range=(0.0, 10.0),
     threshold1__range=(100.0, 10000.0),
     threshold1__slider_logarithmic=True,

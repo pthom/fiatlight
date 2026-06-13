@@ -2,12 +2,12 @@
 from typing import NamedTuple
 
 
-import fiatlight as fl
+from fiatlight.fiat_utils.fiat_attributes_decorator import with_fiat_attributes
 from fiatlight.fiat_kits.fiat_image import ImageU8_GRAY, Image
 
 import cv2
 
-from examples.img_proc_playground.fiat_cv_enums import (
+from .cv_enums import (
     AdaptiveMethod,
     AdaptiveThresholdType,
     AutoThresholdMethod,
@@ -40,7 +40,7 @@ def _block_size_validator(blockSize: int) -> int:
     return blockSize
 
 
-@fl.with_fiat_attributes(
+@with_fiat_attributes(
     thresh__range=(0.0, 255.0),
     maxval__range=(0.0, 255.0),
     fiat_tags=["threshold", "cv2.imgproc"],
@@ -81,7 +81,7 @@ def threshold(
     return ThresholdResult(float(used_thresh), r)  # type: ignore
 
 
-@fl.with_fiat_attributes(
+@with_fiat_attributes(
     maxValue__range=(0.0, 255.0),
     blockSize__range=(3, 51),
     blockSize__validator=_block_size_validator,
@@ -116,7 +116,7 @@ def adaptiveThreshold(
     return r  # type: ignore
 
 
-@fl.with_fiat_attributes(fiat_tags=["threshold", "cv2.imgproc"])
+@with_fiat_attributes(fiat_tags=["threshold", "cv2.imgproc"])
 def distanceTransform(
     image: ImageU8_GRAY,
     distanceType: DistanceType = DistanceType.DIST_L2,

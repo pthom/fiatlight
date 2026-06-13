@@ -1,10 +1,10 @@
 import numpy as np
 
-import fiatlight as fl
+from fiatlight.fiat_utils.fiat_attributes_decorator import with_fiat_attributes
 from fiatlight.fiat_kits.fiat_image import Rect2D, Image
 
 
-@fl.with_fiat_attributes(
+@with_fiat_attributes(
     fiat_tags=["geometry"],
 )
 def image_roi(img: Image, rect: Rect2D) -> Image:
