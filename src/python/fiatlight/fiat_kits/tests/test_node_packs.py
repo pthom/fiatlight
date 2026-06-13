@@ -1,6 +1,8 @@
 """The node-pack registry behind fl.studio()."""
+import pytest
+
 import fiatlight as fl
-from fiatlight.fiat_kits.node_packs import default_nodes
+from fiatlight.fiat_kits.node_packs import default_nodes, node_pack
 from fiatlight.fiat_palette import FunctionPalette
 
 
@@ -18,3 +20,10 @@ def test_default_nodes_span_categories() -> None:
 
 def test_studio_is_exported() -> None:
     assert callable(fl.studio)
+
+
+def test_node_pack_by_name() -> None:
+    assert len(node_pack("text")) > 0
+    assert len(node_pack("ai")) == 1  # invoke_sdxl_turbo (imports lazily, no GPU needed to list it)
+    with pytest.raises(ValueError):
+        node_pack("does_not_exist")

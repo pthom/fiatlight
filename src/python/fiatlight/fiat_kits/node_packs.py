@@ -17,11 +17,16 @@ from fiatlight.fiat_types import Function
 
 # Pack name -> "module:provider" (provider is a zero-arg callable returning a
 # list of functions). Insertion order defines the palette order.
-_DEFAULT_PACKS: dict[str, str] = {
+_PACKS: dict[str, str] = {
     "image": "fiatlight.fiat_kits.fiat_image.cv2_nodes:cv2_nodes",
     "math": "fiatlight.fiat_kits.fiat_math:math_nodes",
     "text": "fiatlight.fiat_kits.fiat_text:text_nodes",
+    "ai": "fiatlight.fiat_kits.fiat_ai:ai_nodes",
 }
+
+# Packs loaded by `fl.studio()` by default. The `ai` pack is excluded: it needs a
+# GPU and a multi-GB model download, so it is opt-in (via `node_pack("ai")`).
+_DEFAULT_PACK_NAMES = ["image", "math", "text"]
 
 
 def _load_pack(spec: str) -> List[Function] | None:
@@ -44,14 +49,23 @@ def _load_packs(specs: List[str]) -> List[Function]:
     return nodes
 
 
+def node_pack(name: str) -> List[Function]:
+    """Load a single named pack: "image", "math", "text", or "ai". Returns []
+    if the pack's optional dependency is missing. Use it to opt into packs that
+    are not in the default `fl.studio()` palette, e.g. `node_pack("ai")`."""
+    if name not in _PACKS:
+        raise ValueError(f"Unknown node pack {name!r}. Known packs: {sorted(_PACKS)}.")
+    return _load_pack(_PACKS[name]) or []
+
+
 def default_nodes() -> List[Function]:
-    """Every built-in node pack whose dependencies are installed (image / math /
-    text), concatenated in a stable order. This is the default palette of
-    `fl.studio()`."""
-    return _load_packs(list(_DEFAULT_PACKS.values()))
+    """Every default built-in node pack whose dependencies are installed (image
+    / math / text), concatenated in a stable order. This is the default palette
+    of `fl.studio()`."""
+    return _load_packs([_PACKS[name] for name in _DEFAULT_PACK_NAMES])
 
 
 def minimal_nodes() -> List[Function]:
     """A lightweight subset (math + text only — no opencv import), for fast
     startup / IDE debugging of non-image features."""
-    return _load_packs([_DEFAULT_PACKS["math"], _DEFAULT_PACKS["text"]])
+    return _load_packs([_PACKS["math"], _PACKS["text"]])
