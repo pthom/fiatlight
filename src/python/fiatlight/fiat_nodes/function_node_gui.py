@@ -652,12 +652,9 @@ class FunctionNodeGui:
 
             header_elements = self._input_param_header_elements(input_param)
 
-            input_param.data_with_gui.label_color = get_fiat_config().style.color_as_vec4(
-                header_elements.param_label_color
-            )
-            input_param.data_with_gui.status_tooltip = header_elements.param_label_tooltip
-
             header_params = GuiHeaderLineParams[Any](parent_name=self._function_node.function_with_gui.label)
+            header_params.label_color = get_fiat_config().style.color_as_vec4(header_elements.param_label_color)
+            header_params.status_tooltip = header_elements.param_label_tooltip
             if fiat_utils.is_rendering_in_node():
                 header_params.prefix_gui = lambda: self._draw_input_pin(header_elements)
             header_params.default_value_if_unspecified = input_param.default_value
@@ -737,10 +734,9 @@ class FunctionNodeGui:
 
         bof_header_elements = self._output_header_elements(idx_output)
 
-        output_param.label_color = get_fiat_config().style.color_as_vec4(bof_header_elements.value_color)
-        output_param.status_tooltip = bof_header_elements.value_tooltip
-
         header_params = GuiHeaderLineParams[Any](parent_name=self._function_node.function_with_gui.label)
+        header_params.label_color = get_fiat_config().style.color_as_vec4(bof_header_elements.value_color)
+        header_params.status_tooltip = bof_header_elements.value_tooltip
         if fiat_utils.is_rendering_in_node():
             header_params.suffix_gui = lambda: self._draw_output_pin(bof_header_elements, idx_output)
 

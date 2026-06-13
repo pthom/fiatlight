@@ -277,9 +277,6 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
         changed = False
 
         for param_gui in self._parameters_with_gui:
-            param_gui.data_with_gui.label_color = get_fiat_config().style.color_as_vec4(
-                FiatColorType.DataclassMemberName
-            )
             param_on_heartbeat = param_gui.data_with_gui.callbacks.on_heartbeat
             if param_on_heartbeat is not None:
                 if param_on_heartbeat():
@@ -303,14 +300,19 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
         # ------------------------------------------------------------------------------------------------------------------
         """
 
+    def _member_header_params(self) -> GuiHeaderLineParams[Any]:
+        return GuiHeaderLineParams(
+            show_clipboard_button=False,
+            parent_name=self.datatype_basename(),
+            label_color=get_fiat_config().style.color_as_vec4(FiatColorType.DataclassMemberName),
+        )
+
     def present(self, _: DataclassLikeType) -> None:
         # the parameter is not used, because we have the data in self._parameters_with_gui
         with imgui_ctx.begin_vertical("##DataclassLikeGui_present"):
             for param_gui in self._parameters_with_gui:
                 with imgui_ctx.push_obj_id(param_gui):
-                    param_gui.data_with_gui.gui_present_customizable(
-                        GuiHeaderLineParams(show_clipboard_button=False, parent_name=self.datatype_basename())
-                    )
+                    param_gui.data_with_gui.gui_present_customizable(self._member_header_params())
 
     def edit(self, original_value: DataclassLikeType) -> tuple[bool, DataclassLikeType]:
         # the parameter is not used, because we have the data in self._parameters_with_gui
@@ -318,9 +320,7 @@ class DataclassLikeGui(AnyDataWithGui[DataclassLikeType]):
 
         for param_gui in self._parameters_with_gui:
             with imgui_ctx.push_obj_id(param_gui):
-                changed_in_edit = param_gui.data_with_gui.gui_edit_customizable(
-                    GuiHeaderLineParams(show_clipboard_button=False, parent_name=self.datatype_basename())
-                )
+                changed_in_edit = param_gui.data_with_gui.gui_edit_customizable(self._member_header_params())
                 if changed_in_edit:
                     changed = True
 
