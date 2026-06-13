@@ -24,7 +24,7 @@ With fiatlight, we can easily examine the intermediate results of each step.
 
 from typing import List, Tuple
 import fiatlight as fl
-from fiatlight.demos.string.str_functions import (
+from fiatlight.fiat_kits.fiat_text import (
     text_from_file,
     str_lower,
     remove_non_letters,
