@@ -17,6 +17,7 @@ NO_COLOR_CONVERSION_CODE: CvColorConversionCode = -123456789
 class ColorType(enum.Enum):
     """Color types for images (BGR, BGRA, RGB, RGBA, HSV, HLS, Lab, Luv, XYZ, Gray)."""
 
+    Gray = enum.auto()
     BGR = enum.auto()
     BGRA = enum.auto()
     RGB = enum.auto()
@@ -26,7 +27,6 @@ class ColorType(enum.Enum):
     Lab = enum.auto()
     Luv = enum.auto()
     XYZ = enum.auto()
-    Gray = enum.auto()
 
     def channels_names(self) -> List[str]:
         return list(self.name)
