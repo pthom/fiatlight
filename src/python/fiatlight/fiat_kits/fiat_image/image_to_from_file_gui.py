@@ -3,6 +3,7 @@ from fiatlight.fiat_types.file_types import ImagePath, ImagePath_Save
 from fiatlight.fiat_core.function_with_gui import FunctionWithGui
 from imgui_bundle import imgui, portable_file_dialogs as pfd
 from .image_types import ImageU8
+import numpy as np
 
 
 _ACCEPT_ANY_FILE = "*.*"
@@ -37,16 +38,24 @@ def image_from_file_resized(path: ImagePath, max_image_size: int | None = None) 
 
     image = imread_rgb(path)
 
-    if max_image_size is not None:
-        try:
-            import cv2
-        except ImportError:
-            raise ImportError("cv2 is required to resize the image, please install it with 'pip install opencv-python'")
-        if image.shape[0] > max_image_size or image.shape[1] > max_image_size:
-            k = max_image_size / max(image.shape[0], image.shape[1])
-            assert k > 0.0
-            image = cv2.resize(image, None, fx=k, fy=k)  # type: ignore
+    if max_image_size is not None and (image.shape[0] > max_image_size or image.shape[1] > max_image_size):
+        k = max_image_size / max(image.shape[0], image.shape[1])
+        assert k > 0.0
+        image = _resize_rgb(image, k)
     return image
+
+
+def _resize_rgb(image: ImageU8, scale: float) -> ImageU8:
+    """Scale an RGB(A) image by `scale`, via OpenCV when available, else Pillow."""
+    try:
+        import cv2
+    except ImportError:
+        from PIL import Image
+
+        h, w = image.shape[:2]
+        new_size = (max(1, round(w * scale)), max(1, round(h * scale)))
+        return np.asarray(Image.fromarray(image).resize(new_size))  # type: ignore
+    return cv2.resize(image, None, fx=scale, fy=scale)  # type: ignore
 
 
 class ImageToFileGui(FunctionWithGui):
