@@ -142,6 +142,24 @@ def test_reroute_type_is_rederived_after_load() -> None:
     assert _out_type(reroute2) is int
 
 
+def test_reroute_display_options_round_trip() -> None:
+    # rotation + show_type are persisted as internal_gui_options.
+    g = FunctionsGraph()
+    g.add_function(RerouteFunctionWithGui())
+    reroute = g.functions_nodes[0].function_with_gui
+    assert isinstance(reroute, RerouteFunctionWithGui)
+    reroute.rotate(-1)  # 0 -> 3
+    reroute.show_type = True
+    saved = g.save_workspace_core_to_json()
+
+    g2 = FunctionsGraph()
+    g2.load_workspace_core_from_json(saved, _reroute_factory_from_ref, rebuild_topology=True)
+    reroute2 = g2.functions_nodes[0].function_with_gui
+    assert isinstance(reroute2, RerouteFunctionWithGui)
+    assert reroute2.rotation == 3
+    assert reroute2.show_type is True
+
+
 def test_no_reroute_graphs_unaffected() -> None:
     # Sanity: the reroute machinery is a no-op when there are no reroutes.
     g = FunctionsGraph()

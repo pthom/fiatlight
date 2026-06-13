@@ -43,6 +43,7 @@ from imgui_bundle import (
     imgui,
     imgui_node_editor as ed,
     ImVec2,
+    ImVec4,
     imgui_ctx,
     hello_imgui,
     imgui_node_editor_ctx as ed_ctx,
@@ -231,29 +232,35 @@ class FunctionNodeGui:
                 else:
                     imgui.begin_group()
                 _CURRENT_FUNCTION_NODE_ID = self._ed_node_id
-                with imgui_ctx.begin_vertical("node_content"):
-                    # Title
-                    with imgui_ctx.begin_horizontal("Title"):
-                        self._draw_title()
-                    # Doc
-                    self._draw_doc()
-                    # Set minimum width
-                    imgui.dummy(ImVec2(hello_imgui.em_size(get_fiat_config().style.node_minimum_width_em), 1))
+                if self._is_reroute() and fiat_utils.is_rendering_in_node():
+                    # Reroute: a minimal node — just the two pins (+ optional type),
+                    # no title / widgets. See `_draw_reroute_node_body`.
+                    inputs_changed = False
+                    self._draw_reroute_node_body()
+                else:
+                    with imgui_ctx.begin_vertical("node_content"):
+                        # Title
+                        with imgui_ctx.begin_horizontal("Title"):
+                            self._draw_title()
+                        # Doc
+                        self._draw_doc()
+                        # Set minimum width
+                        imgui.dummy(ImVec2(hello_imgui.em_size(get_fiat_config().style.node_minimum_width_em), 1))
 
-                    # Inputs
-                    inputs_changed = self._draw_function_inputs()
-                    # Function internal state
-                    internal_state_changed = self._draw_function_internal_state()
+                        # Inputs
+                        inputs_changed = self._draw_function_inputs()
+                        # Function internal state
+                        internal_state_changed = self._draw_function_internal_state()
 
-                    if inputs_changed or internal_state_changed or needs_refresh_for_heartbeat:
-                        self._function_node.on_inputs_changed()
+                        if inputs_changed or internal_state_changed or needs_refresh_for_heartbeat:
+                            self._function_node.on_inputs_changed()
 
-                    # Fiat tuning
-                    self._draw_fiat_tuning()
-                    # Exceptions, if any
-                    self._draw_exception_message()
-                    # Outputs
-                    self._draw_function_outputs()
+                        # Fiat tuning
+                        self._draw_fiat_tuning()
+                        # Exceptions, if any
+                        self._draw_exception_message()
+                        # Outputs
+                        self._draw_function_outputs()
                 if fiat_utils.is_rendering_in_node():
                     ed.end_node()
                 else:
@@ -279,6 +286,68 @@ class FunctionNodeGui:
                 raise Exception(msg) from e
             self._node_size = ed.get_node_size(self._ed_node_id)
         return inputs_changed
+
+    def _is_reroute(self) -> bool:
+        from fiatlight.fiat_core.reroute_function import is_reroute
+
+        return is_reroute(self._function_node.function_with_gui)
+
+    # Pin marker colors: green for the input end, red for the output end.
+    _REROUTE_INPUT_COLOR = ImVec4(0.35, 0.80, 0.40, 1.0)
+    _REROUTE_OUTPUT_COLOR = ImVec4(0.90, 0.35, 0.35, 1.0)
+
+    def _draw_reroute_node_body(self) -> None:
+        """Minimal reroute rendering: just the input (green) and output (red) pins,
+        with the (optional) flowing type in between. The node can be rotated in
+        quarter-turns (`rotation`), so the pins sit on any of the 4 sides. No title,
+        doc, widgets or buttons — rotation / show-type come from the context menu."""
+        from fiatlight.fiat_core.reroute_function import RerouteFunctionWithGui, REROUTE_INPUT_NAME
+
+        fn = self._function_node.function_with_gui
+        assert isinstance(fn, RerouteFunctionWithGui)
+        rotation = fn.rotation % 4
+        vertical = rotation % 2 == 1  # 1 = top->bottom, 3 = bottom->top
+        reversed_order = rotation >= 2  # output end comes first (left / top)
+        gap = hello_imgui.em_size(1.5)
+
+        # Pivot = where the link attaches, per rotation (0:L->R, 1:T->B, 2:R->L, 3:B->T).
+        in_pivot, out_pivot = {
+            0: (ImVec2(0.0, 0.5), ImVec2(1.0, 0.5)),
+            1: (ImVec2(0.5, 0.0), ImVec2(0.5, 1.0)),
+            2: (ImVec2(1.0, 0.5), ImVec2(0.0, 0.5)),
+            3: (ImVec2(0.5, 1.0), ImVec2(0.5, 0.0)),
+        }[rotation]
+
+        def draw_pin(pin_id: ed.PinId, kind: ed.PinKind, pivot: ImVec2, color: ImVec4) -> None:
+            with ed_ctx.begin_pin(pin_id, kind):
+                ed.pin_pivot_alignment(pivot)
+                with imgui_ctx.push_style_color(imgui.Col_.text.value, color), fontawesome_6_ctx():
+                    imgui.push_font(None, imgui.get_font_size() * 0.5)
+                    imgui.text(icons_fontawesome_6.ICON_FA_CIRCLE)
+                    imgui.pop_font()
+
+        in_pin = (self._pins_input[REROUTE_INPUT_NAME], ed.PinKind.input, in_pivot, self._REROUTE_INPUT_COLOR)
+        out_pin = (self._pins_output[0], ed.PinKind.output, out_pivot, self._REROUTE_OUTPUT_COLOR)
+        first, second = (out_pin, in_pin) if reversed_order else (in_pin, out_pin)
+
+        layout = imgui_ctx.begin_vertical if vertical else imgui_ctx.begin_horizontal
+        with layout("reroute_body"):
+            draw_pin(*first)
+            imgui.dummy(ImVec2(0, gap) if vertical else ImVec2(gap, 0))
+            if fn.show_type:
+                self._draw_reroute_type_label(fn.output(0).datatype_basename())
+                imgui.dummy(ImVec2(0, gap) if vertical else ImVec2(gap, 0))
+            draw_pin(*second)
+
+    @staticmethod
+    def _draw_reroute_type_label(full_typename: str) -> None:
+        """Show the flowing type, shortened (long Unions get truncated with a
+        full-name tooltip), so it does not blow up the node width."""
+        max_len = 18
+        short = full_typename if len(full_typename) <= max_len else full_typename[: max_len - 1] + "…"
+        imgui.text_disabled(short)
+        if short != full_typename:
+            fiat_osd.set_widget_tooltip(full_typename)
 
     class _Draw_Title_Section:  # Dummy class to create a section in the IDE # noqa
         """

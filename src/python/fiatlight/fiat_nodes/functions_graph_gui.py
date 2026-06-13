@@ -20,7 +20,10 @@ from fiatlight.fiat_palette import (
 )
 from fiatlight.fiat_widgets import fiat_osd
 from imgui_bundle import imgui, imgui_node_editor as ed, hello_imgui, ImVec2, imgui_ctx
-from typing import List, Dict, Tuple
+from typing import List, Dict, Tuple, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from fiatlight.fiat_core.reroute_function import RerouteFunctionWithGui
 
 
 @dataclass(frozen=True)
@@ -257,11 +260,20 @@ class FunctionsGraphGui:
         # Handle node context menu
         node_context_menu_id = ed.NodeId()
         if ed.show_node_context_menu(node_context_menu_id):
+            nid = node_context_menu_id
 
             def show_node_context_menu() -> None:
-                imgui.text(f"Node context menu: {node_context_menu_id}")
+                reroute = self._reroute_fn_from_node_id(nid)
+                if reroute is not None:
+                    if imgui.menu_item_simple("Rotate +90°"):
+                        reroute.rotate(1)
+                    if imgui.menu_item_simple("Rotate -90°"):
+                        reroute.rotate(-1)
+                    if imgui.menu_item_simple("Show type", "", reroute.show_type):
+                        reroute.show_type = not reroute.show_type
+                    imgui.separator()
                 if imgui.menu_item_simple("Delete node"):
-                    self._remove_function_node(node_context_menu_id)
+                    self._remove_function_node(nid)
 
             fiat_osd.set_popup_gui(show_node_context_menu)
 
@@ -666,6 +678,16 @@ class FunctionsGraphGui:
             self._collapse_linked_input(dst_fn, dst_input_name)
         except ValueError as e:
             logging.warning(f"Palette-spawn link rejected: {e}")
+
+    def _reroute_fn_from_node_id(self, node_id: ed.NodeId) -> "RerouteFunctionWithGui | None":
+        from fiatlight.fiat_core.reroute_function import RerouteFunctionWithGui
+
+        try:
+            fn_gui = self._function_node_gui_from_id(node_id)
+        except ValueError:
+            return None
+        fn = fn_gui.get_function_node().function_with_gui
+        return fn if isinstance(fn, RerouteFunctionWithGui) else None
 
     def _insert_reroute_on_link(self, link_id: ed.LinkId) -> None:
         """Split an existing link by inserting a Reroute node in the middle:
