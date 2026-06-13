@@ -1,12 +1,14 @@
 """FunctionsGraph: A graph of FunctionNodes"""
 
 import copy
+import typing
 
 from fiatlight.fiat_core.function_with_gui import FunctionWithGui, FunctionWithGuiFactoryFromName
 from fiatlight.fiat_core.function_node import FunctionNode, FunctionNodeLink
 from fiatlight.fiat_core.gui_node import GuiNode
 from fiatlight.fiat_core.markdown_node import MarkdownNode
 from fiatlight.fiat_types import Function, JsonDict, GuiFunctionWithInputs
+from fiatlight.fiat_types.typename_utils import TypeLike
 
 from typing import Sequence, Tuple, Set, List
 from pydantic import BaseModel
@@ -304,6 +306,15 @@ class FunctionsGraph:
             if not is_link_compatible(src_type, dst_type):
                 return False, explain_incompatibility(src_type, dst_type)
 
+        # 8. Reroute (P1): if this link makes a reroute adopt a type, ensure it does
+        # not break any existing (downstream) link. Skipped when the graph has no
+        # reroutes, so normal graphs pay nothing.
+        if self._reroute_nodes():
+            reroute_types = self._compute_reroute_types(extra_link=new_link)
+            ok, reason = self._links_compatible_under(reroute_types, extra_link=new_link)
+            if not ok:
+                return False, reason
+
         return True, ""
 
     def _add_link_from_function_nodes(
@@ -348,6 +359,8 @@ class FunctionsGraph:
         src_function_node.add_output_link(link)
         dst_function_node.add_input_link(link)
         self.functions_nodes_links.append(link)
+
+        self._recompute_reroute_types()
 
         # invoke the src function so that the dst function is updated
         src_function_node.function_with_gui._dirty = True
@@ -454,6 +467,7 @@ class FunctionsGraph:
         self.functions_nodes_links.remove(link)
         link.src_function_node.output_links.remove(link)
         link.dst_function_node.input_links.remove(link)
+        self._recompute_reroute_types()
 
     def _remove_function_node(self, function_node: FunctionNode) -> None:
         """Remove a function node from the graph (private)"""
@@ -469,6 +483,92 @@ class FunctionsGraph:
         for link in function_node.input_links:
             self._remove_link(link)
         self.functions_nodes.remove(function_node)
+        self._recompute_reroute_types()
+
+    # ------------------------------------------------------------------
+    # Reroute nodes (polymorphic passthrough): adopt-on-connect typing
+    # ------------------------------------------------------------------
+    def _reroute_nodes(self) -> List[FunctionNode]:
+        from fiatlight.fiat_core.reroute_function import is_reroute
+
+        return [n for n in self.functions_nodes if is_reroute(n.function_with_gui)]
+
+    def _compute_reroute_types(self, extra_link: FunctionNodeLink | None = None) -> dict[FunctionNode, TypeLike]:
+        """Return {reroute_node: adopted_type}: the type each reroute would carry
+        given the current links (plus `extra_link` when simulating a candidate
+        connection). A reroute adopts the type flowing into its single input,
+        transitively through reroute chains; `Any` when its input is unconnected.
+        Pure — no mutation, so it can be used for the P1 what-if check."""
+        from fiatlight.fiat_core.reroute_function import REROUTE_INPUT_NAME
+
+        reroutes = self._reroute_nodes()
+        reroute_set = set(reroutes)
+        links = list(self.functions_nodes_links)
+        if extra_link is not None:
+            links.append(extra_link)
+
+        input_link_of: dict[FunctionNode, FunctionNodeLink | None] = {
+            r: next((lk for lk in links if lk.dst_function_node is r and lk.dst_input_name == REROUTE_INPUT_NAME), None)
+            for r in reroutes
+        }
+        types: dict[FunctionNode, TypeLike] = {r: typing.Any for r in reroutes}
+
+        def output_type_of(node: FunctionNode, idx: int) -> TypeLike:
+            if node in reroute_set:
+                return types[node]
+            return node.function_with_gui.output(idx)._type
+
+        for _ in range(len(reroutes) + 1):  # fixpoint, bounded by chain length
+            changed = False
+            for r in reroutes:
+                lk = input_link_of[r]
+                t = output_type_of(lk.src_function_node, lk.src_output_idx) if lk is not None else typing.Any
+                if types[r] is not t:
+                    types[r] = t
+                    changed = True
+            if not changed:
+                break
+        return types
+
+    def _links_compatible_under(
+        self, reroute_types: dict[FunctionNode, TypeLike], extra_link: FunctionNodeLink | None = None
+    ) -> Tuple[bool, str]:
+        """Check every link (plus `extra_link`) for type compatibility, using
+        `reroute_types` for the pins that belong to a reroute. Used to enforce P1:
+        a connection that would make a reroute adopt a type which breaks an existing
+        downstream link is rejected rather than silently dropping that link."""
+        from fiatlight.fiat_types.type_compat import is_link_compatible, explain_incompatibility
+
+        links = list(self.functions_nodes_links)
+        if extra_link is not None:
+            links.append(extra_link)
+        for lk in links:
+            src, dst = lk.src_function_node, lk.dst_function_node
+            src_t = (
+                reroute_types.get(src)
+                if src in reroute_types
+                else src.function_with_gui.output(lk.src_output_idx)._type
+            )
+            dst_t = (
+                reroute_types.get(dst) if dst in reroute_types else dst.function_with_gui.input(lk.dst_input_name)._type
+            )
+            if src_t is not None and dst_t is not None and not is_link_compatible(src_t, dst_t):
+                return False, explain_incompatibility(src_t, dst_t)
+        return True, ""
+
+    def _recompute_reroute_types(self) -> None:
+        """Mutate each reroute's pin type to the type currently flowing into it.
+        Call after any structural change (link/node add or remove, workspace load)."""
+        from fiatlight.fiat_core.reroute_function import RerouteFunctionWithGui
+
+        reroutes = self._reroute_nodes()
+        if not reroutes:
+            return
+        types = self._compute_reroute_types()
+        for r in reroutes:
+            f_gui = r.function_with_gui
+            assert isinstance(f_gui, RerouteFunctionWithGui)
+            f_gui.set_pin_type(types[r])
 
     class _Utilities_Section:  # Dummy class to create a section in the IDE # noqa
         """

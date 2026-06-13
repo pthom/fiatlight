@@ -175,6 +175,15 @@ class FunctionPalette:
 
         self._add_function_factory(factory, tags, category)
 
+    def add_reroute_node(self) -> None:
+        """Register the built-in Reroute (relay) node: a polymorphic passthrough for
+        tidying crossing wires. It needs the factory path (not `add_function`) since
+        it builds a FunctionWithGui subclass; registering it also lets saved
+        workspaces resolve its `function_ref` on load."""
+        from fiatlight.fiat_core.reroute_function import RerouteFunctionWithGui
+
+        self._add_function_factory(lambda: RerouteFunctionWithGui(), tags=["reroute"], category="utilities")
+
     def _add_function_factory(
         self, function_factory: FunctionWithGuiFactory, tags: list[str], category: str = _UNCATEGORIZED
     ) -> None:

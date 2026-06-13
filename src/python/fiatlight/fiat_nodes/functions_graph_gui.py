@@ -244,11 +244,13 @@ class FunctionsGraphGui:
         # Handle link context menu
         link_context_menu_id = ed.LinkId()
         if ed.show_link_context_menu(link_context_menu_id):
+            lid = link_context_menu_id
 
             def show_link_context_menu() -> None:
-                imgui.text(f"Link context menu: {link_context_menu_id}")
-                if imgui.menu_item_simple("Delete pin"):
-                    self._remove_link(link_context_menu_id)
+                if self.can_edit_graph and imgui.menu_item_simple("Insert reroute here"):
+                    self._insert_reroute_on_link(lid)
+                if imgui.menu_item_simple("Delete link"):
+                    self._remove_link(lid)
 
             fiat_osd.set_popup_gui(show_link_context_menu)
 
@@ -664,6 +666,50 @@ class FunctionsGraphGui:
             self._collapse_linked_input(dst_fn, dst_input_name)
         except ValueError as e:
             logging.warning(f"Palette-spawn link rejected: {e}")
+
+    def _insert_reroute_on_link(self, link_id: ed.LinkId) -> None:
+        """Split an existing link by inserting a Reroute node in the middle:
+        `src -> reroute -> dst`. Wired to the link context menu, for tidying
+        crossing wires. The reroute adopts `src`'s type, so `reroute -> dst` stays
+        as type-valid as the original `src -> dst` link was."""
+        from fiatlight.fiat_core.reroute_function import RerouteFunctionWithGui, REROUTE_INPUT_NAME
+
+        link_gui = next((lg for lg in self.functions_links_gui if lg.link_id == link_id), None)
+        if link_gui is None:
+            return
+        link = link_gui.function_node_link
+        src_fn, dst_fn = link.src_function_node, link.dst_function_node
+        src_output_idx, dst_input_name = link.src_output_idx, link.dst_input_name
+
+        # 1. Add the reroute node, positioned at the midpoint of the two endpoints.
+        self.add_function_with_gui(RerouteFunctionWithGui())
+        reroute_node_gui = self.function_nodes_gui[-1]
+        reroute_node = reroute_node_gui.get_function_node()
+        self._pending_node_position = (reroute_node_gui.node_id(), self._midpoint_of_nodes(src_fn, dst_fn))
+
+        # 2. Replace src -> dst with src -> reroute -> dst.
+        self._remove_link(link_id)
+        self._try_add_link_from_to(
+            src_fn, reroute_node, dst_input_name=REROUTE_INPUT_NAME, src_output_idx=src_output_idx
+        )
+        self._try_add_link_from_to(reroute_node, dst_fn, dst_input_name=dst_input_name, src_output_idx=0)
+
+    def _midpoint_of_nodes(self, fn_a: FunctionNode, fn_b: FunctionNode) -> ImVec2:
+        """Canvas-space midpoint between the centers of two nodes (best-effort:
+        falls back to either available center, or the origin)."""
+        centers = []
+        for fn in (fn_a, fn_b):
+            gui = next((g for g in self.function_nodes_gui if g.get_function_node() is fn), None)
+            if gui is None:
+                continue
+            tl = ed.get_node_position(gui.node_id())
+            size = ed.get_node_size(gui.node_id())
+            centers.append(ImVec2(tl.x + size.x / 2.0, tl.y + size.y / 2.0))
+        if not centers:
+            return ImVec2(0.0, 0.0)
+        if len(centers) == 1:
+            return centers[0]
+        return ImVec2((centers[0].x + centers[1].x) / 2.0, (centers[0].y + centers[1].y) / 2.0)
 
     @staticmethod
     def _collapse_linked_input(dst_fn: FunctionNode, dst_input_name: str) -> None:

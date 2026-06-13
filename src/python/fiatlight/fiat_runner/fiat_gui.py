@@ -1015,6 +1015,7 @@ def run_graph_composer(
 
     graph = initial_graph if initial_graph is not None else FunctionsGraph.create_empty()
     fiat_gui = FiatGui(graph, params=params)
+    fiat_gui._function_palette.add_reroute_node()
     for fn in functions:
         fiat_gui._function_palette.add_function(fn)
     fiat_gui.run()
