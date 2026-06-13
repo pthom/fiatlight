@@ -17,7 +17,7 @@ from fiatlight.fiat_kits.fiat_implot import FloatMatrix_Dim1, FloatMatrix_Dim2
     bins__range=(8, 512),
     range_min__range=(0.0, 255.0),
     range_max__range=(0.0, 255.0),
-    fiat_tags=["histogram", "cv2.imgproc"],
+    fiat_tags=["histogram"],
 )
 def calcHist1D(
     image: ImageU8,
@@ -51,7 +51,7 @@ def calcHist1D(
     channel1__range=(0, 3),
     bins0__range=(8, 256),
     bins1__range=(8, 256),
-    fiat_tags=["histogram", "cv2.imgproc"],
+    fiat_tags=["histogram"],
 )
 def calcHist2D(
     image: ImageU8,
@@ -80,7 +80,7 @@ def calcHist2D(
     range_max__range=(0.0, 255.0),
     scale__range=(0.1, 100.0),
     scale__slider_logarithmic=True,
-    fiat_tags=["histogram", "cv2.imgproc"],
+    fiat_tags=["histogram"],
 )
 def calcBackProject(
     image: ImageU8,

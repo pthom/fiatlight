@@ -31,6 +31,19 @@ def add_fiat_attributes(func: FunctionType, **kwargs: Any) -> FunctionType:
     return func
 
 
+def add_fiat_tags(func: FunctionType, *tags: str) -> FunctionType:
+    """Merge `tags` into the function's existing `fiat_tags` (dedup, order
+    preserved). Unlike `add_fiat_attributes(fiat_tags=...)`, which replaces, this
+    appends. Used to apply kit-level default tags (e.g. "cv2") on top of each
+    function's own tags."""
+    existing = list(getattr(func, "fiat_tags", []) or [])
+    for t in tags:
+        if t not in existing:
+            existing.append(t)
+    setattr(func, "fiat_tags", existing)
+    return func
+
+
 def get_fiat_attribute(func: FunctionType, attr_name: str, default_value: AttrType) -> AttrType:
     if hasattr(func, attr_name):
         return getattr(func, attr_name)  # type: ignore

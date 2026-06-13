@@ -10,7 +10,7 @@ from .cv_enums import MorphOp, MorphShape
 @with_fiat_attributes(
     kernel_size__range=(1, 10),
     iterations__range=(1, 10),
-    fiat_tags=["morphology", "cv2.imgproc"],
+    fiat_tags=["morphology"],
 )
 def dilate(
     image: ImageU8_GRAY,
@@ -40,7 +40,7 @@ def dilate(
 @with_fiat_attributes(
     kernel_size__range=(1, 10),
     iterations__range=(1, 10),
-    fiat_tags=["morphology", "cv2.imgproc"],
+    fiat_tags=["morphology"],
 )
 def erode(
     image: ImageU8_GRAY,
@@ -70,7 +70,7 @@ def erode(
 @with_fiat_attributes(
     kernel_size__range=(1, 15),
     iterations__range=(1, 10),
-    fiat_tags=["morphology", "cv2.imgproc"],
+    fiat_tags=["morphology"],
 )
 def morphologyEx(
     image: ImageU8,

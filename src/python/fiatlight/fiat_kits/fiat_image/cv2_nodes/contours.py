@@ -26,7 +26,7 @@ class FindContoursResult(NamedTuple):
 
 
 @with_fiat_attributes(
-    fiat_tags=["contours", "cv2.imgproc"],
+    fiat_tags=["contours"],
 )
 def findContours(
     image: ImageU8,
@@ -61,7 +61,7 @@ def findContours(
     thickness__range=(-1, 10),
     contourIdx__range=(-1, 100),
     maxLevel__range=(0, 10),
-    fiat_tags=["contours", "cv2.imgproc"],
+    fiat_tags=["contours"],
 )
 def drawContours(
     image: ImageU8,

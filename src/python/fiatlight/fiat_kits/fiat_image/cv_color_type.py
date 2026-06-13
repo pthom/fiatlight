@@ -112,7 +112,7 @@ class ColorConversion(BaseModel):
         return f"{self.src_color.name}=>{self.dst_color.name}"
 
 
-@with_fiat_attributes(fiat_tags=["color", "fiat_image"])
+@with_fiat_attributes(fiat_tags=["color"])
 def color_convert(image: ImageU8, color_conversion: ColorConversion) -> ImageU8:
     return color_conversion.convert_image(image)
 

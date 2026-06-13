@@ -23,7 +23,7 @@ class PencilSketchResult(NamedTuple):
     sigma_s__range=(1.0, 200.0),
     sigma_r__range=(0.0, 1.0),
     shade_factor__range=(0.0, 0.1),
-    fiat_tags=["filter", "photo", "cv2.photo"],
+    fiat_tags=["filter", "photo"],
 )
 def pencilSketch(
     image: ImageU8_3,
@@ -53,7 +53,7 @@ def pencilSketch(
 @with_fiat_attributes(
     lo_diff__range=(0, 100),
     up_diff__range=(0, 100),
-    fiat_tags=["segmentation", "cv2.imgproc"],
+    fiat_tags=["segmentation"],
 )
 def floodFill(
     image: ImageU8,
@@ -93,7 +93,7 @@ def floodFill(
 @with_fiat_attributes(
     iter_count__range=(1, 10),
     invoke_async=True,
-    fiat_tags=["segmentation", "cv2.imgproc"],
+    fiat_tags=["segmentation"],
 )
 def grabCut(
     image: ImageBgr,
@@ -132,7 +132,7 @@ def grabCut(
     return out  # type: ignore
 
 
-@with_fiat_attributes(fiat_tags=["segmentation", "cv2.imgproc"])
+@with_fiat_attributes(fiat_tags=["segmentation"])
 def watershed(
     image: ImageBgr,
     markers: ImageU8_GRAY,

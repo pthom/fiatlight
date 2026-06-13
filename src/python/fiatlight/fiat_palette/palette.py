@@ -5,6 +5,7 @@ browser, a CLI list, headless tests). The matching popup widget lives in
 `fiat_palette.palette_gui`.
 """
 
+import logging
 from dataclasses import dataclass, field
 from enum import Enum
 
@@ -51,6 +52,9 @@ class PaletteFilter(BaseModel):
     selected_tags: list[str] = Field(default_factory=list)
     search_text: str = ""
     match_mode: TagMatchMode = TagMatchMode.AND
+    # Coarse domain filter (image / text / math / ...). None = all categories.
+    # Tag chips are scoped to the selected category.
+    selected_category: str | None = None
 
     # Type filters: when drag-from-pin opens the popup, the graph sets the
     # appropriate slot to restrict the candidate list. Both sides may be
@@ -71,6 +75,8 @@ class FunctionInfo:
     label: str
     function_factory: FunctionWithGuiFactory
     tags: list[str]
+    # Coarse domain (from the `fiat_category` attribute). "other" when unset.
+    category: str
     doc: str | None
     doc_is_markdown: bool
     # Stable cross-run identity (`module.qualname`) used as the registry key
@@ -99,25 +105,42 @@ class FunctionInfo:
         return None
 
 
-def _read_fiat_tags(fn: Function) -> list[str]:
-    """Read `fn.fiat_tags`. Raise if missing or empty.
+# Fallback tag / category for functions that declare neither. They still work
+# in the palette (grouped under "other"); curated packs set their own.
+_UNCATEGORIZED = "other"
 
-    Tags are the single source of truth — they must live on the function so
-    that the same wrapper carries the same intent everywhere it is registered.
-    Set them via `@fl.with_fiat_attributes(fiat_tags=[...])` at definition
-    time, or via `fl.add_fiat_attributes(fn, fiat_tags=[...])` for shimmed
-    or imported functions.
+
+def _read_fiat_tags(fn: Function) -> list[str]:
+    """Read `fn.fiat_tags`, defaulting to `["other"]` when unset.
+
+    Tags are the single source of truth — they live on the function so the same
+    wrapper carries the same intent everywhere it is registered. Set them via
+    `@fl.with_fiat_attributes(fiat_tags=[...])` at definition, or
+    `fl.add_fiat_attributes(fn, fiat_tags=[...])` for imported / shimmed
+    functions. Untagged functions are not rejected (that would make a quick
+    `run_graph_composer([my_fn])` crash); they land in the "other" group, with a
+    warning so the omission is still surfaced.
     """
     tags = getattr(fn, "fiat_tags", None)
     if not tags:
         name = getattr(fn, "__name__", repr(fn))
-        raise ValueError(
-            f"Function {name!r} has no `fiat_tags`. "
-            "Set them via `@fl.with_fiat_attributes(fiat_tags=[...])` at "
-            f"the function definition, or `fl.add_fiat_attributes({name}, "
-            "fiat_tags=[...])` for imported / shimmed functions."
+        logging.warning(
+            f"Function {name!r} has no `fiat_tags`; placing it in the {_UNCATEGORIZED!r} group. "
+            f"Set them via `@fl.with_fiat_attributes(fiat_tags=[...])` or `fl.add_fiat_attributes(...)`."
         )
+        return [_UNCATEGORIZED]
     return list(tags)
+
+
+def _read_fiat_category(fn: Function) -> str:
+    """Read `fn.fiat_category` (coarse domain: image / text / math / ...).
+
+    Optional: defaults to "other" when unset. Set via
+    `@fl.with_fiat_attributes(fiat_category="image")` or by a kit applying it to
+    its whole pack.
+    """
+    category = getattr(fn, "fiat_category", None)
+    return category if category else _UNCATEGORIZED
 
 
 def _search_terms(search_text: str) -> list[str]:
@@ -145,13 +168,16 @@ class FunctionPalette:
 
     def add_function(self, fn: Function) -> None:
         tags = _read_fiat_tags(fn)
+        category = _read_fiat_category(fn)
 
         def factory() -> FunctionWithGui:
             return FunctionWithGui(fn)
 
-        self._add_function_factory(factory, tags)
+        self._add_function_factory(factory, tags, category)
 
-    def _add_function_factory(self, function_factory: FunctionWithGuiFactory, tags: list[str]) -> None:
+    def _add_function_factory(
+        self, function_factory: FunctionWithGuiFactory, tags: list[str], category: str = _UNCATEGORIZED
+    ) -> None:
         gui = function_factory()
         name = gui.function_name
         label = gui.label
@@ -166,6 +192,7 @@ class FunctionPalette:
             label,
             function_factory,
             tags,
+            category,
             doc.user_doc,
             doc.is_user_doc_markdown,
             function_ref=function_ref,
@@ -174,24 +201,35 @@ class FunctionPalette:
         )
         self._functions.append(function_info)
 
-    def tags_set(self) -> list[str]:
+    def tags_set(self, category: str | None = None) -> list[str]:
+        """Distinct tags, optionally restricted to functions in `category`."""
         tags: set[str] = set()
         for function_info in self._functions:
+            if category is not None and function_info.category != category:
+                continue
             tags.update(function_info.tags)
         return sorted(tags)
 
+    def categories_set(self) -> list[str]:
+        """Distinct categories across all functions (sorted)."""
+        return sorted({fi.category for fi in self._functions})
+
     def filter(self, filt: PaletteFilter) -> list[FunctionInfo]:
-        """Apply tag / type / search-text filters in one pass."""
-        # 1. Tag filter.
-        if filt.selected_tags:
-            if filt.match_mode is TagMatchMode.AND:
-                infos = [fi for fi in self._functions if all(t in fi.tags for t in filt.selected_tags)]
-            elif filt.match_mode is TagMatchMode.OR:
-                infos = [fi for fi in self._functions if any(t in fi.tags for t in filt.selected_tags)]
-            else:
-                raise ValueError(f"Unknown TagMatchMode: {filt.match_mode!r}")
+        """Apply category / tag / type / search-text filters in one pass."""
+        # 0. Category filter (coarse domain).
+        if filt.selected_category is not None:
+            infos = [fi for fi in self._functions if fi.category == filt.selected_category]
         else:
             infos = list(self._functions)
+
+        # 1. Tag filter (within the category-filtered set).
+        if filt.selected_tags:
+            if filt.match_mode is TagMatchMode.AND:
+                infos = [fi for fi in infos if all(t in fi.tags for t in filt.selected_tags)]
+            elif filt.match_mode is TagMatchMode.OR:
+                infos = [fi for fi in infos if any(t in fi.tags for t in filt.selected_tags)]
+            else:
+                raise ValueError(f"Unknown TagMatchMode: {filt.match_mode!r}")
 
         # 2. Type filters: AND-combined.
         if filt.input_type_filter is not None:

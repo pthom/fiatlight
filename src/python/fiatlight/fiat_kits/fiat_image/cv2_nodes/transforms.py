@@ -13,7 +13,7 @@ from .cv_enums import BorderType, InterpolationFlag
     center_y__range=(0.0, 2000.0),
     angle__range=(-180.0, 180.0),
     scale__range=(0.1, 4.0),
-    fiat_tags=["transform", "cv2.imgproc"],
+    fiat_tags=["transform"],
 )
 def getRotationMatrix2D(
     center_x: float = 100.0,
@@ -43,7 +43,7 @@ def getRotationMatrix2D(
 @with_fiat_attributes(
     out_width__range=(1, 4000),
     out_height__range=(1, 4000),
-    fiat_tags=["transform", "geometry", "cv2.imgproc"],
+    fiat_tags=["transform", "geometry"],
 )
 def warpAffine(
     image: ImageU8,
@@ -78,7 +78,7 @@ def warpAffine(
 @with_fiat_attributes(
     out_width__range=(1, 4000),
     out_height__range=(1, 4000),
-    fiat_tags=["transform", "geometry", "cv2.imgproc"],
+    fiat_tags=["transform", "geometry"],
 )
 def warpPerspective(
     image: ImageU8,
@@ -111,7 +111,7 @@ def warpPerspective(
     return r  # type: ignore
 
 
-@with_fiat_attributes(fiat_tags=["transform", "cv2.imgproc"])
+@with_fiat_attributes(fiat_tags=["transform"])
 def getAffineTransform(src: Points2D, dst: Points2D) -> Matrix2x3:
     """Solve for the 2x3 affine matrix that maps `src` → `dst`.
 
@@ -130,7 +130,7 @@ def getAffineTransform(src: Points2D, dst: Points2D) -> Matrix2x3:
     return Matrix2x3(m.astype(np.float64))
 
 
-@with_fiat_attributes(fiat_tags=["transform", "cv2.imgproc"])
+@with_fiat_attributes(fiat_tags=["transform"])
 def getPerspectiveTransform(src: Points2D, dst: Points2D) -> Matrix3x3:
     """Solve for the 3x3 perspective matrix that maps `src` → `dst`.
 

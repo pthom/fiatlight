@@ -27,7 +27,7 @@ from fiatlight.fiat_types import ColorRgb
     qualityLevel__slider_logarithmic=True,
     minDistance__range=(1.0, 100.0),
     blockSize__range=(3, 21),
-    fiat_tags=["features", "cv2.imgproc"],
+    fiat_tags=["features"],
 )
 def goodFeaturesToTrack(
     image: ImageU8_GRAY,
@@ -77,7 +77,7 @@ def goodFeaturesToTrack(
     ksize__range=(1, 31),
     ksize__validator=lambda v: v if v % 2 == 1 else v + 1,
     k__range=(0.01, 0.2),
-    fiat_tags=["features", "edges", "cv2.imgproc"],
+    fiat_tags=["features", "edges"],
 )
 def cornerHarris(
     image: ImageU8_GRAY,
@@ -109,7 +109,7 @@ def cornerHarris(
 @with_fiat_attributes(
     radius__range=(1, 20),
     thickness__range=(-1, 5),
-    fiat_tags=["features", "drawing", "cv2.imgproc"],
+    fiat_tags=["features", "drawing"],
 )
 def drawPoints(
     image: ImageU8,
@@ -145,7 +145,7 @@ def drawPoints(
     threshold__range=(1, 500),
     minLineLength__range=(0, 500),
     maxLineGap__range=(0, 100),
-    fiat_tags=["features", "edges", "cv2.imgproc"],
+    fiat_tags=["features", "edges"],
 )
 def HoughLinesP(
     image: ImageU8_GRAY,
@@ -181,7 +181,7 @@ def HoughLinesP(
 
 @with_fiat_attributes(
     thickness__range=(1, 10),
-    fiat_tags=["features", "drawing", "cv2.imgproc"],
+    fiat_tags=["features", "drawing"],
 )
 def drawLines(
     image: ImageU8,
@@ -210,7 +210,7 @@ def drawLines(
     param2__range=(1.0, 200.0),
     minRadius__range=(0, 500),
     maxRadius__range=(0, 500),
-    fiat_tags=["features", "cv2.imgproc"],
+    fiat_tags=["features"],
 )
 def HoughCircles(
     image: ImageU8_GRAY,
@@ -258,7 +258,7 @@ def HoughCircles(
 
 @with_fiat_attributes(
     thickness__range=(-1, 5),
-    fiat_tags=["features", "drawing", "cv2.imgproc"],
+    fiat_tags=["features", "drawing"],
 )
 def drawCircles(
     image: ImageU8,
@@ -294,7 +294,7 @@ def drawCircles(
 # ---------------------------------------------------------------------------
 
 
-@with_fiat_attributes(fiat_tags=["contours", "shape", "cv2.imgproc"])
+@with_fiat_attributes(fiat_tags=["contours", "shape"])
 def boundingRects(contours: Contours) -> Rects2D:
     """Per-contour axis-aligned bounding rectangle.
 
@@ -309,7 +309,7 @@ def boundingRects(contours: Contours) -> Rects2D:
     return Rects2D(np.asarray(rows, dtype=np.int32))
 
 
-@with_fiat_attributes(fiat_tags=["contours", "shape", "cv2.imgproc"])
+@with_fiat_attributes(fiat_tags=["contours", "shape"])
 def minEnclosingCircles(contours: Contours) -> Circles2D:
     """Per-contour minimum enclosing circle.
 
@@ -328,7 +328,7 @@ def minEnclosingCircles(contours: Contours) -> Circles2D:
     return Circles2D(np.asarray(rows, dtype=np.int32))
 
 
-@with_fiat_attributes(fiat_tags=["contours", "shape", "cv2.imgproc"])
+@with_fiat_attributes(fiat_tags=["contours", "shape"])
 def convexHulls(contours: Contours) -> Contours:
     """Per-contour convex hull.
 
@@ -343,7 +343,7 @@ def convexHulls(contours: Contours) -> Contours:
 @with_fiat_attributes(
     epsilon__range=(0.1, 50.0),
     epsilon__slider_logarithmic=True,
-    fiat_tags=["contours", "shape", "cv2.imgproc"],
+    fiat_tags=["contours", "shape"],
 )
 def approxPolyDPs(
     contours: Contours,
@@ -369,7 +369,7 @@ def approxPolyDPs(
 
 @with_fiat_attributes(
     thickness__range=(-1, 5),
-    fiat_tags=["features", "drawing", "cv2.imgproc"],
+    fiat_tags=["features", "drawing"],
 )
 def drawRects(
     image: ImageU8,
@@ -400,7 +400,7 @@ def drawRects(
     max_iter__range=(1, 100),
     epsilon__range=(0.001, 1.0),
     epsilon__slider_logarithmic=True,
-    fiat_tags=["features", "cv2.imgproc"],
+    fiat_tags=["features"],
 )
 def cornerSubPix(
     image: ImageU8_GRAY,
@@ -443,7 +443,7 @@ def _to_rotated_row(
 
 @with_fiat_attributes(
     thickness__range=(1, 5),
-    fiat_tags=["features", "drawing", "cv2.imgproc"],
+    fiat_tags=["features", "drawing"],
 )
 def drawRotatedRects(
     image: ImageU8,
@@ -465,7 +465,7 @@ def drawRotatedRects(
 
 @with_fiat_attributes(
     thickness__range=(-1, 5),
-    fiat_tags=["features", "drawing", "cv2.imgproc"],
+    fiat_tags=["features", "drawing"],
 )
 def drawEllipses(
     image: ImageU8,
@@ -507,7 +507,7 @@ class MinMaxLocResult(NamedTuple):
     max_loc: Point2D
 
 
-@with_fiat_attributes(fiat_tags=["features", "template", "cv2.imgproc"])
+@with_fiat_attributes(fiat_tags=["features"])
 def matchTemplate(
     image: Image,
     template: Image,
@@ -526,7 +526,7 @@ def matchTemplate(
     return score  # type: ignore
 
 
-@with_fiat_attributes(fiat_tags=["features", "cv2.core"])
+@with_fiat_attributes(fiat_tags=["features"])
 def minMaxLoc(image: ImageU8_GRAY) -> MinMaxLocResult:
     """Return the global min/max values and their locations in a single-channel image.
 

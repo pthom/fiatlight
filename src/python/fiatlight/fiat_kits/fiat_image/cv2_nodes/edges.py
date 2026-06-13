@@ -14,7 +14,7 @@ from .cv_enums import CannyApertureSize
     threshold1__slider_logarithmic=True,
     threshold2__range=(100.0, 10000.0),
     threshold2__slider_logarithmic=True,
-    fiat_tags=["edges", "cv2.imgproc"],
+    fiat_tags=["edges"],
 )
 def Canny(
     image: ImageU8,

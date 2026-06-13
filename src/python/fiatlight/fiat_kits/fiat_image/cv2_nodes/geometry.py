@@ -10,7 +10,7 @@ from .cv_enums import BorderType, FlipCode, InterpolationFlag, RotateCode
 @with_fiat_attributes(
     fx__range=(0.05, 4.0),
     fy__range=(0.0, 4.0),
-    fiat_tags=["geometry", "cv2.imgproc"],
+    fiat_tags=["geometry"],
 )
 def resize(
     image: ImageU8,
@@ -37,7 +37,7 @@ def resize(
     return r  # type: ignore
 
 
-@with_fiat_attributes(fiat_tags=["geometry", "cv2.imgproc"])
+@with_fiat_attributes(fiat_tags=["geometry"])
 def pyrDown(image: ImageU8, borderType: BorderType = BorderType.BORDER_DEFAULT) -> ImageU8:
     """Halve image size with a 5×5 Gaussian + 2× downsample.
 
@@ -53,7 +53,7 @@ def pyrDown(image: ImageU8, borderType: BorderType = BorderType.BORDER_DEFAULT) 
     return r  # type: ignore
 
 
-@with_fiat_attributes(fiat_tags=["geometry", "cv2.imgproc"])
+@with_fiat_attributes(fiat_tags=["geometry"])
 def pyrUp(image: ImageU8, borderType: BorderType = BorderType.BORDER_DEFAULT) -> ImageU8:
     """Double image size with a 2× upsample + 5×5 Gaussian smoothing.
 
@@ -68,7 +68,7 @@ def pyrUp(image: ImageU8, borderType: BorderType = BorderType.BORDER_DEFAULT) ->
     return r  # type: ignore
 
 
-@with_fiat_attributes(fiat_tags=["geometry", "cv2.core"])
+@with_fiat_attributes(fiat_tags=["geometry"])
 def flip(image: ImageU8, flipCode: FlipCode = FlipCode.HORIZONTAL) -> ImageU8:
     """Mirror an image around an axis.
 
@@ -84,7 +84,7 @@ def flip(image: ImageU8, flipCode: FlipCode = FlipCode.HORIZONTAL) -> ImageU8:
     return r  # type: ignore
 
 
-@with_fiat_attributes(fiat_tags=["geometry", "cv2.core"])
+@with_fiat_attributes(fiat_tags=["geometry"])
 def rotate(image: ImageU8, rotateCode: RotateCode = RotateCode.ROTATE_90_CW) -> ImageU8:
     """Rotate an image by a multiple of 90°.
 
@@ -103,7 +103,7 @@ def rotate(image: ImageU8, rotateCode: RotateCode = RotateCode.ROTATE_90_CW) -> 
     left__range=(0, 200),
     right__range=(0, 200),
     constant_value__range=(0, 255),
-    fiat_tags=["geometry", "cv2.core"],
+    fiat_tags=["geometry"],
 )
 def copyMakeBorder(
     image: ImageU8,

@@ -11,7 +11,7 @@ _ACCEPT_ANY_FILE = "*.*"
 @with_fiat_attributes(
     path__label="File",
     label="Image from file",
-    fiat_tags=["source", "fiat_image"],
+    fiat_tags=["source"],
 )
 def image_from_file(path: ImagePath) -> ImageU8:
     """Read an image from a file.
@@ -29,7 +29,7 @@ def image_from_file(path: ImagePath) -> ImageU8:
     max_image_size__label="Max Image Size",
     max_image_size__tooltip="If the image with or height is larger than this size, it will be resized",
     label="Image from file (resized)",
-    fiat_tags=["source", "fiat_image"],
+    fiat_tags=["source"],
 )
 def image_from_file_resized(path: ImagePath, max_image_size: int | None = None) -> ImageU8:
     """A simple function that reads an image from a file and optionally resizes it if it is too large."""

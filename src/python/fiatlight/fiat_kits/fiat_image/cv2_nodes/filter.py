@@ -34,7 +34,7 @@ def _bilateral_d_validator(d: int) -> int:
 @with_fiat_attributes(
     sigmaX__range=(0.0, 25.0),
     sigmaY__range=(0.0, 25.0),
-    fiat_tags=["filter", "cv2.imgproc"],
+    fiat_tags=["filter"],
 )
 def GaussianBlur(
     image: ImageU8,
@@ -69,7 +69,7 @@ def GaussianBlur(
     d__validator=_bilateral_d_validator,
     sigmaColor__range=(1.0, 200.0),
     sigmaSpace__range=(1.0, 200.0),
-    fiat_tags=["filter", "cv2.imgproc"],
+    fiat_tags=["filter"],
 )
 def bilateralFilter(
     image: ImageU8,
@@ -102,7 +102,7 @@ def bilateralFilter(
 @with_fiat_attributes(
     ksize__range=(1, 31),
     ksize__validator=_odd_int_validator,
-    fiat_tags=["filter", "cv2.imgproc"],
+    fiat_tags=["filter"],
 )
 def medianBlur(image: ImageU8, ksize: int = 5) -> ImageU8:
     """Replace each pixel by the median of its `ksize`×`ksize` neighbourhood.
@@ -125,7 +125,7 @@ def medianBlur(image: ImageU8, ksize: int = 5) -> ImageU8:
 @with_fiat_attributes(
     ksize__range=(1, 31),
     ksize__validator=_odd_int_validator,
-    fiat_tags=["filter", "cv2.imgproc"],
+    fiat_tags=["filter"],
 )
 def boxFilter(
     image: ImageU8,
@@ -158,7 +158,7 @@ def boxFilter(
     dy__validator=_sobel_dx_dy_validator,
     scale__range=(0.0, 10.0),
     delta__range=(-128.0, 128.0),
-    fiat_tags=["filter", "edges", "cv2.imgproc"],
+    fiat_tags=["filter", "edges"],
 )
 def Sobel(
     image: ImageU8_GRAY,
@@ -196,7 +196,7 @@ def Sobel(
 @with_fiat_attributes(
     scale__range=(0.0, 10.0),
     delta__range=(-128.0, 128.0),
-    fiat_tags=["filter", "edges", "cv2.imgproc"],
+    fiat_tags=["filter", "edges"],
 )
 def Scharr(
     image: ImageU8_GRAY,
@@ -229,7 +229,7 @@ def Scharr(
 @with_fiat_attributes(
     scale__range=(0.0, 10.0),
     delta__range=(-128.0, 128.0),
-    fiat_tags=["filter", "edges", "cv2.imgproc"],
+    fiat_tags=["filter", "edges"],
 )
 def Laplacian(
     image: ImageU8_GRAY,

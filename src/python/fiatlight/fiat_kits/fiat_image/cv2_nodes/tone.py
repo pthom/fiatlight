@@ -11,7 +11,7 @@ import cv2
 from .cv_enums import ColorMap
 
 
-@with_fiat_attributes(fiat_tags=["tone", "cv2.imgproc"])
+@with_fiat_attributes(fiat_tags=["tone"])
 def equalizeHist(image: ImageU8_GRAY) -> ImageU8_GRAY:
     """Global histogram equalization on a grayscale image.
 
@@ -30,7 +30,7 @@ def equalizeHist(image: ImageU8_GRAY) -> ImageU8_GRAY:
 @with_fiat_attributes(
     clipLimit__range=(0.5, 40.0),
     tileGridSize__range=(1, 32),
-    fiat_tags=["tone", "cv2.imgproc"],
+    fiat_tags=["tone"],
 )
 def clahe(
     image: ImageU8_GRAY,
@@ -56,7 +56,7 @@ def clahe(
     return r  # type: ignore
 
 
-@with_fiat_attributes(fiat_tags=["color", "tone", "cv2.imgproc"])
+@with_fiat_attributes(fiat_tags=["color", "tone"])
 def applyColorMap(image: ImageU8_GRAY, colormap: ColorMap = ColorMap.VIRIDIS) -> ImageBgr:
     """Map a single-channel image to color via a built-in cv2 color map.
 
@@ -75,7 +75,7 @@ def applyColorMap(image: ImageU8_GRAY, colormap: ColorMap = ColorMap.VIRIDIS) ->
 @with_fiat_attributes(
     alpha__range=(0.0, 4.0),
     beta__range=(-128.0, 128.0),
-    fiat_tags=["tone", "cv2.core"],
+    fiat_tags=["tone"],
 )
 def convertScaleAbs(image: ImageU8, alpha: float = 1.0, beta: float = 0.0) -> ImageU8:
     """Linear contrast / brightness adjustment: `|alpha*src + beta|` clipped to U8.

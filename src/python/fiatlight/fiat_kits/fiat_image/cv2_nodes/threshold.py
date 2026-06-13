@@ -43,7 +43,7 @@ def _block_size_validator(blockSize: int) -> int:
 @with_fiat_attributes(
     thresh__range=(0.0, 255.0),
     maxval__range=(0.0, 255.0),
-    fiat_tags=["threshold", "cv2.imgproc"],
+    fiat_tags=["threshold"],
 )
 def threshold(
     image: Image,
@@ -86,7 +86,7 @@ def threshold(
     blockSize__range=(3, 51),
     blockSize__validator=_block_size_validator,
     C__range=(-50.0, 50.0),
-    fiat_tags=["threshold", "cv2.imgproc"],
+    fiat_tags=["threshold"],
 )
 def adaptiveThreshold(
     image: ImageU8_GRAY,
@@ -116,7 +116,7 @@ def adaptiveThreshold(
     return r  # type: ignore
 
 
-@with_fiat_attributes(fiat_tags=["threshold", "cv2.imgproc"])
+@with_fiat_attributes(fiat_tags=["threshold"])
 def distanceTransform(
     image: ImageU8_GRAY,
     distanceType: DistanceType = DistanceType.DIST_L2,

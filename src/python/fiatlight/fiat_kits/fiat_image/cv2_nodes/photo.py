@@ -16,7 +16,7 @@ from .cv_enums import EdgePreservingFlag
     h__range=(1.0, 30.0),
     templateWindowSize__range=(3, 21),
     searchWindowSize__range=(3, 41),
-    fiat_tags=["filter", "photo", "cv2.photo"],
+    fiat_tags=["filter", "photo"],
 )
 def fastNlMeansDenoising(
     image: ImageU8_GRAY,
@@ -48,7 +48,7 @@ def fastNlMeansDenoising(
     hColor__range=(1.0, 30.0),
     templateWindowSize__range=(3, 21),
     searchWindowSize__range=(3, 41),
-    fiat_tags=["filter", "photo", "cv2.photo"],
+    fiat_tags=["filter", "photo"],
 )
 def fastNlMeansDenoisingColored(
     image: ImageBgr,
@@ -78,7 +78,7 @@ def fastNlMeansDenoisingColored(
     invoke_async=True,
     sigma_s__range=(1.0, 200.0),
     sigma_r__range=(0.0, 1.0),
-    fiat_tags=["filter", "photo", "cv2.photo"],
+    fiat_tags=["filter", "photo"],
 )
 def stylization(image: ImageBgr, sigma_s: float = 60.0, sigma_r: float = 0.45) -> ImageBgr:
     """Cartoon-like stylization built on edge-preserving smoothing.
@@ -101,7 +101,7 @@ def stylization(image: ImageBgr, sigma_s: float = 60.0, sigma_r: float = 0.45) -
     invoke_async=True,
     sigma_s__range=(1.0, 200.0),
     sigma_r__range=(0.0, 1.0),
-    fiat_tags=["filter", "photo", "cv2.photo"],
+    fiat_tags=["filter", "photo"],
 )
 def edgePreservingFilter(
     image: ImageBgr,
@@ -131,7 +131,7 @@ def edgePreservingFilter(
 @with_fiat_attributes(
     size__range=(1, 10),
     dynRatio__range=(1, 10),
-    fiat_tags=["filter", "photo", "cv2.xphoto"],
+    fiat_tags=["filter", "photo"],
 )
 def oil_paint(image: ImageU8, size: int = 1, dynRatio: int = 3) -> ImageU8:
     """Apply an oil-painting effect to an image.

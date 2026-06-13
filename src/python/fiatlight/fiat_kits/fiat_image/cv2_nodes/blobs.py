@@ -31,7 +31,7 @@ class ConnectedComponentsWithStatsResult(NamedTuple):
 
 @with_fiat_attributes(
     connectivity__range=(4, 8),
-    fiat_tags=["blobs", "cv2.imgproc"],
+    fiat_tags=["blobs"],
 )
 def connectedComponents(
     image: ImageU8_GRAY,
@@ -59,7 +59,7 @@ def connectedComponents(
 
 @with_fiat_attributes(
     connectivity__range=(4, 8),
-    fiat_tags=["blobs", "cv2.imgproc"],
+    fiat_tags=["blobs"],
 )
 def connectedComponentsWithStats(
     image: ImageU8_GRAY,

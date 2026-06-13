@@ -10,6 +10,7 @@ different taxonomy can override per function with `add_fiat_attributes`.
 """
 from typing import Callable, List, Any
 
+from fiatlight.fiat_utils.fiat_attributes_decorator import add_fiat_attributes, add_fiat_tags
 from fiatlight.fiat_kits.fiat_image.image_to_from_file_gui import image_from_file, image_from_file_resized
 from fiatlight.fiat_kits.fiat_image.cv_color_type import color_convert
 from fiatlight.fiat_kits.fiat_image.lut_functions import lut_with_params, lut_channels_in_colorspace
@@ -244,3 +245,15 @@ def cv2_nodes() -> List[Callable[..., Any]]:
         connectedComponents,
         connectedComponentsWithStats,
     ]
+
+
+def _apply_kit_defaults() -> None:
+    """Every node in this pack is a cv2-based image operation, so categorize the
+    whole pack as `image` and add the `cv2` tag once here instead of repeating
+    it on each function. (`add_fiat_tags` merges; it does not replace.)"""
+    for fn in cv2_nodes():
+        add_fiat_attributes(fn, fiat_category="image")
+        add_fiat_tags(fn, "cv2")
+
+
+_apply_kit_defaults()

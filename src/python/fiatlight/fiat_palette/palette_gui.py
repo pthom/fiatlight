@@ -21,8 +21,7 @@ def palette_gui_body(
     `focus_search=True` (set on the first frame the popup opens) sends
     keyboard focus to the search input so the user can start typing.
     """
-    _gui_search_and_match_mode(filt, focus_search=focus_search)
-    _gui_tags(palette, filt)
+    _gui_filter_header(palette, filt, focus_search=focus_search)
 
     # Side-by-side: function list on the left, doc panel on the right.
     # The side layout (rather than below the list) lets the user move the
@@ -37,13 +36,75 @@ def palette_gui_body(
     _gui_doc_panel(filt.latched_fn, ImVec2(0, avail.y))
 
 
-def _gui_search_and_match_mode(filt: PaletteFilter, *, focus_search: bool) -> None:
+def _cell_label(text: str) -> None:
+    """Left-column label, vertically centered against the controls in the next
+    column."""
+    imgui.align_text_to_frame_padding()
+    imgui.text(text)
+
+
+def _check_item_width(label: str) -> float:
+    """Approximate width of a checkbox / radio button with `label`."""
+    style = imgui.get_style()
+    return imgui.get_frame_height() + style.item_inner_spacing.x + imgui.calc_text_size(label).x
+
+
+def _row_right_edge() -> float:
+    """Absolute x of the content region's right edge. Capture once at the start
+    of a flowing row (it stays constant while items are added)."""
+    return imgui.get_cursor_screen_pos().x + imgui.get_content_region_avail().x
+
+
+def _flow_to_next(next_label: str, right_edge: float) -> None:
+    """Call between flowing-row items: stay on the same line if the next
+    checkbox / radio (`next_label`) still fits before `right_edge`, otherwise let
+    it wrap to a new line. Avoids the horizontal overflow a bare `same_line()`
+    would cause when there are many tags / categories."""
+    style = imgui.get_style()
+    next_x2 = imgui.get_item_rect_max().x + style.item_spacing.x + _check_item_width(next_label)
+    if next_x2 < right_edge:
+        imgui.same_line()
+
+
+def _gui_filter_header(palette: FunctionPalette, filt: PaletteFilter, *, focus_search: bool) -> None:
+    """Search + match mode + category + tag filters, grouped inside a discreet
+    panel. A 2-column table aligns the row labels (left) against their controls
+    (right)."""
+    child_flags = imgui.ChildFlags_.auto_resize_y.value | imgui.ChildFlags_.always_use_window_padding.value
+    if imgui.begin_child("##palette_filters", ImVec2(0, 0), child_flags=child_flags):
+        if imgui.begin_table("##filters", 2):
+            imgui.table_setup_column("##label", imgui.TableColumnFlags_.width_fixed.value)
+            imgui.table_setup_column("##controls", imgui.TableColumnFlags_.width_stretch.value)
+
+            _table_row("Search", lambda: _search_and_match_controls(filt, focus_search=focus_search))
+
+            categories = palette.categories_set()
+            if len(categories) > 1:
+                _table_row("Category:", lambda: _category_controls(palette, filt, categories))
+
+            if palette.tags_set(filt.selected_category):
+                _table_row("Tags:", lambda: _tag_controls(palette, filt))
+
+            imgui.end_table()
+    imgui.end_child()
+
+
+def _table_row(label: str, controls: Callable[[], None]) -> None:
+    imgui.table_next_row()
+    imgui.table_next_column()
+    _cell_label(label)
+    imgui.table_next_column()
+    controls()
+
+
+def _search_and_match_controls(filt: PaletteFilter, *, focus_search: bool) -> None:
     imgui.set_next_item_width(hello_imgui.em_size(10))
     if focus_search:
         imgui.set_keyboard_focus_here()
-    _, filt.search_text = imgui.input_text("Search", filt.search_text)
+    _, filt.search_text = imgui.input_text("##search", filt.search_text)
 
-    imgui.text(" Match:")
+    imgui.same_line()
+    _cell_label("Match:")
     imgui.same_line()
     if imgui.radio_button("AND", filt.match_mode is TagMatchMode.AND):
         filt.match_mode = TagMatchMode.AND
@@ -52,27 +113,42 @@ def _gui_search_and_match_mode(filt: PaletteFilter, *, focus_search: bool) -> No
         filt.match_mode = TagMatchMode.OR
 
 
-def _gui_tags(palette: FunctionPalette, filt: PaletteFilter) -> None:
-    all_tags = palette.tags_set()
-    if not all_tags:
-        return
-    style = imgui.get_style()
-    checkbox_extra = imgui.get_frame_height() + style.item_inner_spacing.x
-    col_width = max(imgui.calc_text_size(t).x for t in all_tags) + checkbox_extra + style.item_spacing.x
-    avail = imgui.get_content_region_avail().x
-    n_cols = max(1, int(avail // col_width))
+def _category_controls(palette: FunctionPalette, filt: PaletteFilter, categories: list[str]) -> None:
+    """Coarse domain selector (image / text / math / ...). Selecting a category
+    scopes the tag chips below to that domain."""
 
+    def select(cat: str | None) -> None:
+        if filt.selected_category == cat:
+            return
+        filt.selected_category = cat
+        # Drop selected tags that don't exist in the new category's scope,
+        # otherwise the tag filter would silently empty the list.
+        scoped = set(palette.tags_set(cat))
+        filt.selected_tags[:] = [t for t in filt.selected_tags if t in scoped]
+
+    right_edge = _row_right_edge()
+    options: list[tuple[str, str | None]] = [("All", None)]
+    for c in categories:
+        options.append((c, c))
+    for i, (label, cat) in enumerate(options):
+        if i > 0:
+            _flow_to_next(label, right_edge)
+        if imgui.radio_button(label, filt.selected_category == cat):
+            select(cat)
+
+
+def _tag_controls(palette: FunctionPalette, filt: PaletteFilter) -> None:
+    all_tags = palette.tags_set(filt.selected_category)
+    right_edge = _row_right_edge()
     for i, tag in enumerate(all_tags):
+        if i > 0:
+            _flow_to_next(tag, right_edge)
         was_selected = tag in filt.selected_tags
         _, is_selected = imgui.checkbox(tag, was_selected)
         if is_selected and not was_selected:
             filt.selected_tags.append(tag)
         elif was_selected and not is_selected:
             filt.selected_tags[:] = [t for t in filt.selected_tags if t != tag]
-
-        col = i % n_cols
-        if col + 1 < n_cols and i + 1 < len(all_tags):
-            imgui.same_line(col_width * (col + 1))
 
 
 def _gui_functions(
@@ -139,6 +215,7 @@ def _render_function_doc_markdown(fn_info: FunctionInfo) -> None:
     lines = [f"## {title}"]
     if fn_info.label != fn_info.name:
         lines.append(f"*id: {fn_info.name}*")
+    lines.append(f"Category: {fn_info.category}")
     lines.append(f"Tags: {tags_str}")
     lines.append("---")
     md_str = "\n\n".join(lines)
