@@ -51,7 +51,7 @@ from imgui_bundle import (
     ImColor,
     imgui_md,
 )
-from fiatlight.fiat_widgets import icons_fontawesome_6, fontawesome_6_ctx, fiat_osd
+from fiatlight.fiat_widgets import icons_fontawesome_6, fontawesome_6_ctx, fiat_osd, draw_text_rotated_90
 from fiatlight import fiat_widgets, fiat_togui, fiat_utils
 from typing import Dict, List, Any
 from dataclasses import dataclass
@@ -335,17 +335,22 @@ class FunctionNodeGui:
             draw_pin(*first)
             imgui.dummy(ImVec2(0, gap) if vertical else ImVec2(gap, 0))
             if fn.show_type:
-                self._draw_reroute_type_label(fn.output(0).datatype_basename())
+                self._draw_reroute_type_label(fn.output(0).datatype_basename(), rotation)
                 imgui.dummy(ImVec2(0, gap) if vertical else ImVec2(gap, 0))
             draw_pin(*second)
 
     @staticmethod
-    def _draw_reroute_type_label(full_typename: str) -> None:
-        """Show the flowing type, shortened (long Unions get truncated with a
-        full-name tooltip), so it does not blow up the node width."""
+    def _draw_reroute_type_label(full_typename: str, rotation: int) -> None:
+        """Show the flowing type, shortened (long names get truncated with a
+        full-name tooltip). When the node is vertical (rotation 1 or 3) the text is
+        drawn rotated 90° so it reads along the node's long axis."""
         max_len = 18
         short = full_typename if len(full_typename) <= max_len else full_typename[: max_len - 1] + "…"
-        imgui.text_disabled(short)
+        if rotation % 2 == 0:
+            imgui.text_disabled(short)
+        else:
+            color = imgui.get_color_u32(imgui.Col_.text_disabled.value)
+            draw_text_rotated_90(short, clockwise=rotation == 1, color_u32=color)
         if short != full_typename:
             fiat_osd.set_widget_tooltip(full_typename)
 
