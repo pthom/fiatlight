@@ -230,6 +230,15 @@ class FiatGui:
     # the .ini (via FiatRunParams.delete_settings) wipes the cursor too.
     _USER_PREF_LAST_WORKSPACE = "fiat.last_workspace_path"
 
+    # Recently opened/saved workspace files, most-recent first. Persisted across
+    # launches via hello_imgui user prefs (stored as a JSON list inside the .ini).
+    _recent_workspaces: list[str]
+    _USER_PREF_RECENT_WORKSPACES = "fiat.recent_workspaces"
+    _MAX_RECENT_WORKSPACES = 10
+    # Path queued by the "Open Recent" menu, opened from `_handle_file_dialogs`
+    # (same lifecycle point as the file dialogs, not inline during menu render).
+    _pending_recent_to_open: str | None = None
+
     _function_palette: FunctionPalette
 
     _logo_texture: imgui.ImTextureRef
@@ -247,6 +256,7 @@ class FiatGui:
         self.params = params
         self._prepare_runner_params()
         self._current_workspace_path = self._workspace_filename()
+        self._recent_workspaces = []
 
         self.apply_fiat_style_graph()
 
@@ -328,6 +338,7 @@ class FiatGui:
 
     def _post_init(self) -> None:
         self._restore_cursor_from_user_pref()
+        self._restore_recent_workspaces_from_user_pref()
         self._load_workspace_at_startup()
         self._functions_graph_gui.invoke_all_functions(also_invoke_manual_function=False)
         self._notify_if_dirty_functions()
@@ -471,6 +482,7 @@ class FiatGui:
                     self._menu_new_workspace()
             if imgui.menu_item_simple("Open Workspace…"):
                 self._menu_open_workspace()
+            self._menu_open_recent_workspace()
             if imgui.menu_item_simple("Save Workspace", "Ctrl+S"):
                 self._menu_save_workspace()
             if imgui.menu_item_simple("Save Workspace As…"):
@@ -516,6 +528,21 @@ class FiatGui:
     def _menu_open_workspace(self) -> None:
         self.load_dialog = pfd.open_file(title="Open Workspace")
         self.load_dialog_callback = self._load_workspace_during_execution
+
+    def _menu_open_recent_workspace(self) -> None:
+        existing = [p for p in self._recent_workspaces if pathlib.Path(p).is_file()]
+        if imgui.begin_menu("Open Recent", len(existing) > 0):
+            for path in existing:
+                if imgui.menu_item_simple(pathlib.Path(path).name):
+                    # Defer the actual load to `_handle_file_dialogs` (outside menu rendering).
+                    self._pending_recent_to_open = path
+                if imgui.is_item_hovered():
+                    imgui.set_tooltip(path)
+            imgui.separator()
+            if imgui.menu_item_simple("Clear Recently Opened"):
+                self._recent_workspaces = []
+                self._save_recent_workspaces_to_user_pref()
+            imgui.end_menu()
 
     def _menu_save_workspace(self) -> None:
         self._save_workspace(self._current_workspace_path)
@@ -726,6 +753,11 @@ class FiatGui:
                     self.load_dialog_callback(selected_filenames[0])
             self.load_dialog = None
 
+        if self._pending_recent_to_open is not None:
+            path = self._pending_recent_to_open
+            self._pending_recent_to_open = None
+            self._load_workspace_during_execution(path)
+
     def _docking_splits(self) -> List[hello_imgui.DockingSplit]:
         splits: List[hello_imgui.DockingSplit] = []
         splits.append(
@@ -927,11 +959,38 @@ class FiatGui:
             return
         self._current_workspace_path = stored
 
+    def _restore_recent_workspaces_from_user_pref(self) -> None:
+        """Load the recent-workspaces list persisted on previous runs."""
+        try:
+            stored = hello_imgui.load_user_pref(self._USER_PREF_RECENT_WORKSPACES)
+        except Exception as e:
+            logging.warning(f"FiatGui: cannot read user pref {self._USER_PREF_RECENT_WORKSPACES!r}: {e}")
+            return
+        if not stored:
+            return
+        try:
+            paths = json.loads(stored)
+        except json.JSONDecodeError:
+            return
+        if isinstance(paths, list):
+            self._recent_workspaces = [p for p in paths if isinstance(p, str)]
+
+    def _save_recent_workspaces_to_user_pref(self) -> None:
+        hello_imgui.save_user_pref(self._USER_PREF_RECENT_WORKSPACES, json.dumps(self._recent_workspaces))
+
+    def _add_to_recent_workspaces(self, filename: str) -> None:
+        """Move a workspace path to the front of the recent list (deduped, capped) and persist it."""
+        path = str(pathlib.Path(filename).resolve())
+        self._recent_workspaces = [path] + [p for p in self._recent_workspaces if p != path]
+        del self._recent_workspaces[self._MAX_RECENT_WORKSPACES :]
+        self._save_recent_workspaces_to_user_pref()
+
     def _load_workspace_during_execution(self, filename: str) -> None:
         success = self._load_workspace(filename, whine_if_not_found=True)
         if not success:
             return
         self._current_workspace_path = filename
+        self._add_to_recent_workspaces(filename)
         self._functions_graph_gui.invoke_all_functions(also_invoke_manual_function=False)
         self._notify_if_dirty_functions()
         self._request_undo_baseline()
@@ -941,6 +1000,7 @@ class FiatGui:
             filename += ".fiat_workspace.json"
         self._save_workspace(filename)
         self._current_workspace_path = filename
+        self._add_to_recent_workspaces(filename)
 
 
 def _fiat_run_graph(
