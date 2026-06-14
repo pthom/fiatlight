@@ -87,5 +87,6 @@ reportMissingModuleSource = "none"
 
 [project.scripts]
 fiatlight = "fiatlight.fiat_cli.fiatlight_cli:main"
+fiatlight_studio = "fiatlight.fiat_cli.studio_cli:main"
 
 

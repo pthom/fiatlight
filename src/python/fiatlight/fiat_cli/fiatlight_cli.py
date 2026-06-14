@@ -42,12 +42,15 @@ def fn_attrs() -> None:
 #     _GUI_FACTORIES.run_gui_demo(gui_or_data_typename)
 
 
-def studio() -> None:
+def studio(min: bool = False, ai: bool = False) -> None:
     """Open the Fiatlight studio: an interactive node composer with a palette of
-    the built-in node packs (image / math / text) to drag onto the canvas."""
-    import fiatlight as fl
+    the built-in node packs (image / math / text) to drag onto the canvas.
 
-    fl.studio()
+    --min: fast, opencv-free palette (math + text).
+    --ai:  full palette + the AI image-gen node."""
+    from fiatlight.fiat_cli.studio_cli import run_studio
+
+    run_studio(minimal=min, ai=ai)
 
 
 def main() -> None:
