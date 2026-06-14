@@ -553,7 +553,16 @@ class AnyDataWithGui(Generic[DataType]):
     def _gui_present_header_line(self, params: GuiHeaderLineParams[DataType]) -> None:
         """Present the value as a string in one line, or as a widget if it fits on one line"""
 
-        with imgui_ctx.begin_horizontal("present_header_line"):
+        # Constrain the header row to (available width - right margin) and right-align the
+        # trailing icons with a spring. The right margin is required so the node auto-sizes
+        # down to its real content.
+        header_size = None
+        right_margin = hello_imgui.em_size(0.5)
+        row_width = imgui.get_content_region_avail().x - right_margin
+        if row_width > 0:
+            header_size = ImVec2(row_width, 0.0)
+
+        with imgui_ctx.begin_horizontal("present_header_line", header_size):
             #
             # Left side:
             #   * prefix_gui  (might contain a node input pin when used in a function node)
@@ -615,7 +624,7 @@ class AnyDataWithGui(Generic[DataType]):
             #   * open in popup button
             #   * clipboard button
             #   * suffix_gui (might contain a node output pin when used in a function node)
-            imgui.spring()  # Align the rest to the right
+            imgui.spring()  # Align the trailing icons to the right (within the margin-constrained row width)
             if self._can_present_detachable():
 
                 def gui_present_detached() -> None:
