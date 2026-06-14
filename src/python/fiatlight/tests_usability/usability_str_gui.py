@@ -24,9 +24,11 @@ Victor Hugo, extrait du recueil «Les Contemplations» (1856)
         """
 
     @fl.with_fiat_attributes(
-        multiline_text__allow_multiline_edit=True,
+        multiline_text__multiline=True,
     )
-    def f(short_input: str, multiline_text: str = poem) -> tuple[str, str]:
+    def f(
+        short_input: str, multiline_text: str = poem, prompt: fl.fiat_kits.fiat_ai.Prompt = "A cat on the moon"
+    ) -> tuple[str, str]:
         return short_input, multiline_text
 
     fl.run(f)

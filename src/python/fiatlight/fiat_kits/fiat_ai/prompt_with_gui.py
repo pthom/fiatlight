@@ -15,8 +15,8 @@ class PromptWithGui(AnyDataWithGui[Prompt]):
     def __init__(self) -> None:
         super().__init__(Prompt)
         self._str_gui = StrWithGui()
-        self._str_gui.params.hint = "Enter a prompt"
-        self._str_gui.params.allow_multiline_edit = True
+        self._str_gui._input_text_data.hint = "Enter a prompt"
+        self._str_gui._input_text_data.multiline = True
 
         self._edited_prompt = Prompt("")
         self.callbacks.on_change = self.on_change
@@ -43,13 +43,13 @@ class PromptWithGui(AnyDataWithGui[Prompt]):
 
             is_changed = prompt != self._edited_prompt
             if is_changed:
-                if imgui.button("Submit"):
+                if imgui.small_button("Submit"):
                     return True, self._edited_prompt
                 else:
                     return False, prompt
             else:
                 imgui.begin_disabled(True)
-                imgui.button("Submit")
+                imgui.small_button("Submit")
                 imgui.end_disabled()
                 return False, prompt
 

@@ -1,0 +1,321 @@
+{
+    "version": 1,
+    "nodes": {
+        "n1": {
+            "function_ref": "__main__.make_int",
+            "function_name": "make_int",
+            "input_values": {},
+            "input_gui_options": {},
+            "output_gui_options": {
+                "0": {
+                    "cb_options": {},
+                    "expanded": true
+                }
+            },
+            "position": [
+                218.0,
+                211.0
+            ],
+            "expand_flags": {
+                "_inputs_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_outputs_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_doc_expanded": {
+                    "inside_node": false,
+                    "focused": true
+                },
+                "fiat_tuning_expanded": {
+                    "inside_node": false,
+                    "focused": true
+                },
+                "_internal_state_gui_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_backup_expanded_states": {
+                    "inside_node": null,
+                    "focused": null
+                }
+            },
+            "focused_function_visible": false
+        },
+        "n2": {
+            "function_ref": "fiatlight.fiat_core.reroute_function._reroute_identity",
+            "function_name": "Reroute",
+            "input_values": {},
+            "input_gui_options": {
+                "value": {
+                    "cb_options": {},
+                    "expanded": false
+                }
+            },
+            "output_gui_options": {
+                "0": {
+                    "cb_options": {},
+                    "expanded": true
+                }
+            },
+            "internal_gui_options": {
+                "rotation": 0,
+                "show_type": true
+            },
+            "position": [
+                508.0,
+                276.0
+            ],
+            "expand_flags": {
+                "_inputs_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_outputs_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_doc_expanded": {
+                    "inside_node": false,
+                    "focused": true
+                },
+                "fiat_tuning_expanded": {
+                    "inside_node": false,
+                    "focused": true
+                },
+                "_internal_state_gui_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_backup_expanded_states": {
+                    "inside_node": null,
+                    "focused": null
+                }
+            },
+            "focused_function_visible": false
+        },
+        "n3": {
+            "function_ref": "__main__.need_int",
+            "function_name": "need_int",
+            "input_values": {},
+            "input_gui_options": {
+                "x": {
+                    "cb_options": {},
+                    "expanded": false
+                }
+            },
+            "output_gui_options": {
+                "0": {
+                    "cb_options": {},
+                    "expanded": true
+                }
+            },
+            "position": [
+                866.0,
+                332.0
+            ],
+            "expand_flags": {
+                "_inputs_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_outputs_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_doc_expanded": {
+                    "inside_node": false,
+                    "focused": true
+                },
+                "fiat_tuning_expanded": {
+                    "inside_node": false,
+                    "focused": true
+                },
+                "_internal_state_gui_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_backup_expanded_states": {
+                    "inside_node": null,
+                    "focused": null
+                }
+            },
+            "focused_function_visible": false
+        },
+        "n4": {
+            "function_ref": "__main__.make_str",
+            "function_name": "make_str",
+            "input_values": {},
+            "input_gui_options": {},
+            "output_gui_options": {
+                "0": {
+                    "cb_options": {},
+                    "expanded": true
+                }
+            },
+            "position": [
+                218.0,
+                506.0
+            ],
+            "expand_flags": {
+                "_inputs_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_outputs_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_doc_expanded": {
+                    "inside_node": false,
+                    "focused": true
+                },
+                "fiat_tuning_expanded": {
+                    "inside_node": false,
+                    "focused": true
+                },
+                "_internal_state_gui_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_backup_expanded_states": {
+                    "inside_node": null,
+                    "focused": null
+                }
+            },
+            "focused_function_visible": false
+        },
+        "n6": {
+            "function_ref": "fiatlight.fiat_core.reroute_function._reroute_identity",
+            "function_name": "Reroute",
+            "input_values": {},
+            "input_gui_options": {
+                "value": {
+                    "cb_options": {},
+                    "expanded": false
+                }
+            },
+            "output_gui_options": {
+                "0": {
+                    "cb_options": {},
+                    "expanded": true
+                }
+            },
+            "internal_gui_options": {
+                "rotation": 0,
+                "show_type": false
+            },
+            "position": [
+                672.0,
+                460.0
+            ],
+            "expand_flags": {
+                "_inputs_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_outputs_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_doc_expanded": {
+                    "inside_node": false,
+                    "focused": true
+                },
+                "fiat_tuning_expanded": {
+                    "inside_node": false,
+                    "focused": true
+                },
+                "_internal_state_gui_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_backup_expanded_states": {
+                    "inside_node": null,
+                    "focused": null
+                }
+            },
+            "focused_function_visible": false
+        },
+        "n7": {
+            "function_ref": "fiatlight.fiat_core.reroute_function._reroute_identity",
+            "function_name": "Reroute",
+            "input_values": {},
+            "input_gui_options": {
+                "value": {
+                    "cb_options": {},
+                    "expanded": false
+                }
+            },
+            "output_gui_options": {
+                "0": {
+                    "cb_options": {},
+                    "expanded": true
+                }
+            },
+            "internal_gui_options": {
+                "rotation": 0,
+                "show_type": false
+            },
+            "position": [
+                516.0,
+                592.0
+            ],
+            "expand_flags": {
+                "_inputs_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_outputs_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_doc_expanded": {
+                    "inside_node": false,
+                    "focused": true
+                },
+                "fiat_tuning_expanded": {
+                    "inside_node": false,
+                    "focused": true
+                },
+                "_internal_state_gui_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_backup_expanded_states": {
+                    "inside_node": null,
+                    "focused": null
+                }
+            },
+            "focused_function_visible": false
+        }
+    },
+    "links": [
+        {
+            "src_node": "n1",
+            "src_output_idx": 0,
+            "dst_node": "n2",
+            "dst_input_name": "value"
+        },
+        {
+            "src_node": "n4",
+            "src_output_idx": 0,
+            "dst_node": "n7",
+            "dst_input_name": "value"
+        },
+        {
+            "src_node": "n2",
+            "src_output_idx": 0,
+            "dst_node": "n3",
+            "dst_input_name": "x"
+        },
+        {
+            "src_node": "n7",
+            "src_output_idx": 0,
+            "dst_node": "n6",
+            "dst_input_name": "value"
+        }
+    ]
+}

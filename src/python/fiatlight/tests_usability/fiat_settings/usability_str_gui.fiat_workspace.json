@@ -1,0 +1,88 @@
+{
+    "version": 1,
+    "nodes": {
+        "n1": {
+            "function_ref": "__main__.sandbox_multiline_strings.<locals>.f",
+            "function_name": "f",
+            "input_values": {
+                "short_input": {
+                    "name": "short_input",
+                    "data": {
+                        "type": "Primitive",
+                        "value": "xxxxxxxxxx"
+                    }
+                },
+                "multiline_text": {
+                    "name": "multiline_text",
+                    "data": {
+                        "type": "Primitive",
+                        "value": "Demain, d\u00e8s l'aube, \u00e0 l'heure o\u00f9 blanchit la campagne,\nJe partirai. Vois-tu, je sais que tu m'attends.\nJ'irai par la for\u00eat, j'irai par la montagne.\nJe ne puis demeurer loin de toi plus longtemps.\n\nJe marcherai les yeux fix\u00e9s sur mes pens\u00e9es,\nSans rien voir au dehors, sans entendre aucun bruit,\nSeul, inconnu, le dos courb\u00e9, les mains crois\u00e9es,\nTriste, et le jour pour moi sera comme la nuit.\n\nJe ne regarderai ni l'or du soir qui tombe,\nNi les voiles au loin descendant vers Harfleur,\nEt quand j'arriverai, je mettrai sur ta tombe\nUn bouquet de houx vert et de bruy\u00e8re en fleur.\n\nVictor Hugo, extrait du recueil \u00abLes Contemplations\u00bb (1856)\n        "
+                    }
+                },
+                "prompt": {
+                    "name": "prompt",
+                    "data": {
+                        "type": "Primitive",
+                        "value": "A cat on the moon  www"
+                    }
+                }
+            },
+            "input_gui_options": {
+                "short_input": {
+                    "cb_options": {},
+                    "expanded": true
+                },
+                "multiline_text": {
+                    "cb_options": {},
+                    "expanded": true
+                },
+                "prompt": {
+                    "cb_options": {},
+                    "expanded": true
+                }
+            },
+            "output_gui_options": {
+                "0": {
+                    "cb_options": {},
+                    "expanded": true
+                },
+                "1": {
+                    "cb_options": {},
+                    "expanded": true
+                }
+            },
+            "position": [
+                -472.0,
+                -126.0
+            ],
+            "expand_flags": {
+                "_inputs_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_outputs_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_doc_expanded": {
+                    "inside_node": false,
+                    "focused": true
+                },
+                "fiat_tuning_expanded": {
+                    "inside_node": false,
+                    "focused": true
+                },
+                "_internal_state_gui_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_backup_expanded_states": {
+                    "inside_node": null,
+                    "focused": null
+                }
+            },
+            "focused_function_visible": false
+        }
+    },
+    "links": []
+}
