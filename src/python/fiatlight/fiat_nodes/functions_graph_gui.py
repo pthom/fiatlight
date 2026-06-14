@@ -66,7 +66,16 @@ class FunctionsGraphGui:
     functions_links_gui: List[FunctionNodeLinkGui]
 
     shall_layout_graph: bool = False
+    # Like shall_layout_graph, but lays out only the currently-selected nodes
+    # (in place), leaving the rest of the graph untouched.
+    shall_layout_selection: bool = False
     can_edit_graph: bool = False
+
+    # Min selected nodes for "layout selection" to be offered / to act.
+    _LAYOUT_SELECTION_MIN = 3
+    # Node ids selected in the editor, refreshed each frame (read inside
+    # ed.begin/end) so the menu / shortcut can act on the selection off-frame.
+    _selected_node_ids: List[ed.NodeId] = []
 
     # Set by FiatGui (or any host) when a palette is available. When None,
     # the right-click / drag-from-pin popups don't appear.
@@ -172,6 +181,9 @@ class FunctionsGraphGui:
             draw_links()
             if self.can_edit_graph:
                 self._handle_graph_edition()
+            # Cache the selection while the editor is current, for the
+            # layout-selected menu item / Ctrl+L (which run outside ed.begin/end).
+            self._selected_node_ids = ed.get_selected_nodes()
             ed.end()
             # `navigate_to_content` is invalid inside ed.begin/end, so we
             # fire it here, after ed.end() but still inside the editor's
@@ -390,6 +402,14 @@ class FunctionsGraphGui:
                     return False
             return True
 
+        if self.shall_layout_selection:
+            self.shall_layout_selection = False
+            selected = self._selected_function_node_guis()
+            if len(selected) >= self._LAYOUT_SELECTION_MIN:
+                # In-place: anchored to the selection's current bounds, no camera move.
+                self._layout_graph_layered(selected)
+            return
+
         if self.shall_layout_graph or are_all_nodes_on_zero():
             self.shall_layout_graph = False
             self._layout_graph_layered()
@@ -397,14 +417,35 @@ class FunctionsGraphGui:
             # ed.end() has updated the node bounds the camera reads).
             self._navigate_after_load_frame = imgui.get_frame_count() + 3
 
-    def _layout_graph_layered(self) -> None:
+    def _selected_function_node_guis(self) -> List[FunctionNodeGui]:
+        selected_ids = {nid.id() for nid in self._selected_node_ids}
+        return [g for g in self.function_nodes_gui if g.node_id().id() in selected_ids]
+
+    def num_selected_nodes(self) -> int:
+        return len(self._selected_node_ids)
+
+    def request_smart_layout(self) -> None:
+        """Ctrl+L: lay out the selection if enough nodes are selected, else the
+        whole graph."""
+        if self.num_selected_nodes() >= self._LAYOUT_SELECTION_MIN:
+            self.shall_layout_selection = True
+        else:
+            self.shall_layout_graph = True
+
+    def _layout_graph_layered(self, nodes_gui: List[FunctionNodeGui] | None = None) -> None:
         """Sugiyama-style layered layout: place nodes in columns by their
         data-flow depth (sources left, sinks right), stacked within a column and
         spaced to their actual sizes. Left-to-right, so links run forward
         (output pin on the right -> input pin on the left). Within-column order is
         chosen to reduce link crossings (barycenter heuristic). Layering + ordering
-        come from `sugiyama_layout`; here we turn columns into pixel positions."""
-        nodes_gui = self.function_nodes_gui
+        come from `sugiyama_layout`; here we turn columns into pixel positions.
+
+        `nodes_gui=None` lays out the whole graph, anchored at the origin (the
+        caller then fits it into view). A subset is laid out *in place*: only edges
+        internal to the subset are used, and the result is anchored to the subset's
+        current top-left, so the rest of the graph is left untouched."""
+        is_subset = nodes_gui is not None
+        nodes_gui = nodes_gui if nodes_gui is not None else self.function_nodes_gui
         if not nodes_gui:
             return
 
@@ -412,9 +453,13 @@ class FunctionsGraphGui:
         order: List[str] = [g.get_function_node().stable_id for g in nodes_gui]
         size_by_sid: Dict[str, ImVec2] = {sid: ed.get_node_size(g.node_id()) for sid, g in gui_by_sid.items()}
 
+        sid_set = set(order)
         edges = [
             (link.src_function_node.stable_id, link.dst_function_node.stable_id)
             for link in self.functions_graph.functions_nodes_links
+            # For a subset, only edges between two selected nodes drive the layout.
+            if not is_subset
+            or (link.src_function_node.stable_id in sid_set and link.dst_function_node.stable_id in sid_set)
         ]
         layer = compute_layered_ranks(order, edges)
         columns = order_layers_to_reduce_crossings(order, edges, layer)
@@ -432,9 +477,17 @@ class FunctionsGraphGui:
             col_height[c] = sum(size_by_sid[s].y for s in sids) + v_gap * max(0, len(sids) - 1)
         total_height = max(col_height.values(), default=0.0)
 
-        x = 0.0
+        # Anchor: origin for the whole graph; the selection's current top-left for
+        # an in-place subset relayout.
+        anchor_x, anchor_y = 0.0, 0.0
+        if is_subset:
+            positions = [ed.get_node_position(g.node_id()) for g in nodes_gui]
+            anchor_x = min(p.x for p in positions)
+            anchor_y = min(p.y for p in positions)
+
+        x = anchor_x
         for c in range(max_layer + 1):
-            y = (total_height - col_height[c]) / 2.0  # center the column vertically
+            y = anchor_y + (total_height - col_height[c]) / 2.0  # center the column vertically
             for sid in columns[c]:
                 ed.set_node_position(gui_by_sid[sid].node_id(), ImVec2(x, y))
                 y += size_by_sid[sid].y + v_gap
