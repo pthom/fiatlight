@@ -829,8 +829,56 @@ class FunctionsGraphGui:
         if imgui.get_frame_count() < self._navigate_after_load_frame:
             return
         if not self._all_nodes_fit_in_canvas_view():
-            ed.navigate_to_content(0.05)
+            self._navigate_to_content_zoom_out_only()
         self._navigate_after_load_frame = None
+
+    def _navigate_to_content_zoom_out_only(self) -> None:
+        """Bring all nodes into view, zooming out when needed but never zooming in.
+
+        `ed.navigate_to_content` always *fits* the content, which zooms way in on a
+        small/single node. The node editor exposes no zoom setter, so we pick between
+        its two navigation primitives: zoom-out-to-fit when the content is larger than
+        the viewport, otherwise just recenter at the current zoom (no zoom in)."""
+        if self._content_larger_than_viewport():
+            # Content does not fit at zoom 1.0: navigate_to_content zooms out to fit.
+            ed.navigate_to_content(0.05)
+        else:
+            # Content already fits: recenter without zooming in. navigate_to_selection
+            # acts on the current selection, so select all nodes for the call, then
+            # restore the previous selection.
+            previously_selected = [fn.node_id() for fn in self.function_nodes_gui if ed.is_node_selected(fn.node_id())]
+            ed.clear_selection()
+            for fn in self.function_nodes_gui:
+                ed.select_node(fn.node_id(), True)
+            ed.navigate_to_selection(False, 0.05)
+            ed.clear_selection()
+            for node_id in previously_selected:
+                ed.select_node(node_id, True)
+
+    def _content_larger_than_viewport(self) -> bool:
+        """True if the nodes' bounding box is larger than the canvas viewport, so that
+        fitting it requires zooming out. Node positions/sizes are in canvas units, and at
+        zoom 1.0 one canvas unit maps to one screen pixel, so we compare directly against
+        the viewport pixel size (with the same ~5% margin navigate_to_content adds)."""
+        if len(self.function_nodes_gui) == 0:
+            return False
+        nodes_min: ImVec2 | None = None
+        nodes_max: ImVec2 | None = None
+        for fn in self.function_nodes_gui:
+            node_id = fn.node_id()
+            tl = ed.get_node_position(node_id)
+            br = tl + ed.get_node_size(node_id)
+            if nodes_min is None or nodes_max is None:
+                nodes_min, nodes_max = ImVec2(tl.x, tl.y), ImVec2(br.x, br.y)
+            else:
+                nodes_min = ImVec2(min(nodes_min.x, tl.x), min(nodes_min.y, tl.y))
+                nodes_max = ImVec2(max(nodes_max.x, br.x), max(nodes_max.y, br.y))
+        assert nodes_min is not None and nodes_max is not None
+        content_w = nodes_max.x - nodes_min.x
+        content_h = nodes_max.y - nodes_min.y
+        viewport = ed.get_screen_size()
+        navigation_margin = 1.05
+        return content_w * navigation_margin > viewport.x or content_h * navigation_margin > viewport.y
 
     def _all_nodes_fit_in_canvas_view(self) -> bool:
         """True if every node's screen-space rect lies fully inside the canvas widget's current screen rect."""
