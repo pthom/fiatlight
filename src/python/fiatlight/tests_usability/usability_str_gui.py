@@ -1,4 +1,5 @@
 import fiatlight as fl
+from fiatlight.fiat_kits.fiat_ai import Prompt
 
 
 def sandbox_multiline_strings() -> None:
@@ -27,7 +28,7 @@ Victor Hugo, extrait du recueil «Les Contemplations» (1856)
         multiline_text__multiline=True,
     )
     def f(
-        short_input: str, multiline_text: str = poem, prompt: fl.fiat_kits.fiat_ai.Prompt = "A cat on the moon"
+        short_input: str, multiline_text: str = poem, prompt: Prompt = Prompt("A cat on the moon")
     ) -> tuple[str, str]:
         return short_input, multiline_text
 
