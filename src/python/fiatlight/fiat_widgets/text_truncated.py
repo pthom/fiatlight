@@ -1,4 +1,4 @@
-from imgui_bundle import ImVec4, imgui, imgui_ctx, hello_imgui
+from imgui_bundle import ImVec2, ImVec4, imgui, imgui_ctx, hello_imgui
 from fiatlight.fiat_widgets import fiat_osd
 from fiatlight.fiat_utils.fiat_node_semaphore import is_rendering_in_node
 from pydantic import BaseModel
@@ -47,6 +47,43 @@ def _ellipsis_to_width(line: str, max_width_pixels: float) -> Tuple[bool, str]:
         else:
             hi = mid - 1
     return True, capped[:lo] + "..."
+
+
+def text_colored_no_wrap(color: ImVec4, text: str) -> None:
+    """Colored text with wrapping disabled. A short status literal ("Unspecified", "Error",
+    "Default value:") shown in a node would otherwise collapse into a one-character column on a
+    narrow node, because imgui-node-editor pushes a text wrap pos at the node's right edge."""
+    with imgui_ctx.push_text_wrap_pos(-1.0):
+        imgui.text_colored(color, text)
+
+
+def draw_label_with_max_width(
+    label: str,
+    color: ImVec4,
+    max_width_em: float,
+    label_tooltip: str | None,
+    status_tooltip: str | None = None,
+    id_tooltip: str | None = None,
+) -> None:
+    """Draw a label truncated (with an ellipsis) to `max_width_em`, reserving exactly that width
+    so following content lines up across rows. Full text + the given tooltips go to a tooltip."""
+    segments = [s for s in (label_tooltip, id_tooltip, status_tooltip) if s]
+    tooltip = "\n----------------------------------\n".join(segments)
+
+    cur_pos = imgui.get_cursor_screen_pos()
+    if "##" in label:
+        label = label.split("##")[0]
+    max_width_pixels = hello_imgui.em_size(max_width_em)
+    truncated, shown_label = _ellipsis_to_width(label, max_width_pixels)
+    imgui.text_colored(color, shown_label)
+    if truncated:
+        tooltip = label + "\n" + tooltip
+
+    if len(tooltip) > 0:
+        fiat_osd.set_widget_tooltip(tooltip)
+
+    new_cursor_pos = ImVec2(cur_pos.x + max_width_pixels, cur_pos.y)
+    imgui.set_cursor_screen_pos(new_cursor_pos)
 
 
 def text_maybe_truncated(

@@ -18,7 +18,11 @@ from imgui_bundle import imgui, imgui_ctx, ImVec4, hello_imgui, ImVec2
 from fiatlight.fiat_config import get_fiat_config, FiatColorType
 from fiatlight.fiat_widgets.fontawesome6_ctx_utils import icons_fontawesome_6, fontawesome_6_ctx
 from fiatlight.fiat_widgets import fiat_osd
-from fiatlight.fiat_widgets.text_truncated import text_maybe_truncated
+from fiatlight.fiat_widgets.text_truncated import (
+    text_maybe_truncated,
+    text_colored_no_wrap,
+    draw_label_with_max_width,
+)
 from typing import Generic, Any, Type, final, Callable
 import logging
 
@@ -72,50 +76,6 @@ class AnyDataWithGuiGenericPossibleFiatAttributes(PossibleFiatAttributes):
 
 
 _ANYDATAWITHGUI_GENERIC_POSSIBLE_FIAT_ATTRIBUTES = AnyDataWithGuiGenericPossibleFiatAttributes()
-
-
-def _draw_label_with_max_width(
-    label: str,
-    color: ImVec4,
-    label_tooltip: str | None,
-    status_tooltip: str | None = None,
-    id_tooltip: str | None = None,
-) -> None:
-    segments = [s for s in (label_tooltip, id_tooltip, status_tooltip) if s]
-    tooltip = "\n----------------------------------\n".join(segments)
-
-    cur_pos = imgui.get_cursor_screen_pos()
-    if "##" in label:
-        label = label.split("##")[0]
-    shortened_label = label
-    max_width_pixels = hello_imgui.em_size(get_fiat_config().style.str_truncation.param_label_max_width_em)
-    while True:
-        size = imgui.calc_text_size(shortened_label)
-        if size.x < max_width_pixels:
-            break
-        shortened_label = shortened_label[:-1]
-        if len(shortened_label) == 0:
-            break
-
-    if shortened_label != label:
-        imgui.text_colored(color, shortened_label + "...")
-        tooltip = label + "\n" + tooltip
-    else:
-        imgui.text_colored(color, label)
-
-    if len(tooltip) > 0:
-        fiat_osd.set_widget_tooltip(tooltip)
-
-    new_cursor_pos = ImVec2(cur_pos.x + max_width_pixels, cur_pos.y)
-    imgui.set_cursor_screen_pos(new_cursor_pos)
-
-
-def _text_colored_no_wrap(color: ImVec4, text: str) -> None:
-    """Colored text with wrapping disabled. A short status literal ("Unspecified", "Error",
-    "Default value:") shown in a node would otherwise collapse into a one-character column on a
-    narrow node, because imgui-node-editor pushes a text wrap pos at the node's right edge."""
-    with imgui_ctx.push_text_wrap_pos(-1.0):
-        imgui.text_colored(color, text)
 
 
 @dataclass
@@ -591,8 +551,13 @@ class AnyDataWithGui(Generic[DataType]):
                 label_color = (
                     imgui.get_style().color_(imgui.Col_.text) if params.label_color is None else params.label_color
                 )
-                _draw_label_with_max_width(
-                    self.label, label_color, self.tooltip, params.status_tooltip, params.label_id_tooltip
+                draw_label_with_max_width(
+                    self.label,
+                    label_color,
+                    get_fiat_config().style.str_truncation.param_label_max_width_em,
+                    self.tooltip,
+                    params.status_tooltip,
+                    params.label_id_tooltip,
                 )
             # Expand button
             if self.can_collapse_present(params.is_expand_disabled) and not params.is_expand_disabled:
@@ -605,18 +570,18 @@ class AnyDataWithGui(Generic[DataType]):
             if not self._is_presenting_on_next_lines(params.is_expand_disabled):
                 if isinstance(self.value, Unspecified):
                     if isinstance(params.default_value_if_unspecified, Unspecified):
-                        _text_colored_no_wrap(
+                        text_colored_no_wrap(
                             get_fiat_config().style.color_as_vec4(FiatColorType.ValueUnspecified), "Unspecified"
                         )
                     else:
-                        _text_colored_no_wrap(
+                        text_colored_no_wrap(
                             get_fiat_config().style.color_as_vec4(FiatColorType.ParameterValueUsingDefault),
                             "Default value: ",
                         )
                         as_str = self.datatype_value_to_str(params.default_value_if_unspecified)
                         text_maybe_truncated(as_str, get_fiat_config().style.str_truncation.present_header_line)
                 elif isinstance(self.value, Error):
-                    _text_colored_no_wrap(get_fiat_config().style.color_as_vec4(FiatColorType.ValueWithError), "Error")
+                    text_colored_no_wrap(get_fiat_config().style.color_as_vec4(FiatColorType.ValueWithError), "Error")
                 else:  # if isinstance(self.value, (Invalid, DataType))
                     value = self.get_actual_or_invalid_value()
                     can_present_on_header_line = self.can_present_on_header_line()
@@ -693,8 +658,13 @@ class AnyDataWithGui(Generic[DataType]):
                 label_color = (
                     imgui.get_style().color_(imgui.Col_.text) if params.label_color is None else params.label_color
                 )
-                _draw_label_with_max_width(
-                    self.label, label_color, self.tooltip, params.status_tooltip, params.label_id_tooltip
+                draw_label_with_max_width(
+                    self.label,
+                    label_color,
+                    get_fiat_config().style.str_truncation.param_label_max_width_em,
+                    self.tooltip,
+                    params.status_tooltip,
+                    params.label_id_tooltip,
                 )
             # Expand button
             if self.can_collapse_edit(params.is_expand_disabled):
@@ -707,18 +677,18 @@ class AnyDataWithGui(Generic[DataType]):
             if not self._is_editing_on_next_lines(params.is_expand_disabled):
                 if isinstance(self.value, Unspecified):
                     if isinstance(params.default_value_if_unspecified, Unspecified):
-                        _text_colored_no_wrap(
+                        text_colored_no_wrap(
                             get_fiat_config().style.color_as_vec4(FiatColorType.ValueUnspecified), "Unspecified"
                         )
                     else:
-                        _text_colored_no_wrap(
+                        text_colored_no_wrap(
                             get_fiat_config().style.color_as_vec4(FiatColorType.ParameterValueUsingDefault),
                             "Default value: ",
                         )
                         as_str = self.datatype_value_to_str(params.default_value_if_unspecified)
                         text_maybe_truncated(as_str, get_fiat_config().style.str_truncation.present_header_line)
                 elif isinstance(self.value, Error):
-                    _text_colored_no_wrap(get_fiat_config().style.color_as_vec4(FiatColorType.ValueWithError), "Error")
+                    text_colored_no_wrap(get_fiat_config().style.color_as_vec4(FiatColorType.ValueWithError), "Error")
                 else:  # if isinstance(self.value, (Invalid, DataType))
                     value = self.get_actual_or_invalid_value()
                     can_edit_on_header_line = self.can_edit_on_header_line()
