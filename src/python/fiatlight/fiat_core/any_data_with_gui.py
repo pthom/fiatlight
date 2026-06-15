@@ -181,6 +181,10 @@ class AnyDataWithGui(Generic[DataType]):
     # Is the present or edit view expanded. This is serialized and deserialized in the GUI options.
     _expanded: bool = True
 
+    # Measured width (px, previous frame) of the present header line's trailing icons (detach /
+    # clipboard / output pin), used to reserve room so a wide value truncates before them.
+    _present_trailing_width_px: float = 0.0
+
     # If True, a GUI to set the value as Unspecified is provided
     # This is useful in Function Nodes.
     # Unspecified stands for a function parameter that has not been set by the user
@@ -537,22 +541,17 @@ class AnyDataWithGui(Generic[DataType]):
         capped_width = params.node_width - right_margin
         return ImVec2(capped_width, 0) if capped_width > 0 else None
 
-    def _present_trailing_reserve_px(self, params: GuiHeaderLineParams[DataType]) -> float:
+    def _present_trailing_reserve_px(self) -> float:
         """Width to keep free to the right of the value for the trailing header-line icons
         (detach / clipboard / output pin), so a wide or multi-line value truncates before them
-        instead of overlapping. Counts only the icons that will actually be drawn."""
-        n_icons = 0
-        if self._can_present_detachable():
-            n_icons += 1
-        if params.show_clipboard_button:
-            n_icons += 1
-        if params.suffix_gui is not None:  # the output pin, when drawn in a function node
-            n_icons += 1
-        if n_icons == 0:
+        instead of overlapping. The icon block is measured on the previous frame (see
+        _show_right_side), so the reserve is exact (no over-estimate / gap); plus the border
+        margin so the value ends where the right-aligned icons begin."""
+        if self._present_trailing_width_px <= 0.0:
             return 0.0
-        per_icon = imgui.get_frame_height() + imgui.get_style().item_spacing.x
-        right_margin = hello_imgui.em_size(get_fiat_config().style.node_header_right_margin_em)
-        return n_icons * per_icon + right_margin
+        return self._present_trailing_width_px + hello_imgui.em_size(
+            get_fiat_config().style.node_header_right_margin_em
+        )
 
     def _gui_present_header_line(self, params: GuiHeaderLineParams[DataType]) -> None:
         """Present the value as a string in one line, or as a widget if it fits on one line"""
@@ -633,6 +632,8 @@ class AnyDataWithGui(Generic[DataType]):
             #   * open in popup button
             #   * clipboard button
             #   * suffix_gui (might contain a node output pin when used in a function node)
+            # Grouped + measured so the next frame can reserve exactly this width for the value.
+            imgui.begin_group()
             if self._can_present_detachable():
 
                 def gui_present_detached() -> None:
@@ -650,11 +651,13 @@ class AnyDataWithGui(Generic[DataType]):
             # suffix_gui
             if params.suffix_gui is not None:
                 params.suffix_gui()
+            imgui.end_group()
+            self._present_trailing_width_px = imgui.get_item_rect_size().x
 
         # Cap the row to the node width (icons clear the border via _header_row_size), and reserve
         # room on the right so a wide / multi-line value truncates before the trailing icons
         # instead of overlapping them (works through the present-callback boundary).
-        with node_text_right_reserve(self._present_trailing_reserve_px(params)):
+        with node_text_right_reserve(self._present_trailing_reserve_px()):
             with imgui_ctx.begin_horizontal("present_header_line", self._header_row_size(params)):
                 _show_left_side()
                 imgui.spring()  # Align the rest to the right
