@@ -1,0 +1,196 @@
+{
+    "version": 1,
+    "nodes": {
+        "n1": {
+            "function_ref": "__main__.f",
+            "function_name": "f",
+            "input_values": {
+                "short_input": {
+                    "name": "short_input",
+                    "data": {
+                        "type": "Unspecified"
+                    }
+                },
+                "multiline_text": {
+                    "name": "multiline_text",
+                    "data": {
+                        "type": "Unspecified"
+                    }
+                },
+                "prompt": {
+                    "name": "prompt",
+                    "data": {
+                        "type": "Unspecified"
+                    }
+                }
+            },
+            "input_gui_options": {
+                "short_input": {
+                    "cb_options": {},
+                    "expanded": true
+                },
+                "multiline_text": {
+                    "cb_options": {},
+                    "expanded": true
+                },
+                "prompt": {
+                    "cb_options": {},
+                    "expanded": true
+                }
+            },
+            "output_gui_options": {
+                "0": {
+                    "cb_options": {},
+                    "expanded": true
+                },
+                "1": {
+                    "cb_options": {},
+                    "expanded": true
+                }
+            },
+            "position": [
+                21.0,
+                24.0
+            ],
+            "expand_flags": {
+                "_inputs_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_outputs_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_doc_expanded": {
+                    "inside_node": false,
+                    "focused": true
+                },
+                "fiat_tuning_expanded": {
+                    "inside_node": false,
+                    "focused": true
+                },
+                "_internal_state_gui_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_backup_expanded_states": {
+                    "inside_node": null,
+                    "focused": null
+                }
+            },
+            "focused_function_visible": false
+        },
+        "n2": {
+            "function_ref": "__main__.c",
+            "function_name": "c",
+            "input_values": {},
+            "input_gui_options": {
+                "s": {
+                    "cb_options": {},
+                    "expanded": false
+                }
+            },
+            "output_gui_options": {
+                "0": {
+                    "cb_options": {},
+                    "expanded": true
+                }
+            },
+            "position": [
+                552.0,
+                43.0
+            ],
+            "expand_flags": {
+                "_inputs_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_outputs_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_doc_expanded": {
+                    "inside_node": false,
+                    "focused": true
+                },
+                "fiat_tuning_expanded": {
+                    "inside_node": false,
+                    "focused": true
+                },
+                "_internal_state_gui_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_backup_expanded_states": {
+                    "inside_node": null,
+                    "focused": null
+                }
+            },
+            "focused_function_visible": false
+        },
+        "n3": {
+            "function_ref": "__main__.c",
+            "function_name": "c",
+            "input_values": {
+                "s": {
+                    "name": "s",
+                    "data": {
+                        "type": "Unspecified"
+                    }
+                }
+            },
+            "input_gui_options": {
+                "s": {
+                    "cb_options": {},
+                    "expanded": true
+                }
+            },
+            "output_gui_options": {
+                "0": {
+                    "cb_options": {},
+                    "expanded": true
+                }
+            },
+            "position": [
+                884.0,
+                59.0
+            ],
+            "expand_flags": {
+                "_inputs_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_outputs_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_doc_expanded": {
+                    "inside_node": false,
+                    "focused": true
+                },
+                "fiat_tuning_expanded": {
+                    "inside_node": false,
+                    "focused": true
+                },
+                "_internal_state_gui_expanded": {
+                    "inside_node": true,
+                    "focused": true
+                },
+                "_backup_expanded_states": {
+                    "inside_node": null,
+                    "focused": null
+                }
+            },
+            "focused_function_visible": false
+        }
+    },
+    "links": [
+        {
+            "src_node": "n1",
+            "src_output_idx": 0,
+            "dst_node": "n2",
+            "dst_input_name": "s"
+        }
+    ],
+    "groups": []
+}

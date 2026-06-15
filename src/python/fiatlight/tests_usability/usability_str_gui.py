@@ -2,11 +2,10 @@ import fiatlight as fl
 from fiatlight.fiat_kits.fiat_ai import Prompt
 
 
-def sandbox_multiline_strings() -> None:
-    """Test that we can comfortably edit and display a multi-line string with different layouts
-    depending on whether we are in a node or in a detached window."""
+"""Test that we can comfortably edit and display a multi-line string with different layouts
+depending on whether we are in a node or in a detached window."""
 
-    poem = """Demain, dès l'aube, à l'heure où blanchit la campagne,
+poem = """Demain, dès l'aube, à l'heure où blanchit la campagne,
 Je partirai. Vois-tu, je sais que tu m'attends.
 J'irai par la forêt, j'irai par la montagne.
 Je ne puis demeurer loin de toi plus longtemps.
@@ -24,16 +23,21 @@ Un bouquet de houx vert et de bruyère en fleur.
 Victor Hugo, extrait du recueil «Les Contemplations» (1856)
         """
 
-    @fl.with_fiat_attributes(
-        multiline_text__multiline=True,
-    )
-    def f(
-        short_input: str, multiline_text: str = poem, prompt: Prompt = Prompt("A cat on the moon")
-    ) -> tuple[str, str]:
-        return short_input, multiline_text
 
-    fl.run(f)
+@fl.with_fiat_attributes(
+    multiline_text__multiline=True,
+)
+def f(short_input: str, multiline_text: str = poem, prompt: Prompt = Prompt("A cat on the moon")) -> tuple[str, str]:
+    return short_input, multiline_text
+
+
+def c(s: str) -> int:
+    """Count the number of lines in a string."""
+    return len(s.splitlines())
 
 
 if __name__ == "__main__":
-    sandbox_multiline_strings()
+    graph = fl.FunctionsGraph().from_function_composition([f, c])
+    graph.add_function(c)
+
+    fl.run(graph, app_name="Multiline string usability test")
