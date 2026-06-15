@@ -1,8 +1,31 @@
+import contextlib
+from typing import Generator
+
 from imgui_bundle import ImVec2, ImVec4, imgui, imgui_ctx, hello_imgui
 from fiatlight.fiat_widgets import fiat_osd
 from fiatlight.fiat_utils.fiat_node_semaphore import is_rendering_in_node
 from pydantic import BaseModel
 from typing import Tuple
+
+
+# Width (px) kept free to the right of in-node truncated text, so a wide value truncates earlier
+# instead of crowding the trailing header-line icons. Set via node_text_right_reserve().
+_NODE_TEXT_RIGHT_RESERVE_PX: float = 0.0
+
+
+@contextlib.contextmanager
+def node_text_right_reserve(reserve_px: float) -> Generator[None, None, None]:
+    """Within this context, in-node truncated text reserves `reserve_px` to its right (e.g. for
+    the trailing detach / clipboard / output-pin icons), so a wide or multi-line value truncates
+    before them instead of overlapping. Works through the present-callback boundary (str / list /
+    image presenters all funnel into text_maybe_truncated)."""
+    global _NODE_TEXT_RIGHT_RESERVE_PX
+    previous = _NODE_TEXT_RIGHT_RESERVE_PX
+    _NODE_TEXT_RIGHT_RESERVE_PX = reserve_px
+    try:
+        yield
+    finally:
+        _NODE_TEXT_RIGHT_RESERVE_PX = previous
 
 
 class TruncationParams(BaseModel):
@@ -107,7 +130,7 @@ def text_maybe_truncated(
         # disable imgui-node-editor's wrap-at-node-edge so the ellipsized lines stay on one
         # visual line each (no per-character column).
         max_width_pixels = hello_imgui.em_size(params.max_width_em)
-        available = imgui.get_content_region_avail().x
+        available = imgui.get_content_region_avail().x - _NODE_TEXT_RIGHT_RESERVE_PX
         if available > 0:
             max_width_pixels = min(max_width_pixels, available)
         clamped_lines = []

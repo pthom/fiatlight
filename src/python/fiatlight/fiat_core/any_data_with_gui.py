@@ -22,6 +22,7 @@ from fiatlight.fiat_widgets.text_truncated import (
     text_maybe_truncated,
     text_colored_no_wrap,
     draw_label_with_max_width,
+    node_text_right_reserve,
 )
 from typing import Generic, Any, Type, final, Callable
 import logging
@@ -536,6 +537,23 @@ class AnyDataWithGui(Generic[DataType]):
         capped_width = params.node_width - right_margin
         return ImVec2(capped_width, 0) if capped_width > 0 else None
 
+    def _present_trailing_reserve_px(self, params: GuiHeaderLineParams[DataType]) -> float:
+        """Width to keep free to the right of the value for the trailing header-line icons
+        (detach / clipboard / output pin), so a wide or multi-line value truncates before them
+        instead of overlapping. Counts only the icons that will actually be drawn."""
+        n_icons = 0
+        if self._can_present_detachable():
+            n_icons += 1
+        if params.show_clipboard_button:
+            n_icons += 1
+        if params.suffix_gui is not None:  # the output pin, when drawn in a function node
+            n_icons += 1
+        if n_icons == 0:
+            return 0.0
+        per_icon = imgui.get_frame_height() + imgui.get_style().item_spacing.x
+        right_margin = hello_imgui.em_size(get_fiat_config().style.node_header_right_margin_em)
+        return n_icons * per_icon + right_margin
+
     def _gui_present_header_line(self, params: GuiHeaderLineParams[DataType]) -> None:
         """Present the value as a string in one line, or as a widget if it fits on one line"""
 
@@ -633,12 +651,14 @@ class AnyDataWithGui(Generic[DataType]):
             if params.suffix_gui is not None:
                 params.suffix_gui()
 
-        # Cap the row to the node width, leaving a right margin so the trailing pin /
-        # clipboard icons clear the node border (see _header_row_size).
-        with imgui_ctx.begin_horizontal("present_header_line", self._header_row_size(params)):
-            _show_left_side()
-            imgui.spring()  # Align the rest to the right
-            _show_right_side()
+        # Cap the row to the node width (icons clear the border via _header_row_size), and reserve
+        # room on the right so a wide / multi-line value truncates before the trailing icons
+        # instead of overlapping them (works through the present-callback boundary).
+        with node_text_right_reserve(self._present_trailing_reserve_px(params)):
+            with imgui_ctx.begin_horizontal("present_header_line", self._header_row_size(params)):
+                _show_left_side()
+                imgui.spring()  # Align the rest to the right
+                _show_right_side()
 
         # Optional second line: invalid value info
         if isinstance(self.value, Invalid):

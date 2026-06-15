@@ -5,6 +5,7 @@ from .text_truncated import (
     TruncationParams,
     text_colored_no_wrap,
     draw_label_with_max_width,
+    node_text_right_reserve,
 )
 from .text_rotated import draw_text_rotated_90
 from .fontawesome6_ctx_utils import fontawesome_6_ctx, icons_fontawesome_6
@@ -20,6 +21,7 @@ __all__ = [
     "text_maybe_truncated",
     "text_colored_no_wrap",
     "draw_label_with_max_width",
+    "node_text_right_reserve",
     "draw_text_rotated_90",
     "collapsible_button",
     "button_with_disable_flag",
