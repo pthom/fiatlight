@@ -179,6 +179,38 @@ def _ini_filename_from_app_name(app_name: str) -> str:
     return "fiat_settings/" + app_name_sane + ".ini"
 
 
+# Canvas navigation / selection help. Shown in the logo hover-tooltip and in the
+# Help menu's "Keyboard & mouse shortcuts" window (and the canvas right-click menu).
+_CANVAS_HELP_MD = """
+## Navigation
+
+* **Mouse wheel** : Zoom in and out.
+* **Right-drag** : Pan the graph.
+
+## Centering
+
+* **`F` over a node, pin, or Group** : Center that object.
+* **`F` with a non-empty selection** : Center the selection.
+* **`F` over empty background** : Center all content.
+* **`Shift` + `F`** : Center and zoom to fit.
+
+## Moving nodes
+
+* **Left-drag on a node** : Move the node (and members of any selected Group).
+* **`Shift` + left-drag on a node** : Move only the directly selected nodes.
+
+## Selection
+
+* **Left-click on background** : Clear the selection.
+* **Left-click on a node or link** : Select that object (replaces the current selection).
+* **`Ctrl` + left-click** : Toggle the clicked object in the selection.
+* **Left-drag on background** : Rubber-band select nodes.
+* **`Shift` + left-drag on background** : Rubber-band select Group nodes.
+* **`Alt` + left-drag on background** : Rubber-band select links.
+* **`Ctrl` + left-drag (rubber-band)** : Keep the current selection while lassoing.
+"""
+
+
 # ==================================================================================================================
 #                                  FiatRunParams
 # ==================================================================================================================
@@ -217,6 +249,8 @@ class FiatGui:
     _runner_params: hello_imgui.RunnerParams
     _functions_graph_gui: FunctionsGraphGui
     _show_inspector: bool = False
+    # Toggled from the Help menu / canvas right-click; shows the navigation help in a window.
+    _show_shortcuts_window: bool = False
 
     # Capture / automation (resolved from FiatRunParams + env in _setup_runner): exit after this
     # many swapped frames, optionally saving a full-window screenshot. Counter of frames so far.
@@ -277,6 +311,7 @@ class FiatGui:
 
         self._function_palette = FunctionPalette()
         self._functions_graph_gui = FunctionsGraphGui(functions_graph, function_palette=self._function_palette)
+        self._functions_graph_gui.on_show_canvas_help = self._open_shortcuts_window
 
         if self.params.customizable_graph:
             self._functions_graph_gui.can_edit_graph = True
@@ -491,6 +526,7 @@ class FiatGui:
         self._notify_if_new_log_alert()
         fiat_osd.render_all_osd()  # noqa
         self._handle_file_dialogs()
+        self._show_shortcuts_window_if_open()
 
     def _disable_idling_if_any_live_function(self) -> None:
         has_live_function = False
@@ -561,6 +597,24 @@ class FiatGui:
 
         hello_imgui.show_view_menu(self._runner_params)
 
+        if imgui.begin_menu("Help"):
+            if imgui.menu_item_simple("Keyboard & mouse shortcuts"):
+                self._open_shortcuts_window()
+            imgui.end_menu()
+
+    def _open_shortcuts_window(self) -> None:
+        self._show_shortcuts_window = True
+
+    def _show_shortcuts_window_if_open(self) -> None:
+        if not self._show_shortcuts_window:
+            return
+        imgui.set_next_window_size(hello_imgui.em_to_vec2(42, 34), imgui.Cond_.appearing)
+        expanded, opened = imgui.begin("Shortcuts##canvas_help", self._show_shortcuts_window)
+        if expanded:
+            imgui_md.render_unindented(_CANVAS_HELP_MD)
+        imgui.end()
+        self._show_shortcuts_window = bool(opened)
+
     def _menu_new_workspace(self) -> None:
         # Reset the sticky cursor too, so a New + Quit doesn't silently
         # overwrite the user's previously-saved-As file with an empty graph.
@@ -629,36 +683,7 @@ class FiatGui:
                 logo_size_big = hello_imgui.em_to_vec2(logo_height_em_big * logo_ratio, logo_height_em_big)
                 imgui.image(self._logo_texture, logo_size_big)
                 imgui.dummy(hello_imgui.em_to_vec2(40, 0))
-                imgui_md.render_unindented(
-                    """
-## Navigation
-
-* **Mouse wheel** : Zoom in and out.
-* **Right-drag** : Pan the graph.
-
-## Centering
-
-* **`F` over a node, pin, or Group** : Center that object.
-* **`F` with a non-empty selection** : Center the selection.
-* **`F` over empty background** : Center all content.
-* **`Shift` + `F`** : Center and zoom to fit.
-
-## Moving nodes
-
-* **Left-drag on a node** : Move the node (and members of any selected Group).
-* **`Shift` + left-drag on a node** : Move only the directly selected nodes.
-
-## Selection
-
-* **Left-click on background** : Clear the selection.
-* **Left-click on a node or link** : Select that object (replaces the current selection).
-* **`Ctrl` + left-click** : Toggle the clicked object in the selection.
-* **Left-drag on background** : Rubber-band select nodes.
-* **`Shift` + left-drag on background** : Rubber-band select Group nodes.
-* **`Alt` + left-drag on background** : Rubber-band select links.
-* **`Ctrl` + left-drag (rubber-band)** : Keep the current selection while lassoing.
-                """
-                )
+                imgui_md.render_unindented(_CANVAS_HELP_MD)
                 imgui.end_tooltip()
 
     def _draw_functions_graph(self) -> None:

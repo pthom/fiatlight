@@ -21,7 +21,7 @@ from fiatlight.fiat_palette import (
 )
 from fiatlight.fiat_widgets import fiat_osd
 from imgui_bundle import imgui, imgui_node_editor as ed, hello_imgui, ImVec2, imgui_ctx
-from typing import List, Dict, Tuple, TYPE_CHECKING
+from typing import List, Dict, Tuple, Callable, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from fiatlight.fiat_core.reroute_function import RerouteFunctionWithGui
@@ -83,6 +83,10 @@ class FunctionsGraphGui:
     # Set by FiatGui (or any host) when a palette is available. When None,
     # the right-click / drag-from-pin popups don't appear.
     function_palette: FunctionPalette | None
+
+    # Optional host callback to show the canvas navigation help (wired by FiatGui, since
+    # fiat_nodes must not import fiat_runner). Offered in the background right-click menu.
+    on_show_canvas_help: Callable[[], None] | None = None
 
     _idx_render_graph: int = 0
     _idx_last_frame_render: int = 0
@@ -269,6 +273,10 @@ class FunctionsGraphGui:
                 has_selection = len(self._selected_function_node_guis()) > 0
                 if imgui.menu_item_simple("Group selected nodes", "", False, has_selection):
                     self._group_selected_nodes()
+                if self.on_show_canvas_help is not None:
+                    imgui.separator()
+                    if imgui.menu_item_simple("Keyboard & mouse shortcuts"):
+                        self.on_show_canvas_help()
 
             fiat_osd.set_popup_gui(show_background_context_menu)
 
