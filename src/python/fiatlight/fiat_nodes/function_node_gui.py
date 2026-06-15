@@ -414,7 +414,6 @@ class FunctionNodeGui:
         self._draw_async_status_on_title_line()
         imgui.spring()
         self._draw_minimize_btn()
-        self._focused_function_draw_button()
 
     def _draw_minimize_btn(self) -> None:
         """
@@ -1123,16 +1122,6 @@ class FunctionNodeGui:
         """
 
     _focused_function_visible: bool = False
-
-    def _focused_function_draw_button(self) -> None:
-        if not fiat_utils.is_rendering_in_node():
-            return
-        if not self._focused_function_visible:
-            with fontawesome_6_ctx():
-                clicked = imgui.button(icons_fontawesome_6.ICON_FA_UP_RIGHT_FROM_SQUARE, ImVec2(0, 0))
-                fiat_osd.set_widget_tooltip("Focus on function in a separate window")
-                if clicked:
-                    self._focused_function_visible = True
 
     def _focused_function_label(self) -> str:
         function_name = self.get_function_node().function_with_gui.function_name

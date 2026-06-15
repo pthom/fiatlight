@@ -332,6 +332,10 @@ class FunctionsGraphGui:
                     if imgui.menu_item_simple("Show type", "", reroute.show_type):
                         reroute.show_type = not reroute.show_type
                     imgui.separator()
+                else:
+                    # Open the node in a separate window (was a title-bar icon).
+                    if imgui.menu_item_simple("Open this node in a separate window"):
+                        self._function_node_gui_from_id(nid)._focused_function_visible = True
                 if imgui.menu_item_simple("Delete node"):
                     self._remove_function_node(nid)
 
