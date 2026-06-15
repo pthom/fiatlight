@@ -10,6 +10,7 @@ from fiatlight.fiat_core import FunctionsGraph, FunctionWithGui
 from fiatlight.fiat_core.function_node import FunctionNode
 from fiatlight.fiat_core.function_with_gui import FunctionWithGuiFactoryFromName
 from fiatlight.fiat_nodes.function_node_gui import FunctionNodeGui, FunctionNodeLinkGui
+from fiatlight.fiat_nodes.node_group_gui import GROUP_COLOR_PRESETS, NodeGroup, NodeGroupGui
 from fiatlight.fiat_nodes.sugiyama_layout import compute_layered_ranks, order_layers_to_reduce_crossings
 from fiatlight.fiat_palette import (
     FunctionInfo,
@@ -64,6 +65,8 @@ class FunctionsGraphGui:
 
     function_nodes_gui: List[FunctionNodeGui]
     functions_links_gui: List[FunctionNodeLinkGui]
+    # Classic groups: GUI-only tinted rectangles behind the nodes (no pins / execution).
+    node_groups: List[NodeGroupGui]
 
     shall_layout_graph: bool = False
     # Like shall_layout_graph, but lays out only the currently-selected nodes
@@ -105,6 +108,16 @@ class FunctionsGraphGui:
     # right before `ed.begin`. Combined with `ed.get_screen_size()` it gives
     # the canvas widget's screen rect, used by `_all_nodes_fit_in_canvas_view`.
     _canvas_screen_top_left: ImVec2 | None = None
+    # Group geometry to apply inside ed.begin/end on the next draw (creation, load,
+    # fit-to-nodes). `set_node_position` / `set_group_size` are only valid in that
+    # scope; size is None when the initial `ed.group(size)` already handles it.
+    _pending_group_geometry: List[Tuple[ed.NodeId, ImVec2, ImVec2 | None]]
+
+    # Default size of an empty group, and the padding added around the bounding box
+    # when grouping / fitting existing nodes. In em units (resolved via hello_imgui at
+    # use, so groups scale with the font / DPI).
+    _DEFAULT_GROUP_SIZE_EM = (16.0, 11.0)
+    _GROUP_PADDING_EM = 2.0
 
     # ======================================================================================================================
     # Constructor
@@ -119,6 +132,8 @@ class FunctionsGraphGui:
         # Persistent across popup reopenings: the user's search / tags / category
         # / match mode are kept; only the per-open type filters are reset.
         self._palette_filter = PaletteFilter()
+        self.node_groups = []
+        self._pending_group_geometry = []
         self._create_function_nodes_and_links_gui()
 
     def _create_function_nodes_and_links_gui(self) -> None:
@@ -137,6 +152,8 @@ class FunctionsGraphGui:
         Used by File > New: leaves the host with a fresh, empty canvas."""
         self.functions_graph.clear_all()
         self._create_function_nodes_and_links_gui()
+        self.node_groups = []
+        self._pending_group_geometry = []
         self._open_popup = None
         self._pending_node_position = None
         self._pending_loaded_positions_by_stable_id = None
@@ -165,6 +182,11 @@ class FunctionsGraphGui:
             for link in self.functions_links_gui:
                 link.draw()
 
+        def draw_groups() -> None:
+            # Drawn before the nodes so the tinted rectangles sit behind them.
+            for grp in self.node_groups:
+                grp.draw()
+
         self._layout_graph_if_required()
         nodes_changed = False
         with imgui_ctx.push_obj_id(self):
@@ -176,6 +198,8 @@ class FunctionsGraphGui:
             ed.begin("FunctionsGraphGui")
             self._apply_pending_loaded_positions()
             self._apply_pending_node_position()
+            self._apply_pending_group_geometry()
+            draw_groups()
             if draw_nodes():
                 nodes_changed = True
             draw_links()
@@ -231,9 +255,22 @@ class FunctionsGraphGui:
                         self._open_popup_from_dragged_pin(new_node_pin_id)
             ed.end_create()
 
-        # Right-click on empty canvas → palette popup (no type filter).
-        if self.function_palette is not None and ed.show_background_context_menu():
-            self._open_popup_at(mouse_canvas_pos)
+        # Right-click on empty canvas → a small menu: add a node (palette), add a group,
+        # or wrap the current selection in a group.
+        if ed.show_background_context_menu():
+            # Defensive copy: get_mouse_pos() may hand back a reference imgui mutates.
+            menu_canvas_pos = ImVec2(mouse_canvas_pos.x, mouse_canvas_pos.y)
+
+            def show_background_context_menu() -> None:
+                if self.function_palette is not None and imgui.menu_item_simple("Add node…"):
+                    self._open_popup_at(menu_canvas_pos)
+                if imgui.menu_item_simple("Add group"):
+                    self._add_empty_group(menu_canvas_pos)
+                has_selection = len(self._selected_function_node_guis()) > 0
+                if imgui.menu_item_simple("Group selected nodes", "", False, has_selection):
+                    self._group_selected_nodes()
+
+            fiat_osd.set_popup_gui(show_background_context_menu)
 
         # Handle deletion action
         if ed.begin_delete():
@@ -247,7 +284,14 @@ class FunctionsGraphGui:
             node_id = ed.NodeId()
             while ed.query_deleted_node(node_id):
                 if ed.accept_deleted_item():
-                    self._remove_function_node(node_id)
+                    grp = self._group_gui_from_node_id(node_id)
+                    if grp is not None:
+                        # Del on a group removes the rectangle only; contained nodes
+                        # are not structural children, so they survive (the editor
+                        # never queued them for deletion).
+                        self._remove_node_group(grp)
+                    else:
+                        self._remove_function_node(node_id)
 
             ed.end_delete()
 
@@ -275,6 +319,10 @@ class FunctionsGraphGui:
             nid = node_context_menu_id
 
             def show_node_context_menu() -> None:
+                grp = self._group_gui_from_node_id(nid)
+                if grp is not None:
+                    self._draw_group_context_menu(grp)
+                    return
                 reroute = self._reroute_fn_from_node_id(nid)
                 if reroute is not None:
                     if imgui.menu_item_simple("Rotate +90°"):
@@ -378,6 +426,136 @@ class FunctionsGraphGui:
                 links_to_remove.append(link_gui)
         for link_gui in links_to_remove:
             self.functions_links_gui.remove(link_gui)
+
+    # ======================================================================================================================
+    # Classic groups (GUI-only tinted rectangles, see node_group_gui.py)
+    # ======================================================================================================================
+    class _Groups_Section:  # Dummy class to create a section in the IDE # noqa
+        pass
+
+    def _group_gui_from_node_id(self, node_id: ed.NodeId) -> NodeGroupGui | None:
+        for grp in self.node_groups:
+            if grp.node_id() == node_id:
+                return grp
+        return None
+
+    def _apply_pending_group_geometry(self) -> None:
+        """Apply queued group position/size. Called inside ed.begin/end (the only
+        scope where `set_node_position` / `set_group_size` are valid)."""
+        if not self._pending_group_geometry:
+            return
+        for node_id, pos, size in self._pending_group_geometry:
+            ed.set_node_position(node_id, pos)
+            if size is not None:
+                ed.set_group_size(node_id, size)
+        self._pending_group_geometry = []
+
+    def _nodes_bounding_box(self, nodes: List[FunctionNodeGui]) -> Tuple[ImVec2, ImVec2]:
+        """Top-left / bottom-right of the union of the given nodes' canvas rects."""
+        tl: ImVec2 | None = None
+        br: ImVec2 | None = None
+        for fn in nodes:
+            n_tl = ed.get_node_position(fn.node_id())
+            n_br = n_tl + ed.get_node_size(fn.node_id())
+            if tl is None or br is None:
+                tl, br = ImVec2(n_tl.x, n_tl.y), ImVec2(n_br.x, n_br.y)
+            else:
+                tl = ImVec2(min(tl.x, n_tl.x), min(tl.y, n_tl.y))
+                br = ImVec2(max(br.x, n_br.x), max(br.y, n_br.y))
+        assert tl is not None and br is not None
+        return tl, br
+
+    def _function_nodes_in_group(self, grp: NodeGroupGui) -> List[FunctionNodeGui]:
+        """Nodes whose center sits inside the group rectangle (geometric membership)."""
+        g_tl = ed.get_node_position(grp.node_id())
+        g_br = g_tl + ed.get_node_size(grp.node_id())
+        members = []
+        for fn in self.function_nodes_gui:
+            n_tl = ed.get_node_position(fn.node_id())
+            n_br = n_tl + ed.get_node_size(fn.node_id())
+            cx = (n_tl.x + n_br.x) * 0.5
+            cy = (n_tl.y + n_br.y) * 0.5
+            if g_tl.x <= cx <= g_br.x and g_tl.y <= cy <= g_br.y:
+                members.append(fn)
+        return members
+
+    def _next_group_color(self) -> Tuple[float, float, float]:
+        """Seed a new group's color by cycling the presets (freely editable afterwards)."""
+        return GROUP_COLOR_PRESETS[len(self.node_groups) % len(GROUP_COLOR_PRESETS)]
+
+    def _add_empty_group(self, canvas_pos: ImVec2) -> None:
+        default_size = hello_imgui.em_to_vec2(*self._DEFAULT_GROUP_SIZE_EM)
+        group = NodeGroup(
+            title="Group",
+            color=self._next_group_color(),
+            position=(canvas_pos.x, canvas_pos.y),
+            size=(default_size.x, default_size.y),
+        )
+        self._spawn_group(group)
+
+    def _group_selected_nodes(self) -> None:
+        selected = self._selected_function_node_guis()
+        if not selected:
+            return
+        tl, br = self._nodes_bounding_box(selected)
+        pad = hello_imgui.em_size(self._GROUP_PADDING_EM)
+        header = imgui.get_text_line_height_with_spacing()
+        # The node position is the title's top-left; the rect lives below the title, so
+        # lift the group by one header to let its rectangle enclose the nodes.
+        position = (tl.x - pad, tl.y - pad - header)
+        size = (br.x - tl.x + 2 * pad, br.y - tl.y + 2 * pad)
+        group = NodeGroup(
+            title="Group",
+            color=self._next_group_color(),
+            position=position,
+            size=size,
+        )
+        self._spawn_group(group)
+
+    def _spawn_group(self, group: NodeGroup) -> None:
+        grp_gui = NodeGroupGui(group)
+        self.node_groups.append(grp_gui)
+        # Size flows through the initial `ed.group(size)`; only the position needs queuing.
+        self._pending_group_geometry.append((grp_gui.node_id(), ImVec2(*group.position), None))
+
+    def _fit_group_to_nodes(self, grp: NodeGroupGui) -> None:
+        members = self._function_nodes_in_group(grp)
+        if not members:
+            return
+        tl, br = self._nodes_bounding_box(members)
+        pad = hello_imgui.em_size(self._GROUP_PADDING_EM)
+        header = grp._header_height
+        position = ImVec2(tl.x - pad, tl.y - pad - header)
+        size = ImVec2(br.x - tl.x + 2 * pad, br.y - tl.y + 2 * pad)
+        grp.group.position = (position.x, position.y)
+        grp.group.size = (size.x, size.y)
+        # The group already exists, so its initial `ed.group(size)` no longer applies:
+        # resize it explicitly.
+        self._pending_group_geometry.append((grp.node_id(), position, size))
+
+    def _remove_node_group(self, grp: NodeGroupGui) -> None:
+        if grp in self.node_groups:
+            self.node_groups.remove(grp)
+
+    def _remove_node_group_and_nodes(self, grp: NodeGroupGui) -> None:
+        for fn in self._function_nodes_in_group(grp):
+            self._remove_function_node(fn.node_id())
+        self._remove_node_group(grp)
+
+    def _draw_group_context_menu(self, grp: NodeGroupGui) -> None:
+        changed, new_title = imgui.input_text("Title", grp.group.title)
+        if changed:
+            grp.group.title = new_title
+        color_changed, new_color = imgui.color_edit3("Color", list(grp.group.color))
+        if color_changed:
+            grp.group.color = (new_color[0], new_color[1], new_color[2])
+        if imgui.menu_item_simple("Fit to nodes"):
+            self._fit_group_to_nodes(grp)
+        imgui.separator()
+        if imgui.menu_item_simple("Delete group"):
+            self._remove_node_group(grp)
+        if imgui.menu_item_simple("Delete group & contained nodes"):
+            self._remove_node_group_and_nodes(grp)
 
     # ======================================================================================================================
     # Graph layout
@@ -988,7 +1166,34 @@ class FunctionsGraphGui:
             entry["position"] = [pos.x, pos.y]
             entry["expand_flags"] = self._save_expand_flags(fn_node_gui)
             entry["focused_function_visible"] = bool(fn_node_gui._focused_function_visible)
-        return {"version": self._WORKSPACE_VERSION, **core}
+        return {"version": self._WORKSPACE_VERSION, **core, "groups": self._save_groups()}
+
+    def _save_groups(self) -> List[JsonDict]:
+        """Snapshot the classic groups (GUI-only) for the workspace JSON. Reads each
+        group's live position/size from the editor first so user drags/resizes persist."""
+        groups_json: List[JsonDict] = []
+        for grp in self.node_groups:
+            pos = ed.get_node_position(grp.node_id())
+            node_size = ed.get_node_size(grp.node_id())
+            grp.group.position = (pos.x, pos.y)
+            # get_node_size spans title strip + rectangle; ed.group() takes the rect only.
+            grp.group.size = (node_size.x, max(0.0, node_size.y - grp._header_height))
+            groups_json.append(grp.group.to_json())
+        return groups_json
+
+    def _load_groups(self, json_data: JsonDict) -> None:
+        """Rebuild the classic groups from the workspace JSON, queuing their positions
+        for deferred application inside ed.begin/end (like loaded node positions)."""
+        self.node_groups = []
+        groups_data = json_data.get("groups", [])
+        if not isinstance(groups_data, list):
+            return
+        for gd in groups_data:
+            if not isinstance(gd, dict):
+                continue
+            grp_gui = NodeGroupGui(NodeGroup.from_json(gd))
+            self.node_groups.append(grp_gui)
+            self._pending_group_geometry.append((grp_gui.node_id(), ImVec2(*grp_gui.group.position), None))
 
     def load_workspace_from_json(
         self,
@@ -1035,6 +1240,7 @@ class FunctionsGraphGui:
         # next draw. Stable-id keying is wired through
         # `_apply_pending_loaded_positions_by_stable_id` below.
         self._pending_loaded_positions_by_stable_id = pending_positions or None
+        self._load_groups(json_data)
 
     @classmethod
     def _save_expand_flags(cls, fn_node_gui: FunctionNodeGui) -> JsonDict:
