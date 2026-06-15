@@ -260,12 +260,11 @@ class FunctionsGraphGui:
             ed.end_create()
 
         # Double-click on empty canvas → open the palette (ComfyUI-style). Excluded when the
-        # double-click landed on a node / link / pin (those have their own meaning).
+        # cursor is over a node / link / pin (those have their own meaning); the
+        # get_double_clicked_* getters are unreliable here, so test what is hovered instead.
         if self.function_palette is not None and imgui.is_mouse_double_clicked(0):
             on_object = (
-                ed.get_double_clicked_node().id() != 0
-                or ed.get_double_clicked_link().id() != 0
-                or ed.get_double_clicked_pin().id() != 0
+                ed.get_hovered_node().id() != 0 or ed.get_hovered_link().id() != 0 or ed.get_hovered_pin().id() != 0
             )
             if not on_object:
                 self._open_popup_at(mouse_canvas_pos)
