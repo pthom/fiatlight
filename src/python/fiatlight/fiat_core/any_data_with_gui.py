@@ -592,7 +592,10 @@ class AnyDataWithGui(Generic[DataType]):
                     text_colored_no_wrap(get_fiat_config().style.color_as_vec4(FiatColorType.ValueWithError), "Error")
                 else:  # if isinstance(self.value, (Invalid, DataType))
                     value = self.get_actual_or_invalid_value()
-                    can_present_on_header_line = self.can_present_on_header_line()
+                    # When the section is collapsed, show a one-line preview (datatype_value_to_str,
+                    # truncated to one line) rather than the type's full present, which may take
+                    # several lines (str, list, ...). A collapsed node should stay compact.
+                    can_present_on_header_line = self.can_present_on_header_line() and not params.is_expand_disabled
                     if can_present_on_header_line:
                         if self.callbacks.present is not None:
                             with imgui_ctx.begin_vertical(
