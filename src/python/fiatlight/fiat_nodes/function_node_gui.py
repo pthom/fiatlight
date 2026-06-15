@@ -91,6 +91,10 @@ class FunctionNodeGui:
     # The current size of the node
     # (it varies depending on the content)
     _node_size: ImVec2 | None = None  # will be set after the node is drawn once
+    # Label reserve widths (em) for this frame, so values line up. Inputs and outputs each align
+    # to their own widest label. Computed once per draw (before inputs), read by each header line.
+    _input_label_width_em: float = 0.0
+    _output_label_width_em: float = 0.0
 
     # Fine tune function internals
     # (displayed if the user adds a *function variable* dictionary named fiat_tuning)
@@ -169,6 +173,29 @@ class FunctionNodeGui:
         """The node's width (previous frame), passed to header lines so they can cap
         their row to it. None on the very first frame, before the node has been drawn."""
         return self._node_size.x if self._node_size is not None else None
+
+    @staticmethod
+    def _label_reserve_em(labels: list[str | None]) -> float:
+        """Width (em) reserved for a set of labels so their values line up: the widest actual
+        label plus a small gap, capped at param_label_max_width_em. Without this each label
+        reserves the full cap, leaving a big gap on short-name nodes. Computed for inputs and
+        outputs separately (each section aligns to its own widest label). Measured every frame
+        (labels are short, calc_text_size is cheap)."""
+        cap_em = get_fiat_config().style.str_truncation.param_label_max_width_em
+        stripped = [label.split("##")[0] for label in labels if label is not None]
+        if len(stripped) == 0:
+            return cap_em
+        widest_px = max(imgui.calc_text_size(label).x for label in stripped)
+        gap_em = 0.5
+        return min(widest_px / hello_imgui.em_size(1.0) + gap_em, cap_em)
+
+    def _compute_label_reserves(self) -> None:
+        """Refresh the input / output label reserve widths for this frame."""
+        fn = self._function_node.function_with_gui
+        input_labels = [fn.param(name).data_with_gui.label for name in fn.all_inputs_names()]
+        output_labels = [fn.output(idx).label for idx in range(fn.nb_outputs())]
+        self._input_label_width_em = self._label_reserve_em(input_labels)
+        self._output_label_width_em = self._label_reserve_em(output_labels)
 
     class _Utilities_Section:  # Dummy class to create a section in the IDE # noqa
         """
@@ -251,6 +278,9 @@ class FunctionNodeGui:
                         self._draw_doc()
                         # Set minimum width
                         imgui.dummy(ImVec2(hello_imgui.em_size(get_fiat_config().style.node_minimum_width_em), 1))
+
+                        # Label reserves for this frame (so input/output values line up).
+                        self._compute_label_reserves()
 
                         # Inputs
                         inputs_changed = self._draw_function_inputs()
@@ -745,6 +775,7 @@ class FunctionNodeGui:
 
             header_params.is_expand_disabled = not self._inputs_expanded.current_value()
             header_params.node_width = self._node_width_or_none()
+            header_params.label_width_em = self._input_label_width_em
 
             if can_edit:
                 changed = input_param.data_with_gui.gui_edit_customizable(header_params)
@@ -822,6 +853,7 @@ class FunctionNodeGui:
 
         header_params.is_expand_disabled = not self._outputs_expanded.current_value()
         header_params.node_width = self._node_width_or_none()
+        header_params.label_width_em = self._output_label_width_em
 
         output_param.gui_present_customizable(header_params)
 

@@ -103,6 +103,9 @@ class GuiHeaderLineParams(Generic[DataType]):
     # Optional "id: <name>" hint appended to the label tooltip. Set by the function node for input params whose label
     # differs from the Python parameter name (otherwise lost once a label is set).
     label_id_tooltip: str | None = None
+    # Width (em) reserved for the label so values line up. Set by the function node to the widest
+    # label in the node (capped), so short-name nodes don't leave a big gap. None = config default.
+    label_width_em: float | None = None
 
 
 class AnyDataWithGui(Generic[DataType]):
@@ -551,10 +554,15 @@ class AnyDataWithGui(Generic[DataType]):
                 label_color = (
                     imgui.get_style().color_(imgui.Col_.text) if params.label_color is None else params.label_color
                 )
+                label_width_em = (
+                    params.label_width_em
+                    if params.label_width_em is not None
+                    else get_fiat_config().style.str_truncation.param_label_max_width_em
+                )
                 draw_label_with_max_width(
                     self.label,
                     label_color,
-                    get_fiat_config().style.str_truncation.param_label_max_width_em,
+                    label_width_em,
                     self.tooltip,
                     params.status_tooltip,
                     params.label_id_tooltip,
@@ -658,10 +666,15 @@ class AnyDataWithGui(Generic[DataType]):
                 label_color = (
                     imgui.get_style().color_(imgui.Col_.text) if params.label_color is None else params.label_color
                 )
+                label_width_em = (
+                    params.label_width_em
+                    if params.label_width_em is not None
+                    else get_fiat_config().style.str_truncation.param_label_max_width_em
+                )
                 draw_label_with_max_width(
                     self.label,
                     label_color,
-                    get_fiat_config().style.str_truncation.param_label_max_width_em,
+                    label_width_em,
                     self.tooltip,
                     params.status_tooltip,
                     params.label_id_tooltip,
