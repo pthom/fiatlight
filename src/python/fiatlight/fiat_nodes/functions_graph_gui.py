@@ -259,6 +259,17 @@ class FunctionsGraphGui:
                         self._open_popup_from_dragged_pin(new_node_pin_id)
             ed.end_create()
 
+        # Double-click on empty canvas → open the palette (ComfyUI-style). Excluded when the
+        # double-click landed on a node / link / pin (those have their own meaning).
+        if self.function_palette is not None and imgui.is_mouse_double_clicked(0):
+            on_object = (
+                ed.get_double_clicked_node().id() != 0
+                or ed.get_double_clicked_link().id() != 0
+                or ed.get_double_clicked_pin().id() != 0
+            )
+            if not on_object:
+                self._open_popup_at(mouse_canvas_pos)
+
         # Right-click on empty canvas → a small menu: add a node (palette), add a group,
         # or wrap the current selection in a group.
         if ed.show_background_context_menu():
