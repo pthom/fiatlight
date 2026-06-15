@@ -138,6 +138,7 @@ def _category_controls(palette: FunctionPalette, filt: PaletteFilter, categories
 
 
 def _tag_controls(palette: FunctionPalette, filt: PaletteFilter) -> None:
+    imgui.push_id("##tag_chips")
     all_tags = palette.tags_set(filt.selected_category)
     right_edge = _row_right_edge()
     for i, tag in enumerate(all_tags):
@@ -149,6 +150,7 @@ def _tag_controls(palette: FunctionPalette, filt: PaletteFilter) -> None:
             filt.selected_tags.append(tag)
         elif was_selected and not is_selected:
             filt.selected_tags[:] = [t for t in filt.selected_tags if t != tag]
+    imgui.pop_id()
 
 
 def _gui_functions(
