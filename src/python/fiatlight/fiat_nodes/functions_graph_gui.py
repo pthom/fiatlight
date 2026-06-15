@@ -116,6 +116,13 @@ class FunctionsGraphGui:
     # fit-to-nodes). `set_node_position` / `set_group_size` are only valid in that
     # scope; size is None when the initial `ed.group(size)` already handles it.
     _pending_group_geometry: List[Tuple[ed.NodeId, ImVec2, ImVec2 | None]]
+    # A group whose member nodes should be laid out on the next frame (the layout uses ed
+    # position/size getters, so it has to run from _layout_graph_if_required, not the menu).
+    _pending_group_layout: NodeGroupGui | None = None
+    # A group whose member nodes should be collapsed / expanded on the next draw (applied while
+    # the in-node semaphore is set, so the node-vs-focused flags resolve to the node ones).
+    _pending_group_collapse: NodeGroupGui | None = None
+    _pending_group_expand: NodeGroupGui | None = None
 
     # Default size of an empty group, and the padding added around the bounding box
     # when grouping / fitting existing nodes. In em units (resolved via hello_imgui at
@@ -195,6 +202,8 @@ class FunctionsGraphGui:
         nodes_changed = False
         with imgui_ctx.push_obj_id(self):
             fiat_node_semaphore._IS_RENDERING_IN_NODE = True
+            # Now that the in-node semaphore is set, collapse/expand resolve to the node flags.
+            self._apply_pending_group_collapse_expand()
             # Captured before ed.begin: after begin, get_cursor_screen_pos
             # would return a canvas-space coord, not the widget's screen TL.
             cursor = imgui.get_cursor_screen_pos()
@@ -501,6 +510,18 @@ class FunctionsGraphGui:
                 members.append(fn)
         return members
 
+    def _apply_pending_group_collapse_expand(self) -> None:
+        """Apply a queued group collapse / expand. Called from draw() with the in-node semaphore
+        set, so collapse_all / expand_all act on the node (canvas) flags, not the focused ones."""
+        if self._pending_group_collapse is not None:
+            for fn in self._function_nodes_in_group(self._pending_group_collapse):
+                fn.collapse_all()
+            self._pending_group_collapse = None
+        if self._pending_group_expand is not None:
+            for fn in self._function_nodes_in_group(self._pending_group_expand):
+                fn.expand_all()
+            self._pending_group_expand = None
+
     def _next_group_color(self) -> Tuple[float, float, float]:
         """Seed a new group's color by cycling the presets (freely editable afterwards)."""
         return GROUP_COLOR_PRESETS[len(self.node_groups) % len(GROUP_COLOR_PRESETS)]
@@ -571,6 +592,16 @@ class FunctionsGraphGui:
         color_changed, new_color = imgui.color_edit3("Color", list(grp.group.color))
         if color_changed:
             grp.group.color = (new_color[0], new_color[1], new_color[2])
+        imgui.separator()
+        if imgui.menu_item_simple("Layout nodes"):
+            self._pending_group_layout = grp
+        # Collapse / expand are deferred to the draw (where the in-node semaphore is set), so the
+        # node-vs-focused flags resolve to the node flags - not the focused ones (this menu runs
+        # outside node rendering).
+        if imgui.menu_item_simple("Collapse all nodes"):
+            self._pending_group_collapse = grp
+        if imgui.menu_item_simple("Expand all nodes"):
+            self._pending_group_expand = grp
         if imgui.menu_item_simple("Fit to nodes"):
             self._fit_group_to_nodes(grp)
         imgui.separator()
@@ -601,6 +632,15 @@ class FunctionsGraphGui:
                 if pos.x != 0 or pos.y != 0:
                     return False
             return True
+
+        if self._pending_group_layout is not None:
+            group = self._pending_group_layout
+            self._pending_group_layout = None
+            members = self._function_nodes_in_group(group)
+            if len(members) >= 2:
+                # In-place: anchored to the members' current bounds, no camera move.
+                self._layout_graph_layered(members)
+            return
 
         if self.shall_layout_selection:
             self.shall_layout_selection = False

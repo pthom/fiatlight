@@ -460,46 +460,56 @@ class FunctionNodeGui:
                 return result
 
         def handle_action(action: PossibleAction) -> None:
-            if action == PossibleAction.None_:
-                return
-            elif action == PossibleAction.CollapseAll:
-                self._backup_expanded_states.set_current_value(
-                    {
-                        "inputs": self._inputs_expanded.current_value(),
-                        "outputs": self._outputs_expanded.current_value(),
-                        "doc": self._doc_expanded.current_value(),
-                        "fiat_tuning": self.fiat_tuning_expanded.current_value(),
-                        "internal_state_gui": self._internal_state_gui_expanded.current_value(),
-                    }
-                )
-                self._inputs_expanded.set_current_value(False)
-                self._outputs_expanded.set_current_value(False)
-                self._doc_expanded.set_current_value(False)
-                self.fiat_tuning_expanded.set_current_value(False)
-                self._internal_state_gui_expanded.set_current_value(False)
+            if action == PossibleAction.CollapseAll:
+                self.collapse_all()
             elif action == PossibleAction.Expand:
-                backup = self._backup_expanded_states.current_value()
-                if backup is not None:
-                    self._inputs_expanded.set_current_value(backup["inputs"])
-                    self._outputs_expanded.set_current_value(backup["outputs"])
-                    self._doc_expanded.set_current_value(backup["doc"])
-                    self.fiat_tuning_expanded.set_current_value(backup["fiat_tuning"])
-                    self._internal_state_gui_expanded.set_current_value(backup["internal_state_gui"])
-                    self._backup_expanded_states.set_current_value(None)
-                else:
-                    if has_inputs:
-                        self._inputs_expanded.set_current_value(True)
-                    if has_outputs:
-                        self._outputs_expanded.set_current_value(True)
-                    if has_doc:
-                        self._doc_expanded.set_current_value(True)
-                    if has_fiat_tuning:
-                        self.fiat_tuning_expanded.set_current_value(True)
-                    if has_internal_state_gui:
-                        self._internal_state_gui_expanded.set_current_value(True)
+                self.expand_all()
 
         action_ = display_btn()
         handle_action(action_)
+
+    def collapse_all(self) -> None:
+        """Collapse every section (inputs / outputs / doc / fiat tuning / internal state), backing
+        up the current expanded state so `expand_all` can restore it. Same as the minimize button;
+        also used by the group context menu to collapse all nodes in a group."""
+        self._backup_expanded_states.set_current_value(
+            {
+                "inputs": self._inputs_expanded.current_value(),
+                "outputs": self._outputs_expanded.current_value(),
+                "doc": self._doc_expanded.current_value(),
+                "fiat_tuning": self.fiat_tuning_expanded.current_value(),
+                "internal_state_gui": self._internal_state_gui_expanded.current_value(),
+            }
+        )
+        self._inputs_expanded.set_current_value(False)
+        self._outputs_expanded.set_current_value(False)
+        self._doc_expanded.set_current_value(False)
+        self.fiat_tuning_expanded.set_current_value(False)
+        self._internal_state_gui_expanded.set_current_value(False)
+
+    def expand_all(self) -> None:
+        """Expand sections: restore the backup left by `collapse_all`, else expand every present
+        section. Same as the maximize button; also used by the group context menu."""
+        backup = self._backup_expanded_states.current_value()
+        if backup is not None:
+            self._inputs_expanded.set_current_value(backup["inputs"])
+            self._outputs_expanded.set_current_value(backup["outputs"])
+            self._doc_expanded.set_current_value(backup["doc"])
+            self.fiat_tuning_expanded.set_current_value(backup["fiat_tuning"])
+            self._internal_state_gui_expanded.set_current_value(backup["internal_state_gui"])
+            self._backup_expanded_states.set_current_value(None)
+            return
+        fn = self._function_node.function_with_gui
+        if fn.nb_inputs() > 0:
+            self._inputs_expanded.set_current_value(True)
+        if fn.nb_outputs() > 0:
+            self._outputs_expanded.set_current_value(True)
+        if fn.get_function_doc().user_doc is not None:
+            self._doc_expanded.set_current_value(True)
+        if len(self._fiat_tuning_with_gui) > 0:
+            self.fiat_tuning_expanded.set_current_value(True)
+        if fn.internal_state_gui is not None:
+            self._internal_state_gui_expanded.set_current_value(True)
 
     def _draw_async_status_on_title_line(self) -> None:
         if self._function_node.is_running_async():
