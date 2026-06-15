@@ -24,6 +24,11 @@ FIATLIGHT_EXIT_AFTER_FRAMES=40 FIATLIGHT_SCREENSHOT_PATH=/tmp/shot.png \
   VIRTUAL_ENV=.venv python <their_script.py>
 ```
 
+**Run it from the script's own directory** (`cd` there first): `fiat_settings/` — the saved
+workspace / node layout — is resolved relative to the **cwd**, not the script path. Running from
+the repo root loads a fresh/empty workspace (so the layout won't match the user's) and scatters a
+stray `fiat_settings/` at the root. Use an absolute `FIATLIGHT_SCREENSHOT_PATH` (e.g. `/tmp/...`).
+
 then `Read /tmp/shot.png`. The run loads their real workspace / saved node positions
 (no clean slate, no auto-relayout), renders N frames, writes a **full-window** PNG
 (menus, tabs, status bar, the graph where they left it), and exits. The env vars are
