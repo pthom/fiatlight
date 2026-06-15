@@ -58,6 +58,51 @@ def absolute(x: float = 0.0) -> float:
     return abs(x)
 
 
+# ----------------------------------------------------------------------------- int arithmetic
+# Same operations over `int`, so the GUI renders integer (not float) widgets and the
+# results stay integers (e.g. `int_div` is floor division).
+@with_fiat_attributes(fiat_tags=["source"])
+def int_source(x: int = 0) -> int:
+    """A source node: set an int value to feed downstream nodes."""
+    return x
+
+
+@with_fiat_attributes(fiat_tags=["int"])
+def int_add(a: int = 0, b: int = 0) -> int:
+    return a + b
+
+
+@with_fiat_attributes(fiat_tags=["int"])
+def int_sub(a: int = 0, b: int = 0) -> int:
+    return a - b
+
+
+@with_fiat_attributes(fiat_tags=["int"])
+def int_mul(a: int = 1, b: int = 1) -> int:
+    return a * b
+
+
+@with_fiat_attributes(fiat_tags=["int"])
+def int_div(a: int = 0, b: int = 1) -> int:
+    """Integer (floor) division."""
+    return a // b
+
+
+@with_fiat_attributes(fiat_tags=["int"])
+def int_mod(a: int = 0, b: int = 1) -> int:
+    return a % b
+
+
+@with_fiat_attributes(fiat_tags=["int"])
+def int_power(base: int = 1, exponent: int = 2) -> int:
+    return int(base**exponent)
+
+
+@with_fiat_attributes(fiat_tags=["int"])
+def int_abs(x: int = 0) -> int:
+    return abs(x)
+
+
 # ----------------------------------------------------------------------------- scalar / transcendental
 @with_fiat_attributes(fiat_tags=["trig"])
 def sin(x: float = 0.0) -> float:
