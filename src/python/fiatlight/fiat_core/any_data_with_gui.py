@@ -117,6 +117,10 @@ class GuiHeaderLineParams(Generic[DataType]):
     prefix_gui: Callable[[], None] | None = None
     suffix_gui: Callable[[], None] | None = None
     default_value_if_unspecified: DataType | Unspecified = UnspecifiedValue
+    # Full node width (previous frame), set when drawn inside a function node. The header
+    # line caps its row to this minus a right margin (node_header_right_margin_em), so the
+    # row can shrink with the node instead of re-asserting a stale width. None = uncapped.
+    node_width: float | None = None
     is_expand_disabled: bool = (
         False  # expand will be disabled when a whole region is collapsed (e.g. inputs, outputs, fiat_tuning, etc.)
     )
@@ -553,7 +557,7 @@ class AnyDataWithGui(Generic[DataType]):
     def _gui_present_header_line(self, params: GuiHeaderLineParams[DataType]) -> None:
         """Present the value as a string in one line, or as a widget if it fits on one line"""
 
-        with imgui_ctx.begin_horizontal("present_header_line"):
+        def _show_left_side() -> None:
             #
             # Left side:
             #   * prefix_gui  (might contain a node input pin when used in a function node)
@@ -610,12 +614,12 @@ class AnyDataWithGui(Generic[DataType]):
                         as_str = self.datatype_value_to_str(value)
                         text_maybe_truncated(as_str, get_fiat_config().style.str_truncation.present_header_line)
 
+        def _show_right_side() -> None:
             #
             # Right Side:
             #   * open in popup button
             #   * clipboard button
             #   * suffix_gui (might contain a node output pin when used in a function node)
-            imgui.spring()  # Align the rest to the right
             if self._can_present_detachable():
 
                 def gui_present_detached() -> None:
@@ -633,6 +637,20 @@ class AnyDataWithGui(Generic[DataType]):
             # suffix_gui
             if params.suffix_gui is not None:
                 params.suffix_gui()
+
+        # Cap the row to the node width, leaving a right margin so the trailing pin /
+        # clipboard icons clear the node border. node_width is the full node width; the
+        # margin policy lives here, where the row is laid out.
+        size = None
+        if params.node_width is not None:
+            right_margin = hello_imgui.em_size(get_fiat_config().style.node_header_right_margin_em)
+            capped_width = params.node_width - right_margin
+            if capped_width > 0:
+                size = ImVec2(capped_width, 0)
+        with imgui_ctx.begin_horizontal("present_header_line", size):
+            _show_left_side()
+            imgui.spring()  # Align the rest to the right
+            _show_right_side()
 
         # Optional second line: invalid value info
         if isinstance(self.value, Invalid):

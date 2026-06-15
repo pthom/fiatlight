@@ -161,9 +161,14 @@ class FunctionNodeGui:
     def node_id(self) -> ed.NodeId:
         return self._ed_node_id
 
-    def node_size(self) -> ImVec2:
-        assert self._node_size is not None
+    def node_size(self) -> ImVec2 | None:
+        """Returns the node size (on the previous frame). Might be None at first"""
         return self._node_size
+
+    def _node_width_or_none(self) -> float | None:
+        """The node's width (previous frame), passed to header lines so they can cap
+        their row to it. None on the very first frame, before the node has been drawn."""
+        return self._node_size.x if self._node_size is not None else None
 
     class _Utilities_Section:  # Dummy class to create a section in the IDE # noqa
         """
@@ -739,6 +744,7 @@ class FunctionNodeGui:
                 header_params.label_id_tooltip = f"id: {input_name}"
 
             header_params.is_expand_disabled = not self._inputs_expanded.current_value()
+            header_params.node_width = self._node_width_or_none()
 
             if can_edit:
                 changed = input_param.data_with_gui.gui_edit_customizable(header_params)
@@ -815,6 +821,7 @@ class FunctionNodeGui:
             header_params.suffix_gui = lambda: self._draw_output_pin(bof_header_elements, idx_output)
 
         header_params.is_expand_disabled = not self._outputs_expanded.current_value()
+        header_params.node_width = self._node_width_or_none()
 
         output_param.gui_present_customizable(header_params)
 

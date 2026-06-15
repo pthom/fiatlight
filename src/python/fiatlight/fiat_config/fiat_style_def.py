@@ -184,6 +184,10 @@ class FiatStyle(BaseModel):
     #
     # minimum width of a node, in em units
     node_minimum_width_em: float = 9.0
+    # right margin (em) reserved on a header line for the trailing pin / clipboard icons,
+    # so they clear the node's right border. Subtracted from the node width when capping
+    # the header row (see AnyDataWithGui._gui_present_header_line).
+    node_header_right_margin_em: float = 2.0
     # max number of elements to display in node, for list-like data
     list_maximum_elements_in_node: int = 10
 
