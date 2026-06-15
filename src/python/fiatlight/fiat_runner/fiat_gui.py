@@ -1,3 +1,4 @@
+import os
 import traceback
 from dataclasses import dataclass
 from fiatlight.fiat_nodes.function_node_gui import FunctionNodeGui
@@ -195,6 +196,14 @@ class FiatRunParams:
     customizable_graph: bool = False
     delete_settings: bool = False
 
+    # Capture / automation: run this many frames, then exit (None = run until the user closes
+    # the window). Overridden by the FIATLIGHT_EXIT_AFTER_FRAMES env var when left None, so an
+    # unmodified script can be screenshotted from the outside.
+    exit_after_frames: int | None = None
+    # If set, save a full-window screenshot (PNG) to this path on exit. Overridden by the
+    # FIATLIGHT_SCREENSHOT_PATH env var when left None.
+    screenshot_path: str | None = None
+
 
 # ==================================================================================================================
 #                                  FiatGui
@@ -208,6 +217,12 @@ class FiatGui:
     _runner_params: hello_imgui.RunnerParams
     _functions_graph_gui: FunctionsGraphGui
     _show_inspector: bool = False
+
+    # Capture / automation (resolved from FiatRunParams + env in _setup_runner): exit after this
+    # many swapped frames, optionally saving a full-window screenshot. Counter of frames so far.
+    _exit_after_frames: int | None = None
+    _screenshot_path: str | None = None
+    _nb_frames_swapped: int = 0
 
     # Frames to wait after a (re)load before snapshotting the undo baseline, so
     # node positions (applied deferred inside ed.begin/end) have settled.
@@ -347,6 +362,8 @@ class FiatGui:
 
     def _before_exit(self) -> None:
         self._store_final_app_window_screenshot()
+        if self._screenshot_path is not None:
+            self._save_full_window_screenshot(self._screenshot_path)
         self._functions_graph_gui.on_exit()
         # Sticky cursor: save to wherever the user last opened from (or
         # explicitly Saved As). At startup that is the default autosave path.
@@ -360,8 +377,36 @@ class FiatGui:
         _ENQUEUED_CALLBACKS.run_pre_frame_callbacks()
         get_fiat_config().style.update_colors_from_imgui_colors()
 
+    def _resolve_capture_params(self) -> None:
+        """Resolve capture/automation settings from FiatRunParams, falling back to env vars
+        (FIATLIGHT_EXIT_AFTER_FRAMES / FIATLIGHT_SCREENSHOT_PATH) so an *unmodified* script can be
+        screenshotted from the outside. Disables idling when capturing so the frame counter
+        advances deterministically."""
+        frames = self.params.exit_after_frames
+        if frames is None:
+            env_frames = os.environ.get("FIATLIGHT_EXIT_AFTER_FRAMES")
+            if env_frames:
+                frames = int(env_frames)
+        self._exit_after_frames = frames
+
+        path = self.params.screenshot_path
+        if path is None:
+            path = os.environ.get("FIATLIGHT_SCREENSHOT_PATH") or None
+        self._screenshot_path = path
+
+        if self._exit_after_frames is not None:
+            self._runner_params.fps_idling.enable_idling = False
+
+    def _save_full_window_screenshot(self, path: str) -> None:
+        image = hello_imgui.final_app_window_screenshot()
+        from PIL import Image
+
+        Image.fromarray(image).save(path)
+        logging.info(f"fiatlight: saved screenshot to {path}")
+
     def _setup_runner(self) -> Tuple[hello_imgui.RunnerParams, immapp.AddOnsParams]:
         """Setup the runner params and addons. Returns (runner_params, addons) for use with immapp.run or run_async."""
+        self._resolve_capture_params()
         self._runner_params.docking_params.docking_splits += self._docking_splits()
         self._runner_params.docking_params.dockable_windows += self._dockable_windows()
 
@@ -737,6 +782,13 @@ class FiatGui:
         _ENQUEUED_CALLBACKS.run_post_frame_callbacks()
         if self._functions_graph_gui.did_any_focused_window_change_something():
             self._notify_if_dirty_functions()
+        if self._exit_after_frames is not None:
+            # Count rendered frames and request exit once the target is reached. post_init
+            # (workspace load + invoke) runs on the first frame, so by the time we exit the
+            # user's real graph / settings have settled.
+            self._nb_frames_swapped += 1
+            if self._nb_frames_swapped >= self._exit_after_frames:
+                hello_imgui.get_runner_params().app_shall_exit = True
 
     def _handle_file_dialogs(self) -> None:
         if self.save_dialog is not None and self.save_dialog.ready():
