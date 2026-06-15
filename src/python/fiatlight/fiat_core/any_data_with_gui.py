@@ -110,6 +110,14 @@ def _draw_label_with_max_width(
     imgui.set_cursor_screen_pos(new_cursor_pos)
 
 
+def _text_colored_no_wrap(color: ImVec4, text: str) -> None:
+    """Colored text with wrapping disabled. A short status literal ("Unspecified", "Error",
+    "Default value:") shown in a node would otherwise collapse into a one-character column on a
+    narrow node, because imgui-node-editor pushes a text wrap pos at the node's right edge."""
+    with imgui_ctx.push_text_wrap_pos(-1.0):
+        imgui.text_colored(color, text)
+
+
 @dataclass
 class GuiHeaderLineParams(Generic[DataType]):
     parent_name: str
@@ -554,6 +562,17 @@ class AnyDataWithGui(Generic[DataType]):
         window_name += f"   ({present_or_edit.value})"
         return window_name
 
+    @staticmethod
+    def _header_row_size(params: GuiHeaderLineParams[DataType]) -> ImVec2 | None:
+        """Width to cap a header row to: the node width minus a right margin so the trailing
+        pin / clipboard icons clear the node border. None (uncapped) outside a function node,
+        or if the margin would leave no room. The margin policy lives here, with the layout."""
+        if params.node_width is None:
+            return None
+        right_margin = hello_imgui.em_size(get_fiat_config().style.node_header_right_margin_em)
+        capped_width = params.node_width - right_margin
+        return ImVec2(capped_width, 0) if capped_width > 0 else None
+
     def _gui_present_header_line(self, params: GuiHeaderLineParams[DataType]) -> None:
         """Present the value as a string in one line, or as a widget if it fits on one line"""
 
@@ -586,18 +605,18 @@ class AnyDataWithGui(Generic[DataType]):
             if not self._is_presenting_on_next_lines(params.is_expand_disabled):
                 if isinstance(self.value, Unspecified):
                     if isinstance(params.default_value_if_unspecified, Unspecified):
-                        imgui.text_colored(
+                        _text_colored_no_wrap(
                             get_fiat_config().style.color_as_vec4(FiatColorType.ValueUnspecified), "Unspecified"
                         )
                     else:
-                        imgui.text_colored(
+                        _text_colored_no_wrap(
                             get_fiat_config().style.color_as_vec4(FiatColorType.ParameterValueUsingDefault),
                             "Default value: ",
                         )
                         as_str = self.datatype_value_to_str(params.default_value_if_unspecified)
                         text_maybe_truncated(as_str, get_fiat_config().style.str_truncation.present_header_line)
                 elif isinstance(self.value, Error):
-                    imgui.text_colored(get_fiat_config().style.color_as_vec4(FiatColorType.ValueWithError), "Error")
+                    _text_colored_no_wrap(get_fiat_config().style.color_as_vec4(FiatColorType.ValueWithError), "Error")
                 else:  # if isinstance(self.value, (Invalid, DataType))
                     value = self.get_actual_or_invalid_value()
                     can_present_on_header_line = self.can_present_on_header_line()
@@ -639,15 +658,8 @@ class AnyDataWithGui(Generic[DataType]):
                 params.suffix_gui()
 
         # Cap the row to the node width, leaving a right margin so the trailing pin /
-        # clipboard icons clear the node border. node_width is the full node width; the
-        # margin policy lives here, where the row is laid out.
-        size = None
-        if params.node_width is not None:
-            right_margin = hello_imgui.em_size(get_fiat_config().style.node_header_right_margin_em)
-            capped_width = params.node_width - right_margin
-            if capped_width > 0:
-                size = ImVec2(capped_width, 0)
-        with imgui_ctx.begin_horizontal("present_header_line", size):
+        # clipboard icons clear the node border (see _header_row_size).
+        with imgui_ctx.begin_horizontal("present_header_line", self._header_row_size(params)):
             _show_left_side()
             imgui.spring()  # Align the rest to the right
             _show_right_side()
@@ -663,6 +675,9 @@ class AnyDataWithGui(Generic[DataType]):
     def _gui_edit_header_line(self, params: GuiHeaderLineParams[DataType]) -> bool:
         changed = False
 
+        # NOTE: the edit row is intentionally NOT capped to the node width: it can hold a real
+        # editable widget (input_text, slider, ...) which must be free to size the node. Capping
+        # it makes such widgets overflow the node border.
         with imgui_ctx.begin_horizontal("edit_header_line"):
             #
             # Left side: label, expand button, value or error or gui_edit (if fits one line), invalid value info
@@ -692,18 +707,18 @@ class AnyDataWithGui(Generic[DataType]):
             if not self._is_editing_on_next_lines(params.is_expand_disabled):
                 if isinstance(self.value, Unspecified):
                     if isinstance(params.default_value_if_unspecified, Unspecified):
-                        imgui.text_colored(
+                        _text_colored_no_wrap(
                             get_fiat_config().style.color_as_vec4(FiatColorType.ValueUnspecified), "Unspecified"
                         )
                     else:
-                        imgui.text_colored(
+                        _text_colored_no_wrap(
                             get_fiat_config().style.color_as_vec4(FiatColorType.ParameterValueUsingDefault),
                             "Default value: ",
                         )
                         as_str = self.datatype_value_to_str(params.default_value_if_unspecified)
                         text_maybe_truncated(as_str, get_fiat_config().style.str_truncation.present_header_line)
                 elif isinstance(self.value, Error):
-                    imgui.text_colored(get_fiat_config().style.color_as_vec4(FiatColorType.ValueWithError), "Error")
+                    _text_colored_no_wrap(get_fiat_config().style.color_as_vec4(FiatColorType.ValueWithError), "Error")
                 else:  # if isinstance(self.value, (Invalid, DataType))
                     value = self.get_actual_or_invalid_value()
                     can_edit_on_header_line = self.can_edit_on_header_line()

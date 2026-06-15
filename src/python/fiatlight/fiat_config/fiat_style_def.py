@@ -114,27 +114,29 @@ _STANDARD_COLORS_DARK_THEME: dict[_ColorTypes, ColorRgbaFloat] = {
 class FiatStrTruncationParams(BaseModel):
     """FiatTextTruncation: Configuration for text truncation in the GUI"""
 
+    # Text width budgets are in em (see TruncationParams): a line is clamped to this width
+    # with an ellipsis inside a node, which also caps how wide the text can grow the node.
     # Header line (when presenting a value as a string)
-    present_header_line: TruncationParams = TruncationParams(max_characters=80, max_lines=1)
+    present_header_line: TruncationParams = TruncationParams(max_width_em=30, max_lines=1)
     # Next lines (when presenting a value as a string, and expanded)
-    present_next_lines: TruncationParams = TruncationParams(max_characters=80, max_lines=5)
+    present_next_lines: TruncationParams = TruncationParams(max_width_em=30, max_lines=5)
     # When a string is presented in expanded mode inside a node
-    str_expanded_in_node: TruncationParams = TruncationParams(max_characters=80, max_lines=5)
+    str_expanded_in_node: TruncationParams = TruncationParams(max_width_em=30, max_lines=5)
     # Invalid value message
-    invalid_value_message: TruncationParams = TruncationParams(max_characters=80, max_lines=1)
+    invalid_value_message: TruncationParams = TruncationParams(max_width_em=30, max_lines=1)
     # Exceptions
-    exceptions: TruncationParams = TruncationParams(max_characters=80, max_lines=7)
+    exceptions: TruncationParams = TruncationParams(max_width_em=35, max_lines=7)
     # max width of the param labels, in em units
     param_label_max_width_em: float = 10.0
 
     @staticmethod
     def default_in_function_graph() -> "FiatStrTruncationParams":
         return FiatStrTruncationParams(
-            present_header_line=TruncationParams(max_characters=40, max_lines=1),
-            present_next_lines=TruncationParams(max_characters=40, max_lines=5),
-            str_expanded_in_node=TruncationParams(max_characters=40, max_lines=5),
-            invalid_value_message=TruncationParams(max_characters=60, max_lines=1),
-            exceptions=TruncationParams(max_characters=70, max_lines=7),
+            present_header_line=TruncationParams(max_width_em=16, max_lines=1),
+            present_next_lines=TruncationParams(max_width_em=16, max_lines=5),
+            str_expanded_in_node=TruncationParams(max_width_em=16, max_lines=5),
+            invalid_value_message=TruncationParams(max_width_em=20, max_lines=1),
+            exceptions=TruncationParams(max_width_em=22, max_lines=7),
             param_label_max_width_em=7.0,
         )
 
@@ -182,8 +184,9 @@ class FiatStyle(BaseModel):
     #
     # Node specific settings
     #
-    # minimum width of a node, in em units
-    node_minimum_width_em: float = 9.0
+    # minimum width of a node, in em units. Sized to give text-only nodes (which have no
+    # widget to widen them) room for a readable text preview before it is truncated.
+    node_minimum_width_em: float = 14.0
     # right margin (em) reserved on a header line for the trailing pin / clipboard icons,
     # so they clear the node's right border. Subtracted from the node width when capping
     # the header row (see AnyDataWithGui._gui_present_header_line).

@@ -1,44 +1,52 @@
-from imgui_bundle import ImVec4, imgui
+from imgui_bundle import ImVec4, imgui, imgui_ctx, hello_imgui
 from fiatlight.fiat_widgets import fiat_osd
+from fiatlight.fiat_utils.fiat_node_semaphore import is_rendering_in_node
 from pydantic import BaseModel
 from typing import Tuple
 
 
 class TruncationParams(BaseModel):
-    # Maximum number of characters to display in a string before truncation
-    max_characters: int | None = None
-    # Maximum number of lines to display in a string before truncation
+    # Maximum width (in em) of a line before it is truncated with a trailing ellipsis.
+    # Width-based (not a character count) so it matches the pixel space available in a node
+    # and so that all truncated lines end at the same width. Only applied inside a node.
+    max_width_em: float | None = None
+    # Maximum number of (logical, newline-separated) lines to display before truncation
     max_lines: int | None = None
 
 
-def _truncate_text(msg: str, params: TruncationParams) -> Tuple[bool, str]:
-    if len(msg) == 0:
-        return False, msg
+def _truncate_lines(msg: str, max_lines: int | None) -> Tuple[bool, list[str]]:
+    lines = msg.split("\n")
+    if max_lines is not None and len(lines) > max_lines:
+        lines = lines[:max_lines]
+        lines[-1] += " (...)"
+        return True, lines
+    return False, lines
 
-    is_truncated = False
 
-    def truncate_line(line: str) -> str:
-        nonlocal is_truncated
-        if params.max_characters is None:
-            return line
-        if len(line) > params.max_characters:
-            is_truncated = True
-            return line[: params.max_characters] + "..."
-        return line
+def _ellipsis_to_width(line: str, max_width_pixels: float) -> Tuple[bool, str]:
+    """Longest prefix of `line` that fits in max_width_pixels, with a trailing ellipsis if it
+    was truncated.
 
-    def truncate_lines() -> list[str]:
-        nonlocal is_truncated
-        lines = msg.split("\n")
-        if params.max_lines is not None and len(lines) > params.max_lines:
-            is_truncated = True
-            lines = lines[: params.max_lines]
-            lines[-1] += " (...)"
-        return lines
-
-    truncated_y = truncate_lines()
-    truncated_x = [truncate_line(line) for line in truncated_y]
-    new_msg = "\n".join(truncated_x)
-    return is_truncated, new_msg
+    Binary search (O(log n) measurements), with a cheap character pre-cap so a very long line is
+    never measured character by character: that linear scan ran every frame and froze the app on
+    large in-node text.
+    """
+    if max_width_pixels <= 0:
+        return len(line) > 0, "..."
+    # No glyph is narrower than ~2px, so at most max_width_pixels/2 characters can possibly fit.
+    # Slice to that (plus slack) before any measurement, to bound the work on huge lines.
+    char_cap = int(max_width_pixels / 2) + 4
+    if len(line) <= char_cap and imgui.calc_text_size(line).x <= max_width_pixels:
+        return False, line
+    capped = line[:char_cap]
+    lo, hi = 0, len(capped)
+    while lo < hi:
+        mid = (lo + hi + 1) // 2
+        if imgui.calc_text_size(capped[:mid] + "...").x <= max_width_pixels:
+            lo = mid
+        else:
+            hi = mid - 1
+    return True, capped[:lo] + "..."
 
 
 def text_maybe_truncated(
@@ -54,9 +62,27 @@ def text_maybe_truncated(
         else:
             imgui.text(s)
 
-    is_truncated, msg_truncated = _truncate_text(msg, params)
+    is_truncated, lines = _truncate_lines(msg, params.max_lines)
 
-    output_text(msg_truncated)
+    if is_rendering_in_node() and params.max_width_em is not None:
+        # In a node: clamp each line to the em budget AND to the room actually left in the
+        # node (so the text never overflows / clips at the node border on a narrow node), then
+        # disable imgui-node-editor's wrap-at-node-edge so the ellipsized lines stay on one
+        # visual line each (no per-character column).
+        max_width_pixels = hello_imgui.em_size(params.max_width_em)
+        available = imgui.get_content_region_avail().x
+        if available > 0:
+            max_width_pixels = min(max_width_pixels, available)
+        clamped_lines = []
+        for line in lines:
+            line_truncated, clamped = _ellipsis_to_width(line, max_width_pixels)
+            is_truncated = is_truncated or line_truncated
+            clamped_lines.append(clamped)
+        with imgui_ctx.push_text_wrap_pos(-1.0):
+            output_text("\n".join(clamped_lines))
+    else:
+        # Outside a node (detached popup / focused window): render as-is, wrapping to the window.
+        output_text("\n".join(lines))
 
     # Tooltip
     tooltip_str = ""
