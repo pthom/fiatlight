@@ -65,6 +65,29 @@ class PaletteFilter(BaseModel):
     # Hover latch for the side doc panel — transient UI state.
     latched_fn: "FunctionInfo | None" = Field(default=None, exclude=True)
 
+    # Whether the full tag grid is expanded. Transient presentation state
+    # (collapsed by default); not a filter, so it is excluded from persistence
+    # and ignored by is_user_default().
+    show_all_tags: bool = Field(default=False, exclude=True)
+
+    def reset(self) -> None:
+        """Reset the user-facing filters to their defaults. Leaves the per-open
+        type filters (input/output_type_filter) and the doc-panel latch alone."""
+        self.search_text = ""
+        self.selected_tags = []
+        self.match_mode = TagMatchMode.AND
+        self.selected_category = None
+        self.show_all_tags = False
+
+    def is_user_default(self) -> bool:
+        """True when no user filter is active (so the Clear button can hide)."""
+        return (
+            not self.search_text
+            and not self.selected_tags
+            and self.match_mode is TagMatchMode.AND
+            and self.selected_category is None
+        )
+
 
 @dataclass
 class FunctionInfo:

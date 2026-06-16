@@ -3,6 +3,9 @@ host imgui window or popup, plus the lifetime of the `PaletteFilter`."""
 
 from imgui_bundle import hello_imgui, imgui, imgui_ctx, imgui_md, ImVec2
 
+from fiatlight.fiat_widgets import fiat_osd
+from fiatlight.fiat_widgets.misc_widgets import collapsible_button
+from fiatlight.fiat_widgets.fontawesome6_ctx_utils import fontawesome_6_ctx, icons_fontawesome_6
 from fiatlight.fiat_palette.palette import FunctionInfo, FunctionPalette, PaletteFilter, TagMatchMode
 
 from typing import Callable
@@ -60,8 +63,14 @@ def _flow_to_next(next_label: str, right_edge: float) -> None:
     checkbox / radio (`next_label`) still fits before `right_edge`, otherwise let
     it wrap to a new line. Avoids the horizontal overflow a bare `same_line()`
     would cause when there are many tags / categories."""
+    _flow_to_width(_check_item_width(next_label), right_edge)
+
+
+def _flow_to_width(next_width: float, right_edge: float) -> None:
+    """Like `_flow_to_next` but for an item whose pixel width is known directly
+    (e.g. a chip button, not a checkbox)."""
     style = imgui.get_style()
-    next_x2 = imgui.get_item_rect_max().x + style.item_spacing.x + _check_item_width(next_label)
+    next_x2 = imgui.get_item_rect_max().x + style.item_spacing.x + next_width
     if next_x2 < right_edge:
         imgui.same_line()
 
@@ -82,6 +91,9 @@ def _gui_filter_header(palette: FunctionPalette, filt: PaletteFilter, *, focus_s
             if len(categories) > 1:
                 _table_row("Category:", lambda: _category_controls(palette, filt, categories))
 
+            if filt.selected_tags:
+                _table_row("Selected:", lambda: _selected_tags_controls(filt))
+
             if palette.tags_set(filt.selected_category):
                 _table_row("Tags:", lambda: _tag_controls(palette, filt))
 
@@ -97,20 +109,29 @@ def _table_row(label: str, controls: Callable[[], None]) -> None:
     controls()
 
 
+def _button_width(label: str) -> float:
+    """Width of a button / small_button whose visible text is `label`."""
+    style = imgui.get_style()
+    return imgui.calc_text_size(label).x + 2 * style.frame_padding.x
+
+
 def _search_and_match_controls(filt: PaletteFilter, *, focus_search: bool) -> None:
     imgui.set_next_item_width(hello_imgui.em_size(10))
     if focus_search:
         imgui.set_keyboard_focus_here()
     _, filt.search_text = imgui.input_text("##search", filt.search_text)
 
-    imgui.same_line()
-    _cell_label("Match:")
-    imgui.same_line()
-    if imgui.radio_button("AND", filt.match_mode is TagMatchMode.AND):
-        filt.match_mode = TagMatchMode.AND
-    imgui.same_line()
-    if imgui.radio_button("OR", filt.match_mode is TagMatchMode.OR):
-        filt.match_mode = TagMatchMode.OR
+    # A Clear button at the right edge of the row, only while a filter is active.
+    if not filt.is_user_default():
+        clear_label = icons_fontawesome_6.ICON_FA_TRASH + " Clear"
+        with fontawesome_6_ctx():
+            imgui.same_line()
+            imgui.set_cursor_pos_x(
+                imgui.get_cursor_pos_x() + imgui.get_content_region_avail().x - _button_width(clear_label)
+            )
+            if imgui.small_button(clear_label):
+                filt.reset()
+            fiat_osd.set_widget_tooltip("Clear filters")
 
 
 def _category_controls(palette: FunctionPalette, filt: PaletteFilter, categories: list[str]) -> None:
@@ -137,9 +158,41 @@ def _category_controls(palette: FunctionPalette, filt: PaletteFilter, categories
             select(cat)
 
 
+def _selected_tags_controls(filt: PaletteFilter) -> None:
+    """Selected tags as small removable chips, plus the AND/OR match toggle which
+    only matters (and only shows) once two or more tags are active."""
+    right_edge = _row_right_edge()
+    with fontawesome_6_ctx():
+        for i, tag in enumerate(list(filt.selected_tags)):
+            chip_label = tag + " " + icons_fontawesome_6.ICON_FA_XMARK
+            if i > 0:
+                _flow_to_width(_button_width(chip_label), right_edge)
+            if imgui.small_button(chip_label):
+                filt.selected_tags[:] = [t for t in filt.selected_tags if t != tag]
+
+    if len(filt.selected_tags) >= 2:
+        imgui.same_line()
+        _cell_label("Match:")
+        imgui.same_line()
+        if imgui.radio_button("AND", filt.match_mode is TagMatchMode.AND):
+            filt.match_mode = TagMatchMode.AND
+        imgui.same_line()
+        if imgui.radio_button("OR", filt.match_mode is TagMatchMode.OR):
+            filt.match_mode = TagMatchMode.OR
+
+
 def _tag_controls(palette: FunctionPalette, filt: PaletteFilter) -> None:
-    imgui.push_id("##tag_chips")
     all_tags = palette.tags_set(filt.selected_category)
+
+    # Keep the header compact: the full tag grid is collapsed by default behind
+    # this toggle; selected tags stay visible as chips in the "Selected:" row.
+    filt.show_all_tags = collapsible_button(filt.show_all_tags, "all tags")
+    imgui.same_line()
+    _cell_label(f"Show tags ({len(all_tags)})")
+    if not filt.show_all_tags:
+        return
+
+    imgui.push_id("##tag_chips")
     right_edge = _row_right_edge()
     for i, tag in enumerate(all_tags):
         if i > 0:
