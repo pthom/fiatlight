@@ -130,6 +130,8 @@ class FunctionsGraphGui:
     _DEFAULT_GROUP_SIZE_EM = (16.0, 11.0)
     _GROUP_PADDING_EM = 2.0
 
+    _is_canvas_hovered: bool = False
+
     # ======================================================================================================================
     # Constructor
     # ======================================================================================================================
@@ -222,6 +224,8 @@ class FunctionsGraphGui:
             # layout-selected menu item / Ctrl+L (which run outside ed.begin/end).
             self._selected_node_ids = ed.get_selected_nodes()
             ed.end()
+            self._is_canvas_hovered = imgui.is_item_hovered()
+
             # `navigate_to_content` is invalid inside ed.begin/end, so we
             # fire it here, after ed.end() but still inside the editor's
             # current-editor scope.
@@ -271,7 +275,7 @@ class FunctionsGraphGui:
         # Double-click on empty canvas → open the palette (ComfyUI-style). Excluded when the
         # cursor is over a node / link / pin (those have their own meaning); the
         # get_double_clicked_* getters are unreliable here, so test what is hovered instead.
-        if self.function_palette is not None and imgui.is_mouse_double_clicked(0):
+        if self.function_palette is not None and imgui.is_mouse_double_clicked(0) and self._is_canvas_hovered:
             on_object = (
                 ed.get_hovered_node().id() != 0 or ed.get_hovered_link().id() != 0 or ed.get_hovered_pin().id() != 0
             )
