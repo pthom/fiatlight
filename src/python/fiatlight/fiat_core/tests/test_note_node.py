@@ -26,6 +26,21 @@ def test_note_text_survives_copy_paste() -> None:
     assert new_note.note_params.md_string == "# Title\n\nbody **bold**"
 
 
+def test_note_text_and_width_survive_workspace_save_load() -> None:
+    """Both the markdown text and the (editable) width persist through the workspace round-trip."""
+    g = FunctionsGraph()
+    g.add_function(NoteNode("hello **world**", text_width_em=42.0))
+    core = g.save_workspace_core_to_json()
+
+    g2 = FunctionsGraph()
+    g2.load_workspace_core_from_json(core, _factory)
+
+    note = g2.functions_nodes[0].function_with_gui
+    assert isinstance(note, NoteNode)
+    assert note.note_params.md_string == "hello **world**"
+    assert note.note_params.text_width_em == 42.0
+
+
 def test_default_note_is_empty() -> None:
     note = NoteNode()
     assert note.note_params.md_string == ""
