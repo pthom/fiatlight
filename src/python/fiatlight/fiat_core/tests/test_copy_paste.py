@@ -60,6 +60,20 @@ def test_links_with_an_endpoint_outside_the_copied_set_are_dropped() -> None:
     assert len(g.functions_nodes_links) == 1  # only the original link remains
 
 
+def test_duplicated_source_output_is_recomputed() -> None:
+    """A duplicated standalone / source node must recompute its output, not keep a stale one."""
+    from fiatlight.fiat_types.error_types import Unspecified
+
+    g = FunctionsGraph()
+    n = g.add_function(src)  # src() -> 1, no inputs
+    payload = g.serialize_nodes([n])
+    new_node = g.instantiate_nodes(payload, _factory)[0][1]
+
+    out = new_node.function_with_gui.output(0)
+    assert not isinstance(out.value, Unspecified)
+    assert out.value == 1
+
+
 def test_unknown_function_ref_is_skipped() -> None:
     g = FunctionsGraph()
     n = g.add_function(dbl)

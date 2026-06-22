@@ -753,6 +753,19 @@ class FunctionsGraph:
             if (s := link.get("src_node")) in id_map and (d := link.get("dst_node")) in id_map
         ]
         self._restore_links_from_workspace(remapped_links)
+
+        # Recompute the new nodes' outputs: invoke the roots of the pasted subset (no incoming
+        # link from within it); each invoke propagates downstream through the internal links.
+        # Without this a duplicated source / standalone node keeps a stale (unspecified) output.
+        new_nodes = {fn for _, fn in created}
+        internal_dst_nodes = {
+            link.dst_function_node
+            for link in self.functions_nodes_links
+            if link.src_function_node in new_nodes and link.dst_function_node in new_nodes
+        }
+        for _, f_node in created:
+            if f_node not in internal_dst_nodes:
+                f_node.call_invoke_async_or_not()
         return created
 
     def load_workspace_core_from_json(
