@@ -682,13 +682,15 @@ class FunctionsGraphGui:
         self._remove_node_group(grp)
 
     def _draw_group_context_menu(self, grp: NodeGroupGui) -> None:
+        imgui.separator_text("Group")
         changed, new_title = imgui.input_text("Title", grp.group.title)
         if changed:
             grp.group.title = new_title
         color_changed, new_color = imgui.color_edit3("Color", list(grp.group.color))
         if color_changed:
             grp.group.color = (new_color[0], new_color[1], new_color[2])
-        imgui.separator()
+
+        imgui.separator_text("Layout")
         # Reorganize = re-layout the members + refit the rectangle (the former "Layout
         # nodes" + "Fit to nodes"), optionally collapsing / expanding every member first.
         if imgui.menu_item_simple("Reorganize"):
@@ -697,6 +699,8 @@ class FunctionsGraphGui:
             self._reorganize_group(grp, "collapse")
         if imgui.menu_item_simple("Expand all & reorganize"):
             self._reorganize_group(grp, "expand")
+
+        imgui.separator_text("Nodes")
         # Plain collapse / expand, no relayout. Deferred to the draw (where the in-node
         # semaphore is set) so the node-vs-focused flags resolve to the node flags, not the
         # focused ones (this menu runs outside node rendering). They share a key: last wins.
@@ -714,7 +718,8 @@ class FunctionsGraphGui:
                     fn.expand_all()
 
             self._sched.schedule("group_collapse_expand", do_expand, phase=FramePhase.BEFORE_ED_BEGIN)
-        imgui.separator()
+
+        imgui.separator_text("Delete")
         if imgui.menu_item_simple("Delete group"):
             self._remove_node_group(grp)
         if imgui.menu_item_simple("Delete group & contained nodes"):
