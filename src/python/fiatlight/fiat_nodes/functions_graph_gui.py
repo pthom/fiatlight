@@ -60,10 +60,10 @@ class _OpenPalettePopup:
 class _LayoutRequest:
     """A queued auto-layout, applied next frame (node sizes are only known after a
     draw). At most one is pending; the kinds are resolved by priority
-    group > selection > graph in `_layout_graph_if_required`."""
+    selection > graph in `_layout_graph_if_required`. (Group relayout is not a
+    request: it runs as a scheduled chain in `_reorganize_group`.)"""
 
-    kind: Literal["group", "selection", "graph"]
-    group: NodeGroupGui | None = None  # set iff kind == "group"
+    kind: Literal["selection", "graph"]
 
 
 class FunctionsGraphGui:
@@ -536,8 +536,12 @@ class FunctionsGraphGui:
         # Size flows through the initial `ed.group(size)`; only the position needs queuing.
         self._schedule_group_geometry(grp_gui.node_id(), ImVec2(*group.position), None)
 
-    def _fit_group_to_nodes(self, grp: NodeGroupGui) -> None:
-        members = self._function_nodes_in_group(grp)
+    def _fit_group_to_nodes(self, grp: NodeGroupGui, members: List[FunctionNodeGui] | None = None) -> None:
+        # `members` is passed explicitly by the reorganize chain so the fit uses the
+        # nodes that were just laid out, not a fresh geometric query (which could miss
+        # a node the layout pushed outside the old rectangle).
+        if members is None:
+            members = self._function_nodes_in_group(grp)
         if not members:
             return
         tl, br = self._nodes_bounding_box(members)
@@ -550,6 +554,42 @@ class FunctionsGraphGui:
         # The group already exists, so its initial `ed.group(size)` no longer applies:
         # resize it explicitly.
         self._schedule_group_geometry(grp.node_id(), position, size)
+
+    def _reorganize_group(self, grp: NodeGroupGui, mode: Literal["none", "collapse", "expand"]) -> None:
+        """Re-layout a group's members and refit the rectangle around them, optionally
+        collapsing / expanding every member first.
+
+        Runs as a 3-frame chain through the scheduler, because each step needs the
+        previous one's effect to be measurable: a node's size is only known after it
+        redraws, and a position set inside ed.begin/end is only read back next frame.
+            frame F   collapse / expand (flags flip)        BEFORE_ED_BEGIN
+            frame F+1 layout, using the new sizes           INSIDE_ED
+            frame F+2 fit the rect to the laid-out nodes    INSIDE_ED
+        All steps share one key, so a second request supersedes an in-flight one. The
+        member set is captured once (frame F) and reused, so collapse, layout and fit
+        all act on the same nodes."""
+
+        def do_collapse_expand() -> None:
+            members = self._function_nodes_in_group(grp)
+            if mode == "collapse":
+                for fn in members:
+                    fn.collapse_all()
+            elif mode == "expand":
+                for fn in members:
+                    fn.expand_all()
+
+            def do_layout() -> None:
+                if len(members) >= 2:
+                    self._layout_graph_layered(members)
+
+                def do_fit() -> None:
+                    self._fit_group_to_nodes(grp, members)
+
+                self._sched.schedule("group_reorganize", do_fit, phase=FramePhase.INSIDE_ED, delay_frames=1)
+
+            self._sched.schedule("group_reorganize", do_layout, phase=FramePhase.INSIDE_ED, delay_frames=1)
+
+        self._sched.schedule("group_reorganize", do_collapse_expand, phase=FramePhase.BEFORE_ED_BEGIN)
 
     def _remove_node_group(self, grp: NodeGroupGui) -> None:
         if grp in self.node_groups:
@@ -568,11 +608,17 @@ class FunctionsGraphGui:
         if color_changed:
             grp.group.color = (new_color[0], new_color[1], new_color[2])
         imgui.separator()
-        if imgui.menu_item_simple("Layout nodes"):
-            self.request_layout_group(grp)
-        # Collapse / expand are deferred to the draw (where the in-node semaphore is set), so the
-        # node-vs-focused flags resolve to the node flags - not the focused ones (this menu runs
-        # outside node rendering). Collapse and expand share a key: the last choice wins.
+        # Reorganize = re-layout the members + refit the rectangle (the former "Layout
+        # nodes" + "Fit to nodes"), optionally collapsing / expanding every member first.
+        if imgui.menu_item_simple("Reorganize"):
+            self._reorganize_group(grp, "none")
+        if imgui.menu_item_simple("Collapse all & reorganize"):
+            self._reorganize_group(grp, "collapse")
+        if imgui.menu_item_simple("Expand all & reorganize"):
+            self._reorganize_group(grp, "expand")
+        # Plain collapse / expand, no relayout. Deferred to the draw (where the in-node
+        # semaphore is set) so the node-vs-focused flags resolve to the node flags, not the
+        # focused ones (this menu runs outside node rendering). They share a key: last wins.
         if imgui.menu_item_simple("Collapse all nodes"):
 
             def do_collapse() -> None:
@@ -587,8 +633,6 @@ class FunctionsGraphGui:
                     fn.expand_all()
 
             self._sched.schedule("group_collapse_expand", do_expand, phase=FramePhase.BEFORE_ED_BEGIN)
-        if imgui.menu_item_simple("Fit to nodes"):
-            self._fit_group_to_nodes(grp)
         imgui.separator()
         if imgui.menu_item_simple("Delete group"):
             self._remove_node_group(grp)
@@ -627,13 +671,7 @@ class FunctionsGraphGui:
         if request is None:
             return
 
-        if request.kind == "group":
-            assert request.group is not None
-            members = self._function_nodes_in_group(request.group)
-            if len(members) >= 2:
-                # In-place: anchored to the members' current bounds, no camera move.
-                self._layout_graph_layered(members)
-        elif request.kind == "selection":
+        if request.kind == "selection":
             selected = self._selected_function_node_guis()
             if len(selected) >= self._LAYOUT_SELECTION_MIN:
                 # In-place: anchored to the selection's current bounds, no camera move.
@@ -658,10 +696,6 @@ class FunctionsGraphGui:
     def request_layout_selection(self) -> None:
         """Queue an in-place layout of the current selection for the next frame."""
         self._pending_layout = _LayoutRequest(kind="selection")
-
-    def request_layout_group(self, grp: NodeGroupGui) -> None:
-        """Queue an in-place layout of a group's member nodes for the next frame."""
-        self._pending_layout = _LayoutRequest(kind="group", group=grp)
 
     def request_smart_layout(self) -> None:
         """Ctrl+L: lay out the selection if enough nodes are selected, else the
