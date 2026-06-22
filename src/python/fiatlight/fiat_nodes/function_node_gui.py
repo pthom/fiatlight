@@ -190,10 +190,24 @@ class FunctionNodeGui:
         return min(widest_px / hello_imgui.em_size(1.0) + gap_em, cap_em)
 
     def _compute_label_reserves(self) -> None:
-        """Refresh the input / output label reserve widths for this frame."""
+        """Refresh the input / output label reserve widths for this frame. Only labels of
+        params that are actually drawn count: an unlinked param hidden under a collapsed
+        section ("N hidden") must not inflate the reserve, which would push the visible
+        values far to the right (see _draw_one_input / _draw_function_outputs for the same
+        linked-or-expanded condition)."""
         fn = self._function_node.function_with_gui
-        input_labels = [fn.param(name).data_with_gui.label for name in fn.all_inputs_names()]
-        output_labels = [fn.output(idx).label for idx in range(fn.nb_outputs())]
+        inputs_expanded = self._inputs_expanded.current_value()
+        outputs_expanded = self._outputs_expanded.current_value()
+        input_labels = [
+            fn.param(name).data_with_gui.label
+            for name in fn.all_inputs_names()
+            if inputs_expanded or self._function_node.has_input_link(name)
+        ]
+        output_labels = [
+            fn.output(idx).label
+            for idx in range(fn.nb_outputs())
+            if outputs_expanded or len(self._function_node.output_links_for_idx(idx)) > 0
+        ]
         self._input_label_width_em = self._label_reserve_em(input_labels)
         self._output_label_width_em = self._label_reserve_em(output_labels)
 
