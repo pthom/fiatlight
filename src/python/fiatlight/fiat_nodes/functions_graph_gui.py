@@ -22,7 +22,7 @@ from fiatlight.fiat_palette import (
 )
 from fiatlight.fiat_widgets import fiat_osd
 from imgui_bundle import imgui, imgui_node_editor as ed, hello_imgui, ImVec2, imgui_ctx
-from typing import List, Dict, Tuple, Callable, TYPE_CHECKING
+from typing import List, Dict, Tuple, Callable, Literal, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from fiatlight.fiat_core.reroute_function import RerouteFunctionWithGui
@@ -56,6 +56,16 @@ class _OpenPalettePopup:
     just_requested: bool = True  # True until imgui.open_popup has been called once
 
 
+@dataclass
+class _LayoutRequest:
+    """A queued auto-layout, applied next frame (node sizes are only known after a
+    draw). At most one is pending; the kinds are resolved by priority
+    group > selection > graph in `_layout_graph_if_required`."""
+
+    kind: Literal["group", "selection", "graph"]
+    group: NodeGroupGui | None = None  # set iff kind == "group"
+
+
 class FunctionsGraphGui:
     # Palette popup geometry (em units, scaled by hello_imgui.em_size).
     _PALETTE_POPUP_WIDTH_EM = 50
@@ -69,10 +79,10 @@ class FunctionsGraphGui:
     # Classic groups: GUI-only tinted rectangles behind the nodes (no pins / execution).
     node_groups: List[NodeGroupGui]
 
-    shall_layout_graph: bool = False
-    # Like shall_layout_graph, but lays out only the currently-selected nodes
-    # (in place), leaving the rest of the graph untouched.
-    shall_layout_selection: bool = False
+    # At most one auto-layout queued for the next frame (node sizes are only known
+    # after a draw). Resolved by priority group > selection > graph in
+    # `_layout_graph_if_required`; set via the `request_layout_*` methods.
+    _pending_layout: _LayoutRequest | None = None
     can_edit_graph: bool = False
 
     # Min selected nodes for "layout selection" to be offered / to act.
@@ -101,11 +111,6 @@ class FunctionsGraphGui:
     # right before `ed.begin`. Combined with `ed.get_screen_size()` it gives
     # the canvas widget's screen rect, used by `_all_nodes_fit_in_canvas_view`.
     _canvas_screen_top_left: ImVec2 | None = None
-    # A group whose member nodes should be laid out on the next frame (the layout uses ed
-    # position/size getters, so it has to run from _layout_graph_if_required, not the menu).
-    # Left out of the scheduler on purpose: it is entangled with the shall_layout_* dispatch
-    # and its early-return mutual-exclusion in `_layout_graph_if_required`.
-    _pending_group_layout: NodeGroupGui | None = None
     # Default size of an empty group, and the padding added around the bounding box
     # when grouping / fitting existing nodes. In em units (resolved via hello_imgui at
     # use, so groups scale with the font / DPI).
@@ -564,7 +569,7 @@ class FunctionsGraphGui:
             grp.group.color = (new_color[0], new_color[1], new_color[2])
         imgui.separator()
         if imgui.menu_item_simple("Layout nodes"):
-            self._pending_group_layout = grp
+            self.request_layout_group(grp)
         # Collapse / expand are deferred to the draw (where the in-node semaphore is set), so the
         # node-vs-focused flags resolve to the node flags - not the focused ones (this menu runs
         # outside node rendering). Collapse and expand share a key: the last choice wins.
@@ -613,25 +618,27 @@ class FunctionsGraphGui:
                     return False
             return True
 
-        if self._pending_group_layout is not None:
-            group = self._pending_group_layout
-            self._pending_group_layout = None
-            members = self._function_nodes_in_group(group)
+        request = self._pending_layout
+        self._pending_layout = None
+        # No explicit request, but the graph is freshly loaded (all nodes at origin):
+        # fall back to a whole-graph layout.
+        if request is None and are_all_nodes_on_zero():
+            request = _LayoutRequest(kind="graph")
+        if request is None:
+            return
+
+        if request.kind == "group":
+            assert request.group is not None
+            members = self._function_nodes_in_group(request.group)
             if len(members) >= 2:
                 # In-place: anchored to the members' current bounds, no camera move.
                 self._layout_graph_layered(members)
-            return
-
-        if self.shall_layout_selection:
-            self.shall_layout_selection = False
+        elif request.kind == "selection":
             selected = self._selected_function_node_guis()
             if len(selected) >= self._LAYOUT_SELECTION_MIN:
                 # In-place: anchored to the selection's current bounds, no camera move.
                 self._layout_graph_layered(selected)
-            return
-
-        if self.shall_layout_graph or are_all_nodes_on_zero():
-            self.shall_layout_graph = False
+        elif request.kind == "graph":
             self._layout_graph_layered()
             # Fit the whole laid-out graph into view, a few frames later (once
             # ed.end() has updated the node bounds the camera reads).
@@ -644,13 +651,25 @@ class FunctionsGraphGui:
     def num_selected_nodes(self) -> int:
         return len(self._selected_node_ids)
 
+    def request_layout_graph(self) -> None:
+        """Queue a whole-graph auto-layout for the next frame."""
+        self._pending_layout = _LayoutRequest(kind="graph")
+
+    def request_layout_selection(self) -> None:
+        """Queue an in-place layout of the current selection for the next frame."""
+        self._pending_layout = _LayoutRequest(kind="selection")
+
+    def request_layout_group(self, grp: NodeGroupGui) -> None:
+        """Queue an in-place layout of a group's member nodes for the next frame."""
+        self._pending_layout = _LayoutRequest(kind="group", group=grp)
+
     def request_smart_layout(self) -> None:
         """Ctrl+L: lay out the selection if enough nodes are selected, else the
         whole graph."""
         if self.num_selected_nodes() >= self._LAYOUT_SELECTION_MIN:
-            self.shall_layout_selection = True
+            self.request_layout_selection()
         else:
-            self.shall_layout_graph = True
+            self.request_layout_graph()
 
     def _layout_graph_layered(self, nodes_gui: List[FunctionNodeGui] | None = None) -> None:
         """Sugiyama-style layered layout: place nodes in columns by their

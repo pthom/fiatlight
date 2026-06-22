@@ -588,11 +588,11 @@ class FiatGui:
 
         if imgui.begin_menu("Graph"):
             if imgui.menu_item_simple("Auto-Layout graph", "Ctrl+L"):
-                self._functions_graph_gui.shall_layout_graph = True
+                self._functions_graph_gui.request_layout_graph()
             n_selected = self._functions_graph_gui.num_selected_nodes()
             enabled = n_selected >= self._functions_graph_gui._LAYOUT_SELECTION_MIN
             if imgui.menu_item_simple(f"Auto-Layout selected ({n_selected})", "", False, enabled):
-                self._functions_graph_gui.shall_layout_selection = True
+                self._functions_graph_gui.request_layout_selection()
             imgui.end_menu()
 
         hello_imgui.show_view_menu(self._runner_params)

@@ -68,7 +68,7 @@ def capture_graph(
             prev_after_swap()
         counter["n"] += 1
         if counter["n"] == layout_at:
-            fiat_gui._functions_graph_gui.shall_layout_graph = True
+            fiat_gui._functions_graph_gui.request_layout_graph()
         if counter["n"] >= frames:
             runner_params.app_shall_exit = True
 
