@@ -116,6 +116,9 @@ class FunctionsGraphGui:
     # use, so groups scale with the font / DPI).
     _DEFAULT_GROUP_SIZE_EM = (16.0, 11.0)
     _GROUP_PADDING_EM = 2.0
+    # Safety cap on the reorganize "wait for node sizes to settle" poll, so a node whose
+    # size never stabilizes (e.g. an animated widget) can't loop the chain forever.
+    _REORGANIZE_MAX_SETTLE_FRAMES = 30
 
     _is_canvas_hovered: bool = False
 
@@ -555,19 +558,27 @@ class FunctionsGraphGui:
         # resize it explicitly.
         self._schedule_group_geometry(grp.node_id(), position, size)
 
+    def _member_sizes(self, members: List[FunctionNodeGui]) -> List[Tuple[int, int]]:
+        """Current (rounded) canvas sizes of the given nodes, for settle detection."""
+        return [(round(ed.get_node_size(fn.node_id()).x), round(ed.get_node_size(fn.node_id()).y)) for fn in members]
+
     def _reorganize_group(self, grp: NodeGroupGui, mode: Literal["none", "collapse", "expand"]) -> None:
         """Re-layout a group's members and refit the rectangle around them, optionally
         collapsing / expanding every member first.
 
-        Runs as a 3-frame chain through the scheduler, because each step needs the
-        previous one's effect to be measurable: a node's size is only known after it
-        redraws, and a position set inside ed.begin/end is only read back next frame.
-            frame F   collapse / expand (flags flip)        BEFORE_ED_BEGIN
-            frame F+1 layout, using the new sizes           INSIDE_ED
-            frame F+2 fit the rect to the laid-out nodes    INSIDE_ED
-        All steps share one key, so a second request supersedes an in-flight one. The
-        member set is captured once (frame F) and reused, so collapse, layout and fit
-        all act on the same nodes."""
+        Runs as a scheduled chain, because each step needs the previous one's effect to
+        be measurable:
+            frame F    collapse / expand (flags flip)          BEFORE_ED_BEGIN
+            frames F+  wait until member sizes stop changing,
+                       then layout                             INSIDE_ED
+            +1 frame   fit the rect to the laid-out nodes      INSIDE_ED
+        The wait matters: a node does not reach its final collapsed/expanded size in one
+        frame (an image output shrinks across several frames as its widget reflows), so a
+        fixed delay would lay out against a stale size and a second reorganize would pack
+        tighter. We instead poll until two consecutive frames report identical sizes
+        (ed.get_node_size lags one frame), capped so a never-settling node can't loop
+        forever. All steps share one key, so a repeat request supersedes an in-flight
+        chain; the member set is captured once so every step acts on the same nodes."""
 
         def do_collapse_expand() -> None:
             members = self._function_nodes_in_group(grp)
@@ -578,16 +589,26 @@ class FunctionsGraphGui:
                 for fn in members:
                     fn.expand_all()
 
-            def do_layout() -> None:
-                if len(members) >= 2:
-                    self._layout_graph_layered(members)
+            prev_sizes: List[Tuple[int, int]] | None = None
+            ticks = 0
 
-                def do_fit() -> None:
-                    self._fit_group_to_nodes(grp, members)
+            def do_fit() -> None:
+                self._fit_group_to_nodes(grp, members)
 
-                self._sched.schedule("group_reorganize", do_fit, phase=FramePhase.INSIDE_ED, delay_frames=1)
+            def layout_when_settled() -> None:
+                nonlocal prev_sizes, ticks
+                current = self._member_sizes(members)
+                ticks += 1
+                if current == prev_sizes or ticks >= self._REORGANIZE_MAX_SETTLE_FRAMES:
+                    if len(members) >= 2:
+                        self._layout_graph_layered(members)
+                    # Positions set inside ed.begin/end are only read back next frame.
+                    self._sched.schedule("group_reorganize", do_fit, phase=FramePhase.INSIDE_ED, delay_frames=1)
+                else:
+                    prev_sizes = current
+                    self._sched.schedule("group_reorganize", layout_when_settled, phase=FramePhase.INSIDE_ED)
 
-            self._sched.schedule("group_reorganize", do_layout, phase=FramePhase.INSIDE_ED, delay_frames=1)
+            self._sched.schedule("group_reorganize", layout_when_settled, phase=FramePhase.INSIDE_ED)
 
         self._sched.schedule("group_reorganize", do_collapse_expand, phase=FramePhase.BEFORE_ED_BEGIN)
 
