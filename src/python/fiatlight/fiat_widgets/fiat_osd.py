@@ -98,7 +98,12 @@ class _OsdDetachedWindows:
     def _render_detached_windows(self) -> None:
         alive_windows = []  # remove windows that are closed
         for detached_info in self.detached_windows:
-            window_flags = imgui.WindowFlags_.no_collapse.value
+            # NoSavedSettings: these are transient popups whose name is keyed by id(self) (which
+            # changes every run). Persisting them would bloat the .ini with stale per-id entries
+            # and, when a name happens to contain "###" (window_name + "##" + a "##"-prefixed
+            # unique_id), trip imgui's settings-save assert (settings ID strips at "###", window ID
+            # does not) -> IM_ASSERT(settings->ID == window->ID) on exit.
+            window_flags = imgui.WindowFlags_.no_collapse.value | imgui.WindowFlags_.no_saved_settings.value
             if detached_info.params.window_flags is not None:
                 window_flags |= detached_info.params.window_flags
 

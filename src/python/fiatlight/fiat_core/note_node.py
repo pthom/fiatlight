@@ -42,8 +42,11 @@ class NoteNode(GuiNode):
         # Editing must happen outside ed.begin/end -> a detached window (the button is in-node OK).
         fiat_osd.show_void_detached_window_button(
             fiat_osd.DetachedWindowParams(
-                unique_id="##note_edit_" + str(id(self)),
-                window_name=f"Edit note##{id(self)}",
+                # No leading "##" in unique_id / no "##" in window_name: fiat_osd joins them as
+                # window_name + "##" + unique_id, and a resulting "###" run trips imgui's
+                # settings-save assert. (Detached windows also carry NoSavedSettings now.)
+                unique_id=f"note_edit_{id(self)}",
+                window_name="Edit note",
                 gui_function=self._edit_gui,
                 button_label="Edit",
                 window_size=hello_imgui.em_to_vec2(32.0, 20.0),
