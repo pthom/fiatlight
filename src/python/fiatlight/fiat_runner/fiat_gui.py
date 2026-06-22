@@ -766,6 +766,12 @@ class FiatGui:
             self._menu_save_workspace()
         if imgui.shortcut(ctrl | imgui.Key.l.value, route):
             self._functions_graph_gui.request_smart_layout()
+        if imgui.shortcut(ctrl | imgui.Key.c.value, route):
+            self._functions_graph_gui.copy_selection()
+        if imgui.shortcut(ctrl | imgui.Key.v.value, route):
+            self._functions_graph_gui.paste()
+        if imgui.shortcut(ctrl | imgui.Key.d.value, route):
+            self._functions_graph_gui.duplicate_selection()
 
         # Reconcile only when the graph has settled (no active widget, positions
         # stable) so a continuous gesture becomes one undo step. An image pan

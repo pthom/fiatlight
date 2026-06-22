@@ -676,33 +676,84 @@ class FunctionsGraph:
         on top of this dict by `FunctionsGraphGui.save_workspace_to_json`.
         The top-level `version` is also added by the caller.
         """
-        nodes: JsonDict = {}
-        for fn in self.functions_nodes:
-            f_gui = fn.function_with_gui
-            gui_opts = f_gui.save_gui_options_to_json()
-            entry: JsonDict = {
-                "function_ref": f_gui.function_ref,
-                "function_name": f_gui.function_name,
-                "input_values": fn.save_user_inputs_to_json(),
-                "input_gui_options": gui_opts.get("inputs", {}),
-                "output_gui_options": gui_opts.get("outputs", {}),
-            }
-            internal = gui_opts.get("internal_gui_options")
-            if internal is not None:
-                entry["internal_gui_options"] = internal
-            nodes[fn.stable_id] = entry
-
-        links: List[JsonDict] = []
-        for link in self.functions_nodes_links:
-            links.append(
-                {
-                    "src_node": link.src_function_node.stable_id,
-                    "src_output_idx": link.src_output_idx,
-                    "dst_node": link.dst_function_node.stable_id,
-                    "dst_input_name": link.dst_input_name,
-                }
-            )
+        nodes: JsonDict = {fn.stable_id: self._node_to_json(fn) for fn in self.functions_nodes}
+        links: List[JsonDict] = [self._link_to_json(link) for link in self.functions_nodes_links]
         return {"nodes": nodes, "links": links}
+
+    @staticmethod
+    def _node_to_json(fn: FunctionNode) -> JsonDict:
+        """Per-node core JSON (identity + values + gui option blobs), shared by the workspace
+        save and by `serialize_nodes` (copy). GUI position / expand flags are added on top by
+        the GUI layer."""
+        f_gui = fn.function_with_gui
+        gui_opts = f_gui.save_gui_options_to_json()
+        entry: JsonDict = {
+            "function_ref": f_gui.function_ref,
+            "function_name": f_gui.function_name,
+            "input_values": fn.save_user_inputs_to_json(),
+            "input_gui_options": gui_opts.get("inputs", {}),
+            "output_gui_options": gui_opts.get("outputs", {}),
+        }
+        internal = gui_opts.get("internal_gui_options")
+        if internal is not None:
+            entry["internal_gui_options"] = internal
+        return entry
+
+    @staticmethod
+    def _link_to_json(link: FunctionNodeLink) -> JsonDict:
+        return {
+            "src_node": link.src_function_node.stable_id,
+            "src_output_idx": link.src_output_idx,
+            "dst_node": link.dst_function_node.stable_id,
+            "dst_input_name": link.dst_input_name,
+        }
+
+    def serialize_nodes(self, fnodes: List[FunctionNode]) -> JsonDict:
+        """Serialize a subset of nodes plus the links internal to that subset (both endpoints
+        in it), in the same per-node shape as the workspace save (minus GUI position / expand
+        flags, which the GUI layer adds). Used by copy / duplicate."""
+        sids = {fn.stable_id for fn in fnodes}
+        nodes: JsonDict = {fn.stable_id: self._node_to_json(fn) for fn in fnodes}
+        links: List[JsonDict] = [
+            self._link_to_json(link)
+            for link in self.functions_nodes_links
+            if link.src_function_node.stable_id in sids and link.dst_function_node.stable_id in sids
+        ]
+        return {"nodes": nodes, "links": links}
+
+    def instantiate_nodes(
+        self, payload: JsonDict, function_factory_from_ref: FunctionWithGuiFactoryFromName
+    ) -> List[Tuple[str, FunctionNode]]:
+        """Additively create nodes from a `serialize_nodes` payload, each with a fresh stable id,
+        restore their values / gui options, and re-add the internal links remapped to the new ids.
+        Returns [(original_sid, new_node)] in payload order (the GUI layer uses it to place + select
+        the new nodes). Best-effort: a node whose function_ref is unknown is skipped with a warning."""
+        import logging
+
+        id_map: dict[str, str] = {}
+        created: List[Tuple[str, FunctionNode]] = []
+        for old_sid, node_data in payload.get("nodes", {}).items():
+            function_ref = node_data.get("function_ref", "")
+            try:
+                f_gui = function_factory_from_ref(function_ref)
+            except ValueError as e:
+                logging.warning(f"Paste: skipping node {old_sid!r}: {e}")
+                continue
+            saved_name = node_data.get("function_name")
+            if saved_name:
+                f_gui.function_name = saved_name
+            f_node = self._add_function_with_gui(f_gui)  # fresh stable id
+            self._restore_node_payload(f_node, f_gui, node_data)
+            id_map[old_sid] = f_node.stable_id
+            created.append((old_sid, f_node))
+
+        remapped_links = [
+            {**link, "src_node": id_map[s], "dst_node": id_map[d]}
+            for link in payload.get("links", [])
+            if (s := link.get("src_node")) in id_map and (d := link.get("dst_node")) in id_map
+        ]
+        self._restore_links_from_workspace(remapped_links)
+        return created
 
     def load_workspace_core_from_json(
         self,

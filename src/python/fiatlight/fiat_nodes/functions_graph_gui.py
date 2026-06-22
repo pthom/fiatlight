@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import logging
 from dataclasses import dataclass
 
@@ -119,6 +120,11 @@ class FunctionsGraphGui:
     # Safety cap on the reorganize "wait for node sizes to settle" poll, so a node whose
     # size never stabilizes (e.g. an animated widget) can't loop the chain forever.
     _REORGANIZE_MAX_SETTLE_FRAMES = 30
+    # Gap (em) left between a source and its duplicate/paste: the copy is shifted right by the
+    # source's bounding-box width plus this gap, so it sits next to the original without overlap.
+    _DUPLICATE_GAP_EM = 2.0
+    # Marker key in the clipboard JSON, so paste only accepts payloads we produced.
+    _CLIPBOARD_MARKER = "fiatlight/nodes"
 
     _is_canvas_hovered: bool = False
 
@@ -552,6 +558,12 @@ class FunctionsGraphGui:
         imgui.separator_text("Nodes")
         if self.function_palette is not None and imgui.menu_item_simple("Add node…"):
             self._spawn("node", spawn_pos)
+        if imgui.menu_item_simple("Duplicate selected nodes", "Ctrl+D", False, has_selection):
+            self.duplicate_selection()
+        if imgui.menu_item_simple("Copy selected nodes", "Ctrl+C", False, has_selection):
+            self.copy_selection()
+        if imgui.menu_item_simple("Paste nodes", "Ctrl+V", False, self._clipboard_has_nodes()):
+            self.paste()
         if imgui.menu_item_simple("Collapse selected nodes", "", False, has_selection):
             self._schedule_collapse_expand_nodes(selection, collapse=True)
         if imgui.menu_item_simple("Expand selected nodes", "", False, has_selection):
@@ -598,6 +610,112 @@ class FunctionsGraphGui:
                 fn.collapse_all() if collapse else fn.expand_all()
 
         self._sched.schedule("collapse_expand_nodes", apply, phase=FramePhase.BEFORE_ED_BEGIN)
+
+    # ------------------------------------------------------------------------------------------------------------------
+    #  Copy / paste / duplicate
+    # ------------------------------------------------------------------------------------------------------------------
+    def _serialize_nodes_payload(self, guis: List[FunctionNodeGui]) -> JsonDict:
+        """Core serialization of the given nodes + their internal links, plus the GUI-only
+        per-node position / expand flags (so a paste restores both)."""
+        fnodes = [g.get_function_node() for g in guis]
+        payload = self.functions_graph.serialize_nodes(fnodes)
+        for g in guis:
+            entry = payload["nodes"].get(g.get_function_node().stable_id)
+            if entry is None:
+                continue
+            pos = ed.get_node_position(g.node_id())
+            size = ed.get_node_size(g.node_id())
+            entry["position"] = [pos.x, pos.y]
+            entry["size"] = [size.x, size.y]  # only for computing the paste offset; not used on load
+            entry["expand_flags"] = self._save_expand_flags(g)
+        return payload
+
+    def _instantiate_nodes(self, payload: JsonDict, offset: ImVec2) -> List[FunctionNodeGui]:
+        """Additively recreate the payload's nodes (fresh ids) + internal links, offset from the
+        originals, then select them. Needs the palette factory; a no-op without it."""
+        if self.function_palette is None:
+            return []
+        created = self.functions_graph.instantiate_nodes(payload, self.function_palette.factor_function_from_ref)
+        new_guis: List[FunctionNodeGui] = []
+        placements: List[Tuple[ed.NodeId, ImVec2]] = []
+        for old_sid, fnode in created:
+            gui = FunctionNodeGui(fnode)
+            self.function_nodes_gui.append(gui)
+            new_guis.append(gui)
+            entry = payload["nodes"].get(old_sid, {})
+            pos = entry.get("position", [0.0, 0.0])
+            placements.append((gui.node_id(), ImVec2(pos[0] + offset.x, pos[1] + offset.y)))
+            expand = entry.get("expand_flags")
+            if isinstance(expand, dict):
+                self._load_expand_flags(gui, expand)
+        if not new_guis:
+            return []
+        # Rebuild the link GUIs so the new internal links are drawn (links were added in core).
+        self.functions_links_gui = [
+            FunctionNodeLinkGui(link, self.function_nodes_gui) for link in self.functions_graph.functions_nodes_links
+        ]
+
+        # Position + select the new nodes inside ed.begin/end (the only scope for set_node_position
+        # / selection); one closure so all pasted nodes are placed together.
+        def apply() -> None:
+            for node_id, pos in placements:
+                ed.set_node_position(node_id, pos)
+            ed.clear_selection()
+            for node_id, _ in placements:
+                ed.select_node(node_id, True)
+
+        self._sched.schedule("paste_apply", apply, phase=FramePhase.INSIDE_ED)
+        return new_guis
+
+    def _payload_offset(self, payload: JsonDict) -> ImVec2:
+        """Shift a duplicate/paste to the right of the source's bounding box (+ a gap) so it does
+        not overlap the originals. Uses the per-node position + size stored in the payload."""
+        entries = payload.get("nodes", {}).values()
+        spans = [
+            (e["position"][0], e["position"][0] + e.get("size", [0.0, 0.0])[0]) for e in entries if "position" in e
+        ]
+        if not spans:
+            return ImVec2(0.0, 0.0)
+        width = max(br for _, br in spans) - min(tl for tl, _ in spans)
+        return ImVec2(width + hello_imgui.em_size(self._DUPLICATE_GAP_EM), 0.0)
+
+    @classmethod
+    def _parse_clipboard(cls, text: str) -> JsonDict | None:
+        """Parse the system clipboard as a node payload, or None if it isn't one of ours."""
+        if not text:
+            return None
+        try:
+            data = json.loads(text)
+        except (json.JSONDecodeError, TypeError, ValueError):
+            return None
+        if not isinstance(data, dict) or cls._CLIPBOARD_MARKER not in data:
+            return None
+        return data
+
+    def _clipboard_has_nodes(self) -> bool:
+        return self._parse_clipboard(imgui.get_clipboard_text()) is not None
+
+    def copy_selection(self) -> None:
+        """Serialize the selected nodes (+ internal links) to the system clipboard as JSON."""
+        guis = self._selected_function_node_guis()
+        if not guis:
+            return
+        payload = self._serialize_nodes_payload(guis)
+        payload[self._CLIPBOARD_MARKER] = self._WORKSPACE_VERSION
+        imgui.set_clipboard_text(json.dumps(payload))
+
+    def paste(self) -> None:
+        """Paste nodes from the system clipboard, placed to the right of their original bounds."""
+        payload = self._parse_clipboard(imgui.get_clipboard_text())
+        if payload is not None:
+            self._instantiate_nodes(payload, self._payload_offset(payload))
+
+    def duplicate_selection(self) -> None:
+        """Duplicate the selected nodes to the right of their bounds, without touching the clipboard."""
+        guis = self._selected_function_node_guis()
+        if guis:
+            payload = self._serialize_nodes_payload(guis)
+            self._instantiate_nodes(payload, self._payload_offset(payload))
 
     def _fit_group_to_nodes(self, grp: NodeGroupGui, members: List[FunctionNodeGui] | None = None) -> None:
         # `members` is passed explicitly by the reorganize chain so the fit uses the
@@ -681,6 +799,25 @@ class FunctionsGraphGui:
             self._remove_function_node(fn.node_id())
         self._remove_node_group(grp)
 
+    def _duplicate_group(self, grp: NodeGroupGui) -> None:
+        """Duplicate a group and its member nodes (+ their internal links), placed to the right of
+        the original group (shifted by the group's width + gap) so the two do not overlap."""
+        g_pos = ed.get_node_position(grp.node_id())
+        g_size = ed.get_node_size(grp.node_id())
+        offset = ImVec2(g_size.x + hello_imgui.em_size(self._DUPLICATE_GAP_EM), 0.0)
+        members = self._function_nodes_in_group(grp)
+        if members:
+            self._instantiate_nodes(self._serialize_nodes_payload(members), offset)
+        # Duplicate the rectangle, reading the live geometry (group.size is the rect below the
+        # title, so subtract the header from the full node size).
+        new_group = NodeGroup(
+            title=grp.group.title,
+            color=grp.group.color,
+            position=(g_pos.x + offset.x, g_pos.y + offset.y),
+            size=(g_size.x, max(0.0, g_size.y - grp._header_height)),
+        )
+        self._spawn_group(new_group)
+
     def _draw_group_context_menu(self, grp: NodeGroupGui) -> None:
         imgui.separator_text("Group")
         changed, new_title = imgui.input_text("Title", grp.group.title)
@@ -689,6 +826,8 @@ class FunctionsGraphGui:
         color_changed, new_color = imgui.color_edit3("Color", list(grp.group.color))
         if color_changed:
             grp.group.color = (new_color[0], new_color[1], new_color[2])
+        if imgui.menu_item_simple("Duplicate group & nodes"):
+            self._duplicate_group(grp)
 
         imgui.separator_text("Layout")
         # Reorganize = re-layout the members + refit the rectangle (the former "Layout
