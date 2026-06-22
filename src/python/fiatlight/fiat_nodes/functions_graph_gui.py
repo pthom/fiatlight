@@ -726,18 +726,56 @@ class FunctionsGraphGui:
         else:
             self.request_layout_graph()
 
-    def _layout_graph_layered(self, nodes_gui: List[FunctionNodeGui] | None = None) -> None:
-        """Sugiyama-style layered layout: place nodes in columns by their
-        data-flow depth (sources left, sinks right), stacked within a column and
-        spaced to their actual sizes. Left-to-right, so links run forward
-        (output pin on the right -> input pin on the left). Within-column order is
-        chosen to reduce link crossings (barycenter heuristic). Layering + ordering
-        come from `sugiyama_layout`; here we turn columns into pixel positions.
+    @staticmethod
+    def _layered_positions(
+        order: List[str],
+        edges: List[Tuple[str, str]],
+        size_by_sid: Dict[str, ImVec2],
+        anchor: Tuple[float, float],
+    ) -> Dict[str, ImVec2]:
+        """Sugiyama column layout: top-left position per sid, anchored at `anchor`.
+        Nodes are placed in columns by data-flow depth (sources left, sinks right),
+        stacked within a column and spaced to their sizes; within-column order reduces
+        link crossings (barycenter heuristic, from `sugiyama_layout`). Pure (no ed calls),
+        so it serves the flat graph layout and both stages of the clustered layout."""
+        if not order:
+            return {}
+        layer = compute_layered_ranks(order, edges)
+        columns = order_layers_to_reduce_crossings(order, edges, layer)
 
-        `nodes_gui=None` lays out the whole graph, anchored at the origin (the
-        caller then fits it into view). A subset is laid out *in place*: only edges
-        internal to the subset are used, and the result is anchored to the subset's
-        current top-left, so the rest of the graph is left untouched."""
+        h_gap = hello_imgui.em_size(5)
+        v_gap = hello_imgui.em_size(2)
+        max_layer = max(layer.values())
+
+        # Column widths (widest node) and heights (stacked), to space + center.
+        col_width: Dict[int, float] = {}
+        col_height: Dict[int, float] = {}
+        for c in range(max_layer + 1):
+            sids = columns[c]
+            col_width[c] = max((size_by_sid[s].x for s in sids), default=0.0)
+            col_height[c] = sum(size_by_sid[s].y for s in sids) + v_gap * max(0, len(sids) - 1)
+        total_height = max(col_height.values(), default=0.0)
+
+        positions: Dict[str, ImVec2] = {}
+        anchor_x, anchor_y = anchor
+        x = anchor_x
+        for c in range(max_layer + 1):
+            y = anchor_y + (total_height - col_height[c]) / 2.0  # center the column vertically
+            for sid in columns[c]:
+                positions[sid] = ImVec2(x, y)
+                y += size_by_sid[sid].y + v_gap
+            x += col_width[c] + h_gap
+        return positions
+
+    def _layout_graph_layered(self, nodes_gui: List[FunctionNodeGui] | None = None) -> None:
+        """Flat layered layout, left-to-right so links run forward (output pin on the right
+        -> input pin on the left).
+
+        `nodes_gui=None` lays out the whole graph, anchored at the origin (the caller then
+        fits it into view). A subset is laid out *in place*: only edges internal to the
+        subset are used, and the result is anchored to the subset's current top-left, so the
+        rest of the graph is left untouched. (Group-aware whole-graph layout is
+        `_layout_graph_clustered`.)"""
         is_subset = nodes_gui is not None
         nodes_gui = nodes_gui if nodes_gui is not None else self.function_nodes_gui
         if not nodes_gui:
@@ -755,37 +793,16 @@ class FunctionsGraphGui:
             if not is_subset
             or (link.src_function_node.stable_id in sid_set and link.dst_function_node.stable_id in sid_set)
         ]
-        layer = compute_layered_ranks(order, edges)
-        columns = order_layers_to_reduce_crossings(order, edges, layer)
-
-        h_gap = hello_imgui.em_size(5)
-        v_gap = hello_imgui.em_size(2)
-        max_layer = max(layer.values())
-
-        # Column widths (widest node) and heights (stacked), to space + center.
-        col_width: Dict[int, float] = {}
-        col_height: Dict[int, float] = {}
-        for c in range(max_layer + 1):
-            sids = columns[c]
-            col_width[c] = max((size_by_sid[s].x for s in sids), default=0.0)
-            col_height[c] = sum(size_by_sid[s].y for s in sids) + v_gap * max(0, len(sids) - 1)
-        total_height = max(col_height.values(), default=0.0)
 
         # Anchor: origin for the whole graph; the selection's current top-left for
         # an in-place subset relayout.
-        anchor_x, anchor_y = 0.0, 0.0
+        anchor = (0.0, 0.0)
         if is_subset:
             positions = [ed.get_node_position(g.node_id()) for g in nodes_gui]
-            anchor_x = min(p.x for p in positions)
-            anchor_y = min(p.y for p in positions)
+            anchor = (min(p.x for p in positions), min(p.y for p in positions))
 
-        x = anchor_x
-        for c in range(max_layer + 1):
-            y = anchor_y + (total_height - col_height[c]) / 2.0  # center the column vertically
-            for sid in columns[c]:
-                ed.set_node_position(gui_by_sid[sid].node_id(), ImVec2(x, y))
-                y += size_by_sid[sid].y + v_gap
-            x += col_width[c] + h_gap
+        for sid, pos in self._layered_positions(order, edges, size_by_sid, anchor).items():
+            ed.set_node_position(gui_by_sid[sid].node_id(), pos)
 
     def _get_last_focused_function_boundings(self) -> imgui.internal.ImRect:
         # shot_rect could be a rectangle from the focused function
