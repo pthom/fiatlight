@@ -130,9 +130,13 @@ def text_maybe_truncated(
         # disable imgui-node-editor's wrap-at-node-edge so the ellipsized lines stay on one
         # visual line each (no per-character column).
         max_width_pixels = hello_imgui.em_size(params.max_width_em)
-        available = imgui.get_content_region_avail().x - _NODE_TEXT_RIGHT_RESERVE_PX
-        if available > 0:
-            max_width_pixels = min(max_width_pixels, available)
+        # Room left to the right of the cursor, minus the reserve kept for trailing icons.
+        # Clamp to >= 0: when the reserve exceeds the room (a narrow node where the value
+        # starts within the icon block), the value must collapse to an ellipsis rather than
+        # fall back to the full em budget, which would render at full width and overflow the
+        # node border.
+        available = max(imgui.get_content_region_avail().x - _NODE_TEXT_RIGHT_RESERVE_PX, 0.0)
+        max_width_pixels = min(max_width_pixels, available)
         clamped_lines = []
         for line in lines:
             line_truncated, clamped = _ellipsis_to_width(line, max_width_pixels)
