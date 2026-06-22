@@ -81,7 +81,7 @@ The PNG appears as `<output_image>` in the tool result.
 
 ## API
 
-`capture_graph(graph_or_functions, output_path, *, frames=25, window_size=(1000,700), invoke=True) -> str`
+`capture_graph(graph_or_functions, output_path, *, frames=25, window_size=(1000,700), invoke=True, crop_to_nodes=True) -> str`
 
 - `graph_or_functions` — a ready-built `FunctionsGraph` (build the exact wiring you
   want to validate), or a flat list of functions (added unlinked).
@@ -89,6 +89,9 @@ The PNG appears as `<output_image>` in the tool result.
   graph needs more time for layout + camera-fit to settle.
 - `window_size` — logical pixels; the PNG is `size * dpi_scale` (2× on retina).
 - `invoke=True` — run the functions once so output values (e.g. images) are present.
+- `crop_to_nodes=True` — crop to node bounds (tight + readable). Set False to save the
+  **full window**: needed when content overflows a node's border (a value spilling past
+  the edge), since the node crop clips exactly that overflow away.
 
 ## Validating specific things
 

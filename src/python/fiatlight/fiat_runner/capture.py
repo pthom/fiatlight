@@ -12,6 +12,7 @@ Caveats: needs a real GL context (not headless without Xvfb); the window flashes
 ~150 ms; on retina the PNG is 2× the logical `window_size`. A throwaway settings file
 lands under `fiat_settings/` (already git-ignored).
 """
+
 from __future__ import annotations
 
 from typing import Sequence, Union
@@ -32,11 +33,18 @@ def capture_graph(
     frames: int = 25,
     window_size: tuple[int, int] = (1000, 700),
     invoke: bool = True,
+    crop_to_nodes: bool = True,
 ) -> str:
-    """Run `graph_or_functions` for `frames` frames, then save a node-cropped PNG.
+    """Run `graph_or_functions` for `frames` frames, then save a PNG.
 
     `graph_or_functions` is either a ready-built `FunctionsGraph` (build whatever
     wiring you want to validate) or a flat list of functions (added unlinked).
+
+    `crop_to_nodes=True` (default) saves the framebuffer cropped to the node bounds
+    (tight + readable). Set it to False to save the **full window** instead: use this
+    when content overflows a node's border (e.g. a value spilling past the edge), since
+    the cropped shot clips exactly that overflow away.
+
     Returns `output_path`. Raises if nothing was captured (e.g. empty graph).
     """
     if isinstance(graph_or_functions, FunctionsGraph):
@@ -52,6 +60,11 @@ def capture_graph(
         fiat_gui._functions_graph_gui.invoke_all_functions(also_invoke_manual_function=False)
 
     runner_params, addons = fiat_gui._setup_runner()
+    # Full-window mode: let the app's _before_exit save the uncropped framebuffer to
+    # output_path. Set after _setup_runner, since _resolve_capture_params (called there)
+    # would otherwise reset _screenshot_path.
+    if not crop_to_nodes:
+        fiat_gui._screenshot_path = output_path
     # Deterministic capture: start from a clean imgui window layout so a leftover
     # debug window / dock state from a previous run can't leak into the shot.
     # (Don't fully `ini_disable` — the app derives its workspace path from the
@@ -74,6 +87,10 @@ def capture_graph(
 
     runner_params.callbacks.after_swap = after_swap
     immapp.run(runner_params, addons)
+
+    if not crop_to_nodes:
+        # _before_exit already saved the full window to output_path.
+        return output_path
 
     image = get_last_screenshot()
     if image is None:
