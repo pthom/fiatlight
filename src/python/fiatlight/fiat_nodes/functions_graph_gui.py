@@ -333,12 +333,21 @@ class FunctionsGraphGui:
         node_context_menu_id = ed.NodeId()
         if ed.show_node_context_menu(node_context_menu_id):
             nid = node_context_menu_id
+            # Right-clicking a node that isn't already selected selects just it, so the shared
+            # selection-based actions (duplicate / delete / collapse, ...) target it. A right-click
+            # on a node within a multi-selection keeps that selection.
+            if self._group_gui_from_node_id(nid) is None and not ed.is_node_selected(nid):
+                ed.clear_selection()
+                ed.select_node(nid, True)
+            menu_pos = ImVec2(mouse_canvas_pos.x, mouse_canvas_pos.y)
 
             def show_node_context_menu() -> None:
                 grp = self._group_gui_from_node_id(nid)
                 if grp is not None:
                     self._draw_group_context_menu(grp)
                     return
+                # Per-node items (this node), then the shared "Nodes" section so the node menu
+                # offers the same actions as the graph menu.
                 reroute = self._reroute_fn_from_node_id(nid)
                 if reroute is not None:
                     if imgui.menu_item_simple("Rotate +90°"):
@@ -347,13 +356,12 @@ class FunctionsGraphGui:
                         reroute.rotate(-1)
                     if imgui.menu_item_simple("Show type", "", reroute.show_type):
                         reroute.show_type = not reroute.show_type
-                    imgui.separator()
                 else:
-                    # Open the node in a separate window (was a title-bar icon).
+                    # Open the node in a separate window (was a title-bar icon). Per-node, so it is
+                    # not part of the shared Nodes section / the graph menu.
                     if imgui.menu_item_simple("Open this node in a separate window"):
                         self._function_node_gui_from_id(nid)._focused_function_visible = True
-                if imgui.menu_item_simple("Delete node"):
-                    self._remove_function_node(nid)
+                self._draw_nodes_menu_section(menu_pos)
 
             fiat_osd.set_popup_gui(show_node_context_menu)
 
@@ -546,7 +554,6 @@ class FunctionsGraphGui:
         are separated with `imgui.separator_text`."""
         n_selected = self.num_selected_nodes()
         has_selection = n_selected > 0
-        selection = self._selected_function_node_guis()
 
         imgui.separator_text("Layout")
         if imgui.menu_item_simple("Reorganize graph", "Ctrl+L"):
@@ -555,6 +562,22 @@ class FunctionsGraphGui:
         if imgui.menu_item_simple(f"Reorganize selection ({n_selected})", "", False, sel_enabled):
             self.request_layout_selection()
 
+        self._draw_nodes_menu_section(spawn_pos)
+
+        imgui.separator_text("Groups")
+        if imgui.menu_item_simple("Add group"):
+            self._spawn("group", spawn_pos)
+        if imgui.menu_item_simple("Group selected nodes", "", False, has_selection):
+            self._group_selected_nodes()
+
+    def _draw_nodes_menu_section(self, spawn_pos: ImVec2 | None) -> None:
+        """The "Nodes" category, shared by the graph menu and a node's right-click menu, so both
+        offer the same node actions. All operate on the selection (a node right-click selects the
+        clicked node first). `spawn_pos` is where "Add node" places the new node (None = view
+        center). "Open in separate window" is intentionally not here: it is per-node, in the node
+        menu only."""
+        selection = self._selected_function_node_guis()
+        has_selection = len(selection) > 0
         imgui.separator_text("Nodes")
         if self.function_palette is not None and imgui.menu_item_simple("Add node…"):
             self._spawn("node", spawn_pos)
@@ -564,6 +587,8 @@ class FunctionsGraphGui:
             self.copy_selection()
         if imgui.menu_item_simple("Paste", "Ctrl+V", False, self._clipboard_has_nodes()):
             self.paste()
+        if imgui.menu_item_simple("Delete selected nodes", "", False, has_selection):
+            self.delete_selected_nodes()
         if imgui.menu_item_simple("Collapse selected nodes", "", False, has_selection):
             self._schedule_collapse_expand_nodes(selection, collapse=True)
         if imgui.menu_item_simple("Expand selected nodes", "", False, has_selection):
@@ -573,11 +598,9 @@ class FunctionsGraphGui:
         if imgui.menu_item_simple("Expand all nodes"):
             self._schedule_collapse_expand_nodes(self.function_nodes_gui, collapse=False)
 
-        imgui.separator_text("Groups")
-        if imgui.menu_item_simple("Add group"):
-            self._spawn("group", spawn_pos)
-        if imgui.menu_item_simple("Group selected nodes", "", False, has_selection):
-            self._group_selected_nodes()
+    def delete_selected_nodes(self) -> None:
+        for g in self._selected_function_node_guis():
+            self._remove_function_node(g.node_id())
 
     def _spawn(self, kind: Literal["node", "group"], spawn_pos: ImVec2 | None) -> None:
         """Spawn a node (palette popup) or empty group. With an explicit `spawn_pos` (context
