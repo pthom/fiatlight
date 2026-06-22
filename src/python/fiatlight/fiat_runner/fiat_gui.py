@@ -587,12 +587,9 @@ class FiatGui:
             imgui.end_menu()
 
         if imgui.begin_menu("Graph"):
-            if imgui.menu_item_simple("Reorganize graph", "Ctrl+L"):
-                self._functions_graph_gui.request_layout_graph()
-            n_selected = self._functions_graph_gui.num_selected_nodes()
-            enabled = n_selected >= self._functions_graph_gui._LAYOUT_SELECTION_MIN
-            if imgui.menu_item_simple(f"Reorganize selection ({n_selected})", "", False, enabled):
-                self._functions_graph_gui.request_layout_selection()
+            # Same categorized actions as the canvas background context menu (no click
+            # position here -> new node/group spawn at the view center).
+            self._functions_graph_gui.draw_graph_menu(None)
             imgui.end_menu()
 
         hello_imgui.show_view_menu(self._runner_params)

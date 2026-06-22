@@ -274,15 +274,9 @@ class FunctionsGraphGui:
             menu_canvas_pos = ImVec2(mouse_canvas_pos.x, mouse_canvas_pos.y)
 
             def show_background_context_menu() -> None:
-                if self.function_palette is not None and imgui.menu_item_simple("Add node…"):
-                    self._open_popup_at(menu_canvas_pos)
-                if imgui.menu_item_simple("Add group"):
-                    self._add_empty_group(menu_canvas_pos)
-                has_selection = len(self._selected_function_node_guis()) > 0
-                if imgui.menu_item_simple("Group selected nodes", "", False, has_selection):
-                    self._group_selected_nodes()
+                self.draw_graph_menu(menu_canvas_pos)
                 if self.on_show_canvas_help is not None:
-                    imgui.separator()
+                    imgui.separator_text("Help")
                     if imgui.menu_item_simple("Keyboard & mouse shortcuts"):
                         self.on_show_canvas_help()
 
@@ -538,6 +532,72 @@ class FunctionsGraphGui:
         self.node_groups.append(grp_gui)
         # Size flows through the initial `ed.group(size)`; only the position needs queuing.
         self._schedule_group_geometry(grp_gui.node_id(), ImVec2(*group.position), None)
+
+    def draw_graph_menu(self, spawn_pos: ImVec2 | None) -> None:
+        """Categorized graph-level actions, shared by the canvas background context menu
+        (`spawn_pos` = the click position, in canvas coords) and the top "Graph" menu
+        (`spawn_pos` = None -> new node/group spawn at the current view center). Categories
+        are separated with `imgui.separator_text`."""
+        n_selected = self.num_selected_nodes()
+        has_selection = n_selected > 0
+        selection = self._selected_function_node_guis()
+
+        imgui.separator_text("Layout")
+        if imgui.menu_item_simple("Reorganize graph", "Ctrl+L"):
+            self.request_layout_graph()
+        sel_enabled = n_selected >= self._LAYOUT_SELECTION_MIN
+        if imgui.menu_item_simple(f"Reorganize selection ({n_selected})", "", False, sel_enabled):
+            self.request_layout_selection()
+
+        imgui.separator_text("Nodes")
+        if self.function_palette is not None and imgui.menu_item_simple("Add node…"):
+            self._spawn("node", spawn_pos)
+        if imgui.menu_item_simple("Collapse selected nodes", "", False, has_selection):
+            self._schedule_collapse_expand_nodes(selection, collapse=True)
+        if imgui.menu_item_simple("Expand selected nodes", "", False, has_selection):
+            self._schedule_collapse_expand_nodes(selection, collapse=False)
+        if imgui.menu_item_simple("Collapse all nodes"):
+            self._schedule_collapse_expand_nodes(self.function_nodes_gui, collapse=True)
+        if imgui.menu_item_simple("Expand all nodes"):
+            self._schedule_collapse_expand_nodes(self.function_nodes_gui, collapse=False)
+
+        imgui.separator_text("Groups")
+        if imgui.menu_item_simple("Add group"):
+            self._spawn("group", spawn_pos)
+        if imgui.menu_item_simple("Group selected nodes", "", False, has_selection):
+            self._group_selected_nodes()
+
+    def _spawn(self, kind: Literal["node", "group"], spawn_pos: ImVec2 | None) -> None:
+        """Spawn a node (palette popup) or empty group. With an explicit `spawn_pos` (context
+        menu) place it there; without one (top menu) defer to the view center, since
+        `screen_to_canvas` only works inside ed.begin/end."""
+        if spawn_pos is not None:
+            self._open_popup_at(spawn_pos) if kind == "node" else self._add_empty_group(spawn_pos)
+            return
+
+        def do_spawn() -> None:
+            pos = self._view_center_canvas()
+            self._open_popup_at(pos) if kind == "node" else self._add_empty_group(pos)
+
+        self._sched.schedule("spawn_at_view_center", do_spawn, phase=FramePhase.INSIDE_ED)
+
+    def _view_center_canvas(self) -> ImVec2:
+        """Center of the visible canvas in canvas coords. Must be called inside ed.begin/end."""
+        tl = self._canvas_screen_top_left if self._canvas_screen_top_left is not None else ImVec2(0.0, 0.0)
+        size = ed.get_screen_size()
+        return ed.screen_to_canvas(ImVec2(tl.x + size.x * 0.5, tl.y + size.y * 0.5))
+
+    def _schedule_collapse_expand_nodes(self, nodes: List[FunctionNodeGui], *, collapse: bool) -> None:
+        """Collapse / expand a set of nodes on the next draw, with the in-node semaphore set so
+        the node-vs-focused flags resolve to the node ones. The set is captured now (the menu
+        runs off-frame, the selection may change before the deferred apply)."""
+        captured = list(nodes)
+
+        def apply() -> None:
+            for fn in captured:
+                fn.collapse_all() if collapse else fn.expand_all()
+
+        self._sched.schedule("collapse_expand_nodes", apply, phase=FramePhase.BEFORE_ED_BEGIN)
 
     def _fit_group_to_nodes(self, grp: NodeGroupGui, members: List[FunctionNodeGui] | None = None) -> None:
         # `members` is passed explicitly by the reorganize chain so the fit uses the
