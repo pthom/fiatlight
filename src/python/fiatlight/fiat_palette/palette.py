@@ -43,8 +43,8 @@ class TagMatchMode(Enum):
 class PaletteFilter(BaseModel):
     """Mutated by the GUI each frame; lifetime owned by the popup host.
 
-    Persisted across sessions (search text, selected tags, match mode are
-    user UI state worth remembering)
+    The host resets the user fields each time the palette popup opens
+    (see FunctionsGraphGui._open_popup_at), so every open starts unfiltered.
     """
 
     model_config = ConfigDict(arbitrary_types_allowed=True)

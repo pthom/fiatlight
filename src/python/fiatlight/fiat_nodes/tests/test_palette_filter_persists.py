@@ -13,7 +13,7 @@ def _graph_gui() -> FunctionsGraphGui:
     return FunctionsGraphGui(FunctionsGraph.create_empty())
 
 
-def test_user_filter_survives_reopen() -> None:
+def test_user_filter_cleaned_on_reopen() -> None:
     g = _graph_gui()
     g._palette_filter.search_text = "blur"
     g._palette_filter.selected_tags.append("filter")
@@ -22,11 +22,11 @@ def test_user_filter_survives_reopen() -> None:
     g._open_popup_at(ImVec2(0, 0))
     filt = g._open_popup.filter  # type: ignore[union-attr]
 
-    # Same persistent object, user choices preserved.
+    # Same persistent object, filter reset on reopen.
     assert filt is g._palette_filter
-    assert filt.search_text == "blur"
-    assert filt.selected_tags == ["filter"]
-    assert filt.selected_category == "image"
+    assert filt.search_text == ""
+    assert filt.selected_tags == []
+    assert filt.selected_category is None
 
 
 def test_type_filters_reset_each_open() -> None:

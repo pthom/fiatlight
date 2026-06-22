@@ -123,7 +123,6 @@ class FunctionsGraphGui:
     # the in-node semaphore is set, so the node-vs-focused flags resolve to the node ones).
     _pending_group_collapse: NodeGroupGui | None = None
     _pending_group_expand: NodeGroupGui | None = None
-
     # Default size of an empty group, and the padding added around the bounding box
     # when grouping / fitting existing nodes. In em units (resolved via hello_imgui at
     # use, so groups scale with the font / DPI).
@@ -846,10 +845,11 @@ class FunctionsGraphGui:
     def _open_popup_at(self, canvas_pos: ImVec2, dragged_pin: _DraggedFnParamPin | None = None) -> None:
         """Single entry point for both right-click and drag-from-pin.
         `canvas_pos` must already be in canvas coordinates."""
-        # Reuse the persistent filter so the user's search / tags / category /
-        # match mode survive closing and reopening the popup. Only the per-open
-        # type filters (set by drag-from-pin) are reset each time.
+        # Start every open with a clean slate: clear the user filter (search /
+        # tags / category / match mode) plus the per-open type filters. The type
+        # filter is then set below from the dragged pin, if any.
         filt = self._palette_filter
+        filt.reset()
         filt.input_type_filter = None
         filt.output_type_filter = None
         if dragged_pin is not None:
