@@ -181,22 +181,28 @@ palette popup via `FunctionInfo.first_compatible_input/output` (UX filter).
 
 ## The canvas rule
 
-**Never display bare (i.e outside of  node) GUI widgets while inside `ed.begin / ed.end`** (the
-`imgui_node_editor` canvas). The canvas's zoom transform is incompatible
-with ImGui windows / child windows / popups. Two correct paths:
+Inside `ed.begin / ed.end` (the `imgui_node_editor` canvas) the zoom transform rewrites
+all coordinates (widget + window + mouse coords become canvas coords). Historically this
+broke any bare ImGui windows / child windows / popups shown from inside a node.
 
-1. **`fiat_widgets.fiat_osd`** — preferred for tooltips/popups originating
-   from inside nodes. Queue with `set_tooltip(str)` / `set_tooltip_gui(fn)`
-   / `set_popup_gui(fn)`; rendered later via `render_all_osd()`. The
-   `set_tooltip_str` helper is canvas-aware (defers when inside the editor).
-2. **Render after `ed.end()`** — explicit, used by `FunctionsGraphGui`
-   for the palette popup. `imgui.open_popup` / `begin_popup` calls live
-   *outside* the `ed.begin/end` pair, so no `suspend()` / `resume()` needed.
+**Popups now work inside the canvas** (recent `imgui` / `imgui_node_editor` patches):
+`imgui.open_popup(id)` + `imgui.begin_popup(id)` called from a node's draw behave correctly.
+Prefer an **inline popup** for in-node editing UI — the editable NoteNode's editor does this
+(`fiat_core/note_node.py`: a "Edit" button + `begin_popup`). No `suspend()` / `fiat_osd`
+needed for that case.
 
-When you are inside ed.begin() / ed.end(), the canvas hacks all the coordinates (widgets windows, including the mouse coordinates),
-so that they are in canvas coordinates. It is possible suspend/resume that with the suspend()/resume() functions.
-Suspend and resume are not 100% safe based on Pascal's experiments, so we may also avoid the problem by using the fiat_osd when possible
-(i.e. deferred gui lambdas that will run after ed.end()).
+Still-valid paths for the things that aren't a plain popup:
+
+1. **`fiat_widgets.fiat_osd`** — deferred tooltips / popups / GUI lambdas queued from inside
+   nodes and rendered after `ed.end()` via `render_all_osd()` (`set_tooltip(str)` /
+   `set_tooltip_gui(fn)` / `set_popup_gui(fn)`; `set_tooltip_str` is canvas-aware). Also backs
+   the "open in a separate window" detached windows.
+2. **Render after `ed.end()`** — explicit, e.g. the palette popup in `FunctionsGraphGui`.
+
+Caveat: bare **windows / child windows** inside `ed.begin/end` are still subject to the
+coordinate hacking. You can `suspend()` / `resume()` to escape it, but per Pascal's
+experiments that is not 100% safe — prefer an inline popup (now working) or the `fiat_osd`
+deferred path.
 
 
 
