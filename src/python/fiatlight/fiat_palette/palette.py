@@ -207,6 +207,13 @@ class FunctionPalette:
 
         self._add_function_factory(lambda: RerouteFunctionWithGui(), tags=["reroute"], category="utilities")
 
+    def add_note_node(self) -> None:
+        """Register the built-in editable Note (markdown post-it) node, so it can be added from the
+        palette and saved workspaces can resolve its function_ref on load."""
+        from fiatlight.fiat_core.note_node import NoteNode
+
+        self._add_function_factory(lambda: NoteNode(), tags=["note", "markdown", "comment"], category="utilities")
+
     def _add_function_factory(
         self, function_factory: FunctionWithGuiFactory, tags: list[str], category: str = _UNCATEGORIZED
     ) -> None:

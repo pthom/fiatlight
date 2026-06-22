@@ -485,6 +485,7 @@ class FiatGui:
         # Disable imgui-node-editor's own JSON autosave
         addons.with_node_editor_config.settings_file = ""
         addons.with_markdown = True
+        addons.with_latex = True
         addons.with_implot = True
 
         return self._runner_params, addons
@@ -1158,6 +1159,7 @@ def run_graph_composer(
     graph = initial_graph if initial_graph is not None else FunctionsGraph.create_empty()
     fiat_gui = FiatGui(graph, params=params)
     fiat_gui._function_palette.add_reroute_node()
+    fiat_gui._function_palette.add_note_node()
     for fn in functions:
         fiat_gui._function_palette.add_function(fn)
     fiat_gui.run()
