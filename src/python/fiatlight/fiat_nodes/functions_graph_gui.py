@@ -695,10 +695,24 @@ class FunctionsGraphGui:
         if request.kind == "selection":
             selected = self._selected_function_node_guis()
             if len(selected) >= self._LAYOUT_SELECTION_MIN:
+                # Capture the groups the selection touches (and their members) before the
+                # in-place layout moves anything, so they can be refit afterwards.
+                selected_ids = {g.node_id().id() for g in selected}
+                touched: List[Tuple[NodeGroupGui, List[FunctionNodeGui]]] = []
+                for grp in self.node_groups:
+                    members = self._function_nodes_in_group(grp)
+                    if any(m.node_id().id() in selected_ids for m in members):
+                        touched.append((grp, members))
                 # In-place: anchored to the selection's current bounds, no camera move.
                 self._layout_graph_layered(selected)
+                if touched:
+                    self._schedule_refit_groups(touched)
         elif request.kind == "graph":
-            self._layout_graph_layered()
+            # Group-aware when groups have members, so members stay inside their group.
+            if any(self._function_nodes_in_group(grp) for grp in self.node_groups):
+                self._layout_graph_clustered()
+            else:
+                self._layout_graph_layered()
             # Fit the whole laid-out graph into view, a few frames later (once
             # ed.end() has updated the node bounds the camera reads).
             self._schedule_navigate_after_load()
@@ -803,6 +817,111 @@ class FunctionsGraphGui:
 
         for sid, pos in self._layered_positions(order, edges, size_by_sid, anchor).items():
             ed.set_node_position(gui_by_sid[sid].node_id(), pos)
+
+    def _layout_graph_clustered(self) -> None:
+        """Whole-graph layout that keeps groups intact. Each non-empty group is laid out
+        internally, placed as one super-node in the graph's Sugiyama layout, and its
+        rectangle refit around its members. Members stay inside their group, and groups flow
+        with the data instead of being scattered across columns by a flat layout."""
+        all_nodes = self.function_nodes_gui
+        if not all_nodes:
+            return
+        links = self.functions_graph.functions_nodes_links
+        size_by_sid = {g.get_function_node().stable_id: ed.get_node_size(g.node_id()) for g in all_nodes}
+        pad = hello_imgui.em_size(self._GROUP_PADDING_EM)
+
+        # 1. Membership: sid -> group, group -> members (each node in at most one group;
+        #    on rectangle overlap the first group wins).
+        group_by_sid: Dict[str, NodeGroupGui] = {}
+        members_by_group: Dict[int, List[FunctionNodeGui]] = {}
+        for grp in self.node_groups:
+            for fn in self._function_nodes_in_group(grp):
+                sid = fn.get_function_node().stable_id
+                if sid not in group_by_sid:
+                    group_by_sid[sid] = grp
+                    members_by_group.setdefault(id(grp), []).append(fn)
+
+        # 2. Internal layout per group -> relative member positions + cluster (super-node) size.
+        #    Members are normalized so their top-left sits at (pad, pad + header) in the cluster
+        #    (matching _fit_group_to_nodes: member top-left = group position + (pad, pad + header)).
+        internal_pos: Dict[int, Dict[str, ImVec2]] = {}
+        cluster_size: Dict[int, ImVec2] = {}
+        for grp in self.node_groups:
+            members = members_by_group.get(id(grp))
+            if not members:
+                continue
+            m_order = [m.get_function_node().stable_id for m in members]
+            m_set = set(m_order)
+            m_edges = [
+                (lk.src_function_node.stable_id, lk.dst_function_node.stable_id)
+                for lk in links
+                if lk.src_function_node.stable_id in m_set and lk.dst_function_node.stable_id in m_set
+            ]
+            rel = self._layered_positions(m_order, m_edges, size_by_sid, (0.0, 0.0))
+            tl_x = min(rel[s].x for s in m_order)
+            tl_y = min(rel[s].y for s in m_order)
+            br_x = max(rel[s].x + size_by_sid[s].x for s in m_order)
+            br_y = max(rel[s].y + size_by_sid[s].y for s in m_order)
+            header = grp._header_height
+            internal_pos[id(grp)] = {s: ImVec2(rel[s].x - tl_x + pad, rel[s].y - tl_y + pad + header) for s in m_order}
+            cluster_size[id(grp)] = ImVec2((br_x - tl_x) + 2 * pad, (br_y - tl_y) + 2 * pad + header)
+
+        # 3. Super-graph: a super-node per non-empty group + each ungrouped node; a super-edge
+        #    wherever a link crosses between two different super-nodes.
+        def super_sid(sid: str) -> str:
+            grp = group_by_sid.get(sid)
+            return f"group:{id(grp)}" if grp is not None else sid
+
+        super_order: List[str] = []
+        super_size: Dict[str, ImVec2] = {}
+        for g in all_nodes:
+            sid = g.get_function_node().stable_id
+            ssid = super_sid(sid)
+            if ssid in super_size:
+                continue
+            super_order.append(ssid)
+            super_size[ssid] = cluster_size[id(group_by_sid[sid])] if sid in group_by_sid else size_by_sid[sid]
+
+        super_edges = {
+            (super_sid(lk.src_function_node.stable_id), super_sid(lk.dst_function_node.stable_id)) for lk in links
+        }
+        super_edges = {(s, d) for (s, d) in super_edges if s != d}
+        super_pos = self._layered_positions(super_order, list(super_edges), super_size, (0.0, 0.0))
+
+        # 4. Commit node positions: ungrouped -> super pos; member -> group super pos + internal rel.
+        for g in all_nodes:
+            sid = g.get_function_node().stable_id
+            node_grp = group_by_sid.get(sid)
+            if node_grp is not None:
+                sp = super_pos[f"group:{id(node_grp)}"]
+                rel_pos = internal_pos[id(node_grp)][sid]
+                ed.set_node_position(g.node_id(), ImVec2(sp.x + rel_pos.x, sp.y + rel_pos.y))
+            else:
+                ed.set_node_position(g.node_id(), super_pos[sid])
+
+        # 5. Refit each non-empty group rect to its cluster slot (group.size is the rect below
+        #    the title, so it excludes the header). Applied inside ed.begin/end via the scheduler.
+        for grp in self.node_groups:
+            if id(grp) not in cluster_size:
+                continue
+            sp = super_pos[f"group:{id(grp)}"]
+            cs = cluster_size[id(grp)]
+            position = ImVec2(sp.x, sp.y)
+            rect_size = ImVec2(cs.x, cs.y - grp._header_height)
+            grp.group.position = (position.x, position.y)
+            grp.group.size = (rect_size.x, rect_size.y)
+            self._schedule_group_geometry(grp.node_id(), position, rect_size)
+
+    def _schedule_refit_groups(self, groups_members: List[Tuple[NodeGroupGui, List[FunctionNodeGui]]]) -> None:
+        """Refit the given groups one frame after an in-place selection layout: the new node
+        positions set this frame are only read back next frame. Members are captured before
+        the layout so the fit uses the laid-out set, not a fresh geometric query."""
+
+        def do_fit() -> None:
+            for grp, members in groups_members:
+                self._fit_group_to_nodes(grp, members)
+
+        self._sched.schedule("refit_groups", do_fit, phase=FramePhase.INSIDE_ED, delay_frames=1)
 
     def _get_last_focused_function_boundings(self) -> imgui.internal.ImRect:
         # shot_rect could be a rectangle from the focused function

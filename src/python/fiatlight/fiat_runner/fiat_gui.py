@@ -587,11 +587,11 @@ class FiatGui:
             imgui.end_menu()
 
         if imgui.begin_menu("Graph"):
-            if imgui.menu_item_simple("Auto-Layout graph", "Ctrl+L"):
+            if imgui.menu_item_simple("Reorganize graph", "Ctrl+L"):
                 self._functions_graph_gui.request_layout_graph()
             n_selected = self._functions_graph_gui.num_selected_nodes()
             enabled = n_selected >= self._functions_graph_gui._LAYOUT_SELECTION_MIN
-            if imgui.menu_item_simple(f"Auto-Layout selected ({n_selected})", "", False, enabled):
+            if imgui.menu_item_simple(f"Reorganize selection ({n_selected})", "", False, enabled):
                 self._functions_graph_gui.request_layout_selection()
             imgui.end_menu()
 
@@ -1029,9 +1029,7 @@ class FiatGui:
         if not stored:
             return
         if not pathlib.Path(stored).is_file():
-            logging.info(
-                f"FiatGui: stored workspace cursor {stored!r} no longer exists; " "falling back to default path."
-            )
+            logging.info(f"FiatGui: stored workspace cursor {stored!r} no longer exists; falling back to default path.")
             hello_imgui.save_user_pref(self._USER_PREF_LAST_WORKSPACE, "")
             return
         self._current_workspace_path = stored
