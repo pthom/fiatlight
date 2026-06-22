@@ -558,11 +558,11 @@ class FunctionsGraphGui:
         imgui.separator_text("Nodes")
         if self.function_palette is not None and imgui.menu_item_simple("Add node…"):
             self._spawn("node", spawn_pos)
-        if imgui.menu_item_simple("Duplicate selected nodes", "Ctrl+D", False, has_selection):
+        if imgui.menu_item_simple("Duplicate selection", "Ctrl+D", False, has_selection):
             self.duplicate_selection()
-        if imgui.menu_item_simple("Copy selected nodes", "Ctrl+C", False, has_selection):
+        if imgui.menu_item_simple("Copy selection", "Ctrl+C", False, has_selection):
             self.copy_selection()
-        if imgui.menu_item_simple("Paste nodes", "Ctrl+V", False, self._clipboard_has_nodes()):
+        if imgui.menu_item_simple("Paste", "Ctrl+V", False, self._clipboard_has_nodes()):
             self.paste()
         if imgui.menu_item_simple("Collapse selected nodes", "", False, has_selection):
             self._schedule_collapse_expand_nodes(selection, collapse=True)
@@ -667,13 +667,58 @@ class FunctionsGraphGui:
         self._sched.schedule("paste_apply", apply, phase=FramePhase.INSIDE_ED)
         return new_guis
 
+    def _instantiate_payload(self, payload: JsonDict, offset: ImVec2) -> None:
+        """Recreate a full selection payload (nodes + their internal links + any groups), offset
+        so it sits beside the originals. Groups shift by the same offset as their members."""
+        self._instantiate_nodes(payload, offset)
+        for gdata in payload.get("groups", []):
+            group = NodeGroup.from_json(gdata)
+            group.position = (group.position[0] + offset.x, group.position[1] + offset.y)
+            self._spawn_group(group)
+
+    def _group_to_payload(self, grp: NodeGroupGui) -> JsonDict:
+        """Serialize a group's geometry (live, from the editor) for copy / duplicate. `size` is the
+        rectangle below the title, matching NodeGroup.from_json / _save_groups."""
+        pos = ed.get_node_position(grp.node_id())
+        size = ed.get_node_size(grp.node_id())
+        return {
+            "title": grp.group.title,
+            "color": list(grp.group.color),
+            "position": [pos.x, pos.y],
+            "size": [size.x, max(0.0, size.y - grp._header_height)],
+        }
+
+    def _selected_groups(self) -> List[NodeGroupGui]:
+        selected_ids = {nid.id() for nid in self._selected_node_ids}
+        return [grp for grp in self.node_groups if grp.node_id().id() in selected_ids]
+
+    def _selection_payload(self) -> JsonDict | None:
+        """Payload for the current selection: the selected function nodes plus the members of any
+        selected groups (a selected group copies its contents), the links internal to that set, and
+        the selected group rectangles. None if nothing copyable is selected."""
+        groups = self._selected_groups()
+        # Dedup nodes by stable id (a node may be both directly selected and a group member).
+        node_by_sid: Dict[str, FunctionNodeGui] = {
+            g.get_function_node().stable_id: g for g in self._selected_function_node_guis()
+        }
+        for grp in groups:
+            for member in self._function_nodes_in_group(grp):
+                node_by_sid[member.get_function_node().stable_id] = member
+        if not node_by_sid and not groups:
+            return None
+        payload = self._serialize_nodes_payload(list(node_by_sid.values()))
+        payload["groups"] = [self._group_to_payload(grp) for grp in groups]
+        return payload
+
     def _payload_offset(self, payload: JsonDict) -> ImVec2:
         """Shift a duplicate/paste to the right of the source's bounding box (+ a gap) so it does
-        not overlap the originals. Uses the per-node position + size stored in the payload."""
-        entries = payload.get("nodes", {}).values()
-        spans = [
-            (e["position"][0], e["position"][0] + e.get("size", [0.0, 0.0])[0]) for e in entries if "position" in e
+        not overlap the originals. Spans both the nodes and the group rectangles in the payload."""
+        spans: List[Tuple[float, float]] = [
+            (e["position"][0], e["position"][0] + e.get("size", [0.0, 0.0])[0])
+            for e in payload.get("nodes", {}).values()
+            if "position" in e
         ]
+        spans += [(g["position"][0], g["position"][0] + g["size"][0]) for g in payload.get("groups", [])]
         if not spans:
             return ImVec2(0.0, 0.0)
         width = max(br for _, br in spans) - min(tl for tl, _ in spans)
@@ -696,26 +741,25 @@ class FunctionsGraphGui:
         return self._parse_clipboard(imgui.get_clipboard_text()) is not None
 
     def copy_selection(self) -> None:
-        """Serialize the selected nodes (+ internal links) to the system clipboard as JSON."""
-        guis = self._selected_function_node_guis()
-        if not guis:
+        """Serialize the selection (nodes + their internal links + any selected groups & their
+        members) to the system clipboard as JSON."""
+        payload = self._selection_payload()
+        if payload is None:
             return
-        payload = self._serialize_nodes_payload(guis)
         payload[self._CLIPBOARD_MARKER] = self._WORKSPACE_VERSION
         imgui.set_clipboard_text(json.dumps(payload))
 
     def paste(self) -> None:
-        """Paste nodes from the system clipboard, placed to the right of their original bounds."""
+        """Paste the clipboard (nodes + groups), placed to the right of their original bounds."""
         payload = self._parse_clipboard(imgui.get_clipboard_text())
         if payload is not None:
-            self._instantiate_nodes(payload, self._payload_offset(payload))
+            self._instantiate_payload(payload, self._payload_offset(payload))
 
     def duplicate_selection(self) -> None:
-        """Duplicate the selected nodes to the right of their bounds, without touching the clipboard."""
-        guis = self._selected_function_node_guis()
-        if guis:
-            payload = self._serialize_nodes_payload(guis)
-            self._instantiate_nodes(payload, self._payload_offset(payload))
+        """Duplicate the selection (nodes + groups) to the right of its bounds, no clipboard."""
+        payload = self._selection_payload()
+        if payload is not None:
+            self._instantiate_payload(payload, self._payload_offset(payload))
 
     def _fit_group_to_nodes(self, grp: NodeGroupGui, members: List[FunctionNodeGui] | None = None) -> None:
         # `members` is passed explicitly by the reorganize chain so the fit uses the
@@ -800,23 +844,11 @@ class FunctionsGraphGui:
         self._remove_node_group(grp)
 
     def _duplicate_group(self, grp: NodeGroupGui) -> None:
-        """Duplicate a group and its member nodes (+ their internal links), placed to the right of
-        the original group (shifted by the group's width + gap) so the two do not overlap."""
-        g_pos = ed.get_node_position(grp.node_id())
-        g_size = ed.get_node_size(grp.node_id())
-        offset = ImVec2(g_size.x + hello_imgui.em_size(self._DUPLICATE_GAP_EM), 0.0)
-        members = self._function_nodes_in_group(grp)
-        if members:
-            self._instantiate_nodes(self._serialize_nodes_payload(members), offset)
-        # Duplicate the rectangle, reading the live geometry (group.size is the rect below the
-        # title, so subtract the header from the full node size).
-        new_group = NodeGroup(
-            title=grp.group.title,
-            color=grp.group.color,
-            position=(g_pos.x + offset.x, g_pos.y + offset.y),
-            size=(g_size.x, max(0.0, g_size.y - grp._header_height)),
-        )
-        self._spawn_group(new_group)
+        """Duplicate a group and its members, placed to the right of the original (same path as
+        copy/paste of a selected group)."""
+        payload = self._serialize_nodes_payload(self._function_nodes_in_group(grp))
+        payload["groups"] = [self._group_to_payload(grp)]
+        self._instantiate_payload(payload, self._payload_offset(payload))
 
     def _draw_group_context_menu(self, grp: NodeGroupGui) -> None:
         imgui.separator_text("Group")
