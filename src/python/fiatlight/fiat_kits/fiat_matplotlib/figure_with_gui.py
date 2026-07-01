@@ -1,5 +1,6 @@
 import logging
 
+import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
 
 from imgui_bundle import ImVec2, imgui_fig, imgui, hello_imgui, portable_file_dialogs as pfd
@@ -15,6 +16,7 @@ class FigureWithGui(AnyDataWithGui[Figure]):
     should_refresh_fig: bool = False
     _save_file_dialog: pfd.save_file | None = None
     _last_fig_id: int | None = None
+    _last_figure: Figure | None = None
 
     def __init__(self) -> None:
         super().__init__(Figure)
@@ -59,8 +61,15 @@ class FigureWithGui(AnyDataWithGui[Figure]):
         if "figure_size" in options:
             self._figure_size = ImVec2.from_dict(options["figure_size"])
 
-    def _on_change(self, _fig: Figure) -> None:
+    def _on_change(self, fig: Figure) -> None:
         self.should_refresh_fig = True
+        # Close the previously displayed figure so it leaves pyplot's global registry (Gcf).
+        # Figures created via plt.subplots() in a re-run function stay registered there and are
+        # never garbage-collected, which triggers matplotlib's "More than 20 figures" warning and
+        # leaks memory. plt.close() is a no-op for figures not in Gcf (e.g. built via Figure()).
+        if self._last_figure is not None and self._last_figure is not fig:
+            plt.close(self._last_figure)
+        self._last_figure = fig
 
 
 def _register_figure_with_gui() -> None:
