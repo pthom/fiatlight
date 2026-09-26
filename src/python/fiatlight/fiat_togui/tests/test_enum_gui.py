@@ -46,3 +46,18 @@ def test_enum_serialization() -> None:
     assert as_json == {"class": "MyEnum", "type": "Enum", "value_name": "A"}
     a.value = a.call_load_from_dict({"class": "MyEnum", "type": "Enum", "value_name": "B"})
     assert a.value == MyEnum.B
+
+
+def test_enum_param_fiat_attributes() -> None:
+    """An enum parameter receives its fiat attributes (label, tooltip...), as the other parameters do"""
+
+    def foo(a: SampleEnum = SampleEnum.A, b: SampleEnum | None = None) -> int:
+        return 0
+
+    fl.add_fiat_attributes(foo, a__label="The a", a__tooltip="a tooltip", b__tooltip="b tooltip")
+    foo_gui = fl.FunctionWithGui(foo)
+    a_gui = foo_gui.input("a")
+    assert isinstance(a_gui, EnumWithGui)
+    assert a_gui.label == "The a"
+    assert a_gui.tooltip == "a tooltip"
+    assert foo_gui.input("b").tooltip == "b tooltip"  # Optional[Enum]: the attributes reach the inner enum GUI too

@@ -94,7 +94,9 @@ def _any_new_type_to_gui_impl(type_: Type[Any], fiat_attributes: FiatAttributes)
 def _any_enum_type_to_gui_impl(type_: Type[Enum], fiat_attributes: FiatAttributes) -> AnyDataWithGui[Any]:
     """Handle Enum types."""
     assert issubclass(type_, Enum)
-    return EnumWithGui(type_)
+    r = EnumWithGui(type_)
+    r.merge_fiat_attributes(fiat_attributes)
+    return r
 
 
 def _any_list_type_to_gui_impl(type_: Type[List[Any]], fiat_attributes: FiatAttributes) -> AnyDataWithGui[Any]:
